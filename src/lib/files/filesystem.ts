@@ -185,9 +185,23 @@ export async function copyFileOrDir(
     throw new Error(`Destination already exists: ${validatedDest}`);
   }
 
-  // Prevent copying a directory into itself or its subdirectories
-  const normalizedSrc = validatedSrc.replace(/\\/g, "/").toLowerCase();
-  const normalizedDest = validatedDest.replace(/\\/g, "/").toLowerCase();
+  // Prevent copying a directory into itself or its subdirectories.
+  // Use real paths so that symbolic links are resolved before comparison.
+  let resolvedSrc: string;
+  try {
+    resolvedSrc = await fsp.realpath(validatedSrc);
+  } catch {
+    resolvedSrc = path.resolve(validatedSrc);
+  }
+  let resolvedDest: string;
+  try {
+    const destParent = await fsp.realpath(path.dirname(validatedDest));
+    resolvedDest = path.join(destParent, path.basename(validatedDest));
+  } catch {
+    resolvedDest = path.resolve(validatedDest);
+  }
+  const normalizedSrc = resolvedSrc.replace(/\\/g, "/").toLowerCase();
+  const normalizedDest = resolvedDest.replace(/\\/g, "/").toLowerCase();
 
   if (
     normalizedDest === normalizedSrc ||

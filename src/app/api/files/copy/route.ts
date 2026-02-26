@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const { sourcePath, destPath } = await request.json();
 
-    if (!sourcePath || !destPath) {
+    if (!sourcePath || !destPath || typeof sourcePath !== "string" || typeof destPath !== "string") {
       return NextResponse.json(
         { error: "Missing sourcePath or destPath" },
         { status: 400 }
