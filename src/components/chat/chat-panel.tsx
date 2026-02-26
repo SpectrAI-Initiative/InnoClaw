@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { TextStreamChatTransport } from "ai";
@@ -73,11 +73,19 @@ function processChildren(children: React.ReactNode): React.ReactNode {
   }
   if (Array.isArray(children)) {
     return children.map((child, i) => {
-      if (typeof child === "string" && /\[Source\s+\d+/.test(child)) {
-        return <CitationText key={i} text={child} />;
+      const processed = processChildren(child);
+      if (processed !== child && typeof processed === "object") {
+        return <span key={i}>{processed}</span>;
       }
-      return child;
+      return processed;
     });
+  }
+  // Recursively walk React elements (e.g., <em>, <strong>, <a>)
+  if (React.isValidElement(children) && children.props?.children) {
+    const processedChildren = processChildren(children.props.children);
+    if (processedChildren !== children.props.children) {
+      return React.cloneElement(children, {}, processedChildren);
+    }
   }
   return children;
 }

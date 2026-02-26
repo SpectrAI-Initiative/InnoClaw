@@ -116,6 +116,15 @@ function TreeNode({
 
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Clear click timer on unmount
+  useEffect(() => {
+    return () => {
+      if (clickTimer.current) {
+        clearTimeout(clickTimer.current);
+      }
+    };
+  }, []);
+
   const handleClick = () => {
     if (renaming) return;
     // Use a timer to distinguish single vs double click
@@ -138,6 +147,11 @@ function TreeNode({
   };
 
   const handleDoubleClick = () => {
+    // Clear any pending single-click timer to prevent unexpected open/expand
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current);
+      clickTimer.current = null;
+    }
     setNewName(entry.name);
     setRenaming(true);
   };
