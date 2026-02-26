@@ -18,9 +18,10 @@ export interface RetrievedChunk {
  * When the query mentions a source filename, the first chunks of that file
  * are always included so meta-questions (title, summary) can be answered.
  *
- * Note: filename-matched chunks are prioritised and placed first. If there
- * are many filename matches they may displace some embedding-based results
- * after the list is capped to topK.
+ * Merge strategy: filename-matched chunks are included first, but are capped
+ * to at most (topK - floor(topK/2)) slots so that at least floor(topK/2)
+ * slots are always reserved for embedding-based results. This prevents a
+ * large number of filename matches from crowding out semantic retrieval.
  */
 export async function retrieveRelevantChunks(
   query: string,
@@ -89,18 +90,31 @@ export async function retrieveRelevantChunks(
     throw error;
   }
 
-  // 4. Merge: filename-matched chunks first, then embedding results (deduplicated)
-  if (fileNameChunks.length === 0) return embeddingChunks;
+  // 4. Merge: filename-matched chunks first, then embedding results (deduplicated).
+  //    Reserve at least floor(topK/2) slots for embedding-based results so that
+  //    a large number of filename matches cannot crowd out semantic retrieval.
+  if (fileNameChunks.length === 0) return embeddingChunks.slice(0, topK);
 
-  const seen = new Set(fileNameChunks.map((c) => c.chunkId));
-  const merged = [...fileNameChunks];
+  const minEmbeddingSlots = topK > 1 ? Math.max(Math.floor(topK / 2), 1) : 0;
+  const filenameSlots = Math.min(fileNameChunks.length, topK - minEmbeddingSlots);
+
+  const seen = new Set<string>();
+  const merged: RetrievedChunk[] = [];
+
+  for (const chunk of fileNameChunks.slice(0, filenameSlots)) {
+    merged.push(chunk);
+    seen.add(chunk.chunkId);
+  }
+
   for (const chunk of embeddingChunks) {
+    if (merged.length >= topK) break;
     if (!seen.has(chunk.chunkId)) {
       merged.push(chunk);
       seen.add(chunk.chunkId);
     }
   }
-  return merged.slice(0, topK);
+
+  return merged;
 }
 
 /**
