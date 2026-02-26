@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { getFileName } from "@/lib/utils";
 import { FileTree } from "./file-tree";
 import { FileEditor } from "./file-editor";
 import { PdfViewer } from "./pdf-viewer";
@@ -324,9 +325,7 @@ export function FileBrowser({
         <SheetContent side="bottom" className="h-[70vh]">
           <SheetHeader>
             <SheetTitle>
-              {editingFile?.split("/").pop() ||
-                editingFile?.split("\\").pop() ||
-                ""}
+              {editingFile ? getFileName(editingFile) : ""}
             </SheetTitle>
           </SheetHeader>
           {editingFile && (
@@ -345,9 +344,7 @@ export function FileBrowser({
         <SheetContent side="bottom" className="h-[80vh]">
           <SheetHeader>
             <SheetTitle>
-              {viewingPdf?.split("/").pop() ||
-                viewingPdf?.split("\\").pop() ||
-                ""}
+              {viewingPdf ? getFileName(viewingPdf) : ""}
             </SheetTitle>
           </SheetHeader>
           {viewingPdf && <PdfViewer filePath={viewingPdf} />}
@@ -359,9 +356,7 @@ export function FileBrowser({
         <SheetContent side="bottom" className="h-[80vh]">
           <SheetHeader>
             <SheetTitle>
-              {viewingMol?.split("/").pop() ||
-                viewingMol?.split("\\").pop() ||
-                ""}
+              {viewingMol ? getFileName(viewingMol) : ""}
             </SheetTitle>
           </SheetHeader>
           {viewingMol && <MolViewer filePath={viewingMol} />}
