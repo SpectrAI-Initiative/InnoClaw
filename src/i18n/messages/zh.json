@@ -111,5 +111,15 @@
     "notConfigured": "未配置",
     "apiKeys": "API 密钥与端点",
     "apiKeysDesc": "在 .env.local 中配置 API 密钥和自定义 Base URL。"
+  },
+  "terminal": {
+    "title": "终端",
+    "placeholder": "输入命令...",
+    "running": "执行中..."
+  },
+  "preview": {
+    "title": "预览",
+    "emptyState": "选择一个文件以预览",
+    "unsupported": "此文件类型不支持预览"
   }
 }

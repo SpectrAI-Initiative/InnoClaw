@@ -111,5 +111,15 @@
     "notConfigured": "Not configured",
     "apiKeys": "API Keys & Endpoints",
     "apiKeysDesc": "Configure API keys and custom Base URLs in the .env.local file on the server."
+  },
+  "terminal": {
+    "title": "Terminal",
+    "placeholder": "Type a command...",
+    "running": "Running..."
+  },
+  "preview": {
+    "title": "Preview",
+    "emptyState": "Select a file to preview",
+    "unsupported": "Preview not available for this file type"
   }
 }
