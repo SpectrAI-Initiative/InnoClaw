@@ -48,7 +48,17 @@ export async function POST(req: NextRequest) {
     const trimmed = command.trim();
     const cdMatch = trimmed.match(/^cd\s+(.*)/);
     if (cdMatch || trimmed === "cd") {
-      const target = cdMatch ? cdMatch[1].trim().replace(/^["']|["']$/g, "") : process.env.HOME || "/";
+      let target = cdMatch
+        ? cdMatch[1].trim().replace(/^["']|["']$/g, "")
+        : process.env.HOME || "/";
+
+      // Expand a leading "~" to the user's home directory
+      if (target.startsWith("~")) {
+        const homeDir = process.env.HOME || validatedCwd;
+        const rest = target.slice(1);
+        target = path.join(homeDir, rest);
+      }
+
       const newCwd = path.resolve(validatedCwd, target);
 
       try {
