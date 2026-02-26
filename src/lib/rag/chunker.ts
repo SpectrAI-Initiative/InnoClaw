@@ -1,5 +1,6 @@
 export interface ChunkOptions {
   maxChunkSize: number;
+  /** Reserved for future use. Currently not applied during chunking. */
   chunkOverlap: number;
   separators: string[];
 }
@@ -112,8 +113,9 @@ export function chunkText(
 
     charOffset = startChar >= 0 ? startChar + 1 : charOffset + content.length;
 
-    // Overlap is handled naturally by the retriever finding adjacent chunks.
-    // We don't create explicit overlap chunks to avoid duplicate content.
+    // Explicit overlap chunks are not created to avoid duplicate content.
+    // Related context from adjacent text segments may be retrieved naturally
+    // by the retriever if it is semantically similar.
   }
 
   return chunks;
