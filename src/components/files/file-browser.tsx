@@ -67,6 +67,7 @@ export function FileBrowser({
       toast.success(
         `${tWorkspace("syncComplete")}: ${result.newCount} new, ${result.updatedCount} updated, ${result.removedCount} removed`
       );
+      refresh();
     } catch {
       toast.error("Sync failed");
     } finally {
@@ -193,11 +194,11 @@ export function FileBrowser({
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <FileTree
-            key={refreshKey}
             rootPath={folderPath}
             onFileOpen={handleFileOpen}
             onRefresh={refresh}
             selectedPath={selectedFilePath}
+            refreshKey={refreshKey}
           />
         </ScrollArea>
       </div>

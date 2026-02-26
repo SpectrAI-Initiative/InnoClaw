@@ -26,13 +26,22 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 // --- Tool Call Block ---
 
+// AI SDK v6 ToolUIPart: type is "tool-{name}" or "dynamic-tool",
+// properties are flat: toolCallId, state, input, output, errorText
 interface ToolInvocationPart {
   type: string;
-  toolInvocationId: string;
-  toolName: string;
-  args?: Record<string, unknown>;
+  toolCallId: string;
+  toolName?: string; // only present on "dynamic-tool" parts
   state: string;
-  result?: Record<string, unknown>;
+  input?: unknown;
+  output?: unknown;
+  errorText?: string;
+}
+
+function getToolNameFromPart(part: ToolInvocationPart): string {
+  if (part.toolName) return part.toolName; // dynamic-tool
+  if (part.type.startsWith("tool-")) return part.type.slice(5);
+  return "unknown";
 }
 
 const TOOL_ICONS: Record<string, React.ReactNode> = {
@@ -64,12 +73,14 @@ function getToolSummary(toolName: string, args?: Record<string, unknown>): strin
 function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
   const [expanded, setExpanded] = useState(false);
 
-  const toolName = part.toolName;
+  const toolName = getToolNameFromPart(part);
+  const args = part.input as Record<string, unknown> | undefined;
   const icon = TOOL_ICONS[toolName] || <Terminal className="h-3.5 w-3.5" />;
-  const summary = getToolSummary(toolName, part.args);
-  const isDone = part.state === "result";
-  const isError = part.result && "error" in part.result;
-  const isRunning = !isDone;
+  const summary = getToolSummary(toolName, args);
+  const isDone = part.state === "output-available";
+  const isError = part.state === "output-error";
+  const isRunning = !isDone && !isError;
+  const result = part.output as Record<string, unknown> | undefined;
 
   return (
     <div className="my-1.5 rounded border border-[#30363d] bg-[#161b22] text-xs font-mono overflow-hidden">
@@ -101,30 +112,35 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
       {expanded && (
         <div className="border-t border-[#30363d] px-3 py-2 space-y-2">
           {/* Tool-specific rendering */}
-          {toolName === "bash" && part.args && (
-            <div className="text-[#9ece6a]">$ {String(part.args.command)}</div>
+          {toolName === "bash" && args && (
+            <div className="text-[#9ece6a]">$ {String(args.command)}</div>
           )}
-          {toolName === "readFile" && part.args && (
+          {toolName === "readFile" && args && (
             <div className="text-[#565f89]">
-              Reading: {String(part.args.filePath)}
+              Reading: {String(args.filePath)}
             </div>
           )}
-          {toolName === "writeFile" && part.args && (
+          {toolName === "writeFile" && args && (
             <div className="text-[#565f89]">
-              Writing: {String(part.args.filePath)}
+              Writing: {String(args.filePath)}
             </div>
           )}
-          {toolName === "grep" && part.args && (
+          {toolName === "grep" && args && (
             <div className="text-[#565f89]">
-              Pattern: {String(part.args.pattern)}
-              {part.args.include && ` | Include: ${String(part.args.include)}`}
+              Pattern: {String(args.pattern)}
+              {args.include && ` | Include: ${String(args.include)}`}
             </div>
           )}
 
+          {/* Error */}
+          {isError && part.errorText && (
+            <div className="text-[#f7768e]">{part.errorText}</div>
+          )}
+
           {/* Result */}
-          {isDone && part.result && (
+          {isDone && result && (
             <div className="max-h-[300px] overflow-auto">
-              {renderToolResult(toolName, part.result)}
+              {renderToolResult(toolName, result)}
             </div>
           )}
         </div>
@@ -327,10 +343,15 @@ export function AgentPanel({
 
   const isLoading = status === "submitted" || status === "streaming";
 
-  // Auto-scroll
+  // Auto-scroll to bottom when messages update
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const viewport = scrollRef.current.querySelector(
+        '[data-slot="scroll-area-viewport"]'
+      );
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
+      }
     }
   }, [messages, status]);
 

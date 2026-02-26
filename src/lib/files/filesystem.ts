@@ -171,6 +171,18 @@ export async function renameFile(
 }
 
 /**
+ * Copy a file or directory recursively
+ */
+export async function copyFileOrDir(
+  srcPath: string,
+  destPath: string
+): Promise<void> {
+  const validatedSrc = validatePath(srcPath);
+  const validatedDest = validatePath(destPath);
+  await fsp.cp(validatedSrc, validatedDest, { recursive: true });
+}
+
+/**
  * Create a directory
  */
 export async function createDirectory(dirPath: string): Promise<void> {
