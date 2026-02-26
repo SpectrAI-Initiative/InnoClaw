@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { FileTree } from "./file-tree";
 import { FileEditor } from "./file-editor";
 import { PdfViewer } from "./pdf-viewer";
+import { MolViewer } from "./mol-viewer";
 import { UploadZone } from "./upload-zone";
 import { toast } from "sonner";
 import {
@@ -60,6 +61,7 @@ export function FileBrowser({
   const [pulling, setPulling] = useState(false);
   const [editingFile, setEditingFile] = useState<string | null>(null);
   const [viewingPdf, setViewingPdf] = useState<string | null>(null);
+  const [viewingMol, setViewingMol] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = useCallback(() => {
@@ -162,9 +164,12 @@ export function FileBrowser({
       "sh",
       "bat",
     ];
+    const molExts = ["pdb", "mol", "mol2", "sdf", "sd", "xyz", "cif"];
 
     if (ext === "pdf") {
       setViewingPdf(path);
+    } else if (ext && molExts.includes(ext)) {
+      setViewingMol(path);
     } else if (ext && editableExts.includes(ext)) {
       setEditingFile(path);
     }
@@ -346,6 +351,20 @@ export function FileBrowser({
             </SheetTitle>
           </SheetHeader>
           {viewingPdf && <PdfViewer filePath={viewingPdf} />}
+        </SheetContent>
+      </Sheet>
+
+      {/* Molecular Viewer Sheet */}
+      <Sheet open={!!viewingMol} onOpenChange={() => setViewingMol(null)}>
+        <SheetContent side="bottom" className="h-[80vh]">
+          <SheetHeader>
+            <SheetTitle>
+              {viewingMol?.split("/").pop() ||
+                viewingMol?.split("\\").pop() ||
+                ""}
+            </SheetTitle>
+          </SheetHeader>
+          {viewingMol && <MolViewer filePath={viewingMol} />}
         </SheetContent>
       </Sheet>
     </div>

@@ -54,6 +54,7 @@
     "saving": "保存中...",
     "saved": "已保存",
     "pdfPreviewFailed": "无法预览此 PDF 文件",
+    "molPreviewFailed": "无法预览此分子结构文件",
     "downloadFile": "下载"
   },
   "git": {

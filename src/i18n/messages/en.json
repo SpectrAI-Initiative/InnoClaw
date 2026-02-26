@@ -54,6 +54,7 @@
     "saving": "Saving...",
     "saved": "Saved",
     "pdfPreviewFailed": "Unable to preview this PDF",
+    "molPreviewFailed": "Unable to preview this molecular structure file",
     "downloadFile": "Download"
   },
   "git": {
