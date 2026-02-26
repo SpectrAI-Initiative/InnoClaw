@@ -183,7 +183,9 @@ export async function retrieveByKeywordSearch(
   if (keywords.length === 0) return [];
 
   // Build SQL LIKE conditions for each keyword and filter at DB level
-  const likeConditions = keywords.map((kw) => like(sourceChunks.content, `%${kw}%`));
+  // Escape SQL LIKE wildcards to prevent injection
+  const sanitize = (s: string) => s.replace(/[%_\\]/g, "\\$&");
+  const likeConditions = keywords.map((kw) => like(sourceChunks.content, `%${sanitize(kw)}%`));
   const keywordFilter = likeConditions.length === 1
     ? likeConditions[0]
     : or(...likeConditions)!;
