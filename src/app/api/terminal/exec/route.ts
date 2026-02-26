@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     const safeEnv: NodeJS.ProcessEnv = {
       PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
       HOME: process.env.HOME || "/tmp",
-      NODE_ENV: process.env.NODE_ENV,
+      NODE_ENV: process.env.NODE_ENV || "production",
       TERM: "dumb",
       LANG: process.env.LANG || "en_US.UTF-8",
     };
