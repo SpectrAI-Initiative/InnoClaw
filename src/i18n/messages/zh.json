@@ -81,7 +81,9 @@
       "summarize": "总结我的文件",
       "keyThemes": "主要主题是什么？",
       "overview": "给我一个概述"
-    }
+    },
+    "confirmSelection": "确认选择",
+    "selectionConfirmed": "已确认选择"
   },
   "notes": {
     "title": "笔记",

@@ -81,7 +81,9 @@
       "summarize": "Summarize my files",
       "keyThemes": "What are the key themes?",
       "overview": "Give me an overview"
-    }
+    },
+    "confirmSelection": "Confirm Selection",
+    "selectionConfirmed": "Selection confirmed"
   },
   "notes": {
     "title": "Notes",
