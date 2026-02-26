@@ -1,0 +1,110 @@
+{
+  "common": {
+    "create": "创建",
+    "delete": "删除",
+    "cancel": "取消",
+    "save": "保存",
+    "settings": "设置",
+    "loading": "加载中...",
+    "confirm": "确认",
+    "rename": "重命名",
+    "open": "打开",
+    "close": "关闭",
+    "edit": "编辑",
+    "back": "返回",
+    "refresh": "刷新",
+    "error": "错误",
+    "success": "成功"
+  },
+  "home": {
+    "title": "我的工作空间",
+    "openWorkspace": "打开工作空间",
+    "cloneFromGithub": "从 GitHub 克隆",
+    "empty": "还没有工作空间。打开一个文件夹或克隆一个仓库开始吧。",
+    "lastOpened": "上次打开",
+    "files": "个文件",
+    "deleteConfirm": "确定要删除此工作空间吗？这只会从列表中移除，不会删除实际文件。"
+  },
+  "workspace": {
+    "sources": "资料来源",
+    "chat": "对话",
+    "notes": "笔记",
+    "files": "文件",
+    "sync": "同步",
+    "syncing": "同步中...",
+    "syncComplete": "同步完成",
+    "syncStatus": "{newCount} 个新增, {updatedCount} 个更新, {removedCount} 个删除",
+    "indexed": "已索引",
+    "pending": "待处理",
+    "processing": "处理中..."
+  },
+  "files": {
+    "upload": "上传",
+    "newFile": "新建文件",
+    "newFolder": "新建文件夹",
+    "rename": "重命名",
+    "delete": "删除",
+    "deleteConfirm": "确定要删除「{name}」吗？",
+    "fileName": "文件名",
+    "folderName": "文件夹名",
+    "emptyFolder": "此文件夹为空",
+    "selectFolder": "选择文件夹",
+    "rootPaths": "可用根路径",
+    "dragDrop": "拖放文件到此处，或点击浏览",
+    "saving": "保存中...",
+    "saved": "已保存"
+  },
+  "git": {
+    "clone": "克隆仓库",
+    "pull": "拉取更新",
+    "pulling": "拉取中...",
+    "repoUrl": "仓库地址",
+    "repoUrlPlaceholder": "https://github.com/user/repo",
+    "targetFolder": "目标文件夹名",
+    "cloning": "克隆中...",
+    "cloneSuccess": "仓库克隆成功",
+    "pullSuccess": "拉取完成",
+    "branch": "分支",
+    "clean": "无变更",
+    "dirty": "有修改"
+  },
+  "chat": {
+    "placeholder": "输入你的问题...",
+    "emptyState": "向 AI 提问关于工作空间文件的问题，获取带引用的回答。",
+    "disabledState": "AI 对话功能需要配置 API Key。请在 .env.local 中设置 OPENAI_API_KEY 或 ANTHROPIC_API_KEY。",
+    "citedFrom": "引用自",
+    "send": "发送",
+    "suggested": {
+      "summarize": "总结我的文件",
+      "keyThemes": "主要主题是什么？",
+      "overview": "给我一个概述"
+    }
+  },
+  "notes": {
+    "title": "笔记",
+    "generate": "生成",
+    "summary": "摘要",
+    "faq": "常见问题",
+    "briefing": "简报文档",
+    "timeline": "时间线",
+    "addNote": "添加笔记",
+    "noteTitle": "笔记标题",
+    "emptyState": "还没有笔记。生成一个或创建手动笔记。",
+    "generating": "生成中...",
+    "generateDisabled": "生成功能需要配置 API Key"
+  },
+  "settings": {
+    "title": "设置",
+    "provider": "AI 提供商",
+    "providerDesc": "配置用于对话和生成的 AI 提供商和模型。支持通过 OPENAI_BASE_URL / ANTHROPIC_BASE_URL 环境变量指向第三方兼容服务。",
+    "model": "模型",
+    "language": "语言",
+    "workspaceRoots": "工作空间根路径",
+    "workspaceRootsDesc": "在 .env.local 中通过 WORKSPACE_ROOTS 环境变量配置。",
+    "githubToken": "GitHub Token",
+    "configured": "已配置",
+    "notConfigured": "未配置",
+    "apiKeys": "API 密钥与端点",
+    "apiKeysDesc": "在 .env.local 中配置 API 密钥和自定义 Base URL。"
+  }
+}

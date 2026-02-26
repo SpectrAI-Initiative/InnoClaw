@@ -1,0 +1,110 @@
+{
+  "common": {
+    "create": "Create",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "settings": "Settings",
+    "loading": "Loading...",
+    "confirm": "Confirm",
+    "rename": "Rename",
+    "open": "Open",
+    "close": "Close",
+    "edit": "Edit",
+    "back": "Back",
+    "refresh": "Refresh",
+    "error": "Error",
+    "success": "Success"
+  },
+  "home": {
+    "title": "My Workspaces",
+    "openWorkspace": "Open Workspace",
+    "cloneFromGithub": "Clone from GitHub",
+    "empty": "No workspaces yet. Open a folder or clone a repository to get started.",
+    "lastOpened": "Last opened",
+    "files": "files",
+    "deleteConfirm": "Are you sure you want to delete this workspace? This will only remove it from the list, not delete the actual files."
+  },
+  "workspace": {
+    "sources": "Sources",
+    "chat": "Chat",
+    "notes": "Notes",
+    "files": "Files",
+    "sync": "Sync",
+    "syncing": "Syncing...",
+    "syncComplete": "Sync complete",
+    "syncStatus": "{newCount} new, {updatedCount} updated, {removedCount} removed",
+    "indexed": "Indexed",
+    "pending": "Pending",
+    "processing": "Processing..."
+  },
+  "files": {
+    "upload": "Upload",
+    "newFile": "New File",
+    "newFolder": "New Folder",
+    "rename": "Rename",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+    "fileName": "File name",
+    "folderName": "Folder name",
+    "emptyFolder": "This folder is empty",
+    "selectFolder": "Select a folder",
+    "rootPaths": "Available root paths",
+    "dragDrop": "Drag and drop files here, or click to browse",
+    "saving": "Saving...",
+    "saved": "Saved"
+  },
+  "git": {
+    "clone": "Clone Repository",
+    "pull": "Pull",
+    "pulling": "Pulling...",
+    "repoUrl": "Repository URL",
+    "repoUrlPlaceholder": "https://github.com/user/repo",
+    "targetFolder": "Target folder name",
+    "cloning": "Cloning...",
+    "cloneSuccess": "Repository cloned successfully",
+    "pullSuccess": "Pull complete",
+    "branch": "Branch",
+    "clean": "Clean",
+    "dirty": "Modified"
+  },
+  "chat": {
+    "placeholder": "Type your question...",
+    "emptyState": "Ask questions about your workspace files and get AI-powered answers with citations.",
+    "disabledState": "AI chat requires an API key. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env.local.",
+    "citedFrom": "Cited from",
+    "send": "Send",
+    "suggested": {
+      "summarize": "Summarize my files",
+      "keyThemes": "What are the key themes?",
+      "overview": "Give me an overview"
+    }
+  },
+  "notes": {
+    "title": "Notes",
+    "generate": "Generate",
+    "summary": "Summary",
+    "faq": "FAQ",
+    "briefing": "Briefing Doc",
+    "timeline": "Timeline",
+    "addNote": "Add Note",
+    "noteTitle": "Note title",
+    "emptyState": "No notes yet. Generate one or create a manual note.",
+    "generating": "Generating...",
+    "generateDisabled": "Generation requires an API key"
+  },
+  "settings": {
+    "title": "Settings",
+    "provider": "AI Provider",
+    "providerDesc": "Configure which AI provider and model to use for chat and generation. Supports third-party compatible services via OPENAI_BASE_URL / ANTHROPIC_BASE_URL environment variables.",
+    "model": "Model",
+    "language": "Language",
+    "workspaceRoots": "Workspace Root Paths",
+    "workspaceRootsDesc": "Configured in .env.local via WORKSPACE_ROOTS environment variable.",
+    "githubToken": "GitHub Token",
+    "configured": "Configured",
+    "notConfigured": "Not configured",
+    "apiKeys": "API Keys & Endpoints",
+    "apiKeysDesc": "Configure API keys and custom Base URLs in the .env.local file on the server."
+  }
+}
