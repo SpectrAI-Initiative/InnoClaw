@@ -132,8 +132,8 @@ function processChildren(children: React.ReactNode): React.ReactNode {
 // --- Selectable options support ---
 
 type MessageSegment =
-  | { type: "text"; content: string }
-  | { type: "select"; selectType: "single" | "multi"; options: string[] };
+  | { type: "text"; content: string; offset: number }
+  | { type: "select"; selectType: "single" | "multi"; options: string[]; offset: number };
 
 const MAX_SELECT_BLOCK_LENGTH = 10000;
 
@@ -148,25 +148,25 @@ function parseMessageSegments(text: string): MessageSegment[] {
 
     if (startIdx === -1) {
       if (cursor < text.length) {
-        segments.push({ type: "text", content: text.slice(cursor) });
+        segments.push({ type: "text", content: text.slice(cursor), offset: cursor });
       }
       break;
     }
 
     if (startIdx > cursor) {
-      segments.push({ type: "text", content: text.slice(cursor, startIdx) });
+      segments.push({ type: "text", content: text.slice(cursor, startIdx), offset: cursor });
     }
 
     const headerEndIdx = text.indexOf("]", startIdx + selectStartToken.length);
     if (headerEndIdx === -1) {
-      segments.push({ type: "text", content: text.slice(startIdx) });
+      segments.push({ type: "text", content: text.slice(startIdx), offset: startIdx });
       break;
     }
 
     const selectTypeStr = text.slice(startIdx + selectStartToken.length, headerEndIdx).trim();
 
     if (selectTypeStr !== "single" && selectTypeStr !== "multi") {
-      segments.push({ type: "text", content: text.slice(startIdx, headerEndIdx + 1) });
+      segments.push({ type: "text", content: text.slice(startIdx, headerEndIdx + 1), offset: startIdx });
       cursor = headerEndIdx + 1;
       continue;
     }
@@ -179,7 +179,7 @@ function parseMessageSegments(text: string): MessageSegment[] {
     const endIdx = text.indexOf(selectEndToken, contentStartIdx);
 
     if (endIdx === -1) {
-      segments.push({ type: "text", content: text.slice(startIdx) });
+      segments.push({ type: "text", content: text.slice(startIdx), offset: startIdx });
       break;
     }
 
@@ -188,6 +188,7 @@ function parseMessageSegments(text: string): MessageSegment[] {
       segments.push({
         type: "text",
         content: text.slice(startIdx, endIdx + selectEndToken.length),
+        offset: startIdx,
       });
       cursor = endIdx + selectEndToken.length;
       continue;
@@ -203,6 +204,7 @@ function parseMessageSegments(text: string): MessageSegment[] {
       type: "select",
       selectType: selectTypeStr as "single" | "multi",
       options,
+      offset: startIdx,
     });
 
     cursor = endIdx + selectEndToken.length;
@@ -423,12 +425,12 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                 >
                   {message.role === "assistant" ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none">
-                      {parseMessageSegments(getMessageText(message)).map((seg, si) =>
+                      {parseMessageSegments(getMessageText(message)).map((seg) =>
                         seg.type === "text" ? (
-                          <ReactMarkdown key={`${message.id}-${si}`} components={markdownComponents}>{seg.content}</ReactMarkdown>
+                          <ReactMarkdown key={`${message.id}-t${seg.offset}`} components={markdownComponents}>{seg.content}</ReactMarkdown>
                         ) : (
                           <SelectableOptions
-                            key={`${message.id}-${si}`}
+                            key={`${message.id}-s${seg.offset}`}
                             type={seg.selectType}
                             options={seg.options}
                             disabled={isLoading}
