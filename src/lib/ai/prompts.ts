@@ -45,7 +45,7 @@ ${sourceList}
 - Option 3 description
 [/SELECT]
 
-Keep each option on a single line starting with "- ". Do NOT use SELECT blocks for purely informational lists, explanations, or steps — only use them when the user is expected to choose or prioritize among the items.
+Keep each option on a single line starting with "- " or "* ". Do NOT use SELECT blocks for purely informational lists, explanations, or steps — only use them when the user is expected to choose or prioritize among the items.
 8. Respond in the same language as the user's message.`;
 }
 

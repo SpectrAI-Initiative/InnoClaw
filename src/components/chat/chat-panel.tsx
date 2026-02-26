@@ -135,29 +135,77 @@ type MessageSegment =
   | { type: "text"; content: string }
   | { type: "select"; selectType: "single" | "multi"; options: string[] };
 
-const SELECT_BLOCK_RE = /\[SELECT:(single|multi)\]\n([\s\S]*?)\n?\[\/SELECT\]/g;
+const MAX_SELECT_BLOCK_LENGTH = 10000;
 
 function parseMessageSegments(text: string): MessageSegment[] {
   const segments: MessageSegment[] = [];
-  let lastIndex = 0;
+  const selectStartToken = "[SELECT:";
+  const selectEndToken = "[/SELECT]";
+  let cursor = 0;
 
-  for (const match of text.matchAll(SELECT_BLOCK_RE)) {
-    const matchStart = match.index!;
-    if (matchStart > lastIndex) {
-      segments.push({ type: "text", content: text.slice(lastIndex, matchStart) });
+  while (cursor < text.length) {
+    const startIdx = text.indexOf(selectStartToken, cursor);
+
+    if (startIdx === -1) {
+      if (cursor < text.length) {
+        segments.push({ type: "text", content: text.slice(cursor) });
+      }
+      break;
     }
-    const selectType = match[1] as "single" | "multi";
-    const optionsRaw = match[2];
+
+    if (startIdx > cursor) {
+      segments.push({ type: "text", content: text.slice(cursor, startIdx) });
+    }
+
+    const headerEndIdx = text.indexOf("]", startIdx + selectStartToken.length);
+    if (headerEndIdx === -1) {
+      segments.push({ type: "text", content: text.slice(startIdx) });
+      break;
+    }
+
+    const selectTypeStr = text.slice(startIdx + selectStartToken.length, headerEndIdx).trim();
+
+    if (selectTypeStr !== "single" && selectTypeStr !== "multi") {
+      segments.push({ type: "text", content: text.slice(startIdx, headerEndIdx + 1) });
+      cursor = headerEndIdx + 1;
+      continue;
+    }
+
+    let contentStartIdx = headerEndIdx + 1;
+    if (text[contentStartIdx] === "\n") {
+      contentStartIdx += 1;
+    }
+
+    const endIdx = text.indexOf(selectEndToken, contentStartIdx);
+
+    if (endIdx === -1) {
+      segments.push({ type: "text", content: text.slice(startIdx) });
+      break;
+    }
+
+    if (endIdx - contentStartIdx > MAX_SELECT_BLOCK_LENGTH) {
+      // Treat this oversized SELECT block as plain text and continue parsing after it.
+      segments.push({
+        type: "text",
+        content: text.slice(startIdx, endIdx + selectEndToken.length),
+      });
+      cursor = endIdx + selectEndToken.length;
+      continue;
+    }
+
+    const optionsRaw = text.slice(contentStartIdx, endIdx);
     const options = optionsRaw
       .split("\n")
       .map((line) => line.replace(/^[-*]\s*/, "").trim())
       .filter((line) => line.length > 0);
-    segments.push({ type: "select", selectType, options });
-    lastIndex = matchStart + match[0].length;
-  }
 
-  if (lastIndex < text.length) {
-    segments.push({ type: "text", content: text.slice(lastIndex) });
+    segments.push({
+      type: "select",
+      selectType: selectTypeStr as "single" | "multi",
+      options,
+    });
+
+    cursor = endIdx + selectEndToken.length;
   }
 
   return segments;
@@ -377,16 +425,17 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                     <div className="prose prose-sm dark:prose-invert max-w-none">
                       {parseMessageSegments(getMessageText(message)).map((seg, si) =>
                         seg.type === "text" ? (
-                          <ReactMarkdown key={si} components={markdownComponents}>{seg.content}</ReactMarkdown>
+                          <ReactMarkdown key={`${message.id}-${si}`} components={markdownComponents}>{seg.content}</ReactMarkdown>
                         ) : (
                           <SelectableOptions
-                            key={si}
+                            key={`${message.id}-${si}`}
                             type={seg.selectType}
                             options={seg.options}
                             disabled={isLoading}
                             onConfirm={(selected) => {
                               const text = selected.map((s, i) => `${i + 1}. ${s}`).join("\n");
-                              sendMessage({ text: `我选择了以下${seg.selectType === "single" ? "选项" : "选项"}：\n${text}` });
+                              const prefix = t(seg.selectType === "single" ? "selectionSingle" : "selectionMulti");
+                              sendMessage({ text: `${prefix}\n${text}` });
                             }}
                           />
                         )
