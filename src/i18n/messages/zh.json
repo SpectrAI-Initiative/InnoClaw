@@ -81,7 +81,11 @@
       "summarize": "总结我的文件",
       "keyThemes": "主要主题是什么？",
       "overview": "给我一个概述"
-    }
+    },
+    "confirmSelection": "确认选择",
+    "selectionConfirmed": "已确认选择",
+    "selectionSingle": "我选择了以下选项：",
+    "selectionMulti": "我选择了以下选项："
   },
   "notes": {
     "title": "笔记",
@@ -109,5 +113,15 @@
     "notConfigured": "未配置",
     "apiKeys": "API 密钥与端点",
     "apiKeysDesc": "在 .env.local 中配置 API 密钥和自定义 Base URL。"
+  },
+  "terminal": {
+    "title": "终端",
+    "placeholder": "输入命令...",
+    "running": "执行中..."
+  },
+  "preview": {
+    "title": "预览",
+    "emptyState": "选择一个文件以预览",
+    "unsupported": "此文件类型不支持预览"
   }
 }

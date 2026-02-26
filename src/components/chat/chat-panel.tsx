@@ -7,9 +7,10 @@ import { TextStreamChatTransport } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot, User, AlertCircle, FileText } from "lucide-react";
+import { Send, Bot, User, AlertCircle, FileText, Check, Circle } from "lucide-react";
 import ReactMarkdown, { Components } from "react-markdown";
 import useSWR from "swr";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -128,6 +129,193 @@ function processChildren(children: React.ReactNode): React.ReactNode {
   return children;
 }
 
+// --- Selectable options support ---
+
+type MessageSegment =
+  | { type: "text"; content: string; offset: number }
+  | { type: "select"; selectType: "single" | "multi"; options: string[]; offset: number };
+
+const MAX_SELECT_BLOCK_LENGTH = 10000;
+
+function parseMessageSegments(text: string): MessageSegment[] {
+  const segments: MessageSegment[] = [];
+  const selectStartToken = "[SELECT:";
+  const selectEndToken = "[/SELECT]";
+  let cursor = 0;
+
+  while (cursor < text.length) {
+    const startIdx = text.indexOf(selectStartToken, cursor);
+
+    if (startIdx === -1) {
+      if (cursor < text.length) {
+        segments.push({ type: "text", content: text.slice(cursor), offset: cursor });
+      }
+      break;
+    }
+
+    if (startIdx > cursor) {
+      segments.push({ type: "text", content: text.slice(cursor, startIdx), offset: cursor });
+    }
+
+    const headerEndIdx = text.indexOf("]", startIdx + selectStartToken.length);
+    if (headerEndIdx === -1) {
+      segments.push({ type: "text", content: text.slice(startIdx), offset: startIdx });
+      break;
+    }
+
+    const selectTypeStr = text.slice(startIdx + selectStartToken.length, headerEndIdx).trim();
+
+    if (selectTypeStr !== "single" && selectTypeStr !== "multi") {
+      segments.push({ type: "text", content: text.slice(startIdx, headerEndIdx + 1), offset: startIdx });
+      cursor = headerEndIdx + 1;
+      continue;
+    }
+
+    let contentStartIdx = headerEndIdx + 1;
+    if (text[contentStartIdx] === "\n") {
+      contentStartIdx += 1;
+    }
+
+    const endIdx = text.indexOf(selectEndToken, contentStartIdx);
+
+    if (endIdx === -1) {
+      segments.push({ type: "text", content: text.slice(startIdx), offset: startIdx });
+      break;
+    }
+
+    if (endIdx - contentStartIdx > MAX_SELECT_BLOCK_LENGTH) {
+      // Treat this oversized SELECT block as plain text and continue parsing after it.
+      segments.push({
+        type: "text",
+        content: text.slice(startIdx, endIdx + selectEndToken.length),
+        offset: startIdx,
+      });
+      cursor = endIdx + selectEndToken.length;
+      continue;
+    }
+
+    const optionsRaw = text.slice(contentStartIdx, endIdx);
+    const options = optionsRaw
+      .split("\n")
+      .map((line) => line.replace(/^[-*]\s*/, "").trim())
+      .filter((line) => line.length > 0);
+
+    segments.push({
+      type: "select",
+      selectType: selectTypeStr as "single" | "multi",
+      options,
+      offset: startIdx,
+    });
+
+    cursor = endIdx + selectEndToken.length;
+  }
+
+  return segments;
+}
+
+function SelectableOptions({
+  type,
+  options,
+  onConfirm,
+  disabled,
+}: {
+  type: "single" | "multi";
+  options: string[];
+  onConfirm: (selected: string[]) => void;
+  disabled?: boolean;
+}) {
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [confirmed, setConfirmed] = useState(false);
+  const t = useTranslations("chat");
+
+  const toggle = (idx: number) => {
+    if (confirmed || disabled) return;
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (type === "single") {
+        // Radio: only one at a time
+        if (next.has(idx)) {
+          next.delete(idx);
+        } else {
+          next.clear();
+          next.add(idx);
+        }
+      } else {
+        // Checkbox: toggle
+        if (next.has(idx)) {
+          next.delete(idx);
+        } else {
+          next.add(idx);
+        }
+      }
+      return next;
+    });
+  };
+
+  const handleConfirm = () => {
+    if (selected.size === 0) return;
+    setConfirmed(true);
+    const selectedOptions = [...selected].sort().map((i) => options[i]);
+    onConfirm(selectedOptions);
+  };
+
+  return (
+    <div className="my-2 space-y-2">
+      {options.map((option, idx) => {
+        const isSelected = selected.has(idx);
+        return (
+          <button
+            key={idx}
+            type="button"
+            disabled={confirmed || disabled}
+            onClick={() => toggle(idx)}
+            className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${
+              isSelected
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50 hover:bg-muted/50"
+            } ${confirmed ? "opacity-70 cursor-default" : "cursor-pointer"}`}
+          >
+            {type === "multi" ? (
+              <Checkbox
+                checked={isSelected}
+                className="mt-0.5 pointer-events-none"
+                tabIndex={-1}
+              />
+            ) : (
+              <div
+                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                  isSelected
+                    ? "border-primary bg-primary"
+                    : "border-muted-foreground"
+                }`}
+              >
+                {isSelected && <Circle className="h-2 w-2 fill-primary-foreground text-primary-foreground" />}
+              </div>
+            )}
+            <span className="text-sm leading-relaxed">{option}</span>
+          </button>
+        );
+      })}
+      {!confirmed && (
+        <Button
+          size="sm"
+          disabled={selected.size === 0 || disabled}
+          onClick={handleConfirm}
+          className="mt-1"
+        >
+          <Check className="mr-1 h-3.5 w-3.5" />
+          {t("confirmSelection")}
+        </Button>
+      )}
+      {confirmed && (
+        <p className="text-xs text-muted-foreground">
+          {t("selectionConfirmed")}
+        </p>
+      )}
+    </div>
+  );
+}
+
 interface ChatPanelProps {
   workspaceId: string;
   workspaceName: string;
@@ -237,7 +425,23 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                 >
                   {message.role === "assistant" ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <ReactMarkdown components={markdownComponents}>{getMessageText(message)}</ReactMarkdown>
+                      {parseMessageSegments(getMessageText(message)).map((seg) =>
+                        seg.type === "text" ? (
+                          <ReactMarkdown key={`${message.id}-t${seg.offset}`} components={markdownComponents}>{seg.content}</ReactMarkdown>
+                        ) : (
+                          <SelectableOptions
+                            key={`${message.id}-s${seg.offset}`}
+                            type={seg.selectType}
+                            options={seg.options}
+                            disabled={isLoading}
+                            onConfirm={(selected) => {
+                              const text = selected.map((s, i) => `${i + 1}. ${s}`).join("\n");
+                              const prefix = t(seg.selectType === "single" ? "selectionSingle" : "selectionMulti");
+                              sendMessage({ text: `${prefix}\n${text}` });
+                            }}
+                          />
+                        )
+                      )}
                     </div>
                   ) : (
                     <p>{getMessageText(message)}</p>

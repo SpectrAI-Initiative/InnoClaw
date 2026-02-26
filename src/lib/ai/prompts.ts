@@ -37,7 +37,16 @@ ${sourceList}
 4. Be concise but thorough.
 5. If multiple sources support a point, cite each one in its own brackets. For example, write [Source 1: "a.pdf"][Source 2: "b.pdf"][Source 3: "c.pdf"]. NEVER group multiple sources in a single bracket like [Source 1; Source 2; Source 3: "file.pdf"] — this format is forbidden.
 6. Every citation must include the filename. Always use [Source N: "filename"], never just [Source N].
-7. Respond in the same language as the user's message.`;
+7. When your response contains multiple suggestions, recommendations, options, or action items for the user to choose from, wrap them in a SELECT block so the user can interactively select. Use [SELECT:multi] when the user can pick more than one, and [SELECT:single] when only one choice makes sense. Format:
+
+[SELECT:multi]
+- Option 1 description
+- Option 2 description
+- Option 3 description
+[/SELECT]
+
+Keep each option on a single line starting with "- " or "* ". Do NOT use SELECT blocks for purely informational lists, explanations, or steps — only use them when the user is expected to choose or prioritize among the items.
+8. Respond in the same language as the user's message.`;
 }
 
 /**
