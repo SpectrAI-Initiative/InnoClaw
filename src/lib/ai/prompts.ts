@@ -16,7 +16,7 @@ export function buildChatSystemPrompt(chunks: RetrievedChunk[]): string {
 
   // Build a lookup from source number to filename for citation instructions
   const sourceList = chunks
-    .map((chunk, i) => `- [Source ${i + 1}] → ${chunk.fileName}`)
+    .map((chunk, i) => `- [Source ${i + 1}: "${chunk.fileName}"]`)
     .join("\n");
 
   return `You are a helpful research assistant. Answer the user's questions based ONLY on the following source materials from their workspace files. If the sources don't contain enough information to answer a question, say so clearly.

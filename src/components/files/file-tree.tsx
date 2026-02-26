@@ -119,7 +119,9 @@ function TreeNode({
   // Clean up click timer on unmount to prevent memory leak
   useEffect(() => {
     return () => {
-      if (clickTimer.current) clearTimeout(clickTimer.current);
+      if (clickTimer.current) {
+        clearTimeout(clickTimer.current);
+      }
     };
   }, []);
 
@@ -145,6 +147,11 @@ function TreeNode({
   };
 
   const handleDoubleClick = () => {
+    // Clear any pending single-click timer to prevent unexpected open/expand
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current);
+      clickTimer.current = null;
+    }
     setNewName(entry.name);
     setRenaming(true);
   };

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { sourceChunks, sources } from "@/lib/db/schema";
-import { eq, inArray, like, or, and } from "drizzle-orm";
+import { eq, inArray, like, or, and, asc } from "drizzle-orm";
 import { generateEmbedding } from "./embeddings";
 import { searchSimilar } from "./vector-store";
 
@@ -28,8 +28,11 @@ export async function retrieveRelevantChunks(
   workspaceId: string,
   topK: number = 8
 ): Promise<RetrievedChunk[]> {
-  // 1. Check if query mentions any source filename
-  const fileNameChunks = await getChunksByMentionedFilename(query, workspaceId);
+  // 1. Check if query mentions any source filename (only when query looks like it contains a filename)
+  let fileNameChunks: RetrievedChunk[] = [];
+  if (looksLikeFileReference(query)) {
+    fileNameChunks = await getChunksByMentionedFilename(query, workspaceId);
+  }
 
   // 2. Generate query embedding and search for similar chunks.
   //    If embedding fails, return filename chunks instead of throwing.
@@ -84,10 +87,7 @@ export async function retrieveRelevantChunks(
       }
     }
   } catch (error) {
-    console.warn("Embedding-based retrieval failed:", error);
-    // If we have filename chunks we can still return those
-    if (fileNameChunks.length > 0) return fileNameChunks;
-    throw error;
+    console.warn("Embedding-based retrieval failed, continuing with filename-matched chunks:", error);
   }
 
   // 4. Merge: filename-matched chunks first, then embedding results (deduplicated).
@@ -128,6 +128,14 @@ function queryContainsFilename(query: string, fileName: string): boolean {
 }
 
 /**
+ * Quick pre-check: does the query look like it references a file?
+ * Matches common extensions or quoted names to avoid a full-table scan on every request.
+ */
+function looksLikeFileReference(query: string): boolean {
+  return /\w+\.\w{1,5}\b/.test(query) || /"[^"]+"|'[^']+'/.test(query);
+}
+
+/**
  * When the query mentions a source filename, return the first few chunks
  * of that source so meta-questions (title, abstract, overview) can be answered.
  */
@@ -147,24 +155,28 @@ async function getChunksByMentionedFilename(
   if (matchedSources.length === 0) return [];
 
   // Batch-fetch chunks for all matched sources in a single query
-  const matchedSourceIds = matchedSources.map((s) => s.id);
-  const allChunks = await db
-    .select({ id: sourceChunks.id, content: sourceChunks.content, sourceId: sourceChunks.sourceId, chunkIndex: sourceChunks.chunkIndex })
+  const matchedIds = matchedSources.map((s) => s.id);
+  const chunks = await db
+    .select({
+      id: sourceChunks.id,
+      content: sourceChunks.content,
+      sourceId: sourceChunks.sourceId,
+      chunkIndex: sourceChunks.chunkIndex,
+    })
     .from(sourceChunks)
-    .where(inArray(sourceChunks.sourceId, matchedSourceIds))
-    .orderBy(sourceChunks.chunkIndex);
+    .where(inArray(sourceChunks.sourceId, matchedIds))
+    .orderBy(asc(sourceChunks.sourceId), asc(sourceChunks.chunkIndex));
 
-  // Group by source and take the first 3 chunks per source
-  const sourceMetaMap = new Map(matchedSources.map((s) => [s.id, s]));
+  // Keep only the first 3 chunks per source
+  const sourceMap = new Map(matchedSources.map((s) => [s.id, s]));
   const perSourceCount = new Map<string, number>();
   const results: RetrievedChunk[] = [];
 
-  for (const chunk of allChunks) {
+  for (const chunk of chunks) {
     const count = perSourceCount.get(chunk.sourceId) ?? 0;
     if (count >= 3) continue;
     perSourceCount.set(chunk.sourceId, count + 1);
-
-    const src = sourceMetaMap.get(chunk.sourceId)!;
+    const src = sourceMap.get(chunk.sourceId)!;
     results.push({
       chunkId: chunk.id,
       sourceId: src.id,
@@ -181,7 +193,7 @@ async function getChunksByMentionedFilename(
 /**
  * Fallback retrieval using keyword matching when embedding-based search is unavailable.
  * Uses SQL LIKE to filter chunks at the database level, avoiding loading all chunks
- * into memory.
+ * into memory. Scores chunks by counting keyword matches in JavaScript.
  */
 export async function retrieveByKeywordSearch(
   query: string,
@@ -212,45 +224,65 @@ export async function retrieveByKeywordSearch(
     .from(sourceChunks)
     .where(and(eq(sourceChunks.workspaceId, workspaceId), keywordFilter));
 
-  let topChunks: typeof matchedChunks;
-  if (matchedChunks.length > 0) {
-    // Score chunks by number of keyword matches, sort and take topK
-    const scored = matchedChunks.map((chunk) => {
-      const lowerContent = chunk.content.toLowerCase();
-      const matchCount = keywords.filter((kw) => lowerContent.includes(kw)).length;
-      return { ...chunk, matchCount };
-    });
-    scored.sort((a, b) => b.matchCount - a.matchCount);
-    topChunks = scored.slice(0, topK);
+  // Score chunks by number of keyword matches, sort and take topK
+  const scored = matchedChunks.map((chunk) => {
+    const lowerContent = chunk.content.toLowerCase();
+    const matchCount = keywords.filter((kw) => lowerContent.includes(kw)).length;
+    return { ...chunk, matchCount };
+  });
+
+  const matched = scored
+    .filter((c) => c.matchCount > 0)
+    .sort((a, b) => b.matchCount - a.matchCount)
+    .slice(0, topK);
+
+  // If no keyword matches, return first chunks of each source (deterministic ordering)
+  let topChunks;
+  if (matched.length > 0) {
+    topChunks = matched;
   } else {
-    // No keyword matches – return first few chunks of the workspace
-    topChunks = await db
+    const allChunks = await db
       .select({
         id: sourceChunks.id,
         content: sourceChunks.content,
         sourceId: sourceChunks.sourceId,
       })
       .from(sourceChunks)
-      .where(eq(sourceChunks.workspaceId, workspaceId))
-      .limit(topK);
+      .where(eq(sourceChunks.workspaceId, workspaceId));
+
+    const sortedAllChunks = [...allChunks].sort((a, b) => {
+      if (a.sourceId === b.sourceId) {
+        return String(a.id).localeCompare(String(b.id));
+      }
+      return String(a.sourceId).localeCompare(String(b.sourceId));
+    });
+
+    const firstChunksPerSource: typeof allChunks = [];
+    const seenSourceIds = new Set<string>();
+    for (const chunk of sortedAllChunks) {
+      if (!seenSourceIds.has(chunk.sourceId)) {
+        seenSourceIds.add(chunk.sourceId);
+        firstChunksPerSource.push(chunk);
+        if (firstChunksPerSource.length >= topK) break;
+      }
+    }
+    topChunks = firstChunksPerSource;
   }
 
   if (topChunks.length === 0) return [];
 
-  // Batch-fetch source metadata for all chunks in one query
-  const uniqueSourceIds = [...new Set(topChunks.map((c) => c.sourceId))];
-  const sourceMeta = await db
-    .select({
-      id: sources.id,
-      fileName: sources.fileName,
-      relativePath: sources.relativePath,
-    })
-    .from(sources)
-    .where(inArray(sources.id, uniqueSourceIds));
-
+  // Enrich with source metadata (batch query)
+  const sourceIds = [...new Set(topChunks.map((c) => c.sourceId))];
+  const sourceMeta = sourceIds.length > 0
+    ? await db
+        .select({ id: sources.id, fileName: sources.fileName, relativePath: sources.relativePath })
+        .from(sources)
+        .where(inArray(sources.id, sourceIds))
+    : [];
   const sourceMap = new Map(sourceMeta.map((s) => [s.id, s]));
 
   const enrichedChunks: RetrievedChunk[] = [];
+
   for (const chunk of topChunks) {
     const source = sourceMap.get(chunk.sourceId);
     if (!source) continue;
