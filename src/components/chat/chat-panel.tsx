@@ -269,6 +269,7 @@ function SelectableOptions({
             type="button"
             disabled={confirmed || disabled}
             onClick={() => toggle(idx)}
+            aria-label={option}
             className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${
               isSelected
                 ? "border-primary bg-primary/5"

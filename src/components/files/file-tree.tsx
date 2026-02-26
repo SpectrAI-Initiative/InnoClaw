@@ -348,7 +348,9 @@ function TreeNode({
 
     if (sourcePath === destPath) return;
     if (isDirectory && sourcePath === entry.path) return;
-    if (targetDir.startsWith(sourcePath + "/")) return;
+    const normalizedTarget = targetDir.replace(/\\/g, "/").toLowerCase();
+    const normalizedSource = sourcePath.replace(/\\/g, "/").toLowerCase();
+    if (normalizedTarget === normalizedSource || normalizedTarget.startsWith(normalizedSource + "/")) return;
 
     try {
       const res = await fetch("/api/files/move", {

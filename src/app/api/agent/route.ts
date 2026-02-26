@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const { messages: uiMessages, workspaceId, cwd } = await req.json();
 
-    if (!workspaceId || !cwd) {
+    if (!workspaceId || !cwd || typeof cwd !== "string") {
       return new Response("Missing workspaceId or cwd", { status: 400 });
     }
 
