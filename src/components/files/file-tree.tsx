@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import {
   ChevronRight,
@@ -14,22 +14,58 @@ import {
   FolderOpen,
   Trash2,
   Pencil,
+  Copy,
+  Scissors,
+  ClipboardPaste,
+  ClipboardCopy,
 } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { FileEntry } from "@/types";
 
+// --- Clipboard state (shared across tree nodes) ---
+interface ClipboardData {
+  path: string;
+  name: string;
+  type: "file" | "directory";
+  operation: "copy" | "cut";
+}
+
+let globalClipboard: ClipboardData | null = null;
+let clipboardListeners: Array<() => void> = [];
+
+function setClipboard(data: ClipboardData | null) {
+  globalClipboard = data;
+  clipboardListeners.forEach((fn) => fn());
+}
+
+function useClipboard() {
+  const [clipboard, setLocal] = useState<ClipboardData | null>(globalClipboard);
+  useEffect(() => {
+    const listener = () => setLocal(globalClipboard);
+    clipboardListeners.push(listener);
+    return () => {
+      clipboardListeners = clipboardListeners.filter((fn) => fn !== listener);
+    };
+  }, []);
+  return clipboard;
+}
+
+// --- Helpers ---
+
 interface FileTreeProps {
   rootPath: string;
   onFileOpen: (path: string) => void;
   onRefresh: () => void;
   selectedPath: string | null;
+  refreshKey?: number;
 }
 
 function getFileIcon(name: string, type: string) {
@@ -62,12 +98,19 @@ function getFileIcon(name: string, type: string) {
   }
 }
 
+function getParentPath(filePath: string): string {
+  return filePath.replace(/\\/g, "/").split("/").slice(0, -1).join("/");
+}
+
+// --- TreeNode ---
+
 interface TreeNodeProps {
   entry: FileEntry;
   depth: number;
   onFileOpen: (path: string) => void;
   onRefresh: () => void;
   selectedPath: string | null;
+  refreshKey?: number;
 }
 
 function TreeNode({
@@ -76,6 +119,7 @@ function TreeNode({
   onFileOpen,
   onRefresh,
   selectedPath,
+  refreshKey,
 }: TreeNodeProps) {
   const t = useTranslations("files");
   const tCommon = useTranslations("common");
@@ -84,14 +128,17 @@ function TreeNode({
   const [loading, setLoading] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [newName, setNewName] = useState(entry.name);
+  const [dragOver, setDragOver] = useState(false);
+
+  const clipboard = useClipboard();
 
   const isDirectory = entry.type === "directory";
   const isSelected = selectedPath === entry.path;
-  const Icon = isDirectory && expanded ? FolderOpen : getFileIcon(entry.name, entry.type);
+  const Icon =
+    isDirectory && expanded ? FolderOpen : getFileIcon(entry.name, entry.type);
 
-  const loadChildren = async () => {
+  const fetchChildren = useCallback(async () => {
     if (!isDirectory) return;
-    setLoading(true);
     try {
       const res = await fetch(
         `/api/files/browse?path=${encodeURIComponent(entry.path)}`
@@ -101,10 +148,22 @@ function TreeNode({
       }
     } catch {
       // ignore
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [isDirectory, entry.path]);
+
+  const loadChildren = useCallback(async () => {
+    setLoading(true);
+    await fetchChildren();
+    setLoading(false);
+  }, [fetchChildren]);
+
+  // Re-fetch children silently when refreshKey changes and folder is expanded
+  useEffect(() => {
+    if (expanded && isDirectory) {
+      fetchChildren();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
 
   const toggleExpand = () => {
     if (!isDirectory) return;
@@ -116,7 +175,6 @@ function TreeNode({
 
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Clean up click timer on unmount to prevent memory leak
   useEffect(() => {
     return () => {
       if (clickTimer.current) {
@@ -127,14 +185,11 @@ function TreeNode({
 
   const handleClick = () => {
     if (renaming) return;
-    // Use a timer to distinguish single vs double click
     if (clickTimer.current) {
-      // Second click within the timeout window → double click
       clearTimeout(clickTimer.current);
       clickTimer.current = null;
       handleDoubleClick();
     } else {
-      // First click → wait to see if a second click follows
       clickTimer.current = setTimeout(() => {
         clickTimer.current = null;
         if (isDirectory) {
@@ -147,7 +202,6 @@ function TreeNode({
   };
 
   const handleDoubleClick = () => {
-    // Clear any pending single-click timer to prevent unexpected open/expand
     if (clickTimer.current) {
       clearTimeout(clickTimer.current);
       clickTimer.current = null;
@@ -176,11 +230,7 @@ function TreeNode({
       return;
     }
     try {
-      const parentPath = entry.path
-        .replace(/\\/g, "/")
-        .split("/")
-        .slice(0, -1)
-        .join("/");
+      const parentPath = getParentPath(entry.path);
       const newPath = `${parentPath}/${newName}`;
       await fetch("/api/files/rename", {
         method: "POST",
@@ -194,16 +244,147 @@ function TreeNode({
     }
   };
 
+  // --- Copy / Cut / Paste ---
+
+  const handleCopy = useCallback(() => {
+    setClipboard({
+      path: entry.path,
+      name: entry.name,
+      type: entry.type,
+      operation: "copy",
+    });
+    toast.success(t("copied", { name: entry.name }));
+  }, [entry, t]);
+
+  const handleCut = useCallback(() => {
+    setClipboard({
+      path: entry.path,
+      name: entry.name,
+      type: entry.type,
+      operation: "cut",
+    });
+    toast.success(t("cut", { name: entry.name }));
+  }, [entry, t]);
+
+  const handlePaste = useCallback(async () => {
+    if (!clipboard) return;
+    const targetDir = isDirectory ? entry.path : getParentPath(entry.path);
+    const destPath = `${targetDir}/${clipboard.name}`;
+
+    if (clipboard.path === destPath) return;
+
+    try {
+      const endpoint =
+        clipboard.operation === "cut" ? "/api/files/move" : "/api/files/copy";
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sourcePath: clipboard.path, destPath }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Operation failed");
+      }
+      if (clipboard.operation === "cut") {
+        setClipboard(null);
+      }
+      toast.success(
+        clipboard.operation === "cut" ? t("moved") : t("pasted")
+      );
+      onRefresh();
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to paste"
+      );
+    }
+  }, [clipboard, entry, isDirectory, onRefresh, t]);
+
+  const handleCopyPath = useCallback(() => {
+    navigator.clipboard.writeText(entry.path);
+    toast.success(t("pathCopied"));
+  }, [entry.path, t]);
+
+  // --- Drag and Drop ---
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData("application/x-file-path", entry.path);
+    e.dataTransfer.setData("application/x-file-name", entry.name);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (e.dataTransfer.types.includes("application/x-file-path")) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = "move";
+      setDragOver(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const { clientX, clientY } = e;
+    if (
+      clientX < rect.left ||
+      clientX > rect.right ||
+      clientY < rect.top ||
+      clientY > rect.bottom
+    ) {
+      setDragOver(false);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+
+    const sourcePath = e.dataTransfer.getData("application/x-file-path");
+    const sourceName = e.dataTransfer.getData("application/x-file-name");
+    if (!sourcePath || !sourceName) return;
+
+    const targetDir = isDirectory ? entry.path : getParentPath(entry.path);
+    const destPath = `${targetDir}/${sourceName}`;
+
+    if (sourcePath === destPath) return;
+    if (isDirectory && sourcePath === entry.path) return;
+    if (targetDir.startsWith(sourcePath + "/")) return;
+
+    try {
+      const res = await fetch("/api/files/move", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sourcePath, destPath }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Move failed");
+      }
+      toast.success(t("moved"));
+      onRefresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to move");
+    }
+  };
+
   return (
     <div>
       <ContextMenu>
-        <ContextMenuTrigger>
+        <ContextMenuTrigger asChild>
           <div
             className={`flex cursor-pointer items-center gap-1 rounded-sm px-2 py-1 text-sm hover:bg-accent ${
               isSelected ? "bg-accent" : ""
-            }`}
+            } ${dragOver ? "bg-accent/60 ring-1 ring-primary" : ""}`}
             style={{ paddingLeft: `${depth * 16 + 8}px` }}
             onClick={handleClick}
+            draggable={!renaming}
+            onDragStart={(e) => {
+              e.stopPropagation();
+              handleDragStart(e);
+            }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
             {isDirectory ? (
               expanded ? (
@@ -239,6 +420,25 @@ function TreeNode({
               {tCommon("open")}
             </ContextMenuItem>
           )}
+          <ContextMenuItem onClick={handleCopy}>
+            <Copy className="mr-2 h-4 w-4" />
+            {t("copy")}
+          </ContextMenuItem>
+          <ContextMenuItem onClick={handleCut}>
+            <Scissors className="mr-2 h-4 w-4" />
+            {t("cutItem")}
+          </ContextMenuItem>
+          {clipboard && (
+            <ContextMenuItem onClick={handlePaste}>
+              <ClipboardPaste className="mr-2 h-4 w-4" />
+              {t("paste")}
+            </ContextMenuItem>
+          )}
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={handleCopyPath}>
+            <ClipboardCopy className="mr-2 h-4 w-4" />
+            {t("copyPath")}
+          </ContextMenuItem>
           <ContextMenuItem
             onClick={() => {
               setNewName(entry.name);
@@ -248,6 +448,7 @@ function TreeNode({
             <Pencil className="mr-2 h-4 w-4" />
             {t("rename")}
           </ContextMenuItem>
+          <ContextMenuSeparator />
           <ContextMenuItem
             className="text-destructive"
             onClick={handleDelete}
@@ -283,6 +484,7 @@ function TreeNode({
                 onFileOpen={onFileOpen}
                 onRefresh={onRefresh}
                 selectedPath={selectedPath}
+                refreshKey={refreshKey}
               />
             ))
           )}
@@ -297,15 +499,15 @@ export function FileTree({
   onFileOpen,
   onRefresh,
   selectedPath,
+  refreshKey,
 }: FileTreeProps) {
   const t = useTranslations("files");
   const tCommon = useTranslations("common");
   const [entries, setEntries] = useState<FileEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     const loadRoot = async () => {
-      setLoading(true);
       try {
         const res = await fetch(
           `/api/files/browse?path=${encodeURIComponent(rootPath)}`
@@ -316,13 +518,13 @@ export function FileTree({
       } catch {
         // ignore
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
       }
     };
     loadRoot();
-  }, [rootPath]);
+  }, [rootPath, refreshKey]);
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="p-4 text-sm text-muted-foreground">
         {tCommon("loading")}
@@ -348,6 +550,7 @@ export function FileTree({
           onFileOpen={onFileOpen}
           onRefresh={onRefresh}
           selectedPath={selectedPath}
+          refreshKey={refreshKey}
         />
       ))}
     </div>
