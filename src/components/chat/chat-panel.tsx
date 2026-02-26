@@ -7,11 +7,98 @@ import { TextStreamChatTransport } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot, User, AlertCircle } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { Send, Bot, User, AlertCircle, FileText } from "lucide-react";
+import ReactMarkdown, { Components } from "react-markdown";
 import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+function unescapeCitationFilename(raw: string): string {
+  return raw.replace(/\\(["\\])/g, "$1");
+}
+
+/**
+ * Parse [Source N: "filename"] or [Source N] into styled citation badges.
+ */
+function CitationText({ text }: { text: string }) {
+  // Match [Source N: "filename"] or [Source N], allowing escaped quotes inside filenames
+  const parts = text.split(/(\[Source\s+\d+(?::\s*"(?:[^"\\]|\\.)*")?\])/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        const match = part.match(/^\[Source\s+(\d+)(?::\s*"((?:[^"\\]|\\.)*)")?\]$/);
+        if (match) {
+          const num = match[1];
+          const rawFileName = match[2];
+          const fileName = rawFileName ? unescapeCitationFilename(rawFileName) : undefined;
+          return (
+            <span
+              key={i}
+              className="inline-flex items-center gap-0.5 rounded-md bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary align-middle mx-0.5"
+              title={fileName ? `Source ${num}: ${fileName}` : `Source ${num}`}
+            >
+              <FileText className="h-3 w-3" />
+              {fileName || `Source ${num}`}
+            </span>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+/**
+ * Create a custom ReactMarkdown component that processes citation badges.
+ */
+function renderWithProcessedChildren(
+  Tag: keyof React.JSX.IntrinsicElements
+): (props: { children?: React.ReactNode }) => React.JSX.Element {
+  return function Component({ children, ...rest }: { children?: React.ReactNode }) {
+    return (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      <Tag {...(rest as any)}>
+        {processChildren(children)}
+      </Tag>
+    );
+  };
+}
+
+/**
+ * Custom ReactMarkdown components that render source citations as badges.
+ */
+const markdownComponents: Components = {
+  p: renderWithProcessedChildren("p"),
+  li: renderWithProcessedChildren("li"),
+  h1: renderWithProcessedChildren("h1"),
+  h2: renderWithProcessedChildren("h2"),
+  h3: renderWithProcessedChildren("h3"),
+  h4: renderWithProcessedChildren("h4"),
+  h5: renderWithProcessedChildren("h5"),
+  h6: renderWithProcessedChildren("h6"),
+  blockquote: renderWithProcessedChildren("blockquote"),
+  th: renderWithProcessedChildren("th"),
+  td: renderWithProcessedChildren("td"),
+};
+
+function processChildren(children: React.ReactNode): React.ReactNode {
+  if (!children) return children;
+  if (typeof children === "string") {
+    if (/\[Source\s+\d+/.test(children)) {
+      return <CitationText text={children} />;
+    }
+    return children;
+  }
+  if (Array.isArray(children)) {
+    return children.map((child, i) => {
+      if (typeof child === "string" && /\[Source\s+\d+/.test(child)) {
+        return <CitationText key={i} text={child} />;
+      }
+      return child;
+    });
+  }
+  return children;
+}
 
 interface ChatPanelProps {
   workspaceId: string;
@@ -122,7 +209,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                 >
                   {message.role === "assistant" ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <ReactMarkdown>{getMessageText(message)}</ReactMarkdown>
+                      <ReactMarkdown components={markdownComponents}>{getMessageText(message)}</ReactMarkdown>
                     </div>
                   ) : (
                     <p>{getMessageText(message)}</p>

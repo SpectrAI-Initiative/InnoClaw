@@ -14,17 +14,25 @@ export function buildChatSystemPrompt(chunks: RetrievedChunk[]): string {
     })
     .join("\n\n---\n\n");
 
+  // Build a lookup from source number to filename for citation instructions
+  const sourceList = chunks
+    .map((chunk, i) => `- [Source ${i + 1}] → ${chunk.fileName}`)
+    .join("\n");
+
   return `You are a helpful research assistant. Answer the user's questions based ONLY on the following source materials from their workspace files. If the sources don't contain enough information to answer a question, say so clearly.
 
-When referencing information from the sources, cite them using the format [Source N] where N is the source number.
+When referencing information from the sources, cite them using the format [Source N: "filename"] where N is the source number and filename is the file name. For example: [Source 1: "report.pdf"].
 
 ## Source Materials
 
 ${sourcesContext}
 
+## Source Index
+${sourceList}
+
 ## Rules
 1. Only use information from the provided sources.
-2. Always cite your sources using [Source N] notation.
+2. Always cite your sources using [Source N: "filename"] notation (e.g. [Source 1: "${chunks[0]?.fileName || "file.pdf"}"]).
 3. If you cannot find relevant information in the sources, say "I don't have enough information in the provided sources to answer that question."
 4. Be concise but thorough.
 5. If multiple sources support a point, cite all of them.

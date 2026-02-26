@@ -36,7 +36,7 @@ async function processSource(sourceId: string, filePath: string) {
     const text = normalizeText(rawText);
 
     if (!text || text.length < 10) {
-      // File has no meaningful content
+      // File has no or insufficient content to process meaningfully
       await db
         .update(sources)
         .set({ rawContent: text || "", isProcessed: true })
@@ -101,15 +101,22 @@ async function processSource(sourceId: string, filePath: string) {
 
     // Generate and store embeddings only if an embedding API key is available
     if (process.env.EMBEDDING_API_KEY || process.env.OPENAI_API_KEY) {
-      const texts = chunkRecords.map((r) => r.content);
-      const embeddings = await generateEmbeddings(texts);
+      try {
+        const texts = chunkRecords.map((r) => r.content);
+        const embeddings = await generateEmbeddings(texts);
 
-      const embeddingItems = chunkRecords.map((record, i) => ({
-        chunkId: record.id,
-        embedding: embeddings[i],
-      }));
+        const embeddingItems = chunkRecords.map((record, i) => ({
+          chunkId: record.id,
+          embedding: embeddings[i],
+        }));
 
-      insertEmbeddings(embeddingItems);
+        insertEmbeddings(embeddingItems);
+      } catch (embeddingError) {
+        console.warn(
+          `Embedding generation failed for source ${sourceId} (chunks still stored, keyword search available):`,
+          embeddingError
+        );
+      }
     }
 
     // Mark source as processed
