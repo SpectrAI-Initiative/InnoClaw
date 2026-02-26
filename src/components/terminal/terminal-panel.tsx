@@ -77,7 +77,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
         setEntries((prev) => [
           ...prev,
           {
-            id: ++idCounter.current,
+            id: (idCounter.current += 1),
             cwd,
             command: cmd,
             stdout: data.stdout || "",
@@ -93,7 +93,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
         setEntries((prev) => [
           ...prev,
           {
-            id: ++idCounter.current,
+            id: (idCounter.current += 1),
             cwd,
             command: cmd,
             stdout: "",
@@ -106,7 +106,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
       setEntries((prev) => [
         ...prev,
         {
-          id: ++idCounter.current,
+          id: (idCounter.current += 1),
           cwd,
           command: cmd,
           stdout: "",
@@ -149,8 +149,9 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
     }
   };
 
-  // Shorten the cwd for display
-  const shortCwd = cwd.split("/").slice(-2).join("/");
+  // Shorten the cwd for display (normalize Windows backslashes to forward slashes)
+  const normalizedCwd = cwd.replace(/\\/g, "/");
+  const shortCwd = normalizedCwd.split("/").slice(-2).join("/");
 
   return (
     <div
@@ -172,7 +173,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
               {/* Command line */}
               <div className="flex gap-1">
                 <span className="text-[#6a9955] shrink-0">
-                  {entry.cwd.split("/").pop()}$
+                  {entry.cwd.replace(/\\/g, "/").split("/").pop()}$
                 </span>
                 <span className="text-[#d4d4d4]">{entry.command}</span>
               </div>
@@ -201,7 +202,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
       {/* Input line */}
       <div className="flex items-center gap-1 border-t border-[#333] px-2 py-1.5">
         <span className="text-[#6a9955] shrink-0">
-          {cwd.split("/").pop()}$
+          {normalizedCwd.split("/").pop()}$
         </span>
         <input
           ref={inputRef}
