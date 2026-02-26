@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { TerminalSquare } from "lucide-react";
 
 interface TerminalEntry {
@@ -48,7 +47,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
     inputRef.current?.focus();
   }, []);
 
-  const commandHistory = entries.map((e) => e.command);
+  const commandHistory = useMemo(() => entries.map((e) => e.command), [entries]);
 
   const handleSubmit = async () => {
     const cmd = input.trim();
@@ -56,6 +55,13 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
 
     setInput("");
     setHistoryIndex(-1);
+
+    // Handle `clear` locally
+    if (cmd === "clear") {
+      setEntries([]);
+      return;
+    }
+
     setIsRunning(true);
 
     try {
@@ -71,7 +77,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
         setEntries((prev) => [
           ...prev,
           {
-            id: ++idCounter.current,
+            id: (idCounter.current += 1),
             cwd,
             command: cmd,
             stdout: data.stdout || "",
@@ -87,7 +93,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
         setEntries((prev) => [
           ...prev,
           {
-            id: ++idCounter.current,
+            id: (idCounter.current += 1),
             cwd,
             command: cmd,
             stdout: "",
@@ -100,7 +106,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
       setEntries((prev) => [
         ...prev,
         {
-          id: ++idCounter.current,
+          id: (idCounter.current += 1),
           cwd,
           command: cmd,
           stdout: "",
@@ -143,8 +149,9 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
     }
   };
 
-  // Shorten the cwd for display
-  const shortCwd = cwd.split("/").slice(-2).join("/");
+  // Shorten the cwd for display (normalize Windows backslashes to forward slashes)
+  const normalizedCwd = cwd.replace(/\\/g, "/");
+  const shortCwd = normalizedCwd.split("/").slice(-2).join("/");
 
   return (
     <div
@@ -159,14 +166,14 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
       </div>
 
       {/* Output */}
-      <ScrollArea className="flex-1" ref={scrollRef}>
+      <div className="flex-1 overflow-auto" ref={scrollRef}>
         <div className="p-2 space-y-1">
           {entries.map((entry) => (
             <div key={entry.id}>
               {/* Command line */}
               <div className="flex gap-1">
                 <span className="text-[#6a9955] shrink-0">
-                  {entry.cwd.split("/").pop()}$
+                  {entry.cwd.replace(/\\/g, "/").split("/").pop()}$
                 </span>
                 <span className="text-[#d4d4d4]">{entry.command}</span>
               </div>
@@ -190,12 +197,12 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
             <div className="text-[#888] animate-pulse">{t("running")}</div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Input line */}
       <div className="flex items-center gap-1 border-t border-[#333] px-2 py-1.5">
         <span className="text-[#6a9955] shrink-0">
-          {cwd.split("/").pop()}$
+          {normalizedCwd.split("/").pop()}$
         </span>
         <input
           ref={inputRef}

@@ -6,9 +6,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/header";
 import { FileBrowser } from "@/components/files/file-browser";
 import { AgentPanel } from "@/components/agent/agent-panel";
+import { NotesPanel } from "@/components/notes/notes-panel";
 import { FilePreviewPanel } from "@/components/preview/file-preview-panel";
 import { TerminalPanel } from "@/components/terminal/terminal-panel";
 import { useWorkspace } from "@/lib/hooks/use-workspaces";
@@ -80,10 +82,21 @@ export default function WorkspacePage({
                   <ResizableHandle withHandle />
 
                   <ResizablePanel defaultSize={40} minSize={10} className="overflow-hidden">
-                    <FilePreviewPanel
-                      filePath={selectedFilePath}
-                      onClose={() => setSelectedFilePath(null)}
-                    />
+                    <Tabs defaultValue="preview" className="flex h-full flex-col">
+                      <TabsList className="mx-2 mt-1 shrink-0">
+                        <TabsTrigger value="preview">Preview</TabsTrigger>
+                        <TabsTrigger value="notes">Notes</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="preview" className="flex-1 overflow-hidden mt-0">
+                        <FilePreviewPanel
+                          filePath={selectedFilePath}
+                          onClose={() => setSelectedFilePath(null)}
+                        />
+                      </TabsContent>
+                      <TabsContent value="notes" className="flex-1 overflow-hidden mt-0">
+                        <NotesPanel workspaceId={workspaceId} />
+                      </TabsContent>
+                    </Tabs>
                   </ResizablePanel>
                 </ResizablePanelGroup>
               </ResizablePanel>
