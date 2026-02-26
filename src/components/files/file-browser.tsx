@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { FileTree } from "./file-tree";
 import { FileEditor } from "./file-editor";
+import { PdfViewer } from "./pdf-viewer";
 import { UploadZone } from "./upload-zone";
 import { toast } from "sonner";
 import {
@@ -58,6 +59,7 @@ export function FileBrowser({
   const [syncing, setSyncing] = useState(false);
   const [pulling, setPulling] = useState(false);
   const [editingFile, setEditingFile] = useState<string | null>(null);
+  const [viewingPdf, setViewingPdf] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = useCallback(() => {
@@ -161,7 +163,9 @@ export function FileBrowser({
       "bat",
     ];
 
-    if (ext && editableExts.includes(ext)) {
+    if (ext === "pdf") {
+      setViewingPdf(path);
+    } else if (ext && editableExts.includes(ext)) {
       setEditingFile(path);
     }
     onFileSelect(path);
@@ -328,6 +332,20 @@ export function FileBrowser({
               }}
             />
           )}
+        </SheetContent>
+      </Sheet>
+
+      {/* PDF Viewer Sheet */}
+      <Sheet open={!!viewingPdf} onOpenChange={() => setViewingPdf(null)}>
+        <SheetContent side="bottom" className="h-[80vh]">
+          <SheetHeader>
+            <SheetTitle>
+              {viewingPdf?.split("/").pop() ||
+                viewingPdf?.split("\\").pop() ||
+                ""}
+            </SheetTitle>
+          </SheetHeader>
+          {viewingPdf && <PdfViewer filePath={viewingPdf} />}
         </SheetContent>
       </Sheet>
     </div>

@@ -52,7 +52,9 @@
     "rootPaths": "Available root paths",
     "dragDrop": "Drag and drop files here, or click to browse",
     "saving": "Saving...",
-    "saved": "Saved"
+    "saved": "Saved",
+    "pdfPreviewFailed": "Unable to preview this PDF",
+    "downloadFile": "Download"
   },
   "git": {
     "clone": "Clone Repository",

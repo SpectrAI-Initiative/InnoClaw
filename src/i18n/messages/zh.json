@@ -52,7 +52,9 @@
     "rootPaths": "可用根路径",
     "dragDrop": "拖放文件到此处，或点击浏览",
     "saving": "保存中...",
-    "saved": "已保存"
+    "saved": "已保存",
+    "pdfPreviewFailed": "无法预览此 PDF 文件",
+    "downloadFile": "下载"
   },
   "git": {
     "clone": "克隆仓库",
