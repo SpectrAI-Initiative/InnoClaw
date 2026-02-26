@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { TerminalSquare } from "lucide-react";
 
 interface TerminalEntry {
@@ -48,7 +47,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
     inputRef.current?.focus();
   }, []);
 
-  const commandHistory = entries.map((e) => e.command);
+  const commandHistory = useMemo(() => entries.map((e) => e.command), [entries]);
 
   const handleSubmit = async () => {
     const cmd = input.trim();
@@ -56,6 +55,13 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
 
     setInput("");
     setHistoryIndex(-1);
+
+    // Handle `clear` locally
+    if (cmd === "clear") {
+      setEntries([]);
+      return;
+    }
+
     setIsRunning(true);
 
     try {
@@ -159,7 +165,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
       </div>
 
       {/* Output */}
-      <ScrollArea className="flex-1" ref={scrollRef}>
+      <div className="flex-1 overflow-auto" ref={scrollRef}>
         <div className="p-2 space-y-1">
           {entries.map((entry) => (
             <div key={entry.id}>
@@ -190,7 +196,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
             <div className="text-[#888] animate-pulse">{t("running")}</div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Input line */}
       <div className="flex items-center gap-1 border-t border-[#333] px-2 py-1.5">

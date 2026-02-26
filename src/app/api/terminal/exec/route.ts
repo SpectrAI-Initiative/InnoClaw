@@ -4,6 +4,7 @@ import path from "path";
 import { validatePath } from "@/lib/files/filesystem";
 
 const EXEC_TIMEOUT = 30_000; // 30 seconds
+const MAX_COMMAND_LENGTH = 4096;
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,21 @@ export async function POST(req: NextRequest) {
 
     if (!cwd || typeof cwd !== "string") {
       return NextResponse.json({ error: "Missing cwd" }, { status: 400 });
+    }
+
+    // Reject null bytes and overly long commands
+    if (command.includes("\0") || cwd.includes("\0")) {
+      return NextResponse.json(
+        { error: "Invalid input: contains null bytes" },
+        { status: 400 }
+      );
+    }
+
+    if (command.length > MAX_COMMAND_LENGTH) {
+      return NextResponse.json(
+        { error: `Command too long (max ${MAX_COMMAND_LENGTH} characters)` },
+        { status: 400 }
+      );
     }
 
     // Validate the working directory is within allowed workspace roots
@@ -65,7 +81,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Execute the command
+    // Execute the command with a sanitized environment
+    const safeEnv: NodeJS.ProcessEnv = {
+      PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
+      HOME: process.env.HOME || "/tmp",
+      NODE_ENV: process.env.NODE_ENV || "production",
+      TERM: "dumb",
+      LANG: process.env.LANG || "en_US.UTF-8",
+    };
+
     const result = await new Promise<{
       stdout: string;
       stderr: string;
@@ -77,7 +101,7 @@ export async function POST(req: NextRequest) {
           cwd: validatedCwd,
           timeout: EXEC_TIMEOUT,
           maxBuffer: 1024 * 1024, // 1MB
-          env: { ...process.env, TERM: "dumb" },
+          env: safeEnv,
         },
         (error, stdout, stderr) => {
           resolve({
