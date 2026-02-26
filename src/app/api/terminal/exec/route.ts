@@ -55,8 +55,8 @@ export async function POST(req: NextRequest) {
       // Expand a leading "~" to the user's home directory
       if (target.startsWith("~")) {
         const homeDir = process.env.HOME || validatedCwd;
-        const rest = target.slice(1);
-        target = path.join(homeDir, rest);
+        const restWithoutSep = target.slice(1).replace(/^[/\\]+/, "");
+        target = path.join(homeDir, restWithoutSep);
       }
 
       const newCwd = path.resolve(validatedCwd, target);

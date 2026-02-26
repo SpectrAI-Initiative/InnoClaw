@@ -178,9 +178,19 @@ function parseMessageSegments(text: string): MessageSegment[] {
 
     const endIdx = text.indexOf(selectEndToken, contentStartIdx);
 
-    if (endIdx === -1 || endIdx - contentStartIdx > MAX_SELECT_BLOCK_LENGTH) {
+    if (endIdx === -1) {
       segments.push({ type: "text", content: text.slice(startIdx) });
       break;
+    }
+
+    if (endIdx - contentStartIdx > MAX_SELECT_BLOCK_LENGTH) {
+      // Treat this oversized SELECT block as plain text and continue parsing after it.
+      segments.push({
+        type: "text",
+        content: text.slice(startIdx, endIdx + selectEndToken.length),
+      });
+      cursor = endIdx + selectEndToken.length;
+      continue;
     }
 
     const optionsRaw = text.slice(contentStartIdx, endIdx);
