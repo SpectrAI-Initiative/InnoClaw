@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { sourceChunks, sources } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { generateEmbedding } from "./embeddings";
 import { searchSimilar } from "./vector-store";
 
