@@ -92,7 +92,9 @@
       "overview": "Give me an overview"
     },
     "confirmSelection": "Confirm Selection",
-    "selectionConfirmed": "Selection confirmed"
+    "selectionConfirmed": "Selection confirmed",
+    "selectionSingle": "I selected the following option:",
+    "selectionMulti": "I selected the following options:"
   },
   "notes": {
     "title": "Notes",
