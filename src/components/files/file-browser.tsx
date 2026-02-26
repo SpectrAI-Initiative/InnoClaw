@@ -8,21 +8,11 @@ import {
   FolderPlus,
   RefreshCw,
   GitPullRequest,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { getFileName } from "@/lib/utils";
 import { FileTree } from "./file-tree";
-import { FileEditor } from "./file-editor";
-import { PdfViewer } from "./pdf-viewer";
-import { MolViewer } from "./mol-viewer";
 import { UploadZone } from "./upload-zone";
 import { toast } from "sonner";
 import {
@@ -33,12 +23,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 
 interface FileBrowserProps {
   workspaceId: string;
@@ -66,9 +50,6 @@ export function FileBrowser({
   const [newName, setNewName] = useState("");
   const [syncing, setSyncing] = useState(false);
   const [pulling, setPulling] = useState(false);
-  const [editingFile, setEditingFile] = useState<string | null>(null);
-  const [viewingPdf, setViewingPdf] = useState<string | null>(null);
-  const [viewingMol, setViewingMol] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = useCallback(() => {
@@ -148,49 +129,7 @@ export function FileBrowser({
   };
 
   const handleFileOpen = (path: string) => {
-    const ext = path.split(".").pop()?.toLowerCase();
-    const editableExts = [
-      "txt",
-      "md",
-      "json",
-      "csv",
-      "html",
-      "css",
-      "js",
-      "ts",
-      "tsx",
-      "jsx",
-      "py",
-      "yaml",
-      "yml",
-      "xml",
-      "toml",
-      "ini",
-      "cfg",
-      "env",
-      "sh",
-      "bat",
-    ];
-    const molExts = ["pdb", "mol", "mol2", "sdf", "sd", "xyz", "cif"];
-
-    if (ext === "pdf") {
-      setViewingMol(null);
-      setViewingPdf(path);
-    } else if (ext && molExts.includes(ext)) {
-      setViewingPdf(null);
-      setViewingMol(path);
-    } else if (ext && editableExts.includes(ext)) {
-      setEditingFile(path);
-    }
     onFileSelect(path);
-  };
-
-  // The file currently being previewed in the split panel (PDF or Mol)
-  const previewFile = viewingPdf || viewingMol;
-  const previewFileName = previewFile ? getFileName(previewFile) : "";
-  const closePreview = () => {
-    setViewingPdf(null);
-    setViewingMol(null);
   };
 
   return (
@@ -250,56 +189,17 @@ export function FileBrowser({
         )}
       </div>
 
-      {/* File Tree + Preview Split */}
+      {/* File Tree */}
       <div className="flex-1 overflow-hidden">
-        <ResizablePanelGroup
-          orientation="vertical"
-          key={previewFile ? "with-preview" : "no-preview"}
-        >
-          {/* File Tree Panel */}
-          <ResizablePanel
-            defaultSize={previewFile ? 40 : 100}
-            minSize={20}
-          >
-            <ScrollArea className="h-full">
-              <FileTree
-                key={refreshKey}
-                rootPath={folderPath}
-                onFileOpen={handleFileOpen}
-                onRefresh={refresh}
-                selectedPath={selectedFilePath}
-              />
-            </ScrollArea>
-          </ResizablePanel>
-
-          {/* Preview Panel (PDF / Mol viewer) */}
-          {previewFile && (
-            <>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={60} minSize={20}>
-                <div className="flex h-full flex-col overflow-hidden">
-                  <div className="flex items-center justify-between border-b px-3 py-1.5">
-                    <span className="truncate text-sm font-medium">
-                      {previewFileName}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={closePreview}
-                      className="h-6 w-6 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex-1 overflow-hidden">
-                    {viewingPdf && <PdfViewer filePath={viewingPdf} />}
-                    {viewingMol && <MolViewer filePath={viewingMol} />}
-                  </div>
-                </div>
-              </ResizablePanel>
-            </>
-          )}
-        </ResizablePanelGroup>
+        <ScrollArea className="h-full">
+          <FileTree
+            key={refreshKey}
+            rootPath={folderPath}
+            onFileOpen={handleFileOpen}
+            onRefresh={refresh}
+            selectedPath={selectedFilePath}
+          />
+        </ScrollArea>
       </div>
 
       {/* Upload Dialog */}
@@ -377,24 +277,6 @@ export function FileBrowser({
         </DialogContent>
       </Dialog>
 
-      {/* File Editor Sheet (kept as sheet since it needs full-width editing) */}
-      <Sheet open={!!editingFile} onOpenChange={() => setEditingFile(null)}>
-        <SheetContent side="bottom" className="h-[70vh]">
-          <SheetHeader>
-            <SheetTitle>
-              {editingFile ? getFileName(editingFile) : ""}
-            </SheetTitle>
-          </SheetHeader>
-          {editingFile && (
-            <FileEditor
-              filePath={editingFile}
-              onSaved={() => {
-                refresh();
-              }}
-            />
-          )}
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }
