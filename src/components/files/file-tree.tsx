@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import {
   ChevronRight,
@@ -114,12 +114,39 @@ function TreeNode({
     setExpanded(!expanded);
   };
 
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up click timer on unmount to prevent memory leak
+  useEffect(() => {
+    return () => {
+      if (clickTimer.current) clearTimeout(clickTimer.current);
+    };
+  }, []);
+
   const handleClick = () => {
-    if (isDirectory) {
-      toggleExpand();
+    if (renaming) return;
+    // Use a timer to distinguish single vs double click
+    if (clickTimer.current) {
+      // Second click within the timeout window → double click
+      clearTimeout(clickTimer.current);
+      clickTimer.current = null;
+      handleDoubleClick();
     } else {
-      onFileOpen(entry.path);
+      // First click → wait to see if a second click follows
+      clickTimer.current = setTimeout(() => {
+        clickTimer.current = null;
+        if (isDirectory) {
+          toggleExpand();
+        } else {
+          onFileOpen(entry.path);
+        }
+      }, 250);
     }
+  };
+
+  const handleDoubleClick = () => {
+    setNewName(entry.name);
+    setRenaming(true);
   };
 
   const handleDelete = async () => {

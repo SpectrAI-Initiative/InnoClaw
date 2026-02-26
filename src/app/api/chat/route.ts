@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { streamText, convertToModelMessages, UIMessage } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
-import { retrieveRelevantChunks } from "@/lib/rag/retriever";
+import { retrieveRelevantChunks, retrieveByKeywordSearch } from "@/lib/rag/retriever";
 import { buildChatSystemPrompt } from "@/lib/ai/prompts";
 import { db } from "@/lib/db";
 import { chatMessages } from "@/lib/db/schema";
@@ -38,13 +38,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Retrieve relevant chunks
+    // Retrieve relevant chunks (with keyword fallback if embedding fails or returns empty)
     let relevantChunks: Awaited<ReturnType<typeof retrieveRelevantChunks>> = [];
     if (userText) {
       try {
         relevantChunks = await retrieveRelevantChunks(userText, workspaceId);
       } catch (error) {
-        console.error("RAG retrieval failed:", error);
+        console.warn("Embedding-based retrieval failed, falling back to keyword search:", error);
+      }
+
+      // Fallback to keyword search if embedding retrieval failed or returned nothing
+      if (relevantChunks.length === 0) {
+        try {
+          relevantChunks = await retrieveByKeywordSearch(userText, workspaceId);
+        } catch (fallbackError) {
+          console.error("Keyword search also failed:", fallbackError);
+        }
       }
     }
 
