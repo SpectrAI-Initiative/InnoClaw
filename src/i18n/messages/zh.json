@@ -14,7 +14,8 @@
     "back": "返回",
     "refresh": "刷新",
     "error": "错误",
-    "success": "成功"
+    "success": "成功",
+    "modified": "已修改"
   },
   "home": {
     "title": "我的工作空间",

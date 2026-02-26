@@ -179,6 +179,25 @@ export async function copyFileOrDir(
 ): Promise<void> {
   const validatedSrc = validatePath(srcPath);
   const validatedDest = validatePath(destPath);
+
+  // Prevent overwriting existing destinations
+  if (await pathExists(validatedDest)) {
+    throw new Error(`Destination already exists: ${validatedDest}`);
+  }
+
+  // Prevent copying a directory into itself or its subdirectories
+  const normalizedSrc = validatedSrc.replace(/\\/g, "/").toLowerCase();
+  const normalizedDest = validatedDest.replace(/\\/g, "/").toLowerCase();
+
+  if (
+    normalizedDest === normalizedSrc ||
+    normalizedDest.startsWith(normalizedSrc + "/")
+  ) {
+    throw new Error(
+      `Cannot copy a directory into itself or one of its subdirectories: ${validatedSrc} -> ${validatedDest}`
+    );
+  }
+
   await fsp.cp(validatedSrc, validatedDest, { recursive: true });
 }
 

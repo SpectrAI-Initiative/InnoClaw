@@ -122,7 +122,7 @@ function TextPreview({ filePath }: { filePath: string }) {
     <div className="flex h-full flex-col gap-2 p-3">
       <div className="flex items-center justify-end gap-2">
         {modified && (
-          <span className="text-xs text-muted-foreground">Modified</span>
+          <span className="text-xs text-muted-foreground">{tCommon("modified")}</span>
         )}
         <Button size="sm" onClick={handleSave} disabled={saving || !modified}>
           <Save className="mr-2 h-4 w-4" />

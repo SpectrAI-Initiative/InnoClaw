@@ -13,9 +13,10 @@ export function createAgentTools(workspaceCwd: string) {
   const validatedCwd = validatePath(workspaceCwd);
 
   function resolvePath(filePath: string): string {
-    return path.isAbsolute(filePath)
+    const resolved = path.isAbsolute(filePath)
       ? filePath
       : path.join(validatedCwd, filePath);
+    return validatePath(resolved);
   }
 
   return {
@@ -37,7 +38,13 @@ export function createAgentTools(workspaceCwd: string) {
               cwd: validatedCwd,
               timeout: 30_000,
               maxBuffer: 1024 * 1024,
-              env: { ...process.env, TERM: "dumb" },
+              env: {
+                PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
+                HOME: process.env.HOME || "/tmp",
+                NODE_ENV: process.env.NODE_ENV || "production",
+                LANG: process.env.LANG || "en_US.UTF-8",
+                TERM: "dumb",
+              },
             },
             (error, stdout, stderr) => {
               resolve({

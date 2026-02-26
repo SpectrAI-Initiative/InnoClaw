@@ -14,7 +14,8 @@
     "back": "Back",
     "refresh": "Refresh",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "modified": "Modified"
   },
   "home": {
     "title": "My Workspaces",
