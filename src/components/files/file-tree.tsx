@@ -116,6 +116,14 @@ function TreeNode({
 
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (clickTimer.current) {
+        clearTimeout(clickTimer.current);
+      }
+    };
+  }, []);
+
   const handleClick = () => {
     if (renaming) return;
     // Use a timer to distinguish single vs double click
