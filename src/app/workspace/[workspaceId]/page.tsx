@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/header";
 import { FileBrowser } from "@/components/files/file-browser";
 import { ChatPanel } from "@/components/chat/chat-panel";
-import { NotesPanel } from "@/components/notes/notes-panel";
 import { FilePreviewPanel } from "@/components/preview/file-preview-panel";
 import { TerminalPanel } from "@/components/terminal/terminal-panel";
 import { useWorkspace } from "@/lib/hooks/use-workspaces";
