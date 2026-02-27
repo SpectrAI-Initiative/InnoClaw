@@ -140,11 +140,20 @@
   "agent": {
     "title": "Claude Code",
     "placeholder": "让我帮你编程...",
+    "placeholderPlan": "描述你想要实现的功能...",
+    "placeholderAsk": "问一个关于代码的问题...",
     "emptyState": "我可以读写文件、运行命令、搜索代码。问我任何问题！",
     "disabledState": "AI 代理需要配置 API Key。请在 .env.local 中设置 OPENAI_API_KEY 或 ANTHROPIC_API_KEY。",
     "stop": "停止",
     "clearContext": "清空上下文",
-    "back": "返回"
+    "back": "返回",
+    "modeLabel": "选择模式",
+    "modeAgent": "智能体",
+    "modeAgentDesc": "读写文件、执行代码",
+    "modePlan": "规划",
+    "modePlanDesc": "分析代码、制定方案",
+    "modeAsk": "提问",
+    "modeAskDesc": "回答代码相关问题"
   },
   "skills": {
     "title": "技能",
