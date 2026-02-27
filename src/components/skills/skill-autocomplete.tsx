@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Zap } from "lucide-react";
 import type { Skill } from "@/types";
 
@@ -17,6 +18,7 @@ export function SkillAutocomplete({
   onSelect,
   onClose,
 }: SkillAutocompleteProps) {
+  const t = useTranslations("skills");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -55,7 +57,7 @@ export function SkillAutocomplete({
   if (filtered.length === 0) {
     return (
       <div className="absolute bottom-full left-0 right-0 mb-1 rounded-md border border-[#30363d] bg-[#161b22] p-2 text-xs text-[#565f89] z-50">
-        No matching skills
+        {t("noMatchingSkills")}
       </div>
     );
   }

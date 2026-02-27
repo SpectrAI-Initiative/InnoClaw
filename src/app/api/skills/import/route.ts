@@ -80,9 +80,20 @@ async function fetchRaw(
   const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
   try {
     const res = await fetch(rawUrl, { signal: AbortSignal.timeout(15_000) });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(
+        "Failed to fetch GitHub raw file: non-OK response",
+        {
+          url: rawUrl,
+          status: res.status,
+          statusText: res.statusText,
+        }
+      );
+      return null;
+    }
     return await res.text();
-  } catch {
+  } catch (error) {
+    console.error("Failed to fetch GitHub raw file", { url: rawUrl, error });
     return null;
   }
 }
@@ -172,8 +183,15 @@ async function discoverSkillPaths(
   const apiPath = basePath || "";
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}?ref=${branch}`;
   try {
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github.v3+json",
+    };
+    const ghToken = process.env.GITHUB_TOKEN;
+    if (ghToken) {
+      headers["Authorization"] = `Bearer ${ghToken}`;
+    }
     const res = await fetch(apiUrl, {
-      headers: { Accept: "application/vnd.github.v3+json" },
+      headers,
       signal: AbortSignal.timeout(15_000),
     });
     if (!res.ok) return [];

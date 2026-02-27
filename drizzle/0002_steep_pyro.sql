@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `skills_slug_workspace_idx` ON `skills` (`slug`,`workspace_id`);

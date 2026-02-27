@@ -1,6 +1,17 @@
 import type { Skill } from "@/types";
 
 /**
+ * Sanitize a user-provided parameter value to prevent prompt injection.
+ * Removes control characters and trims excessive length.
+ */
+function sanitizeParamValue(value: string): string {
+  // Strip control characters (keep \n \r \t; remove \x0B vertical tab, \x0C form feed, C1 controls, and others)
+  return value
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, "")
+    .slice(0, 10_000); // limit length
+}
+
+/**
  * Build a complete system prompt for executing a skill.
  * Combines the skill's custom system prompt, step instructions,
  * tool restrictions, and injected parameter values.
@@ -14,7 +25,8 @@ export function buildSkillSystemPrompt(
   let resolvedPrompt = skill.systemPrompt;
   if (skill.parameters) {
     for (const param of skill.parameters) {
-      const value = paramValues[param.name] ?? param.defaultValue ?? "";
+      const raw = paramValues[param.name] ?? param.defaultValue ?? "";
+      const value = sanitizeParamValue(raw);
       resolvedPrompt = resolvedPrompt.replaceAll(`{{${param.name}}}`, value);
     }
   }
@@ -30,8 +42,9 @@ export function buildSkillSystemPrompt(
         // Also inject parameters into step instructions
         if (skill.parameters) {
           for (const param of skill.parameters) {
-            const value =
+            const raw =
               paramValues[param.name] ?? param.defaultValue ?? "";
+            const value = sanitizeParamValue(raw);
             line = line.replaceAll(`{{${param.name}}}`, value);
           }
         }
