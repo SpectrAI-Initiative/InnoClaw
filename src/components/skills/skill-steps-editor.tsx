@@ -14,7 +14,7 @@ import {
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import type { SkillStep } from "@/types";
 
-const TOOL_OPTIONS = ["bash", "readFile", "writeFile", "listDirectory", "grep"];
+import { ALL_TOOLS } from "@/lib/ai/tool-names";
 
 interface SkillStepsEditorProps {
   steps: SkillStep[];
@@ -74,7 +74,7 @@ export function SkillStepsEditor({ steps, onChange }: SkillStepsEditorProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="_none">-</SelectItem>
-              {TOOL_OPTIONS.map((tool) => (
+              {ALL_TOOLS.map((tool) => (
                 <SelectItem key={tool} value={tool}>
                   {tool}
                 </SelectItem>

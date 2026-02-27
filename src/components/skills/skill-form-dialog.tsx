@@ -16,19 +16,12 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 import { SkillStepsEditor } from "./skill-steps-editor";
 import { SkillParametersEditor } from "./skill-parameters-editor";
 import type { Skill, SkillStep, SkillParameter } from "@/types";
-
-const ALL_TOOLS = ["bash", "readFile", "writeFile", "listDirectory", "grep"];
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+import { slugify } from "@/lib/utils/slugify";
+import { ALL_TOOLS } from "@/lib/ai/tool-names";
 
 interface SkillFormDialogProps {
   open: boolean;
@@ -123,6 +116,10 @@ export function SkillFormDialog({
         parameters: parameters.length > 0 ? parameters : null,
       });
       onOpenChange(false);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to save skill";
+      toast.error(message);
     } finally {
       setSaving(false);
     }

@@ -352,28 +352,14 @@ export function AgentPanel({
   const { data: settings } = useSWR("/api/settings", fetcher);
   const aiEnabled = settings?.hasAIKey ?? false;
 
-  // Mutable body object — allows injecting skillId/paramValues before each send
-  const agentBody = useMemo(
-    () =>
-      ({ workspaceId, cwd: folderPath }) as Record<string, unknown>,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  // Keep body in sync with props
-  useEffect(() => {
-    agentBody.workspaceId = workspaceId;
-    agentBody.cwd = folderPath;
-  }, [workspaceId, folderPath, agentBody]);
-
-  // Create transport once with the mutable body reference
+  // Create transport with a body that reflects the current workspace and folder
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/agent",
-        body: agentBody,
+        body: { workspaceId, cwd: folderPath } as Record<string, unknown>,
       }),
-    [agentBody]
+    [workspaceId, folderPath]
   );
 
   const { messages, sendMessage, setMessages, stop, status } = useChat({ transport });
@@ -424,17 +410,14 @@ export function AgentPanel({
     setInput("");
     setActiveSkill(null);
 
-    // Inject skill context into the mutable body before sending
-    agentBody.skillId = skill.id;
-    agentBody.paramValues = paramValues;
-
-    await sendMessage({
-      text: `/${skill.slug}${Object.keys(paramValues).length > 0 ? " " + Object.entries(paramValues).map(([k, v]) => `${k}="${v}"`).join(" ") : ""}`,
-    });
-
-    // Clear skill context after sending
-    delete agentBody.skillId;
-    delete agentBody.paramValues;
+    await sendMessage(
+      {
+        text: `/${skill.slug}${Object.keys(paramValues).length > 0 ? " " + Object.entries(paramValues).map(([k, v]) => `${k}="${v}"`).join(" ") : ""}`,
+      },
+      {
+        body: { skillId: skill.id, paramValues },
+      }
+    );
   };
 
   const handleSend = async () => {

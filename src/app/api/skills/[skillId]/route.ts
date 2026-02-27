@@ -2,29 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
 import { eq, ne, and, isNull } from "drizzle-orm";
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-function parseSkillRow(row: Record<string, unknown>) {
-  return {
-    ...row,
-    steps: typeof row.steps === "string" ? JSON.parse(row.steps) : null,
-    allowedTools:
-      typeof row.allowedTools === "string"
-        ? JSON.parse(row.allowedTools)
-        : null,
-    parameters:
-      typeof row.parameters === "string"
-        ? JSON.parse(row.parameters)
-        : null,
-  };
-}
+import { slugify } from "@/lib/utils/slugify";
+import { parseSkillRow } from "@/lib/db/skills-utils";
 
 export async function GET(
   _request: NextRequest,
@@ -123,6 +102,38 @@ export async function PATCH(
         ? JSON.stringify(body.parameters)
         : null;
     if (body.isEnabled !== undefined) updateData.isEnabled = body.isEnabled;
+
+    // Check slug uniqueness when slug is being updated
+    if (body.slug !== undefined) {
+      const current = await db
+        .select()
+        .from(skills)
+        .where(eq(skills.id, skillId))
+        .limit(1);
+
+      if (current.length > 0) {
+        const workspaceId = current[0].workspaceId;
+        const existing = await db
+          .select()
+          .from(skills)
+          .where(
+            and(
+              eq(skills.slug, body.slug),
+              workspaceId
+                ? eq(skills.workspaceId, workspaceId)
+                : isNull(skills.workspaceId)
+            )
+          )
+          .limit(1);
+
+        if (existing.length > 0 && existing[0].id !== skillId) {
+          return NextResponse.json(
+            { error: "A skill with this slug already exists in the same scope" },
+            { status: 409 }
+          );
+        }
+      }
+    }
 
     await db
       .update(skills)

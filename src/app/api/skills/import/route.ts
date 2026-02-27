@@ -4,14 +4,8 @@ import { skills } from "@/lib/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import type { SkillExportData } from "@/types";
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+import { slugify } from "@/lib/utils/slugify";
+import { parseSkillRow } from "@/lib/db/skills-utils";
 
 /** Check if a hostname/IP is private, loopback, or internal */
 function isPrivateOrInternalHost(hostname: string): boolean {
@@ -65,21 +59,6 @@ function isPrivateOrInternalHost(hostname: string): boolean {
   return false;
 }
 
-function parseSkillRow(row: Record<string, unknown>) {
-  return {
-    ...row,
-    steps: typeof row.steps === "string" ? JSON.parse(row.steps) : null,
-    allowedTools:
-      typeof row.allowedTools === "string"
-        ? JSON.parse(row.allowedTools)
-        : null,
-    parameters:
-      typeof row.parameters === "string"
-        ? JSON.parse(row.parameters)
-        : null,
-  };
-}
-
 function validateSkillData(data: unknown): data is SkillExportData {
   if (!data || typeof data !== "object") return false;
   const d = data as Record<string, unknown>;
@@ -123,6 +102,8 @@ function isGitHubUrl(url: string): boolean {
   return /^https?:\/\/(www\.)?github\.com\/[^/]+\/[^/]+/.test(url);
 }
 
+const MAX_FETCH_BYTES = 1_000_000; // 1 MB safety limit for external fetches
+
 async function fetchRaw(
   owner: string,
   repo: string,
@@ -133,7 +114,18 @@ async function fetchRaw(
   try {
     const res = await fetch(rawUrl, { signal: AbortSignal.timeout(15_000) });
     if (!res.ok) return null;
-    return await res.text();
+
+    const contentLengthHeader = res.headers.get("content-length");
+    if (contentLengthHeader) {
+      const contentLength = Number.parseInt(contentLengthHeader, 10);
+      if (!Number.isNaN(contentLength) && contentLength > MAX_FETCH_BYTES) {
+        return null;
+      }
+    }
+
+    const text = await res.text();
+    if (text.length > MAX_FETCH_BYTES) return null;
+    return text;
   } catch {
     return null;
   }
@@ -224,8 +216,16 @@ async function discoverSkillPaths(
   const apiPath = basePath || "";
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}?ref=${branch}`;
   try {
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github.v3+json",
+    };
+    const githubToken = process.env.GITHUB_TOKEN;
+    if (githubToken) {
+      headers.Authorization = `Bearer ${githubToken}`;
+    }
+
     const res = await fetch(apiUrl, {
-      headers: { Accept: "application/vnd.github.v3+json" },
+      headers,
       signal: AbortSignal.timeout(15_000),
     });
     if (!res.ok) return [];
@@ -261,57 +261,62 @@ async function insertSkill(
   data: SkillExportData,
   workspaceId: string | null
 ): Promise<string | null> {
-  const normalizedSlug = slugify(data.slug);
+  try {
+    const normalizedSlug = slugify(data.slug);
 
-  if (!normalizedSlug) {
+    if (!normalizedSlug) {
+      return null;
+    }
+
+    // Deduplicate slug
+    let finalSlug = normalizedSlug;
+    let attempt = 0;
+    while (true) {
+      const existing = await db
+        .select()
+        .from(skills)
+        .where(
+          and(
+            eq(skills.slug, finalSlug),
+            workspaceId
+              ? eq(skills.workspaceId, workspaceId)
+              : isNull(skills.workspaceId)
+          )
+        )
+        .limit(1);
+
+      if (existing.length === 0) break;
+      attempt++;
+      finalSlug = `${normalizedSlug}-${attempt}`;
+    }
+
+    const id = nanoid();
+    const now = new Date().toISOString();
+
+    await db.insert(skills).values({
+      id,
+      workspaceId: workspaceId || null,
+      name: data.name,
+      slug: finalSlug,
+      description: data.description || null,
+      systemPrompt: data.systemPrompt,
+      steps: data.steps ? JSON.stringify(data.steps) : null,
+      allowedTools: data.allowedTools
+        ? JSON.stringify(data.allowedTools)
+        : null,
+      parameters: data.parameters
+        ? JSON.stringify(data.parameters)
+        : null,
+      isEnabled: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return id;
+  } catch (error) {
+    console.error("[skills/import] insertSkill failed:", error);
     return null;
   }
-
-  // Deduplicate slug
-  let finalSlug = normalizedSlug;
-  let attempt = 0;
-  while (true) {
-    const existing = await db
-      .select()
-      .from(skills)
-      .where(
-        and(
-          eq(skills.slug, finalSlug),
-          workspaceId
-            ? eq(skills.workspaceId, workspaceId)
-            : isNull(skills.workspaceId)
-        )
-      )
-      .limit(1);
-
-    if (existing.length === 0) break;
-    attempt++;
-    finalSlug = `${normalizedSlug}-${attempt}`;
-  }
-
-  const id = nanoid();
-  const now = new Date().toISOString();
-
-  await db.insert(skills).values({
-    id,
-    workspaceId: workspaceId || null,
-    name: data.name,
-    slug: finalSlug,
-    description: data.description || null,
-    systemPrompt: data.systemPrompt,
-    steps: data.steps ? JSON.stringify(data.steps) : null,
-    allowedTools: data.allowedTools
-      ? JSON.stringify(data.allowedTools)
-      : null,
-    parameters: data.parameters
-      ? JSON.stringify(data.parameters)
-      : null,
-    isEnabled: true,
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  return id;
 }
 
 // --------------- Main handler ---------------
@@ -481,8 +486,27 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+
+      const contentLengthHeader = res.headers.get("content-length");
+      if (contentLengthHeader) {
+        const contentLength = Number.parseInt(contentLengthHeader, 10);
+        if (!Number.isNaN(contentLength) && contentLength > MAX_FETCH_BYTES) {
+          return NextResponse.json(
+            { error: "Response too large" },
+            { status: 400 }
+          );
+        }
+      }
+
       try {
-        importData = await res.json();
+        const bodyText = await res.text();
+        if (bodyText.length > MAX_FETCH_BYTES) {
+          return NextResponse.json(
+            { error: "Response too large" },
+            { status: 400 }
+          );
+        }
+        importData = JSON.parse(bodyText);
       } catch {
         return NextResponse.json(
           { error: "URL did not return valid JSON" },
@@ -512,8 +536,8 @@ export async function POST(request: NextRequest) {
     const id = await insertSkill(importData, workspaceId || null);
     if (!id) {
       return NextResponse.json(
-        { error: "Invalid slug: slug must contain at least one alphanumeric character after normalization" },
-        { status: 400 }
+        { error: "Failed to create skill" },
+        { status: 500 }
       );
     }
     const skill = await db

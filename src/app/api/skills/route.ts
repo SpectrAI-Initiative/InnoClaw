@@ -3,29 +3,8 @@ import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
 import { eq, or, isNull, and, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-function parseSkillRow(row: Record<string, unknown>) {
-  return {
-    ...row,
-    steps: typeof row.steps === "string" ? JSON.parse(row.steps) : null,
-    allowedTools:
-      typeof row.allowedTools === "string"
-        ? JSON.parse(row.allowedTools)
-        : null,
-    parameters:
-      typeof row.parameters === "string"
-        ? JSON.parse(row.parameters)
-        : null,
-  };
-}
+import { slugify } from "@/lib/utils/slugify";
+import { parseSkillRow } from "@/lib/db/skills-utils";
 
 // GET /api/skills?workspaceId=xxx
 // Returns global skills + workspace-specific skills
@@ -78,7 +57,14 @@ export async function POST(request: NextRequest) {
       parameters,
     } = body;
 
-    if (!name || !slug || !systemPrompt) {
+    if (
+      typeof name !== "string" ||
+      !name.trim() ||
+      typeof slug !== "string" ||
+      !slug.trim() ||
+      typeof systemPrompt !== "string" ||
+      !systemPrompt.trim()
+    ) {
       return NextResponse.json(
         { error: "Missing required fields: name, slug, systemPrompt" },
         { status: 400 }

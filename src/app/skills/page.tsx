@@ -67,17 +67,54 @@ export default function SkillsPage() {
 
   const handleDelete = async (skill: Skill) => {
     if (!confirm(t("deleteConfirm", { name: skill.name }))) return;
-    await fetch(`/api/skills/${skill.id}`, { method: "DELETE" });
-    mutate();
+    try {
+      const res = await fetch(`/api/skills/${skill.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        let message = "Failed to delete skill";
+        try {
+          const err = await res.json();
+          if (err && typeof err.error === "string") {
+            message = err.error;
+          }
+        } catch {
+          // ignore JSON parse errors and use default message
+        }
+        toast.error(message);
+        return;
+      }
+      mutate();
+    } catch {
+      toast.error("Failed to delete skill");
+    }
   };
 
   const handleToggleEnabled = async (skill: Skill) => {
-    await fetch(`/api/skills/${skill.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isEnabled: !skill.isEnabled }),
-    });
-    mutate();
+    try {
+      const res = await fetch(`/api/skills/${skill.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isEnabled: !skill.isEnabled }),
+      });
+
+      if (!res.ok) {
+        let message = "Failed to update skill state";
+        try {
+          const err = await res.json();
+          if (err && typeof err.error === "string") {
+            message = err.error;
+          }
+        } catch {
+          // Ignore JSON parsing errors and fall back to default message
+        }
+        toast.error(message);
+        return;
+      }
+
+      mutate();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update skill state");
+    }
   };
 
   return (
