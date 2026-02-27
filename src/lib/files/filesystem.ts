@@ -190,15 +190,23 @@ export async function copyFileOrDir(
   let resolvedSrc: string;
   try {
     resolvedSrc = await fsp.realpath(validatedSrc);
-  } catch {
-    resolvedSrc = path.resolve(validatedSrc);
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      resolvedSrc = path.resolve(validatedSrc);
+    } else {
+      throw err;
+    }
   }
   let resolvedDest: string;
   try {
     const destParent = await fsp.realpath(path.dirname(validatedDest));
     resolvedDest = path.join(destParent, path.basename(validatedDest));
-  } catch {
-    resolvedDest = path.resolve(validatedDest);
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      resolvedDest = path.resolve(validatedDest);
+    } else {
+      throw err;
+    }
   }
   const normalizedSrc = resolvedSrc.replace(/\\/g, "/").toLowerCase();
   const normalizedDest = resolvedDest.replace(/\\/g, "/").toLowerCase();
