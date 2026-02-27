@@ -5,9 +5,9 @@ import type { Skill } from "@/types";
  * Removes control characters and trims excessive length.
  */
 function sanitizeParamValue(value: string): string {
-  // Strip control characters (keep \n \r \t; remove \x0B vertical tab, \x0C form feed, and others)
+  // Strip control characters (keep \n \r \t; remove \x0B vertical tab, \x0C form feed, C1 controls, and others)
   return value
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "")
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, "")
     .slice(0, 10_000); // limit length
 }
 

@@ -56,7 +56,7 @@ export function SkillParameterDialog({
       }
       setValues(init);
     }
-  }, [skill.id, open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [skill.id, open, skill.parameters?.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setValue = (name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
