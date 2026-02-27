@@ -155,6 +155,16 @@ export async function PATCH(
 
     return NextResponse.json(parseSkillRow(updated[0]));
   } catch (error) {
+    // Catch unique constraint violation from the DB index
+    if (
+      error instanceof Error &&
+      error.message.includes("UNIQUE constraint failed")
+    ) {
+      return NextResponse.json(
+        { error: "A skill with this slug already exists in the same scope" },
+        { status: 409 }
+      );
+    }
     const message =
       error instanceof Error ? error.message : "Failed to update skill";
     return NextResponse.json({ error: message }, { status: 500 });

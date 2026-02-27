@@ -113,7 +113,17 @@ async function fetchRaw(
   const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
   try {
     const res = await fetch(rawUrl, { signal: AbortSignal.timeout(15_000) });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(
+        "Failed to fetch GitHub raw file: non-OK response",
+        {
+          url: rawUrl,
+          status: res.status,
+          statusText: res.statusText,
+        }
+      );
+      return null;
+    }
 
     const contentLengthHeader = res.headers.get("content-length");
     if (contentLengthHeader) {
@@ -126,7 +136,8 @@ async function fetchRaw(
     const text = await res.text();
     if (text.length > MAX_FETCH_BYTES) return null;
     return text;
-  } catch {
+  } catch (error) {
+    console.error("Failed to fetch GitHub raw file", { url: rawUrl, error });
     return null;
   }
 }
@@ -223,6 +234,7 @@ async function discoverSkillPaths(
     if (githubToken) {
       headers.Authorization = `Bearer ${githubToken}`;
     }
+
 
     const res = await fetch(apiUrl, {
       headers,

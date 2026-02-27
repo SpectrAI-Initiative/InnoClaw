@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { skills } from "@/lib/db/schema";
+import { skills, workspaces } from "@/lib/db/schema";
 import { eq, or, isNull, and, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { slugify } from "@/lib/utils/slugify";
@@ -78,6 +78,21 @@ export async function POST(request: NextRequest) {
         { error: "Invalid slug: slug must contain at least one alphanumeric character after normalization" },
         { status: 400 }
       );
+    }
+
+    // Validate workspace exists if workspaceId is provided
+    if (workspaceId) {
+      const ws = await db
+        .select()
+        .from(workspaces)
+        .where(eq(workspaces.id, workspaceId))
+        .limit(1);
+      if (ws.length === 0) {
+        return NextResponse.json(
+          { error: "Workspace not found" },
+          { status: 404 }
+        );
+      }
     }
 
     // Check slug uniqueness within same scope
