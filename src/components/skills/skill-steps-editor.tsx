@@ -48,7 +48,7 @@ export function SkillStepsEditor({ steps, onChange }: SkillStepsEditorProps) {
   return (
     <div className="space-y-2">
       {steps.map((step, index) => (
-        <div key={index} className="flex items-center gap-2">
+        <div key={step.order} className="flex items-center gap-2">
           <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground" />
           <span className="text-sm text-muted-foreground w-6 shrink-0">
             {step.order}
@@ -86,6 +86,7 @@ export function SkillStepsEditor({ steps, onChange }: SkillStepsEditorProps) {
             size="icon"
             onClick={() => removeStep(index)}
             className="shrink-0"
+            aria-label={t("deleteStep")}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

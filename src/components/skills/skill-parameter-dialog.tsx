@@ -100,14 +100,15 @@ export function SkillParameterDialog({
               {param.type === "boolean" && (
                 <div className="flex items-center gap-2">
                   <Checkbox
+                    id={`bool-${param.name}`}
                     checked={values[param.name] === "true"}
                     onCheckedChange={(checked) =>
                       setValue(param.name, checked ? "true" : "false")
                     }
                   />
-                  <span className="text-sm text-muted-foreground">
+                  <label htmlFor={`bool-${param.name}`} className="text-sm text-muted-foreground">
                     {param.placeholder || param.label}
-                  </span>
+                  </label>
                 </div>
               )}
 

@@ -175,8 +175,22 @@ export function createAgentTools(
   };
 
   // Filter tools if allowedTools is specified
-  if (!allowedTools || allowedTools.length === 0) {
+  if (allowedTools === undefined || allowedTools === null) {
     return allTools;
+  }
+
+  if (allowedTools.length === 0) {
+    return {};
+  }
+
+  // Validate that all requested tools exist
+  const allToolNames = new Set(Object.keys(allTools));
+  const unknownTools = allowedTools.filter((name) => !allToolNames.has(name));
+
+  if (unknownTools.length > 0) {
+    console.warn(
+      `[agent-tools] Unknown tools in allowedTools: ${unknownTools.join(", ")}. Known tools: ${Array.from(allToolNames).join(", ")}`
+    );
   }
 
   const filtered: Record<string, (typeof allTools)[keyof typeof allTools]> =

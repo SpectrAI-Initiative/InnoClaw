@@ -442,10 +442,17 @@ export function AgentPanel({
     // Check if input matches a skill slug
     if (text.startsWith("/")) {
       const query = text.slice(1).toLowerCase();
-      const matchedSkill = availableSkills.find(
+      const enabledMatches = availableSkills.filter(
         (s) => s.isEnabled && s.slug === query
       );
-      if (matchedSkill) {
+      if (enabledMatches.length === 1) {
+        setShowAutocomplete(false);
+        handleSkillSelect(enabledMatches[0]);
+        return;
+      } else if (enabledMatches.length > 1) {
+        // Prefer workspace-specific skill over global when slugs collide
+        const workspaceMatch = enabledMatches.find((s) => s.workspaceId);
+        const matchedSkill = workspaceMatch || enabledMatches[0];
         setShowAutocomplete(false);
         handleSkillSelect(matchedSkill);
         return;

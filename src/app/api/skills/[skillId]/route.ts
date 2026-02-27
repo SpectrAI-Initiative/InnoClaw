@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, ne, and, isNull } from "drizzle-orm";
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 function parseSkillRow(row: Record<string, unknown>) {
   return {
@@ -60,7 +68,46 @@ export async function PATCH(
     };
 
     if (body.name !== undefined) updateData.name = body.name;
-    if (body.slug !== undefined) updateData.slug = body.slug;
+    if (body.slug !== undefined) {
+      const normalizedSlug = slugify(body.slug);
+      if (!normalizedSlug) {
+        return NextResponse.json(
+          { error: "Invalid slug: slug must contain at least one alphanumeric character after normalization" },
+          { status: 400 }
+        );
+      }
+
+      // Get the existing skill to determine scope for uniqueness check
+      const existingSkill = await db
+        .select()
+        .from(skills)
+        .where(eq(skills.id, skillId))
+        .limit(1);
+
+      if (existingSkill.length > 0) {
+        const wid = existingSkill[0].workspaceId;
+        const duplicate = await db
+          .select()
+          .from(skills)
+          .where(
+            and(
+              eq(skills.slug, normalizedSlug),
+              ne(skills.id, skillId),
+              wid ? eq(skills.workspaceId, wid) : isNull(skills.workspaceId)
+            )
+          )
+          .limit(1);
+
+        if (duplicate.length > 0) {
+          return NextResponse.json(
+            { error: "A skill with this slug already exists in the same scope" },
+            { status: 409 }
+          );
+        }
+      }
+
+      updateData.slug = normalizedSlug;
+    }
     if (body.description !== undefined)
       updateData.description = body.description;
     if (body.systemPrompt !== undefined)

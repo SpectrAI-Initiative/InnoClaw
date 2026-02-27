@@ -5,7 +5,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function useSkills(workspaceId: string | null) {
   const { data, error, isLoading, mutate } = useSWR<Skill[]>(
-    workspaceId ? `/api/skills?workspaceId=${workspaceId}` : `/api/skills`,
+    workspaceId ? `/api/skills?workspaceId=${encodeURIComponent(workspaceId)}` : `/api/skills`,
     fetcher
   );
 

@@ -97,6 +97,7 @@ export function SkillParametersEditor({
               size="icon"
               onClick={() => removeParameter(index)}
               className="shrink-0"
+              aria-label={t("removeParameter")}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
