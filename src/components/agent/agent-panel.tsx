@@ -41,6 +41,18 @@ import type { Skill } from "@/types";
 
 type AgentMode = "agent" | "plan" | "ask";
 
+const MODE_TRANSLATION_KEYS: Record<AgentMode, "modeAgent" | "modePlan" | "modeAsk"> = {
+  agent: "modeAgent",
+  plan: "modePlan",
+  ask: "modeAsk",
+};
+
+const MODE_PLACEHOLDER_KEYS: Record<AgentMode, "placeholder" | "placeholderPlan" | "placeholderAsk"> = {
+  agent: "placeholder",
+  plan: "placeholderPlan",
+  ask: "placeholderAsk",
+};
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 // --- Tool Call Block ---
@@ -393,6 +405,15 @@ export function AgentPanel({
 
   const { messages, sendMessage, setMessages, stop, status } = useChat({ transport });
 
+  // Auto-clear messages when mode changes
+  const prevModeRef = useRef(mode);
+  useEffect(() => {
+    if (prevModeRef.current !== mode) {
+      prevModeRef.current = mode;
+      setMessages([]);
+    }
+  }, [mode, setMessages]);
+
   const isLoading = status === "submitted" || status === "streaming";
 
   // Auto-scroll to bottom when messages update
@@ -551,7 +572,7 @@ export function AgentPanel({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-[#7aa2f7] hover:bg-[#30363d] transition-colors">
-                {t(`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}` as "modeAgent" | "modePlan" | "modeAsk")}
+                {t(MODE_TRANSLATION_KEYS[mode])}
                 <ChevronDown className="h-3 w-3" />
               </button>
             </DropdownMenuTrigger>
@@ -599,7 +620,7 @@ export function AgentPanel({
               }
             }}
             disabled={!aiEnabled}
-            placeholder={aiEnabled ? t(mode === "plan" ? "placeholderPlan" : mode === "ask" ? "placeholderAsk" : "placeholder") : t("disabledState")}
+            placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
             className="flex-1 bg-transparent text-[#c9d1d9] placeholder:text-[#565f89] outline-none text-sm font-mono"
             autoFocus
           />
