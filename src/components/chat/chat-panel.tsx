@@ -120,10 +120,13 @@ function processChildren(children: React.ReactNode): React.ReactNode {
     });
   }
   // Recursively walk React elements (e.g., <em>, <strong>, <a>)
-  if (React.isValidElement(children) && children.props?.children) {
-    const processedChildren = processChildren(children.props.children);
-    if (processedChildren !== children.props.children) {
-      return React.cloneElement(children, {}, processedChildren);
+  if (React.isValidElement(children)) {
+    const props = children.props as Record<string, unknown>;
+    if (props.children) {
+      const processedChildren = processChildren(props.children as React.ReactNode);
+      if (processedChildren !== props.children) {
+        return React.cloneElement(children, {}, processedChildren);
+      }
     }
   }
   return children;
