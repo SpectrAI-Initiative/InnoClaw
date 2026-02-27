@@ -13,6 +13,51 @@ function slugify(input: string): string {
     .replace(/^-|-$/g, "");
 }
 
+/** Check if a hostname/IP is private, loopback, or internal */
+function isPrivateOrInternalHost(hostname: string): boolean {
+  // IPv4 loopback and private ranges
+  if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "0.0.0.0" ||
+    hostname.startsWith("10.") ||
+    hostname.startsWith("192.168.") ||
+    hostname.startsWith("169.254.")
+  ) {
+    return true;
+  }
+
+  // IPv4 172.16.0.0/12
+  const m172 = hostname.match(/^172\.(\d+)\./);
+  if (m172) {
+    const octet = parseInt(m172[1], 10);
+    if (octet >= 16 && octet <= 31) return true;
+  }
+
+  // IPv6 loopback and private ranges
+  const lower = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (
+    lower === "::1" ||
+    lower === "::" ||
+    lower.startsWith("fc") || // fc00::/7 (ULA)
+    lower.startsWith("fd") || // fc00::/7 (ULA)
+    lower.startsWith("fe80") || // fe80::/10 (link-local)
+    lower.startsWith("::ffff:127.") || // IPv4-mapped loopback
+    lower.startsWith("::ffff:10.") || // IPv4-mapped private
+    lower.startsWith("::ffff:192.168.") || // IPv4-mapped private
+    lower.startsWith("::ffff:169.254.") // IPv4-mapped link-local
+  ) {
+    return true;
+  }
+
+  // Common internal hostnames
+  if (hostname.endsWith(".local") || hostname.endsWith(".internal")) {
+    return true;
+  }
+
+  return false;
+}
+
 function parseSkillRow(row: Record<string, unknown>) {
   return {
     ...row,
@@ -396,24 +441,7 @@ export async function POST(request: NextRequest) {
         }
         // Block private/loopback IP ranges
         const hostname = parsed.hostname;
-        const isPrivate172 = (() => {
-          const m = hostname.match(/^172\.(\d+)\./);
-          if (!m) return false;
-          const octet = parseInt(m[1], 10);
-          return octet >= 16 && octet <= 31;
-        })();
-        if (
-          hostname === "localhost" ||
-          hostname === "127.0.0.1" ||
-          hostname === "::1" ||
-          hostname.startsWith("10.") ||
-          hostname.startsWith("192.168.") ||
-          isPrivate172 ||
-          hostname.startsWith("169.254.") ||
-          hostname === "0.0.0.0" ||
-          hostname.endsWith(".local") ||
-          hostname.endsWith(".internal")
-        ) {
+        if (isPrivateOrInternalHost(hostname)) {
           return NextResponse.json(
             { error: "URLs pointing to private or internal addresses are not allowed" },
             { status: 400 }
@@ -426,10 +454,20 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Disable automatic redirects so we can validate each hop
       const res = await fetch(url, {
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(10_000),
+        redirect: "manual",
       });
+
+      // Reject redirects to prevent SSRF via open redirects
+      if (res.status >= 300 && res.status < 400) {
+        return NextResponse.json(
+          { error: "URL redirects are not allowed for security reasons" },
+          { status: 400 }
+        );
+      }
       if (!res.ok) {
         return NextResponse.json(
           { error: `Failed to fetch URL: ${res.status} ${res.statusText}` },
@@ -465,10 +503,16 @@ export async function POST(request: NextRequest) {
     }
 
     const id = await insertSkill(importData, workspaceId || null);
+    if (!id) {
+      return NextResponse.json(
+        { error: "Invalid slug: slug must contain at least one alphanumeric character after normalization" },
+        { status: 400 }
+      );
+    }
     const skill = await db
       .select()
       .from(skills)
-      .where(eq(skills.id, id!))
+      .where(eq(skills.id, id))
       .limit(1);
 
     return NextResponse.json(parseSkillRow(skill[0]), { status: 201 });

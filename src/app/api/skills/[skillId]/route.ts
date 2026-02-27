@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, ne, and, isNull } from "drizzle-orm";
 
 function slugify(input: string): string {
   return input
@@ -92,12 +92,13 @@ export async function PATCH(
           .where(
             and(
               eq(skills.slug, normalizedSlug),
+              ne(skills.id, skillId),
               wid ? eq(skills.workspaceId, wid) : isNull(skills.workspaceId)
             )
           )
           .limit(1);
 
-        if (duplicate.length > 0 && duplicate[0].id !== skillId) {
+        if (duplicate.length > 0) {
           return NextResponse.json(
             { error: "A skill with this slug already exists in the same scope" },
             { status: 409 }
