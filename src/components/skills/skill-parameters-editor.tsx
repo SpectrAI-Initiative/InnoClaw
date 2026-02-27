@@ -53,7 +53,7 @@ export function SkillParametersEditor({
     <div className="space-y-3">
       {parameters.map((param, index) => (
         <div
-          key={index}
+          key={param.name || String(index)}
           className="rounded-md border p-3 space-y-2"
         >
           <div className="flex items-center gap-2">
@@ -97,6 +97,7 @@ export function SkillParametersEditor({
               size="icon"
               onClick={() => removeParameter(index)}
               className="shrink-0"
+              aria-label={t("removeParameter")}
             >
               <Trash2 className="h-4 w-4" />
             </Button>

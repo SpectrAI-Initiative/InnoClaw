@@ -206,6 +206,8 @@
     "batchImportSuccess": "Successfully imported {count} skills",
     "batchImportFailed": "{count} failed",
     "exportSuccess": "Skill JSON copied to clipboard",
-    "exportDownload": "Download JSON"
+    "exportDownload": "Download JSON",
+    "deleteStep": "Delete step",
+    "removeParameter": "Remove parameter"
   }
 }

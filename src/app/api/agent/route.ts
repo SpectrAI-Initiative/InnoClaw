@@ -57,6 +57,15 @@ export async function POST(req: NextRequest) {
       }
 
       const skill = parseSkillRow(skillRows[0]);
+
+      if (!skill.isEnabled) {
+        return new Response("Skill is disabled", { status: 403 });
+      }
+
+      // Enforce workspace scope: a workspace-specific skill can only be used within its workspace
+      if (skill.workspaceId && skill.workspaceId !== workspaceId) {
+        return new Response("Skill not found", { status: 404 });
+      }
       systemPrompt = buildSkillSystemPrompt(skill, cwd, paramValues || {});
       tools = createAgentTools(cwd, skill.allowedTools);
     } else {

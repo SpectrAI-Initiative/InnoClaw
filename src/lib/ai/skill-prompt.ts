@@ -22,7 +22,7 @@ export function buildSkillSystemPrompt(
   // 2. Build step instructions if present
   let stepsBlock = "";
   if (skill.steps && skill.steps.length > 0) {
-    const stepLines = skill.steps
+    const stepLines = [...skill.steps]
       .sort((a, b) => a.order - b.order)
       .map((step) => {
         let line = `Step ${step.order}: ${step.instruction}`;

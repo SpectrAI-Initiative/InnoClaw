@@ -206,6 +206,8 @@
     "batchImportSuccess": "成功导入 {count} 个技能",
     "batchImportFailed": "{count} 个失败",
     "exportSuccess": "技能 JSON 已复制到剪贴板",
-    "exportDownload": "下载 JSON"
+    "exportDownload": "下载 JSON",
+    "deleteStep": "删除步骤",
+    "removeParameter": "移除参数"
   }
 }
