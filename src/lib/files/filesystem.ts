@@ -1,4 +1,3 @@
-import fs from "fs";
 import fsp from "fs/promises";
 import path from "path";
 import type { FileEntry } from "@/types";

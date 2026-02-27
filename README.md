@@ -47,7 +47,7 @@ An AI-powered research assistant web app similar to Google NotebookLM. Users ope
 ### 第 1 步：安装依赖
 
 ```bash
-cd d:/Project/notebooklm
+cd notebooklm
 npm install
 ```
 
