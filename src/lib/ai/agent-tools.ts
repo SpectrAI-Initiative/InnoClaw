@@ -12,6 +12,12 @@ import {
 export function createAgentTools(workspaceCwd: string) {
   const validatedCwd = validatePath(workspaceCwd);
 
+  /**
+   * Resolves a file path relative to the workspace and validates it against
+   * allowed workspace roots.
+   * @throws {Error} If the resolved path is outside the allowed workspace roots
+   * or contains invalid characters (e.g. null bytes).
+   */
   function resolvePath(filePath: string): string {
     const resolved = path.isAbsolute(filePath)
       ? filePath
