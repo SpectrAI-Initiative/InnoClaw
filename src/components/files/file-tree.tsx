@@ -379,6 +379,7 @@ function TreeNode({
             } ${dragOver ? "bg-accent/60 ring-1 ring-primary" : ""}`}
             style={{ paddingLeft: `${depth * 16 + 8}px` }}
             onClick={handleClick}
+            tabIndex={0}
             draggable={!renaming}
             onDragStart={(e) => {
               e.stopPropagation();
