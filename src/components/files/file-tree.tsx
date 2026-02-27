@@ -159,11 +159,31 @@ function TreeNode({
 
   // Re-fetch children silently when refreshKey changes and folder is expanded
   useEffect(() => {
-    if (expanded && isDirectory) {
-      fetchChildren();
+    if (!expanded || !isDirectory) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshKey]);
+
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        const res = await fetch(
+          `/api/files/browse?path=${encodeURIComponent(entry.path)}`
+        );
+        if (res.ok && !cancelled) {
+          setChildren(await res.json());
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [expanded, isDirectory, entry.path, refreshKey]);
 
   const toggleExpand = () => {
     if (!isDirectory) return;
