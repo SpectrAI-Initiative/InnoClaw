@@ -18,6 +18,8 @@ import {
   Check,
   AlertCircle,
   Bot,
+  Square,
+  Trash2,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import useSWR from "swr";
@@ -374,7 +376,7 @@ export function AgentPanel({
     [agentBody]
   );
 
-  const { messages, sendMessage, status } = useChat({ transport });
+  const { messages, sendMessage, setMessages, stop, status } = useChat({ transport });
 
   const isLoading = status === "submitted" || status === "streaming";
 
@@ -455,6 +457,15 @@ export function AgentPanel({
     setInput("");
     setShowAutocomplete(false);
     await sendMessage({ text });
+  };
+
+  const handleStop = () => {
+    stop();
+  };
+
+  const handleClear = () => {
+    setMessages([]);
+    setInput("");
   };
 
   const slashQuery = input.startsWith("/") ? input.slice(1) : "";
@@ -543,6 +554,24 @@ export function AgentPanel({
             className="flex-1 bg-transparent text-[#c9d1d9] placeholder:text-[#565f89] outline-none text-sm font-mono"
             autoFocus
           />
+          {isLoading && (
+            <button
+              onClick={handleStop}
+              title={t("stop")}
+              className="shrink-0 p-1 rounded hover:bg-[#30363d] text-[#f7768e] transition-colors"
+            >
+              <Square className="h-4 w-4" />
+            </button>
+          )}
+          {!isLoading && messages.length > 0 && (
+            <button
+              onClick={handleClear}
+              title={t("clearContext")}
+              className="shrink-0 p-1 rounded hover:bg-[#30363d] text-[#565f89] hover:text-[#c9d1d9] transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
