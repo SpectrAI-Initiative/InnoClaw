@@ -359,7 +359,7 @@ export function AgentPanel({
     [workspaceId, folderPath]
   );
 
-  // Create transport once with the mutable body reference
+  // Create transport with the body object — recreated when workspace/folder changes
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
