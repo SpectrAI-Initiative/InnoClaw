@@ -392,9 +392,6 @@ export function AgentPanel({
     agentBody.cwd = folderPath;
   }, [workspaceId, folderPath, agentBody]);
 
-  // Ensure mode is always in sync with the current UI state at send-time.
-  agentBody.mode = mode;
-
   // Create transport once with the mutable body reference
   const transport = useMemo(
     () =>
@@ -456,6 +453,7 @@ export function AgentPanel({
     // Inject skill context into the mutable body before sending
     agentBody.skillId = skill.id;
     agentBody.paramValues = paramValues;
+    agentBody.mode = mode;
 
     await sendMessage({
       text: `/${skill.slug}${Object.keys(paramValues).length > 0 ? " " + Object.entries(paramValues).map(([k, v]) => `${k}="${v}"`).join(" ") : ""}`,
@@ -485,6 +483,7 @@ export function AgentPanel({
 
     setInput("");
     setShowAutocomplete(false);
+    agentBody.mode = mode;
     await sendMessage({ text });
   };
 
