@@ -52,6 +52,8 @@ export function SkillAutocomplete({
       } else if (e.key === "Enter" && filtered.length > 0) {
         e.preventDefault();
         onSelect(filtered[selectedIndex]);
+      } else if (e.key === "Tab") {
+        onClose();
       } else if (e.key === "Escape") {
         e.preventDefault();
         onClose();
