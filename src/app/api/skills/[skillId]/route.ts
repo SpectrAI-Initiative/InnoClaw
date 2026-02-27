@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, isNull, ne } from "drizzle-orm";
 
 function parseSkillRow(row: Record<string, unknown>) {
   return {
@@ -60,7 +60,40 @@ export async function PATCH(
     };
 
     if (body.name !== undefined) updateData.name = body.name;
-    if (body.slug !== undefined) updateData.slug = body.slug;
+    if (body.slug !== undefined) {
+      updateData.slug = body.slug;
+
+      // Validate slug uniqueness within the same scope
+      const current = await db
+        .select()
+        .from(skills)
+        .where(eq(skills.id, skillId))
+        .limit(1);
+
+      if (current.length > 0) {
+        const workspaceId = current[0].workspaceId;
+        const duplicates = await db
+          .select()
+          .from(skills)
+          .where(
+            and(
+              eq(skills.slug, body.slug),
+              workspaceId
+                ? eq(skills.workspaceId, workspaceId)
+                : isNull(skills.workspaceId),
+              ne(skills.id, skillId)
+            )
+          )
+          .limit(1);
+
+        if (duplicates.length > 0) {
+          return NextResponse.json(
+            { error: "A skill with this slug already exists in the same scope" },
+            { status: 409 }
+          );
+        }
+      }
+    }
     if (body.description !== undefined)
       updateData.description = body.description;
     if (body.systemPrompt !== undefined)

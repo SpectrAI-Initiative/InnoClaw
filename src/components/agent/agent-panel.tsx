@@ -352,19 +352,12 @@ export function AgentPanel({
   const { data: settings } = useSWR("/api/settings", fetcher);
   const aiEnabled = settings?.hasAIKey ?? false;
 
-  // Mutable body object — allows injecting skillId/paramValues before each send
+  // Body object for agent requests — recreated when workspace/folder changes
   const agentBody = useMemo(
     () =>
       ({ workspaceId, cwd: folderPath }) as Record<string, unknown>,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [workspaceId, folderPath]
   );
-
-  // Keep body in sync with props
-  useEffect(() => {
-    agentBody.workspaceId = workspaceId;
-    agentBody.cwd = folderPath;
-  }, [workspaceId, folderPath, agentBody]);
 
   // Create transport once with the mutable body reference
   const transport = useMemo(

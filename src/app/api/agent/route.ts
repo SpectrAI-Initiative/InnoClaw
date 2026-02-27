@@ -57,6 +57,13 @@ export async function POST(req: NextRequest) {
       }
 
       const skill = parseSkillRow(skillRows[0]);
+
+      // Validate workspace ownership: workspace-specific skills can only be
+      // accessed from their own workspace
+      if (skill.workspaceId && skill.workspaceId !== workspaceId) {
+        return new Response("Skill not accessible from this workspace", { status: 403 });
+      }
+
       systemPrompt = buildSkillSystemPrompt(skill, cwd, paramValues || {});
       tools = createAgentTools(cwd, skill.allowedTools);
     } else {
