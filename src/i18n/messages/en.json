@@ -16,7 +16,8 @@
     "refresh": "Refresh",
     "error": "Error",
     "success": "Success",
-    "modified": "Modified"
+    "modified": "Modified",
+    "workspace": "Workspace"
   },
   "home": {
     "title": "My Workspaces",
@@ -142,7 +143,8 @@
     "emptyState": "I can read, write, and execute code in your workspace. Ask me anything!",
     "disabledState": "AI agent requires an API key. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env.local.",
     "stop": "Stop",
-    "clearContext": "Clear context"
+    "clearContext": "Clear context",
+    "back": "Back"
   },
   "skills": {
     "title": "Skills",

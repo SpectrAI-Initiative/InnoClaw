@@ -16,7 +16,8 @@
     "refresh": "刷新",
     "error": "错误",
     "success": "成功",
-    "modified": "已修改"
+    "modified": "已修改",
+    "workspace": "工作区"
   },
   "home": {
     "title": "我的工作空间",
@@ -142,7 +143,8 @@
     "emptyState": "我可以读写文件、运行命令、搜索代码。问我任何问题！",
     "disabledState": "AI 代理需要配置 API Key。请在 .env.local 中设置 OPENAI_API_KEY 或 ANTHROPIC_API_KEY。",
     "stop": "停止",
-    "clearContext": "清空上下文"
+    "clearContext": "清空上下文",
+    "back": "返回"
   },
   "skills": {
     "title": "技能",
