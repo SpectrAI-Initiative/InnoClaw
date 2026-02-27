@@ -211,6 +211,10 @@ async function insertSkill(
 ): Promise<string | null> {
   const normalizedSlug = slugify(data.slug);
 
+  if (!normalizedSlug) {
+    return null;
+  }
+
   // Deduplicate slug
   let finalSlug = normalizedSlug;
   let attempt = 0;
@@ -381,6 +385,41 @@ export async function POST(request: NextRequest) {
     let importData: unknown;
 
     if (url) {
+      // SSRF protection: only allow https URLs
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol !== "https:") {
+          return NextResponse.json(
+            { error: "Only HTTPS URLs are allowed" },
+            { status: 400 }
+          );
+        }
+        // Block private/loopback IP ranges
+        const hostname = parsed.hostname;
+        if (
+          hostname === "localhost" ||
+          hostname === "127.0.0.1" ||
+          hostname === "::1" ||
+          hostname.startsWith("10.") ||
+          hostname.startsWith("192.168.") ||
+          hostname.startsWith("172.") ||
+          hostname.startsWith("169.254.") ||
+          hostname === "0.0.0.0" ||
+          hostname.endsWith(".local") ||
+          hostname.endsWith(".internal")
+        ) {
+          return NextResponse.json(
+            { error: "URLs pointing to private or internal addresses are not allowed" },
+            { status: 400 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { error: "Invalid URL" },
+          { status: 400 }
+        );
+      }
+
       const res = await fetch(url, {
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(10_000),

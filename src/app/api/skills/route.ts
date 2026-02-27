@@ -87,6 +87,13 @@ export async function POST(request: NextRequest) {
 
     const normalizedSlug = slugify(slug);
 
+    if (!normalizedSlug) {
+      return NextResponse.json(
+        { error: "Invalid slug: slug must contain at least one alphanumeric character after normalization" },
+        { status: 400 }
+      );
+    }
+
     // Check slug uniqueness within same scope
     const existing = await db
       .select()
