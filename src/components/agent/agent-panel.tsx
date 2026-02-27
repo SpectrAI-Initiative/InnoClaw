@@ -374,12 +374,14 @@ export function AgentPanel({
     []
   );
 
-  // Keep body in sync with props and mode
+  // Keep body in sync with props (mode is passed at send time to avoid stale state)
   useEffect(() => {
     agentBody.workspaceId = workspaceId;
     agentBody.cwd = folderPath;
-    agentBody.mode = mode;
-  }, [workspaceId, folderPath, mode, agentBody]);
+  }, [workspaceId, folderPath, agentBody]);
+
+  // Keep mode in sync immediately via ref pattern (no effect delay)
+  agentBody.mode = mode;
 
   // Create transport once with the mutable body reference
   const transport = useMemo(
