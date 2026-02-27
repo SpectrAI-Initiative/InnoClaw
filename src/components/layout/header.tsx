@@ -24,7 +24,7 @@ export function Header() {
         </Link>
         <div className="flex-1" />
         <div className="flex items-center gap-2">
-          {workspaceId && (
+          {workspaceId && pathname !== `/workspace/${workspaceId}` && (
             <Link
               href={`/workspace/${workspaceId}`}
               className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
