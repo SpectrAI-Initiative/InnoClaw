@@ -380,6 +380,13 @@ function TreeNode({
             style={{ paddingLeft: `${depth * 16 + 8}px` }}
             onClick={handleClick}
             tabIndex={0}
+            role="button"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick();
+              }
+            }}
             draggable={!renaming}
             onDragStart={(e) => {
               e.stopPropagation();
