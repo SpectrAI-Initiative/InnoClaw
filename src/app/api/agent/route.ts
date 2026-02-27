@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { createAgentTools } from "@/lib/ai/agent-tools";
-import { buildAgentSystemPrompt } from "@/lib/ai/prompts";
+import { buildAgentSystemPrompt, buildPlanSystemPrompt, buildAskSystemPrompt } from "@/lib/ai/prompts";
 import { buildSkillSystemPrompt } from "@/lib/ai/skill-prompt";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
@@ -26,7 +26,7 @@ function parseSkillRow(row: Record<string, unknown>): Skill {
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages: uiMessages, workspaceId, cwd, skillId, paramValues } =
+    const { messages: uiMessages, workspaceId, cwd, skillId, paramValues, mode } =
       await req.json();
 
     if (!workspaceId || !cwd || typeof cwd !== "string") {
@@ -59,6 +59,14 @@ export async function POST(req: NextRequest) {
       const skill = parseSkillRow(skillRows[0]);
       systemPrompt = buildSkillSystemPrompt(skill, cwd, paramValues || {});
       tools = createAgentTools(cwd, skill.allowedTools);
+    } else if (mode === "plan") {
+      // Plan mode: read-only tools, focus on analysis and planning
+      systemPrompt = buildPlanSystemPrompt(cwd);
+      tools = createAgentTools(cwd, ["bash", "readFile", "listDirectory", "grep"]);
+    } else if (mode === "ask") {
+      // Ask mode: read-only tools, answer questions about code
+      systemPrompt = buildAskSystemPrompt(cwd);
+      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
     } else {
       // Default agent mode
       systemPrompt = buildAgentSystemPrompt(cwd);

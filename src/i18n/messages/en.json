@@ -140,11 +140,20 @@
   "agent": {
     "title": "Claude Code",
     "placeholder": "Ask me to code...",
+    "placeholderPlan": "Describe what you want to build...",
+    "placeholderAsk": "Ask a question about your code...",
     "emptyState": "I can read, write, and execute code in your workspace. Ask me anything!",
     "disabledState": "AI agent requires an API key. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env.local.",
     "stop": "Stop",
     "clearContext": "Clear context",
-    "back": "Back"
+    "back": "Back",
+    "modeLabel": "Select Mode",
+    "modeAgent": "Agent",
+    "modeAgentDesc": "Read, write, and execute code",
+    "modePlan": "Plan",
+    "modePlanDesc": "Analyze code and create plans",
+    "modeAsk": "Ask",
+    "modeAskDesc": "Answer questions about code"
   },
   "skills": {
     "title": "Skills",

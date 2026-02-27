@@ -20,13 +20,26 @@ import {
   Bot,
   Square,
   Trash2,
+  ClipboardList,
+  MessageCircleQuestion,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import useSWR from "swr";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { useSkills } from "@/lib/hooks/use-skills";
 import { SkillAutocomplete } from "@/components/skills/skill-autocomplete";
 import { SkillParameterDialog } from "@/components/skills/skill-parameter-dialog";
 import type { Skill } from "@/types";
+
+type AgentMode = "agent" | "plan" | "ask";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -342,6 +355,7 @@ export function AgentPanel({
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState("");
+  const [mode, setMode] = useState<AgentMode>("agent");
 
   // Skills state
   const { skills: availableSkills } = useSkills(workspaceId);
@@ -360,11 +374,12 @@ export function AgentPanel({
     []
   );
 
-  // Keep body in sync with props
+  // Keep body in sync with props and mode
   useEffect(() => {
     agentBody.workspaceId = workspaceId;
     agentBody.cwd = folderPath;
-  }, [workspaceId, folderPath, agentBody]);
+    agentBody.mode = mode;
+  }, [workspaceId, folderPath, mode, agentBody]);
 
   // Create transport once with the mutable body reference
   const transport = useMemo(
@@ -474,7 +489,9 @@ export function AgentPanel({
     <div className="flex h-full min-w-0 flex-col bg-[#0d1117] text-[#c9d1d9] font-mono text-sm">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-[#30363d] px-3 py-2">
-        <Bot className="h-4 w-4 text-[#7aa2f7]" />
+        {mode === "agent" && <Bot className="h-4 w-4 text-[#7aa2f7]" />}
+        {mode === "plan" && <ClipboardList className="h-4 w-4 text-[#9ece6a]" />}
+        {mode === "ask" && <MessageCircleQuestion className="h-4 w-4 text-[#bb9af7]" />}
         <span className="text-xs font-semibold text-[#c9d1d9]">
           {t("title")}
         </span>
@@ -531,6 +548,38 @@ export function AgentPanel({
         )}
 
         <div className="flex items-center gap-2 px-3 py-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-[#7aa2f7] hover:bg-[#30363d] transition-colors">
+                {t(`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}` as "modeAgent" | "modePlan" | "modeAsk")}
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52">
+              <DropdownMenuLabel className="text-xs">{t("modeLabel")}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup value={mode} onValueChange={(v) => setMode(v as AgentMode)}>
+                <DropdownMenuRadioItem value="agent">
+                  <div className="flex flex-col">
+                    <span>{t("modeAgent")}</span>
+                    <span className="text-xs text-muted-foreground">{t("modeAgentDesc")}</span>
+                  </div>
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="plan">
+                  <div className="flex flex-col">
+                    <span>{t("modePlan")}</span>
+                    <span className="text-xs text-muted-foreground">{t("modePlanDesc")}</span>
+                  </div>
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="ask">
+                  <div className="flex flex-col">
+                    <span>{t("modeAsk")}</span>
+                    <span className="text-xs text-muted-foreground">{t("modeAskDesc")}</span>
+                  </div>
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <span className="text-[#bb9af7] font-bold shrink-0 select-none">
             &gt;
           </span>
@@ -550,7 +599,7 @@ export function AgentPanel({
               }
             }}
             disabled={!aiEnabled}
-            placeholder={aiEnabled ? t("placeholder") : t("disabledState")}
+            placeholder={aiEnabled ? t(mode === "plan" ? "placeholderPlan" : mode === "ask" ? "placeholderAsk" : "placeholder") : t("disabledState")}
             className="flex-1 bg-transparent text-[#c9d1d9] placeholder:text-[#565f89] outline-none text-sm font-mono"
             autoFocus
           />
