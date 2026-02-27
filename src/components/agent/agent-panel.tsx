@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -21,6 +21,10 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import useSWR from "swr";
+import { useSkills } from "@/lib/hooks/use-skills";
+import { SkillAutocomplete } from "@/components/skills/skill-autocomplete";
+import { SkillParameterDialog } from "@/components/skills/skill-parameter-dialog";
+import type { Skill } from "@/types";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -128,7 +132,7 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
           {toolName === "grep" && args && (
             <div className="text-[#565f89]">
               Pattern: {String(args.pattern)}
-              {args.include && ` | Include: ${String(args.include)}`}
+              {args.include ? ` | Include: ${String(args.include)}` : null}
             </div>
           )}
 
@@ -331,15 +335,40 @@ export function AgentPanel({
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState("");
 
+  // Skills state
+  const { skills: availableSkills } = useSkills(workspaceId);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
+  const [showParamDialog, setShowParamDialog] = useState(false);
+
   const { data: settings } = useSWR("/api/settings", fetcher);
   const aiEnabled = settings?.hasAIKey ?? false;
 
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/agent",
-      body: { workspaceId, cwd: folderPath },
-    }),
-  });
+  // Mutable body object — allows injecting skillId/paramValues before each send
+  const agentBody = useMemo(
+    () =>
+      ({ workspaceId, cwd: folderPath }) as Record<string, unknown>,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  // Keep body in sync with props
+  useEffect(() => {
+    agentBody.workspaceId = workspaceId;
+    agentBody.cwd = folderPath;
+  }, [workspaceId, folderPath, agentBody]);
+
+  // Create transport once with the mutable body reference
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/agent",
+        body: agentBody,
+      }),
+    [agentBody]
+  );
+
+  const { messages, sendMessage, status } = useChat({ transport });
 
   const isLoading = status === "submitted" || status === "streaming";
 
@@ -355,12 +384,74 @@ export function AgentPanel({
     }
   }, [messages, status]);
 
+  // Slash command detection
+  const handleInputChange = (value: string) => {
+    setInput(value);
+    if (value.startsWith("/") && value.length >= 1 && !isLoading) {
+      setShowAutocomplete(true);
+    } else {
+      setShowAutocomplete(false);
+    }
+  };
+
+  // Skill selected from autocomplete
+  const handleSkillSelect = (skill: Skill) => {
+    setShowAutocomplete(false);
+    setActiveSkill(skill);
+
+    if (skill.parameters && skill.parameters.length > 0) {
+      // Has parameters — show dialog to collect them
+      setShowParamDialog(true);
+    } else {
+      // No parameters — execute immediately
+      executeSkill(skill, {});
+    }
+  };
+
+  // Execute skill after params are collected
+  const executeSkill = async (
+    skill: Skill,
+    paramValues: Record<string, string>
+  ) => {
+    setInput("");
+    setActiveSkill(null);
+
+    // Inject skill context into the mutable body before sending
+    agentBody.skillId = skill.id;
+    agentBody.paramValues = paramValues;
+
+    await sendMessage({
+      text: `/${skill.slug}${Object.keys(paramValues).length > 0 ? " " + Object.entries(paramValues).map(([k, v]) => `${k}="${v}"`).join(" ") : ""}`,
+    });
+
+    // Clear skill context after sending
+    delete agentBody.skillId;
+    delete agentBody.paramValues;
+  };
+
   const handleSend = async () => {
     const text = input.trim();
     if (!text || isLoading || !aiEnabled) return;
+
+    // Check if input matches a skill slug
+    if (text.startsWith("/")) {
+      const query = text.slice(1).toLowerCase();
+      const matchedSkill = availableSkills.find(
+        (s) => s.isEnabled && s.slug === query
+      );
+      if (matchedSkill) {
+        setShowAutocomplete(false);
+        handleSkillSelect(matchedSkill);
+        return;
+      }
+    }
+
     setInput("");
+    setShowAutocomplete(false);
     await sendMessage({ text });
   };
+
+  const slashQuery = input.startsWith("/") ? input.slice(1) : "";
 
   return (
     <div className="flex h-full min-w-0 flex-col bg-[#0d1117] text-[#c9d1d9] font-mono text-sm">
@@ -410,28 +501,57 @@ export function AgentPanel({
         </div>
       </ScrollArea>
 
-      {/* Input */}
-      <div className="flex items-center gap-2 border-t border-[#30363d] px-3 py-2">
-        <span className="text-[#bb9af7] font-bold shrink-0 select-none">
-          &gt;
-        </span>
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          disabled={!aiEnabled}
-          placeholder={aiEnabled ? t("placeholder") : t("disabledState")}
-          className="flex-1 bg-transparent text-[#c9d1d9] placeholder:text-[#565f89] outline-none text-sm font-mono"
-          autoFocus
-        />
+      {/* Input area with autocomplete */}
+      <div className="relative border-t border-[#30363d]">
+        {/* Slash command autocomplete */}
+        {showAutocomplete && availableSkills.length > 0 && (
+          <SkillAutocomplete
+            query={slashQuery}
+            skills={availableSkills}
+            onSelect={handleSkillSelect}
+            onClose={() => setShowAutocomplete(false)}
+          />
+        )}
+
+        <div className="flex items-center gap-2 px-3 py-2">
+          <span className="text-[#bb9af7] font-bold shrink-0 select-none">
+            &gt;
+          </span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey &&
+                !showAutocomplete
+              ) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            disabled={!aiEnabled}
+            placeholder={aiEnabled ? t("placeholder") : t("disabledState")}
+            className="flex-1 bg-transparent text-[#c9d1d9] placeholder:text-[#565f89] outline-none text-sm font-mono"
+            autoFocus
+          />
+        </div>
       </div>
+
+      {/* Skill parameter dialog */}
+      {activeSkill && (
+        <SkillParameterDialog
+          open={showParamDialog}
+          onOpenChange={(open) => {
+            setShowParamDialog(open);
+            if (!open) setActiveSkill(null);
+          }}
+          skill={activeSkill}
+          onSubmit={(paramValues) => executeSkill(activeSkill, paramValues)}
+        />
+      )}
     </div>
   );
 }

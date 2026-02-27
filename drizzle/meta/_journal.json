@@ -8,6 +8,13 @@
       "when": 1772034700624,
       "tag": "0000_good_blink",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1772170445426,
+      "tag": "0001_futuristic_stardust",
+      "breakpoints": true
     }
   ]
 }

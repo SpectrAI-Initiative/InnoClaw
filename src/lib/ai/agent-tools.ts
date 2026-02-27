@@ -9,7 +9,10 @@ import {
   listDirectory as fsListDirectory,
 } from "@/lib/files/filesystem";
 
-export function createAgentTools(workspaceCwd: string) {
+export function createAgentTools(
+  workspaceCwd: string,
+  allowedTools?: string[] | null
+) {
   const validatedCwd = validatePath(workspaceCwd);
 
   function resolvePath(filePath: string): string {
@@ -18,7 +21,7 @@ export function createAgentTools(workspaceCwd: string) {
       : path.join(validatedCwd, filePath);
   }
 
-  return {
+  const allTools = {
     bash: tool({
       description:
         "Execute a shell command in the workspace directory. Use for running builds, tests, git operations, package management, etc.",
@@ -157,4 +160,18 @@ export function createAgentTools(workspaceCwd: string) {
       },
     }),
   };
+
+  // Filter tools if allowedTools is specified
+  if (!allowedTools || allowedTools.length === 0) {
+    return allTools;
+  }
+
+  const filtered: Record<string, (typeof allTools)[keyof typeof allTools]> =
+    {};
+  for (const name of allowedTools) {
+    if (name in allTools) {
+      filtered[name] = allTools[name as keyof typeof allTools];
+    }
+  }
+  return filtered;
 }

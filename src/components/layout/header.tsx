@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BookOpen, Settings } from "lucide-react";
+import { BookOpen, Settings, Zap } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageToggle } from "./language-toggle";
 
@@ -20,6 +20,13 @@ export function Header() {
         <div className="flex items-center gap-2">
           <LanguageToggle />
           <ThemeToggle />
+          <Link
+            href="/skills"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+          >
+            <Zap className="h-4 w-4" />
+            <span className="sr-only">{t("skills")}</span>
+          </Link>
           <Link
             href="/settings"
             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
