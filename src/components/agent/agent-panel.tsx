@@ -41,6 +41,18 @@ import type { Skill } from "@/types";
 
 type AgentMode = "agent" | "plan" | "ask";
 
+const MODE_LABEL_KEYS: Record<AgentMode, "modeAgent" | "modePlan" | "modeAsk"> = {
+  agent: "modeAgent",
+  plan: "modePlan",
+  ask: "modeAsk",
+};
+
+const MODE_PLACEHOLDER_KEYS: Record<AgentMode, "placeholder" | "placeholderPlan" | "placeholderAsk"> = {
+  agent: "placeholder",
+  plan: "placeholderPlan",
+  ask: "placeholderAsk",
+};
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 // --- Tool Call Block ---
@@ -374,14 +386,11 @@ export function AgentPanel({
     []
   );
 
-  // Keep body in sync with props (mode is passed at send time to avoid stale state)
+  // Keep body in sync with props without render-side effects
   useEffect(() => {
     agentBody.workspaceId = workspaceId;
     agentBody.cwd = folderPath;
   }, [workspaceId, folderPath, agentBody]);
-
-  // Keep mode in sync immediately via ref pattern (no effect delay)
-  agentBody.mode = mode;
 
   // Create transport once with the mutable body reference
   const transport = useMemo(
@@ -444,6 +453,7 @@ export function AgentPanel({
     // Inject skill context into the mutable body before sending
     agentBody.skillId = skill.id;
     agentBody.paramValues = paramValues;
+    agentBody.mode = mode;
 
     await sendMessage({
       text: `/${skill.slug}${Object.keys(paramValues).length > 0 ? " " + Object.entries(paramValues).map(([k, v]) => `${k}="${v}"`).join(" ") : ""}`,
@@ -473,6 +483,7 @@ export function AgentPanel({
 
     setInput("");
     setShowAutocomplete(false);
+    agentBody.mode = mode;
     await sendMessage({ text });
   };
 
@@ -553,7 +564,7 @@ export function AgentPanel({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-[#7aa2f7] hover:bg-[#30363d] transition-colors">
-                {t(`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}` as "modeAgent" | "modePlan" | "modeAsk")}
+                {t(MODE_LABEL_KEYS[mode])}
                 <ChevronDown className="h-3 w-3" />
               </button>
             </DropdownMenuTrigger>
@@ -601,7 +612,7 @@ export function AgentPanel({
               }
             }}
             disabled={!aiEnabled}
-            placeholder={aiEnabled ? t(mode === "plan" ? "placeholderPlan" : mode === "ask" ? "placeholderAsk" : "placeholder") : t("disabledState")}
+            placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
             className="flex-1 bg-transparent text-[#c9d1d9] placeholder:text-[#565f89] outline-none text-sm font-mono"
             autoFocus
           />
