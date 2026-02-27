@@ -43,7 +43,7 @@ let clipboardListeners: Array<() => void> = [];
 
 function setClipboard(data: ClipboardData | null) {
   globalClipboard = data;
-  clipboardListeners.forEach((fn) => fn());
+  [...clipboardListeners].forEach((fn) => fn());
 }
 
 function useClipboard() {
