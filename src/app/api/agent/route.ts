@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     } else if (mode === "plan") {
       // Plan mode: read-only tools, focus on analysis and planning
       systemPrompt = buildPlanSystemPrompt(cwd);
-      tools = createAgentTools(cwd, ["bash", "readFile", "listDirectory", "grep"]);
+      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
     } else if (mode === "ask") {
       // Ask mode: read-only tools, answer questions about code
       systemPrompt = buildAskSystemPrompt(cwd);
