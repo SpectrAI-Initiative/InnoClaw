@@ -118,7 +118,6 @@ export function buildPlanSystemPrompt(cwd: string): string {
   return `You are an expert software architect working in a web-based terminal. You have read-only access to the user's workspace at: ${cwd}
 
 ## Available Tools
-- **bash**: Execute read-only shell commands (git log, git diff, find, cat, etc. — NO writes)
 - **readFile**: Read file contents
 - **listDirectory**: List directory contents
 - **grep**: Search for regex patterns in files

@@ -86,7 +86,7 @@ export function FileBrowser({
       }
     };
 
-    start();
+    onVisibility();
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
