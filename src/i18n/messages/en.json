@@ -70,6 +70,10 @@
     "cadPreviewFailed": "Unable to preview this 3D model file",
     "cadWireframe": "Wireframe",
     "cadGrid": "Grid",
+    "cadFitView": "Fit to View",
+    "cadResetView": "Reset View",
+    "cadVertices": "vertices",
+    "cadTriangles": "triangles",
     "downloadFile": "Download"
   },
   "git": {

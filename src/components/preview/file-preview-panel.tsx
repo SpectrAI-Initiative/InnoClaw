@@ -22,7 +22,7 @@ const EDITABLE_EXTS = [
   "log", "conf", "c", "cpp", "h", "hpp", "java", "go", "rs", "rb", "php",
 ];
 const MOL_EXTS = ["pdb", "mol", "mol2", "sdf", "sd", "xyz", "cif"];
-const CAD_EXTS = ["stl", "obj", "ply", "vtk", "vtp", "gltf", "glb"];
+const CAD_EXTS = ["stl", "obj", "ply", "vtk", "vtp", "gltf", "glb", "fbx", "dae", "3ds", "3mf", "pcd"];
 const IMAGE_EXTS = ["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp", "ico"];
 
 function getFileType(filePath: string) {

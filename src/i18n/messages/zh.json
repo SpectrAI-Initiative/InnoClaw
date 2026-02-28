@@ -70,6 +70,10 @@
     "cadPreviewFailed": "无法预览此 3D 模型文件",
     "cadWireframe": "线框",
     "cadGrid": "网格",
+    "cadFitView": "适应视图",
+    "cadResetView": "重置视图",
+    "cadVertices": "顶点",
+    "cadTriangles": "三角形",
     "downloadFile": "下载"
   },
   "git": {

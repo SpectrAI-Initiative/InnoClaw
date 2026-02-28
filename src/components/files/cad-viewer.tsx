@@ -2,8 +2,15 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { FileDown, AlertCircle, Loader2, Grid3x3, Box } from "lucide-react";
+import { useTheme } from "next-themes";
+import {
+  FileDown, AlertCircle, Loader2, Grid3x3, Box,
+  Maximize, RotateCcw, Triangle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip, TooltipTrigger, TooltipContent,
+} from "@/components/ui/tooltip";
 import { getFileName } from "@/lib/utils";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -12,6 +19,11 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { PLYLoader } from "three/addons/loaders/PLYLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { VTKLoader } from "three/addons/loaders/VTKLoader.js";
+import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+import { ColladaLoader } from "three/addons/loaders/ColladaLoader.js";
+import { TDSLoader } from "three/addons/loaders/TDSLoader.js";
+import { ThreeMFLoader } from "three/addons/loaders/3MFLoader.js";
+import { PCDLoader } from "three/addons/loaders/PCDLoader.js";
 
 /** Maximum file size (in bytes) before showing a warning — 50 MB */
 const MAX_CAD_FILE_SIZE = 50 * 1024 * 1024;
@@ -25,7 +37,56 @@ const FORMAT_MAP: Record<string, string> = {
   vtp: "vtk",
   gltf: "gltf",
   glb: "gltf",
+  fbx: "fbx",
+  dae: "dae",
+  "3ds": "3ds",
+  "3mf": "3mf",
+  pcd: "pcd",
 };
+
+/** Model statistics */
+interface ModelStats {
+  vertices: number;
+  triangles: number;
+}
+
+/** Collect vertex/triangle counts from an object tree */
+function collectStats(obj: THREE.Object3D): ModelStats {
+  let vertices = 0;
+  let triangles = 0;
+  obj.traverse((child) => {
+    if (child instanceof THREE.Mesh && child.geometry) {
+      const geo = child.geometry;
+      vertices += geo.attributes.position?.count ?? 0;
+      if (geo.index) {
+        triangles += geo.index.count / 3;
+      } else {
+        triangles += (geo.attributes.position?.count ?? 0) / 3;
+      }
+    } else if (child instanceof THREE.Points && child.geometry) {
+      vertices += child.geometry.attributes.position?.count ?? 0;
+    }
+  });
+  return { vertices: Math.round(vertices), triangles: Math.round(triangles) };
+}
+
+/** Format number with K/M suffix */
+function fmtNum(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toString();
+}
+
+/** Default material for single-geometry formats */
+function createDefaultMaterial(doubleSide = false) {
+  return new THREE.MeshStandardMaterial({
+    color: 0x2194ce,
+    metalness: 0.3,
+    roughness: 0.6,
+    flatShading: false,
+    side: doubleSide ? THREE.DoubleSide : THREE.FrontSide,
+  });
+}
 
 interface CadViewerProps {
   filePath: string;
@@ -33,6 +94,7 @@ interface CadViewerProps {
 
 export function CadViewer({ filePath }: CadViewerProps) {
   const t = useTranslations("files");
+  const { theme, systemTheme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -45,11 +107,15 @@ export function CadViewer({ filePath }: CadViewerProps) {
   const [loading, setLoading] = useState(true);
   const [wireframe, setWireframe] = useState(false);
   const [showGrid, setShowGrid] = useState(true);
+  const [stats, setStats] = useState<ModelStats | null>(null);
 
   const rawUrl = `/api/files/raw?path=${encodeURIComponent(filePath)}`;
   const fileName = getFileName(filePath, "model");
   const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
   const format = FORMAT_MAP[ext] ?? "stl";
+
+  // Resolve effective theme
+  const isDark = (theme === "system" ? systemTheme : theme) === "dark";
 
   // Toggle wireframe on the loaded model
   const applyWireframe = useCallback((obj: THREE.Object3D, enabled: boolean) => {
@@ -93,6 +159,107 @@ export function CadViewer({ filePath }: CadViewerProps) {
     });
   }, [applyWireframe]);
 
+  // Fit camera to model
+  const fitToView = useCallback(() => {
+    const model = modelRef.current;
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!model || !camera || !controls) return;
+
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const dist = maxDim * 1.8;
+
+    camera.position.set(
+      center.x + dist * 0.7,
+      center.y + dist * 0.6,
+      center.z + dist * 0.9,
+    );
+    camera.lookAt(center);
+    controls.target.copy(center);
+    controls.update();
+  }, []);
+
+  // Reset to front view
+  const resetView = useCallback(() => {
+    const model = modelRef.current;
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!model || !camera || !controls) return;
+
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const dist = maxDim * 2;
+
+    camera.position.set(center.x, center.y, center.z + dist);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(center);
+    controls.target.copy(center);
+    controls.update();
+  }, []);
+
+  // Respond to dark/light theme changes
+  useEffect(() => {
+    if (!sceneRef.current) return;
+    sceneRef.current.background = new THREE.Color(isDark ? 0x1e1e2e : 0xf0f0f0);
+
+    // Update grid colors for theme
+    sceneRef.current.traverse((child) => {
+      if (child instanceof THREE.GridHelper) {
+        const colors = isDark
+          ? { center: 0x555555, grid: 0x333333 }
+          : { center: 0xcccccc, grid: 0xe0e0e0 };
+        child.material.opacity = 1;
+        // Re-create grid colors
+        const colorAttr = child.geometry.getAttribute("color");
+        if (colorAttr) {
+          const centerColor = new THREE.Color(colors.center);
+          const gridColor = new THREE.Color(colors.grid);
+          for (let i = 0; i < colorAttr.count; i++) {
+            const isCenter = i < 2;
+            const c = isCenter ? centerColor : gridColor;
+            colorAttr.setXYZ(i, c.r, c.g, c.b);
+          }
+          colorAttr.needsUpdate = true;
+        }
+      }
+    });
+  }, [isDark]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle shortcuts when focus is within our container
+      if (!containerRef.current?.contains(document.activeElement) &&
+          document.activeElement !== document.body) return;
+
+      switch (e.key.toLowerCase()) {
+        case "f":
+          e.preventDefault();
+          fitToView();
+          break;
+        case "w":
+          e.preventDefault();
+          toggleWireframe();
+          break;
+        case "g":
+          e.preventDefault();
+          toggleGrid();
+          break;
+        case "r":
+          e.preventDefault();
+          resetView();
+          break;
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [fitToView, toggleWireframe, toggleGrid, resetView]);
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -101,7 +268,7 @@ export function CadViewer({ filePath }: CadViewerProps) {
 
     // --- Scene setup ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
+    scene.background = new THREE.Color(isDark ? 0x1e1e2e : 0xf0f0f0);
     sceneRef.current = scene;
 
     // --- Camera ---
@@ -116,6 +283,8 @@ export function CadViewer({ filePath }: CadViewerProps) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
     renderer.shadowMap.enabled = true;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -135,9 +304,14 @@ export function CadViewer({ filePath }: CadViewerProps) {
     const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
     directionalLight2.position.set(-5, -5, -5);
     scene.add(directionalLight2);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.3);
+    scene.add(hemiLight);
 
-    // --- Grid & Axes ---
-    const gridHelper = new THREE.GridHelper(10, 20, 0xcccccc, 0xe0e0e0);
+    // --- Grid & Axes (created with theme-aware colors) ---
+    const gridColors = isDark
+      ? { center: 0x555555, grid: 0x333333 }
+      : { center: 0xcccccc, grid: 0xe0e0e0 };
+    const gridHelper = new THREE.GridHelper(10, 20, gridColors.center, gridColors.grid);
     scene.add(gridHelper);
     const axesHelper = new THREE.AxesHelper(3);
     scene.add(axesHelper);
@@ -183,26 +357,19 @@ export function CadViewer({ filePath }: CadViewerProps) {
           const loader = new STLLoader();
           const geometry = loader.parse(buf);
           geometry.computeVertexNormals();
-          const material = new THREE.MeshStandardMaterial({
-            color: 0x2194ce,
-            metalness: 0.3,
-            roughness: 0.6,
-            flatShading: false,
-          });
-          object = new THREE.Mesh(geometry, material);
+          object = new THREE.Mesh(geometry, createDefaultMaterial(true));
         } else if (format === "obj") {
           const text = await res.text();
           if (disposed) return;
           const loader = new OBJLoader();
           object = loader.parse(text);
-          // Apply default material to OBJ meshes that lack one
           object.traverse((child) => {
-            if (child instanceof THREE.Mesh && !child.material) {
-              child.material = new THREE.MeshStandardMaterial({
-                color: 0x2194ce,
-                metalness: 0.3,
-                roughness: 0.6,
-              });
+            if (child instanceof THREE.Mesh) {
+              if (!child.material) {
+                child.material = createDefaultMaterial();
+              }
+              // Ensure OBJ meshes have computed normals
+              child.geometry?.computeVertexNormals();
             }
           });
         } else if (format === "ply") {
@@ -218,6 +385,7 @@ export function CadViewer({ filePath }: CadViewerProps) {
             metalness: 0.3,
             roughness: 0.6,
             flatShading: false,
+            side: THREE.DoubleSide,
           });
           object = new THREE.Mesh(geometry, material);
         } else if (format === "vtk") {
@@ -226,13 +394,7 @@ export function CadViewer({ filePath }: CadViewerProps) {
           const loader = new VTKLoader();
           const geometry = loader.parse(buf, "");
           geometry.computeVertexNormals();
-          const material = new THREE.MeshStandardMaterial({
-            color: 0x2194ce,
-            metalness: 0.3,
-            roughness: 0.6,
-            flatShading: false,
-          });
-          object = new THREE.Mesh(geometry, material);
+          object = new THREE.Mesh(geometry, createDefaultMaterial(true));
         } else if (format === "gltf") {
           const buf = await res.arrayBuffer();
           if (disposed) return;
@@ -245,11 +407,40 @@ export function CadViewer({ filePath }: CadViewerProps) {
               (err) => reject(err)
             );
           });
+        } else if (format === "fbx") {
+          const buf = await res.arrayBuffer();
+          if (disposed) return;
+          const loader = new FBXLoader();
+          object = loader.parse(buf, "");
+        } else if (format === "dae") {
+          const text = await res.text();
+          if (disposed) return;
+          const loader = new ColladaLoader();
+          const collada = loader.parse(text, "");
+          if (collada) object = collada.scene;
+        } else if (format === "3ds") {
+          const buf = await res.arrayBuffer();
+          if (disposed) return;
+          const loader = new TDSLoader();
+          object = loader.parse(buf, "");
+        } else if (format === "3mf") {
+          const buf = await res.arrayBuffer();
+          if (disposed) return;
+          const loader = new ThreeMFLoader();
+          object = loader.parse(buf);
+        } else if (format === "pcd") {
+          const buf = await res.arrayBuffer();
+          if (disposed) return;
+          const loader = new PCDLoader();
+          const points = loader.parse(buf);
+          object = points;
         }
 
         if (disposed) return;
         if (object) {
           addObjectToScene(object);
+        } else {
+          setLoading(false);
         }
       } catch (err: unknown) {
         if (disposed || (err instanceof DOMException && err.name === "AbortError")) return;
@@ -279,16 +470,23 @@ export function CadViewer({ filePath }: CadViewerProps) {
       scene.add(object);
       modelRef.current = object;
 
-      // Adjust camera to fit
+      // Scale grid to match model size
       const finalBox = new THREE.Box3().setFromObject(object);
       const finalSize = finalBox.getSize(new THREE.Vector3());
       const maxFinal = Math.max(finalSize.x, finalSize.y, finalSize.z);
+      const gridScale = Math.max(1, Math.ceil(maxFinal / 4) * 2);
+      gridHelper.scale.set(gridScale, gridScale, gridScale);
+      axesHelper.scale.set(gridScale * 0.5, gridScale * 0.5, gridScale * 0.5);
+
+      // Adjust camera to fit
       const dist = maxFinal * 1.8;
       camera.position.set(dist * 0.7, dist * 0.6, dist * 0.9);
       camera.lookAt(0, 0, 0);
       controls.target.set(0, 0, 0);
       controls.update();
 
+      // Collect model statistics
+      setStats(collectStats(object));
       setLoading(false);
     }
 
@@ -344,31 +542,97 @@ export function CadViewer({ filePath }: CadViewerProps) {
   return (
     <div className="flex h-full flex-col gap-2 pt-2">
       {/* Toolbar */}
-      <div className="flex items-center justify-end gap-2 px-2">
-        <Button
-          variant={wireframe ? "default" : "outline"}
-          size="sm"
-          onClick={toggleWireframe}
-          title={t("cadWireframe")}
-        >
-          <Box className="mr-1 h-4 w-4" />
-          {t("cadWireframe")}
-        </Button>
-        <Button
-          variant={showGrid ? "default" : "outline"}
-          size="sm"
-          onClick={toggleGrid}
-          title={t("cadGrid")}
-        >
-          <Grid3x3 className="mr-1 h-4 w-4" />
-          {t("cadGrid")}
-        </Button>
-        <a href={rawUrl} download={fileName}>
-          <Button variant="outline" size="sm">
-            <FileDown className="mr-1 h-4 w-4" />
-            {t("downloadFile")}
-          </Button>
-        </a>
+      <div className="flex items-center justify-between gap-2 px-2">
+        {/* Model stats */}
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          {stats && (
+            <>
+              <span className="flex items-center gap-1" title={t("cadVertices")}>
+                <Triangle className="h-3 w-3" />
+                {fmtNum(stats.vertices)} {t("cadVertices")}
+              </span>
+              {stats.triangles > 0 && (
+                <span>
+                  {fmtNum(stats.triangles)} {t("cadTriangles")}
+                </span>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={wireframe ? "default" : "outline"}
+                size="sm"
+                onClick={toggleWireframe}
+                className="h-8 w-8 p-0"
+              >
+                <Box className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("cadWireframe")} (W)</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={showGrid ? "default" : "outline"}
+                size="sm"
+                onClick={toggleGrid}
+                className="h-8 w-8 p-0"
+              >
+                <Grid3x3 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("cadGrid")} (G)</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fitToView}
+                disabled={loading}
+                className="h-8 w-8 p-0"
+              >
+                <Maximize className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("cadFitView")} (F)</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetView}
+                disabled={loading}
+                className="h-8 w-8 p-0"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("cadResetView")} (R)</TooltipContent>
+          </Tooltip>
+
+          <div className="mx-1 h-5 w-px bg-border" />
+
+          <a href={rawUrl} download={fileName}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                  <FileDown className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">{t("downloadFile")}</TooltipContent>
+            </Tooltip>
+          </a>
+        </div>
       </div>
 
       {/* 3D Canvas */}
@@ -381,6 +645,7 @@ export function CadViewer({ filePath }: CadViewerProps) {
         <div
           ref={containerRef}
           className="w-full h-full"
+          tabIndex={0}
           aria-label={`Interactive 3D visualization of ${fileName}`}
           role="img"
         />
