@@ -16,6 +16,60 @@ function yamlEscape(value: string): string {
   return value.replace(/'/g, "''");
 }
 
+/**
+ * Parse a shell-style command string into an argv array.
+ * Handles single-quoted, double-quoted, and unquoted tokens.
+ * Backslash escaping within double quotes is supported.
+ */
+function parseShellArgs(input: string): string[] {
+  const args: string[] = [];
+  let current = "";
+  let i = 0;
+  const len = input.length;
+
+  while (i < len) {
+    const ch = input[i];
+
+    if (ch === "'" ) {
+      // Single-quoted segment: take everything until closing '
+      i++;
+      while (i < len && input[i] !== "'") {
+        current += input[i];
+        i++;
+      }
+      i++; // skip closing '
+    } else if (ch === '"') {
+      // Double-quoted segment: supports backslash escaping
+      i++;
+      while (i < len && input[i] !== '"') {
+        if (input[i] === "\\" && i + 1 < len) {
+          i++;
+          current += input[i];
+        } else {
+          current += input[i];
+        }
+        i++;
+      }
+      i++; // skip closing "
+    } else if (/\s/.test(ch)) {
+      if (current.length > 0) {
+        args.push(current);
+        current = "";
+      }
+      i++;
+    } else {
+      current += ch;
+      i++;
+    }
+  }
+
+  if (current.length > 0) {
+    args.push(current);
+  }
+
+  return args;
+}
+
 /** Validate that a string is a valid DNS label (used for namespace / jobName). */
 function isValidDnsLabel(value: string): boolean {
   return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(value) && value.length <= 63;
@@ -353,9 +407,31 @@ export function createAgentTools(
           };
         }
 
-        // Build the command as args array (no shell)
+        // Build the command as args array (no shell) using shell-style parsing
         const bin = useVcctl ? "vcctl" : "kubectl";
-        const args = subcommand.trim().split(/\s+/);
+        const args = parseShellArgs(subcommand.trim());
+
+        // Reject context-override flags that could bypass the fixed KUBECONFIG
+        const forbiddenFlags = [
+          "--kubeconfig", "--context", "--cluster", "--server",
+          "--token", "--as", "--as-group", "--certificate-authority",
+          "--client-certificate", "--client-key", "--insecure-skip-tls-verify",
+        ];
+        const hasOverrideFlag = args.some((arg) =>
+          forbiddenFlags.some((flag) => arg === flag || arg.startsWith(flag + "="))
+        );
+        if (hasOverrideFlag) {
+          return {
+            stdout: "",
+            stderr: `SAFETY BLOCK: subcommand contains a context-override flag (e.g. --kubeconfig, --context, --token). These are not allowed.`,
+            exitCode: 1,
+            blocked: true,
+          };
+        }
+
+        // Always inject --kubeconfig to enforce the configured cluster
+        args.push("--kubeconfig", kubeconfigPath);
+
         if (
           !useVcctl &&
           namespace &&

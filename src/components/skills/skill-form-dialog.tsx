@@ -21,7 +21,7 @@ import { SkillStepsEditor } from "./skill-steps-editor";
 import { SkillParametersEditor } from "./skill-parameters-editor";
 import type { Skill, SkillStep, SkillParameter } from "@/types";
 import { slugify } from "@/lib/utils/slugify";
-import { ALL_TOOLS } from "@/lib/ai/tool-names";
+import { ALL_TOOLS, EVERY_TOOL } from "@/lib/ai/tool-names";
 
 interface SkillFormDialogProps {
   open: boolean;
@@ -248,7 +248,7 @@ export function SkillFormDialog({
               </div>
               {!allToolsEnabled && (
                 <div className="grid grid-cols-3 gap-2">
-                  {ALL_TOOLS.map((tool) => (
+                  {EVERY_TOOL.map((tool) => (
                     <div key={tool} className="flex items-center gap-2">
                       <Checkbox
                         id={`tool-${tool}`}
