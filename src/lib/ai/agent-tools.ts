@@ -1,13 +1,211 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import path from "path";
+import os from "os";
+import fsp from "fs/promises";
 import {
   validatePath,
   readFile as fsReadFile,
   writeFile as fsWriteFile,
   listDirectory as fsListDirectory,
 } from "@/lib/files/filesystem";
+
+/** Escape a value for use in a YAML single-quoted scalar (double any single quotes). */
+function yamlEscape(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+/**
+ * Parse a shell-style command string into an argv array.
+ * Handles single-quoted, double-quoted, and unquoted tokens.
+ * Backslash escaping within double quotes is supported.
+ */
+function parseShellArgs(input: string): string[] {
+  const args: string[] = [];
+  let current = "";
+  let i = 0;
+  const len = input.length;
+
+  while (i < len) {
+    const ch = input[i];
+
+    if (ch === "'") {
+      // Single-quoted segment: take everything until closing '
+      i++;
+      while (i < len && input[i] !== "'") {
+        current += input[i];
+        i++;
+      }
+      i++; // skip closing '
+    } else if (ch === '"') {
+      // Double-quoted segment: supports backslash escaping
+      i++;
+      while (i < len && input[i] !== '"') {
+        if (input[i] === "\\" && i + 1 < len) {
+          i++;
+          current += input[i];
+        } else {
+          current += input[i];
+        }
+        i++;
+      }
+      i++; // skip closing "
+    } else if (/\s/.test(ch)) {
+      if (current.length > 0) {
+        args.push(current);
+        current = "";
+      }
+      i++;
+    } else {
+      current += ch;
+      i++;
+    }
+  }
+
+  if (current.length > 0) {
+    args.push(current);
+  }
+
+  return args;
+}
+
+/** Validate that a string is a valid DNS label (used for namespace / jobName). */
+function isValidDnsLabel(value: string): boolean {
+  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(value) && value.length <= 63;
+}
+
+/** Validate that a string looks like a valid OCI image reference. */
+function isValidImageRef(value: string): boolean {
+  return /^[a-zA-Z0-9][a-zA-Z0-9._\-/:@]+$/.test(value) && value.length <= 512;
+}
+
+/**
+ * Generate a clean Volcano Job YAML from template parameters.
+ * Based on config/d_k8s_job.yaml structure, stripped of runtime fields.
+ * Submitter, PVC, and imagePullSecrets are parameterized via env vars with defaults.
+ */
+function generateVolcanoJobYaml(params: {
+  jobName: string;
+  command: string;
+  image: string;
+  gpuCount: number;
+  namespace: string;
+}): string {
+  const { jobName, command, image, gpuCount, namespace } = params;
+
+  // Escape all interpolated values for YAML single-quoted string safety
+  const safeCommand = yamlEscape(command);
+  const safeImage = yamlEscape(image);
+  const safeNamespace = yamlEscape(namespace);
+  const safeJobName = yamlEscape(jobName);
+
+  // Parameterized values from environment with defaults
+  const rawSubmitter = process.env.K8S_SUBMITTER || "tangshixiang";
+  const submitter = yamlEscape(rawSubmitter);
+  const imagePullSecret = yamlEscape(process.env.K8S_IMAGE_PULL_SECRET || rawSubmitter);
+  const pvcAi4s = yamlEscape(process.env.K8S_PVC_AI4S || "pvc-mdjl8");
+  const pvcUser = yamlEscape(process.env.K8S_PVC_USER || "pvc-tzsf9");
+  const pvcAi4sA2 = yamlEscape(process.env.K8S_PVC_AI4S_A2 || "pvc-r4sjn");
+  const mountUser = yamlEscape(process.env.K8S_MOUNT_USER || rawSubmitter);
+
+  return `apiVersion: batch.volcano.sh/v1alpha1
+kind: Job
+metadata:
+  name: '${safeJobName}'
+  namespace: '${safeNamespace}'
+  labels:
+    lepton.sensetime.com/framework-type: 'PyTorch'
+    lepton.sensetime.com/submitter: '${submitter}'
+    ring-controller.atlas: 'ascend-910b'
+  annotations:
+    sp-block: '${gpuCount}'
+spec:
+  schedulerName: 'volcano'
+  minAvailable: 1
+  tasks:
+    - name: 'worker'
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            lepton.sensetime.com/submitter: '${submitter}'
+            ring-controller.atlas: 'ascend-910b'
+        spec:
+          volumes:
+            - name: 'vol-ai4s'
+              persistentVolumeClaim:
+                claimName: '${pvcAi4s}'
+            - name: 'vol-user'
+              persistentVolumeClaim:
+                claimName: '${pvcUser}'
+            - name: 'vol-ai4s-a2'
+              persistentVolumeClaim:
+                claimName: '${pvcAi4sA2}'
+            - name: 'shm-data'
+              emptyDir:
+                medium: 'Memory'
+                sizeLimit: '64Gi'
+          containers:
+            - name: 'worker'
+              image: '${safeImage}'
+              command:
+                - 'bash'
+                - '-c'
+              args:
+                - '${safeCommand}'
+              resources:
+                limits:
+                  cpu: '64'
+                  huawei.com/Ascend910: '${gpuCount}'
+                  memory: '480Gi'
+                requests:
+                  cpu: '64'
+                  huawei.com/Ascend910: '${gpuCount}'
+                  memory: '480Gi'
+              volumeMounts:
+                - name: 'vol-ai4s'
+                  mountPath: '/mnt/ai4s'
+                - name: 'vol-user'
+                  mountPath: '/mnt/${mountUser}'
+                - name: 'vol-ai4s-a2'
+                  mountPath: '/mnt/ai4s-a2'
+                - name: 'shm-data'
+                  mountPath: '/dev/shm'
+              imagePullPolicy: 'IfNotPresent'
+          restartPolicy: 'Never'
+          nodeSelector:
+            accelerator-type: 'module-910c-8'
+            host-arch: 'huawei-arm'
+          imagePullSecrets:
+            - name: '${imagePullSecret}'
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: 'resource.compute.sensecore.cn/machine-type'
+                        operator: 'In'
+                        values:
+                          - 'h2ls.ru.k10'
+      policies:
+        - action: 'RestartJob'
+          event: 'PodEvicted'
+      maxRetry: 3
+  policies:
+    - action: 'RestartJob'
+      event: 'PodEvicted'
+  plugins:
+    hcclrank: []
+    pytorch:
+      - '--master=master'
+      - '--worker=worker'
+      - '--port=23456'
+    svc: []
+  queue: 'default'
+  maxRetry: 1
+  priorityClassName: 'normal'`;
+}
 
 export function createAgentTools(
   workspaceCwd: string,
@@ -124,6 +322,339 @@ export function createAgentTools(
           total: entries.length,
           path: resolved,
         };
+      },
+    }),
+
+    kubectl: tool({
+      description:
+        "Execute kubectl or vcctl commands against the configured Kubernetes cluster (Volcano scheduler, Ascend910 NPUs). Use for monitoring pods, jobs, deployments, nodes, logs, and cluster status. Set useVcctl=true to use the vcctl CLI for Volcano job management (job get/run/delete/clone/suspend/resume, pod get/logs/exec). Mutating operations require confirmDangerous=true.",
+      inputSchema: z.object({
+        subcommand: z
+          .string()
+          .describe(
+            "The subcommand and arguments, e.g. 'get pods -n default', 'get vcjob', 'describe node host-10-12-104-1', 'logs my-pod --tail=100'. Do NOT include the 'kubectl' or 'vcctl' prefix."
+          ),
+        namespace: z
+          .string()
+          .optional()
+          .describe(
+            "Kubernetes namespace (一般为用户AD账户名字). If omitted, uses the default namespace or the one specified in the subcommand."
+          ),
+        useVcctl: z
+          .boolean()
+          .optional()
+          .describe(
+            "Set to true to use vcctl instead of kubectl. Use vcctl for Volcano job management: job get/run/delete/clone/suspend/resume, pod get/logs/exec, image load."
+          ),
+        confirmDangerous: z
+          .boolean()
+          .optional()
+          .describe(
+            "Must be set to true to execute non-read-only operations (anything not in the allowlist: get, describe, logs, top, etc.). Default is false."
+          ),
+      }),
+      execute: async ({ subcommand, namespace, useVcctl, confirmDangerous }) => {
+        const kubeconfigPath =
+          process.env.KUBECONFIG_PATH ||
+          path.join(process.cwd(), "config", "d_k8s");
+
+        // Safety: allowlist read-only subcommands; require confirmation for everything else
+        const readOnlyPatterns = [
+          /^get\b/,
+          /^describe\b/,
+          /^logs\b/,
+          /^top\b/,
+          /^config\s+view\b/,
+          /^config\s+current-context\b/,
+          /^config\s+get-contexts\b/,
+          /^cluster-info\b/,
+          /^api-resources\b/,
+          /^api-versions\b/,
+          /^version\b/,
+          /^auth\s+can-i\b/,
+          /^explain\b/,
+          /^events?\b/,
+          /^job\s+get\b/,
+          /^pod\s+get\b/,
+          /^pod\s+logs\b/,
+        ];
+
+        const isReadOnly = readOnlyPatterns.some((p) =>
+          p.test(subcommand.trim())
+        );
+
+        if (!isReadOnly && !confirmDangerous) {
+          return {
+            stdout: "",
+            stderr: `SAFETY BLOCK: "${subcommand}" may modify the cluster. Set confirmDangerous=true to proceed.`,
+            exitCode: 1,
+            blocked: true,
+          };
+        }
+
+        // Block truly forbidden operations
+        const forbiddenPatterns = [
+          /^delete\s+(namespace|ns)\s+(kube-system|kube-public|default)\b/,
+          /^delete\s+node\b/,
+        ];
+
+        if (forbiddenPatterns.some((p) => p.test(subcommand.trim()))) {
+          return {
+            stdout: "",
+            stderr: `FORBIDDEN: "${subcommand}" is permanently blocked for safety.`,
+            exitCode: 1,
+            blocked: true,
+          };
+        }
+
+        // Build the command as args array (no shell) using shell-style parsing
+        const bin = useVcctl ? "vcctl" : "kubectl";
+        const args = parseShellArgs(subcommand.trim());
+
+        // Reject context-override flags that could bypass the fixed KUBECONFIG
+        const forbiddenFlags = [
+          "--kubeconfig", "--context", "--cluster", "--server",
+          "--token", "--as", "--as-group", "--certificate-authority",
+          "--client-certificate", "--client-key", "--insecure-skip-tls-verify",
+        ];
+        const hasOverrideFlag = args.some((arg) =>
+          forbiddenFlags.some((flag) => arg === flag || arg.startsWith(flag + "="))
+        );
+        if (hasOverrideFlag) {
+          return {
+            stdout: "",
+            stderr: `SAFETY BLOCK: subcommand contains a context-override flag (e.g. --kubeconfig, --context, --token). These are not allowed.`,
+            exitCode: 1,
+            blocked: true,
+          };
+        }
+
+        // Always inject --kubeconfig to enforce the configured cluster
+        args.push("--kubeconfig", kubeconfigPath);
+
+        if (
+          !useVcctl &&
+          namespace &&
+          !subcommand.includes("-n ") &&
+          !subcommand.includes("--namespace") &&
+          !subcommand.includes("--all-namespaces")
+        ) {
+          args.push("-n", namespace);
+        }
+
+        return new Promise<{
+          stdout: string;
+          stderr: string;
+          exitCode: number;
+          blocked?: boolean;
+        }>((resolve) => {
+          execFile(
+            bin,
+            args,
+            {
+              cwd: validatedCwd,
+              timeout: 30_000,
+              maxBuffer: 1024 * 1024,
+              env: {
+                PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
+                HOME: process.env.HOME || "/tmp",
+                NODE_ENV: process.env.NODE_ENV || "production",
+                KUBECONFIG: kubeconfigPath,
+                LANG: process.env.LANG || "en_US.UTF-8",
+                TERM: "dumb",
+              },
+            },
+            (error: Error | null, stdout: string, stderr: string) => {
+              resolve({
+                stdout: (stdout || "").slice(0, 10000),
+                stderr: (stderr || "").slice(0, 5000),
+                exitCode: (error as NodeJS.ErrnoException)?.code
+                  ? Number((error as NodeJS.ErrnoException).code) || 1
+                  : error
+                    ? 1
+                    : 0,
+              });
+            }
+          );
+        });
+      },
+    }),
+
+    submitK8sJob: tool({
+      description:
+        "Submit a Volcano K8s job to the D cluster (Ascend 910B NPUs). Generates a job YAML from the standard template and submits it via kubectl. IMPORTANT: Before using this tool, always confirm with the user: (1) the container image to use (default: registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc), (2) the GPU count (default: 4), and (3) the exact command to run. Set confirmSubmit=true only after the user has explicitly confirmed.",
+      inputSchema: z.object({
+        jobName: z
+          .string()
+          .describe(
+            "Unique name for the Volcano job (DNS-compatible: lowercase alphanumeric and hyphens, max 63 chars). Example: 'hello-world-test-01'"
+          ),
+        command: z
+          .string()
+          .describe(
+            "The bash command to run inside the container. For scripts, use the full path, e.g. 'bash /mnt/tangshixiang/research_folder/research/hello_word.sh'."
+          ),
+        image: z
+          .string()
+          .optional()
+          .describe(
+            "Container image. Default: 'registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc'"
+          ),
+        gpuCount: z
+          .number()
+          .optional()
+          .describe(
+            "Number of Ascend 910B NPUs to request. Default: 4. Common values: 1, 2, 4, 8."
+          ),
+        namespace: z
+          .string()
+          .optional()
+          .describe(
+            "Kubernetes namespace. Default: 'default'."
+          ),
+        confirmSubmit: z
+          .boolean()
+          .optional()
+          .describe(
+            "Set this to true only after you have explicitly confirmed with the user the container image, GPU count, and exact command. If false or omitted, the job will NOT be submitted."
+          ),
+      }),
+      execute: async ({ jobName, command, image, gpuCount, namespace, confirmSubmit = false }) => {
+        if (!confirmSubmit) {
+          return {
+            success: false,
+            error:
+              "Job submission blocked: confirmSubmit must be true to submit a K8s job. First confirm with the user the container image, GPU count, and exact command, then call this tool again with confirmSubmit set to true.",
+            stdout: "",
+            stderr: "",
+            exitCode: 1,
+          };
+        }
+
+        const kubeconfigPath =
+          process.env.KUBECONFIG_PATH ||
+          path.join(process.cwd(), "config", "d_k8s");
+
+        const resolvedImage =
+          image || "registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc";
+        const resolvedGpuCount = gpuCount ?? 4;
+        const resolvedNamespace = namespace || "default";
+
+        // Validate jobName is DNS-compatible
+        if (!isValidDnsLabel(jobName)) {
+          return {
+            success: false,
+            error:
+              "Invalid jobName: must be lowercase alphanumeric with hyphens, start/end with alphanumeric, max 63 chars.",
+            stdout: "",
+            stderr: "",
+            exitCode: 1,
+          };
+        }
+
+        // Validate namespace is a DNS label
+        if (!isValidDnsLabel(resolvedNamespace)) {
+          return {
+            success: false,
+            error:
+              "Invalid namespace: must be a valid DNS label (lowercase alphanumeric with hyphens, max 63 chars).",
+            stdout: "",
+            stderr: "",
+            exitCode: 1,
+          };
+        }
+
+        // Validate image reference
+        if (!isValidImageRef(resolvedImage)) {
+          return {
+            success: false,
+            error:
+              "Invalid image: must be a valid OCI image reference.",
+            stdout: "",
+            stderr: "",
+            exitCode: 1,
+          };
+        }
+
+        // Validate gpuCount
+        if (resolvedGpuCount < 1 || resolvedGpuCount > 8) {
+          return {
+            success: false,
+            error: "gpuCount must be between 1 and 8.",
+            stdout: "",
+            stderr: "",
+            exitCode: 1,
+          };
+        }
+
+        // Generate YAML
+        const yaml = generateVolcanoJobYaml({
+          jobName,
+          command,
+          image: resolvedImage,
+          gpuCount: resolvedGpuCount,
+          namespace: resolvedNamespace,
+        });
+
+        // Write to temp file, submit, clean up
+        const tmpFile = path.join(
+          os.tmpdir(),
+          `vcjob-${jobName}-${Date.now()}.yaml`
+        );
+
+        try {
+          await fsp.writeFile(tmpFile, yaml, "utf-8");
+
+          const result = await new Promise<{
+            stdout: string;
+            stderr: string;
+            exitCode: number;
+          }>((resolve) => {
+            execFile(
+              "kubectl",
+              ["create", "-f", tmpFile],
+              {
+                cwd: validatedCwd,
+                timeout: 30_000,
+                maxBuffer: 1024 * 1024,
+                env: {
+                  PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
+                  HOME: process.env.HOME || "/tmp",
+                  NODE_ENV: process.env.NODE_ENV || "production",
+                  KUBECONFIG: kubeconfigPath,
+                  LANG: process.env.LANG || "en_US.UTF-8",
+                  TERM: "dumb",
+                },
+              },
+              (error: Error | null, stdout: string, stderr: string) => {
+                resolve({
+                  stdout: (stdout || "").slice(0, 10000),
+                  stderr: (stderr || "").slice(0, 5000),
+                  exitCode: (error as NodeJS.ErrnoException)?.code
+                    ? Number((error as NodeJS.ErrnoException).code) || 1
+                    : error
+                      ? 1
+                      : 0,
+                });
+              }
+            );
+          });
+
+          return {
+            success: result.exitCode === 0,
+            jobName,
+            namespace: resolvedNamespace,
+            image: resolvedImage,
+            gpuCount: resolvedGpuCount,
+            command,
+            stdout: result.stdout,
+            stderr: result.stderr,
+            exitCode: result.exitCode,
+            yaml,
+          };
+        } finally {
+          await fsp.unlink(tmpFile).catch(() => {});
+        }
       },
     }),
 

@@ -77,16 +77,38 @@ function CitationText({ text }: { text: string }) {
 function CodeBlock({ children, className, ...rest }: React.HTMLAttributes<HTMLElement>) {
   const [copied, setCopied] = useState(false);
   const codeRef = useRef<HTMLElement>(null);
+  const timeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Extract language from className like "hljs language-python"
   const langMatch = className?.match(/language-(\w+)/);
   const lang = langMatch?.[1];
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
     const text = codeRef.current?.textContent ?? "";
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      // Clipboard write failed; do not show "copied" state.
+    }
   }, []);
 
   return (
