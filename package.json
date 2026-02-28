@@ -18,6 +18,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
+    "highlight.js": "^11.11.1",
+    "katex": "^0.16.33",
     "lucide-react": "^0.575.0",
     "nanoid": "^5.1.6",
     "next": "16.1.6",

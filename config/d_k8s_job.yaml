@@ -1,128 +1,68 @@
-kind: 'Job'
+# Minimal Volcano Job template for Ascend 910B NPU cluster.
+# Runtime-generated fields (uid, resourceVersion, managedFields, status) are
+# intentionally omitted – they are populated by the API server at submission time.
+# User-specific values (submitter, PVC claimNames, imagePullSecrets) should be
+# parameterized via environment variables; see generateVolcanoJobYaml() in agent-tools.ts.
 apiVersion: 'batch.volcano.sh/v1alpha1'
+kind: 'Job'
 metadata:
-  name: 'bigbang'
-  generateName: 'vcjob-'
+  name: 'example-job'
   namespace: 'default'
-  uid: '125f4c54-4754-4c42-8a8c-35dd7e7df773'
-  resourceVersion: 'MTIvMjAyNi0wMi0yNCAwNjo0NTo1OS45NzM0ODkrMDA='
-  generation: 1
-  creationTimestamp: '2026-02-24T06:45:23Z'
   labels:
     lepton.sensetime.com/framework-type: 'PyTorch'
-    lepton.sensetime.com/submitter: 'tangshixiang'
+    lepton.sensetime.com/submitter: '<SUBMITTER>'
     ring-controller.atlas: 'ascend-910b'
   annotations:
-    sp-block: '4'
-  managedFields:
-    - manager: 'Mozilla'
-      operation: 'Update'
-      apiVersion: 'batch.volcano.sh/v1alpha1'
-      time: '2026-02-24T06:45:23Z'
-      fieldsType: 'FieldsV1'
-      fieldsV1:
-        f:metadata:
-          f:annotations:
-            .: {}
-            f:sp-block: {}
-          f:generateName: {}
-          f:labels:
-            .: {}
-            f:lepton.sensetime.com/framework-type: {}
-            f:lepton.sensetime.com/submitter: {}
-            f:ring-controller.atlas: {}
-        f:spec:
-          .: {}
-          f:maxRetry: {}
-          f:minAvailable: {}
-          f:plugins:
-            .: {}
-            f:hcclrank: {}
-            f:pytorch: {}
-            f:svc: {}
-          f:policies: {}
-          f:priorityClassName: {}
-          f:queue: {}
-          f:schedulerName: {}
-          f:tasks: {}
-    - manager: 'vc-controller-manager'
-      operation: 'Update'
-      apiVersion: 'batch.volcano.sh/v1alpha1'
-      time: '2026-02-24T06:45:59Z'
-      fieldsType: 'FieldsV1'
-      fieldsV1:
-        f:status:
-          .: {}
-          f:conditions: {}
-          f:controlledResources:
-            .: {}
-            f:plugin-pytorch: {}
-            f:plugin-svc: {}
-          f:minAvailable: {}
-          f:running: {}
-          f:state:
-            .: {}
-            f:lastTransitionTime: {}
-            f:phase: {}
-          f:taskStatusCount:
-            .: {}
-            f:worker:
-              .: {}
-              f:phase:
-                .: {}
-                f:Running: {}
-      subresource: 'status'
+    sp-block: '<GPU_COUNT>'
 spec:
   schedulerName: 'volcano'
   minAvailable: 1
   tasks:
     - name: 'worker'
       replicas: 1
-      minAvailable: 1
       template:
         metadata:
-          creationTimestamp: null
           labels:
-            lepton.sensetime.com/submitter: 'tangshixiang'
+            lepton.sensetime.com/submitter: '<SUBMITTER>'
             ring-controller.atlas: 'ascend-910b'
         spec:
           volumes:
-            - name: '019a90c2-2530-7e58-b47a-a86def77ad95-mnt-ai4s'
+            - name: 'vol-ai4s'
               persistentVolumeClaim:
-                claimName: 'pvc-mdjl8'
-            - name: '019a8170-062b-79f6-a79a-de5b671f3a6f-mnt-tangshixiang'
+                claimName: '<PVC_AI4S>'
+            - name: 'vol-user'
               persistentVolumeClaim:
-                claimName: 'pvc-tzsf9'
-            - name: '019a8171-651a-7c65-ab01-0fa4414ebc3b-mnt-ai4s-a2'
+                claimName: '<PVC_USER>'
+            - name: 'vol-ai4s-a2'
               persistentVolumeClaim:
-                claimName: 'pvc-r4sjn'
+                claimName: '<PVC_AI4S_A2>'
             - name: 'shm-data'
               emptyDir:
                 medium: 'Memory'
                 sizeLimit: '64Gi'
           containers:
             - name: 'worker'
-              image: 'registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc'
+              image: '<IMAGE>'
               command:
                 - 'bash'
                 - '-c'
               args:
-                - 'sleep inf'
+                - '<COMMAND>'
               resources:
                 limits:
                   cpu: '64'
-                  huawei.com/Ascend910: '4'
+                  huawei.com/Ascend910: '<GPU_COUNT>'
                   memory: '480Gi'
                 requests:
                   cpu: '64'
-                  huawei.com/Ascend910: '4'
+                  huawei.com/Ascend910: '<GPU_COUNT>'
                   memory: '480Gi'
               volumeMounts:
-                - name: '019a90c2-2530-7e58-b47a-a86def77ad95-mnt-ai4s'
+                - name: 'vol-ai4s'
                   mountPath: '/mnt/ai4s'
-                - name: '019a8170-062b-79f6-a79a-de5b671f3a6f-mnt-tangshixiang'
-                  mountPath: '/mnt/tangshixiang'
-                - name: '019a8171-651a-7c65-ab01-0fa4414ebc3b-mnt-ai4s-a2'
+                - name: 'vol-user'
+                  mountPath: '/mnt/<MOUNT_USER>'
+                - name: 'vol-ai4s-a2'
                   mountPath: '/mnt/ai4s-a2'
                 - name: 'shm-data'
                   mountPath: '/dev/shm'
@@ -132,7 +72,7 @@ spec:
             accelerator-type: 'module-910c-8'
             host-arch: 'huawei-arm'
           imagePullSecrets:
-            - name: 'tangshixiang'
+            - name: '<IMAGE_PULL_SECRET>'
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -159,21 +99,3 @@ spec:
   queue: 'default'
   maxRetry: 1
   priorityClassName: 'normal'
-status:
-  state:
-    phase: 'Running'
-    lastTransitionTime: '2026-02-24T06:45:59Z'
-  minAvailable: 1
-  taskStatusCount:
-    worker:
-      phase:
-        Running: 1
-  running: 1
-  controlledResources:
-    plugin-pytorch: 'pytorch'
-    plugin-svc: 'svc'
-  conditions:
-    - status: 'Pending'
-      lastTransitionTime: '2026-02-24T06:45:23Z'
-    - status: 'Running'
-      lastTransitionTime: '2026-02-24T06:45:59Z'
