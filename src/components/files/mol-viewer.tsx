@@ -27,7 +27,9 @@ export function MolViewer({ filePath }: MolViewerProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const viewerRef = useRef<any>(null);
   const [error, setError] = useState(false);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(
+    () => typeof window !== "undefined" && typeof window.$3Dmol !== "undefined"
+  );
   const [molData, setMolData] = useState<string | null>(null);
 
   const rawUrl = `/api/files/raw?path=${encodeURIComponent(filePath)}`;
