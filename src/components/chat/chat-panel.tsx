@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Bot, User, AlertCircle, FileText, Check, Circle, Copy, CheckCheck } from "lucide-react";
 import ReactMarkdown, { Components } from "react-markdown";
+import type { PluggableList } from "unified";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -392,9 +393,8 @@ function SelectableOptions({
 }
 
 // Remark/rehype plugins (stable references to avoid re-renders)
-const remarkPlugins = [remarkGfm, remarkMath];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const rehypePlugins = [rehypeKatex, rehypeHighlight] as any[];
+const remarkPlugins: PluggableList = [remarkGfm, remarkMath];
+const rehypePlugins: PluggableList = [rehypeKatex, rehypeHighlight];
 
 function AssistantMessageContent({
   content,
