@@ -102,7 +102,7 @@ function disposeSceneResources(scene: THREE.Scene) {
         ? child.material
         : [child.material];
       for (const mat of materials) {
-        if (!(mat instanceof THREE.Material)) continue;
+        if (!(mat instanceof THREE.Material)) continue; // guard against null entries
         // Dispose textures attached to the material
         for (const value of Object.values(mat)) {
           if (value instanceof THREE.Texture) value.dispose();
@@ -376,6 +376,7 @@ export function CadViewer({ filePath }: CadViewerProps) {
       if (disposed || !container) return;
       const w = container.clientWidth;
       const h = container.clientHeight;
+      // Skip when panel is hidden/collapsed to avoid Infinity aspect ratio
       if (w <= 0 || h <= 0) return;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
