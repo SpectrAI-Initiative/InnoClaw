@@ -230,12 +230,15 @@ export function CadViewer({ filePath }: CadViewerProps) {
     });
   }, [isDark]);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts — only active when our container has focus
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only handle shortcuts when focus is within our container
-      if (!containerRef.current?.contains(document.activeElement) &&
-          document.activeElement !== document.body) return;
+      // Skip if an input/textarea/select is focused
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
       switch (e.key.toLowerCase()) {
         case "f":
@@ -256,8 +259,8 @@ export function CadViewer({ filePath }: CadViewerProps) {
           break;
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    container.addEventListener("keydown", handleKeyDown);
+    return () => container.removeEventListener("keydown", handleKeyDown);
   }, [fitToView, toggleWireframe, toggleGrid, resetView]);
 
   useEffect(() => {
@@ -417,7 +420,8 @@ export function CadViewer({ filePath }: CadViewerProps) {
           if (disposed) return;
           const loader = new ColladaLoader();
           const collada = loader.parse(text, "");
-          if (collada) object = collada.scene;
+          if (!collada?.scene) throw new Error("Invalid Collada file");
+          object = collada.scene;
         } else if (format === "3ds") {
           const buf = await res.arrayBuffer();
           if (disposed) return;
@@ -644,7 +648,7 @@ export function CadViewer({ filePath }: CadViewerProps) {
         )}
         <div
           ref={containerRef}
-          className="w-full h-full"
+          className="w-full h-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
           tabIndex={0}
           aria-label={`Interactive 3D visualization of ${fileName}`}
           role="img"
