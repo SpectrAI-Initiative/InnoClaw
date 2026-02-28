@@ -83,6 +83,7 @@ function CodeBlock({ children, className, ...rest }: React.HTMLAttributes<HTMLEl
     return () => {
       if (timeoutRef.current !== null) {
         clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     };
   }, []);
@@ -95,20 +96,47 @@ function CodeBlock({ children, className, ...rest }: React.HTMLAttributes<HTMLEl
     const text = codeRef.current?.textContent ?? "";
     if (!text) return;
 
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current);
+    /** Fallback: hidden textarea + execCommand('copy') */
+    const fallbackCopy = (): boolean => {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      textarea.style.pointerEvents = "none";
+      textarea.setAttribute("aria-hidden", "true");
+      try {
+        document.body.appendChild(textarea);
+        textarea.select();
+        return document.execCommand("copy");
+      } catch {
+        return false;
+      } finally {
+        if (textarea.parentNode) {
+          textarea.parentNode.removeChild(textarea);
+        }
       }
+    };
 
-      timeoutRef.current = window.setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch {
-      // Clipboard write failed; do not show "copied" state.
+    // Prefer modern async clipboard API when available
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        // Async API failed; try execCommand fallback before giving up
+        if (!fallbackCopy()) return;
+      }
+    } else {
+      if (!fallbackCopy()) return;
     }
+
+    setCopied(true);
+    if (timeoutRef.current !== null) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = window.setTimeout(() => {
+      setCopied(false);
+      timeoutRef.current = null;
+    }, 2000);
   }, []);
 
   return (
@@ -118,6 +146,7 @@ function CodeBlock({ children, className, ...rest }: React.HTMLAttributes<HTMLEl
         onClick={handleCopy}
         className="code-copy-btn rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
         title="Copy code"
+        aria-label={copied ? "Copied" : "Copy code"}
         type="button"
       >
         {copied ? <CheckCheck className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
