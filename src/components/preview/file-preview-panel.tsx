@@ -8,6 +8,7 @@ import { Eye, X, Save, FileDown, AlertCircle } from "lucide-react";
 import { getFileName } from "@/lib/utils";
 import { PdfViewer } from "@/components/files/pdf-viewer";
 import { MolViewer } from "@/components/files/mol-viewer";
+import { CadViewer } from "@/components/files/cad-viewer";
 import { toast } from "sonner";
 
 interface FilePreviewPanelProps {
@@ -21,12 +22,14 @@ const EDITABLE_EXTS = [
   "log", "conf", "c", "cpp", "h", "hpp", "java", "go", "rs", "rb", "php",
 ];
 const MOL_EXTS = ["pdb", "mol", "mol2", "sdf", "sd", "xyz", "cif"];
+const CAD_EXTS = ["stl", "obj", "ply", "vtk", "vtp", "gltf", "glb"];
 const IMAGE_EXTS = ["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp", "ico"];
 
 function getFileType(filePath: string) {
   const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
   if (ext === "pdf") return "pdf" as const;
   if (MOL_EXTS.includes(ext)) return "mol" as const;
+  if (CAD_EXTS.includes(ext)) return "cad" as const;
   if (IMAGE_EXTS.includes(ext)) return "image" as const;
   if (EDITABLE_EXTS.includes(ext)) return "text" as const;
   return "unknown" as const;
@@ -205,6 +208,8 @@ export function FilePreviewPanel({ filePath, onClose }: FilePreviewPanelProps) {
           <PdfViewer filePath={filePath} />
         ) : fileType === "mol" ? (
           <MolViewer filePath={filePath} />
+        ) : fileType === "cad" ? (
+          <CadViewer filePath={filePath} />
         ) : fileType === "image" ? (
           <ImagePreview filePath={filePath} />
         ) : fileType === "text" ? (

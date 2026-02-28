@@ -67,6 +67,9 @@
     "saved": "Saved",
     "pdfPreviewFailed": "Unable to preview this PDF",
     "molPreviewFailed": "Unable to preview this molecular structure file",
+    "cadPreviewFailed": "Unable to preview this 3D model file",
+    "cadWireframe": "Wireframe",
+    "cadGrid": "Grid",
     "downloadFile": "Download"
   },
   "git": {
