@@ -88,6 +88,31 @@ function createDefaultMaterial(doubleSide = false) {
   });
 }
 
+/** Dispose all GPU resources (geometries, materials, textures) from a scene */
+function disposeSceneResources(scene: THREE.Scene) {
+  scene.traverse((child) => {
+    if (
+      child instanceof THREE.Mesh ||
+      child instanceof THREE.LineSegments ||
+      child instanceof THREE.Line ||
+      child instanceof THREE.Points
+    ) {
+      child.geometry?.dispose();
+      const materials = Array.isArray(child.material)
+        ? child.material
+        : [child.material];
+      for (const mat of materials) {
+        if (!(mat instanceof THREE.Material)) continue;
+        // Dispose textures attached to the material
+        for (const value of Object.values(mat)) {
+          if (value instanceof THREE.Texture) value.dispose();
+        }
+        mat.dispose();
+      }
+    }
+  });
+}
+
 interface CadViewerProps {
   filePath: string;
 }
@@ -102,6 +127,7 @@ export function CadViewer({ filePath }: CadViewerProps) {
   const controlsRef = useRef<OrbitControls | null>(null);
   const animFrameRef = useRef<number>(0);
   const modelRef = useRef<THREE.Object3D | null>(null);
+  const wireframeRef = useRef(false);
 
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -152,6 +178,7 @@ export function CadViewer({ filePath }: CadViewerProps) {
   const toggleWireframe = useCallback(() => {
     setWireframe((prev) => {
       const next = !prev;
+      wireframeRef.current = next;
       if (modelRef.current) {
         applyWireframe(modelRef.current, next);
       }
@@ -267,6 +294,14 @@ export function CadViewer({ filePath }: CadViewerProps) {
     const container = containerRef.current;
     if (!container) return;
 
+    // Reset state for new file
+    setLoading(true);
+    setError(false);
+    setStats(null);
+    setWireframe(false);
+    wireframeRef.current = false;
+    setShowGrid(true);
+
     let disposed = false;
 
     // --- Scene setup ---
@@ -282,7 +317,15 @@ export function CadViewer({ filePath }: CadViewerProps) {
     cameraRef.current = camera;
 
     // --- Renderer ---
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+    } catch (err) {
+      console.error("Failed to initialize WebGL renderer:", err);
+      setError(true);
+      setLoading(false);
+      return;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
     renderer.shadowMap.enabled = true;
@@ -333,6 +376,7 @@ export function CadViewer({ filePath }: CadViewerProps) {
       if (disposed || !container) return;
       const w = container.clientWidth;
       const h = container.clientHeight;
+      if (w <= 0 || h <= 0) return;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -474,6 +518,11 @@ export function CadViewer({ filePath }: CadViewerProps) {
       scene.add(object);
       modelRef.current = object;
 
+      // Apply current wireframe state (may have been toggled during load)
+      if (wireframeRef.current) {
+        applyWireframe(object, true);
+      }
+
       // Scale grid to match model size
       const finalBox = new THREE.Box3().setFromObject(object);
       const finalSize = finalBox.getSize(new THREE.Vector3());
@@ -502,17 +551,8 @@ export function CadViewer({ filePath }: CadViewerProps) {
       resizeObserver.disconnect();
       controls.dispose();
 
-      // Dispose geometries and materials
-      scene.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.geometry?.dispose();
-          if (Array.isArray(child.material)) {
-            child.material.forEach((m) => m.dispose());
-          } else {
-            child.material?.dispose();
-          }
-        }
-      });
+      // Dispose all GPU resources (geometries, materials, textures)
+      disposeSceneResources(scene);
 
       renderer.dispose();
       if (container.contains(renderer.domElement)) {

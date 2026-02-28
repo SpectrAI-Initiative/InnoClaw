@@ -2,14 +2,27 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, X, Save, FileDown, AlertCircle } from "lucide-react";
+import { Eye, X, Save, FileDown, AlertCircle, Loader2 } from "lucide-react";
 import { getFileName } from "@/lib/utils";
 import { PdfViewer } from "@/components/files/pdf-viewer";
 import { MolViewer } from "@/components/files/mol-viewer";
-import { CadViewer } from "@/components/files/cad-viewer";
 import { toast } from "sonner";
+
+// Lazy-load CadViewer so Three.js is only fetched when a CAD file is opened
+const CadViewer = dynamic(
+  () => import("@/components/files/cad-viewer").then((mod) => mod.CadViewer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    ),
+  },
+);
 
 interface FilePreviewPanelProps {
   filePath: string | null;
