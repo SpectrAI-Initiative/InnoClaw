@@ -10,6 +10,18 @@ const MIME_TYPES: Record<string, string> = {
   gif: "image/gif",
   svg: "image/svg+xml",
   webp: "image/webp",
+  stl: "model/stl",
+  obj: "text/plain",
+  ply: "application/x-ply",
+  vtk: "application/x-vtk",
+  vtp: "application/x-vtk",
+  gltf: "model/gltf+json",
+  glb: "model/gltf-binary",
+  fbx: "application/octet-stream",
+  dae: "model/vnd.collada+xml",
+  "3ds": "application/x-3ds",
+  "3mf": "application/vnd.ms-package.3dmanufacturing-3dmodel+xml",
+  pcd: "application/octet-stream",
 };
 
 export async function GET(request: NextRequest) {
