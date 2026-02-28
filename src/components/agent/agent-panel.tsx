@@ -177,7 +177,7 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
           {toolName === "kubectl" && args && (
             <div className="text-[#9ece6a]">
               $ {args.useVcctl ? "vcctl" : "kubectl"} {String(args.subcommand)}
-              {args.namespace ? ` -n ${String(args.namespace)}` : ""}
+              {!args.useVcctl && args.namespace ? ` -n ${String(args.namespace)}` : ""}
             </div>
           )}
           {toolName === "submitK8sJob" && args && (
@@ -530,13 +530,15 @@ export function AgentPanel({
     agentBody.paramValues = paramValues;
     agentBody.mode = mode;
 
-    await sendMessage({
-      text: `/${skill.slug}${Object.keys(paramValues).length > 0 ? " " + Object.entries(paramValues).map(([k, v]) => `${k}="${v}"`).join(" ") : ""}`,
-    });
-
-    // Clear skill context after sending
-    delete agentBody.skillId;
-    delete agentBody.paramValues;
+    try {
+      await sendMessage({
+        text: `/${skill.slug}${Object.keys(paramValues).length > 0 ? " " + Object.entries(paramValues).map(([k, v]) => `${k}="${v}"`).join(" ") : ""}`,
+      });
+    } finally {
+      // Clear skill context after sending, even if sendMessage throws
+      delete agentBody.skillId;
+      delete agentBody.paramValues;
+    }
   };
 
   const handleSend = async () => {
@@ -582,7 +584,6 @@ export function AgentPanel({
   const handleModeChange = (newMode: AgentMode) => {
     setMode(newMode);
     agentBody.mode = newMode; // synchronous — guarantees next request uses correct mode
-    setMessages([]);
     setInput("");
   };
 

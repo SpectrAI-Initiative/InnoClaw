@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import path from "path";
 import os from "os";
 import fsp from "fs/promises";
@@ -11,9 +11,79 @@ import {
   listDirectory as fsListDirectory,
 } from "@/lib/files/filesystem";
 
+/** Escape a value for use in a YAML single-quoted scalar (double any single quotes). */
+function yamlEscape(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+/**
+ * Parse a shell-style command string into an argv array.
+ * Handles single-quoted, double-quoted, and unquoted tokens.
+ * Backslash escaping within double quotes is supported.
+ */
+function parseShellArgs(input: string): string[] {
+  const args: string[] = [];
+  let current = "";
+  let i = 0;
+  const len = input.length;
+
+  while (i < len) {
+    const ch = input[i];
+
+    if (ch === "'") {
+      // Single-quoted segment: take everything until closing '
+      i++;
+      while (i < len && input[i] !== "'") {
+        current += input[i];
+        i++;
+      }
+      i++; // skip closing '
+    } else if (ch === '"') {
+      // Double-quoted segment: supports backslash escaping
+      i++;
+      while (i < len && input[i] !== '"') {
+        if (input[i] === "\\" && i + 1 < len) {
+          i++;
+          current += input[i];
+        } else {
+          current += input[i];
+        }
+        i++;
+      }
+      i++; // skip closing "
+    } else if (/\s/.test(ch)) {
+      if (current.length > 0) {
+        args.push(current);
+        current = "";
+      }
+      i++;
+    } else {
+      current += ch;
+      i++;
+    }
+  }
+
+  if (current.length > 0) {
+    args.push(current);
+  }
+
+  return args;
+}
+
+/** Validate that a string is a valid DNS label (used for namespace / jobName). */
+function isValidDnsLabel(value: string): boolean {
+  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(value) && value.length <= 63;
+}
+
+/** Validate that a string looks like a valid OCI image reference. */
+function isValidImageRef(value: string): boolean {
+  return /^[a-zA-Z0-9][a-zA-Z0-9._\-/:@]+$/.test(value) && value.length <= 512;
+}
+
 /**
  * Generate a clean Volcano Job YAML from template parameters.
  * Based on config/d_k8s_job.yaml structure, stripped of runtime fields.
+ * Submitter, PVC, and imagePullSecrets are parameterized via env vars with defaults.
  */
 function generateVolcanoJobYaml(params: {
   jobName: string;
@@ -24,17 +94,29 @@ function generateVolcanoJobYaml(params: {
 }): string {
   const { jobName, command, image, gpuCount, namespace } = params;
 
-  // Escape single quotes in command for YAML single-quoted string safety
-  const safeCommand = command.replace(/'/g, "''");
+  // Escape all interpolated values for YAML single-quoted string safety
+  const safeCommand = yamlEscape(command);
+  const safeImage = yamlEscape(image);
+  const safeNamespace = yamlEscape(namespace);
+  const safeJobName = yamlEscape(jobName);
+
+  // Parameterized values from environment with defaults
+  const rawSubmitter = process.env.K8S_SUBMITTER || "tangshixiang";
+  const submitter = yamlEscape(rawSubmitter);
+  const imagePullSecret = yamlEscape(process.env.K8S_IMAGE_PULL_SECRET || rawSubmitter);
+  const pvcAi4s = yamlEscape(process.env.K8S_PVC_AI4S || "pvc-mdjl8");
+  const pvcUser = yamlEscape(process.env.K8S_PVC_USER || "pvc-tzsf9");
+  const pvcAi4sA2 = yamlEscape(process.env.K8S_PVC_AI4S_A2 || "pvc-r4sjn");
+  const mountUser = yamlEscape(process.env.K8S_MOUNT_USER || rawSubmitter);
 
   return `apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
 metadata:
-  name: '${jobName}'
-  namespace: '${namespace}'
+  name: '${safeJobName}'
+  namespace: '${safeNamespace}'
   labels:
     lepton.sensetime.com/framework-type: 'PyTorch'
-    lepton.sensetime.com/submitter: 'tangshixiang'
+    lepton.sensetime.com/submitter: '${submitter}'
     ring-controller.atlas: 'ascend-910b'
   annotations:
     sp-block: '${gpuCount}'
@@ -47,26 +129,26 @@ spec:
       template:
         metadata:
           labels:
-            lepton.sensetime.com/submitter: 'tangshixiang'
+            lepton.sensetime.com/submitter: '${submitter}'
             ring-controller.atlas: 'ascend-910b'
         spec:
           volumes:
-            - name: '019a90c2-2530-7e58-b47a-a86def77ad95-mnt-ai4s'
+            - name: 'vol-ai4s'
               persistentVolumeClaim:
-                claimName: 'pvc-mdjl8'
-            - name: '019a8170-062b-79f6-a79a-de5b671f3a6f-mnt-tangshixiang'
+                claimName: '${pvcAi4s}'
+            - name: 'vol-user'
               persistentVolumeClaim:
-                claimName: 'pvc-tzsf9'
-            - name: '019a8171-651a-7c65-ab01-0fa4414ebc3b-mnt-ai4s-a2'
+                claimName: '${pvcUser}'
+            - name: 'vol-ai4s-a2'
               persistentVolumeClaim:
-                claimName: 'pvc-r4sjn'
+                claimName: '${pvcAi4sA2}'
             - name: 'shm-data'
               emptyDir:
                 medium: 'Memory'
                 sizeLimit: '64Gi'
           containers:
             - name: 'worker'
-              image: '${image}'
+              image: '${safeImage}'
               command:
                 - 'bash'
                 - '-c'
@@ -82,11 +164,11 @@ spec:
                   huawei.com/Ascend910: '${gpuCount}'
                   memory: '480Gi'
               volumeMounts:
-                - name: '019a90c2-2530-7e58-b47a-a86def77ad95-mnt-ai4s'
+                - name: 'vol-ai4s'
                   mountPath: '/mnt/ai4s'
-                - name: '019a8170-062b-79f6-a79a-de5b671f3a6f-mnt-tangshixiang'
-                  mountPath: '/mnt/tangshixiang'
-                - name: '019a8171-651a-7c65-ab01-0fa4414ebc3b-mnt-ai4s-a2'
+                - name: 'vol-user'
+                  mountPath: '/mnt/${mountUser}'
+                - name: 'vol-ai4s-a2'
                   mountPath: '/mnt/ai4s-a2'
                 - name: 'shm-data'
                   mountPath: '/dev/shm'
@@ -96,7 +178,7 @@ spec:
             accelerator-type: 'module-910c-8'
             host-arch: 'huawei-arm'
           imagePullSecrets:
-            - name: 'tangshixiang'
+            - name: '${imagePullSecret}'
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -245,7 +327,7 @@ export function createAgentTools(
 
     kubectl: tool({
       description:
-        "Execute kubectl or vcctl commands against the configured Kubernetes cluster (Volcano scheduler, Ascend910 NPUs). Use for monitoring pods, jobs, deployments, nodes, logs, and cluster status. Set useVcctl=true to use the vcctl CLI for Volcano job management (job get/run/delete/clone/suspend/resume, pod get/logs/exec). Dangerous operations require confirm_dangerous=true.",
+        "Execute kubectl or vcctl commands against the configured Kubernetes cluster (Volcano scheduler, Ascend910 NPUs). Use for monitoring pods, jobs, deployments, nodes, logs, and cluster status. Set useVcctl=true to use the vcctl CLI for Volcano job management (job get/run/delete/clone/suspend/resume, pod get/logs/exec). Mutating operations require confirmDangerous=true.",
       inputSchema: z.object({
         subcommand: z
           .string()
@@ -264,42 +346,47 @@ export function createAgentTools(
           .describe(
             "Set to true to use vcctl instead of kubectl. Use vcctl for Volcano job management: job get/run/delete/clone/suspend/resume, pod get/logs/exec, image load."
           ),
-        confirm_dangerous: z
+        confirmDangerous: z
           .boolean()
           .optional()
           .describe(
-            "Must be set to true to execute dangerous operations (delete, drain, cordon, scale, suspend, etc.). Default is false."
+            "Must be set to true to execute non-read-only operations (anything not in the allowlist: get, describe, logs, top, etc.). Default is false."
           ),
       }),
-      execute: async ({ subcommand, namespace, useVcctl, confirm_dangerous }) => {
+      execute: async ({ subcommand, namespace, useVcctl, confirmDangerous }) => {
         const kubeconfigPath =
           process.env.KUBECONFIG_PATH ||
           path.join(process.cwd(), "config", "d_k8s");
 
-        // Safety: detect dangerous subcommands
-        const dangerousPatterns = [
-          /^delete\b/,
-          /^drain\b/,
-          /^cordon\b/,
-          /^uncordon\b/,
-          /^taint\b/,
-          /^edit\b/,
-          /^replace\b.*--force/,
-          /^patch\b/,
-          /^scale\b/,
-          /^rollout\s+undo\b/,
-          /^job\s+delete\b/,
-          /^job\s+suspend\b/,
+        // Safety: allowlist read-only subcommands; require confirmation for everything else
+        const readOnlyPatterns = [
+          /^get\b/,
+          /^describe\b/,
+          /^logs\b/,
+          /^top\b/,
+          /^config\s+view\b/,
+          /^config\s+current-context\b/,
+          /^config\s+get-contexts\b/,
+          /^cluster-info\b/,
+          /^api-resources\b/,
+          /^api-versions\b/,
+          /^version\b/,
+          /^auth\s+can-i\b/,
+          /^explain\b/,
+          /^events?\b/,
+          /^job\s+get\b/,
+          /^pod\s+get\b/,
+          /^pod\s+logs\b/,
         ];
 
-        const isDangerous = dangerousPatterns.some((p) =>
+        const isReadOnly = readOnlyPatterns.some((p) =>
           p.test(subcommand.trim())
         );
 
-        if (isDangerous && !confirm_dangerous) {
+        if (!isReadOnly && !confirmDangerous) {
           return {
             stdout: "",
-            stderr: `SAFETY BLOCK: "${subcommand}" is a dangerous operation. Set confirm_dangerous=true to proceed.`,
+            stderr: `SAFETY BLOCK: "${subcommand}" may modify the cluster. Set confirmDangerous=true to proceed.`,
             exitCode: 1,
             blocked: true,
           };
@@ -320,9 +407,31 @@ export function createAgentTools(
           };
         }
 
-        // Build the command
+        // Build the command as args array (no shell) using shell-style parsing
         const bin = useVcctl ? "vcctl" : "kubectl";
-        let cmd = `${bin} ${subcommand}`;
+        const args = parseShellArgs(subcommand.trim());
+
+        // Reject context-override flags that could bypass the fixed KUBECONFIG
+        const forbiddenFlags = [
+          "--kubeconfig", "--context", "--cluster", "--server",
+          "--token", "--as", "--as-group", "--certificate-authority",
+          "--client-certificate", "--client-key", "--insecure-skip-tls-verify",
+        ];
+        const hasOverrideFlag = args.some((arg) =>
+          forbiddenFlags.some((flag) => arg === flag || arg.startsWith(flag + "="))
+        );
+        if (hasOverrideFlag) {
+          return {
+            stdout: "",
+            stderr: `SAFETY BLOCK: subcommand contains a context-override flag (e.g. --kubeconfig, --context, --token). These are not allowed.`,
+            exitCode: 1,
+            blocked: true,
+          };
+        }
+
+        // Always inject --kubeconfig to enforce the configured cluster
+        args.push("--kubeconfig", kubeconfigPath);
+
         if (
           !useVcctl &&
           namespace &&
@@ -330,7 +439,7 @@ export function createAgentTools(
           !subcommand.includes("--namespace") &&
           !subcommand.includes("--all-namespaces")
         ) {
-          cmd += ` -n ${namespace}`;
+          args.push("-n", namespace);
         }
 
         return new Promise<{
@@ -339,8 +448,9 @@ export function createAgentTools(
           exitCode: number;
           blocked?: boolean;
         }>((resolve) => {
-          exec(
-            cmd,
+          execFile(
+            bin,
+            args,
             {
               cwd: validatedCwd,
               timeout: 30_000,
@@ -372,7 +482,7 @@ export function createAgentTools(
 
     submitK8sJob: tool({
       description:
-        "Submit a Volcano K8s job to the D cluster (Ascend 910B NPUs). Generates a job YAML from the standard template and submits it via kubectl. IMPORTANT: Before using this tool, always confirm with the user: (1) the container image to use (default: registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc), (2) the GPU count (default: 4), and (3) the exact command to run.",
+        "Submit a Volcano K8s job to the D cluster (Ascend 910B NPUs). Generates a job YAML from the standard template and submits it via kubectl. IMPORTANT: Before using this tool, always confirm with the user: (1) the container image to use (default: registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc), (2) the GPU count (default: 4), and (3) the exact command to run. Set confirmSubmit=true only after the user has explicitly confirmed.",
       inputSchema: z.object({
         jobName: z
           .string()
@@ -402,8 +512,25 @@ export function createAgentTools(
           .describe(
             "Kubernetes namespace. Default: 'default'."
           ),
+        confirmSubmit: z
+          .boolean()
+          .optional()
+          .describe(
+            "Set this to true only after you have explicitly confirmed with the user the container image, GPU count, and exact command. If false or omitted, the job will NOT be submitted."
+          ),
       }),
-      execute: async ({ jobName, command, image, gpuCount, namespace }) => {
+      execute: async ({ jobName, command, image, gpuCount, namespace, confirmSubmit = false }) => {
+        if (!confirmSubmit) {
+          return {
+            success: false,
+            error:
+              "Job submission blocked: confirmSubmit must be true to submit a K8s job. First confirm with the user the container image, GPU count, and exact command, then call this tool again with confirmSubmit set to true.",
+            stdout: "",
+            stderr: "",
+            exitCode: 1,
+          };
+        }
+
         const kubeconfigPath =
           process.env.KUBECONFIG_PATH ||
           path.join(process.cwd(), "config", "d_k8s");
@@ -414,11 +541,35 @@ export function createAgentTools(
         const resolvedNamespace = namespace || "default";
 
         // Validate jobName is DNS-compatible
-        if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(jobName) || jobName.length > 63) {
+        if (!isValidDnsLabel(jobName)) {
           return {
             success: false,
             error:
               "Invalid jobName: must be lowercase alphanumeric with hyphens, start/end with alphanumeric, max 63 chars.",
+            stdout: "",
+            stderr: "",
+            exitCode: 1,
+          };
+        }
+
+        // Validate namespace is a DNS label
+        if (!isValidDnsLabel(resolvedNamespace)) {
+          return {
+            success: false,
+            error:
+              "Invalid namespace: must be a valid DNS label (lowercase alphanumeric with hyphens, max 63 chars).",
+            stdout: "",
+            stderr: "",
+            exitCode: 1,
+          };
+        }
+
+        // Validate image reference
+        if (!isValidImageRef(resolvedImage)) {
+          return {
+            success: false,
+            error:
+              "Invalid image: must be a valid OCI image reference.",
             stdout: "",
             stderr: "",
             exitCode: 1,
@@ -459,8 +610,9 @@ export function createAgentTools(
             stderr: string;
             exitCode: number;
           }>((resolve) => {
-            exec(
-              `kubectl create -f ${tmpFile}`,
+            execFile(
+              "kubectl",
+              ["create", "-f", tmpFile],
               {
                 cwd: validatedCwd,
                 timeout: 30_000,
