@@ -369,7 +369,7 @@ export function AgentPanel({
   // Mutable body object — allows injecting skillId/paramValues before each send
   const agentBody = useMemo(
     () =>
-      ({ workspaceId, cwd: folderPath, mode: "agent" as string }) as Record<string, unknown>,
+      ({ workspaceId, cwd: folderPath, mode: "agent" }) as Record<string, unknown>,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
