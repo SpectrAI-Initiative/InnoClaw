@@ -47,12 +47,13 @@ function generateVolcanoJobYaml(params: {
   const safeJobName = yamlEscape(jobName);
 
   // Parameterized values from environment with defaults
-  const submitter = yamlEscape(process.env.K8S_SUBMITTER || "tangshixiang");
-  const imagePullSecret = yamlEscape(process.env.K8S_IMAGE_PULL_SECRET || submitter);
+  const rawSubmitter = process.env.K8S_SUBMITTER || "tangshixiang";
+  const submitter = yamlEscape(rawSubmitter);
+  const imagePullSecret = yamlEscape(process.env.K8S_IMAGE_PULL_SECRET || rawSubmitter);
   const pvcAi4s = yamlEscape(process.env.K8S_PVC_AI4S || "pvc-mdjl8");
   const pvcUser = yamlEscape(process.env.K8S_PVC_USER || "pvc-tzsf9");
   const pvcAi4sA2 = yamlEscape(process.env.K8S_PVC_AI4S_A2 || "pvc-r4sjn");
-  const mountUser = yamlEscape(process.env.K8S_MOUNT_USER || submitter);
+  const mountUser = yamlEscape(process.env.K8S_MOUNT_USER || rawSubmitter);
 
   return `apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
