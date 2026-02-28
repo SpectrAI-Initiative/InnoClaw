@@ -126,70 +126,70 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
   const result = part.output as Record<string, unknown> | undefined;
 
   return (
-    <div className="my-1.5 rounded border border-[#30363d] bg-[#161b22] text-xs font-mono overflow-hidden">
+    <div className="my-1.5 rounded border border-agent-border bg-agent-card-bg text-xs font-mono overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#1c2129] transition-colors"
+        className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-agent-card-hover transition-colors"
       >
         {expanded ? (
-          <ChevronDown className="h-3 w-3 shrink-0 text-[#565f89]" />
+          <ChevronDown className="h-3 w-3 shrink-0 text-agent-muted" />
         ) : (
-          <ChevronRight className="h-3 w-3 shrink-0 text-[#565f89]" />
+          <ChevronRight className="h-3 w-3 shrink-0 text-agent-muted" />
         )}
-        <span className="text-[#7aa2f7]">{icon}</span>
-        <span className="font-semibold text-[#7aa2f7]">{toolName}</span>
-        <span className="text-[#565f89] truncate flex-1">{summary}</span>
+        <span className="text-agent-accent">{icon}</span>
+        <span className="font-semibold text-agent-accent">{toolName}</span>
+        <span className="text-agent-muted truncate flex-1">{summary}</span>
         {isRunning && (
-          <Loader2 className="h-3 w-3 shrink-0 animate-spin text-[#7aa2f7]" />
+          <Loader2 className="h-3 w-3 shrink-0 animate-spin text-agent-accent" />
         )}
         {isDone && !isError && (
-          <Check className="h-3 w-3 shrink-0 text-[#9ece6a]" />
+          <Check className="h-3 w-3 shrink-0 text-agent-success" />
         )}
         {isDone && isError && (
-          <AlertCircle className="h-3 w-3 shrink-0 text-[#f7768e]" />
+          <AlertCircle className="h-3 w-3 shrink-0 text-agent-error" />
         )}
       </button>
 
       {/* Expanded content */}
       {expanded && (
-        <div className="border-t border-[#30363d] px-3 py-2 space-y-2">
+        <div className="border-t border-agent-border px-3 py-2 space-y-2">
           {/* Tool-specific rendering */}
           {toolName === "bash" && args && (
-            <div className="text-[#9ece6a]">$ {String(args.command)}</div>
+            <div className="text-agent-success">$ {String(args.command)}</div>
           )}
           {toolName === "readFile" && args && (
-            <div className="text-[#565f89]">
+            <div className="text-agent-muted">
               Reading: {String(args.filePath)}
             </div>
           )}
           {toolName === "writeFile" && args && (
-            <div className="text-[#565f89]">
+            <div className="text-agent-muted">
               Writing: {String(args.filePath)}
             </div>
           )}
           {toolName === "grep" && args && (
-            <div className="text-[#565f89]">
+            <div className="text-agent-muted">
               Pattern: {String(args.pattern)}
               {args.include ? ` | Include: ${String(args.include)}` : null}
             </div>
           )}
           {toolName === "kubectl" && args && (
-            <div className="text-[#9ece6a]">
+            <div className="text-agent-success">
               $ {args.useVcctl ? "vcctl" : "kubectl"} {String(args.subcommand)}
               {!args.useVcctl && args.namespace ? ` -n ${String(args.namespace)}` : ""}
             </div>
           )}
           {toolName === "submitK8sJob" && args && (
-            <div className="text-[#565f89] space-y-0.5">
-              <div>Job: <span className="text-[#7aa2f7]">{String(args.jobName)}</span> | Image: <span className="text-[#c9d1d9]">{String(args.image || "default")}</span> | GPUs: <span className="text-[#bb9af7]">{String(args.gpuCount || 4)}</span></div>
-              <div className="text-[#9ece6a]">$ {String(args.command)}</div>
+            <div className="text-agent-muted space-y-0.5">
+              <div>Job: <span className="text-agent-accent">{String(args.jobName)}</span> | Image: <span className="text-agent-foreground">{String(args.image || "default")}</span> | GPUs: <span className="text-agent-purple">{String(args.gpuCount || 4)}</span></div>
+              <div className="text-agent-success">$ {String(args.command)}</div>
             </div>
           )}
 
           {/* Error */}
           {isError && part.errorText && (
-            <div className="text-[#f7768e]">{part.errorText}</div>
+            <div className="text-agent-error">{part.errorText}</div>
           )}
 
           {/* Result */}
@@ -216,30 +216,30 @@ function renderToolResult(
       return (
         <div className="space-y-1">
           {stdout && (
-            <pre className="whitespace-pre-wrap text-[#c9d1d9] leading-relaxed">
+            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed">
               {stdout}
             </pre>
           )}
           {stderr && (
-            <pre className="whitespace-pre-wrap text-[#f7768e] leading-relaxed">
+            <pre className="whitespace-pre-wrap text-agent-error leading-relaxed">
               {stderr}
             </pre>
           )}
           {exitCode !== 0 && (
-            <div className="text-[#f7768e]">Exit code: {exitCode}</div>
+            <div className="text-agent-error">Exit code: {exitCode}</div>
           )}
         </div>
       );
     }
     case "readFile":
       return (
-        <pre className="whitespace-pre-wrap text-[#c9d1d9] leading-relaxed">
+        <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed">
           {String(result.content || "")}
         </pre>
       );
     case "writeFile":
       return (
-        <div className="text-[#9ece6a]">
+        <div className="text-agent-success">
           Wrote {String(result.bytesWritten || 0)} bytes to{" "}
           {String(result.path || "")}
         </div>
@@ -256,13 +256,13 @@ function renderToolResult(
             <div key={i} className="flex gap-2">
               <span
                 className={
-                  e.type === "directory" ? "text-[#7aa2f7]" : "text-[#c9d1d9]"
+                  e.type === "directory" ? "text-agent-accent" : "text-agent-foreground"
                 }
               >
                 {e.type === "directory" ? "📁" : "📄"} {e.name}
               </span>
               {e.type === "file" && (
-                <span className="text-[#565f89]">
+                <span className="text-agent-muted">
                   {e.size > 1024
                     ? `${(e.size / 1024).toFixed(1)}KB`
                     : `${e.size}B`}
@@ -271,7 +271,7 @@ function renderToolResult(
             </div>
           ))}
           {Number(result.total || 0) > entries.length && (
-            <div className="text-[#565f89]">
+            <div className="text-agent-muted">
               ... and {Number(result.total) - entries.length} more
             </div>
           )}
@@ -280,7 +280,7 @@ function renderToolResult(
     }
     case "grep":
       return (
-        <pre className="whitespace-pre-wrap text-[#c9d1d9] leading-relaxed">
+        <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed">
           {String(result.matches || "No matches found")}
         </pre>
       );
@@ -291,17 +291,17 @@ function renderToolResult(
       return (
         <div className="space-y-1">
           {kStdout && (
-            <pre className="whitespace-pre-wrap text-[#c9d1d9] leading-relaxed">
+            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed">
               {kStdout}
             </pre>
           )}
           {kStderr && (
-            <pre className="whitespace-pre-wrap text-[#f7768e] leading-relaxed">
+            <pre className="whitespace-pre-wrap text-agent-error leading-relaxed">
               {kStderr}
             </pre>
           )}
           {kExitCode !== 0 && (
-            <div className="text-[#f7768e]">Exit code: {kExitCode}</div>
+            <div className="text-agent-error">Exit code: {kExitCode}</div>
           )}
         </div>
       );
@@ -312,29 +312,29 @@ function renderToolResult(
       const sStderr = String(result.stderr || "");
       return (
         <div className="space-y-1">
-          <div className={success ? "text-[#9ece6a]" : "text-[#f7768e]"}>
+          <div className={success ? "text-agent-success" : "text-agent-error"}>
             {success ? "Job submitted successfully" : "Job submission failed"}
             {result.jobName ? ` — ${String(result.jobName)}` : ""}
           </div>
           {sStdout && (
-            <pre className="whitespace-pre-wrap text-[#c9d1d9] leading-relaxed">
+            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed">
               {sStdout}
             </pre>
           )}
           {sStderr && (
-            <pre className="whitespace-pre-wrap text-[#f7768e] leading-relaxed">
+            <pre className="whitespace-pre-wrap text-agent-error leading-relaxed">
               {sStderr}
             </pre>
           )}
           {result.error != null && (
-            <div className="text-[#f7768e]">{String(result.error)}</div>
+            <div className="text-agent-error">{String(result.error)}</div>
           )}
         </div>
       );
     }
     default:
       return (
-        <pre className="whitespace-pre-wrap text-[#c9d1d9]">
+        <pre className="whitespace-pre-wrap text-agent-foreground">
           {JSON.stringify(result, null, 2)}
         </pre>
       );
@@ -357,10 +357,10 @@ function AgentMessage({ message }: { message: UIMessage }) {
 
     return (
       <div className="flex gap-2 items-start">
-        <span className="text-[#bb9af7] shrink-0 font-bold select-none">
+        <span className="text-agent-purple shrink-0 font-bold select-none">
           &gt;
         </span>
-        <span className="text-[#c9d1d9] whitespace-pre-wrap">{text}</span>
+        <span className="text-agent-foreground whitespace-pre-wrap">{text}</span>
       </div>
     );
   }
@@ -375,7 +375,7 @@ function AgentMessage({ message }: { message: UIMessage }) {
           return (
             <div
               key={i}
-              className="prose prose-sm prose-invert max-w-none text-[#c9d1d9] [&_p]:my-1 [&_pre]:bg-[#161b22] [&_pre]:border [&_pre]:border-[#30363d] [&_code]:text-[#e6edf3] [&_h1]:text-[#c9d1d9] [&_h2]:text-[#c9d1d9] [&_h3]:text-[#c9d1d9] [&_a]:text-[#7aa2f7] [&_strong]:text-[#c9d1d9]"
+              className="prose prose-sm max-w-none text-agent-foreground [&_p]:my-1 [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_code]:text-agent-code [&_h1]:text-agent-foreground [&_h2]:text-agent-foreground [&_h3]:text-agent-foreground [&_a]:text-agent-accent [&_strong]:text-agent-foreground dark:prose-invert"
             >
               <ReactMarkdown>{text}</ReactMarkdown>
             </div>
@@ -399,11 +399,11 @@ function AgentMessage({ message }: { message: UIMessage }) {
         if (part.type === "reasoning") {
           const reasoning = (part as { type: "reasoning"; text: string }).text;
           return (
-            <details key={i} className="text-[#565f89] text-xs">
-              <summary className="cursor-pointer hover:text-[#7aa2f7]">
+            <details key={i} className="text-agent-muted text-xs">
+              <summary className="cursor-pointer hover:text-agent-accent">
                 Thinking...
               </summary>
-              <pre className="whitespace-pre-wrap mt-1 pl-2 border-l border-[#30363d]">
+              <pre className="whitespace-pre-wrap mt-1 pl-2 border-l border-agent-border">
                 {reasoning}
               </pre>
             </details>
@@ -590,16 +590,16 @@ export function AgentPanel({
   const slashQuery = input.startsWith("/") ? input.slice(1) : "";
 
   return (
-    <div className="flex h-full min-w-0 flex-col bg-[#0d1117] text-[#c9d1d9] font-mono text-sm">
+    <div className="flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-[#30363d] px-3 py-2">
-        {mode === "agent" && <Bot className="h-4 w-4 text-[#7aa2f7]" />}
-        {mode === "plan" && <ClipboardList className="h-4 w-4 text-[#9ece6a]" />}
-        {mode === "ask" && <MessageCircleQuestion className="h-4 w-4 text-[#bb9af7]" />}
-        <span className="text-xs font-semibold text-[#c9d1d9]">
+      <div className="flex items-center gap-2 border-b border-agent-border px-3 py-2">
+        {mode === "agent" && <Bot className="h-4 w-4 text-agent-accent" />}
+        {mode === "plan" && <ClipboardList className="h-4 w-4 text-agent-success" />}
+        {mode === "ask" && <MessageCircleQuestion className="h-4 w-4 text-agent-purple" />}
+        <span className="text-xs font-semibold text-agent-foreground">
           {t("title")}
         </span>
-        <span className="text-xs text-[#565f89] ml-auto truncate">
+        <span className="text-xs text-agent-muted ml-auto truncate">
           {workspaceName}
         </span>
       </div>
@@ -609,15 +609,15 @@ export function AgentPanel({
         <div className="p-3 space-y-3">
           {!aiEnabled ? (
             <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-              <AlertCircle className="h-8 w-8 text-[#565f89]" />
-              <p className="text-xs text-[#565f89] max-w-xs">
+              <AlertCircle className="h-8 w-8 text-agent-muted" />
+              <p className="text-xs text-agent-muted max-w-xs">
                 {t("disabledState")}
               </p>
             </div>
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-              <Bot className="h-8 w-8 text-[#565f89]" />
-              <p className="text-xs text-[#565f89] max-w-xs">
+              <Bot className="h-8 w-8 text-agent-muted" />
+              <p className="text-xs text-agent-muted max-w-xs">
                 {t("emptyState")}
               </p>
             </div>
@@ -631,7 +631,7 @@ export function AgentPanel({
           {isLoading &&
             messages.length > 0 &&
             messages[messages.length - 1].role === "user" && (
-              <div className="flex items-center gap-2 text-[#565f89]">
+              <div className="flex items-center gap-2 text-agent-muted">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <span className="text-xs">Thinking...</span>
               </div>
@@ -640,7 +640,7 @@ export function AgentPanel({
       </ScrollArea>
 
       {/* Input area with autocomplete */}
-      <div className="relative border-t border-[#30363d]">
+      <div className="relative border-t border-agent-border">
         {/* Slash command autocomplete */}
         {showAutocomplete && availableSkills.length > 0 && (
           <SkillAutocomplete
@@ -654,7 +654,7 @@ export function AgentPanel({
         <div className="flex items-center gap-2 px-3 py-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-[#7aa2f7] hover:bg-[#30363d] transition-colors">
+              <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors">
                 {t(MODE_LABEL_KEYS[mode])}
                 <ChevronDown className="h-3 w-3" />
               </button>
@@ -684,7 +684,7 @@ export function AgentPanel({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <span className="text-[#bb9af7] font-bold shrink-0 select-none">
+          <span className="text-agent-purple font-bold shrink-0 select-none">
             &gt;
           </span>
           <input
@@ -704,14 +704,14 @@ export function AgentPanel({
             }}
             disabled={!aiEnabled}
             placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
-            className="flex-1 bg-transparent text-[#c9d1d9] placeholder:text-[#565f89] outline-none text-sm font-mono"
+            className="flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono"
             autoFocus
           />
           {isLoading && (
             <button
               onClick={handleStop}
               title={t("stop")}
-              className="shrink-0 p-1 rounded hover:bg-[#30363d] text-[#f7768e] transition-colors"
+              className="shrink-0 p-1 rounded hover:bg-agent-card-hover text-agent-error transition-colors"
             >
               <Square className="h-4 w-4" />
             </button>
@@ -720,7 +720,7 @@ export function AgentPanel({
             <button
               onClick={handleClear}
               title={t("clearContext")}
-              className="shrink-0 p-1 rounded hover:bg-[#30363d] text-[#565f89] hover:text-[#c9d1d9] transition-colors"
+              className="shrink-0 p-1 rounded hover:bg-agent-card-hover text-agent-muted hover:text-agent-foreground transition-colors"
             >
               <Trash2 className="h-4 w-4" />
             </button>

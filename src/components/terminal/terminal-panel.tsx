@@ -155,14 +155,14 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
 
   return (
     <div
-      className="flex h-full flex-col bg-[#1e1e1e] text-[#d4d4d4] font-mono text-xs"
+      className="flex h-full flex-col bg-terminal-bg text-terminal-foreground font-mono text-xs"
       onClick={focusInput}
     >
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-[#333] px-3 py-1.5 text-[#888]">
+      <div className="flex items-center gap-2 border-b border-terminal-border px-3 py-1.5 text-terminal-muted">
         <TerminalSquare className="h-3.5 w-3.5" />
         <span className="text-xs font-medium">{t("title")}</span>
-        <span className="ml-auto text-[10px] text-[#555]">{shortCwd}</span>
+        <span className="ml-auto text-[10px] text-terminal-muted-dim">{shortCwd}</span>
       </div>
 
       {/* Output */}
@@ -172,20 +172,20 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
             <div key={entry.id}>
               {/* Command line */}
               <div className="flex gap-1">
-                <span className="text-[#6a9955] shrink-0">
+                <span className="text-terminal-prompt shrink-0">
                   {entry.cwd.replace(/\\/g, "/").split("/").pop()}$
                 </span>
-                <span className="text-[#d4d4d4]">{entry.command}</span>
+                <span className="text-terminal-foreground">{entry.command}</span>
               </div>
               {/* Stdout */}
               {entry.stdout && (
-                <pre className="whitespace-pre-wrap text-[#cccccc] pl-2 leading-relaxed">
+                <pre className="whitespace-pre-wrap text-terminal-stdout pl-2 leading-relaxed">
                   {entry.stdout}
                 </pre>
               )}
               {/* Stderr */}
               {entry.stderr && (
-                <pre className="whitespace-pre-wrap text-[#f44747] pl-2 leading-relaxed">
+                <pre className="whitespace-pre-wrap text-terminal-stderr pl-2 leading-relaxed">
                   {entry.stderr}
                 </pre>
               )}
@@ -194,14 +194,14 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
 
           {/* Running indicator */}
           {isRunning && (
-            <div className="text-[#888] animate-pulse">{t("running")}</div>
+            <div className="text-terminal-muted animate-pulse">{t("running")}</div>
           )}
         </div>
       </div>
 
       {/* Input line */}
-      <div className="flex items-center gap-1 border-t border-[#333] px-2 py-1.5">
-        <span className="text-[#6a9955] shrink-0">
+      <div className="flex items-center gap-1 border-t border-terminal-border px-2 py-1.5">
+        <span className="text-terminal-prompt shrink-0">
           {normalizedCwd.split("/").pop()}$
         </span>
         <input
@@ -211,7 +211,7 @@ export function TerminalPanel({ cwd: initialCwd }: TerminalPanelProps) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={t("placeholder")}
-          className="flex-1 bg-transparent text-[#d4d4d4] placeholder:text-[#555] outline-none text-xs font-mono"
+          className="flex-1 bg-transparent text-terminal-foreground placeholder:text-terminal-muted-dim outline-none text-xs font-mono"
           autoFocus
         />
       </div>
