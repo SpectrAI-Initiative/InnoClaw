@@ -111,38 +111,47 @@ async function fetchRaw(
   filePath: string
 ): Promise<string | null> {
   const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
-  try {
-    const res = await fetch(rawUrl, { signal: AbortSignal.timeout(15_000) });
-    if (!res.ok) {
-      console.error(
-        "Failed to fetch GitHub raw file: non-OK response",
-        {
-          url: rawUrl,
-          status: res.status,
-          statusText: res.statusText,
+
+  // Retry up to 2 times with increasing timeout
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const timeout = 15_000 + attempt * 10_000; // 15s, 25s, 35s
+      const res = await fetch(rawUrl, { signal: AbortSignal.timeout(timeout) });
+      if (!res.ok) {
+        // 404 is not retryable
+        if (res.status === 404) return null;
+        console.error(
+          "Failed to fetch GitHub raw file: non-OK response",
+          { url: rawUrl, status: res.status, attempt }
+        );
+        continue; // retry on server errors
+      }
+
+      const contentLengthHeader = res.headers.get("content-length");
+      if (contentLengthHeader) {
+        const contentLength = Number.parseInt(contentLengthHeader, 10);
+        if (!Number.isNaN(contentLength) && contentLength > MAX_FETCH_BYTES) {
+          return null;
         }
-      );
+      }
+
+      const text = await res.text();
+      if (text.length > MAX_FETCH_BYTES) return null;
+      return text;
+    } catch (error) {
+      if (attempt < 2) {
+        // Wait before retry: 1s, 2s
+        await new Promise((r) => setTimeout(r, (attempt + 1) * 1000));
+        continue;
+      }
+      console.error("Failed to fetch GitHub raw file after retries", { url: rawUrl, error });
       return null;
     }
-
-    const contentLengthHeader = res.headers.get("content-length");
-    if (contentLengthHeader) {
-      const contentLength = Number.parseInt(contentLengthHeader, 10);
-      if (!Number.isNaN(contentLength) && contentLength > MAX_FETCH_BYTES) {
-        return null;
-      }
-    }
-
-    const text = await res.text();
-    if (text.length > MAX_FETCH_BYTES) return null;
-    return text;
-  } catch (error) {
-    console.error("Failed to fetch GitHub raw file", { url: rawUrl, error });
-    return null;
   }
+  return null;
 }
 
-/** Parse SKILL.md YAML frontmatter + markdown body into a SkillExportData */
+/** Parse SKILL.md / command.md / agent.md YAML frontmatter + markdown body into a SkillExportData */
 function parseSkillMd(
   content: string,
   fallbackSlug: string
@@ -176,79 +185,110 @@ function parseSkillMd(
   const name = getValue("name") || fallbackSlug;
   const description = getValue("description") || null;
 
+  // Extract allowed-tools from command frontmatter (e.g., "Bash(git add:*), Bash(git commit:*)")
+  const allowedToolsRaw = getValue("allowed-tools");
+  let allowedTools: string[] | null = null;
+  if (allowedToolsRaw) {
+    // Extract tool names from patterns like "Bash(git add:*)" → "bash"
+    const toolNames = new Set<string>();
+    for (const part of allowedToolsRaw.split(",")) {
+      const toolMatch = part.trim().match(/^(\w+)/);
+      if (toolMatch) {
+        toolNames.add(toolMatch[1].toLowerCase());
+      }
+    }
+    if (toolNames.size > 0) {
+      allowedTools = Array.from(toolNames);
+    }
+  }
+
   return {
     name,
     slug: slugify(name),
     description,
     systemPrompt: body,
     steps: null,
-    allowedTools: null,
+    allowedTools,
     parameters: null,
   };
 }
 
 interface MarketplaceJson {
   plugins?: Array<{
+    source?: string;
     skills?: string[];
   }>;
 }
 
-/** Discover skill paths from a GitHub repo */
-async function discoverSkillPaths(
+interface PluginContentFile {
+  path: string;
+  fallbackSlug: string;
+}
+
+/** Discover importable content (skills, commands, agents) from a GitHub repo */
+async function discoverPluginContent(
   owner: string,
   repo: string,
   branch: string,
   basePath: string
-): Promise<string[]> {
-  // Strategy 1: Try marketplace.json
-  const marketplaceContent = await fetchRaw(
-    owner,
-    repo,
-    branch,
-    ".claude-plugin/marketplace.json"
-  );
-  if (marketplaceContent) {
-    try {
-      const mp: MarketplaceJson = JSON.parse(marketplaceContent);
-      const allPaths: string[] = [];
-      for (const plugin of mp.plugins || []) {
-        for (const p of plugin.skills || []) {
-          // Normalize "./scientific-skills/rdkit" → "scientific-skills/rdkit"
-          allPaths.push(p.replace(/^\.\//, ""));
-        }
-      }
-      if (allPaths.length > 0) return allPaths;
-    } catch {
-      // ignore parse errors, fall through
-    }
+): Promise<PluginContentFile[]> {
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github.v3+json",
+  };
+  const githubToken = process.env.GITHUB_TOKEN;
+  if (githubToken) {
+    headers.Authorization = `Bearer ${githubToken}`;
   }
 
-  // Strategy 2: List directory via GitHub API (for repos without marketplace.json)
-  const apiPath = basePath || "";
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}?ref=${branch}`;
+  // Use the recursive tree API to get all files in one call
+  const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
   try {
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github.v3+json",
-    };
-    const githubToken = process.env.GITHUB_TOKEN;
-    if (githubToken) {
-      headers.Authorization = `Bearer ${githubToken}`;
-    }
-
-
-    const res = await fetch(apiUrl, {
+    const res = await fetch(treeUrl, {
       headers,
-      signal: AbortSignal.timeout(15_000),
+      signal: AbortSignal.timeout(20_000),
     });
     if (!res.ok) return [];
 
-    const items: Array<{ name: string; type: string; path: string }> =
+    const data: { tree?: Array<{ path: string; type: string }>; truncated?: boolean } =
       await res.json();
-    // Return directories (each might contain a SKILL.md)
-    return items
-      .filter((i) => i.type === "dir")
-      .map((i) => i.path);
-  } catch {
+    if (!data.tree) return [];
+
+    const results: PluginContentFile[] = [];
+
+    for (const item of data.tree) {
+      if (item.type !== "blob") continue;
+      const p = item.path;
+
+      // Filter by basePath if specified
+      if (basePath && !p.startsWith(basePath)) continue;
+
+      // Match: */skills/*/SKILL.md (top-level skill definitions)
+      const skillMatch = p.match(/\/skills\/([^/]+)\/SKILL\.md$/);
+      if (skillMatch) {
+        // Skip sub-agents inside skills (e.g., skill-creator/skills/skill-creator/agents/*.md)
+        results.push({ path: p, fallbackSlug: skillMatch[1] });
+        continue;
+      }
+
+      // Match: */commands/*.md (slash commands)
+      const cmdMatch = p.match(/\/commands\/([^/]+)\.md$/);
+      if (cmdMatch) {
+        results.push({ path: p, fallbackSlug: cmdMatch[1] });
+        continue;
+      }
+
+      // Match: */agents/*.md but NOT inside skills/*/agents/ (those are skill sub-agents)
+      if (/\/agents\/[^/]+\.md$/.test(p) && !/\/skills\/[^/]+\/agents\//.test(p)) {
+        const agentSlug = p.match(/\/agents\/([^/]+)\.md$/)?.[1];
+        if (agentSlug) {
+          results.push({ path: p, fallbackSlug: agentSlug });
+        }
+      }
+    }
+
+    return results;
+  } catch (error) {
+    console.error("[skills/import] GitHub tree API failed:", error);
     return [];
   }
 }
@@ -390,19 +430,19 @@ export async function POST(request: NextRequest) {
         // If SKILL.md not found at this path, fall through to discovery
       }
 
-      // Discover all skills in the repo
-      const skillPaths = await discoverSkillPaths(
+      // Discover all skills/commands/agents in the repo
+      const contentFiles = await discoverPluginContent(
         gh.owner,
         gh.repo,
         gh.branch,
         gh.path
       );
 
-      if (skillPaths.length === 0) {
+      if (contentFiles.length === 0) {
         return NextResponse.json(
           {
             error:
-              "No skills found in this GitHub repository. Expected SKILL.md files in subdirectories.",
+              "No skills found in this GitHub repository. Expected SKILL.md, commands/*.md, or agents/*.md files.",
           },
           { status: 400 }
         );
@@ -412,21 +452,20 @@ export async function POST(request: NextRequest) {
       let failed = 0;
       const importedNames: string[] = [];
 
-      await batchProcess(skillPaths, 10, async (skillPath) => {
+      await batchProcess(contentFiles, 3, async (file) => {
         try {
           const content = await fetchRaw(
             gh.owner,
             gh.repo,
             gh.branch,
-            `${skillPath}/SKILL.md`
+            file.path
           );
           if (!content) {
             failed++;
             return;
           }
 
-          const dirName = skillPath.split("/").pop() || skillPath;
-          const parsed = parseSkillMd(content, dirName);
+          const parsed = parseSkillMd(content, file.fallbackSlug);
           if (!parsed) {
             failed++;
             return;

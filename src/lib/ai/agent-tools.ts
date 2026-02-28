@@ -11,6 +11,47 @@ import {
   listDirectory as fsListDirectory,
 } from "@/lib/files/filesystem";
 
+const DEFAULT_CONTAINER_IMAGE =
+  "registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc";
+
+/** Base environment variables for all exec() calls. */
+const baseExecEnv = {
+  PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
+  HOME: process.env.HOME || "/tmp",
+  NODE_ENV: process.env.NODE_ENV || "production",
+  LANG: process.env.LANG || "en_US.UTF-8",
+  TERM: "dumb",
+};
+
+/**
+ * Execute a shell command in the workspace directory and return truncated output.
+ * Shared helper that eliminates boilerplate across bash and grep tools.
+ */
+function execInWorkspace(
+  command: string,
+  cwd: string,
+  opts?: { timeout?: number; maxBuffer?: number; env?: Record<string, string> }
+): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  return new Promise((resolve) => {
+    exec(
+      command,
+      {
+        cwd,
+        timeout: opts?.timeout ?? 30_000,
+        maxBuffer: opts?.maxBuffer ?? 1024 * 1024,
+        env: { ...baseExecEnv, ...opts?.env } as NodeJS.ProcessEnv,
+      },
+      (error, stdout, stderr) => {
+        resolve({
+          stdout: (stdout || "").slice(0, 10000),
+          stderr: (stderr || "").slice(0, 5000),
+          exitCode: error?.code ?? (error ? 1 : 0),
+        });
+      }
+    );
+  });
+}
+
 /** Escape a value for use in a YAML single-quoted scalar (double any single quotes). */
 function yamlEscape(value: string): string {
   return value.replace(/'/g, "''");
@@ -213,6 +254,10 @@ export function createAgentTools(
 ) {
   const validatedCwd = validatePath(workspaceCwd);
 
+  const kubeconfigPath =
+    process.env.KUBECONFIG_PATH ||
+    path.join(process.cwd(), "config", "d_k8s");
+
   /**
    * Resolves a file path relative to the workspace and validates it against
    * allowed workspace roots.
@@ -234,34 +279,7 @@ export function createAgentTools(
         command: z.string().describe("The shell command to execute"),
       }),
       execute: async ({ command }) => {
-        return new Promise<{
-          stdout: string;
-          stderr: string;
-          exitCode: number;
-        }>((resolve) => {
-          exec(
-            command,
-            {
-              cwd: validatedCwd,
-              timeout: 30_000,
-              maxBuffer: 1024 * 1024,
-              env: {
-                PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
-                HOME: process.env.HOME || "/tmp",
-                NODE_ENV: process.env.NODE_ENV || "production",
-                LANG: process.env.LANG || "en_US.UTF-8",
-                TERM: "dumb",
-              },
-            },
-            (error, stdout, stderr) => {
-              resolve({
-                stdout: (stdout || "").slice(0, 10000),
-                stderr: (stderr || "").slice(0, 5000),
-                exitCode: error?.code ?? (error ? 1 : 0),
-              });
-            }
-          );
-        });
+        return execInWorkspace(command, validatedCwd);
       },
     }),
 
@@ -338,7 +356,7 @@ export function createAgentTools(
           .string()
           .optional()
           .describe(
-            "Kubernetes namespace (一般为用户AD账户名字). If omitted, uses the default namespace or the one specified in the subcommand."
+            "Kubernetes namespace (\u4e00\u822c\u4e3a\u7528\u6237AD\u8d26\u6237\u540d\u5b57). If omitted, uses the default namespace or the one specified in the subcommand."
           ),
         useVcctl: z
           .boolean()
@@ -354,10 +372,6 @@ export function createAgentTools(
           ),
       }),
       execute: async ({ subcommand, namespace, useVcctl, confirmDangerous }) => {
-        const kubeconfigPath =
-          process.env.KUBECONFIG_PATH ||
-          path.join(process.cwd(), "config", "d_k8s");
-
         // Safety: allowlist read-only subcommands; require confirmation for everything else
         const readOnlyPatterns = [
           /^get\b/,
@@ -456,12 +470,8 @@ export function createAgentTools(
               timeout: 30_000,
               maxBuffer: 1024 * 1024,
               env: {
-                PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
-                HOME: process.env.HOME || "/tmp",
-                NODE_ENV: process.env.NODE_ENV || "production",
+                ...baseExecEnv,
                 KUBECONFIG: kubeconfigPath,
-                LANG: process.env.LANG || "en_US.UTF-8",
-                TERM: "dumb",
               },
             },
             (error: Error | null, stdout: string, stderr: string) => {
@@ -482,7 +492,7 @@ export function createAgentTools(
 
     submitK8sJob: tool({
       description:
-        "Submit a Volcano K8s job to the D cluster (Ascend 910B NPUs). Generates a job YAML from the standard template and submits it via kubectl. IMPORTANT: Before using this tool, always confirm with the user: (1) the container image to use (default: registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc), (2) the GPU count (default: 4), and (3) the exact command to run. Set confirmSubmit=true only after the user has explicitly confirmed.",
+        `Submit a Volcano K8s job to the D cluster (Ascend 910B NPUs). Generates a job YAML from the standard template and submits it via kubectl. IMPORTANT: Before using this tool, always confirm with the user: (1) the container image to use (default: ${DEFAULT_CONTAINER_IMAGE}), (2) the GPU count (default: 4), and (3) the exact command to run. Set confirmSubmit=true only after the user has explicitly confirmed.`,
       inputSchema: z.object({
         jobName: z
           .string()
@@ -498,7 +508,7 @@ export function createAgentTools(
           .string()
           .optional()
           .describe(
-            "Container image. Default: 'registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc'"
+            `Container image. Default: '${DEFAULT_CONTAINER_IMAGE}'`
           ),
         gpuCount: z
           .number()
@@ -531,12 +541,7 @@ export function createAgentTools(
           };
         }
 
-        const kubeconfigPath =
-          process.env.KUBECONFIG_PATH ||
-          path.join(process.cwd(), "config", "d_k8s");
-
-        const resolvedImage =
-          image || "registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc";
+        const resolvedImage = image || DEFAULT_CONTAINER_IMAGE;
         const resolvedGpuCount = gpuCount ?? 4;
         const resolvedNamespace = namespace || "default";
 
@@ -618,12 +623,8 @@ export function createAgentTools(
                 timeout: 30_000,
                 maxBuffer: 1024 * 1024,
                 env: {
-                  PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
-                  HOME: process.env.HOME || "/tmp",
-                  NODE_ENV: process.env.NODE_ENV || "production",
+                  ...baseExecEnv,
                   KUBECONFIG: kubeconfigPath,
-                  LANG: process.env.LANG || "en_US.UTF-8",
-                  TERM: "dumb",
                 },
               },
               (error: Error | null, stdout: string, stderr: string) => {
@@ -650,7 +651,8 @@ export function createAgentTools(
             stdout: result.stdout,
             stderr: result.stderr,
             exitCode: result.exitCode,
-            yaml,
+            // Only include YAML on failure for debugging; saves LLM tokens on success
+            ...(result.exitCode !== 0 ? { yaml } : {}),
           };
         } finally {
           await fsp.unlink(tmpFile).catch(() => {});
@@ -676,31 +678,19 @@ export function createAgentTools(
       }),
       execute: async ({ pattern, path: searchPath, include }) => {
         const target = searchPath ? resolvePath(searchPath) : validatedCwd;
-        validatePath(target);
 
         let cmd = `grep -rn --max-count=50`;
         if (include) cmd += ` --include='${include.replace(/'/g, "'\\''")}'`;
         cmd += ` -- '${pattern.replace(/'/g, "'\\''")}' '${target.replace(/'/g, "'\\''")}'`;
 
-        return new Promise<{
-          matches: string;
-          exitCode: number;
-        }>((resolve) => {
-          exec(
-            cmd,
-            {
-              cwd: validatedCwd,
-              timeout: 15_000,
-              maxBuffer: 512 * 1024,
-            },
-            (error, stdout, stderr) => {
-              resolve({
-                matches: (stdout || "").slice(0, 20000) || (stderr || ""),
-                exitCode: error?.code ?? (error ? 1 : 0),
-              });
-            }
-          );
+        const result = await execInWorkspace(cmd, validatedCwd, {
+          timeout: 15_000,
+          maxBuffer: 512 * 1024,
         });
+        return {
+          matches: result.stdout.slice(0, 20000) || result.stderr,
+          exitCode: result.exitCode,
+        };
       },
     }),
   };
