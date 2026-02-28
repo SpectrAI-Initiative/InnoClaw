@@ -143,10 +143,10 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
         {isRunning && (
           <Loader2 className="h-3 w-3 shrink-0 animate-spin text-[#7aa2f7]" />
         )}
-        {isDone && !isError && (
+        {isDone && (
           <Check className="h-3 w-3 shrink-0 text-[#9ece6a]" />
         )}
-        {isDone && isError && (
+        {isError && (
           <AlertCircle className="h-3 w-3 shrink-0 text-[#f7768e]" />
         )}
       </button>
@@ -326,9 +326,9 @@ function renderToolResult(
               {sStderr}
             </pre>
           )}
-          {result.error && (
+          {result.error ? (
             <div className="text-[#f7768e]">{String(result.error)}</div>
-          )}
+          ) : null}
         </div>
       );
     }
