@@ -36,6 +36,7 @@
     "sonner": "^2.0.7",
     "swr": "^2.4.0",
     "tailwind-merge": "^3.5.0",
+    "three": "^0.183.2",
     "unified": "^11.0.5",
     "zod": "^4.3.6"
   },
@@ -46,6 +47,7 @@
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.183.1",
     "drizzle-kit": "^0.31.9",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
