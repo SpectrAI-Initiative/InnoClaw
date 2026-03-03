@@ -6,6 +6,35 @@ An AI-powered research assistant web app similar to Google NotebookLM. Users ope
 
 ---
 
+## 概览 / Overview
+
+本项目旨在提供一个可自托管的、类似 Google NotebookLM 的 AI 研究助手。它让用户将服务器端文件夹作为「工作空间」，利用 RAG（检索增强生成）技术，让 AI 基于用户自有文档进行对话、回答问题并生成笔记，从而显著提升研究和信息整理效率。
+
+This project provides a self-hostable AI research assistant inspired by Google NotebookLM. It allows users to turn server-side folders into "workspaces" and leverages RAG (Retrieval-Augmented Generation) so that AI can answer questions and generate notes grounded in your own documents — significantly boosting research and information organization efficiency.
+
+**核心亮点 / Key Highlights:**
+- 🗂️ **工作空间 + 文件管理 / Workspace & File Management** — 映射服务器文件夹，支持浏览、上传、编辑
+- 🤖 **RAG 增强对话 / RAG-Powered Chat** — AI 基于文档内容回答问题，附带来源引用
+- 📝 **智能笔记生成 / Smart Note Generation** — 自动生成摘要、FAQ、简报、时间线等
+- 🔀 **多模型 & 多语言 / Multi-LLM & i18n** — 支持 OpenAI / Anthropic，中英双语界面，暗色模式
+
+_完整功能列表请见 [功能 / Features](#功能--features) / For the full feature list, see [Features](#功能--features)._
+
+**适用人群 / Who is it for?**
+- 📚 需要基于大量文档进行 AI 辅助研究和分析的**研究人员**
+- 💻 希望利用 AI 探索和理解代码仓库的**开发者**
+- 🏠 想要搭建私有、可控的 NotebookLM 替代方案的**自托管爱好者**
+- 🎓 需要整理学习资料并快速生成笔记的**学生和教育工作者**
+
+**快速导航 / Quick Links:**
+- [⚡ 快速开始 / Quick Start](#快速开始--quick-start)
+- [📖 使用指南 / Usage Guide](#使用指南--usage-guide)
+- [🏗️ 项目结构 / Project Structure](#项目结构--project-structure)
+- [🔧 RAG 管道架构 / RAG Pipeline](#rag-管道架构--rag-pipeline-architecture)
+- [❓ 常见问题 / FAQ](#常见问题--faq)
+
+---
+
 ## 功能 / Features
 
 - **工作空间管理** — 将服务器文件夹映射为工作空间，持久化存储，可重复打开
