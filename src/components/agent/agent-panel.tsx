@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -19,7 +19,7 @@ import {
   AlertCircle,
   Bot,
   Square,
-  Trash2,
+  Brain,
   ClipboardList,
   MessageCircleQuestion,
 } from "lucide-react";
@@ -37,6 +37,19 @@ import {
 import { useSkills } from "@/lib/hooks/use-skills";
 import { SkillAutocomplete } from "@/components/skills/skill-autocomplete";
 import { SkillParameterDialog } from "@/components/skills/skill-parameter-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Skill } from "@/types";
 
 type AgentMode = "agent" | "plan" | "ask";
@@ -430,6 +443,7 @@ export function AgentPanel({
   folderPath,
 }: AgentPanelProps) {
   const t = useTranslations("agent");
+  const tCommon = useTranslations("common");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState("");
@@ -440,6 +454,97 @@ export function AgentPanel({
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const [showParamDialog, setShowParamDialog] = useState(false);
+
+  // Auto-memory state
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const summarizingRef = useRef(false);
+
+  // Memory preview dialog state
+  const [showMessageSelect, setShowMessageSelect] = useState(false);
+  const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+  const [showMemoryPreview, setShowMemoryPreview] = useState(false);
+  const [memoryPreviewTitle, setMemoryPreviewTitle] = useState("");
+  const [memoryPreviewContent, setMemoryPreviewContent] = useState("");
+
+  // Draggable + resizable dialog state
+  const [dialogPos, setDialogPos] = useState({ x: 0, y: 0 });
+  const [dialogSize, setDialogSize] = useState({ width: 512, height: 520 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [resizeEdge, setResizeEdge] = useState<string | null>(null);
+  const dragStartRef = useRef({ mouseX: 0, mouseY: 0, posX: 0, posY: 0 });
+  const resizeStartRef = useRef({ mouseX: 0, mouseY: 0, w: 0, h: 0, posX: 0, posY: 0 });
+
+  // Reset dialog position/size when opened
+  useEffect(() => {
+    if (showMemoryPreview) {
+      setDialogPos({ x: 0, y: 0 });
+      setDialogSize({ width: 512, height: 520 });
+    }
+  }, [showMemoryPreview]);
+
+  // Global pointer listeners for dragging
+  useEffect(() => {
+    if (!isDragging) return;
+    const onMove = (e: PointerEvent) => {
+      const s = dragStartRef.current;
+      setDialogPos({ x: s.posX + e.clientX - s.mouseX, y: s.posY + e.clientY - s.mouseY });
+    };
+    const onUp = () => setIsDragging(false);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [isDragging]);
+
+  // Global pointer listeners for resizing (all edges/corners)
+  useEffect(() => {
+    if (!resizeEdge) return;
+    const onMove = (e: PointerEvent) => {
+      const s = resizeStartRef.current;
+      const dx = e.clientX - s.mouseX;
+      const dy = e.clientY - s.mouseY;
+      let newW = s.w, newH = s.h, newX = s.posX, newY = s.posY;
+
+      if (resizeEdge.includes("e")) newW = s.w + dx;
+      if (resizeEdge.includes("w")) { newW = s.w - dx; newX = s.posX + dx; }
+      if (resizeEdge.includes("s")) newH = s.h + dy;
+      if (resizeEdge.includes("n")) { newH = s.h - dy; newY = s.posY + dy; }
+
+      // Enforce minimums and clamp position
+      if (newW < 360) { newW = 360; if (resizeEdge.includes("w")) newX = s.posX + s.w - 360; }
+      if (newH < 300) { newH = 300; if (resizeEdge.includes("n")) newY = s.posY + s.h - 300; }
+
+      setDialogSize({ width: newW, height: newH });
+      setDialogPos({ x: newX, y: newY });
+    };
+    const onUp = () => setResizeEdge(null);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [resizeEdge]);
+
+  const onDragStart = useCallback((e: React.PointerEvent) => {
+    // Don't drag when clicking close button or inputs
+    if ((e.target as HTMLElement).closest("button")) return;
+    dragStartRef.current = { mouseX: e.clientX, mouseY: e.clientY, posX: dialogPos.x, posY: dialogPos.y };
+    setIsDragging(true);
+  }, [dialogPos]);
+
+  const onEdgeResizeStart = useCallback((e: React.PointerEvent, edge: string) => {
+    e.stopPropagation();
+    resizeStartRef.current = {
+      mouseX: e.clientX, mouseY: e.clientY,
+      w: dialogSize.width, h: dialogSize.height,
+      posX: dialogPos.x, posY: dialogPos.y,
+    };
+    setResizeEdge(edge);
+  }, [dialogSize, dialogPos]);
 
   const { data: settings } = useSWR("/api/settings", fetcher);
   const aiEnabled = settings?.hasAIKey ?? false;
@@ -468,11 +573,35 @@ export function AgentPanel({
     [agentBody]
   );
 
-  const { messages, sendMessage, setMessages, stop, status } = useChat({ transport });
+  // Scrub any in-progress tool invocations to a terminal state.
+  // Used after stop() and on restore from localStorage.
+  function scrubStuckToolParts(msgs: UIMessage[]): UIMessage[] {
+    const needsScrub = msgs.some((msg) =>
+      msg.parts?.some((part) => {
+        const p = part as { type?: string; state?: string };
+        return p.type?.startsWith("tool") && p.state && p.state !== "output-available" && p.state !== "output-error";
+      })
+    );
+    if (!needsScrub) return msgs;
+    return msgs.map((msg) => ({
+      ...msg,
+      parts: msg.parts?.map((part) => {
+        const p = part as { type?: string; state?: string };
+        if (p.type?.startsWith("tool") && p.state && p.state !== "output-available" && p.state !== "output-error") {
+          return { ...part, state: "output-error", errorText: "Stopped" };
+        }
+        return part;
+      }),
+    })) as UIMessage[];
+  }
+
+  const { messages, sendMessage, setMessages, stop, status, error: chatError } = useChat({ transport });
 
   // --- Message persistence via localStorage ---
   const storageKey = `agent-messages:${workspaceId}:${mode}`;
-  const isRestoringRef = useRef(false);
+  // Counter-based gate: incremented on restore, decremented in the save effect
+  // that sees the restored messages. Avoids save-during-restore race.
+  const restoreGenRef = useRef(0);
 
   // Restore messages from localStorage on mount / workspace change / mode change
   useEffect(() => {
@@ -481,42 +610,27 @@ export function AgentPanel({
       if (saved) {
         const parsed = JSON.parse(saved) as UIMessage[];
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Scrub any "in-progress" tool invocations that would confuse useChat
-          const cleaned = parsed.map((msg) => ({
-            ...msg,
-            parts: msg.parts?.map((part) => {
-              // If a tool part is stuck in non-terminal state, mark it as errored
-              if (
-                typeof part === "object" &&
-                part !== null &&
-                "type" in part &&
-                typeof (part as Record<string, unknown>).type === "string" &&
-                ((part as Record<string, unknown>).type as string).startsWith("tool") &&
-                "state" in part &&
-                (part as Record<string, unknown>).state !== "output-available" &&
-                (part as Record<string, unknown>).state !== "output-error"
-              ) {
-                return { ...part, state: "output-error", errorText: "Session ended" };
-              }
-              return part;
-            }),
-          }));
-          isRestoringRef.current = true;
-          setMessages(cleaned as UIMessage[]);
-          // Allow save effect to run after React processes the state update
-          requestAnimationFrame(() => { isRestoringRef.current = false; });
+          restoreGenRef.current++;
+          setMessages(scrubStuckToolParts(parsed));
           return;
         }
       }
     } catch {
       // ignore corrupt data
     }
-    // No saved data — ensure clean slate (but don't wipe during first mount when useChat already has [])
   }, [storageKey, setMessages]);
 
-  // Save messages to localStorage whenever they change (skip during restoration)
+  // Save messages to localStorage on meaningful changes.
+  // Skip during restore (counter-gated) and during streaming (too frequent).
+  // Persist when streaming completes (status === "ready") or when messages change while idle.
   useEffect(() => {
-    if (isRestoringRef.current) return;
+    if (restoreGenRef.current > 0) {
+      // This render was triggered by the restore above — skip, then clear the gate
+      restoreGenRef.current--;
+      return;
+    }
+    // Don't persist mid-stream — wait for completion
+    if (status === "streaming" || status === "submitted") return;
     try {
       if (messages.length === 0) {
         localStorage.removeItem(storageKey);
@@ -526,7 +640,89 @@ export function AgentPanel({
     } catch {
       // storage full or unavailable — silently ignore
     }
-  }, [messages, storageKey]);
+  }, [messages, storageKey, status]);
+
+  // --- Auto-memory: summarize and evict ---
+  const OVERFLOW_THRESHOLD_CHARS = 640_000; // ~160K tokens (80% of 200K context)
+
+  const summarizeAndEvict = async (
+    messagesToSummarize: UIMessage[],
+    messagesToKeep: UIMessage[],
+    trigger: "overflow" | "clear"
+  ) => {
+    if (summarizingRef.current) return;
+    summarizingRef.current = true;
+    setIsSummarizing(true);
+    setSummaryError(null);
+
+    try {
+      const res = await fetch("/api/agent/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspaceId,
+          messages: messagesToSummarize,
+          trigger,
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: "Summarization failed" }));
+        throw new Error(errData.error || "Summarization failed");
+      }
+
+      if (trigger === "clear") {
+        setMessages([]);
+      } else {
+        // Inject a marker message indicating memory was saved
+        const memoryMarker = {
+          id: `memory-${Date.now()}`,
+          role: "assistant" as const,
+          parts: [{ type: "text" as const, text: t("memorySaved") }],
+        } as UIMessage;
+        setMessages([memoryMarker, ...messagesToKeep]);
+      }
+    } catch (err) {
+      setSummaryError(err instanceof Error ? err.message : "Summarization failed");
+      // On failure: do NOT evict messages
+    } finally {
+      setIsSummarizing(false);
+      summarizingRef.current = false;
+    }
+  };
+
+  // Detect context overflow after messages stabilize (not during streaming)
+  useEffect(() => {
+    if (restoreGenRef.current > 0 || isSummarizing) return;
+    if (status !== "ready" && status !== "error") return;
+    if (messages.length < 4) return;
+
+    const totalChars = JSON.stringify(messages).length;
+    if (totalChars <= OVERFLOW_THRESHOLD_CHARS) return;
+
+    // Find split point: keep newest ~20% by character count
+    let keepFromIndex = messages.length;
+    let accumulatedChars = 0;
+    const targetKeepChars = totalChars * 0.2;
+
+    for (let i = messages.length - 1; i >= 0; i--) {
+      accumulatedChars += JSON.stringify(messages[i]).length;
+      if (accumulatedChars >= targetKeepChars) {
+        keepFromIndex = i;
+        break;
+      }
+    }
+
+    // Keep at least the last 2 messages
+    keepFromIndex = Math.min(keepFromIndex, messages.length - 2);
+    if (keepFromIndex <= 0) return;
+
+    const toSummarize = messages.slice(0, keepFromIndex);
+    const toKeep = messages.slice(keepFromIndex);
+
+    summarizeAndEvict(toSummarize, toKeep, "overflow");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, status, isSummarizing]);
 
   const isLoading = status === "submitted" || status === "streaming";
 
@@ -622,12 +818,100 @@ export function AgentPanel({
 
   const handleStop = () => {
     stop();
+    // Scrub incomplete tool parts so the next sendMessage works cleanly
+    // Use setTimeout to let useChat process the abort first
+    setTimeout(() => {
+      setMessages((prev) => scrubStuckToolParts(prev));
+    }, 100);
   };
 
   const handleClear = () => {
     if (status === "streaming" || status === "submitted") stop();
-    setMessages([]);
+    if (messages.length > 0 && aiEnabled) {
+      // Show message selection dialog first
+      setSelectedMessageIds(new Set(messages.map((m) => m.id)));
+      setShowMessageSelect(true);
+    } else {
+      setMessages([]);
+    }
     setInput("");
+  };
+
+  // Helper: extract plain text from a message
+  const getMessageText = (message: UIMessage) =>
+    message.parts
+      ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
+      .map((p) => p.text)
+      .join("") ?? "";
+
+  // Step 2: generate preview from selected messages
+  const handleSelectNext = async () => {
+    setShowMessageSelect(false);
+    const selected = messages.filter((m) => selectedMessageIds.has(m.id));
+    if (selected.length === 0) return;
+
+    setIsSummarizing(true);
+    setSummaryError(null);
+    try {
+      const res = await fetch("/api/agent/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspaceId,
+          messages: selected,
+          trigger: "clear",
+          preview: true,
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: "Summarization failed" }));
+        throw new Error(errData.error || "Summarization failed");
+      }
+      const data = await res.json();
+      setMemoryPreviewTitle(data.title);
+      setMemoryPreviewContent(data.content);
+      setShowMemoryPreview(true);
+    } catch (err) {
+      setSummaryError(err instanceof Error ? err.message : "Summarization failed");
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  const handleSelectCancel = () => {
+    setShowMessageSelect(false);
+    setSelectedMessageIds(new Set());
+  };
+
+  const handleMemoryConfirm = async () => {
+    setShowMemoryPreview(false);
+    setIsSummarizing(true);
+    try {
+      const res = await fetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspaceId,
+          title: memoryPreviewTitle,
+          content: memoryPreviewContent,
+          type: "memory",
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to save memory note");
+      }
+      setMessages([]);
+    } catch (err) {
+      setSummaryError(err instanceof Error ? err.message : "Failed to save memory");
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  const handleMemoryCancel = () => {
+    setShowMemoryPreview(false);
+    setMemoryPreviewTitle("");
+    setMemoryPreviewContent("");
   };
 
   // Switch mode: update body synchronously and clear stale conversation
@@ -686,8 +970,36 @@ export function AgentPanel({
                 <span className="text-xs">Thinking...</span>
               </div>
             )}
+
+          {/* Chat error indicator */}
+          {chatError && !isLoading && (
+            <div className="flex items-start gap-2 text-[#f7768e] text-xs rounded border border-[#f7768e]/30 bg-[#f7768e]/5 px-3 py-2">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              <span>{chatError.message || "Request failed. Try again."}</span>
+            </div>
+          )}
         </div>
       </ScrollArea>
+
+      {/* Memory summarization indicators */}
+      {isSummarizing && (
+        <div className="flex items-center gap-2 px-3 py-1.5 border-t border-[#30363d] bg-[#161b22] text-xs text-[#7aa2f7]">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span>{t("memorySaving")}</span>
+        </div>
+      )}
+      {summaryError && (
+        <div className="flex items-center gap-2 px-3 py-1.5 border-t border-[#30363d] bg-[#161b22] text-xs text-[#f7768e]">
+          <AlertCircle className="h-3 w-3" />
+          <span>{t("memoryError")}: {summaryError}</span>
+          <button
+            onClick={() => setSummaryError(null)}
+            className="ml-auto text-[#565f89] hover:text-[#c9d1d9] text-xs"
+          >
+            {t("dismiss")}
+          </button>
+        </div>
+      )}
 
       {/* Input area with autocomplete */}
       <div className="relative border-t border-[#30363d]">
@@ -766,13 +1078,13 @@ export function AgentPanel({
               <Square className="h-4 w-4" />
             </button>
           )}
-          {!isLoading && messages.length > 0 && (
+          {!isLoading && !isSummarizing && messages.length > 0 && (
             <button
               onClick={handleClear}
               title={t("clearContext")}
               className="shrink-0 p-1 rounded hover:bg-[#30363d] text-[#565f89] hover:text-[#c9d1d9] transition-colors"
             >
-              <Trash2 className="h-4 w-4" />
+              <Brain className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -790,6 +1102,179 @@ export function AgentPanel({
           onSubmit={(paramValues) => executeSkill(activeSkill, paramValues)}
         />
       )}
+
+      {/* Message selection dialog */}
+      <Dialog open={showMessageSelect} onOpenChange={(open) => {
+        if (!open) handleSelectCancel();
+      }}>
+        <DialogContent
+          className="flex flex-col !p-0 overflow-hidden"
+          style={{
+            width: dialogSize.width,
+            height: dialogSize.height,
+            maxWidth: "none",
+            maxHeight: "none",
+            transform: `translate(calc(-50% + ${dialogPos.x}px), calc(-50% + ${dialogPos.y}px))`,
+          }}
+        >
+          <DialogHeader
+            className="cursor-move select-none px-6 pt-6 pb-2"
+            onPointerDown={onDragStart}
+          >
+            <DialogTitle>{t("selectMessagesTitle")}</DialogTitle>
+            <DialogDescription>{t("selectMessagesDesc")}</DialogDescription>
+          </DialogHeader>
+
+          <div className="flex items-center gap-3 px-6 pb-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedMessageIds(new Set(messages.map((m) => m.id)))}
+            >
+              {t("selectAll")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedMessageIds(new Set())}
+            >
+              {t("selectNone")}
+            </Button>
+            <span className="text-xs text-muted-foreground ml-auto">
+              {selectedMessageIds.size} / {messages.length}
+            </span>
+          </div>
+
+          <ScrollArea className="flex-1 min-h-0 px-6">
+            <div className="space-y-2 py-2 pr-4">
+              {messages.map((msg) => {
+                const text = getMessageText(msg);
+                if (!text) return null;
+                const checked = selectedMessageIds.has(msg.id);
+                return (
+                  <label
+                    key={msg.id}
+                    className={`flex items-start gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
+                      checked
+                        ? "border-[#7aa2f7]/50 bg-[#7aa2f7]/5"
+                        : "border-[#30363d] hover:border-[#484f58]"
+                    }`}
+                  >
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(v) => {
+                        setSelectedMessageIds((prev) => {
+                          const next = new Set(prev);
+                          if (v) next.add(msg.id);
+                          else next.delete(msg.id);
+                          return next;
+                        });
+                      }}
+                      className="mt-0.5 shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <span className={`text-xs font-medium ${
+                        msg.role === "user" ? "text-[#bb9af7]" : "text-[#7aa2f7]"
+                      }`}>
+                        {msg.role === "user" ? "User" : "Assistant"}
+                      </span>
+                      <p className="text-xs text-[#c9d1d9] line-clamp-3 mt-0.5 whitespace-pre-wrap">
+                        {text}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="px-6 pb-6 pt-2">
+            <Button variant="outline" onClick={handleSelectCancel}>
+              {tCommon("cancel")}
+            </Button>
+            <Button onClick={handleSelectNext} disabled={selectedMessageIds.size === 0}>
+              {t("nextStep")}
+            </Button>
+          </DialogFooter>
+
+          {/* Edge resize handles */}
+          <div className="absolute top-0 left-3 right-3 h-1.5 cursor-n-resize" onPointerDown={(e) => onEdgeResizeStart(e, "n")} />
+          <div className="absolute bottom-0 left-3 right-3 h-1.5 cursor-s-resize" onPointerDown={(e) => onEdgeResizeStart(e, "s")} />
+          <div className="absolute left-0 top-3 bottom-3 w-1.5 cursor-w-resize" onPointerDown={(e) => onEdgeResizeStart(e, "w")} />
+          <div className="absolute right-0 top-3 bottom-3 w-1.5 cursor-e-resize" onPointerDown={(e) => onEdgeResizeStart(e, "e")} />
+          {/* Corner resize handles */}
+          <div className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "nw")} />
+          <div className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize" onPointerDown={(e) => onEdgeResizeStart(e, "ne")} />
+          <div className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "sw")} />
+          <div className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize" onPointerDown={(e) => onEdgeResizeStart(e, "se")} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Memory preview dialog */}
+      <Dialog open={showMemoryPreview} onOpenChange={(open) => {
+        if (!open) handleMemoryCancel();
+      }}>
+        <DialogContent
+          className="flex flex-col !p-0 overflow-hidden"
+          style={{
+            width: dialogSize.width,
+            height: dialogSize.height,
+            maxWidth: "none",
+            maxHeight: "none",
+            transform: `translate(calc(-50% + ${dialogPos.x}px), calc(-50% + ${dialogPos.y}px))`,
+          }}
+        >
+          {/* Drag handle */}
+          <DialogHeader
+            className="cursor-move select-none px-6 pt-6 pb-2"
+            onPointerDown={onDragStart}
+          >
+            <DialogTitle>{t("memoryPreviewTitle")}</DialogTitle>
+            <DialogDescription>{t("memoryPreviewDesc")}</DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="flex-1 min-h-0 px-6">
+            <div className="space-y-4 py-2 pr-4">
+              <div className="space-y-1.5">
+                <Label>{t("memoryNoteTitle")}</Label>
+                <Input
+                  value={memoryPreviewTitle}
+                  onChange={(e) => setMemoryPreviewTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t("memoryNoteContent")}</Label>
+                <Textarea
+                  value={memoryPreviewContent}
+                  onChange={(e) => setMemoryPreviewContent(e.target.value)}
+                  rows={12}
+                  className="font-mono text-xs"
+                />
+              </div>
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="px-6 pb-6 pt-2">
+            <Button variant="outline" onClick={handleMemoryCancel}>
+              {tCommon("cancel")}
+            </Button>
+            <Button onClick={handleMemoryConfirm} disabled={!memoryPreviewTitle.trim()}>
+              {tCommon("confirm")}
+            </Button>
+          </DialogFooter>
+
+          {/* Edge resize handles */}
+          <div className="absolute top-0 left-3 right-3 h-1.5 cursor-n-resize" onPointerDown={(e) => onEdgeResizeStart(e, "n")} />
+          <div className="absolute bottom-0 left-3 right-3 h-1.5 cursor-s-resize" onPointerDown={(e) => onEdgeResizeStart(e, "s")} />
+          <div className="absolute left-0 top-3 bottom-3 w-1.5 cursor-w-resize" onPointerDown={(e) => onEdgeResizeStart(e, "w")} />
+          <div className="absolute right-0 top-3 bottom-3 w-1.5 cursor-e-resize" onPointerDown={(e) => onEdgeResizeStart(e, "e")} />
+          {/* Corner resize handles */}
+          <div className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "nw")} />
+          <div className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize" onPointerDown={(e) => onEdgeResizeStart(e, "ne")} />
+          <div className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "sw")} />
+          <div className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize" onPointerDown={(e) => onEdgeResizeStart(e, "se")} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -109,11 +109,13 @@
     "faq": "FAQ",
     "briefing": "Briefing Doc",
     "timeline": "Timeline",
+    "manual": "Manual",
     "addNote": "Add Note",
     "noteTitle": "Note title",
     "emptyState": "No notes yet. Generate one or create a manual note.",
     "generating": "Generating...",
-    "generateDisabled": "Generation requires an API key"
+    "generateDisabled": "Generation requires an API key",
+    "memory": "Memory"
   },
   "settings": {
     "title": "Settings",
@@ -155,7 +157,20 @@
     "modePlan": "Plan",
     "modePlanDesc": "Analyze code and create plans",
     "modeAsk": "Ask",
-    "modeAskDesc": "Answer questions about code"
+    "modeAskDesc": "Answer questions about code",
+    "memorySaving": "Saving conversation to memory...",
+    "memorySaved": "Previous conversation saved to memory notes.",
+    "memoryError": "Failed to save memory",
+    "selectMessagesTitle": "Select Messages",
+    "selectMessagesDesc": "Choose which messages to include in the memory.",
+    "selectAll": "Select All",
+    "selectNone": "Deselect All",
+    "nextStep": "Next",
+    "memoryPreviewTitle": "Memory Preview",
+    "memoryPreviewDesc": "Review and edit the conversation memory before saving.",
+    "memoryNoteTitle": "Title",
+    "memoryNoteContent": "Content",
+    "dismiss": "Dismiss"
   },
   "skills": {
     "title": "Skills",

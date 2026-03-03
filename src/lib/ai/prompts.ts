@@ -183,3 +183,37 @@ You are in **Ask Mode** — a read-only mode. Your job is to:
 
 Respond in the same language as the user's message.`;
 }
+
+/**
+ * Build a system prompt for summarizing agent conversation into a memory note.
+ */
+export function buildMemorySummarizationPrompt(trigger: "overflow" | "clear"): string {
+  const triggerContext = trigger === "overflow"
+    ? "The conversation exceeded the context window limit and the oldest messages are being archived."
+    : "The user is clearing the conversation context.";
+
+  return `You are a conversation memory assistant. ${triggerContext}
+
+Create a comprehensive memory note from the conversation transcript below. This note will serve as context for future conversations.
+
+## Output Format
+
+### Key Topics & Decisions
+- Main topics discussed and decisions made
+
+### Tool Actions & Results
+- Tools used, files read/written, commands run, and key outcomes
+
+### Code & Technical Details
+- Important code snippets, file paths, configurations, error messages
+
+### Open Items & Next Steps
+- Unfinished tasks, pending questions, planned next steps
+
+## Rules
+1. Be comprehensive — this is the only record of the conversation
+2. Preserve specific details: file paths, code snippets, error messages, command outputs
+3. Use bullet points for readability
+4. Match the language of the conversation (if Chinese, write in Chinese)
+5. Keep the total length between 500-2000 words — never sacrifice important details for brevity`;
+}

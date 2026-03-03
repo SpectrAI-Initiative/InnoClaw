@@ -109,11 +109,13 @@
     "faq": "常见问题",
     "briefing": "简报文档",
     "timeline": "时间线",
+    "manual": "手动",
     "addNote": "添加笔记",
     "noteTitle": "笔记标题",
     "emptyState": "还没有笔记。生成一个或创建手动笔记。",
     "generating": "生成中...",
-    "generateDisabled": "生成功能需要配置 API Key"
+    "generateDisabled": "生成功能需要配置 API Key",
+    "memory": "记忆"
   },
   "settings": {
     "title": "设置",
@@ -155,7 +157,20 @@
     "modePlan": "规划",
     "modePlanDesc": "分析代码、制定方案",
     "modeAsk": "提问",
-    "modeAskDesc": "回答代码相关问题"
+    "modeAskDesc": "回答代码相关问题",
+    "memorySaving": "正在保存对话记忆...",
+    "memorySaved": "之前的对话已保存到记忆笔记。",
+    "memoryError": "保存记忆失败",
+    "selectMessagesTitle": "选择对话",
+    "selectMessagesDesc": "选择需要纳入记忆的对话内容。",
+    "selectAll": "全选",
+    "selectNone": "取消全选",
+    "nextStep": "下一步",
+    "memoryPreviewTitle": "记忆预览",
+    "memoryPreviewDesc": "保存前查看并编辑对话记忆。",
+    "memoryNoteTitle": "标题",
+    "memoryNoteContent": "内容",
+    "dismiss": "关闭"
   },
   "skills": {
     "title": "技能",
