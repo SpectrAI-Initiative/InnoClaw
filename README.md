@@ -6,6 +6,9 @@ An AI-powered research assistant web app similar to Google NotebookLM. Users ope
 
 ---
 
+## 文档 / Documentation
+
+📖 **[View the full documentation](https://zjowowen.github.io/notebooklm/)** (English & 简体中文)
 ## 概览 / Overview
 
 本项目旨在提供一个可自托管的、类似 Google NotebookLM 的 AI 研究助手。它让用户将服务器端文件夹作为「工作空间」，利用 RAG（检索增强生成）技术，让 AI 基于用户自有文档进行对话、回答问题并生成笔记，从而显著提升研究和信息整理效率。

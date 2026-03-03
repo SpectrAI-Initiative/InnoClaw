@@ -1,7 +1,6 @@
 import useSWR from "swr";
 import type { Note } from "@/types";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from "@/lib/fetcher";
 
 export function useNotes(workspaceId: string | null) {
   const { data, error, isLoading, mutate } = useSWR<Note[]>(
@@ -10,7 +9,7 @@ export function useNotes(workspaceId: string | null) {
   );
 
   return {
-    notes: data || [],
+    notes: Array.isArray(data) ? data : [],
     isLoading,
     error,
     mutate,

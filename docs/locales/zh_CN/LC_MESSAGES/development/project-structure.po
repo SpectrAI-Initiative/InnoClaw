@@ -1,0 +1,98 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../development/project-structure.md:1 36830bada2e64afb804c6b40450759b4
+msgid "Project Structure"
+msgstr "项目结构"
+
+#: ../../development/project-structure.md:3 9b518c762701422a959a9e61b2c9af59
+msgid ""
+"This page describes the directory layout and module organization of "
+"NotebookLM."
+msgstr "本页介绍 NotebookLM 的目录布局和模块组织。"
+
+#: ../../development/project-structure.md:5 0f470eed110549a991e32f9393b5919d
+msgid "High-Level Structure"
+msgstr "高层结构"
+
+#: ../../development/project-structure.md:41 6ff59af6fc3a4735b8cbc0d1170b7d91
+msgid "Directory Layout"
+msgstr "目录布局"
+
+#: ../../development/project-structure.md:119 2ad6453f1890405b8efb09b335fb9f3c
+msgid "Key Modules"
+msgstr "核心模块"
+
+#: ../../development/project-structure.md:121 4fca0a753a0a47348d7a62177acd419d
+msgid "App Router (`src/app/`)"
+msgstr "App Router（`src/app/`）"
+
+#: ../../development/project-structure.md:123 f9a43757cbae4a53854956faa6adcefe
+msgid ""
+"Next.js 16 App Router with file-based routing. Pages are server "
+"components by default; client components use the `\"use client\"` "
+"directive."
+msgstr "Next.js 16 App Router，基于文件的路由。页面默认为服务器组件；客户端组件使用 `\\\"use client\\\"` 指令。"
+
+#: ../../development/project-structure.md:125 aa7fa8323c594d7596ef2d7df3395a9a
+msgid "Components (`src/components/`)"
+msgstr "组件（`src/components/`）"
+
+#: ../../development/project-structure.md:127 ce3a771e3033446fb6c609f5e51f6f8f
+msgid ""
+"React components organized by feature area. Uses shadcn/ui as the base "
+"component library with Tailwind CSS for styling."
+msgstr "按功能区域组织的 React 组件。使用 shadcn/ui 作为基础组件库，Tailwind CSS 进行样式设计。"
+
+#: ../../development/project-structure.md:129 a4430f77396542c38aeb6b0cf5ef4cc7
+msgid "Database (`src/lib/db/`)"
+msgstr "数据库（`src/lib/db/`）"
+
+#: ../../development/project-structure.md:131 e508fda57ad0463b8d7cdfcfd3f927f6
+msgid ""
+"SQLite database managed by Drizzle ORM. The schema defines tables for "
+"workspaces, sources, source chunks, chunk embeddings, chat messages, "
+"notes, settings, and skills."
+msgstr ""
+"由 Drizzle ORM 管理的 SQLite 数据库。Schema "
+"定义了工作空间、来源、来源分块、分块嵌入、对话消息、笔记、设置和技能的表。"
+
+#: ../../development/project-structure.md:133 06c5a78c1a424d0d8ea662b7057a3d4e
+msgid "RAG Pipeline (`src/lib/rag/`)"
+msgstr "RAG 流水线（`src/lib/rag/`）"
+
+#: ../../development/project-structure.md:135 c7ed1cdda6aa4ccf98020c6e0f010056
+msgid ""
+"The Retrieval-Augmented Generation pipeline handles text chunking, vector"
+" embedding, storage, and similarity search. Uses pure JavaScript cosine "
+"similarity — no external vector database needed."
+msgstr "检索增强生成流水线处理文本分块、向量嵌入、存储和相似性搜索。使用纯 JavaScript 余弦相似度 —— 无需外部向量数据库。"
+
+#: ../../development/project-structure.md:137 c04b81db511e47dd926713edc6774f0b
+msgid "Bot Integrations (`src/lib/bot/`)"
+msgstr "机器人集成（`src/lib/bot/`）"
+
+#: ../../development/project-structure.md:139 d1fca2465fad41639daa263eaff0074c
+msgid ""
+"Implements the `BotAdapter` interface for Feishu (Lark) and WeChat "
+"Enterprise. Each adapter handles webhook verification, message parsing, "
+"and response formatting."
+msgstr "为飞书和企业微信实现了 `BotAdapter` 接口。每个适配器处理 Webhook 验证、消息解析和响应格式化。"
