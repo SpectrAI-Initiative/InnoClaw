@@ -46,7 +46,7 @@ export async function searchArticles(
       return { source, articles };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      return { source, articles: [] as Article[], error: msg };
+      return { source, articles: [], error: msg };
     }
   });
 

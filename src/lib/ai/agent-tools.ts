@@ -17,12 +17,15 @@ import {
 import type { Article } from "@/lib/article-search";
 
 /** Format an Article for LLM-friendly output. */
+const MAX_AUTHORS_DISPLAY = 5;
+const MAX_ABSTRACT_LENGTH = 500;
+
 function formatArticle(a: Article) {
   return {
     id: a.id,
     title: a.title,
-    authors: a.authors.slice(0, 5).join(", ") + (a.authors.length > 5 ? " et al." : ""),
-    abstract: a.abstract.length > 500 ? a.abstract.slice(0, 500) + "…" : a.abstract,
+    authors: a.authors.slice(0, MAX_AUTHORS_DISPLAY).join(", ") + (a.authors.length > MAX_AUTHORS_DISPLAY ? " et al." : ""),
+    abstract: a.abstract.length > MAX_ABSTRACT_LENGTH ? a.abstract.slice(0, MAX_ABSTRACT_LENGTH) + "…" : a.abstract,
     url: a.url,
     pdfUrl: a.pdfUrl,
     publishedDate: a.publishedDate,
