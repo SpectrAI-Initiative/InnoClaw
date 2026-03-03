@@ -67,8 +67,17 @@ export function downloadAsPdf(report: ReportData) {
   if (contentEl) {
     contentEl.textContent = report.markdownContent;
   }
+
+  // Close via onafterprint to avoid cutting off the print dialog
+  printWindow.addEventListener("afterprint", () => {
+    printWindow.close();
+  });
+  // Fallback: close if afterprint doesn't fire (e.g. user cancels)
+  setTimeout(() => {
+    try { printWindow.close(); } catch { /* already closed */ }
+  }, 1000);
+
   printWindow.print();
-  printWindow.close();
 }
 
 export async function copyShareLink(report: ReportData): Promise<boolean> {
