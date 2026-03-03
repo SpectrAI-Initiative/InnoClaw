@@ -12,15 +12,25 @@ export function downloadAsMarkdown(report: ReportData) {
   URL.revokeObjectURL(url);
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export function downloadAsPdf(report: ReportData) {
   const printWindow = window.open("", "_blank");
   if (!printWindow) return;
+
+  const safeTitle = escapeHtml(report.title);
 
   printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>${report.title}</title>
+      <title>${safeTitle}</title>
       <style>
         body {
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -29,6 +39,7 @@ export function downloadAsPdf(report: ReportData) {
           margin: 0 auto;
           padding: 2rem;
           color: #1a1a1a;
+          white-space: pre-wrap;
         }
         h1 { font-size: 1.875em; font-weight: 700; margin-top: 0; margin-bottom: 0.75em; }
         h2 { font-size: 1.375em; font-weight: 600; margin-top: 2em; margin-bottom: 0.5em; }
@@ -46,15 +57,27 @@ export function downloadAsPdf(report: ReportData) {
     </head>
     <body>
       <div id="content"></div>
-      <script>
-        document.getElementById("content").innerHTML = ${JSON.stringify(report.markdownContent)};
-        window.print();
-        window.close();
-      </script>
     </body>
     </html>
   `);
   printWindow.document.close();
+
+  // Safely set content via DOM API to prevent XSS
+  const contentEl = printWindow.document.getElementById("content");
+  if (contentEl) {
+    contentEl.textContent = report.markdownContent;
+  }
+
+  // Close via onafterprint to avoid cutting off the print dialog
+  printWindow.addEventListener("afterprint", () => {
+    printWindow.close();
+  });
+  // Fallback: close if afterprint doesn't fire (e.g. user cancels)
+  setTimeout(() => {
+    try { printWindow.close(); } catch { /* already closed */ }
+  }, 1000);
+
+  printWindow.print();
 }
 
 export async function copyShareLink(report: ReportData): Promise<boolean> {
