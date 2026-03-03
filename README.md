@@ -127,6 +127,14 @@ cp .env.example .env.local
 # 这些目录必须在服务器上真实存在
 WORKSPACE_ROOTS=D:/Data/research,D:/Data/projects
 
+# [可选] 自定义数据库路径（默认为 ./data/notebooklm.db）
+# 如果项目位于网络/共享文件系统（NFS、CIFS 等），建议将数据库指向本地文件系统路径
+# DATABASE_URL=/tmp/notebooklm/notebooklm.db
+
+# [可选] 自定义 Next.js 构建目录（默认为 .next）
+# 如果项目位于网络/共享文件系统，建议指向本地路径以避免 Turbopack 缓存错误
+# NEXT_BUILD_DIR=/tmp/notebooklm-next
+
 # [可选] OpenAI API Key（用于 AI 对话）
 OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -153,6 +161,8 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxx
 
 **重要说明：**
 - `WORKSPACE_ROOTS` 指定的目录必须已经存在于服务器上，应用不会自动创建
+- `DATABASE_URL` 可自定义 SQLite 数据库存放路径。**如果项目位于网络/共享文件系统（NFS、CIFS 等），强烈建议配置此项指向本地文件系统路径**，否则可能因 SQLite WAL 模式不兼容而报错
+- `NEXT_BUILD_DIR` 可自定义 Next.js 构建目录（默认为项目下的 `.next`）。网络文件系统上建议配置此项指向本地路径，以避免 Turbopack 缓存持久化失败的警告
 - 不配置任何 API Key 时，工作空间、文件管理、GitHub 克隆等功能正常可用，仅 AI 对话和笔记生成功能会禁用
 - 配置了 `OPENAI_API_KEY` 或 `EMBEDDING_API_KEY` 后，同步文件时会自动生成向量嵌入（embedding），支持 RAG 检索增强对话
 - Embedding API 支持独立配置：如果你的对话模型代理不支持 embedding 接口（如仅提供 Gemini 聊天模型的代理），可以通过 `EMBEDDING_API_KEY`、`EMBEDDING_BASE_URL`、`EMBEDDING_MODEL` 指向一个单独的 embedding 服务
@@ -217,10 +227,30 @@ mkdir -p /data/research /data/projects
 ### 第 5 步：初始化数据库
 
 ```bash
+# 创建数据目录（必须手动创建，不会自动生成）
+mkdir -p ./data
+
+# 执行数据库迁移
 npx drizzle-kit migrate
 ```
 
 这会在 `./data/notebooklm.db` 创建 SQLite 数据库并执行迁移。
+
+> **注意：** `./data/` 目录必须在执行迁移前手动创建，SQLite 驱动（better-sqlite3）会自动创建数据库文件，但不会自动创建父目录。如果目录不存在，会报错 `Cannot open database because the directory does not exist`。
+
+**自定义数据库路径：** 如果项目位于网络/共享文件系统（NFS、CIFS 等），建议在 `.env.local` 中将数据库指向本地文件系统，以避免 `SQLITE_IOERR_SHMMAP` 错误：
+
+```env
+DATABASE_URL=/tmp/notebooklm/notebooklm.db
+```
+
+使用自定义路径时，需手动创建父目录后再执行迁移：
+
+```bash
+# 例如 DATABASE_URL=/tmp/notebooklm/notebooklm.db
+mkdir -p /tmp/notebooklm
+npx drizzle-kit migrate
+```
 
 **✅ 验证：** 确认数据库文件已生成：
 
@@ -260,7 +290,7 @@ npm run dev
 | 1 | `node -v` | 输出 `v20.9.x` 或更高版本 |
 | 2 | `npm -v` | 输出版本号（无报错） |
 | 3 | `node_modules/` 目录存在 | `npm install` 成功完成，无 ERR 报错 |
-| 4 | `./data/notebooklm.db` 文件存在 | `npx drizzle-kit migrate` 成功执行 |
+| 4 | 数据库文件存在（默认 `./data/notebooklm.db`，或 `DATABASE_URL` 指定的路径） | `npx drizzle-kit migrate` 成功执行 |
 | 5 | `npm run dev` 终端输出 `Ready` | 开发服务器正常启动 |
 | 6 | 浏览器访问 `http://localhost:3000` | 显示工作空间列表页面 |
 | 7 | 点击"打开工作空间"可选择目录 | `WORKSPACE_ROOTS` 配置正确，目录存在 |
@@ -310,7 +340,17 @@ npm install --registry=https://registry.npmmirror.com
 ### `npx drizzle-kit migrate` 执行报错
 
 - 确认 `./drizzle/` 目录下存在 SQL 迁移文件（如 `0000_*.sql`）
-- 确认 `./data/` 目录存在（若不存在会自动创建）
+- **确认 `./data/` 目录存在**（不会自动创建！）。如果报错 `Cannot open database because the directory does not exist`，请先手动创建：
+  ```bash
+  # Linux / macOS
+  mkdir -p ./data
+
+  # Windows PowerShell
+  New-Item -ItemType Directory -Force -Path .\data
+
+  # Windows CMD
+  mkdir data
+  ```
 - 若数据库损坏，可删除后重新迁移：
   ```bash
   # Linux / macOS
@@ -326,6 +366,40 @@ npm install --registry=https://registry.npmmirror.com
   ```bash
   npx drizzle-kit migrate
   ```
+
+### 启动报 `SQLITE_IOERR_SHMMAP` / `disk I/O error`
+
+这通常是因为项目位于网络/共享文件系统（NFS、CIFS、FUSE 等），SQLite 的 WAL 模式需要 `mmap` 支持，而网络文件系统往往不支持。
+
+**解决方法：** 在 `.env.local` 中将数据库路径指向本地文件系统：
+
+```env
+DATABASE_URL=/tmp/notebooklm/notebooklm.db
+```
+
+然后重新初始化数据库：
+
+```bash
+# 使用自定义路径时，仍需手动创建父目录
+# 例如 DATABASE_URL=/tmp/notebooklm/notebooklm.db
+mkdir -p /tmp/notebooklm
+npx drizzle-kit migrate
+npm run dev
+```
+
+> 应用代码已内置 WAL 模式降级机制：如果 WAL 模式设置失败，会自动降级为 DELETE 日志模式。但在网络文件系统上，仍建议通过 `DATABASE_URL` 将数据库放在本地磁盘以获得最佳性能和稳定性。
+
+### 启动报 `Persisting failed` / `No such device (os error 19)`
+
+这是 Turbopack（Next.js 打包器）在网络/共享文件系统上无法持久化编译缓存的警告。**不影响应用功能**，但每次冷启动无法复用缓存，首次编译会稍慢。
+
+**解决方法：** 在 `.env.local` 中将构建目录指向本地文件系统：
+
+```env
+NEXT_BUILD_DIR=/tmp/notebooklm-next
+```
+
+然后重启开发服务器即可。
 
 ### 启动 `npm run dev` 后端口被占用
 
@@ -371,7 +445,8 @@ npm install
 cp .env.example .env.local
 # 编辑 .env.local
 
-# 3. 初始化数据库
+# 3. 创建数据目录并初始化数据库
+mkdir -p ./data
 npx drizzle-kit migrate
 
 # 4. 构建生产版本
@@ -553,10 +628,12 @@ src/
 
 | 数据 | 位置 | 说明 |
 |------|------|------|
-| SQLite 数据库 | `./data/notebooklm.db` | 工作空间、来源索引、对话历史、笔记、设置 |
+| SQLite 数据库 | `./data/notebooklm.db`（可通过 `DATABASE_URL` 自定义） | 工作空间、来源索引、对话历史、笔记、设置 |
 | 工作空间文件 | `WORKSPACE_ROOTS` 指定的目录 | 用户的实际文件，不在项目目录内 |
 
-备份时只需备份 `./data/` 目录和 `.env.local` 文件。
+备份时只需备份数据库文件（默认 `./data/` 目录）和 `.env.local` 文件。
+
+> **网络文件系统注意事项：** 如果项目部署在 NFS、CIFS 等网络/共享文件系统上，SQLite 的 WAL 模式可能因 `mmap` 不支持而报错（`SQLITE_IOERR_SHMMAP`）。应用会自动降级为 DELETE 日志模式，但仍建议通过 `DATABASE_URL` 将数据库指向本地文件系统以获得最佳性能。
 
 ---
 
@@ -685,7 +762,7 @@ A: 确保服务器已安装 `git` 命令行工具，且 `GITHUB_TOKEN` 配置正
 A: 确保服务器已安装 `kubectl` 命令行工具（运行 `kubectl version --client` 检查），并在 `.env.local` 中正确配置了 `KUBECONFIG_PATH`。可通过 `export KUBECONFIG=/path/to/kubeconfig && kubectl cluster-info` 验证集群连通性。
 
 **Q: 如何重置数据库？**
-A: 删除 `./data/notebooklm.db` 文件，然后重新运行 `npx drizzle-kit migrate`。
+A: 删除数据库文件（默认 `./data/notebooklm.db`，如配置了 `DATABASE_URL` 则为对应路径），确保父目录存在，然后重新运行 `npx drizzle-kit migrate`。
 
 ---
 
@@ -703,5 +780,5 @@ npm run lint
 
 # 数据库迁移（修改 schema 后）
 npx drizzle-kit generate
-npx drizzle-kit migrate
+mkdir -p ./data && npx drizzle-kit migrate
 ```
