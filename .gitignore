@@ -53,3 +53,5 @@ config/d_k8s
 
 # docs build artifacts
 docs/_build/
+docs/locales/*/LC_MESSAGES/*.mo
+docs/locales/*/LC_MESSAGES/**/*.mo
