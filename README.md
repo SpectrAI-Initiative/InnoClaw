@@ -6,6 +6,35 @@ An AI-powered research assistant web app similar to Google NotebookLM. Users ope
 
 ---
 
+## 概览 / Overview
+
+本项目旨在提供一个可自托管的、类似 Google NotebookLM 的 AI 研究助手。它让用户将服务器端文件夹作为「工作空间」，利用 RAG（检索增强生成）技术，让 AI 基于用户自有文档进行对话、回答问题并生成笔记，从而显著提升研究和信息整理效率。
+
+This project provides a self-hostable AI research assistant inspired by Google NotebookLM. It allows users to turn server-side folders into "workspaces" and leverages RAG (Retrieval-Augmented Generation) so that AI can answer questions and generate notes grounded in your own documents — significantly boosting research and information organization efficiency.
+
+**核心亮点 / Key Highlights:**
+- 🗂️ **工作空间 + 文件管理 / Workspace & File Management** — 映射服务器文件夹，支持浏览、上传、编辑
+- 🤖 **RAG 增强对话 / RAG-Powered Chat** — AI 基于文档内容回答问题，附带来源引用
+- 📝 **智能笔记生成 / Smart Note Generation** — 自动生成摘要、FAQ、简报、时间线等
+- 🔀 **多模型 & 多语言 / Multi-LLM & i18n** — 支持 OpenAI / Anthropic，中英双语界面，暗色模式
+
+_完整功能列表请见 [功能 / Features](#功能--features) / For the full feature list, see [Features](#功能--features)._
+
+**适用人群 / Who is it for?**
+- 📚 需要基于大量文档进行 AI 辅助研究和分析的**研究人员**
+- 💻 希望利用 AI 探索和理解代码仓库的**开发者**
+- 🏠 想要搭建私有、可控的 NotebookLM 替代方案的**自托管爱好者**
+- 🎓 需要整理学习资料并快速生成笔记的**学生和教育工作者**
+
+**快速导航 / Quick Links:**
+- [⚡ 快速开始 / Quick Start](#快速开始--quick-start)
+- [📖 使用指南 / Usage Guide](#使用指南--usage-guide)
+- [🏗️ 项目结构 / Project Structure](#项目结构--project-structure)
+- [🔧 RAG 管道架构 / RAG Pipeline](#rag-管道架构--rag-pipeline-architecture)
+- [❓ 常见问题 / FAQ](#常见问题--faq)
+
+---
+
 ## 功能 / Features
 
 - **工作空间管理** — 将服务器文件夹映射为工作空间，持久化存储，可重复打开
@@ -35,22 +64,49 @@ An AI-powered research assistant web app similar to Google NotebookLM. Users ope
 
 ## 前置要求 / Prerequisites
 
-1. **Node.js 18+**（推荐 20+）
-2. **Git**（如需 GitHub 克隆/拉取功能）
-3. **kubectl**（如需使用 K8s 集群任务提交功能，Agent 面板的 `submitK8sJob` / `kubectl` 工具依赖此命令）
-4. **AI API Key**（可选，至少配置一个才能使用 AI 对话和生成功能；不配置时其余功能正常可用）
-5. **GitHub Token**（可选，如需克隆/拉取私有仓库）
+1. **Node.js >=20.9.0**（推荐最新 LTS 版本）
+2. **npm**（随 Node.js 一起安装）
+3. **Git**（如需 GitHub 克隆/拉取功能）
+4. **kubectl**（如需使用 K8s 集群任务提交功能，Agent 面板的 `submitK8sJob` / `kubectl` 工具依赖此命令）
+5. **AI API Key**（可选，至少配置一个才能使用 AI 对话和生成功能；不配置时其余功能正常可用）
+6. **GitHub Token**（可选，如需克隆/拉取私有仓库）
+
+**环境检查 / Environment Check：**
+
+```bash
+# 检查 Node.js 版本（需 >= 20.9.0）
+node -v
+
+# 检查 npm 版本
+npm -v
+
+# 检查 Git 版本（如需 GitHub 集成）
+git --version
+```
+
+如果 `node -v` 显示版本低于 20.9.0，请前往 [Node.js 官网](https://nodejs.org/) 下载最新 LTS 版本。
 
 ---
 
 ## 快速开始 / Quick Start
 
-### 第 1 步：安装依赖
+### 第 1 步：克隆仓库并安装依赖
 
 ```bash
+git clone https://github.com/zjowowen/notebooklm.git
 cd notebooklm
 npm install
 ```
+
+**✅ 验证：** 安装完成后，确认 `node_modules` 目录已生成且无报错：
+
+```bash
+# 检查 node_modules 目录是否存在
+ls node_modules   # Linux / macOS
+dir node_modules  # Windows
+```
+
+如安装过程中出现 `better-sqlite3` 编译错误，请确保系统已安装 C++ 编译工具链（见下方 [常见安装问题排查](#常见安装问题排查--troubleshooting-installation)）。
 
 ### 第 2 步：配置环境变量
 
@@ -163,6 +219,16 @@ npx drizzle-kit migrate
 
 这会在 `./data/notebooklm.db` 创建 SQLite 数据库并执行迁移。
 
+**✅ 验证：** 确认数据库文件已生成：
+
+```bash
+# Linux / macOS
+ls -lh ./data/notebooklm.db
+
+# Windows (PowerShell)
+dir .\data\notebooklm.db
+```
+
 ### 第 6 步：启动开发服务器
 
 ```bash
@@ -170,6 +236,123 @@ npm run dev
 ```
 
 打开浏览器访问 **http://localhost:3000** 即可使用。
+
+**✅ 验证：** 在终端中看到类似以下输出表示启动成功：
+
+```
+✓ Ready in Xs
+○ Compiling / ...
+```
+
+然后在浏览器中访问 `http://localhost:3000`，应能看到工作空间列表页面。
+
+---
+
+## 验证安装 / Verify Installation
+
+完成上述步骤后，请按以下清单逐一确认：
+
+| # | 检查项 | 预期结果 |
+|---|--------|----------|
+| 1 | `node -v` | 输出 `v20.9.x` 或更高版本 |
+| 2 | `npm -v` | 输出版本号（无报错） |
+| 3 | `node_modules/` 目录存在 | `npm install` 成功完成，无 ERR 报错 |
+| 4 | `./data/notebooklm.db` 文件存在 | `npx drizzle-kit migrate` 成功执行 |
+| 5 | `npm run dev` 终端输出 `Ready` | 开发服务器正常启动 |
+| 6 | 浏览器访问 `http://localhost:3000` | 显示工作空间列表页面 |
+| 7 | 点击"打开工作空间"可选择目录 | `WORKSPACE_ROOTS` 配置正确，目录存在 |
+| 8 | （可选）进入工作空间后 AI 对话可用 | API Key 配置正确 |
+
+**快速健康检查命令：**
+
+```bash
+# 代码检查（ESLint）
+npm run lint
+
+# TypeScript 类型检查
+npx tsc --noEmit
+
+# 构建项目（可用于验证整体编译是否正常）
+npm run build
+```
+
+如以上命令均无报错，则表示项目安装和配置完全正确。
+
+---
+
+## 常见安装问题排查 / Troubleshooting Installation
+
+### `better-sqlite3` 编译失败
+
+`better-sqlite3` 是原生 Node.js 模块，需要 C++ 编译工具链：
+
+- **Windows：** 安装 [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)，勾选 "Desktop development with C++" 工作负载
+- **macOS：** 安装 Xcode Command Line Tools
+  ```bash
+  xcode-select --install
+  ```
+- **Linux（Debian/Ubuntu）：**
+  ```bash
+  sudo apt-get install -y build-essential python3
+  ```
+
+### `npm install` 报网络错误
+
+如果下载依赖超时或失败，可尝试使用国内镜像源：
+
+```bash
+npm install --registry=https://registry.npmmirror.com
+```
+
+### `npx drizzle-kit migrate` 执行报错
+
+- 确认 `./drizzle/` 目录下存在 SQL 迁移文件（如 `0000_*.sql`）
+- 确认 `./data/` 目录存在（若不存在会自动创建）
+- 若数据库损坏，可删除后重新迁移：
+  ```bash
+  # Linux / macOS
+  rm -f ./data/notebooklm.db
+
+  # Windows PowerShell
+  Remove-Item -Path .\data\notebooklm.db -ErrorAction SilentlyContinue
+
+  # Windows CMD
+  del /F /Q .\data\notebooklm.db
+  ```
+  然后重新执行：
+  ```bash
+  npx drizzle-kit migrate
+  ```
+
+### 启动 `npm run dev` 后端口被占用
+
+```bash
+# 查看 3000 端口占用情况
+# Linux / macOS
+lsof -i :3000
+
+# Windows (PowerShell)
+netstat -ano | findstr :3000
+```
+
+可通过环境变量指定其他端口：
+
+```bash
+# Linux / macOS / WSL / Git Bash
+PORT=3001 npm run dev
+
+# Windows PowerShell
+$env:PORT=3001; npm run dev
+
+# Windows CMD
+set PORT=3001&& npm run dev
+```
+
+### 页面访问报 500 错误
+
+- 检查 `.env.local` 文件是否存在且 `WORKSPACE_ROOTS` 已正确配置
+- 确认 `WORKSPACE_ROOTS` 中指定的目录在服务器上真实存在
+- 检查终端输出的错误日志，根据提示排查
 
 ---
 

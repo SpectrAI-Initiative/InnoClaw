@@ -23,6 +23,18 @@ export async function GET() {
       hasAIKey: !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY,
       openaiBaseUrl: process.env.OPENAI_BASE_URL || "",
       anthropicBaseUrl: process.env.ANTHROPIC_BASE_URL || "",
+      feishuBotEnabled:
+        process.env.FEISHU_BOT_ENABLED === "true" &&
+        !!process.env.FEISHU_APP_ID &&
+        !!process.env.FEISHU_APP_SECRET &&
+        !!process.env.FEISHU_VERIFICATION_TOKEN,
+      wechatBotEnabled:
+        process.env.WECHAT_BOT_ENABLED === "true" &&
+        !!process.env.WECHAT_CORP_ID &&
+        !!process.env.WECHAT_CORP_SECRET &&
+        !!process.env.WECHAT_TOKEN &&
+        !!process.env.WECHAT_ENCODING_AES_KEY &&
+        !!process.env.WECHAT_AGENT_ID,
     });
   } catch (error) {
     const message =

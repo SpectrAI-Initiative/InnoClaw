@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
@@ -444,6 +444,7 @@ export function AgentPanel({
 }: AgentPanelProps) {
   const t = useTranslations("agent");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState("");
@@ -576,19 +577,19 @@ export function AgentPanel({
   // Scrub any in-progress tool invocations to a terminal state.
   // Used after stop() and on restore from localStorage.
   function scrubStuckToolParts(msgs: UIMessage[]): UIMessage[] {
-    const isToolPart = (type?: string) => type?.startsWith("tool") || type === "dynamic-tool";
+    const isToolPart = (type?: string) =>
+      type !== undefined && (type.startsWith("tool-") || type === "dynamic-tool");
+    const isStuck = (p: { type?: string; state?: string }) =>
+      isToolPart(p.type) && p.state && p.state !== "output-available" && p.state !== "output-error";
+
     const needsScrub = msgs.some((msg) =>
-      msg.parts?.some((part) => {
-        const p = part as { type?: string; state?: string };
-        return isToolPart(p.type) && p.state && p.state !== "output-available" && p.state !== "output-error";
-      })
+      msg.parts?.some((part) => isStuck(part as { type?: string; state?: string }))
     );
     if (!needsScrub) return msgs;
     return msgs.map((msg) => ({
       ...msg,
       parts: msg.parts?.map((part) => {
-        const p = part as { type?: string; state?: string };
-        if (isToolPart(p.type) && p.state && p.state !== "output-available" && p.state !== "output-error") {
+        if (isStuck(part as { type?: string; state?: string })) {
           return { ...part, state: "output-error", errorText: "Stopped" };
         }
         return part;
@@ -606,19 +607,21 @@ export function AgentPanel({
 
   // Restore messages from localStorage on mount / workspace change / mode change
   useEffect(() => {
+    restoreGenRef.current++;
+    let restored: UIMessage[] = [];
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved) as UIMessage[];
         if (Array.isArray(parsed) && parsed.length > 0) {
-          restoreGenRef.current++;
-          setMessages(scrubStuckToolParts(parsed));
-          return;
+          restored = scrubStuckToolParts(parsed);
         }
       }
     } catch {
-      // ignore corrupt data
+      // ignore corrupt data; fall back to empty conversation
     }
+    // Always set messages for this storageKey, even if nothing was restored
+    setMessages(restored);
   }, [storageKey, setMessages]);
 
   // Save messages to localStorage on meaningful changes.
@@ -664,6 +667,7 @@ export function AgentPanel({
           workspaceId,
           messages: messagesToSummarize,
           trigger,
+          locale,
         }),
       });
 
@@ -698,7 +702,9 @@ export function AgentPanel({
     if (status !== "ready" && status !== "error") return;
     if (messages.length < 4) return;
 
-    const totalChars = JSON.stringify(messages).length;
+    // Pre-compute per-message sizes once to avoid repeated serialization
+    const messageSizes = messages.map((m) => JSON.stringify(m).length);
+    const totalChars = messageSizes.reduce((sum, s) => sum + s, 0);
     if (totalChars <= OVERFLOW_THRESHOLD_CHARS) return;
 
     // Find split point: keep newest ~20% by character count
@@ -707,7 +713,7 @@ export function AgentPanel({
     const targetKeepChars = totalChars * 0.2;
 
     for (let i = messages.length - 1; i >= 0; i--) {
-      accumulatedChars += JSON.stringify(messages[i]).length;
+      accumulatedChars += messageSizes[i];
       if (accumulatedChars >= targetKeepChars) {
         keepFromIndex = i;
         break;
@@ -862,6 +868,7 @@ export function AgentPanel({
           messages: selected,
           trigger: "clear",
           preview: true,
+          locale,
         }),
       });
       if (!res.ok) {
@@ -899,11 +906,14 @@ export function AgentPanel({
         }),
       });
       if (!res.ok) {
-        throw new Error("Failed to save memory note");
+        const errData = await res.json().catch(() => ({}));
+        const errorMessage =
+          errData && typeof errData.error === "string" ? errData.error : t("memoryError");
+        throw new Error(errorMessage);
       }
       setMessages([]);
     } catch (err) {
-      setSummaryError(err instanceof Error ? err.message : "Failed to save memory");
+      setSummaryError(err instanceof Error && err.message ? err.message : t("memoryError"));
     } finally {
       setIsSummarizing(false);
     }

@@ -122,7 +122,9 @@
     "emptyState": "还没有笔记。生成一个或创建手动笔记。",
     "generating": "生成中...",
     "generateDisabled": "生成功能需要配置 API Key",
-    "memory": "记忆"
+    "memory": "记忆",
+    "memoryTitleClear": "对话记忆 - {date}",
+    "memoryTitleOverflow": "上下文压缩 - {date}"
   },
   "settings": {
     "title": "设置",
@@ -136,7 +138,11 @@
     "configured": "已配置",
     "notConfigured": "未配置",
     "apiKeys": "API 密钥与端点",
-    "apiKeysDesc": "在 .env.local 中配置 API 密钥和自定义 Base URL。"
+    "apiKeysDesc": "在 .env.local 中配置 API 密钥和自定义 Base URL。",
+    "botIntegrations": "IM 机器人集成",
+    "botIntegrationsDesc": "在 .env.local 中配置飞书和微信机器人密钥。Webhook 端点：/api/bot/feishu、/api/bot/wechat。",
+    "feishuBot": "飞书机器人",
+    "wechatBot": "企业微信机器人"
   },
   "terminal": {
     "title": "终端",

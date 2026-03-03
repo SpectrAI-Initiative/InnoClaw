@@ -122,7 +122,9 @@
     "emptyState": "No notes yet. Generate one or create a manual note.",
     "generating": "Generating...",
     "generateDisabled": "Generation requires an API key",
-    "memory": "Memory"
+    "memory": "Memory",
+    "memoryTitleClear": "Conversation Memory - {date}",
+    "memoryTitleOverflow": "Context Compression - {date}"
   },
   "settings": {
     "title": "Settings",
@@ -136,7 +138,11 @@
     "configured": "Configured",
     "notConfigured": "Not configured",
     "apiKeys": "API Keys & Endpoints",
-    "apiKeysDesc": "Configure API keys and custom Base URLs in the .env.local file on the server."
+    "apiKeysDesc": "Configure API keys and custom Base URLs in the .env.local file on the server.",
+    "botIntegrations": "IM Bot Integrations",
+    "botIntegrationsDesc": "Configure Feishu and WeChat bot credentials in .env.local. Webhook endpoints: /api/bot/feishu, /api/bot/wechat.",
+    "feishuBot": "Feishu (Lark) Bot",
+    "wechatBot": "WeChat (Enterprise) Bot"
   },
   "terminal": {
     "title": "Terminal",

@@ -8,8 +8,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Bot, User, AlertCircle, FileText, Check, Circle, Copy, CheckCheck } from "lucide-react";
-import ReactMarkdown, { Components } from "react-markdown";
+import ReactMarkdown from "react-markdown";
 import {
+  markdownComponents,
   remarkPlugins,
   rehypePlugins,
 } from "@/lib/markdown/shared-components";
