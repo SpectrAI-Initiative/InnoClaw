@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Testing - NotebookLM Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Documentation Development" href="documentation.html" /><link rel="prev" title="Local Development" href="local-development.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Testing"/>
+<meta name="twitter:card" content="summary"/>
+  
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>NotebookLM</strong>
+    </a>
+    <div class="sy-head-nav" id="HeadNav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../getting-started/overview.html">Getting Started</a></li><li class="link"><a href="../usage/features.html">Usage</a></li><li class="link"><a href="contributing.html">Development</a></li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="nav-languages">
+  <button type="button">
+    <span class="md:hidden">Translations</span>
+    <iconify-icon icon="lucide:languages"></iconify-icon>
+  </button>
+  <div class="nav-languages-choices">
+    <ul><li><a href="/en/">English</a></li><li><a href="/zh/">简体中文</a></li></ul>
+  </div>
+</div><div class="sy-head-socials">
+  <a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="HeadNav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/environment-variables.html">Environment Variables</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage &amp; Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/features.html">Core Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Notifications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notifications/index.html">Notifications &amp; Bot Integrations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="project-structure.html">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local-development.html">Local Development</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation Development</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Troubleshooting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/faq.html">Troubleshooting &amp; FAQ</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#test-framework">Test Framework</a><ul>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-tests">Running Tests</a></li>
+<li><a class="reference internal" href="#writing-tests">Writing Tests</a><ul>
+<li><a class="reference internal" href="#test-file-location">Test File Location</a></li>
+<li><a class="reference internal" href="#test-structure">Test Structure</a></li>
+<li><a class="reference internal" href="#path-aliases">Path Aliases</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test-categories">Test Categories</a><ul>
+<li><a class="reference internal" href="#unit-tests">Unit Tests</a></li>
+<li><a class="reference internal" href="#integration-tests">Integration Tests</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#best-practices">Best Practices</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">NotebookLM</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Testing</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="testing">
+<h1>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h1>
+<p>This guide covers how to write and run tests for NotebookLM.</p>
+<section id="test-framework">
+<h2>Test Framework<a class="headerlink" href="#test-framework" title="Link to this heading">¶</a></h2>
+<p>NotebookLM uses <a class="reference external" href="https://vitest.dev/">Vitest</a> (v4+) as its test framework, configured in <code class="docutils literal notranslate"><span class="pre">vitest.config.ts</span></code>.</p>
+<section id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h3>
+<div class="highlight-typescript notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1">// vitest.config.ts</span>
+</span><span data-line="2"><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">defineConfig</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;vitest/config&quot;</span><span class="p">;</span>
+</span><span data-line="3"><span class="k">import</span><span class="w"> </span><span class="nx">path</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="p">;</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">defineConfig</span><span class="p">({</span>
+</span><span data-line="6"><span class="w">  </span><span class="nx">test</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="7"><span class="w">    </span><span class="c1">// Test file patterns</span>
+</span><span data-line="8"><span class="w">    </span><span class="nx">include</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;src/**/*.test.{ts,tsx}&quot;</span><span class="p">],</span>
+</span><span data-line="9"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="10"><span class="w">  </span><span class="nx">resolve</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="11"><span class="w">    </span><span class="nx">alias</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="12"><span class="w">      </span><span class="s2">&quot;@&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;./src&quot;</span><span class="p">),</span>
+</span><span data-line="13"><span class="w">    </span><span class="p">},</span>
+</span><span data-line="14"><span class="w">  </span><span class="p">},</span>
+</span><span data-line="15"><span class="p">});</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="running-tests">
+<h2>Running Tests<a class="headerlink" href="#running-tests" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Run all tests</span>
+</span><span data-line="2">npm<span class="w"> </span><span class="nb">test</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Run tests with Vitest directly</span>
+</span><span data-line="5">npx<span class="w"> </span>vitest<span class="w"> </span>run
+</span><span data-line="6">
+</span><span data-line="7"><span class="c1"># Run tests in watch mode (re-runs on file changes)</span>
+</span><span data-line="8">npx<span class="w"> </span>vitest
+</span><span data-line="9">
+</span><span data-line="10"><span class="c1"># Run a specific test file</span>
+</span><span data-line="11">npx<span class="w"> </span>vitest<span class="w"> </span>run<span class="w"> </span>src/lib/rag/chunker.test.ts
+</span><span data-line="12">
+</span><span data-line="13"><span class="c1"># Run tests matching a pattern</span>
+</span><span data-line="14">npx<span class="w"> </span>vitest<span class="w"> </span>run<span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;should chunk text&quot;</span>
+</span></pre></div>
+</div>
+</section>
+<section id="writing-tests">
+<h2>Writing Tests<a class="headerlink" href="#writing-tests" title="Link to this heading">¶</a></h2>
+<section id="test-file-location">
+<h3>Test File Location<a class="headerlink" href="#test-file-location" title="Link to this heading">¶</a></h3>
+<p>Test files should be co-located with the source files they test:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">src/
+</span><span data-line="2">├── lib/
+</span><span data-line="3">│   ├── rag/
+</span><span data-line="4">│   │   ├── chunker.ts
+</span><span data-line="5">│   │   └── chunker.test.ts    # Tests for chunker.ts
+</span><span data-line="6">│   └── utils/
+</span><span data-line="7">│       ├── helpers.ts
+</span><span data-line="8">│       └── helpers.test.ts    # Tests for helpers.ts
+</span></pre></div>
+</div>
+</section>
+<section id="test-structure">
+<h3>Test Structure<a class="headerlink" href="#test-structure" title="Link to this heading">¶</a></h3>
+<div class="highlight-typescript notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">describe</span><span class="p">,</span><span class="w"> </span><span class="nx">it</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;vitest&quot;</span><span class="p">;</span>
+</span><span data-line="2"><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">myFunction</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./my-module&quot;</span><span class="p">;</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="nx">describe</span><span class="p">(</span><span class="s2">&quot;myFunction&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="5"><span class="w">  </span><span class="nx">it</span><span class="p">(</span><span class="s2">&quot;should return expected result&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="6"><span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">myFunction</span><span class="p">(</span><span class="s2">&quot;input&quot;</span><span class="p">);</span>
+</span><span data-line="7"><span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">result</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">&quot;expected output&quot;</span><span class="p">);</span>
+</span><span data-line="8"><span class="w">  </span><span class="p">});</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="w">  </span><span class="nx">it</span><span class="p">(</span><span class="s2">&quot;should handle edge cases&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span data-line="11"><span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">myFunction</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+</span><span data-line="12"><span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">myFunction</span><span class="p">(</span><span class="kc">null</span><span class="p">)).</span><span class="nx">toBeNull</span><span class="p">();</span>
+</span><span data-line="13"><span class="w">  </span><span class="p">});</span>
+</span><span data-line="14"><span class="p">});</span>
+</span></pre></div>
+</div>
+</section>
+<section id="path-aliases">
+<h3>Path Aliases<a class="headerlink" href="#path-aliases" title="Link to this heading">¶</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">&#64;/</span></code> alias to import from the <code class="docutils literal notranslate"><span class="pre">src/</span></code> directory:</p>
+<div class="highlight-typescript notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">someUtil</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@/lib/utils/helpers&quot;</span><span class="p">;</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="test-categories">
+<h2>Test Categories<a class="headerlink" href="#test-categories" title="Link to this heading">¶</a></h2>
+<section id="unit-tests">
+<h3>Unit Tests<a class="headerlink" href="#unit-tests" title="Link to this heading">¶</a></h3>
+<p>Test individual functions and modules in isolation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">npx<span class="w"> </span>vitest<span class="w"> </span>run<span class="w"> </span>src/lib/rag/
+</span></pre></div>
+</div>
+</section>
+<section id="integration-tests">
+<h3>Integration Tests<a class="headerlink" href="#integration-tests" title="Link to this heading">¶</a></h3>
+<p>Test interactions between modules (e.g., API routes with database):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">npx<span class="w"> </span>vitest<span class="w"> </span>run<span class="w"> </span>src/app/api/
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Co-locate</strong> test files with source files (e.g., <code class="docutils literal notranslate"><span class="pre">module.test.ts</span></code> next to <code class="docutils literal notranslate"><span class="pre">module.ts</span></code>)</p></li>
+<li><p><strong>Use descriptive names</strong> for test cases that explain expected behavior</p></li>
+<li><p><strong>Test edge cases</strong> — empty inputs, null values, boundary conditions</p></li>
+<li><p><strong>Mock external dependencies</strong> — API calls, file system operations</p></li>
+<li><p><strong>Keep tests focused</strong> — each test should verify one specific behavior</p></li>
+</ul>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="local-development.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Local Development</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="documentation.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Documentation Development</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, NotebookLM Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+<a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+</html>

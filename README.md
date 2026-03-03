@@ -6,6 +6,12 @@ An AI-powered research assistant web app similar to Google NotebookLM. Users ope
 
 ---
 
+## 文档 / Documentation
+
+📖 **[View the full documentation](https://zjowowen.github.io/notebooklm/)** (English & 简体中文)
+
+---
+
 ## 功能 / Features
 
 - **工作空间管理** — 将服务器文件夹映射为工作空间，持久化存储，可重复打开

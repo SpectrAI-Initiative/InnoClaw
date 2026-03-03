@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Troubleshooting &amp; FAQ - NotebookLM Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Documentation Development" href="../development/documentation.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Troubleshooting &amp; FAQ"/>
+<meta name="twitter:card" content="summary"/>
+  
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>NotebookLM</strong>
+    </a>
+    <div class="sy-head-nav" id="HeadNav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../getting-started/overview.html">Getting Started</a></li><li class="link"><a href="../usage/features.html">Usage</a></li><li class="link"><a href="../development/contributing.html">Development</a></li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="nav-languages">
+  <button type="button">
+    <span class="md:hidden">Translations</span>
+    <iconify-icon icon="lucide:languages"></iconify-icon>
+  </button>
+  <div class="nav-languages-choices">
+    <ul><li><a href="/en/">English</a></li><li><a href="/zh/">简体中文</a></li></ul>
+  </div>
+</div><div class="sy-head-socials">
+  <a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="HeadNav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/environment-variables.html">Environment Variables</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage &amp; Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/features.html">Core Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Notifications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notifications/index.html">Notifications &amp; Bot Integrations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/project-structure.html">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/local-development.html">Local Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/documentation.html">Documentation Development</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Troubleshooting</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Troubleshooting &amp; FAQ</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#frequently-asked-questions">Frequently Asked Questions</a><ul>
+<li><a class="reference internal" href="#can-i-use-notebooklm-without-an-api-key">Can I use NotebookLM without an API key?</a></li>
+<li><a class="reference internal" href="#how-do-i-use-third-party-compatible-services-proxies-self-hosted-models">How do I use third-party compatible services (proxies, self-hosted models)?</a></li>
+<li><a class="reference internal" href="#what-file-formats-are-supported-for-rag-indexing">What file formats are supported for RAG indexing?</a></li>
+<li><a class="reference internal" href="#is-indexing-slow-for-large-workspaces">Is indexing slow for large workspaces?</a></li>
+<li><a class="reference internal" href="#can-i-run-notebooklm-on-linux">Can I run NotebookLM on Linux?</a></li>
+<li><a class="reference internal" href="#github-clone-fails-what-should-i-check">GitHub clone fails &#8212; what should I check?</a></li>
+<li><a class="reference internal" href="#how-do-i-reset-the-database">How do I reset the database?</a></li>
+<li><a class="reference internal" href="#how-do-i-back-up-my-data">How do I back up my data?</a></li>
+<li><a class="reference internal" href="#the-development-server-won-t-start">The development server won&#8217;t start</a></li>
+<li><a class="reference internal" href="#build-fails-with-font-related-errors">Build fails with font-related errors</a></li>
+<li><a class="reference internal" href="#how-do-i-change-the-port">How do I change the port?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#getting-help">Getting Help</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">NotebookLM</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Troubleshooting &amp; FAQ</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="troubleshooting-faq">
+<h1>Troubleshooting &amp; FAQ<a class="headerlink" href="#troubleshooting-faq" title="Link to this heading">¶</a></h1>
+<section id="frequently-asked-questions">
+<h2>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Link to this heading">¶</a></h2>
+<section id="can-i-use-notebooklm-without-an-api-key">
+<h3>Can I use NotebookLM without an API key?<a class="headerlink" href="#can-i-use-notebooklm-without-an-api-key" title="Link to this heading">¶</a></h3>
+<p><strong>Yes.</strong> Workspace management, file browsing, uploading, editing, and GitHub cloning features work without any API key. Only AI chat and note generation features require an API key. The UI will display a prompt indicating that AI features are unavailable.</p>
+</section>
+<section id="how-do-i-use-third-party-compatible-services-proxies-self-hosted-models">
+<h3>How do I use third-party compatible services (proxies, self-hosted models)?<a class="headerlink" href="#how-do-i-use-third-party-compatible-services-proxies-self-hosted-models" title="Link to this heading">¶</a></h3>
+<p>Set <code class="docutils literal notranslate"><span class="pre">OPENAI_BASE_URL</span></code> or <code class="docutils literal notranslate"><span class="pre">ANTHROPIC_BASE_URL</span></code> in your <code class="docutils literal notranslate"><span class="pre">.env.local</span></code> file to point to any API-compatible endpoint:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="na">OPENAI_BASE_URL</span><span class="o">=</span><span class="s">https://api.your-proxy.com/v1</span>
+</span><span data-line="2"><span class="na">OPENAI_API_KEY</span><span class="o">=</span><span class="s">sk-your-key</span>
+</span></pre></div>
+</div>
+<p>If your proxy doesn’t support the embedding endpoint, configure a separate embedding service:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="na">EMBEDDING_API_KEY</span><span class="o">=</span><span class="s">sk-your-embedding-key</span>
+</span><span data-line="2"><span class="na">EMBEDDING_BASE_URL</span><span class="o">=</span><span class="s">https://api.your-embedding-proxy.com/v1</span>
+</span><span data-line="3"><span class="na">EMBEDDING_MODEL</span><span class="o">=</span><span class="s">text-embedding-3-small</span>
+</span></pre></div>
+</div>
+</section>
+<section id="what-file-formats-are-supported-for-rag-indexing">
+<h3>What file formats are supported for RAG indexing?<a class="headerlink" href="#what-file-formats-are-supported-for-rag-indexing" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Category</p></th>
+<th class="head"><p>Extensions</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Documents</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.pdf</span></code>, <code class="docutils literal notranslate"><span class="pre">.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">.md</span></code>, <code class="docutils literal notranslate"><span class="pre">.html</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Data</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.json</span></code>, <code class="docutils literal notranslate"><span class="pre">.csv</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Code</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.js</span></code>, <code class="docutils literal notranslate"><span class="pre">.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">.py</span></code>, <code class="docutils literal notranslate"><span class="pre">.java</span></code>, <code class="docutils literal notranslate"><span class="pre">.go</span></code>, <code class="docutils literal notranslate"><span class="pre">.rs</span></code>, <code class="docutils literal notranslate"><span class="pre">.cpp</span></code>, <code class="docutils literal notranslate"><span class="pre">.c</span></code>, <code class="docutils literal notranslate"><span class="pre">.rb</span></code>, <code class="docutils literal notranslate"><span class="pre">.php</span></code>, and more</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="is-indexing-slow-for-large-workspaces">
+<h3>Is indexing slow for large workspaces?<a class="headerlink" href="#is-indexing-slow-for-large-workspaces" title="Link to this heading">¶</a></h3>
+<p>The first sync processes all files (extract text → chunk → generate embeddings), which depends on the number and size of files. Subsequent syncs only process new or modified files (based on file hash comparison), making them significantly faster.</p>
+</section>
+<section id="can-i-run-notebooklm-on-linux">
+<h3>Can I run NotebookLM on Linux?<a class="headerlink" href="#can-i-run-notebooklm-on-linux" title="Link to this heading">¶</a></h3>
+<p><strong>Yes.</strong> Set <code class="docutils literal notranslate"><span class="pre">WORKSPACE_ROOTS</span></code> to Linux paths:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="na">WORKSPACE_ROOTS</span><span class="o">=</span><span class="s">/home/user/research,/home/user/projects</span>
+</span></pre></div>
+</div>
+</section>
+<section id="github-clone-fails-what-should-i-check">
+<h3>GitHub clone fails — what should I check?<a class="headerlink" href="#github-clone-fails-what-should-i-check" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Verify that <code class="docutils literal notranslate"><span class="pre">git</span></code> is installed: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">--version</span></code></p></li>
+<li><p>Check that <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code> is set correctly in <code class="docutils literal notranslate"><span class="pre">.env.local</span></code></p></li>
+<li><p>Ensure the token has the <code class="docutils literal notranslate"><span class="pre">repo</span></code> scope for private repositories</p></li>
+<li><p>Check network connectivity to <code class="docutils literal notranslate"><span class="pre">github.com</span></code></p></li>
+</ol>
+</section>
+<section id="how-do-i-reset-the-database">
+<h3>How do I reset the database?<a class="headerlink" href="#how-do-i-reset-the-database" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Remove the database file</span>
+</span><span data-line="2">rm<span class="w"> </span>./data/notebooklm.db
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Re-run migrations</span>
+</span><span data-line="5">npx<span class="w"> </span>drizzle-kit<span class="w"> </span>migrate
+</span></pre></div>
+</div>
+<p>This creates a fresh database. All workspaces, chat history, notes, and settings will be lost, but workspace files on disk are not affected.</p>
+</section>
+<section id="how-do-i-back-up-my-data">
+<h3>How do I back up my data?<a class="headerlink" href="#how-do-i-back-up-my-data" title="Link to this heading">¶</a></h3>
+<p>Back up the following:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Item</p></th>
+<th class="head"><p>Location</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Database</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">./data/notebooklm.db</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Configuration</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.env.local</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Workspace files</p></td>
+<td><p>Directories listed in <code class="docutils literal notranslate"><span class="pre">WORKSPACE_ROOTS</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="the-development-server-won-t-start">
+<h3>The development server won’t start<a class="headerlink" href="#the-development-server-won-t-start" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Ensure Node.js 18+ is installed: <code class="docutils literal notranslate"><span class="pre">node</span> <span class="pre">--version</span></code></p></li>
+<li><p>Ensure dependencies are installed: <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">install</span></code></p></li>
+<li><p>Ensure the database is initialized: <code class="docutils literal notranslate"><span class="pre">npx</span> <span class="pre">drizzle-kit</span> <span class="pre">migrate</span></code></p></li>
+<li><p>Ensure <code class="docutils literal notranslate"><span class="pre">WORKSPACE_ROOTS</span></code> directories exist on disk</p></li>
+<li><p>Check for port conflicts on port 3000</p></li>
+</ol>
+</section>
+<section id="build-fails-with-font-related-errors">
+<h3>Build fails with font-related errors<a class="headerlink" href="#build-fails-with-font-related-errors" title="Link to this heading">¶</a></h3>
+<p>If <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">build</span></code> fails with errors about fetching Google Fonts, this is a network issue. Ensure your build environment has internet access, or configure Next.js to use local fonts.</p>
+</section>
+<section id="how-do-i-change-the-port">
+<h3>How do I change the port?<a class="headerlink" href="#how-do-i-change-the-port" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Development</span>
+</span><span data-line="2"><span class="nv">PORT</span><span class="o">=</span><span class="m">8080</span><span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>dev
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Production</span>
+</span><span data-line="5"><span class="nv">PORT</span><span class="o">=</span><span class="m">8080</span><span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>start
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>GitHub Issues</strong> — <a class="reference external" href="https://github.com/zjowowen/notebooklm/issues">Report bugs or request features</a></p></li>
+<li><p><strong>Documentation</strong> — You’re reading it! Check other sections for specific topics</p></li>
+<li><p><strong>Source Code</strong> — The code is well-structured and documented; see <a class="reference internal" href="../development/project-structure.html"><span class="std std-doc">Project Structure</span></a></p></li>
+</ul>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="../development/documentation.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Documentation Development</div></div>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, NotebookLM Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+<a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Core Features - NotebookLM Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Configuration" href="configuration.html" /><link rel="prev" title="Environment Variables" href="../getting-started/environment-variables.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Core Features"/>
+<meta name="twitter:card" content="summary"/>
+  
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>NotebookLM</strong>
+    </a>
+    <div class="sy-head-nav" id="HeadNav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../getting-started/overview.html">Getting Started</a></li><li class="link"><a href="#">Usage</a></li><li class="link"><a href="../development/contributing.html">Development</a></li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="nav-languages">
+  <button type="button">
+    <span class="md:hidden">Translations</span>
+    <iconify-icon icon="lucide:languages"></iconify-icon>
+  </button>
+  <div class="nav-languages-choices">
+    <ul><li><a href="/en/">English</a></li><li><a href="/zh/">简体中文</a></li></ul>
+  </div>
+</div><div class="sy-head-socials">
+  <a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="HeadNav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/environment-variables.html">Environment Variables</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage &amp; Features</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Core Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Notifications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notifications/index.html">Notifications &amp; Bot Integrations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/project-structure.html">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/local-development.html">Local Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/documentation.html">Documentation Development</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Troubleshooting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/faq.html">Troubleshooting &amp; FAQ</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#workspace-management">Workspace Management</a></li>
+<li><a class="reference internal" href="#file-browser">File Browser</a></li>
+<li><a class="reference internal" href="#rag-chat">RAG Chat</a><ul>
+<li><a class="reference internal" href="#supported-file-types-for-rag">Supported File Types for RAG</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#note-generation">Note Generation</a></li>
+<li><a class="reference internal" href="#agent-mode">Agent Mode</a></li>
+<li><a class="reference internal" href="#skills">Skills</a></li>
+<li><a class="reference internal" href="#multi-llm-support">Multi-LLM Support</a></li>
+<li><a class="reference internal" href="#bilingual-ui">Bilingual UI</a></li>
+<li><a class="reference internal" href="#dark-mode">Dark Mode</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">NotebookLM</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Core Features</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="core-features">
+<h1>Core Features<a class="headerlink" href="#core-features" title="Link to this heading">¶</a></h1>
+<p>NotebookLM provides a rich set of features for AI-powered research and file management.</p>
+<section id="workspace-management">
+<h2>Workspace Management<a class="headerlink" href="#workspace-management" title="Link to this heading">¶</a></h2>
+<p>Workspaces map server-side folders into the application. Each workspace is a persistent container for files, chat history, and notes.</p>
+<ul class="simple">
+<li><p><strong>Create</strong> workspaces from any allowed root directory (configured via <code class="docutils literal notranslate"><span class="pre">WORKSPACE_ROOTS</span></code>)</p></li>
+<li><p><strong>Open</strong> existing workspaces from the home page</p></li>
+<li><p><strong>Delete</strong> workspaces (removes only the database record; files on disk are preserved)</p></li>
+<li><p><strong>GitHub Clone</strong> — Clone a GitHub repository directly as a new workspace</p></li>
+</ul>
+</section>
+<section id="file-browser">
+<h2>File Browser<a class="headerlink" href="#file-browser" title="Link to this heading">¶</a></h2>
+<p>The file browser provides full file management within a workspace:</p>
+<ul class="simple">
+<li><p><strong>Tree View</strong> — Hierarchical directory browsing with expand/collapse</p></li>
+<li><p><strong>Upload</strong> — Drag-and-drop or click to upload files</p></li>
+<li><p><strong>Create</strong> — New files and folders</p></li>
+<li><p><strong>Edit</strong> — Open files in the built-in editor</p></li>
+<li><p><strong>Rename / Delete</strong> — Right-click context menu</p></li>
+<li><p><strong>Preview</strong> — Preview images, PDFs, 3D models (STL, OBJ, GLTF, etc.), and more</p></li>
+<li><p><strong>Sync</strong> — Trigger RAG indexing to enable AI-powered search</p></li>
+</ul>
+</section>
+<section id="rag-chat">
+<h2>RAG Chat<a class="headerlink" href="#rag-chat" title="Link to this heading">¶</a></h2>
+<p>The AI chat interface uses Retrieval-Augmented Generation to answer questions based on your workspace files:</p>
+<ol class="arabic simple">
+<li><p><strong>Sync</strong> your workspace to index files into the vector store</p></li>
+<li><p><strong>Ask questions</strong> in the chat panel</p></li>
+<li><p><strong>Receive answers</strong> with <code class="docutils literal notranslate"><span class="pre">[Source:</span> <span class="pre">filename]</span></code> citations pointing to the relevant files</p></li>
+<li><p><strong>Multi-turn conversations</strong> — Context is maintained across messages</p></li>
+</ol>
+<section id="supported-file-types-for-rag">
+<h3>Supported File Types for RAG<a class="headerlink" href="#supported-file-types-for-rag" title="Link to this heading">¶</a></h3>
+<p>The following file types are supported for text extraction and indexing:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Category</p></th>
+<th class="head"><p>Extensions</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Documents</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.pdf</span></code>, <code class="docutils literal notranslate"><span class="pre">.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">.md</span></code>, <code class="docutils literal notranslate"><span class="pre">.html</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Data</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.json</span></code>, <code class="docutils literal notranslate"><span class="pre">.csv</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Code</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.js</span></code>, <code class="docutils literal notranslate"><span class="pre">.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">.py</span></code>, <code class="docutils literal notranslate"><span class="pre">.java</span></code>, <code class="docutils literal notranslate"><span class="pre">.go</span></code>, <code class="docutils literal notranslate"><span class="pre">.rs</span></code>, <code class="docutils literal notranslate"><span class="pre">.cpp</span></code>, <code class="docutils literal notranslate"><span class="pre">.c</span></code>, <code class="docutils literal notranslate"><span class="pre">.rb</span></code>, <code class="docutils literal notranslate"><span class="pre">.php</span></code>, and more</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="note-generation">
+<h2>Note Generation<a class="headerlink" href="#note-generation" title="Link to this heading">¶</a></h2>
+<p>Automatically generate structured notes from your workspace content:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Summary</strong></p></td>
+<td><p>Concise overview of key points</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>FAQ</strong></p></td>
+<td><p>Frequently asked questions with answers</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Brief</strong></p></td>
+<td><p>Executive-style briefing document</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Timeline</strong></p></td>
+<td><p>Chronological sequence of events</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Notes can also be created and edited manually.</p>
+</section>
+<section id="agent-mode">
+<h2>Agent Mode<a class="headerlink" href="#agent-mode" title="Link to this heading">¶</a></h2>
+<p>The Agent mode provides an autonomous AI assistant with access to system tools:</p>
+<ul class="simple">
+<li><p><strong>Bash</strong> — Execute shell commands</p></li>
+<li><p><strong>File Operations</strong> — Read, write, and list directory contents</p></li>
+<li><p><strong>Grep</strong> — Search file contents with regular expressions</p></li>
+<li><p><strong>kubectl</strong> — Kubernetes cluster management (when configured)</p></li>
+</ul>
+<p>Agent mode is useful for tasks that require interacting with the file system or running commands.</p>
+</section>
+<section id="skills">
+<h2>Skills<a class="headerlink" href="#skills" title="Link to this heading">¶</a></h2>
+<p>Skills are reusable prompt templates for common tasks:</p>
+<ul class="simple">
+<li><p>Create custom skills with specific instructions</p></li>
+<li><p>Configure which tools a skill can access</p></li>
+<li><p>Skills can be triggered from the chat interface</p></li>
+<li><p>Built-in skills for common operations</p></li>
+</ul>
+</section>
+<section id="multi-llm-support">
+<h2>Multi-LLM Support<a class="headerlink" href="#multi-llm-support" title="Link to this heading">¶</a></h2>
+<p>Switch between different AI providers and models:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Provider</p></th>
+<th class="head"><p>Models</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>OpenAI</strong></p></td>
+<td><p>GPT-4o, GPT-4, GPT-3.5, and compatible models</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Anthropic</strong></p></td>
+<td><p>Claude 3.5, Claude 3, and compatible models</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Custom endpoints are supported via <code class="docutils literal notranslate"><span class="pre">OPENAI_BASE_URL</span></code> and <code class="docutils literal notranslate"><span class="pre">ANTHROPIC_BASE_URL</span></code> for third-party providers.</p>
+</section>
+<section id="bilingual-ui">
+<h2>Bilingual UI<a class="headerlink" href="#bilingual-ui" title="Link to this heading">¶</a></h2>
+<p>The user interface supports both Chinese and English:</p>
+<ul class="simple">
+<li><p>Click the <strong>language toggle</strong> in the top navigation bar</p></li>
+<li><p>All UI elements, labels, and messages are translated</p></li>
+<li><p>Language preference is persisted across sessions</p></li>
+</ul>
+</section>
+<section id="dark-mode">
+<h2>Dark Mode<a class="headerlink" href="#dark-mode" title="Link to this heading">¶</a></h2>
+<p>Toggle between light and dark themes:</p>
+<ul class="simple">
+<li><p>Click the <strong>theme toggle</strong> in the top navigation bar</p></li>
+<li><p>Applies to all panels including the file browser, chat, and editor</p></li>
+<li><p>Theme preference is persisted across sessions</p></li>
+</ul>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="../getting-started/environment-variables.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Environment Variables</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="configuration.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Configuration</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, NotebookLM Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+<a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+</html>

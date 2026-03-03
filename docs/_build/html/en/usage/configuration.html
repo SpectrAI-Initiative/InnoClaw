@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Configuration - NotebookLM Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API Reference" href="api-reference.html" /><link rel="prev" title="Core Features" href="features.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Configuration"/>
+<meta name="twitter:card" content="summary"/>
+  
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>NotebookLM</strong>
+    </a>
+    <div class="sy-head-nav" id="HeadNav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../getting-started/overview.html">Getting Started</a></li><li class="link"><a href="features.html">Usage</a></li><li class="link"><a href="../development/contributing.html">Development</a></li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="nav-languages">
+  <button type="button">
+    <span class="md:hidden">Translations</span>
+    <iconify-icon icon="lucide:languages"></iconify-icon>
+  </button>
+  <div class="nav-languages-choices">
+    <ul><li><a href="/en/">English</a></li><li><a href="/zh/">简体中文</a></li></ul>
+  </div>
+</div><div class="sy-head-socials">
+  <a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="HeadNav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/environment-variables.html">Environment Variables</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage &amp; Features</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="features.html">Core Features</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Notifications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notifications/index.html">Notifications &amp; Bot Integrations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/project-structure.html">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/local-development.html">Local Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/documentation.html">Documentation Development</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Troubleshooting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/faq.html">Troubleshooting &amp; FAQ</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#environment-based-configuration">Environment-Based Configuration</a></li>
+<li><a class="reference internal" href="#ai-provider-settings">AI Provider Settings</a><ul>
+<li><a class="reference internal" href="#selecting-a-provider">Selecting a Provider</a></li>
+<li><a class="reference internal" href="#using-custom-endpoints">Using Custom Endpoints</a></li>
+<li><a class="reference internal" href="#separate-embedding-configuration">Separate Embedding Configuration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#in-app-settings">In-App Settings</a></li>
+<li><a class="reference internal" href="#workspace-configuration">Workspace Configuration</a><ul>
+<li><a class="reference internal" href="#root-directories">Root Directories</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#database-configuration">Database Configuration</a></li>
+<li><a class="reference internal" href="#bot-integration-configuration">Bot Integration Configuration</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">NotebookLM</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Configuration</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h1>
+<p>This page describes how to customize NotebookLM’s behavior through configuration options.</p>
+<section id="environment-based-configuration">
+<h2>Environment-Based Configuration<a class="headerlink" href="#environment-based-configuration" title="Link to this heading">¶</a></h2>
+<p>All configuration is done through environment variables in your <code class="docutils literal notranslate"><span class="pre">.env.local</span></code> file. See <a class="reference internal" href="../getting-started/environment-variables.html"><span class="std std-doc">Environment Variables</span></a> for a complete reference.</p>
+</section>
+<section id="ai-provider-settings">
+<h2>AI Provider Settings<a class="headerlink" href="#ai-provider-settings" title="Link to this heading">¶</a></h2>
+<section id="selecting-a-provider">
+<h3>Selecting a Provider<a class="headerlink" href="#selecting-a-provider" title="Link to this heading">¶</a></h3>
+<p>NotebookLM supports multiple AI providers. Configure your preferred provider by setting the appropriate API key:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Use OpenAI</span>
+</span><span data-line="2"><span class="na">OPENAI_API_KEY</span><span class="o">=</span><span class="s">sk-xxxxxxxxxxxxxxxxxxxxxxxx</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Use Anthropic Claude</span>
+</span><span data-line="5"><span class="na">ANTHROPIC_API_KEY</span><span class="o">=</span><span class="s">sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="c1"># Or configure both and switch in the Settings UI</span>
+</span></pre></div>
+</div>
+</section>
+<section id="using-custom-endpoints">
+<h3>Using Custom Endpoints<a class="headerlink" href="#using-custom-endpoints" title="Link to this heading">¶</a></h3>
+<p>For third-party compatible services, proxies, or self-hosted models:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Custom OpenAI-compatible endpoint</span>
+</span><span data-line="2"><span class="na">OPENAI_BASE_URL</span><span class="o">=</span><span class="s">https://api.your-provider.com/v1</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Custom Anthropic endpoint</span>
+</span><span data-line="5"><span class="na">ANTHROPIC_BASE_URL</span><span class="o">=</span><span class="s">https://api.your-provider.com</span>
+</span></pre></div>
+</div>
+</section>
+<section id="separate-embedding-configuration">
+<h3>Separate Embedding Configuration<a class="headerlink" href="#separate-embedding-configuration" title="Link to this heading">¶</a></h3>
+<p>If your chat model provider doesn’t support the embedding endpoint, configure a separate service:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="na">EMBEDDING_API_KEY</span><span class="o">=</span><span class="s">sk-your-embedding-key</span>
+</span><span data-line="2"><span class="na">EMBEDDING_BASE_URL</span><span class="o">=</span><span class="s">https://api.your-embedding-provider.com/v1</span>
+</span><span data-line="3"><span class="na">EMBEDDING_MODEL</span><span class="o">=</span><span class="s">text-embedding-3-small</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="in-app-settings">
+<h2>In-App Settings<a class="headerlink" href="#in-app-settings" title="Link to this heading">¶</a></h2>
+<p>Access the settings page at <code class="docutils literal notranslate"><span class="pre">/settings</span></code> to:</p>
+<ul class="simple">
+<li><p><strong>Switch AI Provider</strong> — Toggle between OpenAI and Anthropic</p></li>
+<li><p><strong>Select Model</strong> — Choose the specific model to use for chat</p></li>
+<li><p><strong>View API Status</strong> — Check which API keys are configured</p></li>
+<li><p><strong>View Workspace Roots</strong> — See the configured workspace root directories</p></li>
+</ul>
+</section>
+<section id="workspace-configuration">
+<h2>Workspace Configuration<a class="headerlink" href="#workspace-configuration" title="Link to this heading">¶</a></h2>
+<section id="root-directories">
+<h3>Root Directories<a class="headerlink" href="#root-directories" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">WORKSPACE_ROOTS</span></code> variable controls which server directories users can create workspaces in:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Single root</span>
+</span><span data-line="2"><span class="na">WORKSPACE_ROOTS</span><span class="o">=</span><span class="s">/data/workspaces</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Multiple roots (comma-separated)</span>
+</span><span data-line="5"><span class="na">WORKSPACE_ROOTS</span><span class="o">=</span><span class="s">/data/research,/data/projects,/home/user/documents</span>
+</span></pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<ul class="simple">
+<li><p>All specified directories must already exist on the server</p></li>
+<li><p>Users can only create workspaces within these root directories</p></li>
+<li><p>Path traversal outside these roots is prevented by security checks</p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="database-configuration">
+<h2>Database Configuration<a class="headerlink" href="#database-configuration" title="Link to this heading">¶</a></h2>
+<p>NotebookLM uses SQLite with the database stored at <code class="docutils literal notranslate"><span class="pre">./data/notebooklm.db</span></code>. This location is set in <code class="docutils literal notranslate"><span class="pre">drizzle.config.ts</span></code> and is not currently configurable via environment variables.</p>
+<p>To use a fresh database:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Remove existing database</span>
+</span><span data-line="2">rm<span class="w"> </span>./data/notebooklm.db
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Re-run migrations</span>
+</span><span data-line="5">npx<span class="w"> </span>drizzle-kit<span class="w"> </span>migrate
+</span></pre></div>
+</div>
+</section>
+<section id="bot-integration-configuration">
+<h2>Bot Integration Configuration<a class="headerlink" href="#bot-integration-configuration" title="Link to this heading">¶</a></h2>
+<p>See <a class="reference internal" href="../notifications/index.html"><span class="std std-doc">Notifications</span></a> for configuring Feishu and WeChat bot integrations.</p>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="features.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Core Features</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="api-reference.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">API Reference</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, NotebookLM Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+<a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+</html>

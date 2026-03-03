@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Documentation Development - NotebookLM Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Troubleshooting &amp; FAQ" href="../troubleshooting/faq.html" /><link rel="prev" title="Testing" href="testing.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Documentation Development"/>
+<meta name="twitter:card" content="summary"/>
+  
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>NotebookLM</strong>
+    </a>
+    <div class="sy-head-nav" id="HeadNav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../getting-started/overview.html">Getting Started</a></li><li class="link"><a href="../usage/features.html">Usage</a></li><li class="link"><a href="contributing.html">Development</a></li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="nav-languages">
+  <button type="button">
+    <span class="md:hidden">Translations</span>
+    <iconify-icon icon="lucide:languages"></iconify-icon>
+  </button>
+  <div class="nav-languages-choices">
+    <ul><li><a href="/en/">English</a></li><li><a href="/zh/">简体中文</a></li></ul>
+  </div>
+</div><div class="sy-head-socials">
+  <a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="HeadNav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/environment-variables.html">Environment Variables</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage &amp; Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/features.html">Core Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Notifications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notifications/index.html">Notifications &amp; Bot Integrations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="project-structure.html">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local-development.html">Local Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation Development</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Troubleshooting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/faq.html">Troubleshooting &amp; FAQ</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#building-docs-locally">Building Docs Locally</a><ul>
+<li><a class="reference internal" href="#install-dependencies">Install Dependencies</a></li>
+<li><a class="reference internal" href="#build-english-documentation">Build English Documentation</a></li>
+<li><a class="reference internal" href="#build-chinese-documentation">Build Chinese Documentation</a></li>
+<li><a class="reference internal" href="#build-both-languages">Build Both Languages</a></li>
+<li><a class="reference internal" href="#clean-build-artifacts">Clean Build Artifacts</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#adding-new-pages">Adding New Pages</a></li>
+<li><a class="reference internal" href="#myst-markdown-syntax">MyST Markdown Syntax</a><ul>
+<li><a class="reference internal" href="#admonitions">Admonitions</a></li>
+<li><a class="reference internal" href="#mermaid-diagrams">Mermaid Diagrams</a></li>
+<li><a class="reference internal" href="#tables">Tables</a></li>
+<li><a class="reference internal" href="#cross-references">Cross-References</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#translation-workflow">Translation Workflow</a><ul>
+<li><a class="reference internal" href="#how-it-works">How It Works</a></li>
+<li><a class="reference internal" href="#updating-translations">Updating Translations</a></li>
+<li><a class="reference internal" href="#editing-translations">Editing Translations</a></li>
+<li><a class="reference internal" href="#building-translated-documentation">Building Translated Documentation</a></li>
+<li><a class="reference internal" href="#translation-checklist">Translation Checklist</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#file-structure">File Structure</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">NotebookLM</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Documentation Development</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="documentation-development">
+<h1>Documentation Development<a class="headerlink" href="#documentation-development" title="Link to this heading">¶</a></h1>
+<p>This guide explains how to build the documentation locally, add new pages, and contribute translations.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Python 3.9+</strong> installed</p></li>
+<li><p><strong>pip</strong> package manager</p></li>
+</ul>
+</section>
+<section id="building-docs-locally">
+<h2>Building Docs Locally<a class="headerlink" href="#building-docs-locally" title="Link to this heading">¶</a></h2>
+<section id="install-dependencies">
+<h3>Install Dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nb">cd</span><span class="w"> </span>docs
+</span><span data-line="2">pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</span></pre></div>
+</div>
+</section>
+<section id="build-english-documentation">
+<h3>Build English Documentation<a class="headerlink" href="#build-english-documentation" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">make<span class="w"> </span>html
+</span></pre></div>
+</div>
+<p>The output is generated in <code class="docutils literal notranslate"><span class="pre">docs/_build/html/en/</span></code>. Open <code class="docutils literal notranslate"><span class="pre">docs/_build/html/en/index.html</span></code> in your browser.</p>
+</section>
+<section id="build-chinese-documentation">
+<h3>Build Chinese Documentation<a class="headerlink" href="#build-chinese-documentation" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">make<span class="w"> </span>html-zh
+</span></pre></div>
+</div>
+<p>The output is generated in <code class="docutils literal notranslate"><span class="pre">docs/_build/html/zh/</span></code>.</p>
+</section>
+<section id="build-both-languages">
+<h3>Build Both Languages<a class="headerlink" href="#build-both-languages" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">make<span class="w"> </span>html-all
+</span></pre></div>
+</div>
+</section>
+<section id="clean-build-artifacts">
+<h3>Clean Build Artifacts<a class="headerlink" href="#clean-build-artifacts" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">make<span class="w"> </span>clean
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="adding-new-pages">
+<h2>Adding New Pages<a class="headerlink" href="#adding-new-pages" title="Link to this heading">¶</a></h2>
+<ol class="arabic">
+<li><p><strong>Create a Markdown file</strong> in the appropriate directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Example: adding a new guide</span>
+</span><span data-line="2">touch<span class="w"> </span>docs/usage/new-feature.md
+</span></pre></div>
+</div>
+</li>
+<li><p><strong>Write content</strong> using MyST Markdown syntax:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gh"># New Feature</span>
+</span><span data-line="2">
+</span><span data-line="3">Description of the new feature.
+</span><span data-line="4">
+</span><span data-line="5"><span class="gu">## Section Title</span>
+</span><span data-line="6">
+</span><span data-line="7">Content goes here.
+</span></pre></div>
+</div>
+</li>
+<li><p><strong>Add to the table of contents</strong> in <code class="docutils literal notranslate"><span class="pre">docs/index.md</span></code>:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span data-line="1">```{toctree}
+</span><span data-line="2">:maxdepth: 2
+</span><span data-line="3">:caption: Usage &amp; Features
+</span><span data-line="4">
+</span><span data-line="5">usage/features
+</span><span data-line="6">usage/configuration
+</span><span data-line="7">usage/api-reference
+</span><span data-line="8">usage/new-feature
+</span></pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">
+</span></pre></div>
+</div>
+</li>
+<li><p><strong>Build and verify</strong> locally:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">make<span class="w"> </span>html
+</span></pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="myst-markdown-syntax">
+<h2>MyST Markdown Syntax<a class="headerlink" href="#myst-markdown-syntax" title="Link to this heading">¶</a></h2>
+<p>NotebookLM docs use <a class="reference external" href="https://myst-parser.readthedocs.io/">MyST-Parser</a> for Markdown support in Sphinx.</p>
+<section id="admonitions">
+<h3>Admonitions<a class="headerlink" href="#admonitions" title="Link to this heading">¶</a></h3>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span data-line="1">:::{note}
+</span><span data-line="2">This is a note.
+</span><span data-line="3">:::
+</span><span data-line="4">
+</span><span data-line="5">:::{warning}
+</span><span data-line="6">This is a warning.
+</span><span data-line="7">:::
+</span><span data-line="8">
+</span><span data-line="9">:::{tip}
+</span><span data-line="10">This is a tip.
+</span><span data-line="11">:::
+</span><span data-line="12">
+</span><span data-line="13">:::{important}
+</span><span data-line="14">This is important.
+</span><span data-line="15">:::
+</span></pre></div>
+</div>
+</section>
+<section id="mermaid-diagrams">
+<h3>Mermaid Diagrams<a class="headerlink" href="#mermaid-diagrams" title="Link to this heading">¶</a></h3>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span data-line="1">```{mermaid}
+</span><span data-line="2">graph LR
+</span><span data-line="3">    A --&gt; B --&gt; C
+</span><span data-line="4">```
+</span></pre></div>
+</div>
+</section>
+<section id="tables">
+<h3>Tables<a class="headerlink" href="#tables" title="Link to this heading">¶</a></h3>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span data-line="1">| Column 1 | Column 2 |
+</span><span data-line="2">|----------|----------|
+</span><span data-line="3">| Value 1  | Value 2  |
+</span></pre></div>
+</div>
+</section>
+<section id="cross-references">
+<h3>Cross-References<a class="headerlink" href="#cross-references" title="Link to this heading">¶</a></h3>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span data-line="1">See [<span class="nt">Installation Guide</span>](<span class="na">getting-started/installation.md</span>) for details.
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="translation-workflow">
+<h2>Translation Workflow<a class="headerlink" href="#translation-workflow" title="Link to this heading">¶</a></h2>
+<p>NotebookLM documentation uses Sphinx’s built-in internationalization (i18n) with <code class="docutils literal notranslate"><span class="pre">sphinx-intl</span></code>.</p>
+<section id="how-it-works">
+<h3>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>English (<code class="docutils literal notranslate"><span class="pre">.md</span></code>) files are the <strong>source of truth</strong></p></li>
+<li><p>Sphinx extracts translatable strings into <code class="docutils literal notranslate"><span class="pre">.pot</span></code> template files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sphinx-intl</span></code> generates <code class="docutils literal notranslate"><span class="pre">.po</span></code> translation files for each language</p></li>
+<li><p>Translators edit the <code class="docutils literal notranslate"><span class="pre">.po</span></code> files to add translations</p></li>
+<li><p>Sphinx builds the translated documentation using the <code class="docutils literal notranslate"><span class="pre">.po</span></code> files</p></li>
+</ol>
+</section>
+<section id="updating-translations">
+<h3>Updating Translations<a class="headerlink" href="#updating-translations" title="Link to this heading">¶</a></h3>
+<p>After modifying English source files, update the translation files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Step 1: Extract translatable strings</span>
+</span><span data-line="2">make<span class="w"> </span>gettext
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Step 2: Update .po files for Chinese</span>
+</span><span data-line="5">make<span class="w"> </span>update-po
+</span></pre></div>
+</div>
+<p>This updates <code class="docutils literal notranslate"><span class="pre">docs/locales/zh/LC_MESSAGES/*.po</span></code> files with new or changed strings.</p>
+</section>
+<section id="editing-translations">
+<h3>Editing Translations<a class="headerlink" href="#editing-translations" title="Link to this heading">¶</a></h3>
+<p>Open the <code class="docutils literal notranslate"><span class="pre">.po</span></code> files in <code class="docutils literal notranslate"><span class="pre">docs/locales/zh/LC_MESSAGES/</span></code> with a text editor or a PO editor like <a class="reference external" href="https://poedit.net/">Poedit</a>:</p>
+<div class="highlight-po notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kd">#: ../../getting-started/overview.md:3</span>
+</span><span data-line="2"><span class="nv">msgid</span> <span class="s">&quot;What is NotebookLM?&quot;</span>
+</span><span data-line="3"><span class="nv">msgstr</span> <span class="s">&quot;什么是 NotebookLM？&quot;</span>
+</span></pre></div>
+</div>
+<p>Each entry has:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">msgid</span></code> — The original English text</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">msgstr</span></code> — The Chinese translation (fill this in)</p></li>
+</ul>
+</section>
+<section id="building-translated-documentation">
+<h3>Building Translated Documentation<a class="headerlink" href="#building-translated-documentation" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">make<span class="w"> </span>html-zh
+</span></pre></div>
+</div>
+</section>
+<section id="translation-checklist">
+<h3>Translation Checklist<a class="headerlink" href="#translation-checklist" title="Link to this heading">¶</a></h3>
+<ul class="contains-task-list simple">
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">gettext</span></code> to extract strings</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">update-po</span></code> to update <code class="docutils literal notranslate"><span class="pre">.po</span></code> files</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Translate all <code class="docutils literal notranslate"><span class="pre">msgstr</span></code> entries in <code class="docutils literal notranslate"><span class="pre">.po</span></code> files</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html-zh</span></code> to verify the build</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Check the output for any untranslated strings</p></li>
+</ul>
+</section>
+</section>
+<section id="file-structure">
+<h2>File Structure<a class="headerlink" href="#file-structure" title="Link to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">docs/
+</span><span data-line="2">├── conf.py                  # Sphinx configuration
+</span><span data-line="3">├── index.md                 # Root index
+</span><span data-line="4">├── requirements.txt         # Python dependencies
+</span><span data-line="5">├── Makefile                 # Build commands
+</span><span data-line="6">├── _static/                 # Custom CSS, images
+</span><span data-line="7">├── _templates/              # Custom templates
+</span><span data-line="8">├── getting-started/         # Getting started guides
+</span><span data-line="9">├── usage/                   # Usage documentation
+</span><span data-line="10">├── notifications/           # Bot integration docs
+</span><span data-line="11">├── development/             # Developer guides
+</span><span data-line="12">├── troubleshooting/         # FAQ and troubleshooting
+</span><span data-line="13">└── locales/                 # Translation files
+</span><span data-line="14">    └── zh/
+</span><span data-line="15">        └── LC_MESSAGES/
+</span><span data-line="16">            └── *.po         # Chinese translations
+</span></pre></div>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="testing.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Testing</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../troubleshooting/faq.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Troubleshooting &amp; FAQ</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, NotebookLM Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+<a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+</html>

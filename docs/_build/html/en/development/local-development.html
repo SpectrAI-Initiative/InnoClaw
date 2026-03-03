@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Local Development - NotebookLM Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Testing" href="testing.html" /><link rel="prev" title="Project Structure" href="project-structure.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Local Development"/>
+<meta name="twitter:card" content="summary"/>
+  
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>NotebookLM</strong>
+    </a>
+    <div class="sy-head-nav" id="HeadNav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../getting-started/overview.html">Getting Started</a></li><li class="link"><a href="../usage/features.html">Usage</a></li><li class="link"><a href="contributing.html">Development</a></li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="nav-languages">
+  <button type="button">
+    <span class="md:hidden">Translations</span>
+    <iconify-icon icon="lucide:languages"></iconify-icon>
+  </button>
+  <div class="nav-languages-choices">
+    <ul><li><a href="/en/">English</a></li><li><a href="/zh/">简体中文</a></li></ul>
+  </div>
+</div><div class="sy-head-socials">
+  <a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="HeadNav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/environment-variables.html">Environment Variables</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage &amp; Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/features.html">Core Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Notifications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notifications/index.html">Notifications &amp; Bot Integrations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="project-structure.html">Project Structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Local Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation Development</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Troubleshooting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/faq.html">Troubleshooting &amp; FAQ</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#starting-the-development-server">Starting the Development Server</a><ul>
+<li><a class="reference internal" href="#development-features">Development Features</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#common-development-tasks">Common Development Tasks</a><ul>
+<li><a class="reference internal" href="#running-type-checks">Running Type Checks</a></li>
+<li><a class="reference internal" href="#running-lint">Running Lint</a></li>
+<li><a class="reference internal" href="#building-for-production">Building for Production</a></li>
+<li><a class="reference internal" href="#database-operations">Database Operations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#debugging">Debugging</a><ul>
+<li><a class="reference internal" href="#server-side-debugging">Server-Side Debugging</a></li>
+<li><a class="reference internal" href="#client-side-debugging">Client-Side Debugging</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#environment-setup-tips">Environment Setup Tips</a><ul>
+<li><a class="reference internal" href="#without-ai-api-keys">Without AI API Keys</a></li>
+<li><a class="reference internal" href="#multiple-root-directories">Multiple Root Directories</a></li>
+<li><a class="reference internal" href="#using-a-local-ai-proxy">Using a Local AI Proxy</a></li>
+</ul>
+</li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">NotebookLM</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Local Development</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="local-development">
+<h1>Local Development<a class="headerlink" href="#local-development" title="Link to this heading">¶</a></h1>
+<p>This guide covers running, debugging, and iterating on NotebookLM locally.</p>
+<section id="starting-the-development-server">
+<h2>Starting the Development Server<a class="headerlink" href="#starting-the-development-server" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">npm<span class="w"> </span>run<span class="w"> </span>dev
+</span></pre></div>
+</div>
+<p>This starts the Next.js development server with hot module replacement (HMR). The application is available at <strong>http://localhost:3000</strong>.</p>
+<section id="development-features">
+<h3>Development Features<a class="headerlink" href="#development-features" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Hot Reload</strong> — Changes to components and pages are reflected immediately</p></li>
+<li><p><strong>API Route Reload</strong> — Server-side API changes take effect on the next request</p></li>
+<li><p><strong>Error Overlay</strong> — Build errors and runtime errors are displayed in the browser</p></li>
+</ul>
+</section>
+</section>
+<section id="common-development-tasks">
+<h2>Common Development Tasks<a class="headerlink" href="#common-development-tasks" title="Link to this heading">¶</a></h2>
+<section id="running-type-checks">
+<h3>Running Type Checks<a class="headerlink" href="#running-type-checks" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">npx<span class="w"> </span>tsc<span class="w"> </span>--noEmit
+</span></pre></div>
+</div>
+</section>
+<section id="running-lint">
+<h3>Running Lint<a class="headerlink" href="#running-lint" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">npm<span class="w"> </span>run<span class="w"> </span>lint
+</span></pre></div>
+</div>
+<p>Uses ESLint with the project’s configured rules.</p>
+</section>
+<section id="building-for-production">
+<h3>Building for Production<a class="headerlink" href="#building-for-production" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">npm<span class="w"> </span>run<span class="w"> </span>build
+</span></pre></div>
+</div>
+<p>Creates an optimized production build. This also performs type checking.</p>
+</section>
+<section id="database-operations">
+<h3>Database Operations<a class="headerlink" href="#database-operations" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Run migrations (apply schema changes)</span>
+</span><span data-line="2">npx<span class="w"> </span>drizzle-kit<span class="w"> </span>migrate
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Generate new migration files (after modifying schema.ts)</span>
+</span><span data-line="5">npx<span class="w"> </span>drizzle-kit<span class="w"> </span>generate
+</span><span data-line="6">
+</span><span data-line="7"><span class="c1"># Explore the database interactively</span>
+</span><span data-line="8">npx<span class="w"> </span>drizzle-kit<span class="w"> </span>studio
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="debugging">
+<h2>Debugging<a class="headerlink" href="#debugging" title="Link to this heading">¶</a></h2>
+<section id="server-side-debugging">
+<h3>Server-Side Debugging<a class="headerlink" href="#server-side-debugging" title="Link to this heading">¶</a></h3>
+<ol class="arabic">
+<li><p>Start the dev server with the Node.js inspector:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nv">NODE_OPTIONS</span><span class="o">=</span><span class="s1">&#39;--inspect&#39;</span><span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>dev
+</span></pre></div>
+</div>
+</li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">chrome://inspect</span></code> in Chrome and connect to the Node.js process</p></li>
+<li><p>Set breakpoints in API routes and server-side code</p></li>
+</ol>
+</section>
+<section id="client-side-debugging">
+<h3>Client-Side Debugging<a class="headerlink" href="#client-side-debugging" title="Link to this heading">¶</a></h3>
+<p>Use the browser’s built-in developer tools:</p>
+<ul class="simple">
+<li><p><strong>React DevTools</strong> — Inspect component hierarchy and state</p></li>
+<li><p><strong>Network Tab</strong> — Monitor API requests and responses</p></li>
+<li><p><strong>Console</strong> — View logs and errors</p></li>
+</ul>
+</section>
+</section>
+<section id="environment-setup-tips">
+<h2>Environment Setup Tips<a class="headerlink" href="#environment-setup-tips" title="Link to this heading">¶</a></h2>
+<section id="without-ai-api-keys">
+<h3>Without AI API Keys<a class="headerlink" href="#without-ai-api-keys" title="Link to this heading">¶</a></h3>
+<p>You can develop most features without configuring AI API keys:</p>
+<ul class="simple">
+<li><p>Workspace management, file browser, and UI components work without any API key</p></li>
+<li><p>AI chat and note generation features will show a “not configured” message</p></li>
+</ul>
+</section>
+<section id="multiple-root-directories">
+<h3>Multiple Root Directories<a class="headerlink" href="#multiple-root-directories" title="Link to this heading">¶</a></h3>
+<p>For testing workspace management with multiple roots:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="na">WORKSPACE_ROOTS</span><span class="o">=</span><span class="s">/tmp/workspace-a,/tmp/workspace-b</span>
+</span></pre></div>
+</div>
+</section>
+<section id="using-a-local-ai-proxy">
+<h3>Using a Local AI Proxy<a class="headerlink" href="#using-a-local-ai-proxy" title="Link to this heading">¶</a></h3>
+<p>If you run a local LLM (e.g., via Ollama or LM Studio) with an OpenAI-compatible API:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="na">OPENAI_API_KEY</span><span class="o">=</span><span class="s">dummy-key</span>
+</span><span data-line="2"><span class="na">OPENAI_BASE_URL</span><span class="o">=</span><span class="s">http://localhost:11434/v1</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="project-structure.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Project Structure</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="testing.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Testing</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, NotebookLM Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+<a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script></body>
+</html>

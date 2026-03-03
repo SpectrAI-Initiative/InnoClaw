@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Project Structure - NotebookLM Documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Local Development" href="local-development.html" /><link rel="prev" title="Contributing" href="contributing.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=10d1008b" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Project Structure"/>
+<meta name="twitter:card" content="summary"/>
+  
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>NotebookLM</strong>
+    </a>
+    <div class="sy-head-nav" id="HeadNav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../getting-started/overview.html">Getting Started</a></li><li class="link"><a href="../usage/features.html">Usage</a></li><li class="link"><a href="contributing.html">Development</a></li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="nav-languages">
+  <button type="button">
+    <span class="md:hidden">Translations</span>
+    <iconify-icon icon="lucide:languages"></iconify-icon>
+  </button>
+  <div class="nav-languages-choices">
+    <ul><li><a href="/en/">English</a></li><li><a href="/zh/">简体中文</a></li></ul>
+  </div>
+</div><div class="sy-head-socials">
+  <a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="HeadNav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/environment-variables.html">Environment Variables</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage &amp; Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/features.html">Core Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/api-reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Notifications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notifications/index.html">Notifications &amp; Bot Integrations</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Project Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local-development.html">Local Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation Development</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Troubleshooting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/faq.html">Troubleshooting &amp; FAQ</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#high-level-structure">High-Level Structure</a></li>
+<li><a class="reference internal" href="#directory-layout">Directory Layout</a></li>
+<li><a class="reference internal" href="#key-modules">Key Modules</a><ul>
+<li><a class="reference internal" href="#app-router-src-app">App Router (<code class="docutils literal notranslate"><span class="pre">src/app/</span></code>)</a></li>
+<li><a class="reference internal" href="#components-src-components">Components (<code class="docutils literal notranslate"><span class="pre">src/components/</span></code>)</a></li>
+<li><a class="reference internal" href="#database-src-lib-db">Database (<code class="docutils literal notranslate"><span class="pre">src/lib/db/</span></code>)</a></li>
+<li><a class="reference internal" href="#rag-pipeline-src-lib-rag">RAG Pipeline (<code class="docutils literal notranslate"><span class="pre">src/lib/rag/</span></code>)</a></li>
+<li><a class="reference internal" href="#bot-integrations-src-lib-bot">Bot Integrations (<code class="docutils literal notranslate"><span class="pre">src/lib/bot/</span></code>)</a></li>
+</ul>
+</li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6"><div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">NotebookLM</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Project Structure</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="project-structure">
+<h1>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading">¶</a></h1>
+<p>This page describes the directory layout and module organization of NotebookLM.</p>
+<section id="high-level-structure">
+<h2>High-Level Structure<a class="headerlink" href="#high-level-structure" title="Link to this heading">¶</a></h2>
+<pre  class="mermaid">
+        graph TB
+    subgraph App[&quot;src/app/ — Pages &amp; API Routes&quot;]
+        Pages[&quot;Pages&lt;br/&gt;(page.tsx)&quot;]
+        APIRoutes[&quot;API Routes&lt;br/&gt;(route.ts)&quot;]
+    end
+
+    subgraph Components[&quot;src/components/ — React Components&quot;]
+        UI[&quot;ui/ (shadcn/ui)&quot;]
+        Layout[&quot;layout/&quot;]
+        Workspace[&quot;workspaces/&quot;]
+        FileBrowser[&quot;files/&quot;]
+        Chat[&quot;chat/&quot;]
+        Notes[&quot;notes/&quot;]
+        Agent[&quot;agent/&quot;]
+        Skills[&quot;skills/&quot;]
+    end
+
+    subgraph Lib[&quot;src/lib/ — Core Business Logic&quot;]
+        DB[&quot;db/ (Drizzle ORM)&quot;]
+        AILib[&quot;ai/ (Provider Config)&quot;]
+        RAGLib[&quot;rag/ (Pipeline)&quot;]
+        FilesLib[&quot;files/ (FS Operations)&quot;]
+        GitLib[&quot;git/ (GitHub)&quot;]
+        BotLib[&quot;bot/ (Feishu, WeChat)&quot;]
+        Hooks[&quot;hooks/ (SWR)&quot;]
+    end
+
+    Pages --&gt; Components
+    APIRoutes --&gt; Lib
+    Components --&gt; Hooks
+    Hooks --&gt; APIRoutes
+    </pre></section>
+<section id="directory-layout">
+<h2>Directory Layout<a class="headerlink" href="#directory-layout" title="Link to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">notebooklm/
+</span><span data-line="2">├── src/
+</span><span data-line="3">│   ├── app/                          # Next.js App Router
+</span><span data-line="4">│   │   ├── page.tsx                  # Home page (workspace list)
+</span><span data-line="5">│   │   ├── layout.tsx                # Root layout
+</span><span data-line="6">│   │   ├── globals.css               # Global styles
+</span><span data-line="7">│   │   ├── settings/page.tsx         # Settings page
+</span><span data-line="8">│   │   ├── workspace/[workspaceId]/  # Workspace page (3-panel layout)
+</span><span data-line="9">│   │   ├── skills/                   # Skills management page
+</span><span data-line="10">│   │   └── api/                      # API routes
+</span><span data-line="11">│   │       ├── workspaces/           # Workspace CRUD
+</span><span data-line="12">│   │       ├── files/                # File operations
+</span><span data-line="13">│   │       ├── git/                  # Git clone/pull/status
+</span><span data-line="14">│   │       ├── chat/                 # AI chat (streaming)
+</span><span data-line="15">│   │       ├── generate/             # Note generation
+</span><span data-line="16">│   │       ├── notes/                # Note CRUD
+</span><span data-line="17">│   │       ├── settings/             # Settings management
+</span><span data-line="18">│   │       ├── skills/               # Skills CRUD
+</span><span data-line="19">│   │       ├── bot/                  # Bot webhook endpoints
+</span><span data-line="20">│   │       └── terminal/             # Terminal command execution
+</span><span data-line="21">│   ├── components/                   # React components
+</span><span data-line="22">│   │   ├── ui/                       # shadcn/ui base components
+</span><span data-line="23">│   │   ├── layout/                   # Header, theme toggle, language toggle
+</span><span data-line="24">│   │   ├── workspaces/               # Workspace list and creation
+</span><span data-line="25">│   │   ├── files/                    # File browser, file tree, upload
+</span><span data-line="26">│   │   ├── chat/                     # Chat messages and input
+</span><span data-line="27">│   │   ├── notes/                    # Notes list and editor
+</span><span data-line="28">│   │   ├── git/                      # Git clone/pull dialogs
+</span><span data-line="29">│   │   ├── agent/                    # Agent mode panel
+</span><span data-line="30">│   │   ├── skills/                   # Skills form and list
+</span><span data-line="31">│   │   ├── preview/                  # File preview (images, PDF, 3D)
+</span><span data-line="32">│   │   └── terminal/                 # Terminal emulator UI
+</span><span data-line="33">│   ├── lib/                          # Core business logic
+</span><span data-line="34">│   │   ├── db/                       # Database (Drizzle ORM + SQLite)
+</span><span data-line="35">│   │   │   ├── schema.ts            # Database schema definitions
+</span><span data-line="36">│   │   │   └── index.ts             # Database connection
+</span><span data-line="37">│   │   ├── ai/                       # AI provider configuration
+</span><span data-line="38">│   │   │   ├── providers.ts          # OpenAI/Anthropic setup
+</span><span data-line="39">│   │   │   ├── agent-tools.ts        # Agent mode tools
+</span><span data-line="40">│   │   │   └── tool-names.ts         # Tool name constants
+</span><span data-line="41">│   │   ├── rag/                      # RAG pipeline
+</span><span data-line="42">│   │   │   ├── chunker.ts            # Text chunking
+</span><span data-line="43">│   │   │   ├── embeddings.ts         # Vector embedding generation
+</span><span data-line="44">│   │   │   ├── retriever.ts          # Similarity search
+</span><span data-line="45">│   │   │   └── vector-store.ts       # Vector storage
+</span><span data-line="46">│   │   ├── files/                    # File system operations
+</span><span data-line="47">│   │   │   ├── workspace.ts          # Workspace file operations
+</span><span data-line="48">│   │   │   └── text-extractor.ts     # Text extraction from files
+</span><span data-line="49">│   │   ├── git/                      # GitHub operations
+</span><span data-line="50">│   │   ├── bot/                      # Bot integrations
+</span><span data-line="51">│   │   │   ├── types.ts              # BotAdapter interface
+</span><span data-line="52">│   │   │   ├── processor.ts          # Message processing
+</span><span data-line="53">│   │   │   ├── feishu/               # Feishu adapter
+</span><span data-line="54">│   │   │   └── wechat/               # WeChat adapter
+</span><span data-line="55">│   │   ├── hooks/                    # SWR data fetching hooks
+</span><span data-line="56">│   │   └── utils/                    # Utility functions
+</span><span data-line="57">│   ├── i18n/                         # Internationalization
+</span><span data-line="58">│   │   ├── request.ts                # Language detection
+</span><span data-line="59">│   │   └── messages/                 # Translation files
+</span><span data-line="60">│   │       ├── en.json               # English translations
+</span><span data-line="61">│   │       └── zh.json               # Chinese translations
+</span><span data-line="62">│   └── types/                        # TypeScript type definitions
+</span><span data-line="63">├── public/                           # Static assets
+</span><span data-line="64">├── drizzle/                          # Database migrations
+</span><span data-line="65">├── config/                           # Configuration files
+</span><span data-line="66">├── docs/                             # Documentation (Sphinx)
+</span><span data-line="67">├── data/                             # SQLite database (runtime)
+</span><span data-line="68">├── package.json                      # Node.js dependencies
+</span><span data-line="69">├── tsconfig.json                     # TypeScript configuration
+</span><span data-line="70">├── next.config.ts                    # Next.js configuration
+</span><span data-line="71">├── drizzle.config.ts                 # Drizzle ORM configuration
+</span><span data-line="72">├── vitest.config.ts                  # Vitest test configuration
+</span><span data-line="73">└── .env.example                      # Environment variable template
+</span></pre></div>
+</div>
+</section>
+<section id="key-modules">
+<h2>Key Modules<a class="headerlink" href="#key-modules" title="Link to this heading">¶</a></h2>
+<section id="app-router-src-app">
+<h3>App Router (<code class="docutils literal notranslate"><span class="pre">src/app/</span></code>)<a class="headerlink" href="#app-router-src-app" title="Link to this heading">¶</a></h3>
+<p>Next.js 16 App Router with file-based routing. Pages are server components by default; client components use the <code class="docutils literal notranslate"><span class="pre">&quot;use</span> <span class="pre">client&quot;</span></code> directive.</p>
+</section>
+<section id="components-src-components">
+<h3>Components (<code class="docutils literal notranslate"><span class="pre">src/components/</span></code>)<a class="headerlink" href="#components-src-components" title="Link to this heading">¶</a></h3>
+<p>React components organized by feature area. Uses shadcn/ui as the base component library with Tailwind CSS for styling.</p>
+</section>
+<section id="database-src-lib-db">
+<h3>Database (<code class="docutils literal notranslate"><span class="pre">src/lib/db/</span></code>)<a class="headerlink" href="#database-src-lib-db" title="Link to this heading">¶</a></h3>
+<p>SQLite database managed by Drizzle ORM. The schema defines tables for workspaces, sources, source chunks, chunk embeddings, chat messages, notes, settings, and skills.</p>
+</section>
+<section id="rag-pipeline-src-lib-rag">
+<h3>RAG Pipeline (<code class="docutils literal notranslate"><span class="pre">src/lib/rag/</span></code>)<a class="headerlink" href="#rag-pipeline-src-lib-rag" title="Link to this heading">¶</a></h3>
+<p>The Retrieval-Augmented Generation pipeline handles text chunking, vector embedding, storage, and similarity search. Uses pure JavaScript cosine similarity — no external vector database needed.</p>
+</section>
+<section id="bot-integrations-src-lib-bot">
+<h3>Bot Integrations (<code class="docutils literal notranslate"><span class="pre">src/lib/bot/</span></code>)<a class="headerlink" href="#bot-integrations-src-lib-bot" title="Link to this heading">¶</a></h3>
+<p>Implements the <code class="docutils literal notranslate"><span class="pre">BotAdapter</span></code> interface for Feishu (Lark) and WeChat Enterprise. Each adapter handles webhook verification, message parsing, and response formatting.</p>
+</section>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="contributing.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Contributing</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="local-development.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Local Development</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, NotebookLM Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+<a href="https://github.com/zjowowen/notebooklm" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/shibuya.js?v=55e26b35"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script></body>
+</html>
