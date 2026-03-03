@@ -251,7 +251,7 @@ export function createWechatAdapter(config: WechatBotConfig): BotAdapter {
       // msg_signature: encrypted mode — include body (encrypt data) in hash
       if (msgSignature) {
         return verifySignature(
-          config.token, timestamp, nonce, msgSignature, body || undefined
+          config.token, timestamp, nonce, msgSignature, body
         );
       }
       // signature: plaintext mode — token + timestamp + nonce only

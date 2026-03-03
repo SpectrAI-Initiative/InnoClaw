@@ -46,7 +46,8 @@ export async function processMessage(
   try {
     if (message.type === "file") {
       // Sanitize chatId to prevent path traversal (chatId comes from webhook payload)
-      const safeChatId = message.chatId.replace(/[^a-zA-Z0-9_-]/g, "_") || "unknown";
+      const sanitized = message.chatId.replace(/[^a-zA-Z0-9_-]/g, "_");
+      const safeChatId = sanitized || "unknown";
       const destDir = path.join(BOT_FILES_DIR, safeChatId);
       let localPath: string;
 
