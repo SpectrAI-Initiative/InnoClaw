@@ -37,8 +37,9 @@ An AI-powered research assistant web app similar to Google NotebookLM. Users ope
 
 1. **Node.js 18+**（推荐 20+）
 2. **Git**（如需 GitHub 克隆/拉取功能）
-3. **AI API Key**（可选，至少配置一个才能使用 AI 对话和生成功能；不配置时其余功能正常可用）
-4. **GitHub Token**（可选，如需克隆/拉取私有仓库）
+3. **kubectl**（如需使用 K8s 集群任务提交功能，Agent 面板的 `submitK8sJob` / `kubectl` 工具依赖此命令）
+4. **AI API Key**（可选，至少配置一个才能使用 AI 对话和生成功能；不配置时其余功能正常可用）
+5. **GitHub Token**（可选，如需克隆/拉取私有仓库）
 
 ---
 
@@ -86,6 +87,9 @@ ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
 # [可选] GitHub Personal Access Token（如需克隆/拉取私有仓库）
 # 需要 repo scope 权限
 GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxx
+
+# [可选] Kubernetes 配置文件路径（用于 Agent 面板的 kubectl / submitK8sJob 工具）
+# KUBECONFIG_PATH=/path/to/your/kubeconfig
 ```
 
 **重要说明：**
@@ -96,7 +100,40 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxx
 - `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` 支持指向任何兼容 OpenAI / Anthropic 协议的第三方服务（如自部署代理、国内中转等）
 - 所有 Key 和 URL 仅在服务器端使用，不会暴露给前端浏览器
 
-### 第 3 步：创建工作空间根目录
+### 第 3 步：安装 kubectl（可选，K8s 功能需要）
+
+Agent 面板中的 `kubectl` 和 `submitK8sJob` 工具需要服务器上安装 kubectl 命令行工具。
+
+```bash
+# 检查是否已安装
+kubectl version --client
+
+# 如未安装，根据系统架构下载安装：
+# Linux amd64
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+# Linux arm64
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"
+
+# macOS (Apple Silicon)
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/arm64/kubectl"
+
+# 安装
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/kubectl
+
+# 验证
+kubectl version --client
+```
+
+安装后，在 `.env.local` 中配置 `KUBECONFIG_PATH` 指向你的 kubeconfig 文件，并验证连通性：
+
+```bash
+export KUBECONFIG=/path/to/your/kubeconfig
+kubectl cluster-info
+```
+
+### 第 4 步：创建工作空间根目录
 
 确保 `WORKSPACE_ROOTS` 中指定的目录存在：
 
@@ -109,7 +146,7 @@ mkdir D:/Data/projects
 mkdir -p /data/research /data/projects
 ```
 
-### 第 4 步：初始化数据库
+### 第 5 步：初始化数据库
 
 ```bash
 npx drizzle-kit migrate
@@ -117,7 +154,7 @@ npx drizzle-kit migrate
 
 这会在 `./data/notebooklm.db` 创建 SQLite 数据库并执行迁移。
 
-### 第 5 步：启动开发服务器
+### 第 6 步：启动开发服务器
 
 ```bash
 npm run dev
@@ -180,8 +217,10 @@ pm2 save
 ```dockerfile
 FROM node:20-alpine
 
-# 安装 git（GitHub 集成需要）
-RUN apk add --no-cache git python3 make g++
+# 安装 git（GitHub 集成需要）和 kubectl（K8s 任务提交需要）
+RUN apk add --no-cache git python3 make g++ curl \
+    && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')/kubectl" \
+    && chmod +x kubectl && mv kubectl /usr/local/bin/
 
 WORKDIR /app
 
@@ -441,6 +480,9 @@ A: 可以。将 `WORKSPACE_ROOTS` 设置为 Linux 路径即可，例如 `WORKSPA
 
 **Q: GitHub 克隆失败？**
 A: 确保服务器已安装 `git` 命令行工具，且 `GITHUB_TOKEN` 配置正确（需要 `repo` scope）。可在终端运行 `git --version` 验证。
+
+**Q: Agent 面板提交 K8s 任务失败？**
+A: 确保服务器已安装 `kubectl` 命令行工具（运行 `kubectl version --client` 检查），并在 `.env.local` 中正确配置了 `KUBECONFIG_PATH`。可通过 `export KUBECONFIG=/path/to/kubeconfig && kubectl cluster-info` 验证集群连通性。
 
 **Q: 如何重置数据库？**
 A: 删除 `./data/notebooklm.db` 文件，然后重新运行 `npx drizzle-kit migrate`。
