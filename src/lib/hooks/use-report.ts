@@ -25,6 +25,12 @@ export function useReport(workspaceId: string) {
     setReport(readReportFromStorage(workspaceId));
   }, [workspaceId]);
 
+  // Re-read storage immediately when workspaceId changes
+  useEffect(() => {
+    refresh();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId]);
+
   // Listen for localStorage changes (from AgentPanel writing messages)
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
