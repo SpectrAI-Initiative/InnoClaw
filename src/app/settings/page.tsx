@@ -32,6 +32,8 @@ interface Settings {
   hasGithubToken: boolean;
   openaiBaseUrl: string;
   anthropicBaseUrl: string;
+  feishuBotEnabled: boolean;
+  wechatBotEnabled: boolean;
 }
 
 export default function SettingsPage() {
@@ -217,6 +219,38 @@ export default function SettingsPage() {
                   {t("notConfigured")}
                 </p>
               )}
+            </CardContent>
+          </Card>
+
+          {/* IM Bot Integrations */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("botIntegrations")}</CardTitle>
+              <CardDescription>
+                {t("botIntegrationsDesc")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">{t("feishuBot")}</span>
+                <Badge
+                  variant={settings?.feishuBotEnabled ? "default" : "secondary"}
+                >
+                  {settings?.feishuBotEnabled
+                    ? t("configured")
+                    : t("notConfigured")}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">{t("wechatBot")}</span>
+                <Badge
+                  variant={settings?.wechatBotEnabled ? "default" : "secondary"}
+                >
+                  {settings?.wechatBotEnabled
+                    ? t("configured")
+                    : t("notConfigured")}
+                </Badge>
+              </div>
             </CardContent>
           </Card>
         </div>
