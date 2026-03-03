@@ -91,6 +91,7 @@ export function buildAgentSystemPrompt(cwd: string): string {
 - **writeFile**: Create or overwrite files
 - **listDirectory**: List directory contents
 - **grep**: Search for regex patterns in files
+- **searchArticles**: Search for academic articles from arXiv and Hugging Face Daily Papers by keywords, with optional date filtering. Can also find related articles for a given paper. After showing search results, you can summarize selected articles and recommend related papers.
 - **kubectl**: Execute kubectl/vcctl commands against the Kubernetes cluster (Volcano jobs, pods, nodes, logs). Read-only operations (get, describe, logs, etc.) are allowed by default; mutating operations require confirmDangerous=true.
 - **submitK8sJob**: Submit a Volcano K8s job to the D cluster with customizable parameters (job name, command, image, GPU count). Always confirm image, GPU count, and command with the user, then set confirmSubmit=true.
 
@@ -105,6 +106,7 @@ export function buildAgentSystemPrompt(cwd: string): string {
 8. If a command fails, analyze the error and try an alternative approach.
 9. File paths are relative to the workspace root unless specified as absolute.
 10. When submitting K8s jobs, always confirm with the user: the container image, GPU count, and the exact command before calling submitK8sJob with confirmSubmit=true. After submission, use kubectl to check job status.
+11. When the user asks to search for academic articles or papers, use the searchArticles tool. Present results as a numbered list with title, authors, date, and a brief excerpt. After presenting results, offer to summarize selected articles and find related papers.
 
 ## Safety
 - You can only access files within the workspace directory.

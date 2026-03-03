@@ -183,7 +183,27 @@
     "memoryPreviewDesc": "保存前查看并编辑对话记忆。",
     "memoryNoteTitle": "标题",
     "memoryNoteContent": "内容",
-    "dismiss": "关闭"
+    "dismiss": "关闭",
+    "clearAll": "直接清除"
+  },
+  "report": {
+    "tabReport": "研究报告",
+    "tabProcess": "过程",
+    "tabSources": "来源",
+    "statusPending": "待处理",
+    "statusRunning": "生成中",
+    "statusCompleted": "已完成",
+    "statusError": "错误",
+    "downloadPdf": "下载 PDF",
+    "downloadMd": "下载 Markdown",
+    "share": "分享",
+    "linkCopied": "内容已复制到剪贴板",
+    "noReport": "暂无报告。请先在 Agent 面板中运行研究任务。",
+    "noProcessSteps": "暂无处理步骤记录。",
+    "noSourcesFound": "未找到来源。",
+    "noReportContent": "暂无报告内容。",
+    "agentToggle": "智能体",
+    "reportToggle": "报告"
   },
   "skills": {
     "title": "技能",
