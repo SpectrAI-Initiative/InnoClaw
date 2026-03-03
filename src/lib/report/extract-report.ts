@@ -90,7 +90,11 @@ export function extractProcessSteps(messages: UIMessage[]): ReportProcessStep[] 
       ) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const toolPart = part as any;
-        const toolName = toolPart.toolInvocation?.toolName ?? toolPart.toolName ?? "unknown";
+        const toolName =
+          toolPart.toolInvocation?.toolName ??
+          toolPart.toolName ??
+          (partType?.startsWith?.("tool-") ? partType.slice("tool-".length) : undefined) ??
+          "unknown";
         const args = toolPart.toolInvocation?.args ?? toolPart.input ?? toolPart.args ?? {};
         const state = toolPart.toolInvocation?.state ?? toolPart.state ?? "output-available";
 

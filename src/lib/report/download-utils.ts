@@ -78,15 +78,21 @@ export async function downloadAsPdf(report: ReportData) {
     </head>
     <body>
       <div id="content"></div>
-      <script>
-        document.getElementById("content").innerHTML = ${JSON.stringify(safeHtml)};
-        window.print();
-        window.close();
-      </script>
     </body>
     </html>
   `);
   printWindow.document.close();
+
+  // Set sanitized HTML via DOM API (avoids inline <script> XSS)
+  const contentEl = printWindow.document.getElementById("content");
+  if (contentEl) {
+    contentEl.innerHTML = safeHtml;
+  }
+
+  printWindow.addEventListener("afterprint", () => {
+    printWindow.close();
+  });
+  printWindow.print();
 }
 
 export async function copyReportContent(report: ReportData): Promise<boolean> {

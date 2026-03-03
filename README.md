@@ -109,19 +109,21 @@ Agent 面板中的 `kubectl` 和 `submitK8sJob` 工具需要服务器上安装 k
 kubectl version --client
 
 # 如未安装，根据系统架构下载安装：
+KUBE_VERSION="$(curl -L -s https://dl.k8s.io/release/stable.txt)"
+
 # Linux amd64
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl"
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl.sha256"
 echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
 
 # Linux arm64
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl.sha256"
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/arm64/kubectl"
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/arm64/kubectl.sha256"
 echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
 
 # macOS (Apple Silicon)
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/arm64/kubectl"
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/arm64/kubectl.sha256"
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/darwin/arm64/kubectl"
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/darwin/arm64/kubectl.sha256"
 echo "$(cat kubectl.sha256)  kubectl" | shasum -a 256 --check
 
 # 安装
@@ -227,8 +229,9 @@ FROM node:20-alpine
 # 安装 git（GitHub 集成需要）和 kubectl（K8s 任务提交需要）
 RUN apk add --no-cache git python3 make g++ curl \
     && ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') \
-    && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${ARCH}/kubectl" \
-    && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${ARCH}/kubectl.sha256" \
+    && KUBE_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt) \
+    && curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/${ARCH}/kubectl" \
+    && curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/${ARCH}/kubectl.sha256" \
     && echo "$(cat kubectl.sha256)  kubectl" | sha256sum -c \
     && chmod +x kubectl && mv kubectl /usr/local/bin/ \
     && rm -f kubectl.sha256
