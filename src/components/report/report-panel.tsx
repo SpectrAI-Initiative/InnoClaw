@@ -2,22 +2,23 @@
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, FileDown, FileText, Link2, Loader2 } from "lucide-react";
-import { useReport } from "@/lib/hooks/use-report";
 import { ReportContent } from "@/components/report/report-content";
 import { ProcessTimeline } from "@/components/report/process-timeline";
+import { SourcesList } from "@/components/report/sources-list";
 import {
   downloadAsMarkdown,
   downloadAsPdf,
-  copyShareLink,
+  copyReportContent,
 } from "@/lib/report/download-utils";
 import { toast } from "sonner";
+import type { ReportData } from "@/types/report";
 
 interface ReportPanelProps {
-  workspaceId: string;
+  report: ReportData | null;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -51,9 +52,8 @@ function StatusBadge({ status }: { status: string }) {
   }
 }
 
-export function ReportPanel({ workspaceId }: ReportPanelProps) {
+export function ReportPanel({ report }: ReportPanelProps) {
   const t = useTranslations("report");
-  const { report } = useReport(workspaceId);
   const [activeTab, setActiveTab] = useState("report");
 
   if (!report) {
@@ -87,6 +87,9 @@ export function ReportPanel({ workspaceId }: ReportPanelProps) {
                 {processCompleted && <Check className="mr-1 h-3.5 w-3.5" />}
                 {t("tabProcess")}
               </TabsTrigger>
+              <TabsTrigger value="sources" className="text-sm">
+                {t("tabSources")}
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -115,7 +118,7 @@ export function ReportPanel({ workspaceId }: ReportPanelProps) {
             variant="outline"
             size="sm"
             onClick={async () => {
-              const ok = await copyShareLink(report);
+              const ok = await copyReportContent(report);
               if (ok) toast.success(t("linkCopied"));
             }}
             title={t("share")}
@@ -133,6 +136,9 @@ export function ReportPanel({ workspaceId }: ReportPanelProps) {
         )}
         {activeTab === "process" && (
           <ProcessTimeline steps={report.processSteps} />
+        )}
+        {activeTab === "sources" && (
+          <SourcesList sources={report.sources} />
         )}
       </div>
     </div>

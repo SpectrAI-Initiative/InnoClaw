@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Check,
@@ -56,10 +57,12 @@ interface ProcessTimelineProps {
 }
 
 export function ProcessTimeline({ steps }: ProcessTimelineProps) {
+  const t = useTranslations("report");
+
   if (steps.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        <p className="text-sm">No process steps recorded.</p>
+        <p className="text-sm">{t("noProcessSteps")}</p>
       </div>
     );
   }

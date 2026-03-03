@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -30,7 +31,8 @@ export default function WorkspacePage({
   const { workspace, isLoading } = useWorkspace(workspaceId);
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [middlePanel, setMiddlePanel] = useState<MiddlePanel>("agent");
-  const { isAvailable: reportAvailable } = useReport(workspaceId);
+  const { report, isAvailable: reportAvailable } = useReport(workspaceId);
+  const t = useTranslations("report");
 
   if (isLoading) {
     return (
@@ -83,7 +85,8 @@ export default function WorkspacePage({
                       variant={middlePanel === "agent" ? "default" : "outline"}
                       size="icon-xs"
                       onClick={() => setMiddlePanel("agent")}
-                      title="Agent"
+                      title={t("agentToggle")}
+                      aria-label={t("agentToggle")}
                     >
                       <Bot className="h-3 w-3" />
                     </Button>
@@ -92,7 +95,8 @@ export default function WorkspacePage({
                       size="icon-xs"
                       onClick={() => setMiddlePanel("report")}
                       disabled={!reportAvailable}
-                      title="Report"
+                      title={t("reportToggle")}
+                      aria-label={t("reportToggle")}
                     >
                       <FileText className="h-3 w-3" />
                     </Button>
@@ -107,7 +111,7 @@ export default function WorkspacePage({
                     />
                   </div>
                   <div className={middlePanel === "report" ? "h-full" : "hidden"}>
-                    <ReportPanel workspaceId={workspaceId} />
+                    <ReportPanel report={report} />
                   </div>
                 </div>
               </ResizablePanel>

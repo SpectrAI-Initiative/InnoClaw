@@ -192,7 +192,12 @@
     "downloadMd": "Download Markdown",
     "share": "Share",
     "linkCopied": "Content copied to clipboard",
-    "noReport": "No report available yet. Run a research task in the Agent panel first."
+    "noReport": "No report available yet. Run a research task in the Agent panel first.",
+    "noProcessSteps": "No process steps recorded.",
+    "noSourcesFound": "No sources found.",
+    "noReportContent": "No report content available.",
+    "agentToggle": "Agent",
+    "reportToggle": "Report"
   },
   "skills": {
     "title": "Skills",

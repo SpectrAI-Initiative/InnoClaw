@@ -35,11 +35,13 @@ function messagesToTranscript(
         )
         .map((p) => {
           const toolName =
-            typeof p.type === "string" && p.type.startsWith("tool-")
+            typeof (p as Record<string, unknown>).toolName === "string"
+              ? String((p as Record<string, unknown>).toolName)
+              : typeof p.type === "string" && p.type.startsWith("tool-")
               ? p.type.slice(5)
               : "tool";
-          const inputStr = p.input
-            ? JSON.stringify(p.input).slice(0, 500)
+          const inputStr = (p.input ?? (p as Record<string, unknown>).args)
+            ? JSON.stringify(p.input ?? (p as Record<string, unknown>).args).slice(0, 500)
             : "";
           const outputStr = p.output
             ? JSON.stringify(p.output).slice(0, 500)

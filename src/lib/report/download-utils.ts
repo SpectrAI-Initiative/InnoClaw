@@ -1,5 +1,14 @@
 import type { ReportData } from "@/types/report";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function downloadAsMarkdown(report: ReportData) {
   const blob = new Blob([report.markdownContent], { type: "text/markdown;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -20,7 +29,7 @@ export function downloadAsPdf(report: ReportData) {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>${report.title}</title>
+      <title>${escapeHtml(report.title)}</title>
       <style>
         body {
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -47,7 +56,7 @@ export function downloadAsPdf(report: ReportData) {
     <body>
       <div id="content"></div>
       <script>
-        document.getElementById("content").innerHTML = ${JSON.stringify(report.markdownContent)};
+        document.getElementById("content").textContent = ${JSON.stringify(report.markdownContent)};
         window.print();
         window.close();
       </script>
@@ -57,7 +66,7 @@ export function downloadAsPdf(report: ReportData) {
   printWindow.document.close();
 }
 
-export async function copyShareLink(report: ReportData): Promise<boolean> {
+export async function copyReportContent(report: ReportData): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(report.markdownContent);
     return true;

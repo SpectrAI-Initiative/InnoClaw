@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, ExternalLink } from "lucide-react";
 import type { ReportSource } from "@/types/report";
@@ -10,10 +11,12 @@ interface SourcesListProps {
 }
 
 export function SourcesList({ sources }: SourcesListProps) {
+  const t = useTranslations("report");
+
   if (sources.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        <p className="text-sm">No sources found.</p>
+        <p className="text-sm">{t("noSourcesFound")}</p>
       </div>
     );
   }

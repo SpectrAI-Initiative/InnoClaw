@@ -192,7 +192,12 @@
     "downloadMd": "下载 Markdown",
     "share": "分享",
     "linkCopied": "内容已复制到剪贴板",
-    "noReport": "暂无报告。请先在 Agent 面板中运行研究任务。"
+    "noReport": "暂无报告。请先在 Agent 面板中运行研究任务。",
+    "noProcessSteps": "暂无处理步骤记录。",
+    "noSourcesFound": "未找到来源。",
+    "noReportContent": "暂无报告内容。",
+    "agentToggle": "智能体",
+    "reportToggle": "报告"
   },
   "skills": {
     "title": "技能",

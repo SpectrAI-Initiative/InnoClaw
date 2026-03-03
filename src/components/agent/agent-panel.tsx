@@ -576,10 +576,11 @@ export function AgentPanel({
   // Scrub any in-progress tool invocations to a terminal state.
   // Used after stop() and on restore from localStorage.
   function scrubStuckToolParts(msgs: UIMessage[]): UIMessage[] {
+    const isToolPart = (type?: string) => type?.startsWith("tool") || type === "dynamic-tool";
     const needsScrub = msgs.some((msg) =>
       msg.parts?.some((part) => {
         const p = part as { type?: string; state?: string };
-        return p.type?.startsWith("tool") && p.state && p.state !== "output-available" && p.state !== "output-error";
+        return isToolPart(p.type) && p.state && p.state !== "output-available" && p.state !== "output-error";
       })
     );
     if (!needsScrub) return msgs;
@@ -587,7 +588,7 @@ export function AgentPanel({
       ...msg,
       parts: msg.parts?.map((part) => {
         const p = part as { type?: string; state?: string };
-        if (p.type?.startsWith("tool") && p.state && p.state !== "output-available" && p.state !== "output-error") {
+        if (isToolPart(p.type) && p.state && p.state !== "output-available" && p.state !== "output-error") {
           return { ...part, state: "output-error", errorText: "Stopped" };
         }
         return part;

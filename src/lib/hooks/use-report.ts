@@ -41,7 +41,11 @@ export function useReport(workspaceId: string) {
 
   // Also poll periodically to catch same-tab localStorage updates
   useEffect(() => {
-    const interval = setInterval(refresh, 3000);
+    const interval = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        refresh();
+      }
+    }, 3000);
     return () => clearInterval(interval);
   }, [refresh]);
 
