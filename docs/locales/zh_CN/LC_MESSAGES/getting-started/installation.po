@@ -1,0 +1,215 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../getting-started/installation.md:1 7e55ff6f9fec49299cd40309331ff355
+msgid "Installation"
+msgstr "安装"
+
+#: ../../getting-started/installation.md:3 403fb892175a49fa9136a58ccd04035f
+msgid ""
+"This guide walks you through setting up NotebookLM locally for "
+"development or self-hosting."
+msgstr "本指南将引导您在本地搭建 NotebookLM，用于开发或自托管。"
+
+#: ../../getting-started/installation.md:5 6a52d44d3c0346f3b900d0e2fb0aa90b
+msgid "Prerequisites"
+msgstr "前置要求"
+
+#: ../../getting-started/installation.md:7 28f81859b1ce4ecfac5a2b4bc93efa77
+msgid "Before you begin, ensure you have the following installed:"
+msgstr "在开始之前，请确保已安装以下软件："
+
+#: ../../getting-started/installation.md 1d50a9414eb24c6d9cda8153c715ca53
+#: 849274ed7256480ca5163bb0be5cb8f8
+msgid "Requirement"
+msgstr "要求"
+
+#: ../../getting-started/installation.md 1c1e8a07b3a1446aa5ba67d32511759e
+msgid "Version"
+msgstr "版本"
+
+#: ../../getting-started/installation.md 0a79abe5dc834e0a9a5a98a949fbb05f
+#: 29feaa8c7d4a48aaa754bd36f2c6f150
+msgid "Notes"
+msgstr "备注"
+
+#: ../../getting-started/installation.md ffc4383698fb40ffa0fa78734791cb22
+msgid "**Node.js**"
+msgstr "**Node.js**"
+
+#: ../../getting-started/installation.md 6c2a136eaba9488b9028d72a372682ed
+msgid "18+ (20+ recommended)"
+msgstr "18+（推荐 20+）"
+
+#: ../../getting-started/installation.md 2cd03196b1a3452b8cb37aa519ff54e7
+msgid "Runtime environment"
+msgstr "运行时环境"
+
+#: ../../getting-started/installation.md 622ea757c4634801a4ab8abc7ecb43d0
+msgid "**npm**"
+msgstr "**npm**"
+
+#: ../../getting-started/installation.md c9f1f9feb1fe423baa64881939d18af9
+msgid "Included with Node.js"
+msgstr "随 Node.js 一同安装"
+
+#: ../../getting-started/installation.md 0ce73fdc66d74dd389e765fd4fe868da
+msgid "Package manager"
+msgstr "包管理器"
+
+#: ../../getting-started/installation.md a6775d7152494f15930b5289606ee584
+msgid "**Git**"
+msgstr "**Git**"
+
+#: ../../getting-started/installation.md 5702ef8f68804216a2191743660044bb
+msgid "Any recent version"
+msgstr "任意较新版本"
+
+#: ../../getting-started/installation.md fca1ce2b3d174d93a9107f583121e281
+msgid "Required for GitHub clone/pull features"
+msgstr "GitHub 克隆/拉取功能所需"
+
+#: ../../getting-started/installation.md:15 67a1330b760d492bbc8daa38cf9ff860
+msgid "Optional:"
+msgstr "可选："
+
+#: ../../getting-started/installation.md 8ef0684970214306b4387cb8f1bce47a
+msgid "**AI API Key**"
+msgstr "**AI API 密钥**"
+
+#: ../../getting-started/installation.md 03b823c120594f94b29cc2f9fa8f2aa7
+msgid "At least one (OpenAI or Anthropic) for AI chat and note generation"
+msgstr "AI 对话和笔记生成至少需要一个（OpenAI 或 Anthropic）"
+
+#: ../../getting-started/installation.md 8efe2710d84f479aae93b2e469e240d9
+msgid "**GitHub Token**"
+msgstr "**GitHub Token**"
+
+#: ../../getting-started/installation.md 3c3b839c0fa74896a3056d32274364aa
+msgid "For cloning/pulling private repositories"
+msgstr "用于克隆/拉取私有仓库"
+
+#: ../../getting-started/installation.md:22 6e0d7211164140faa8fa08ae7c71d1a1
+msgid "Step 1: Clone the Repository"
+msgstr "步骤 1：克隆仓库"
+
+#: ../../getting-started/installation.md:29 81162176e26e408b9809cae4f7879ddd
+msgid "Step 2: Install Dependencies"
+msgstr "步骤 2：安装依赖"
+
+#: ../../getting-started/installation.md:35 19a41a1fa9be4957bcac3c4ac871c8c8
+msgid ""
+"This installs all required Node.js packages including Next.js, the AI "
+"SDK, database drivers, and UI components."
+msgstr "这将安装所有必需的 Node.js 包，包括 Next.js、AI SDK、数据库驱动程序和 UI 组件。"
+
+#: ../../getting-started/installation.md:37 82d05d6f5db04ef2bde405bb736a04c3
+msgid "Step 3: Configure Environment Variables"
+msgstr "步骤 3：配置环境变量"
+
+#: ../../getting-started/installation.md:39 95132e9fcf3e4da5b2690af85ca1fc38
+msgid "Copy the example environment file and edit it:"
+msgstr "复制示例环境文件并进行编辑："
+
+#: ../../getting-started/installation.md:45 4f03eb8962bb4ab6ae197870438b9909
+msgid "Edit `.env.local` with your configuration:"
+msgstr "使用您的配置编辑 `.env.local`："
+
+#: ../../getting-started/installation.md:58 8f6d5c1b3c724eec970571124dfe00b8
+msgid ""
+"See [Environment Variables](environment-variables.md) for a complete "
+"reference of all available options."
+msgstr "请参阅[环境变量](environment-variables.md)获取所有可用选项的完整参考。"
+
+#: ../../getting-started/installation.md:60 58273984ed7a45a79bd75780979447a8
+msgid "Step 4: Create Workspace Directories"
+msgstr "步骤 4：创建工作空间目录"
+
+#: ../../getting-started/installation.md:62 b7bf049ded6f423d8a0a901647726f7a
+msgid ""
+"Ensure the directories specified in `WORKSPACE_ROOTS` exist on your "
+"system:"
+msgstr "确保系统中存在 `WORKSPACE_ROOTS` 指定的目录："
+
+#: ../../getting-started/installation.md:74 bcc68509643d4dd0a82fb5d0ead53b06
+msgid ""
+"The application will **not** automatically create these directories. They"
+" must exist before starting the server."
+msgstr "应用程序**不会**自动创建这些目录。在启动服务器之前，这些目录必须已经存在。"
+
+#: ../../getting-started/installation.md:77 ac7d946abd28483f877d03376e3420de
+msgid "Step 5: Initialize the Database"
+msgstr "步骤 5：初始化数据库"
+
+#: ../../getting-started/installation.md:79 e7cbb466f80e44fd8e8b367c9ed38dfc
+msgid "Run the database migration to create the SQLite database:"
+msgstr "运行数据库迁移以创建 SQLite 数据库："
+
+#: ../../getting-started/installation.md:85 4dc8f4f4458a4056a601887d916fc621
+msgid ""
+"This creates the database file at `./data/notebooklm.db` with all "
+"required tables."
+msgstr "这将在 `./data/notebooklm.db` 创建包含所有必需表的数据库文件。"
+
+#: ../../getting-started/installation.md:87 279315102f4740e9b4fdf7ad5a21f964
+msgid "Step 6: Start the Development Server"
+msgstr "步骤 6：启动开发服务器"
+
+#: ../../getting-started/installation.md:93 fe80a682196548b0a566cfe0d4eddb3a
+msgid ""
+"Open your browser and navigate to **http://localhost:3000** to start "
+"using NotebookLM."
+msgstr "打开浏览器并访问 **http://localhost:3000** 即可开始使用 NotebookLM。"
+
+#: ../../getting-started/installation.md:95 a3e8372124c140519ac535b368b7d8bd
+msgid "Verifying Your Setup"
+msgstr "验证安装"
+
+#: ../../getting-started/installation.md:97 57bdaefe304a4030b5381c9f5989a971
+msgid "After starting the server, you should be able to:"
+msgstr "启动服务器后，您应该能够："
+
+#: ../../getting-started/installation.md:99 042f4f0383a4428c8de040233dc445d0
+msgid "See the workspace list on the home page"
+msgstr "在首页看到工作空间列表"
+
+#: ../../getting-started/installation.md:100 6207b35a73e847e88dd6bb329940ed4f
+msgid "Create a new workspace from one of your configured root directories"
+msgstr "从已配置的根目录之一创建新的工作空间"
+
+#: ../../getting-started/installation.md:101 9d449e72bd26495fbb01a1846a647231
+msgid "Browse and manage files in the workspace"
+msgstr "在工作空间中浏览和管理文件"
+
+#: ../../getting-started/installation.md:102 9bc6dc040e2c42cda1775bf6995f5399
+msgid ""
+"If an API key is configured, chat with AI about your files (after "
+"clicking \"Sync\")"
+msgstr "如果已配置 API 密钥，可以就您的文件与 AI 进行对话（点击\"同步\"后）"
+
+#: ../../getting-started/installation.md:105 a305793d1b2140dbb308f9dbe4ec7f33
+msgid ""
+"If you don't configure any API keys, workspace management, file browsing,"
+" uploading, editing, and GitHub cloning features will still work. Only AI"
+" chat and note generation will be disabled."
+msgstr ""
+"如果您未配置任何 API 密钥，工作空间管理、文件浏览、上传、编辑和 GitHub 克隆功能仍然可用。只有 AI "
+"对话和笔记生成功能会被禁用。"

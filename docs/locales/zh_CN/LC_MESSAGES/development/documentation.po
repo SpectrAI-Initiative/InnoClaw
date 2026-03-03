@@ -1,0 +1,230 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../development/documentation.md:1 9fa62ae5c145461183627d83a00edd98
+msgid "Documentation Development"
+msgstr "文档开发"
+
+#: ../../development/documentation.md:3 a4062eb0102f40fab2aa48eb66db2f47
+msgid ""
+"This guide explains how to build the documentation locally, add new "
+"pages, and contribute translations."
+msgstr "本指南介绍如何在本地构建文档、添加新页面以及贡献翻译。"
+
+#: ../../development/documentation.md:5 155dc5b54a8d4e61af06251ad8880533
+msgid "Prerequisites"
+msgstr "前置要求"
+
+#: ../../development/documentation.md:7 9e7a2ad5e09e4728bddf3ae81831cda5
+msgid "**Python 3.9+** installed"
+msgstr "已安装 **Python 3.9+**"
+
+#: ../../development/documentation.md:8 70a2744ed99a4fdea1d53febbb55bdf8
+msgid "**pip** package manager"
+msgstr "**pip** 包管理器"
+
+#: ../../development/documentation.md:10 ac48496815b840cead1e1cee27818ffe
+msgid "Building Docs Locally"
+msgstr "本地构建文档"
+
+#: ../../development/documentation.md:12 feb56c38421a406a841354f3394f70fe
+msgid "Install Dependencies"
+msgstr "安装依赖"
+
+#: ../../development/documentation.md:19 ed9f0933babc456da58cc35e039e2467
+msgid "Build English Documentation"
+msgstr "构建英文文档"
+
+#: ../../development/documentation.md:25 6ae6c5dab3a44386816b15c532e709ad
+msgid ""
+"The output is generated in `docs/_build/html/en/`. Open "
+"`docs/_build/html/en/index.html` in your browser."
+msgstr ""
+"输出生成在 `docs/_build/html/en/` 目录中。在浏览器中打开 "
+"`docs/_build/html/en/index.html`。"
+
+#: ../../development/documentation.md:27 9b6a8ac4fb9a468db90c0f7dc048433f
+msgid "Build Chinese Documentation"
+msgstr "构建中文文档"
+
+#: ../../development/documentation.md:33 66690d3fb36444908211e8fa8058c1a8
+msgid "The output is generated in `docs/_build/html/zh/`."
+msgstr "输出生成在 `docs/_build/html/zh/` 目录中。"
+
+#: ../../development/documentation.md:35 112bcb18565e40a98966835df22d5eaa
+msgid "Build Both Languages"
+msgstr "构建双语文档"
+
+#: ../../development/documentation.md:41 127d2bac5c93411ab25f895b25fb4338
+msgid "Clean Build Artifacts"
+msgstr "清理构建产物"
+
+#: ../../development/documentation.md:47 ff8c518173cc403f83190a36808fb11a
+msgid "Adding New Pages"
+msgstr "添加新页面"
+
+#: ../../development/documentation.md:49 be6214d9f4d84a4999dec9336f7d7cdb
+msgid "**Create a Markdown file** in the appropriate directory:"
+msgstr "在相应目录中**创建 Markdown 文件**："
+
+#: ../../development/documentation.md:56 51070cdf22bc41c18a58f40198329ef0
+msgid "**Write content** using MyST Markdown syntax:"
+msgstr "使用 MyST Markdown 语法**编写内容**："
+
+#: ../../development/documentation.md:68 ef9b69b40ffa43d593c556ec71af623d
+msgid "**Add to the table of contents** in `docs/index.md`:"
+msgstr "在 `docs/index.md` 中**添加到目录**："
+
+#: ../../development/documentation.md:82 ccec2988b587422b9f2f409e4038b4ee
+msgid "**Build and verify** locally:"
+msgstr "在本地**构建并验证**："
+
+#: ../../development/documentation.md:88 9caf50616e844ba6b32ca32db4a82df1
+msgid "MyST Markdown Syntax"
+msgstr "MyST Markdown 语法"
+
+#: ../../development/documentation.md:90 0abe526f08e64f7db9df57a32bd09913
+msgid ""
+"NotebookLM docs use [MyST-Parser](https://myst-parser.readthedocs.io/) "
+"for Markdown support in Sphinx."
+msgstr ""
+"NotebookLM 文档使用 [MyST-Parser](https://myst-parser.readthedocs.io/) 在 "
+"Sphinx 中支持 Markdown。"
+
+#: ../../development/documentation.md:92 0ae795db3b76476eb9d7702de52a129c
+msgid "Admonitions"
+msgstr "提示框"
+
+#: ../../development/documentation.md:112 a7c5f48048b54b2fb9559911dca6d6e1
+msgid "Mermaid Diagrams"
+msgstr "Mermaid 图表"
+
+#: ../../development/documentation.md:121 609a05581a26498ab4d2898f6727d76c
+msgid "Tables"
+msgstr "表格"
+
+#: ../../development/documentation.md:129 b8871267aec44d73b1d669e71740b909
+msgid "Cross-References"
+msgstr "交叉引用"
+
+#: ../../development/documentation.md:135 2762bc91227e41bba9db4fab0f63240b
+msgid "Translation Workflow"
+msgstr "翻译工作流"
+
+#: ../../development/documentation.md:137 ef5776757dd24ac58cd31a78663c51bc
+msgid ""
+"NotebookLM documentation uses Sphinx's built-in internationalization "
+"(i18n) with `sphinx-intl`."
+msgstr "NotebookLM 文档使用 Sphinx 内置的国际化（i18n）功能和 `sphinx-intl`。"
+
+#: ../../development/documentation.md:139 92dd2fc3b3294fcbb4b82187f075c9f8
+msgid "How It Works"
+msgstr "工作原理"
+
+#: ../../development/documentation.md:141 d615432b6105493abfd61f2ac5e2758c
+msgid "English (`.md`) files are the **source of truth**"
+msgstr "英文（`.md`）文件是**唯一真实来源**"
+
+#: ../../development/documentation.md:142 980151f901354f1a8868379da9a78af0
+msgid "Sphinx extracts translatable strings into `.pot` template files"
+msgstr "Sphinx 将可翻译的字符串提取到 `.pot` 模板文件中"
+
+#: ../../development/documentation.md:143 466d326d92984667b25178a6bf682969
+msgid "`sphinx-intl` generates `.po` translation files for each language"
+msgstr "`sphinx-intl` 为每种语言生成 `.po` 翻译文件"
+
+#: ../../development/documentation.md:144 1a74f3391f754631bb60267cdb501ba3
+msgid "Translators edit the `.po` files to add translations"
+msgstr "翻译者编辑 `.po` 文件以添加翻译"
+
+#: ../../development/documentation.md:145 99668ca0a3f64b47a48d34fafe5f7cf6
+msgid "Sphinx builds the translated documentation using the `.po` files"
+msgstr "Sphinx 使用 `.po` 文件构建翻译后的文档"
+
+#: ../../development/documentation.md:147 8ad943efad134973a60953cebea34ba1
+msgid "Updating Translations"
+msgstr "更新翻译"
+
+#: ../../development/documentation.md:149 42a8e3ea109646d58fcc0421ebccdc69
+msgid "After modifying English source files, update the translation files:"
+msgstr "修改英文源文件后，更新翻译文件："
+
+#: ../../development/documentation.md:159 438a9e5c173143abac70a42232b162cf
+msgid ""
+"This updates `docs/locales/zh/LC_MESSAGES/*.po` files with new or changed"
+" strings."
+msgstr "这将使用新的或更改的字符串更新 `docs/locales/zh/LC_MESSAGES/*.po` 文件。"
+
+#: ../../development/documentation.md:161 06902c3b46964181b01acda4d7e2ac75
+msgid "Editing Translations"
+msgstr "编辑翻译"
+
+#: ../../development/documentation.md:163 8e7106481f504833bbddcb4ae270bc92
+msgid ""
+"Open the `.po` files in `docs/locales/zh/LC_MESSAGES/` with a text editor"
+" or a PO editor like [Poedit](https://poedit.net/):"
+msgstr ""
+"使用文本编辑器或 PO 编辑器（如 [Poedit](https://poedit.net/)）打开 "
+"`docs/locales/zh/LC_MESSAGES/` 中的 `.po` 文件："
+
+#: ../../development/documentation.md:171 38b77d2bd69b4b1fb0c9a6d92037d87e
+msgid "Each entry has:"
+msgstr "每个条目包含："
+
+#: ../../development/documentation.md:172 cdef05b75d7f4d668deb393b1a474a3e
+msgid "`msgid` — The original English text"
+msgstr "`msgid` —— 原始英文文本"
+
+#: ../../development/documentation.md:173 7e1bb81bb1f846d488f43a49bd23fba1
+msgid "`msgstr` — The Chinese translation (fill this in)"
+msgstr "`msgstr` —— 中文翻译（在此填写）"
+
+#: ../../development/documentation.md:175 052cf7ceac924d0795ae9a19061e55eb
+msgid "Building Translated Documentation"
+msgstr "构建翻译后的文档"
+
+#: ../../development/documentation.md:181 5f85b76e4e524554a51dd40c1200247e
+msgid "Translation Checklist"
+msgstr "翻译检查清单"
+
+#: ../../development/documentation.md:183 05b0ba9e89434fe8b107e0ed9e21a920
+msgid "Run `make gettext` to extract strings"
+msgstr "运行 `make gettext` 提取字符串"
+
+#: ../../development/documentation.md:184 412466e6eb394b638350ee76c52d2cfe
+msgid "Run `make update-po` to update `.po` files"
+msgstr "运行 `make update-po` 更新 `.po` 文件"
+
+#: ../../development/documentation.md:185 95ed786ce624482daa0c2562f93dbce4
+msgid "Translate all `msgstr` entries in `.po` files"
+msgstr "翻译 `.po` 文件中所有的 `msgstr` 条目"
+
+#: ../../development/documentation.md:186 7c2d2c211461478f91b00e23b86138b2
+msgid "Run `make html-zh` to verify the build"
+msgstr "运行 `make html-zh` 验证构建"
+
+#: ../../development/documentation.md:187 f32fe0c8e59f4a84a9d5b5c204e2715e
+msgid "Check the output for any untranslated strings"
+msgstr "检查输出中是否有未翻译的字符串"
+
+#: ../../development/documentation.md:189 ec9a6d28a2784984acfe8e8ce149c124
+msgid "File Structure"
+msgstr "文件结构"
