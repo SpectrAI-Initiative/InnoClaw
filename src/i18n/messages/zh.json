@@ -115,7 +115,9 @@
     "emptyState": "还没有笔记。生成一个或创建手动笔记。",
     "generating": "生成中...",
     "generateDisabled": "生成功能需要配置 API Key",
-    "memory": "记忆"
+    "memory": "记忆",
+    "memoryTitleClear": "对话记忆 - {date}",
+    "memoryTitleOverflow": "上下文压缩 - {date}"
   },
   "settings": {
     "title": "设置",

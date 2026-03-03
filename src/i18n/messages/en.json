@@ -115,7 +115,9 @@
     "emptyState": "No notes yet. Generate one or create a manual note.",
     "generating": "Generating...",
     "generateDisabled": "Generation requires an API key",
-    "memory": "Memory"
+    "memory": "Memory",
+    "memoryTitleClear": "Conversation Memory - {date}",
+    "memoryTitleOverflow": "Context Compression - {date}"
   },
   "settings": {
     "title": "Settings",

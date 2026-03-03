@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import enMessages from "@/i18n/messages/en.json";
+import zhMessages from "@/i18n/messages/zh.json";
 
 /**
  * Convert UIMessage-like objects into a plain-text transcript for summarization.
@@ -55,7 +57,7 @@ function messagesToTranscript(
 
 export async function POST(req: NextRequest) {
   try {
-    const { workspaceId, messages, trigger, preview } = await req.json();
+    const { workspaceId, messages, trigger, preview, locale } = await req.json();
 
     if (
       !workspaceId ||
@@ -95,10 +97,10 @@ export async function POST(req: NextRequest) {
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
     const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    const title =
-      trigger === "clear"
-        ? `对话记忆 - ${dateStr}`
-        : `上下文压缩 - ${dateStr}`;
+
+    const i18n = locale === "en" ? enMessages : zhMessages;
+    const titleKey = trigger === "clear" ? "memoryTitleClear" : "memoryTitleOverflow";
+    const title = i18n.notes[titleKey].replace("{date}", dateStr);
 
     // Preview mode: return summary without saving to DB
     if (preview) {
