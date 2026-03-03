@@ -76,6 +76,57 @@ export type BotReply = BotTextReply | BotFileReply;
 export const MAX_FILE_SIZE = 100 * 1024 * 1024;
 
 /**
+ * Read a fetch Response body with a streaming size limit.
+ * Aborts early if the received bytes exceed `maxBytes`, avoiding
+ * unbounded memory usage when content-length is absent or incorrect.
+ */
+export async function readResponseWithLimit(
+  res: Response,
+  maxBytes: number
+): Promise<Buffer> {
+  // Quick reject via content-length header (if present)
+  const contentLength = Number(res.headers.get("content-length") || "0");
+  if (contentLength > maxBytes) {
+    throw new Error(
+      `File too large: ${contentLength} bytes exceeds ${maxBytes} byte limit`
+    );
+  }
+
+  const body = res.body;
+  if (!body) {
+    throw new Error("Response body is empty");
+  }
+
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      received += value.byteLength;
+      if (received > maxBytes) {
+        throw new Error(
+          `File too large: received ${received} bytes exceeds ${maxBytes} byte limit`
+        );
+      }
+      chunks.push(value);
+    }
+  } finally {
+    try {
+      reader.releaseLock();
+    } catch {
+      // Ignore — lock may already be released
+    }
+  }
+
+  return Buffer.concat(chunks.map((c) => Buffer.from(c)));
+}
+
+/**
  * Platform-specific file operations.
  * Each IM adapter implements this interface to handle file download/upload
  * through the platform's own APIs.

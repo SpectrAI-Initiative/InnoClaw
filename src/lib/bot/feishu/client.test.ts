@@ -52,6 +52,41 @@ describe("Feishu adapter", () => {
     });
   });
 
+  describe("verifyWebhook", () => {
+    it("should verify valid token in event callback v2 body", () => {
+      const adapter = createFeishuAdapter(testConfig);
+      const body = JSON.stringify({
+        header: { token: "verify_token_abc" },
+        event: {},
+      });
+      expect(adapter.verifyWebhook({}, body)).toBe(true);
+    });
+
+    it("should verify valid token in url_verification body", () => {
+      const adapter = createFeishuAdapter(testConfig);
+      const body = JSON.stringify({
+        type: "url_verification",
+        token: "verify_token_abc",
+        challenge: "abc123",
+      });
+      expect(adapter.verifyWebhook({}, body)).toBe(true);
+    });
+
+    it("should reject invalid token", () => {
+      const adapter = createFeishuAdapter(testConfig);
+      const body = JSON.stringify({
+        header: { token: "wrong_token" },
+        event: {},
+      });
+      expect(adapter.verifyWebhook({}, body)).toBe(false);
+    });
+
+    it("should reject malformed JSON body", () => {
+      const adapter = createFeishuAdapter(testConfig);
+      expect(adapter.verifyWebhook({}, "not-json")).toBe(false);
+    });
+  });
+
   describe("parseMessages", () => {
     it("should parse a text message", () => {
       const adapter = createFeishuAdapter(testConfig);
@@ -85,7 +120,7 @@ describe("Feishu adapter", () => {
       }
     });
 
-    it("should parse a file message", () => {
+    it("should parse a file message with encoded messageId:fileKey", () => {
       const adapter = createFeishuAdapter(testConfig);
       const body = {
         header: {
@@ -115,9 +150,43 @@ describe("Feishu adapter", () => {
       expect(messages[0].type).toBe("file");
       if (messages[0].type === "file") {
         expect(messages[0].fileName).toBe("report.xlsx");
-        expect(messages[0].fileKey).toBe("fk_001");
+        // fileKey is encoded as "messageId:fileKey" for download URL construction
+        expect(messages[0].fileKey).toBe("msg_002:fk_001");
         expect(messages[0].fileSize).toBe(12345);
         expect(messages[0].isGroup).toBe(false);
+      }
+    });
+
+    it("should parse an image message with encoded image:imageKey", () => {
+      const adapter = createFeishuAdapter(testConfig);
+      const body = {
+        header: {
+          event_type: "im.message.receive_v1",
+          token: "verify_token_abc",
+        },
+        event: {
+          sender: {
+            sender_id: { open_id: "ou_user789" },
+          },
+          message: {
+            message_id: "msg_004",
+            chat_id: "oc_chat789",
+            chat_type: "p2p",
+            message_type: "image",
+            content: JSON.stringify({
+              image_key: "img_key_001",
+            }),
+          },
+        },
+      };
+
+      const messages = adapter.parseMessages(body);
+      expect(messages).toHaveLength(1);
+      expect(messages[0].type).toBe("file");
+      if (messages[0].type === "file") {
+        // Image keys are encoded as "image:{imageKey}"
+        expect(messages[0].fileKey).toBe("image:img_key_001");
+        expect(messages[0].fileType).toBe("image");
       }
     });
 

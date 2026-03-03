@@ -45,8 +45,9 @@ export async function processMessage(
 
   try {
     if (message.type === "file") {
-      // Download the file
-      const destDir = path.join(BOT_FILES_DIR, message.chatId);
+      // Sanitize chatId to prevent path traversal (chatId comes from webhook payload)
+      const safeChatId = message.chatId.replace(/[^a-zA-Z0-9_-]/g, "_") || "unknown";
+      const destDir = path.join(BOT_FILES_DIR, safeChatId);
       let localPath: string;
 
       try {
@@ -97,6 +98,13 @@ export async function processMessage(
 
       const aiResponse = await callAI(fullPrompt);
       replies.push({ type: "text", text: aiResponse });
+
+      // Clean up downloaded file to avoid unbounded disk growth
+      try {
+        await fsp.unlink(localPath);
+      } catch {
+        // Best-effort cleanup; ignore if file was already removed
+      }
     } else {
       // Text message — forward to AI
       const aiResponse = await callAI(message.text);

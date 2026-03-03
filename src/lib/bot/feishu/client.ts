@@ -15,6 +15,7 @@ import {
   type FileHandler,
   type FeishuBotConfig,
   MAX_FILE_SIZE,
+  readResponseWithLimit,
 } from "../types";
 
 const FEISHU_API_BASE = "https://open.feishu.cn/open-apis";
@@ -45,6 +46,13 @@ async function getTenantAccessToken(config: FeishuBotConfig): Promise<string> {
       }),
     }
   );
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(
+      `Feishu token request failed: ${res.status} ${res.statusText} — ${text}`
+    );
+  }
 
   const data = (await res.json()) as {
     code: number;
@@ -79,13 +87,26 @@ function createFeishuFileHandler(config: FeishuBotConfig): FileHandler {
     ): Promise<string> {
       const token = await getTenantAccessToken(config);
 
-      const res = await fetch(
-        `${FEISHU_API_BASE}/im/v1/messages/${fileKey}/resources`,
-        {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
+      // fileKey is encoded as "image:{imageKey}" or "{messageId}:{fileKey}"
+      // by parseMessages to carry the message_id needed for the download URL.
+      let downloadUrl: string;
+      if (fileKey.startsWith("image:")) {
+        const imageKey = fileKey.slice(6);
+        downloadUrl = `${FEISHU_API_BASE}/im/v1/images/${imageKey}`;
+      } else {
+        const sepIdx = fileKey.indexOf(":");
+        if (sepIdx === -1) {
+          throw new Error(`Invalid Feishu file key format: ${fileKey}`);
         }
-      );
+        const msgId = fileKey.slice(0, sepIdx);
+        const fKey = fileKey.slice(sepIdx + 1);
+        downloadUrl = `${FEISHU_API_BASE}/im/v1/messages/${msgId}/resources/${fKey}?type=file`;
+      }
+
+      const res = await fetch(downloadUrl, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!res.ok) {
         throw new Error(
@@ -93,29 +114,17 @@ function createFeishuFileHandler(config: FeishuBotConfig): FileHandler {
         );
       }
 
-      const contentLength = Number(res.headers.get("content-length") || "0");
-      if (contentLength > MAX_FILE_SIZE) {
-        throw new Error(
-          `File too large: ${contentLength} bytes exceeds ${MAX_FILE_SIZE} byte limit`
-        );
-      }
+      // Stream the response and enforce MAX_FILE_SIZE
+      const buffer = await readResponseWithLimit(res, MAX_FILE_SIZE);
 
       await fsp.mkdir(destDir, { recursive: true });
-      // Sanitize fileName to prevent path traversal
       const safeName = path.basename(fileName) || `file_${Date.now()}`;
       const destPath = path.join(destDir, safeName);
-      const buffer = Buffer.from(await res.arrayBuffer());
-
-      // Also check actual buffer size (content-length may be absent)
-      if (buffer.length > MAX_FILE_SIZE) {
-        throw new Error(
-          `File too large: ${buffer.length} bytes exceeds ${MAX_FILE_SIZE} byte limit`
-        );
-      }
-
       await fsp.writeFile(destPath, buffer);
 
-      console.log(`[feishu] Downloaded file: ${destPath} (${buffer.length} bytes)`);
+      console.log(
+        `[feishu] Downloaded file: ${destPath} (${buffer.length} bytes)`
+      );
       return destPath;
     },
 
@@ -209,11 +218,19 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
       );
     },
 
-    verifyWebhook(): boolean {
-      // Feishu uses verification token in the request body for event callbacks.
-      // The actual verification is done during message parsing by comparing tokens.
-      // For URL verification events, the token is checked in parseMessages.
-      return true;
+    verifyWebhook(_headers: Record<string, string>, body: string): boolean {
+      // Feishu uses a verification token embedded in the JSON body
+      // (header.token for event callback v2, or top-level token for v1).
+      try {
+        const parsed = JSON.parse(body);
+        const token =
+          (parsed?.header as Record<string, unknown>)?.token ??
+          parsed?.token ??
+          "";
+        return token === config.verificationToken;
+      } catch {
+        return false;
+      }
     },
 
     parseMessages(body: Record<string, unknown>): BotMessage[] {
@@ -268,6 +285,14 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
             timestamp,
           });
         } else if (msgType === "file" || msgType === "image") {
+          // Encode messageId into fileKey so downloadFile can build the
+          // correct Feishu API URL (files need message_id + file_key;
+          // images just need image_key).
+          const rawKey =
+            (content.file_key as string) || (content.image_key as string) || "";
+          const encodedKey =
+            msgType === "image" ? `image:${rawKey}` : `${messageId}:${rawKey}`;
+
           messages.push({
             type: "file",
             messageId,
@@ -278,7 +303,7 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
             fileName: (content.file_name as string) || `file_${messageId}`,
             fileType: msgType,
             fileSize: Number(content.file_size || 0),
-            fileKey: (content.file_key as string) || (content.image_key as string) || "",
+            fileKey: encodedKey,
           });
         }
       }
