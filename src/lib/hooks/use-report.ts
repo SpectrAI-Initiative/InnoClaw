@@ -21,14 +21,15 @@ export function useReport(workspaceId: string) {
     typeof window !== "undefined" ? readReportFromStorage(workspaceId) : null
   );
 
+  // Re-read storage immediately when workspaceId changes (render-time update)
+  const [prevWorkspaceId, setPrevWorkspaceId] = useState(workspaceId);
+  if (workspaceId !== prevWorkspaceId) {
+    setPrevWorkspaceId(workspaceId);
+    setReport(readReportFromStorage(workspaceId));
+  }
+
   const refresh = useCallback(() => {
     setReport(readReportFromStorage(workspaceId));
-  }, [workspaceId]);
-
-  // Re-read storage immediately when workspaceId changes
-  useEffect(() => {
-    refresh();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId]);
 
   // Listen for localStorage changes (from AgentPanel writing messages)
