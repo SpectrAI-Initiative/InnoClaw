@@ -80,7 +80,7 @@ function toArticle(paper: HFPaper): Article {
     authors,
     abstract: p?.summary || "",
     url: id ? `https://huggingface.co/papers/${id}` : "",
-    pdfUrl: id ? `https://huggingface.co/papers/${id}` : undefined,
+    pdfUrl: undefined,
     publishedDate: paper.publishedAt || p?.publishedAt || "",
     source: "huggingface",
   };

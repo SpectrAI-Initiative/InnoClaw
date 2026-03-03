@@ -46,5 +46,5 @@ export interface SearchResult {
   /** Total count across all sources. */
   totalCount: number;
   /** Any errors encountered per source. */
-  errors?: Record<string, string>;
+  errors?: Partial<Record<ArticleSource, string>>;
 }

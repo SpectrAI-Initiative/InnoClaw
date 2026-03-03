@@ -15,26 +15,38 @@ const ARXIV_API_URL = "https://export.arxiv.org/api/query";
 /** Timestamp of the last arXiv request, used for rate limiting. */
 let lastRequestTime = 0;
 
+/** Promise chain used to serialize rate-limited requests. */
+let rateLimitChain: Promise<void> = Promise.resolve();
+
 /** Minimum delay between arXiv requests in milliseconds. */
 const RATE_LIMIT_MS = 3000;
 
 /**
  * Wait if necessary to respect arXiv rate limits.
+ *
+ * Serializes callers via a shared promise chain so that concurrent
+ * invocations still respect the global RATE_LIMIT_MS interval.
  */
 async function respectRateLimit(): Promise<void> {
-  const elapsed = Date.now() - lastRequestTime;
-  if (elapsed < RATE_LIMIT_MS) {
-    await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_MS - elapsed));
-  }
-  lastRequestTime = Date.now();
+  rateLimitChain = rateLimitChain.then(async () => {
+    const elapsed = Date.now() - lastRequestTime;
+    if (elapsed < RATE_LIMIT_MS) {
+      await new Promise<void>((resolve) =>
+        setTimeout(resolve, RATE_LIMIT_MS - elapsed)
+      );
+    }
+    lastRequestTime = Date.now();
+  });
+  return rateLimitChain;
 }
 
 /**
  * Build the arXiv query string from keywords.
  * Combines keywords with AND for the "all" field search.
+ * Each keyword is URL-encoded to handle spaces and special characters.
  */
 function buildQuery(keywords: string[]): string {
-  const terms = keywords.map((kw) => `all:${kw}`);
+  const terms = keywords.map((kw) => `all:${encodeURIComponent(kw)}`);
   return terms.join("+AND+");
 }
 
@@ -70,8 +82,8 @@ function parseAtomResponse(xml: string): Article[] {
     );
     const pdfUrl = pdfMatch ? pdfMatch[1] : undefined;
 
-    // arXiv ID from the full URL
-    const arxivId = id.replace("http://arxiv.org/abs/", "");
+    // arXiv ID from the full URL (handle http/https and optional www)
+    const arxivId = id.replace(/^https?:\/\/(?:www\.)?arxiv\.org\/abs\//, "");
 
     if (title && id) {
       articles.push({
