@@ -61,7 +61,7 @@ jobs:
           EOF
 
       - name: Link check
-        run: sphinx-build -b linkcheck docs docs/_build/linkcheck || true
+        run: sphinx-build -b linkcheck docs docs/_build/linkcheck -W --keep-going
 
       - name: Upload artifact
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

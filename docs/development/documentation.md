@@ -67,7 +67,7 @@ make clean
 
 3. **Add to the table of contents** in `docs/index.md`:
 
-   ```markdown
+   ````markdown
    ```{toctree}
    :maxdepth: 2
    :caption: Usage & Features
@@ -77,7 +77,7 @@ make clean
    usage/api-reference
    usage/new-feature
    ```
-   ```
+   ````
 
 4. **Build and verify** locally:
 

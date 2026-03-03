@@ -3,8 +3,6 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import os
-
 # -- Project information -----------------------------------------------------
 project = "NotebookLM"
 copyright = "2025, NotebookLM Contributors"
@@ -57,8 +55,8 @@ html_theme_options = {
 
 html_context = {
     "languages": [
-        ("English", "/en/"),
-        ("简体中文", "/zh/"),
+        ("English", "en/"),
+        ("简体中文", "zh/"),
     ],
 }
 
