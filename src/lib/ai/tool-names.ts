@@ -8,6 +8,7 @@ export const ALL_TOOLS = [
   "writeFile",
   "listDirectory",
   "grep",
+  "searchArticles",
 ] as const;
 
 /**
