@@ -36,20 +36,47 @@ An AI-powered research assistant web app similar to Google NotebookLM. Users ope
 ## 前置要求 / Prerequisites
 
 1. **Node.js 18+**（推荐 20+）
-2. **Git**（如需 GitHub 克隆/拉取功能）
-3. **AI API Key**（可选，至少配置一个才能使用 AI 对话和生成功能；不配置时其余功能正常可用）
-4. **GitHub Token**（可选，如需克隆/拉取私有仓库）
+2. **npm**（随 Node.js 一起安装）
+3. **Git**（如需 GitHub 克隆/拉取功能）
+4. **AI API Key**（可选，至少配置一个才能使用 AI 对话和生成功能；不配置时其余功能正常可用）
+5. **GitHub Token**（可选，如需克隆/拉取私有仓库）
+
+**环境检查 / Environment Check：**
+
+```bash
+# 检查 Node.js 版本（需 >= 18）
+node -v
+
+# 检查 npm 版本
+npm -v
+
+# 检查 Git 版本（如需 GitHub 集成）
+git --version
+```
+
+如果 `node -v` 显示版本低于 18，请前往 [Node.js 官网](https://nodejs.org/) 下载最新 LTS 版本。
 
 ---
 
 ## 快速开始 / Quick Start
 
-### 第 1 步：安装依赖
+### 第 1 步：克隆仓库并安装依赖
 
 ```bash
+git clone https://github.com/zjowowen/notebooklm.git
 cd notebooklm
 npm install
 ```
+
+**✅ 验证：** 安装完成后，确认 `node_modules` 目录已生成且无报错：
+
+```bash
+# 检查 node_modules 目录是否存在
+ls node_modules   # Linux / macOS
+dir node_modules  # Windows
+```
+
+如安装过程中出现 `better-sqlite3` 编译错误，请确保系统已安装 C++ 编译工具链（见下方 [常见安装问题排查](#常见安装问题排查--troubleshooting-installation)）。
 
 ### 第 2 步：配置环境变量
 
@@ -117,6 +144,16 @@ npx drizzle-kit migrate
 
 这会在 `./data/notebooklm.db` 创建 SQLite 数据库并执行迁移。
 
+**✅ 验证：** 确认数据库文件已生成：
+
+```bash
+# Linux / macOS
+ls -lh ./data/notebooklm.db
+
+# Windows (PowerShell)
+dir .\data\notebooklm.db
+```
+
 ### 第 5 步：启动开发服务器
 
 ```bash
@@ -124,6 +161,106 @@ npm run dev
 ```
 
 打开浏览器访问 **http://localhost:3000** 即可使用。
+
+**✅ 验证：** 在终端中看到类似以下输出表示启动成功：
+
+```
+✓ Ready in Xs
+○ Compiling / ...
+```
+
+然后在浏览器中访问 `http://localhost:3000`，应能看到工作空间列表页面。
+
+---
+
+## 验证安装 / Verify Installation
+
+完成上述步骤后，请按以下清单逐一确认：
+
+| # | 检查项 | 预期结果 |
+|---|--------|----------|
+| 1 | `node -v` | 输出 `v18.x.x` 或更高版本 |
+| 2 | `npm -v` | 输出版本号（无报错） |
+| 3 | `node_modules/` 目录存在 | `npm install` 成功完成，无 ERR 报错 |
+| 4 | `./data/notebooklm.db` 文件存在 | `npx drizzle-kit migrate` 成功执行 |
+| 5 | `npm run dev` 终端输出 `Ready` | 开发服务器正常启动 |
+| 6 | 浏览器访问 `http://localhost:3000` | 显示工作空间列表页面 |
+| 7 | 点击"打开工作空间"可选择目录 | `WORKSPACE_ROOTS` 配置正确，目录存在 |
+| 8 | （可选）进入工作空间后 AI 对话可用 | API Key 配置正确 |
+
+**快速健康检查命令：**
+
+```bash
+# 代码检查（ESLint）
+npm run lint
+
+# TypeScript 类型检查
+npx tsc --noEmit
+
+# 构建项目（可用于验证整体编译是否正常）
+npm run build
+```
+
+如以上命令均无报错，则表示项目安装和配置完全正确。
+
+---
+
+## 常见安装问题排查 / Troubleshooting Installation
+
+### `better-sqlite3` 编译失败
+
+`better-sqlite3` 是原生 Node.js 模块，需要 C++ 编译工具链：
+
+- **Windows：** 安装 [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)，勾选 "Desktop development with C++" 工作负载
+- **macOS：** 安装 Xcode Command Line Tools
+  ```bash
+  xcode-select --install
+  ```
+- **Linux（Debian/Ubuntu）：**
+  ```bash
+  sudo apt-get install -y build-essential python3
+  ```
+
+### `npm install` 报网络错误
+
+如果下载依赖超时或失败，可尝试使用国内镜像源：
+
+```bash
+npm install --registry=https://registry.npmmirror.com
+```
+
+### `npx drizzle-kit migrate` 执行报错
+
+- 确认 `./drizzle/` 目录下存在 SQL 迁移文件（如 `0000_*.sql`）
+- 确认 `./data/` 目录存在（若不存在会自动创建）
+- 若数据库损坏，可删除后重新迁移：
+  ```bash
+  rm -f ./data/notebooklm.db
+  npx drizzle-kit migrate
+  ```
+
+### 启动 `npm run dev` 后端口被占用
+
+```bash
+# 查看 3000 端口占用情况
+# Linux / macOS
+lsof -i :3000
+
+# Windows (PowerShell)
+netstat -ano | findstr :3000
+```
+
+可通过环境变量指定其他端口：
+
+```bash
+PORT=3001 npm run dev
+```
+
+### 页面访问报 500 错误
+
+- 检查 `.env.local` 文件是否存在且 `WORKSPACE_ROOTS` 已正确配置
+- 确认 `WORKSPACE_ROOTS` 中指定的目录在服务器上真实存在
+- 检查终端输出的错误日志，根据提示排查
 
 ---
 
