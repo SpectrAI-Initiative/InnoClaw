@@ -36,12 +36,16 @@ function messagesToTranscript(
             (p.type.startsWith("tool-") || p.type === "dynamic-tool")
         )
         .map((p) => {
+          const pAny = p as Record<string, unknown>;
           const toolName =
-            typeof p.type === "string" && p.type.startsWith("tool-")
+            typeof pAny.toolName === "string"
+              ? pAny.toolName
+              : typeof p.type === "string" && p.type.startsWith("tool-")
               ? p.type.slice(5)
               : "tool";
-          const inputStr = p.input
-            ? JSON.stringify(p.input).slice(0, 500)
+          const toolInput = p.input ?? pAny.args;
+          const inputStr = toolInput
+            ? JSON.stringify(toolInput).slice(0, 500)
             : "";
           const outputStr = p.output
             ? JSON.stringify(p.output).slice(0, 500)
