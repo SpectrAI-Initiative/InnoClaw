@@ -170,7 +170,22 @@
     "memoryPreviewDesc": "Review and edit the conversation memory before saving.",
     "memoryNoteTitle": "Title",
     "memoryNoteContent": "Content",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "clearAll": "Clear All"
+  },
+  "report": {
+    "tabReport": "Research report",
+    "tabProcess": "Process",
+    "tabSources": "Sources",
+    "statusPending": "Pending",
+    "statusRunning": "Running",
+    "statusCompleted": "Final",
+    "statusError": "Error",
+    "downloadPdf": "Download PDF",
+    "downloadMd": "Download Markdown",
+    "share": "Share",
+    "linkCopied": "Content copied to clipboard",
+    "noReport": "No report available yet. Run a research task in the Agent panel first."
   },
   "skills": {
     "title": "Skills",

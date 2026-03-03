@@ -10,10 +10,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/header";
 import { FileBrowser } from "@/components/files/file-browser";
 import { AgentPanel } from "@/components/agent/agent-panel";
+import { ReportPanel } from "@/components/report/report-panel";
 import { NotesPanel } from "@/components/notes/notes-panel";
 import { FilePreviewPanel } from "@/components/preview/file-preview-panel";
 import { useWorkspace } from "@/lib/hooks/use-workspaces";
+import { useReport } from "@/lib/hooks/use-report";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Bot, FileText } from "lucide-react";
+
+type MiddlePanel = "agent" | "report";
 
 export default function WorkspacePage({
   params,
@@ -23,6 +29,8 @@ export default function WorkspacePage({
   const { workspaceId } = use(params);
   const { workspace, isLoading } = useWorkspace(workspaceId);
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
+  const [middlePanel, setMiddlePanel] = useState<MiddlePanel>("agent");
+  const { isAvailable: reportAvailable } = useReport(workspaceId);
 
   if (isLoading) {
     return (
@@ -64,15 +72,44 @@ export default function WorkspacePage({
 
           <ResizableHandle withHandle />
 
-          {/* Right: Agent + Preview/Notes horizontal split */}
+          {/* Right: Agent/Report + Preview/Notes horizontal split */}
           <ResizablePanel defaultSize={75} minSize={30} className="overflow-hidden">
             <ResizablePanelGroup orientation="horizontal">
               <ResizablePanel defaultSize={60} minSize={10} className="overflow-hidden">
-                <AgentPanel
-                  workspaceId={workspaceId}
-                  workspaceName={workspace.name}
-                  folderPath={workspace.folderPath}
-                />
+                <div className="relative h-full">
+                  {/* Panel toggle buttons */}
+                  <div className="absolute top-2 right-2 z-10 flex gap-1">
+                    <Button
+                      variant={middlePanel === "agent" ? "default" : "outline"}
+                      size="icon-xs"
+                      onClick={() => setMiddlePanel("agent")}
+                      title="Agent"
+                    >
+                      <Bot className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant={middlePanel === "report" ? "default" : "outline"}
+                      size="icon-xs"
+                      onClick={() => setMiddlePanel("report")}
+                      disabled={!reportAvailable}
+                      title="Report"
+                    >
+                      <FileText className="h-3 w-3" />
+                    </Button>
+                  </div>
+
+                  {/* Keep both mounted for state preservation */}
+                  <div className={middlePanel === "agent" ? "h-full" : "hidden"}>
+                    <AgentPanel
+                      workspaceId={workspaceId}
+                      workspaceName={workspace.name}
+                      folderPath={workspace.folderPath}
+                    />
+                  </div>
+                  <div className={middlePanel === "report" ? "h-full" : "hidden"}>
+                    <ReportPanel workspaceId={workspaceId} />
+                  </div>
+                </div>
               </ResizablePanel>
 
               <ResizableHandle withHandle />
