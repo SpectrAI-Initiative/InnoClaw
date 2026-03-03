@@ -10,7 +10,7 @@ describe("buildSafeExecEnv", () => {
   const originalEnv = { ...process.env };
 
   afterEach(() => {
-    Object.defineProperty(process, "platform", { value: originalPlatform });
+    Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
     process.env = { ...originalEnv };
     vi.resetModules();
   });
@@ -47,7 +47,7 @@ describe("buildSafeExecEnv", () => {
 
   it("should provide Unix PATH fallback on non-Windows platforms", async () => {
     delete process.env.PATH;
-    Object.defineProperty(process, "platform", { value: "linux" });
+    Object.defineProperty(process, "platform", { value: "linux", configurable: true });
     const buildSafeExecEnv = await loadModule();
     const env = buildSafeExecEnv();
     expect(env.PATH).toBe("/usr/local/bin:/usr/bin:/bin");
@@ -55,14 +55,14 @@ describe("buildSafeExecEnv", () => {
 
   it("should provide Windows PATH fallback on win32", async () => {
     delete process.env.PATH;
-    Object.defineProperty(process, "platform", { value: "win32" });
+    Object.defineProperty(process, "platform", { value: "win32", configurable: true });
     const buildSafeExecEnv = await loadModule();
     const env = buildSafeExecEnv();
     expect(env.PATH).toBe("C:\\Windows\\system32;C:\\Windows");
   });
 
   it("should include Windows-specific env vars on win32", async () => {
-    Object.defineProperty(process, "platform", { value: "win32" });
+    Object.defineProperty(process, "platform", { value: "win32", configurable: true });
     process.env.SYSTEMROOT = "C:\\Windows";
     process.env.COMSPEC = "C:\\Windows\\system32\\cmd.exe";
     const buildSafeExecEnv = await loadModule();
@@ -76,7 +76,7 @@ describe("buildSafeExecEnv", () => {
   });
 
   it("should NOT include Windows-specific env vars on Linux", async () => {
-    Object.defineProperty(process, "platform", { value: "linux" });
+    Object.defineProperty(process, "platform", { value: "linux", configurable: true });
     const buildSafeExecEnv = await loadModule();
     const env = buildSafeExecEnv();
     expect(env.SYSTEMROOT).toBeUndefined();
@@ -92,7 +92,7 @@ describe("buildSafeExecEnv", () => {
   });
 
   it("should provide hardcoded SYSTEMROOT and COMSPEC fallbacks on win32", async () => {
-    Object.defineProperty(process, "platform", { value: "win32" });
+    Object.defineProperty(process, "platform", { value: "win32", configurable: true });
     delete process.env.SYSTEMROOT;
     delete process.env.SystemRoot;
     delete process.env.COMSPEC;

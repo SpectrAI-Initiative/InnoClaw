@@ -1,0 +1,259 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../notifications/index.md:1 e655bbadc03e4013b6a5939e466ee84b
+msgid "Notifications & Bot Integrations"
+msgstr "通知与机器人集成"
+
+#: ../../notifications/index.md:3 d810a647b5b842599c63da676c4f0723
+msgid ""
+"NotebookLM supports integration with messaging platforms through bot "
+"adapters. This allows users to interact with their workspaces directly "
+"from chat applications."
+msgstr "NotebookLM 通过机器人适配器支持与消息平台的集成。这使用户可以直接从聊天应用程序与其工作空间进行交互。"
+
+#: ../../notifications/index.md:5 0c45d8f95e1c404eb1a3e9c04818f333
+msgid "Supported Channels"
+msgstr "支持的渠道"
+
+#: ../../notifications/index.md 61e7c0cc253248f8b8999fe41fc0a693
+msgid "Platform"
+msgstr "平台"
+
+#: ../../notifications/index.md e95db5fecce84c92a86805e99980082b
+msgid "Status"
+msgstr "状态码"
+
+#: ../../notifications/index.md 90585dbad0914648a90d25b5d534c342
+msgid "Webhook Endpoint"
+msgstr "Webhook 端点"
+
+#: ../../notifications/index.md d44abf627fd343bb875c1f0e8c555d81
+msgid "**Feishu (Lark)**"
+msgstr "**飞书**"
+
+#: ../../notifications/index.md a10d5ce7861f4bcf8845a175d84bc3f8
+#: b156892d69c4484f9c946159fd310bc5
+msgid "Supported"
+msgstr "已支持"
+
+#: ../../notifications/index.md 3cdc810c6a744ff0ababf949f15a9316
+msgid "`/api/bot/feishu`"
+msgstr "`/api/bot/feishu`"
+
+#: ../../notifications/index.md a4fe33913e054e46b0fbcb29c115933e
+msgid "**WeChat Enterprise**"
+msgstr "**企业微信**"
+
+#: ../../notifications/index.md e1c728e7457a43aaa9750b3c874cac6a
+msgid "`/api/bot/wechat`"
+msgstr "`/api/bot/wechat`"
+
+#: ../../notifications/index.md:12 9e29280fa0ee4701a779a2a0463f3dbb
+msgid "Architecture"
+msgstr "架构"
+
+#: ../../notifications/index.md:31 0b5d2a2f9f5049ea92b05ecf93bc5d18
+msgid "Feishu (Lark) Bot"
+msgstr "飞书机器人"
+
+#: ../../notifications/index.md:33 ../../notifications/index.md:69
+#: 09e8048b9a5047c6a024bddd795adae4 b6b128d0d982468db3607eedf15dfe6a
+msgid "Setup"
+msgstr "设置"
+
+#: ../../notifications/index.md:35 e11c768217074b13aff7ec1f948ce941
+msgid ""
+"Create a Feishu application at the [Feishu Open "
+"Platform](https://open.feishu.cn/)"
+msgstr "在[飞书开放平台](https://open.feishu.cn/)创建飞书应用"
+
+#: ../../notifications/index.md:36 ../../notifications/index.md:72
+#: 1d1d367ca2bc479193ce783b940ed25a 656badad93fb4ef390b1b79dfca94d11
+msgid "Configure the following environment variables:"
+msgstr "配置以下环境变量："
+
+#: ../../notifications/index.md:46 a2720a367da34b4783f4496511b5e852
+msgid "Set the webhook URL in your Feishu app configuration:"
+msgstr "在飞书应用配置中设置 Webhook URL："
+
+#: ../../notifications/index.md:51 ../../notifications/index.md:88
+#: 2b6fe5c61fea4f688ed97e2fb2493504 715b5a0159844676b2292581671b3f1d
+msgid "Features"
+msgstr "功能特性"
+
+#: ../../notifications/index.md:53 ../../notifications/index.md:90
+#: 4bdb147f33d84a8d81dea1c1ffdcb350 f08c56afb94d48e78ffe0902d1edc5b6
+msgid "Receive and respond to text messages"
+msgstr "接收并回复文本消息"
+
+#: ../../notifications/index.md:54 785333731f954cb28c479fad9634bc7b
+msgid "Download and process file attachments"
+msgstr "下载和处理文件附件"
+
+#: ../../notifications/index.md:55 78b4158dbd024ce0a50ce8e85de8d309
+msgid "Support for encrypted event payloads"
+msgstr "支持加密事件负载"
+
+#: ../../notifications/index.md:56 ff834382f1f04efa88e16edd3beceb40
+msgid "Automatic webhook verification"
+msgstr "自动 Webhook 验证"
+
+#: ../../notifications/index.md:58 12c7f0c56bb14f2eb17fa1c1219d76ed
+msgid "Event Handling"
+msgstr "事件处理"
+
+#: ../../notifications/index.md:60 13e4f314e12e435fa67be83296ecc739
+msgid "The Feishu bot handles the following event types:"
+msgstr "飞书机器人处理以下事件类型："
+
+#: ../../notifications/index.md:14 e7ae6256f2054136baa74e1036fad7bd
+msgid "Event"
+msgstr "事件"
+
+#: ../../notifications/index.md:14 3b1e1f3f44284e34a48d248fecedf707
+msgid "Description"
+msgstr "描述"
+
+#: ../../notifications/index.md:14 4fc9797db60647fa87a09f07e6ba3aae
+msgid "`url_verification`"
+msgstr "`url_verification`"
+
+#: ../../notifications/index.md:14 335817f47ace4ac7887c1705d812e0b8
+msgid "Initial webhook URL verification"
+msgstr "初始 Webhook URL 验证"
+
+#: ../../notifications/index.md:14 970d21b6df464e43a0a2159095c07df5
+msgid "`im.message.receive_v1`"
+msgstr "`im.message.receive_v1`"
+
+#: ../../notifications/index.md:14 fb4a399a36dd4427b9c8552b8f2a8d75
+msgid "Incoming message from a user"
+msgstr "来自用户的传入消息"
+
+#: ../../notifications/index.md:67 6fdc2e3ecd824190bec4b57f1e98d467
+msgid "WeChat Enterprise Bot"
+msgstr "企业微信机器人"
+
+#: ../../notifications/index.md:71 9e4db4728d3b47bdb7934c692a4eab36
+msgid ""
+"Create an application in the [WeChat Enterprise Admin "
+"Console](https://work.weixin.qq.com/)"
+msgstr "在[企业微信管理后台](https://work.weixin.qq.com/)创建应用"
+
+#: ../../notifications/index.md:83 ae1d45ce32ef4fe3b0919b14d5183473
+msgid "Set the webhook URL in your WeChat Enterprise app configuration:"
+msgstr "在企业微信应用配置中设置 Webhook URL："
+
+#: ../../notifications/index.md:91 b417ed0f71a4431589b67a87f35abc80
+msgid "Support for both plaintext and encrypted message modes"
+msgstr "支持明文和加密两种消息模式"
+
+#: ../../notifications/index.md:92 d155558768d944d2869ad7c2545e0126
+msgid "Webhook signature verification"
+msgstr "Webhook 签名验证"
+
+#: ../../notifications/index.md:93 78031f172f144c47aa719f2bd6651d31
+msgid "Automatic access token management"
+msgstr "自动访问令牌管理"
+
+#: ../../notifications/index.md:95 afe4bdf1512440418fbb99c8fb9352c1
+msgid "Verification Modes"
+msgstr "验证模式"
+
+#: ../../notifications/index.md:97 06067f640fd34fe18f06b95c1e957f2e
+msgid "WeChat Enterprise supports two webhook verification modes:"
+msgstr "企业微信支持两种 Webhook 验证模式："
+
+#: ../../notifications/index.md:14 ec2c7352e921481b9f978a60ba31cdb5
+msgid "Mode"
+msgstr "模式"
+
+#: ../../notifications/index.md:14 90e0eb6681824054b1ac1fdd2e67d9a3
+msgid "Parameters Used"
+msgstr "使用的参数"
+
+#: ../../notifications/index.md:14 46193d1726904230b548b3f71f54cded
+msgid "**Plaintext**"
+msgstr "**明文**"
+
+#: ../../notifications/index.md:14 45194d936f1648b2820f19904912d97a
+msgid "`msg_signature`, `timestamp`, `nonce` with SHA-1 signature"
+msgstr "`msg_signature`、`timestamp`、`nonce` 配合 SHA-1 签名"
+
+#: ../../notifications/index.md:14 516b3ead40954e94b868aceb067e4ace
+msgid "**Encrypted**"
+msgstr "**加密**"
+
+#: ../../notifications/index.md:14 15c5e241905549f59dba2d0b08efe159
+msgid "AES-256-CBC encrypted message body"
+msgstr "AES-256-CBC 加密消息体"
+
+#: ../../notifications/index.md:104 aa49288f0506409b9cd7f34c27924868
+msgid "Common Configuration"
+msgstr "通用配置"
+
+#: ../../notifications/index.md:106 9f202f2f8584473ab8f9fcca338e35e7
+msgid "Workspace Binding"
+msgstr "工作空间绑定"
+
+#: ../../notifications/index.md:108 8f7835dd040e444db9dda6257c6bb245
+msgid ""
+"Bot integrations process messages using the RAG pipeline from a "
+"configured workspace. The bot processor routes incoming messages to the "
+"appropriate workspace and AI provider."
+msgstr "机器人集成使用已配置工作空间的 RAG 流水线处理消息。机器人处理器将传入消息路由到相应的工作空间和 AI 提供商。"
+
+#: ../../notifications/index.md:110 1e0eab49601e42c58a40000f327bf8df
+msgid "Security"
+msgstr "安全性"
+
+#: ../../notifications/index.md:112 1fc00a89c88f447cb060e7260f0253ad
+msgid ""
+"All webhook requests are verified using platform-specific signature/token"
+" validation"
+msgstr "所有 Webhook 请求都通过平台特定的签名/令牌验证进行校验"
+
+#: ../../notifications/index.md:113 cb7692fefa894e21b6c395e4bd2ca2dd
+msgid "Encrypted message modes are supported for both platforms"
+msgstr "两个平台均支持加密消息模式"
+
+#: ../../notifications/index.md:114 3bed22f08c8b4ba1ae2a44652012f909
+msgid ""
+"API keys and secrets are stored server-side only and never exposed to "
+"clients"
+msgstr "API 密钥和密钥仅存储在服务器端，永远不会暴露给客户端"
+
+#: ../../notifications/index.md:116 55909e9de8b448f48dac64af7dc0a5ab
+msgid "Notification Payload Format"
+msgstr "通知负载格式"
+
+#: ../../notifications/index.md:118 efeca138f9fe462d9d544aeb3b440af0
+msgid "Bot responses follow each platform's native message format:"
+msgstr "机器人响应遵循各平台的原生消息格式："
+
+#: ../../notifications/index.md:120 97a637672ace43efbaa02df4cb348d7c
+msgid "**Feishu:**"
+msgstr "**飞书：**"
+
+#: ../../notifications/index.md:130 c1313b48f1f24721b3f538bbec1e5f3d
+msgid "**WeChat Enterprise:**"
+msgstr "**企业微信：**"
