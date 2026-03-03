@@ -44,15 +44,17 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.text();
     const body = JSON.parse(rawBody) as Record<string, unknown>;
 
-    // Handle URL verification challenge (also verify token)
+    // Verify webhook token from body (Feishu uses body-embedded tokens)
+    if (!adapter.verifyWebhook({}, rawBody)) {
+      console.warn("[feishu-webhook] Webhook verification failed");
+      return NextResponse.json(
+        { error: "Verification failed" },
+        { status: 403 }
+      );
+    }
+
+    // Handle URL verification challenge
     if (body.type === "url_verification") {
-      if (body.token !== config.verificationToken) {
-        console.warn("[feishu-webhook] URL verification: invalid token");
-        return NextResponse.json(
-          { error: "Invalid verification token" },
-          { status: 403 }
-        );
-      }
       const challenge = body.challenge as string;
       console.log("[feishu-webhook] URL verification challenge received");
       return NextResponse.json({ challenge });
@@ -66,20 +68,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // Verify webhook authenticity
-    const headers: Record<string, string> = {};
-    req.headers.forEach((value, key) => {
-      headers[key.toLowerCase()] = value;
-    });
-
-    if (!adapter.verifyWebhook(headers, rawBody)) {
-      console.warn("[feishu-webhook] Webhook verification failed");
-      return NextResponse.json(
-        { error: "Verification failed" },
-        { status: 403 }
-      );
-    }
-
     // Parse messages
     const messages = adapter.parseMessages(body);
 
@@ -87,8 +75,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // Process messages asynchronously (don't block the webhook response)
+    // Process messages asynchronously (don't block the webhook response).
     // Feishu requires a quick response to acknowledge receipt.
+    // Note: This relies on the Node.js runtime keeping the process alive
+    // after the response. In serverless/edge environments, consider using
+    // a durable queue (e.g., Vercel Background Functions) instead.
     for (const message of messages) {
       (async () => {
         try {

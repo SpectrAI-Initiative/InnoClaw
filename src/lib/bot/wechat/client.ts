@@ -16,6 +16,7 @@ import {
   type FileHandler,
   type WechatBotConfig,
   MAX_FILE_SIZE,
+  readResponseWithLimit,
 } from "../types";
 
 const WECHAT_API_BASE = "https://qyapi.weixin.qq.com/cgi-bin";
@@ -38,6 +39,14 @@ async function getAccessToken(config: WechatBotConfig): Promise<string> {
   const url = `${WECHAT_API_BASE}/gettoken?corpid=${encodeURIComponent(config.corpId)}&corpsecret=${encodeURIComponent(config.corpSecret)}`;
 
   const res = await fetch(url);
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(
+      `WeChat token request failed: ${res.status} ${res.statusText} — ${text}`
+    );
+  }
+
   const data = (await res.json()) as {
     errcode: number;
     errmsg: string;
@@ -64,16 +73,26 @@ async function getAccessToken(config: WechatBotConfig): Promise<string> {
 
 /**
  * Verify the Enterprise WeChat callback signature.
- * signature = SHA1(sort(token, timestamp, nonce))
+ *
+ * Plaintext mode:  signature = SHA1(sort(token, timestamp, nonce))
+ * Encrypted mode:  msg_signature = SHA1(sort(token, timestamp, nonce, encrypt))
+ *
  * Uses timing-safe comparison to prevent timing attacks.
+ *
+ * @param extraData  Optional encrypted payload (echostr or <Encrypt> value)
+ *                   to include in the hash when using msg_signature.
  */
 function verifySignature(
   token: string,
   timestamp: string,
   nonce: string,
-  signature: string
+  signature: string,
+  extraData?: string
 ): boolean {
-  const parts = [token, timestamp, nonce].sort();
+  const parts = [token, timestamp, nonce];
+  if (extraData) parts.push(extraData);
+  parts.sort();
+
   const computed = crypto
     .createHash("sha1")
     .update(parts.join(""))
@@ -112,29 +131,17 @@ function createWechatFileHandler(config: WechatBotConfig): FileHandler {
         );
       }
 
-      const contentLength = Number(res.headers.get("content-length") || "0");
-      if (contentLength > MAX_FILE_SIZE) {
-        throw new Error(
-          `File too large: ${contentLength} bytes exceeds ${MAX_FILE_SIZE} byte limit`
-        );
-      }
+      // Stream the response and enforce MAX_FILE_SIZE
+      const buffer = await readResponseWithLimit(res, MAX_FILE_SIZE);
 
       await fsp.mkdir(destDir, { recursive: true });
-      // Sanitize fileName to prevent path traversal
       const safeName = path.basename(fileName) || `file_${Date.now()}`;
       const destPath = path.join(destDir, safeName);
-      const buffer = Buffer.from(await res.arrayBuffer());
-
-      // Also check actual buffer size (content-length may be absent)
-      if (buffer.length > MAX_FILE_SIZE) {
-        throw new Error(
-          `File too large: ${buffer.length} bytes exceeds ${MAX_FILE_SIZE} byte limit`
-        );
-      }
-
       await fsp.writeFile(destPath, buffer);
 
-      console.log(`[wechat] Downloaded file: ${destPath} (${buffer.length} bytes)`);
+      console.log(
+        `[wechat] Downloaded file: ${destPath} (${buffer.length} bytes)`
+      );
       return destPath;
     },
 
@@ -225,22 +232,34 @@ export function createWechatAdapter(config: WechatBotConfig): BotAdapter {
         !!config.corpSecret &&
         !!config.token &&
         !!config.encodingAESKey &&
-        !!config.agentId
+        !!config.agentId &&
+        !isNaN(Number(config.agentId))
       );
     },
 
     verifyWebhook(
       headers: Record<string, string>,
+      body: string
     ): boolean {
-      const signature = headers["msg_signature"] || headers["signature"] || "";
+      const msgSignature = headers["msg_signature"] || "";
+      const signature = headers["signature"] || "";
       const timestamp = headers["timestamp"] || "";
       const nonce = headers["nonce"] || "";
 
-      if (!signature || !timestamp || !nonce) {
-        return false;
+      if (!timestamp || !nonce) return false;
+
+      // msg_signature: encrypted mode — include body (encrypt data) in hash
+      if (msgSignature) {
+        return verifySignature(
+          config.token, timestamp, nonce, msgSignature, body || undefined
+        );
+      }
+      // signature: plaintext mode — token + timestamp + nonce only
+      if (signature) {
+        return verifySignature(config.token, timestamp, nonce, signature);
       }
 
-      return verifySignature(config.token, timestamp, nonce, signature);
+      return false;
     },
 
     parseMessages(body: Record<string, unknown>): BotMessage[] {

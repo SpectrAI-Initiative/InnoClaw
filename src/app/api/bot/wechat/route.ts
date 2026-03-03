@@ -29,17 +29,19 @@ export async function GET(req: NextRequest) {
 
   const searchParams = req.nextUrl.searchParams;
   const echostr = searchParams.get("echostr") || "";
-  const signature = searchParams.get("msg_signature") || searchParams.get("signature") || "";
+  const msgSignature = searchParams.get("msg_signature") || "";
+  const signature = searchParams.get("signature") || "";
   const timestamp = searchParams.get("timestamp") || "";
   const nonce = searchParams.get("nonce") || "";
 
   const headers: Record<string, string> = {
-    msg_signature: signature,
     timestamp,
     nonce,
+    ...(msgSignature ? { msg_signature: msgSignature } : {}),
+    ...(signature ? { signature } : {}),
   };
 
-  if (!adapter.verifyWebhook(headers, "")) {
+  if (!adapter.verifyWebhook(headers, echostr)) {
     console.warn("[wechat-webhook] URL verification failed");
     return new Response("Verification failed", { status: 403 });
   }
@@ -65,19 +67,24 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Read body first so we can include it in signature verification
+    const rawBody = await req.text();
+
     // Verify webhook signature from query params
     const searchParams = req.nextUrl.searchParams;
-    const signature = searchParams.get("msg_signature") || searchParams.get("signature") || "";
+    const msgSignature = searchParams.get("msg_signature") || "";
+    const signature = searchParams.get("signature") || "";
     const timestamp = searchParams.get("timestamp") || "";
     const nonce = searchParams.get("nonce") || "";
 
     const headers: Record<string, string> = {
-      msg_signature: signature,
       timestamp,
       nonce,
+      ...(msgSignature ? { msg_signature: msgSignature } : {}),
+      ...(signature ? { signature } : {}),
     };
 
-    if (!adapter.verifyWebhook(headers, "")) {
+    if (!adapter.verifyWebhook(headers, rawBody)) {
       console.warn("[wechat-webhook] Webhook verification failed");
       return NextResponse.json(
         { error: "Verification failed" },
@@ -85,7 +92,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const rawBody = await req.text();
     let body: Record<string, unknown>;
 
     // WeChat can send XML or JSON depending on configuration
@@ -106,7 +112,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Process messages asynchronously
+    // Process messages asynchronously.
+    // Note: This relies on the Node.js runtime keeping the process alive
+    // after the response. In serverless/edge environments, consider using
+    // a durable queue (e.g., Vercel Background Functions) instead.
     for (const message of messages) {
       (async () => {
         try {

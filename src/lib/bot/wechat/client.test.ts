@@ -52,6 +52,11 @@ describe("WeChat adapter", () => {
       const adapter = createWechatAdapter({ ...testConfig, agentId: "" });
       expect(adapter.isEnabled()).toBe(false);
     });
+
+    it("should return false when agentId is non-numeric", () => {
+      const adapter = createWechatAdapter({ ...testConfig, agentId: "abc" });
+      expect(adapter.isEnabled()).toBe(false);
+    });
   });
 
   describe("platform", () => {
@@ -64,11 +69,11 @@ describe("WeChat adapter", () => {
   describe("verifyWebhook", () => {
     it("should return false when signature params are missing", () => {
       const adapter = createWechatAdapter(testConfig);
-      expect(adapter.verifyWebhook({})).toBe(false);
-      expect(adapter.verifyWebhook({ timestamp: "123" })).toBe(false);
+      expect(adapter.verifyWebhook({}, "")).toBe(false);
+      expect(adapter.verifyWebhook({ timestamp: "123" }, "")).toBe(false);
     });
 
-    it("should verify correct SHA1 signature", () => {
+    it("should verify correct SHA1 signature (plaintext mode)", () => {
       const adapter = createWechatAdapter(testConfig);
       const parts = ["test_token", "1234567890", "nonce123"].sort();
       const expected = crypto
@@ -76,22 +81,49 @@ describe("WeChat adapter", () => {
         .update(parts.join(""))
         .digest("hex");
 
-      const result = adapter.verifyWebhook({
-        msg_signature: expected,
-        timestamp: "1234567890",
-        nonce: "nonce123",
-      });
+      const result = adapter.verifyWebhook(
+        {
+          signature: expected,
+          timestamp: "1234567890",
+          nonce: "nonce123",
+        },
+        ""
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it("should verify msg_signature with body data (encrypted mode)", () => {
+      const adapter = createWechatAdapter(testConfig);
+      const echostr = "encrypted_echostr_value";
+      const parts = ["test_token", "1234567890", "nonce123", echostr].sort();
+      const expected = crypto
+        .createHash("sha1")
+        .update(parts.join(""))
+        .digest("hex");
+
+      const result = adapter.verifyWebhook(
+        {
+          msg_signature: expected,
+          timestamp: "1234567890",
+          nonce: "nonce123",
+        },
+        echostr
+      );
 
       expect(result).toBe(true);
     });
 
     it("should reject incorrect signature", () => {
       const adapter = createWechatAdapter(testConfig);
-      const result = adapter.verifyWebhook({
-        msg_signature: "wrong_signature_hash",
-        timestamp: "1234567890",
-        nonce: "nonce123",
-      });
+      const result = adapter.verifyWebhook(
+        {
+          signature: "wrong_signature_hash",
+          timestamp: "1234567890",
+          nonce: "nonce123",
+        },
+        ""
+      );
 
       expect(result).toBe(false);
     });
