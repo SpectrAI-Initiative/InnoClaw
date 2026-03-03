@@ -239,10 +239,10 @@ msgstr "获取帮助"
 #: ../../troubleshooting/faq.md:99 d1cc4475b44740329751efcd394accbe
 msgid ""
 "**GitHub Issues** — [Report bugs or request "
-"features](https://github.com/zjowowen/notebooklm/issues)"
+"features](https://github.com/zjowowen/notebooklm/issues) (when enabled)"
 msgstr ""
 "**GitHub Issues** —— "
-"[报告错误或请求功能](https://github.com/zjowowen/notebooklm/issues)"
+"[报告错误或请求功能](https://github.com/zjowowen/notebooklm/issues)（启用后可用）"
 
 #: ../../troubleshooting/faq.md:100 7098e82b6fb44e92b38e5cbdbe1bcf21
 msgid ""

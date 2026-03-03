@@ -63,5 +63,10 @@ html_context = {
 html_static_path = ["_static"]
 html_title = "NotebookLM Documentation"
 
+# -- Options for linkcheck ---------------------------------------------------
+linkcheck_ignore = [
+    r"https://github\.com/zjowowen/notebooklm/(issues|pulls|actions)",
+]
+
 # -- Options for sphinxcontrib-mermaid ---------------------------------------
 mermaid_version = "11"

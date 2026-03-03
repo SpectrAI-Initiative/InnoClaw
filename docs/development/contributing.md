@@ -87,6 +87,6 @@ Please be respectful and constructive in all interactions. We aim to create a we
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/zjowowen/notebooklm/issues) to report bugs or request features
+- Use [GitHub Issues](https://github.com/zjowowen/notebooklm/issues) to report bugs or request features (when enabled)
 - Include clear steps to reproduce any bugs
 - Provide environment details (OS, Node.js version, browser)
