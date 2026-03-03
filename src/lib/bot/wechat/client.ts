@@ -21,17 +21,18 @@ import {
 const WECHAT_API_BASE = "https://qyapi.weixin.qq.com/cgi-bin";
 
 // ---------------------------------------------------------------------------
-// Access token cache
+// Access token cache (keyed by corpId to support multiple instances)
 // ---------------------------------------------------------------------------
 
-let cachedToken: { token: string; expiresAt: number } | null = null;
+const tokenCache = new Map<string, { token: string; expiresAt: number }>();
 
 /**
- * Obtain an access_token for Enterprise WeChat. Caches and refreshes automatically.
+ * Obtain an access_token for Enterprise WeChat. Caches per corpId and refreshes automatically.
  */
 async function getAccessToken(config: WechatBotConfig): Promise<string> {
-  if (cachedToken && Date.now() < cachedToken.expiresAt) {
-    return cachedToken.token;
+  const cached = tokenCache.get(config.corpId);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.token;
   }
 
   const url = `${WECHAT_API_BASE}/gettoken?corpid=${encodeURIComponent(config.corpId)}&corpsecret=${encodeURIComponent(config.corpSecret)}`;
@@ -48,13 +49,13 @@ async function getAccessToken(config: WechatBotConfig): Promise<string> {
     throw new Error(`WeChat token error: ${data.errmsg}`);
   }
 
-  cachedToken = {
+  tokenCache.set(config.corpId, {
     token: data.access_token,
     // Refresh 60s before expiry
     expiresAt: Date.now() + (data.expires_in - 60) * 1000,
-  };
+  });
 
-  return cachedToken.token;
+  return data.access_token;
 }
 
 // ---------------------------------------------------------------------------
@@ -64,6 +65,7 @@ async function getAccessToken(config: WechatBotConfig): Promise<string> {
 /**
  * Verify the Enterprise WeChat callback signature.
  * signature = SHA1(sort(token, timestamp, nonce))
+ * Uses timing-safe comparison to prevent timing attacks.
  */
 function verifySignature(
   token: string,
@@ -76,7 +78,15 @@ function verifySignature(
     .createHash("sha1")
     .update(parts.join(""))
     .digest("hex");
-  return computed === signature;
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(computed, "utf-8"),
+      Buffer.from(signature, "utf-8")
+    );
+  } catch {
+    // timingSafeEqual throws if lengths differ
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -110,8 +120,18 @@ function createWechatFileHandler(config: WechatBotConfig): FileHandler {
       }
 
       await fsp.mkdir(destDir, { recursive: true });
-      const destPath = path.join(destDir, fileName);
+      // Sanitize fileName to prevent path traversal
+      const safeName = path.basename(fileName) || `file_${Date.now()}`;
+      const destPath = path.join(destDir, safeName);
       const buffer = Buffer.from(await res.arrayBuffer());
+
+      // Also check actual buffer size (content-length may be absent)
+      if (buffer.length > MAX_FILE_SIZE) {
+        throw new Error(
+          `File too large: ${buffer.length} bytes exceeds ${MAX_FILE_SIZE} byte limit`
+        );
+      }
+
       await fsp.writeFile(destPath, buffer);
 
       console.log(`[wechat] Downloaded file: ${destPath} (${buffer.length} bytes)`);

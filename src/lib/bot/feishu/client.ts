@@ -20,17 +20,18 @@ import {
 const FEISHU_API_BASE = "https://open.feishu.cn/open-apis";
 
 // ---------------------------------------------------------------------------
-// Tenant access token cache
+// Tenant access token cache (keyed by appId to support multiple instances)
 // ---------------------------------------------------------------------------
 
-let cachedToken: { token: string; expiresAt: number } | null = null;
+const tokenCache = new Map<string, { token: string; expiresAt: number }>();
 
 /**
- * Obtain a tenant_access_token. Caches the token and refreshes automatically.
+ * Obtain a tenant_access_token. Caches per appId and refreshes automatically.
  */
 async function getTenantAccessToken(config: FeishuBotConfig): Promise<string> {
-  if (cachedToken && Date.now() < cachedToken.expiresAt) {
-    return cachedToken.token;
+  const cached = tokenCache.get(config.appId);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.token;
   }
 
   const res = await fetch(
@@ -56,13 +57,13 @@ async function getTenantAccessToken(config: FeishuBotConfig): Promise<string> {
     throw new Error(`Feishu token error: ${data.msg}`);
   }
 
-  cachedToken = {
+  tokenCache.set(config.appId, {
     token: data.tenant_access_token,
     // Refresh 60s before expiry
     expiresAt: Date.now() + (data.expire - 60) * 1000,
-  };
+  });
 
-  return cachedToken.token;
+  return data.tenant_access_token;
 }
 
 // ---------------------------------------------------------------------------
@@ -100,8 +101,18 @@ function createFeishuFileHandler(config: FeishuBotConfig): FileHandler {
       }
 
       await fsp.mkdir(destDir, { recursive: true });
-      const destPath = path.join(destDir, fileName);
+      // Sanitize fileName to prevent path traversal
+      const safeName = path.basename(fileName) || `file_${Date.now()}`;
+      const destPath = path.join(destDir, safeName);
       const buffer = Buffer.from(await res.arrayBuffer());
+
+      // Also check actual buffer size (content-length may be absent)
+      if (buffer.length > MAX_FILE_SIZE) {
+        throw new Error(
+          `File too large: ${buffer.length} bytes exceeds ${MAX_FILE_SIZE} byte limit`
+        );
+      }
+
       await fsp.writeFile(destPath, buffer);
 
       console.log(`[feishu] Downloaded file: ${destPath} (${buffer.length} bytes)`);
@@ -238,19 +249,25 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
         const msgType = (message.message_type as string) || "";
         const timestamp = new Date().toISOString();
 
+        let content: Record<string, unknown> = {};
+        try {
+          content = JSON.parse((message.content as string) || "{}");
+        } catch {
+          console.warn("[feishu] Failed to parse message content JSON");
+          return messages;
+        }
+
         if (msgType === "text") {
-          const content = JSON.parse((message.content as string) || "{}");
           messages.push({
             type: "text",
             messageId,
-            text: content.text || "",
+            text: (content.text as string) || "",
             senderId,
             chatId,
             isGroup: chatType === "group",
             timestamp,
           });
         } else if (msgType === "file" || msgType === "image") {
-          const content = JSON.parse((message.content as string) || "{}");
           messages.push({
             type: "file",
             messageId,
@@ -258,10 +275,10 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
             chatId,
             isGroup: chatType === "group",
             timestamp,
-            fileName: content.file_name || `file_${messageId}`,
+            fileName: (content.file_name as string) || `file_${messageId}`,
             fileType: msgType,
             fileSize: Number(content.file_size || 0),
-            fileKey: content.file_key || content.image_key || "",
+            fileKey: (content.file_key as string) || (content.image_key as string) || "",
           });
         }
       }

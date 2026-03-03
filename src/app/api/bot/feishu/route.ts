@@ -14,6 +14,21 @@ import { getFeishuConfig } from "@/lib/bot/types";
 import { createFeishuAdapter } from "@/lib/bot/feishu/client";
 import { processMessage, sendReplies } from "@/lib/bot/processor";
 
+/** Simple in-memory set to deduplicate Feishu event re-deliveries (TTL 5min) */
+const processedEvents = new Map<string, number>();
+const EVENT_TTL = 5 * 60 * 1000;
+
+function isDuplicateEvent(eventId: string): boolean {
+  // Clean expired entries
+  const now = Date.now();
+  for (const [id, ts] of processedEvents) {
+    if (now - ts > EVENT_TTL) processedEvents.delete(id);
+  }
+  if (processedEvents.has(eventId)) return true;
+  processedEvents.set(eventId, now);
+  return false;
+}
+
 export async function POST(req: NextRequest) {
   const config = getFeishuConfig();
   const adapter = createFeishuAdapter(config);
@@ -29,11 +44,26 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.text();
     const body = JSON.parse(rawBody) as Record<string, unknown>;
 
-    // Handle URL verification challenge
+    // Handle URL verification challenge (also verify token)
     if (body.type === "url_verification") {
+      if (body.token !== config.verificationToken) {
+        console.warn("[feishu-webhook] URL verification: invalid token");
+        return NextResponse.json(
+          { error: "Invalid verification token" },
+          { status: 403 }
+        );
+      }
       const challenge = body.challenge as string;
       console.log("[feishu-webhook] URL verification challenge received");
       return NextResponse.json({ challenge });
+    }
+
+    // Deduplicate events (Feishu may re-deliver on slow response)
+    const header = body.header as Record<string, unknown> | undefined;
+    const eventId = (header?.event_id as string) || "";
+    if (eventId && isDuplicateEvent(eventId)) {
+      console.log(`[feishu-webhook] Duplicate event ${eventId}, skipping`);
+      return NextResponse.json({ ok: true });
     }
 
     // Verify webhook authenticity
@@ -60,7 +90,6 @@ export async function POST(req: NextRequest) {
     // Process messages asynchronously (don't block the webhook response)
     // Feishu requires a quick response to acknowledge receipt.
     for (const message of messages) {
-      // Use setImmediate-style to not block the response
       (async () => {
         try {
           console.log(
