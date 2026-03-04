@@ -10,6 +10,9 @@ import { ArticleCard } from "./article-card";
 import { PaperSummarySection } from "./paper-summary-section";
 import type { Article, ArticleSource } from "@/lib/article-search/types";
 
+/** Composite key for identifying an article across sources. */
+const articleKey = (a: Article) => `${a.source}-${a.id}`;
+
 interface PaperStudyPanelProps {
   workspaceId: string;
   onArticleSelect: (article: Article | null) => void;
@@ -57,7 +60,7 @@ export function PaperStudyPanel({
     (article: Article, checked: boolean) => {
       setCheckedIds((prev) => {
         const next = new Set(prev);
-        const key = `${article.source}-${article.id}`;
+        const key = articleKey(article);
         if (checked) {
           next.add(key);
         } else {
@@ -74,7 +77,7 @@ export function PaperStudyPanel({
     if (checkedIds.size === articles.length) {
       setCheckedIds(new Set());
     } else {
-      setCheckedIds(new Set(articles.map((a) => `${a.source}-${a.id}`)));
+      setCheckedIds(new Set(articles.map(articleKey)));
     }
   }, [articles, checkedIds.size]);
 
@@ -88,7 +91,7 @@ export function PaperStudyPanel({
   /** Summarize checked articles via the API. */
   const handleSummarize = useCallback(async () => {
     const toSummarize = articles.filter(
-      (a) => checkedIds.has(`${a.source}-${a.id}`)
+      (a) => checkedIds.has(articleKey(a))
     );
     if (toSummarize.length === 0) return;
 
@@ -201,7 +204,7 @@ export function PaperStudyPanel({
         setSelectedArticle(fetchedArticles[0]);
         onArticleSelect(fetchedArticles[0]);
         // Also auto-check it
-        setCheckedIds(new Set([`${fetchedArticles[0].source}-${fetchedArticles[0].id}`]));
+        setCheckedIds(new Set([articleKey(fetchedArticles[0])]));
       }
     } catch (error) {
       setSearchErrors({
@@ -299,12 +302,12 @@ export function PaperStudyPanel({
         {articles.length > 0 && (
           <div className="space-y-2 p-3">
             {articles.map((article) => {
-              const key = `${article.source}-${article.id}`;
+              const key = articleKey(article);
               return (
                 <ArticleCard
                   key={key}
                   article={article}
-                  isSelected={selectedArticle?.id === article.id && selectedArticle?.source === article.source}
+                  isSelected={selectedArticle != null && articleKey(selectedArticle) === key}
                   isChecked={checkedIds.has(key)}
                   onSelect={handleSelectArticle}
                   onCheckChange={handleCheckChange}
