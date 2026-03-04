@@ -1,0 +1,118 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../development/testing.md:1 bbd5167e854c4c62aad00166cf87d887
+msgid "Testing"
+msgstr "测试"
+
+#: ../../development/testing.md:3 f08e96f7903a4d518ee9cc841a0fba06
+msgid "This guide covers how to write and run tests for NotebookLM."
+msgstr "本指南介绍如何为 NotebookLM 编写和运行测试。"
+
+#: ../../development/testing.md:5 826440b5f3874f0fb100bfa4b327698a
+msgid "Test Framework"
+msgstr "测试框架"
+
+#: ../../development/testing.md:7 b8d96105ea1845c4b1301c5b387cdfa7
+msgid ""
+"NotebookLM uses [Vitest](https://vitest.dev/) (v4+) as its test "
+"framework, configured in `vitest.config.ts`."
+msgstr ""
+"NotebookLM 使用 [Vitest](https://vitest.dev/)（v4+）作为测试框架，配置在 "
+"`vitest.config.ts` 中。"
+
+#: ../../development/testing.md:9 94008c1f9273483abe305cb7b5d84467
+msgid "Configuration"
+msgstr "配置"
+
+#: ../../development/testing.md:29 ae1505f1d64345f49f20f7a11daf83d1
+msgid "Running Tests"
+msgstr "运行测试"
+
+#: ../../development/testing.md:48 006243320146457a899c7246141e758c
+msgid "Writing Tests"
+msgstr "编写测试"
+
+#: ../../development/testing.md:50 a54dd68230164103b85866d29673bfd2
+msgid "Test File Location"
+msgstr "测试文件位置"
+
+#: ../../development/testing.md:52 904e153ffe504bd884512705502acdea
+msgid "Test files should be co-located with the source files they test:"
+msgstr "测试文件应与它们测试的源文件放在一起："
+
+#: ../../development/testing.md:65 9925d1fbf19243879871f45428f5a2b0
+msgid "Test Structure"
+msgstr "测试结构"
+
+#: ../../development/testing.md:84 ca74816c15f7457da060fd193773e273
+msgid "Path Aliases"
+msgstr "路径别名"
+
+#: ../../development/testing.md:86 8805b9acbfc842c0aa4c2c3a224812d4
+msgid "Use the `@/` alias to import from the `src/` directory:"
+msgstr "使用 `@/` 别名从 `src/` 目录导入："
+
+#: ../../development/testing.md:92 715990c4cad543c793bf8f6354fe998e
+msgid "Test Categories"
+msgstr "测试分类"
+
+#: ../../development/testing.md:94 e7e81c0d7a2949ad8bdb79453d6a8f22
+msgid "Unit Tests"
+msgstr "单元测试"
+
+#: ../../development/testing.md:96 5c8838211cf34e3483cc316386175808
+msgid "Test individual functions and modules in isolation:"
+msgstr "独立测试单个函数和模块："
+
+#: ../../development/testing.md:102 cd84b0d65fbc401f897f4b05fec5a315
+msgid "Integration Tests"
+msgstr "集成测试"
+
+#: ../../development/testing.md:104 14d7ec7afa204807a81da3b5e988fdd9
+msgid "Test interactions between modules (e.g., API routes with database):"
+msgstr "测试模块之间的交互（例如 API 路由与数据库）："
+
+#: ../../development/testing.md:110 fb21fd04de8245f3bdc8b176fa6fa9a2
+msgid "Best Practices"
+msgstr "最佳实践"
+
+#: ../../development/testing.md:112 9384c6cb594641d88e8e9e94939f5cb4
+msgid ""
+"**Co-locate** test files with source files (e.g., `module.test.ts` next "
+"to `module.ts`)"
+msgstr "将测试文件与源文件**放在一起**（例如 `module.test.ts` 与 `module.ts` 相邻）"
+
+#: ../../development/testing.md:113 bb51585771204e70b9bdf97b3b8b0c06
+msgid "**Use descriptive names** for test cases that explain expected behavior"
+msgstr "为测试用例**使用描述性名称**，说明预期行为"
+
+#: ../../development/testing.md:114 d044f9bce8ca48a08dd75c933fee30be
+msgid "**Test edge cases** — empty inputs, null values, boundary conditions"
+msgstr "**测试边界情况** —— 空输入、null 值、边界条件"
+
+#: ../../development/testing.md:115 795aeb9a824845aab98148c98ed28031
+msgid "**Mock external dependencies** — API calls, file system operations"
+msgstr "**模拟外部依赖** —— API 调用、文件系统操作"
+
+#: ../../development/testing.md:116 139fd12ce4574e648028c80297fc4ee6
+msgid "**Keep tests focused** — each test should verify one specific behavior"
+msgstr "**保持测试聚焦** —— 每个测试应验证一个特定行为"

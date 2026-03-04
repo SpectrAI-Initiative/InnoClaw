@@ -1,241 +1,23 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { TextStreamChatTransport } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot, User, AlertCircle, FileText, Check, Circle, Copy, CheckCheck } from "lucide-react";
-import ReactMarkdown, { Components } from "react-markdown";
-import type { PluggableList } from "unified";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import rehypeHighlight from "rehype-highlight";
+import { Send, Bot, User, AlertCircle, Check, Circle, CheckCheck } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import {
+  markdownComponents,
+  remarkPlugins,
+  rehypePlugins,
+} from "@/lib/markdown/shared-components";
 import useSWR from "swr";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
-
-function unescapeCitationFilename(raw: string): string {
-  return raw.replace(/\\(["\\])/g, "$1");
-}
-
-/**
- * Normalize grouped citations like [Source 1; Source 2; Source 3: "file.pdf"]
- * into individual citations: [Source 1: "file.pdf"][Source 2: "file.pdf"][Source 3: "file.pdf"]
- */
-function normalizeGroupedCitations(text: string): string {
-  return text.replace(
-    /\[(Source\s+\d+(?:\s*;\s*Source\s+\d+)+)(?::\s*"((?:[^"\\]|\\.)*)")?\]/g,
-    (_, sourcesPart: string, filename: string | undefined) => {
-      const sourceRefs = sourcesPart.split(/\s*;\s*/);
-      return sourceRefs
-        .map((ref) =>
-          filename ? `[${ref.trim()}: "${filename}"]` : `[${ref.trim()}]`
-        )
-        .join("");
-    }
-  );
-}
-
-/**
- * Parse [Source N: "filename"] or [Source N] into styled citation badges.
- */
-function CitationText({ text }: { text: string }) {
-  const normalized = normalizeGroupedCitations(text);
-  const parts = normalized.split(/(\[Source\s+\d+(?::\s*"(?:[^"\\]|\\.)*")?\])/g);
-  return (
-    <>
-      {parts.map((part, i) => {
-        const match = part.match(/^\[Source\s+(\d+)(?::\s*"((?:[^"\\]|\\.)*)")?\]$/);
-        if (match) {
-          const num = match[1];
-          const rawFileName = match[2];
-          const fileName = rawFileName ? unescapeCitationFilename(rawFileName) : undefined;
-          return (
-            <span
-              key={i}
-              className="inline-flex items-center gap-0.5 rounded-md bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary align-middle mx-0.5"
-              title={fileName ? `Source ${num}: ${fileName}` : `Source ${num}`}
-            >
-              <FileText className="h-3 w-3" />
-              {fileName || `Source ${num}`}
-            </span>
-          );
-        }
-        return <span key={i}>{part}</span>;
-      })}
-    </>
-  );
-}
-
-// --- Code block with copy button and language label ---
-
-function CodeBlock({ children, className, ...rest }: React.HTMLAttributes<HTMLElement>) {
-  const [copied, setCopied] = useState(false);
-  const codeRef = useRef<HTMLElement>(null);
-  const timeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-    };
-  }, []);
-
-  // Extract language from className like "hljs language-python"
-  const langMatch = className?.match(/language-(\w+)/);
-  const lang = langMatch?.[1];
-
-  const handleCopy = useCallback(async () => {
-    const text = codeRef.current?.textContent ?? "";
-    if (!text) return;
-
-    /** Fallback: hidden textarea + execCommand('copy') */
-    const fallbackCopy = (): boolean => {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      textarea.style.pointerEvents = "none";
-      textarea.setAttribute("aria-hidden", "true");
-      try {
-        document.body.appendChild(textarea);
-        textarea.select();
-        return document.execCommand("copy");
-      } catch {
-        return false;
-      } finally {
-        if (textarea.parentNode) {
-          textarea.parentNode.removeChild(textarea);
-        }
-      }
-    };
-
-    // Prefer modern async clipboard API when available
-    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch {
-        // Async API failed; try execCommand fallback before giving up
-        if (!fallbackCopy()) return;
-      }
-    } else {
-      if (!fallbackCopy()) return;
-    }
-
-    setCopied(true);
-    if (timeoutRef.current !== null) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = window.setTimeout(() => {
-      setCopied(false);
-      timeoutRef.current = null;
-    }, 2000);
-  }, []);
-
-  return (
-    <div className="code-block-wrapper">
-      {lang && <span className="code-lang-label">{lang}</span>}
-      <button
-        onClick={handleCopy}
-        className="code-copy-btn rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-        title="Copy code"
-        aria-label={copied ? "Copied" : "Copy code"}
-        type="button"
-      >
-        {copied ? <CheckCheck className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
-      </button>
-      <code ref={codeRef} className={className} {...rest}>
-        {children}
-      </code>
-    </div>
-  );
-}
-
-/**
- * Create a custom ReactMarkdown component that processes citation badges.
- */
-function renderWithProcessedChildren(
-  Tag: keyof React.JSX.IntrinsicElements
-): (props: { children?: React.ReactNode }) => React.JSX.Element {
-  return function Component({ children, ...rest }: { children?: React.ReactNode }) {
-    return (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      <Tag {...(rest as any)}>
-        {processChildren(children)}
-      </Tag>
-    );
-  };
-}
-
-/**
- * Custom ReactMarkdown components with GFM, math, syntax highlighting support.
- */
-const markdownComponents: Components = {
-  p: renderWithProcessedChildren("p"),
-  li: renderWithProcessedChildren("li"),
-  h1: renderWithProcessedChildren("h1"),
-  h2: renderWithProcessedChildren("h2"),
-  h3: renderWithProcessedChildren("h3"),
-  h4: renderWithProcessedChildren("h4"),
-  h5: renderWithProcessedChildren("h5"),
-  h6: renderWithProcessedChildren("h6"),
-  blockquote: renderWithProcessedChildren("blockquote"),
-  th: renderWithProcessedChildren("th"),
-  td: renderWithProcessedChildren("td"),
-  // Code blocks: wrap <pre> children with copy button
-  pre({ children }) {
-    return <pre>{children}</pre>;
-  },
-  code({ children, className, ...rest }) {
-    // If inside a <pre> (block code), render with copy button
-    const isBlock = className?.includes("hljs") || className?.includes("language-");
-    if (isBlock) {
-      return (
-        <CodeBlock className={className} {...rest}>
-          {children}
-        </CodeBlock>
-      );
-    }
-    // Inline code
-    return <code className={className} {...rest}>{children}</code>;
-  },
-};
-
-function processChildren(children: React.ReactNode): React.ReactNode {
-  if (!children) return children;
-  if (typeof children === "string") {
-    if (/\[Source\s+\d+/.test(children)) {
-      return <CitationText text={children} />;
-    }
-    return children;
-  }
-  if (Array.isArray(children)) {
-    return children.map((child, i) => {
-      const processed = processChildren(child);
-      if (processed !== child && typeof processed === "object") {
-        return <span key={i}>{processed}</span>;
-      }
-      return processed;
-    });
-  }
-  if (React.isValidElement(children)) {
-    const props = children.props as Record<string, unknown>;
-    if (props.children) {
-      const processedChildren = processChildren(props.children as React.ReactNode);
-      if (processedChildren !== props.children) {
-        return React.cloneElement(children, {}, processedChildren);
-      }
-    }
-  }
-  return children;
-}
 
 // --- Selectable options support ---
 
@@ -442,10 +224,6 @@ function SelectableOptions({
     </div>
   );
 }
-
-// Remark/rehype plugins (stable references to avoid re-renders)
-const remarkPlugins: PluggableList = [remarkGfm, remarkMath];
-const rehypePlugins: PluggableList = [rehypeKatex, rehypeHighlight];
 
 function AssistantMessageContent({
   content,

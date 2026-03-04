@@ -1,0 +1,59 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../index.md:7
+msgid "Getting Started"
+msgstr "快速入门"
+
+#: ../../index.md:17
+msgid "Usage & Features"
+msgstr "使用与功能"
+
+#: ../../index.md:26
+msgid "Notifications"
+msgstr "通知"
+
+#: ../../index.md:33
+msgid "Development Guide"
+msgstr "开发指南"
+
+#: ../../index.md:44
+msgid "Troubleshooting"
+msgstr "故障排除"
+
+#: ../../index.md:1 cca7508f1c2749b4a40d62755f0a0e72
+msgid "NotebookLM Documentation"
+msgstr "NotebookLM 文档"
+
+#: ../../index.md:3 d66d453028114d289663c2c6542ce305
+msgid ""
+"Welcome to the **NotebookLM** documentation — an AI-powered research "
+"assistant web application similar to Google NotebookLM."
+msgstr ""
+"欢迎阅读 **NotebookLM** 文档 —— 一个类似于 Google NotebookLM 的 AI 驱动的研究助手 Web "
+"应用程序。"
+
+#: ../../index.md:5 46be3e8b729d4f89919c5e1fb08fd3cc
+msgid ""
+"Users open server-side folders as workspaces, browse and manage files, "
+"and chat with AI grounded in workspace files via RAG (Retrieval-Augmented"
+" Generation)."
+msgstr "用户可以将服务器端文件夹作为工作空间打开，浏览和管理文件，并通过 RAG（检索增强生成）与基于工作空间文件的 AI 进行对话。"
