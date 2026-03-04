@@ -83,9 +83,7 @@ export function startFeishuWSClient(): void {
 
       // Process each message (fire-and-forget, don't block the event loop)
       for (const message of messages) {
-        routeMessage(adapter, message, "[feishu-ws]").catch((err) => {
-          console.error("[feishu-ws] Unhandled error in routeMessage:", err);
-        });
+        routeMessage(adapter, message, "[feishu-ws]");
       }
     },
   });

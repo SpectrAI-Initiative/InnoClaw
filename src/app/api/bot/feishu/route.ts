@@ -80,9 +80,7 @@ export async function POST(req: NextRequest) {
     // Process messages asynchronously (don't block the webhook response).
     // Feishu requires a quick response to acknowledge receipt.
     for (const message of messages) {
-      routeMessage(adapter, message, "[feishu-webhook]").catch((err) => {
-        console.error("[feishu-webhook] Unhandled error in routeMessage:", err);
-      });
+      routeMessage(adapter, message, "[feishu-webhook]");
     }
 
     return NextResponse.json({ ok: true });
