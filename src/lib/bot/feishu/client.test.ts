@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { Readable } from "stream";
 import type { FeishuBotConfig } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -350,13 +351,7 @@ describe("Feishu adapter", () => {
       const destDir = `${os.default.tmpdir()}/feishu_test_dl_img_${Date.now()}`;
 
       mockImageGet.mockResolvedValue({
-        writeFile: vi.fn().mockImplementation(async (filePath: string) => {
-          await fsp.default.mkdir(
-            (await import("path")).default.dirname(filePath),
-            { recursive: true }
-          );
-          await fsp.default.writeFile(filePath, "fake image data");
-        }),
+        getReadableStream: () => Readable.from(Buffer.from("fake image data")),
       });
 
       const adapter = createFeishuAdapter(testConfig);
@@ -381,13 +376,7 @@ describe("Feishu adapter", () => {
       const destDir = `${os.default.tmpdir()}/feishu_test_dl_file_${Date.now()}`;
 
       mockMessageResourceGet.mockResolvedValue({
-        writeFile: vi.fn().mockImplementation(async (filePath: string) => {
-          await fsp.default.mkdir(
-            (await import("path")).default.dirname(filePath),
-            { recursive: true }
-          );
-          await fsp.default.writeFile(filePath, "fake file data");
-        }),
+        getReadableStream: () => Readable.from(Buffer.from("fake file data")),
       });
 
       const adapter = createFeishuAdapter(testConfig);
@@ -412,6 +401,33 @@ describe("Feishu adapter", () => {
       await expect(
         adapter.fileHandler.downloadFile("invalid_no_colon", "file.txt", "/tmp")
       ).rejects.toThrow("Invalid Feishu file key format");
+    });
+
+    it("should abort early and delete partial file when stream exceeds MAX_FILE_SIZE", async () => {
+      const fsp = await import("fs/promises");
+      const os = await import("os");
+      const { MAX_FILE_SIZE } = await import("../types");
+      const destDir = `${os.default.tmpdir()}/feishu_test_sizelimit_${Date.now()}`;
+
+      // Create a stream of (MAX_FILE_SIZE + 1) bytes to trigger the limit
+      const bigChunk = Buffer.alloc(MAX_FILE_SIZE + 1, 0x41);
+      mockMessageResourceGet.mockResolvedValue({
+        getReadableStream: () => Readable.from(bigChunk),
+      });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(
+        adapter.fileHandler.downloadFile("msg_big:fk_big", "big.bin", destDir)
+      ).rejects.toThrow("File too large");
+
+      // Directory is created by downloadFile before streaming; verify the partial file is cleaned up
+      const destDir2 = destDir;
+      const exists = await fsp.default.access(destDir2).then(() => true).catch(() => false);
+      expect(exists).toBe(true);
+      const files = await fsp.default.readdir(destDir2);
+      expect(files).toHaveLength(0);
+
+      await fsp.default.rm(destDir, { recursive: true }).catch(() => {});
     });
   });
 });
