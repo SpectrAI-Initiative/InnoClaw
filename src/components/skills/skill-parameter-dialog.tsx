@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
@@ -49,9 +49,7 @@ export function SkillParameterDialog({
 
   // Reset values when the skill changes or dialog reopens
   const resetKey = `${skill.id}-${open}-${skill.parameters?.length}`;
-  const [prevResetKey, setPrevResetKey] = useState(resetKey);
-  if (prevResetKey !== resetKey) {
-    setPrevResetKey(resetKey);
+  useEffect(() => {
     if (open) {
       const init: Record<string, string> = {};
       for (const p of params) {
@@ -59,7 +57,7 @@ export function SkillParameterDialog({
       }
       setValues(init);
     }
-  }
+  }, [resetKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setValue = (name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));

@@ -67,7 +67,7 @@ export function ReportPanel({ report }: ReportPanelProps) {
     );
   }
 
-  const processCompleted = report.processSteps.every((s) => s.status === "completed");
+  const processCompleted = report.processSteps.length > 0 && report.processSteps.every((s) => s.status === "completed");
 
   return (
     <div className="flex h-full min-w-0 flex-col bg-background">

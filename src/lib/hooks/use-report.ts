@@ -30,12 +30,10 @@ export function useReport(workspaceId: string) {
     typeof window !== "undefined" ? readReportFromStorage(workspaceId) : null
   );
 
-  // Re-read storage immediately when workspaceId changes (render-time update)
-  const [prevWorkspaceId, setPrevWorkspaceId] = useState(workspaceId);
-  if (workspaceId !== prevWorkspaceId) {
-    setPrevWorkspaceId(workspaceId);
+  // Re-read storage when workspaceId changes
+  useEffect(() => {
     setReport(readReportFromStorage(workspaceId));
-  }
+  }, [workspaceId]);
 
   const refresh = useCallback(() => {
     setReport(readReportFromStorage(workspaceId));

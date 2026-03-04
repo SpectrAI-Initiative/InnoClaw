@@ -21,7 +21,6 @@ export function SkillAutocomplete({
   const t = useTranslations("skills");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
-  const [trackedQuery, setTrackedQuery] = useState(query);
 
   const filtered = skills.filter(
     (s) =>
@@ -30,10 +29,9 @@ export function SkillAutocomplete({
         s.name.toLowerCase().includes(query.toLowerCase()))
   );
 
-  if (trackedQuery !== query) {
-    setTrackedQuery(query);
+  useEffect(() => {
     setSelectedIndex(0);
-  }
+  }, [query]);
 
   // Scroll selected item into view
   useEffect(() => {
