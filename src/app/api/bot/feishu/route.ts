@@ -14,14 +14,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFeishuConfig } from "@/lib/bot/types";
 import { createFeishuAdapter } from "@/lib/bot/feishu/client";
-import { processMessage, sendReplies } from "@/lib/bot/processor";
-import { parseAndHandleCommand } from "@/lib/bot/feishu/commands";
-import { processAgentMessage } from "@/lib/bot/feishu/agent-processor";
-import {
-  getChatState,
-  acquireProcessingLock,
-  releaseProcessingLock,
-} from "@/lib/bot/feishu/state";
+import { routeMessage } from "@/lib/bot/feishu/message-router";
 
 /** Simple in-memory set to deduplicate Feishu event re-deliveries (TTL 5min) */
 const processedEvents = new Map<string, number>();
@@ -87,72 +80,7 @@ export async function POST(req: NextRequest) {
     // Process messages asynchronously (don't block the webhook response).
     // Feishu requires a quick response to acknowledge receipt.
     for (const message of messages) {
-      (async () => {
-        try {
-          console.log(
-            `[feishu-webhook] Processing ${message.type} message from ${message.senderId}`
-          );
-
-          // --- Text messages: check for commands or agent processing ---
-          if (message.type === "text") {
-            // 1. Check for slash commands (/workspace, /status, etc.)
-            const cmdResult = await parseAndHandleCommand(
-              message.chatId,
-              message.text
-            );
-            if (cmdResult.handled) {
-              if (cmdResult.card && adapter.sendInteractiveCard) {
-                await adapter.sendInteractiveCard(message.chatId, cmdResult.card);
-              } else if (cmdResult.text) {
-                await adapter.sendText(message.chatId, cmdResult.text);
-              }
-              return;
-            }
-
-            // 2. Check if workspace is bound for agent processing
-            const state = getChatState(message.chatId);
-            if (state.workspacePath) {
-              // Acquire processing lock to prevent concurrent agent executions
-              if (!acquireProcessingLock(message.chatId)) {
-                await adapter.sendText(
-                  message.chatId,
-                  "I'm still processing your previous request. Please wait."
-                );
-                return;
-              }
-
-              try {
-                await processAgentMessage({
-                  adapter,
-                  chatId: message.chatId,
-                  userMessage: message.text,
-                  workspacePath: state.workspacePath,
-                  mode: state.mode,
-                });
-              } finally {
-                releaseProcessingLock(message.chatId);
-              }
-              return;
-            }
-
-            // 3. No workspace bound — fall back to simple AI chat
-          }
-
-          // --- File messages or text without workspace: use simple processor ---
-          const replies = await processMessage(adapter, message);
-          await sendReplies(adapter, message.chatId, replies);
-        } catch (error) {
-          console.error("[feishu-webhook] Async processing error:", error);
-          try {
-            await adapter.sendText(
-              message.chatId,
-              `Error: ${error instanceof Error ? error.message : "Unknown error"}`
-            );
-          } catch {
-            // Last resort — log only
-          }
-        }
-      })();
+      routeMessage(adapter, message, "[feishu-webhook]");
     }
 
     return NextResponse.json({ ok: true });
