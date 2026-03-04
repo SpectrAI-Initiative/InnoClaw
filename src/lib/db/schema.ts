@@ -138,3 +138,34 @@ export const skills = sqliteTable("skills", {
 }, (table) => [
   uniqueIndex("skills_slug_workspace_idx").on(table.slug, table.workspaceId),
 ]);
+
+// ============================================================
+// HF DATASETS (HuggingFace dataset/model/space downloads)
+// ============================================================
+export const hfDatasets = sqliteTable("hf_datasets", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  repoId: text("repo_id").notNull(),
+  repoType: text("repo_type").notNull().default("dataset"), // dataset | model | space
+  revision: text("revision"), // branch/tag, null = default
+  sourceConfig: text("source_config"), // JSON: { allowPatterns, ignorePatterns }
+  status: text("status", {
+    enum: ["pending", "downloading", "ready", "failed", "cancelled"],
+  })
+    .notNull()
+    .default("pending"),
+  progress: integer("progress").notNull().default(0), // 0-100
+  lastError: text("last_error"),
+  localPath: text("local_path"),
+  sizeBytes: integer("size_bytes"),
+  numFiles: integer("num_files"),
+  manifest: text("manifest"), // JSON: file list with splits/formats
+  stats: text("stats"), // JSON: format counts, row counts
+  lastSyncAt: text("last_sync_at"),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});

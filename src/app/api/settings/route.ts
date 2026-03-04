@@ -20,6 +20,7 @@ export async function GET() {
       hasOpenAIKey: !!process.env.OPENAI_API_KEY,
       hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
       hasGithubToken: !!process.env.GITHUB_TOKEN,
+      hasHfToken: !!process.env.HF_TOKEN,
       hasAIKey: !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY,
       openaiBaseUrl: process.env.OPENAI_BASE_URL || "",
       anthropicBaseUrl: process.env.ANTHROPIC_BASE_URL || "",

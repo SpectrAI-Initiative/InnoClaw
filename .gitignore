@@ -50,3 +50,5 @@ next-env.d.ts
 
 # cluster config
 config/d_k8s
+
+reference/

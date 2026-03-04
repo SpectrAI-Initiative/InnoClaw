@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { FolderOpen, GitBranch } from "lucide-react";
+import { FolderOpen, GitBranch, Database } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { WorkspaceList } from "@/components/workspaces/workspace-list";
 import { OpenWorkspaceDialog } from "@/components/workspaces/open-workspace-dialog";
@@ -10,6 +10,7 @@ import { CloneRepoDialog } from "@/components/git/clone-repo-dialog";
 import { Button } from "@/components/ui/button";
 import { useWorkspaces } from "@/lib/hooks/use-workspaces";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function HomePage() {
   const t = useTranslations("home");
@@ -46,6 +47,12 @@ export default function HomePage() {
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{t("title")}</h1>
           <div className="flex gap-2">
+            <Link href="/datasets">
+              <Button variant="outline">
+                <Database className="mr-2 h-4 w-4" />
+                {t("hfDatasets")}
+              </Button>
+            </Link>
             <CloneRepoDialog
               trigger={
                 <Button variant="outline">
