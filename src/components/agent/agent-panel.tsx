@@ -641,6 +641,8 @@ export function AgentPanel({
       } else {
         localStorage.setItem(storageKey, JSON.stringify(messages));
       }
+      // Notify same-tab listeners (StorageEvent only fires cross-tab)
+      window.dispatchEvent(new CustomEvent("agent-messages-updated", { detail: { key: storageKey } }));
     } catch {
       // storage full or unavailable — silently ignore
     }

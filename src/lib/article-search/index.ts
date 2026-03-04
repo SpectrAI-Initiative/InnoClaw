@@ -29,7 +29,11 @@ export async function searchArticles(
 
   // Run searches concurrently across requested sources
   const tasks = sources.map(async (source) => {
-    const cacheKey = SearchCache.buildKey({ source, ...params });
+    // Build cache key per-source; exclude the original `sources` array to
+    // avoid redundant entries when sources are specified in different orders.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { sources: _ignored, ...restParams } = params;
+    const cacheKey = SearchCache.buildKey({ source, ...restParams });
     const cached = cache.get(cacheKey);
     if (cached) {
       return { source, articles: cached };

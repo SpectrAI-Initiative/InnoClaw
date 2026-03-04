@@ -192,7 +192,7 @@
     "tabSources": "Sources",
     "statusPending": "Pending",
     "statusRunning": "Running",
-    "statusCompleted": "Final",
+    "statusCompleted": "Completed",
     "statusError": "Error",
     "downloadPdf": "Download PDF",
     "downloadMd": "Download Markdown",
