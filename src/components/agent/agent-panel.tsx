@@ -641,6 +641,8 @@ export function AgentPanel({
       } else {
         localStorage.setItem(storageKey, JSON.stringify(messages));
       }
+      // Notify same-tab listeners (StorageEvent only fires cross-tab)
+      window.dispatchEvent(new CustomEvent("agent-messages-updated", { detail: { key: storageKey } }));
     } catch {
       // storage full or unavailable — silently ignore
     }
@@ -1202,6 +1204,16 @@ export function AgentPanel({
           <DialogFooter className="px-6 pb-6 pt-2">
             <Button variant="outline" onClick={handleSelectCancel}>
               {tCommon("cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setShowMessageSelect(false);
+                setSelectedMessageIds(new Set());
+                setMessages([]);
+              }}
+            >
+              {t("clearAll")}
             </Button>
             <Button onClick={handleSelectNext} disabled={selectedMessageIds.size === 0}>
               {t("nextStep")}

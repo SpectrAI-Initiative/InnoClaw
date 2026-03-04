@@ -1,7 +1,6 @@
 import useSWR from "swr";
 import type { Skill } from "@/types";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from "@/lib/fetcher";
 
 export function useSkills(workspaceId: string | null) {
   const { data, error, isLoading, mutate } = useSWR<Skill[]>(
@@ -10,7 +9,7 @@ export function useSkills(workspaceId: string | null) {
   );
 
   return {
-    skills: data || [],
+    skills: Array.isArray(data) ? data : [],
     isLoading,
     error,
     mutate,

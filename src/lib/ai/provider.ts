@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -12,6 +12,31 @@ import type { LanguageModel } from "ai";
 export function isAIAvailable(): boolean {
   return !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY;
 }
+
+/**
+ * Normalize ANTHROPIC_BASE_URL for @ai-sdk/anthropic.
+ *
+ * Claude Code's SDK expects the base URL WITHOUT "/v1" (e.g. "http://host:3888")
+ * and internally appends "/v1/messages".
+ *
+ * @ai-sdk/anthropic expects the base URL WITH "/v1" (e.g. "http://host:3888/v1")
+ * and internally appends only "/messages".
+ *
+ * To avoid conflicts when the same ANTHROPIC_BASE_URL env var is shared between
+ * Claude Code and this app, auto-append "/v1" if it's missing.
+ */
+function getAnthropicBaseURL(): string | undefined {
+  const raw = process.env.ANTHROPIC_BASE_URL;
+  if (!raw) return undefined;
+  const trimmed = raw.replace(/\/+$/, ""); // strip trailing slashes
+  if (trimmed.endsWith("/v1")) return trimmed;
+  return `${trimmed}/v1`;
+}
+
+// Create a custom Anthropic provider with the normalized base URL
+const anthropic = createAnthropic({
+  baseURL: getAnthropicBaseURL(),
+});
 
 /**
  * Get the currently configured LLM model based on settings
