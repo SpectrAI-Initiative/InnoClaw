@@ -29,7 +29,10 @@ export async function POST(req: NextRequest) {
 
   const authHeader = req.headers.get("authorization");
   if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const providedSecret = authHeader.slice(7).trim();
@@ -39,7 +42,10 @@ export async function POST(req: NextRequest) {
     expectedBuf.length !== providedBuf.length ||
     !timingSafeEqual(expectedBuf, providedBuf)
   ) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const config = getFeishuConfig();

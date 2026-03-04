@@ -316,10 +316,9 @@ export function buildFinalCard(options: {
     }
 
     // Further truncate text if needed
-    const shorterText =
-      finalText.length > 1500
-        ? finalText.slice(0, 1500) + "\n\n... (truncated)"
-        : finalText;
+    const shorterText = finalText.length > 1500
+      ? finalText.slice(0, 1500) + "\n\n... (truncated)"
+      : finalText;
     trimmedElements.push({
       tag: "div",
       text: { content: shorterText, tag: "lark_md" },
