@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node -e \"import('rehype-sanitize').then(()=>import('better-sqlite3')).catch(()=>process.exit(1))\" || npm install",
+    "predev": "node --input-type=module -e \"await import('rehype-sanitize');await import('better-sqlite3')\" 2>/dev/null || npm install",
     "dev": "next dev",
-    "prebuild": "node -e \"import('rehype-sanitize').then(()=>import('better-sqlite3')).catch(()=>process.exit(1))\" || npm install",
+    "prebuild": "node --input-type=module -e \"await import('rehype-sanitize');await import('better-sqlite3')\" 2>/dev/null || npm install",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
