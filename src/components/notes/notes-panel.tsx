@@ -178,7 +178,7 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
                     </Button>
                   </div>
                   <CardDescription className="text-xs">
-                    {note.type} &middot;{" "}
+                    {t(note.type)} &middot;{" "}
                     {new Date(note.createdAt).toLocaleDateString()}
                   </CardDescription>
                 </CardHeader>

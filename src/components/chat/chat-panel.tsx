@@ -7,127 +7,17 @@ import { TextStreamChatTransport } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot, User, AlertCircle, FileText, Check, Circle } from "lucide-react";
-import ReactMarkdown, { Components } from "react-markdown";
+import { Send, Bot, User, AlertCircle, Check, Circle, CheckCheck } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import {
+  markdownComponents,
+  remarkPlugins,
+  rehypePlugins,
+} from "@/lib/markdown/shared-components";
 import useSWR from "swr";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
-
-function unescapeCitationFilename(raw: string): string {
-  return raw.replace(/\\(["\\])/g, "$1");
-}
-
-/**
- * Normalize grouped citations like [Source 1; Source 2; Source 3: "file.pdf"]
- * into individual citations: [Source 1: "file.pdf"][Source 2: "file.pdf"][Source 3: "file.pdf"]
- */
-function normalizeGroupedCitations(text: string): string {
-  return text.replace(
-    /\[(Source\s+\d+(?:\s*;\s*Source\s+\d+)+)(?::\s*"((?:[^"\\]|\\.)*)")?\]/g,
-    (_, sourcesPart: string, filename: string | undefined) => {
-      const sourceRefs = sourcesPart.split(/\s*;\s*/);
-      return sourceRefs
-        .map((ref) =>
-          filename ? `[${ref.trim()}: "${filename}"]` : `[${ref.trim()}]`
-        )
-        .join("");
-    }
-  );
-}
-
-/**
- * Parse [Source N: "filename"] or [Source N] into styled citation badges.
- */
-function CitationText({ text }: { text: string }) {
-  // First, normalize any grouped citations into individual ones
-  const normalized = normalizeGroupedCitations(text);
-  // Match [Source N: "filename"] or [Source N], allowing escaped quotes inside filenames
-  const parts = normalized.split(/(\[Source\s+\d+(?::\s*"(?:[^"\\]|\\.)*")?\])/g);
-  return (
-    <>
-      {parts.map((part, i) => {
-        const match = part.match(/^\[Source\s+(\d+)(?::\s*"((?:[^"\\]|\\.)*)")?\]$/);
-        if (match) {
-          const num = match[1];
-          const rawFileName = match[2];
-          const fileName = rawFileName ? unescapeCitationFilename(rawFileName) : undefined;
-          return (
-            <span
-              key={i}
-              className="inline-flex items-center gap-0.5 rounded-md bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary align-middle mx-0.5"
-              title={fileName ? `Source ${num}: ${fileName}` : `Source ${num}`}
-            >
-              <FileText className="h-3 w-3" />
-              {fileName || `Source ${num}`}
-            </span>
-          );
-        }
-        return <span key={i}>{part}</span>;
-      })}
-    </>
-  );
-}
-
-/**
- * Create a custom ReactMarkdown component that processes citation badges.
- */
-function renderWithProcessedChildren(
-  Tag: keyof React.JSX.IntrinsicElements
-): (props: { children?: React.ReactNode }) => React.JSX.Element {
-  return function Component({ children, ...rest }: { children?: React.ReactNode }) {
-    return (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      <Tag {...(rest as any)}>
-        {processChildren(children)}
-      </Tag>
-    );
-  };
-}
-
-/**
- * Custom ReactMarkdown components that render source citations as badges.
- */
-const markdownComponents: Components = {
-  p: renderWithProcessedChildren("p"),
-  li: renderWithProcessedChildren("li"),
-  h1: renderWithProcessedChildren("h1"),
-  h2: renderWithProcessedChildren("h2"),
-  h3: renderWithProcessedChildren("h3"),
-  h4: renderWithProcessedChildren("h4"),
-  h5: renderWithProcessedChildren("h5"),
-  h6: renderWithProcessedChildren("h6"),
-  blockquote: renderWithProcessedChildren("blockquote"),
-  th: renderWithProcessedChildren("th"),
-  td: renderWithProcessedChildren("td"),
-};
-
-function processChildren(children: React.ReactNode): React.ReactNode {
-  if (!children) return children;
-  if (typeof children === "string") {
-    if (/\[Source\s+\d+/.test(children)) {
-      return <CitationText text={children} />;
-    }
-    return children;
-  }
-  if (Array.isArray(children)) {
-    return children.map((child, i) => {
-      const processed = processChildren(child);
-      if (processed !== child && typeof processed === "object") {
-        return <span key={i}>{processed}</span>;
-      }
-      return processed;
-    });
-  }
-  // Recursively walk React elements (e.g., <em>, <strong>, <a>)
-  if (React.isValidElement(children) && children.props?.children) {
-    const processedChildren = processChildren(children.props.children);
-    if (processedChildren !== children.props.children) {
-      return React.cloneElement(children, {}, processedChildren);
-    }
-  }
-  return children;
-}
 
 // --- Selectable options support ---
 
@@ -184,7 +74,6 @@ function parseMessageSegments(text: string): MessageSegment[] {
     }
 
     if (endIdx - contentStartIdx > MAX_SELECT_BLOCK_LENGTH) {
-      // Treat this oversized SELECT block as plain text and continue parsing after it.
       segments.push({
         type: "text",
         content: text.slice(startIdx, endIdx + selectEndToken.length),
@@ -233,7 +122,6 @@ function SelectableOptions({
     setSelected((prev) => {
       const next = new Set(prev);
       if (type === "single") {
-        // Radio: only one at a time
         if (next.has(idx)) {
           next.delete(idx);
         } else {
@@ -241,7 +129,6 @@ function SelectableOptions({
           next.add(idx);
         }
       } else {
-        // Checkbox: toggle
         if (next.has(idx)) {
           next.delete(idx);
         } else {
@@ -261,12 +148,21 @@ function SelectableOptions({
 
   return (
     <div
-      className="my-2 space-y-2"
+      className="my-3 space-y-1.5 rounded-lg border border-border bg-card p-3"
       role={type === "single" ? "radiogroup" : "group"}
       aria-label={t("selectionOptions")}
     >
+      <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+        {type === "single" ? (
+          <Circle className="h-3 w-3" />
+        ) : (
+          <CheckCheck className="h-3 w-3" />
+        )}
+        <span>{t(type === "single" ? "selectOne" : "selectMultiple")}</span>
+      </div>
       {options.map((option, idx) => {
         const isSelected = selected.has(idx);
+        const isConfirmedSelected = confirmed && isSelected;
         return (
           <button
             key={idx}
@@ -275,11 +171,13 @@ function SelectableOptions({
             aria-checked={isSelected}
             disabled={confirmed || disabled}
             onClick={() => toggle(idx)}
-            className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${
-              isSelected
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/50 hover:bg-muted/50"
-            } ${confirmed ? "opacity-70 cursor-default" : "cursor-pointer"}`}
+            className={`flex w-full items-start gap-3 rounded-lg border px-3 py-2.5 text-left transition-all ${
+              isConfirmedSelected
+                ? "border-green-500/50 bg-green-500/5"
+                : isSelected
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-transparent hover:border-border hover:bg-muted/50"
+            } ${confirmed && !isSelected ? "opacity-40" : ""} ${confirmed ? "cursor-default" : "cursor-pointer"}`}
           >
             {type === "multi" ? (
               <Checkbox
@@ -289,34 +187,39 @@ function SelectableOptions({
               />
             ) : (
               <div
-                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
                   isSelected
                     ? "border-primary bg-primary"
-                    : "border-muted-foreground"
+                    : "border-muted-foreground/40"
                 }`}
               >
-                {isSelected && <Circle className="h-2 w-2 fill-primary-foreground text-primary-foreground" />}
+                {isSelected && <Circle className="h-1.5 w-1.5 fill-primary-foreground text-primary-foreground" />}
               </div>
             )}
-            <span className="text-sm leading-relaxed">{option}</span>
+            <span className="text-sm leading-relaxed flex-1">{option}</span>
+            {isConfirmedSelected && (
+              <Check className="h-4 w-4 shrink-0 text-green-500 mt-0.5" />
+            )}
           </button>
         );
       })}
       {!confirmed && (
-        <Button
-          size="sm"
-          disabled={selected.size === 0 || disabled}
-          onClick={handleConfirm}
-          className="mt-1"
-        >
-          <Check className="mr-1 h-3.5 w-3.5" />
-          {t("confirmSelection")}
-        </Button>
+        <div className="pt-2">
+          <Button
+            size="sm"
+            disabled={selected.size === 0 || disabled}
+            onClick={handleConfirm}
+          >
+            <Check className="mr-1 h-3.5 w-3.5" />
+            {t("confirmSelection")} {selected.size > 0 && `(${selected.size})`}
+          </Button>
+        </div>
       )}
       {confirmed && (
-        <p className="text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5 pt-1 text-xs text-green-600 dark:text-green-400">
+          <Check className="h-3 w-3" />
           {t("selectionConfirmed")}
-        </p>
+        </div>
       )}
     </div>
   );
@@ -336,10 +239,17 @@ function AssistantMessageContent({
   const t = useTranslations("chat");
   const segments = useMemo(() => parseMessageSegments(content), [content]);
   return (
-    <div className="prose prose-sm dark:prose-invert max-w-none">
+    <div className="chat-prose max-w-none text-sm">
       {segments.map((seg) =>
         seg.type === "text" ? (
-          <ReactMarkdown key={`${messageId}-t${seg.offset}`} components={markdownComponents}>{seg.content}</ReactMarkdown>
+          <ReactMarkdown
+            key={`${messageId}-t${seg.offset}`}
+            remarkPlugins={remarkPlugins}
+            rehypePlugins={rehypePlugins}
+            components={markdownComponents}
+          >
+            {seg.content}
+          </ReactMarkdown>
         ) : (
           <SelectableOptions
             key={`${messageId}-s${seg.offset}`}
@@ -459,7 +369,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                   </div>
                 )}
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 text-sm ${
+                  className={`max-w-[85%] rounded-lg px-4 py-2 text-sm ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted"
@@ -473,7 +383,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                       sendMessage={sendMessage}
                     />
                   ) : (
-                    <p>{getMessageText(message)}</p>
+                    <p className="whitespace-pre-wrap">{getMessageText(message)}</p>
                   )}
                 </div>
                 {message.role === "user" && (

@@ -1,0 +1,152 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../usage/configuration.md:1 9b32e10ec58941238c23b6f17e6284b7
+msgid "Configuration"
+msgstr "配置"
+
+#: ../../usage/configuration.md:3 89cb0612a7ff423fa7649b14cc61cc18
+msgid ""
+"This page describes how to customize NotebookLM's behavior through "
+"configuration options."
+msgstr "本页介绍如何通过配置选项自定义 NotebookLM 的行为。"
+
+#: ../../usage/configuration.md:5 ddce840b5e624b878b8b1e2ecfefa5ac
+msgid "Environment-Based Configuration"
+msgstr "基于环境变量的配置"
+
+#: ../../usage/configuration.md:7 e61cd2f93ad84860bc603c8be0322960
+msgid ""
+"All configuration is done through environment variables in your "
+"`.env.local` file. See [Environment Variables](../getting-started"
+"/environment-variables.md) for a complete reference."
+msgstr ""
+"所有配置都通过 `.env.local` "
+"文件中的环境变量完成。请参阅[环境变量](../getting-started/environment-variables.md)获取完整参考。"
+
+#: ../../usage/configuration.md:9 b8b6bf7e776c4d92b2ab8e9e54dc53fd
+msgid "AI Provider Settings"
+msgstr "AI 提供商设置"
+
+#: ../../usage/configuration.md:11 b6d6044671fb44ee965a65d1b9613b32
+msgid "Selecting a Provider"
+msgstr "选择提供商"
+
+#: ../../usage/configuration.md:13 8c34f1c1d465412694c3bff057e9d4e8
+msgid ""
+"NotebookLM supports multiple AI providers. Configure your preferred "
+"provider by setting the appropriate API key:"
+msgstr "NotebookLM 支持多个 AI 提供商。通过设置相应的 API 密钥来配置您偏好的提供商："
+
+#: ../../usage/configuration.md:25 e527eb820d1e4c889be8d867c8d57bbd
+msgid "Using Custom Endpoints"
+msgstr "使用自定义端点"
+
+#: ../../usage/configuration.md:27 9fc6cb8ff9df4b4682707243f933800f
+msgid "For third-party compatible services, proxies, or self-hosted models:"
+msgstr "用于第三方兼容服务、代理或自托管模型："
+
+#: ../../usage/configuration.md:37 eb3813edae764ccbbfd3a7efd8241d4e
+msgid "Separate Embedding Configuration"
+msgstr "独立的 Embedding 配置"
+
+#: ../../usage/configuration.md:39 3dc962bcaa8e48e5b0ce920df2f2ebd4
+msgid ""
+"If your chat model provider doesn't support the embedding endpoint, "
+"configure a separate service:"
+msgstr "如果您的对话模型提供商不支持 Embedding 端点，请配置单独的服务："
+
+#: ../../usage/configuration.md:47 c33c35ff0b614d659cfeba4270180e6e
+msgid "In-App Settings"
+msgstr "应用内设置"
+
+#: ../../usage/configuration.md:49 09a93695f47041ab9b25862a2ebfd59e
+msgid "Access the settings page at `/settings` to:"
+msgstr "访问 `/settings` 设置页面以："
+
+#: ../../usage/configuration.md:51 98e03b71e973464497d1900aaa4e0a59
+msgid "**Switch AI Provider** — Toggle between OpenAI and Anthropic"
+msgstr "**切换 AI 提供商** —— 在 OpenAI 和 Anthropic 之间切换"
+
+#: ../../usage/configuration.md:52 cc57026342ce46ae9eabf2f57a72219e
+msgid "**Select Model** — Choose the specific model to use for chat"
+msgstr "**选择模型** —— 选择用于对话的特定模型"
+
+#: ../../usage/configuration.md:53 a55d0c5d225b4263bbe80e84cc0bc3aa
+msgid "**View API Status** — Check which API keys are configured"
+msgstr "**查看 API 状态** —— 检查已配置的 API 密钥"
+
+#: ../../usage/configuration.md:54 1f521897ad384737a7bd7ec8c549ac20
+msgid "**View Workspace Roots** — See the configured workspace root directories"
+msgstr "**查看工作空间根目录** —— 查看已配置的工作空间根目录"
+
+#: ../../usage/configuration.md:56 6ced9cdcc58c4f6087d1beaa5a261008
+msgid "Workspace Configuration"
+msgstr "工作空间配置"
+
+#: ../../usage/configuration.md:58 6634d9e4929b4403a86141058bd04f3d
+msgid "Root Directories"
+msgstr "根目录"
+
+#: ../../usage/configuration.md:60 bb463e04ba5a492cb10d3f9154c927e7
+msgid ""
+"The `WORKSPACE_ROOTS` variable controls which server directories users "
+"can create workspaces in:"
+msgstr "`WORKSPACE_ROOTS` 变量控制用户可以在哪些服务器目录中创建工作空间："
+
+#: ../../usage/configuration.md:71 82fbc2f358194b548dff07403432637e
+msgid "All specified directories must already exist on the server"
+msgstr "所有指定的目录必须已在服务器上存在"
+
+#: ../../usage/configuration.md:72 64bfdb81f5f64cd0bfe4292e334c69d1
+msgid "Users can only create workspaces within these root directories"
+msgstr "用户只能在这些根目录内创建工作空间"
+
+#: ../../usage/configuration.md:73 a1611d6b933e4aa08da0c374ba5f659f
+msgid "Path traversal outside these roots is prevented by security checks"
+msgstr "安全检查会阻止路径遍历到这些根目录之外"
+
+#: ../../usage/configuration.md:76 556a6042f967443a89c72f9c588fc13b
+msgid "Database Configuration"
+msgstr "数据库配置"
+
+#: ../../usage/configuration.md:78 4229a1c2278f484783e9db113abe94ab
+msgid ""
+"NotebookLM uses SQLite with the database stored at "
+"`./data/notebooklm.db`. This location is set in `drizzle.config.ts` and "
+"is not currently configurable via environment variables."
+msgstr ""
+"NotebookLM 使用 SQLite，数据库存储在 `./data/notebooklm.db`。该位置在 "
+"`drizzle.config.ts` 中设置，目前不支持通过环境变量配置。"
+
+#: ../../usage/configuration.md:80 0ed19419eacf40be83dbeab410888411
+msgid "To use a fresh database:"
+msgstr "要使用全新数据库："
+
+#: ../../usage/configuration.md:90 82281fff9fd44154ac74e79adf1786d2
+msgid "Bot Integration Configuration"
+msgstr "机器人集成配置"
+
+#: ../../usage/configuration.md:92 ea617f8333c94f1fb58cc620396d37ac
+msgid ""
+"See [Notifications](../notifications/index.md) for configuring Feishu and"
+" WeChat bot integrations."
+msgstr "请参阅[通知](../notifications/index.md)了解飞书和企业微信机器人集成的配置。"

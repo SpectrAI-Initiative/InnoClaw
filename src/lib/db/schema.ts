@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
 // ============================================================
@@ -91,7 +91,7 @@ export const notes = sqliteTable("notes", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   type: text("type", {
-    enum: ["manual", "summary", "faq", "briefing", "timeline"],
+    enum: ["manual", "summary", "faq", "briefing", "timeline", "memory"],
   })
     .notNull()
     .default("manual"),
@@ -110,3 +110,31 @@ export const appSettings = sqliteTable("app_settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
 });
+
+// ============================================================
+// SKILLS (custom AI agent workflows)
+// ============================================================
+export const skills = sqliteTable("skills", {
+  id: text("id").primaryKey(),
+  workspaceId: text("workspace_id").references(() => workspaces.id, {
+    onDelete: "cascade",
+  }), // null = global skill
+  name: text("name").notNull(),
+  slug: text("slug").notNull(), // slash command trigger, e.g. "code-review"
+  description: text("description"),
+  systemPrompt: text("system_prompt").notNull(),
+  steps: text("steps"), // JSON: SkillStep[]
+  allowedTools: text("allowed_tools"), // JSON: string[] | null (null = all tools)
+  parameters: text("parameters"), // JSON: SkillParameter[]
+  isEnabled: integer("is_enabled", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+}, (table) => [
+  uniqueIndex("skills_slug_workspace_idx").on(table.slug, table.workspaceId),
+]);

@@ -2,11 +2,17 @@ import { NextRequest } from "next/server";
 import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { createAgentTools } from "@/lib/ai/agent-tools";
-import { buildAgentSystemPrompt } from "@/lib/ai/prompts";
+import { buildAgentSystemPrompt, buildPlanSystemPrompt, buildAskSystemPrompt } from "@/lib/ai/prompts";
+import { buildSkillSystemPrompt } from "@/lib/ai/skill-prompt";
+import { db } from "@/lib/db";
+import { skills } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { parseSkillRow } from "@/lib/db/skills-utils";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages: uiMessages, workspaceId, cwd } = await req.json();
+    const { messages: uiMessages, workspaceId, cwd, skillId, paramValues, mode } =
+      await req.json();
 
     if (!workspaceId || !cwd || typeof cwd !== "string") {
       return new Response("Missing workspaceId or cwd", { status: 400 });
@@ -20,17 +26,59 @@ export async function POST(req: NextRequest) {
     }
 
     const model = await getConfiguredModel();
-    const tools = createAgentTools(cwd);
+    let systemPrompt: string;
+    let tools;
+
+    if (skillId) {
+      // Skill mode: load skill from DB and use skill-specific prompt + tools
+      const skillRows = await db
+        .select()
+        .from(skills)
+        .where(eq(skills.id, skillId))
+        .limit(1);
+
+      if (skillRows.length === 0) {
+        return new Response("Skill not found", { status: 404 });
+      }
+
+      const skill = parseSkillRow(skillRows[0]);
+
+      if (!skill.isEnabled) {
+        return new Response("Skill is disabled", { status: 403 });
+      }
+
+      // Validate workspace ownership: workspace-specific skills can only be
+      // accessed from their own workspace
+      if (skill.workspaceId && skill.workspaceId !== workspaceId) {
+        return new Response("Skill not found", { status: 404 });
+      }
+
+      systemPrompt = buildSkillSystemPrompt(skill, cwd, paramValues || {});
+      tools = createAgentTools(cwd, skill.allowedTools);
+    } else if (mode === "plan") {
+      // Plan mode: read-only tools, focus on analysis and planning
+      systemPrompt = buildPlanSystemPrompt(cwd);
+      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
+    } else if (mode === "ask") {
+      // Ask mode: read-only tools, can read files but never write or execute
+      systemPrompt = buildAskSystemPrompt(cwd);
+      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
+    } else {
+      // Default agent mode
+      systemPrompt = buildAgentSystemPrompt(cwd);
+      tools = createAgentTools(cwd);
+    }
+
     const modelMessages = await convertToModelMessages(
       uiMessages as UIMessage[]
     );
-    const systemPrompt = buildAgentSystemPrompt(cwd);
 
     const result = streamText({
       model,
       system: systemPrompt,
       messages: modelMessages,
       tools,
+      abortSignal: req.signal,
       stopWhen: stepCountIs(10),
       onError({ error }) {
         console.error("Agent stream error:", error);

@@ -1,0 +1,138 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../getting-started/deployment.md:1 8ef27fa810ab4a3b94489299fdc35e13
+msgid "Deployment"
+msgstr "部署"
+
+#: ../../getting-started/deployment.md:3 1656e148dbc647b39515276e62555f88
+msgid "This guide covers deploying NotebookLM in production environments."
+msgstr "本指南介绍如何在生产环境中部署 NotebookLM。"
+
+#: ../../getting-started/deployment.md:5 2f262310fde546e780841fd27f689479
+msgid "Deployment Architecture"
+msgstr "部署架构"
+
+#: ../../getting-started/deployment.md:39 08a87655abc84535bcf6a0f18640d1b0
+msgid "Option 1: Direct Deployment (Recommended for Self-Hosting)"
+msgstr "方案 1：直接部署（推荐用于自托管）"
+
+#: ../../getting-started/deployment.md:62 94e89600fd7e4e108b5b2f294a6bbe0d
+msgid "Option 2: PM2 Process Manager"
+msgstr "方案 2：PM2 进程管理器"
+
+#: ../../getting-started/deployment.md:64 716fdaa29e54404e872357d4274e1582
+msgid ""
+"[PM2](https://pm2.keymetrics.io/) keeps your application running in the "
+"background and auto-restarts on crashes."
+msgstr "[PM2](https://pm2.keymetrics.io/) 可以让您的应用程序在后台运行，并在崩溃时自动重启。"
+
+#: ../../getting-started/deployment.md:85 be94bebd012e4c98bbe1b74539101816
+msgid "Option 3: Docker Deployment"
+msgstr "方案 3：Docker 部署"
+
+#: ../../getting-started/deployment.md:87 78b556ee34cf43bb9bec5b8af719ef16
+msgid "Dockerfile"
+msgstr "Dockerfile"
+
+#: ../../getting-started/deployment.md:89 5b3d63768ebb4b689a686bf1aabfe46e
+msgid "Create a `Dockerfile` in the project root:"
+msgstr "在项目根目录创建 `Dockerfile`："
+
+#: ../../getting-started/deployment.md:113 f2122e2aef394a7a8e9199d2451b17a3
+msgid "Docker Compose"
+msgstr "Docker Compose"
+
+#: ../../getting-started/deployment.md:115 858603e224234fc1b0012cb6a11e5648
+msgid "Create a `docker-compose.yml`:"
+msgstr "创建 `docker-compose.yml`："
+
+#: ../../getting-started/deployment.md:138 a79bfd49c8004fbaa4c06fac220e16ae
+msgid "Start the container:"
+msgstr "启动容器："
+
+#: ../../getting-started/deployment.md:144 ebbe0d2cc92b44e58eeb0189313155df
+msgid "Reverse Proxy Configuration"
+msgstr "反向代理配置"
+
+#: ../../getting-started/deployment.md:146 a21321aa3d6146c085a44d7e2316336a
+msgid "Nginx"
+msgstr "Nginx"
+
+#: ../../getting-started/deployment.md:166 7681681b31fc4d40b9fc888f8204d553
+msgid "Caddy"
+msgstr "Caddy"
+
+#: ../../getting-started/deployment.md:174 8223ae5b28ab4d1fb213f60fd9f8b0c2
+msgid "Data Backup"
+msgstr "数据备份"
+
+#: ../../getting-started/deployment.md:7 b0a04795fef945e88d31622050631295
+msgid "Data"
+msgstr "数据"
+
+#: ../../getting-started/deployment.md:7 43e81ca41d644afe907837d2c0dcf886
+msgid "Location"
+msgstr "位置"
+
+#: ../../getting-started/deployment.md:7 6c9dd87ee28a489bbc98e0f2c955375c
+msgid "Description"
+msgstr "描述"
+
+#: ../../getting-started/deployment.md:7 6cfc5379bf4f4cd992dcc82abe6e78e4
+msgid "SQLite Database"
+msgstr "SQLite 数据库"
+
+#: ../../getting-started/deployment.md:7 03ede5004c67483b962ed95c3e3bda7e
+msgid "`./data/notebooklm.db`"
+msgstr "`./data/notebooklm.db`"
+
+#: ../../getting-started/deployment.md:7 556fed63c446420685a2b97b822a8600
+msgid "Workspaces, source index, chat history, notes, settings"
+msgstr "工作空间、源索引、对话历史、笔记、设置"
+
+#: ../../getting-started/deployment.md:7 f45e318c0518449c8c5b6ab74a7a7cf8
+msgid "Workspace Files"
+msgstr "工作空间文件"
+
+#: ../../getting-started/deployment.md:7 1a70267659924d0b9a271cc127e74cf8
+msgid "`WORKSPACE_ROOTS` directories"
+msgstr "`WORKSPACE_ROOTS` 目录"
+
+#: ../../getting-started/deployment.md:7 c0d5f5ff25f44b14a82c07b5bf13c1d2
+msgid "User's actual files (outside the project directory)"
+msgstr "用户的实际文件（项目目录之外）"
+
+#: ../../getting-started/deployment.md:7 a0b10ff9785c469398dfede57b0f308b
+msgid "Configuration"
+msgstr "配置"
+
+#: ../../getting-started/deployment.md:7 8d99b370c9ef416b8ff72c60e1d79002
+msgid "`.env.local`"
+msgstr "`.env.local`"
+
+#: ../../getting-started/deployment.md:7 e2fd318e2eca4eb08b4696e592d72cf5
+msgid "Environment variables and API keys"
+msgstr "环境变量和 API 密钥"
+
+#: ../../getting-started/deployment.md:182 e302c350f075443b83de3b1024f5b881
+msgid "To back up, save the `./data/` directory and `.env.local` file."
+msgstr "备份时，请保存 `./data/` 目录和 `.env.local` 文件。"

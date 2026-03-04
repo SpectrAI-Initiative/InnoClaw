@@ -1,0 +1,101 @@
+# Minimal Volcano Job template for Ascend 910B NPU cluster.
+# Runtime-generated fields (uid, resourceVersion, managedFields, status) are
+# intentionally omitted – they are populated by the API server at submission time.
+# User-specific values (submitter, PVC claimNames, imagePullSecrets) should be
+# parameterized via environment variables; see generateVolcanoJobYaml() in agent-tools.ts.
+apiVersion: 'batch.volcano.sh/v1alpha1'
+kind: 'Job'
+metadata:
+  name: 'example-job'
+  namespace: 'default'
+  labels:
+    lepton.sensetime.com/framework-type: 'PyTorch'
+    lepton.sensetime.com/submitter: '<SUBMITTER>'
+    ring-controller.atlas: 'ascend-910b'
+  annotations:
+    sp-block: '<GPU_COUNT>'
+spec:
+  schedulerName: 'volcano'
+  minAvailable: 1
+  tasks:
+    - name: 'worker'
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            lepton.sensetime.com/submitter: '<SUBMITTER>'
+            ring-controller.atlas: 'ascend-910b'
+        spec:
+          volumes:
+            - name: 'vol-ai4s'
+              persistentVolumeClaim:
+                claimName: '<PVC_AI4S>'
+            - name: 'vol-user'
+              persistentVolumeClaim:
+                claimName: '<PVC_USER>'
+            - name: 'vol-ai4s-a2'
+              persistentVolumeClaim:
+                claimName: '<PVC_AI4S_A2>'
+            - name: 'shm-data'
+              emptyDir:
+                medium: 'Memory'
+                sizeLimit: '64Gi'
+          containers:
+            - name: 'worker'
+              image: '<IMAGE>'
+              command:
+                - 'bash'
+                - '-c'
+              args:
+                - '<COMMAND>'
+              resources:
+                limits:
+                  cpu: '64'
+                  huawei.com/Ascend910: '<GPU_COUNT>'
+                  memory: '480Gi'
+                requests:
+                  cpu: '64'
+                  huawei.com/Ascend910: '<GPU_COUNT>'
+                  memory: '480Gi'
+              volumeMounts:
+                - name: 'vol-ai4s'
+                  mountPath: '/mnt/ai4s'
+                - name: 'vol-user'
+                  mountPath: '/mnt/<MOUNT_USER>'
+                - name: 'vol-ai4s-a2'
+                  mountPath: '/mnt/ai4s-a2'
+                - name: 'shm-data'
+                  mountPath: '/dev/shm'
+              imagePullPolicy: 'IfNotPresent'
+          restartPolicy: 'Never'
+          nodeSelector:
+            accelerator-type: 'module-910c-8'
+            host-arch: 'huawei-arm'
+          imagePullSecrets:
+            - name: '<IMAGE_PULL_SECRET>'
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: 'resource.compute.sensecore.cn/machine-type'
+                        operator: 'In'
+                        values:
+                          - 'h2ls.ru.k10'
+      policies:
+        - action: 'RestartJob'
+          event: 'PodEvicted'
+      maxRetry: 3
+  policies:
+    - action: 'RestartJob'
+      event: 'PodEvicted'
+  plugins:
+    hcclrank: []
+    pytorch:
+      - '--master=master'
+      - '--worker=worker'
+      - '--port=23456'
+    svc: []
+  queue: 'default'
+  maxRetry: 1
+  priorityClassName: 'normal'

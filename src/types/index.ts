@@ -55,7 +55,7 @@ export interface Note {
   workspaceId: string;
   title: string;
   content: string;
-  type: "manual" | "summary" | "faq" | "briefing" | "timeline";
+  type: "manual" | "summary" | "faq" | "briefing" | "timeline" | "memory";
   createdAt: string;
   updatedAt: string;
 }
@@ -94,4 +94,49 @@ export interface LLMModel {
   id: string;
   name: string;
   contextWindow: number;
+}
+
+// ---- Skills ----
+
+export interface Skill {
+  id: string;
+  workspaceId: string | null;
+  name: string;
+  slug: string;
+  description: string | null;
+  systemPrompt: string;
+  steps: SkillStep[] | null;
+  allowedTools: string[] | null;
+  parameters: SkillParameter[] | null;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SkillStep {
+  order: number;
+  instruction: string;
+  toolHint?: string;
+}
+
+export interface SkillParameter {
+  name: string;
+  label: string;
+  type: "string" | "number" | "boolean" | "select";
+  required: boolean;
+  defaultValue?: string;
+  options?: string[];
+  placeholder?: string;
+}
+
+// Portable format for sharing skills (no internal IDs or timestamps)
+export interface SkillExportData {
+  name: string;
+  slug: string;
+  description: string | null;
+  systemPrompt: string;
+  steps: SkillStep[] | null;
+  allowedTools: string[] | null;
+  parameters: SkillParameter[] | null;
+  version?: string;
 }

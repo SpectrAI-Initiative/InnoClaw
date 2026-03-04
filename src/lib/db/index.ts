@@ -4,7 +4,12 @@ import * as schema from "./schema";
 import path from "path";
 import fs from "fs";
 
-const DB_PATH = path.join(process.cwd(), "data", "notebooklm.db");
+// DATABASE_URL accepts plain filesystem paths only (not SQLite URI strings).
+// Strip a leading "file:" prefix if present so that path.resolve() works correctly.
+const rawDbUrl = process.env.DATABASE_URL?.replace(/^file:/, "");
+const DB_PATH = rawDbUrl
+  ? path.resolve(rawDbUrl)
+  : path.join(process.cwd(), "data", "notebooklm.db");
 
 // Ensure data directory exists
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -20,7 +25,24 @@ if (process.env.NODE_ENV !== "production") {
   globalForDb.sqlite = sqlite;
 }
 
-sqlite.pragma("journal_mode = WAL");
+// WAL mode is faster but requires mmap support.
+// Network/shared filesystems (NFS, CIFS, FUSE) often lack mmap support,
+// causing SQLITE_IOERR_SHMMAP. Fall back to DELETE journal mode in that case.
+try {
+  sqlite.pragma("journal_mode = WAL");
+} catch (err) {
+  // Only fall back for the specific mmap-related error; surface others.
+  if (
+    err &&
+    typeof err === "object" &&
+    "code" in err &&
+    (err as { code?: unknown }).code === "SQLITE_IOERR_SHMMAP"
+  ) {
+    sqlite.pragma("journal_mode = DELETE");
+  } else {
+    throw err;
+  }
+}
 sqlite.pragma("foreign_keys = ON");
 
 export const db = drizzle(sqlite, { schema });
