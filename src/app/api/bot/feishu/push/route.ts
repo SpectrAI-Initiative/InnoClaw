@@ -14,6 +14,34 @@ import { getFeishuConfig } from "@/lib/bot/types";
 import { createFeishuAdapter } from "@/lib/bot/feishu/client";
 
 export async function POST(req: NextRequest) {
+  // Authenticate the request using a shared secret
+  const expectedSecret = process.env.FEISHU_PUSH_SECRET;
+  if (!expectedSecret) {
+    console.error(
+      "[feishu-push] Missing FEISHU_PUSH_SECRET; refusing unauthenticated access.",
+    );
+    return NextResponse.json(
+      { error: "Feishu push endpoint is not configured" },
+      { status: 503 },
+    );
+  }
+
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 },
+    );
+  }
+
+  const providedSecret = authHeader.slice(7).trim();
+  if (providedSecret !== expectedSecret) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 },
+    );
+  }
+
   const config = getFeishuConfig();
   const adapter = createFeishuAdapter(config);
 
@@ -24,6 +52,32 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const expectedSecret = process.env.FEISHU_PUSH_SECRET;
+  if (!expectedSecret) {
+    console.error(
+      "[feishu-push] Missing FEISHU_PUSH_SECRET; refusing unauthenticated access.",
+    );
+    return NextResponse.json(
+      { error: "Feishu push endpoint is not configured" },
+      { status: 503 },
+    );
+  }
+
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 },
+    );
+  }
+
+  const providedSecret = authHeader.slice(7).trim();
+  if (providedSecret !== expectedSecret) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 },
+    );
+  }
   try {
     const { chatId, title, content, type = "card" } = await req.json();
 
