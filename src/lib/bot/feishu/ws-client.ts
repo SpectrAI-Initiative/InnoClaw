@@ -88,6 +88,12 @@ export function startFeishuWSClient(): void {
     },
   });
 
+  // Mark as started before calling wsClient.start() to prevent concurrent
+  // start attempts. Reset to false if the connection fails so that a
+  // subsequent call to startFeishuWSClient() can retry.
+  globalForFeishu.__feishuWsStarted = true;
+  console.log("[feishu-ws] WSClient starting...");
+
   // Start the WebSocket connection
   wsClient
     .start({ eventDispatcher })
@@ -96,8 +102,6 @@ export function startFeishuWSClient(): void {
     })
     .catch((err) => {
       console.error("[feishu-ws] WSClient failed to start:", err);
+      globalForFeishu.__feishuWsStarted = false;
     });
-
-  globalForFeishu.__feishuWsStarted = true;
-  console.log("[feishu-ws] WSClient starting...");
 }
