@@ -6,6 +6,9 @@ export {
   getProgress,
   setProgress,
   cancelDownload,
+  pauseDownload,
+  isPaused,
   markFinished,
   removeProgress,
 } from "./progress";
+export { getHfToken } from "./token";

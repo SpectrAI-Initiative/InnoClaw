@@ -4,18 +4,47 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, ArrowDown, ArrowUp, Server } from "lucide-react";
 import { toast } from "sonner";
-import { useDatasets, useActiveProgress } from "@/lib/hooks/use-datasets";
+import { useDatasets, useActiveProgress, useNetworkSpeed } from "@/lib/hooks/use-datasets";
 import { DatasetList } from "@/components/datasets/dataset-list";
 import { DatasetDetail } from "@/components/datasets/dataset-detail";
 import { HfDownloadDialog } from "@/components/datasets/hf-download-dialog";
 import type { HfDataset } from "@/types";
 
+function formatBytesPerSecond(bytes: number): string {
+  if (bytes < 1024) return `${bytes.toFixed(0)} B/s`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB/s`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB/s`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB/s`;
+}
+
+function NetworkSpeedBar({ networkSpeed }: { networkSpeed: { rxBytesPerSecond: number; txBytesPerSecond: number } }) {
+  const t = useTranslations("datasets");
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-2 text-sm mb-4">
+      <Server className="h-4 w-4 text-muted-foreground shrink-0" />
+      <span className="text-muted-foreground">{t("serverNetwork")}</span>
+      <div className="flex items-center gap-3 font-mono text-xs">
+        <span className="flex items-center gap-1">
+          <ArrowDown className="h-3 w-3 text-blue-500" />
+          {formatBytesPerSecond(networkSpeed.rxBytesPerSecond)}
+        </span>
+        <span className="flex items-center gap-1">
+          <ArrowUp className="h-3 w-3 text-green-500" />
+          {formatBytesPerSecond(networkSpeed.txBytesPerSecond)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function DatasetsPage() {
   const t = useTranslations("datasets");
   const { datasets, mutate } = useDatasets();
   const progressMap = useActiveProgress(datasets);
+  const networkSpeed = useNetworkSpeed();
   const [selectedDataset, setSelectedDataset] = useState<HfDataset | null>(null);
 
   const handlePreview = (dataset: HfDataset) => {
@@ -79,6 +108,40 @@ export default function DatasetsPage() {
     }
   };
 
+  const handlePause = async (dataset: HfDataset) => {
+    try {
+      const res = await fetch(`/api/datasets/${dataset.id}/pause`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Failed to pause download");
+        return;
+      }
+      toast.success(t("statusPaused"));
+      mutate();
+    } catch {
+      toast.error("Failed to pause download");
+    }
+  };
+
+  const handleRefresh = async (dataset: HfDataset) => {
+    try {
+      const res = await fetch(`/api/datasets/${dataset.id}/refresh`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Failed to refresh stats");
+        return;
+      }
+      toast.success(t("refreshSuccess"));
+      mutate();
+    } catch {
+      toast.error("Failed to refresh stats");
+    }
+  };
+
   // Show detail view if a dataset is selected
   if (selectedDataset) {
     // Find the latest version from the list
@@ -98,6 +161,10 @@ export default function DatasetsPage() {
     );
   }
 
+  const showNetSpeed =
+    networkSpeed &&
+    (networkSpeed.rxBytesPerSecond > 1024 || networkSpeed.txBytesPerSecond > 1024);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -115,6 +182,8 @@ export default function DatasetsPage() {
           />
         </div>
 
+        {showNetSpeed && <NetworkSpeedBar networkSpeed={networkSpeed} />}
+
         <DatasetList
           datasets={datasets}
           progressMap={progressMap}
@@ -122,6 +191,8 @@ export default function DatasetsPage() {
           onDelete={handleDelete}
           onCancel={handleCancel}
           onRetry={handleRetry}
+          onPause={handlePause}
+          onRefresh={handleRefresh}
         />
       </main>
     </div>

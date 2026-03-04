@@ -33,7 +33,7 @@ export function useDatasetProgress(datasetId: string | null) {
  */
 export function useActiveProgress(datasets: HfDataset[]) {
   const activeIds = datasets
-    .filter((d) => d.status === "downloading" || d.status === "pending")
+    .filter((d) => d.status === "downloading" || d.status === "pending" || d.status === "paused")
     .map((d) => d.id);
 
   // Create a stable key for SWR
@@ -63,4 +63,22 @@ export function useActiveProgress(datasets: HfDataset[]) {
   );
 
   return data ?? {};
+}
+
+interface NetworkSpeed {
+  rxBytesPerSecond: number;
+  txBytesPerSecond: number;
+}
+
+/**
+ * Hook to poll server network speed.
+ */
+export function useNetworkSpeed() {
+  const { data } = useSWR<NetworkSpeed>(
+    "/api/system/network",
+    fetcher,
+    { refreshInterval: 3000 }
+  );
+
+  return data ?? null;
 }

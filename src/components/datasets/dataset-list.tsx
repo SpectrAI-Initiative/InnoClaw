@@ -11,6 +11,8 @@ interface DatasetListProps {
   onDelete: (dataset: HfDataset) => void;
   onCancel: (dataset: HfDataset) => void;
   onRetry: (dataset: HfDataset) => void;
+  onPause: (dataset: HfDataset) => void;
+  onRefresh: (dataset: HfDataset) => void;
 }
 
 export function DatasetList({
@@ -20,6 +22,8 @@ export function DatasetList({
   onDelete,
   onCancel,
   onRetry,
+  onPause,
+  onRefresh,
 }: DatasetListProps) {
   const t = useTranslations("datasets");
 
@@ -42,6 +46,8 @@ export function DatasetList({
           onDelete={onDelete}
           onCancel={onCancel}
           onRetry={onRetry}
+          onPause={onPause}
+          onRefresh={onRefresh}
         />
       ))}
     </div>

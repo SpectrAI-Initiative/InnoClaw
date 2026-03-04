@@ -144,7 +144,11 @@
     "botIntegrations": "IM Bot Integrations",
     "botIntegrationsDesc": "Configure Feishu and WeChat bot credentials in .env.local. Webhook endpoints: /api/bot/feishu, /api/bot/wechat.",
     "feishuBot": "Feishu (Lark) Bot",
-    "wechatBot": "WeChat (Enterprise) Bot"
+    "wechatBot": "WeChat (Enterprise) Bot",
+    "hfToken": "HuggingFace Token",
+    "hfTokenDesc": "Set a HuggingFace access token to avoid rate limiting when downloading datasets. You can also set it via the HF_TOKEN environment variable.",
+    "hfTokenPlaceholder": "Enter token",
+    "hfTokenClear": "Remove saved token"
   },
   "terminal": {
     "title": "Terminal",
@@ -317,9 +321,13 @@
     "size": "Size",
     "statusPending": "Pending",
     "statusDownloading": "Downloading",
+    "statusPaused": "Paused",
     "statusReady": "Ready",
     "statusFailed": "Failed",
     "statusCancelled": "Cancelled",
+    "pause": "Pause",
+    "resume": "Resume",
+    "eta": "remaining",
     "progress": "Progress",
     "speed": "Speed",
     "phase": "Phase",
@@ -333,6 +341,11 @@
     "path": "Path",
     "fileList": "Files",
     "loadingRepoInfo": "Loading repository info...",
-    "repoNotFound": "Repository not found"
+    "repoNotFound": "Repository not found",
+    "networkDownload": "Download",
+    "networkUpload": "Upload",
+    "serverNetwork": "Server Network",
+    "refreshStats": "Refresh",
+    "refreshSuccess": "Statistics refreshed"
   }
 }

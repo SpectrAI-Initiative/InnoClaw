@@ -124,7 +124,7 @@ async function startDownload(
     // Update status to downloading
     await db
       .update(hfDatasets)
-      .set({ status: "downloading", updatedAt: new Date().toISOString() })
+      .set({ status: "downloading", progress: 0, updatedAt: new Date().toISOString() })
       .where(eq(hfDatasets.id, datasetId));
 
     setProgress(datasetId, {
@@ -164,20 +164,33 @@ async function startDownload(
     markFinished(datasetId, "ready");
   } catch (error) {
     const message = error instanceof Error ? error.message : "Download failed";
+    const isPauseError = error instanceof Error && error.message === "Download paused";
+    const isCancelError = error instanceof Error && error.message === "Download cancelled";
+
+    if (isPauseError) {
+      // Paused — status already set by pauseDownload(), just update DB
+      await db
+        .update(hfDatasets)
+        .set({
+          status: "paused",
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(hfDatasets.id, datasetId));
+      markFinished(datasetId, "paused");
+      return;
+    }
+
     const now = new Date().toISOString();
     await db
       .update(hfDatasets)
       .set({
-        status: error instanceof Error && error.message === "Download cancelled" ? "cancelled" : "failed",
+        status: isCancelError ? "cancelled" : "failed",
         lastError: message,
         updatedAt: now,
       })
       .where(eq(hfDatasets.id, datasetId));
 
-    markFinished(
-      datasetId,
-      error instanceof Error && error.message === "Download cancelled" ? "cancelled" : "failed"
-    );
+    markFinished(datasetId, isCancelError ? "cancelled" : "failed");
   }
 }
 

@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hfDatasets } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { cancelDownload, removeProgress } from "@/lib/hf-datasets/progress";
+import { pauseDownload } from "@/lib/hf-datasets/progress";
 
 type RouteParams = { params: Promise<{ datasetId: string }> };
 
 /**
- * POST /api/datasets/[datasetId]/cancel - Cancel an in-progress or paused download
+ * POST /api/datasets/[datasetId]/pause - Pause an in-progress download
  */
 export async function POST(_request: NextRequest, { params }: RouteParams) {
   try {
@@ -24,29 +24,27 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     }
 
     const status = rows[0].status;
-    if (status !== "downloading" && status !== "pending" && status !== "paused") {
+    if (status !== "downloading" && status !== "pending") {
       return NextResponse.json(
-        { error: "Dataset is not in a cancellable state" },
+        { error: "Dataset is not currently downloading" },
         { status: 400 }
       );
     }
 
-    // Try to abort if actively downloading
-    cancelDownload(datasetId);
-    // Clean up any in-memory progress (e.g. paused state)
-    removeProgress(datasetId);
+    const paused = pauseDownload(datasetId);
 
+    // Always update DB even if in-memory abort didn't fire (e.g. pending state)
     await db
       .update(hfDatasets)
       .set({
-        status: "cancelled",
+        status: "paused",
         updatedAt: new Date().toISOString(),
       })
       .where(eq(hfDatasets.id, datasetId));
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, paused });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to cancel download";
+    const message = error instanceof Error ? error.message : "Failed to pause download";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

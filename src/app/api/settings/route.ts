@@ -13,6 +13,8 @@ export async function GET() {
       settingsMap[s.key] = s.value;
     }
 
+    const hasHfToken = !!settingsMap["hf_token"] || !!process.env.HF_TOKEN;
+
     return NextResponse.json({
       llmProvider: settingsMap["llm_provider"] || "openai",
       llmModel: settingsMap["llm_model"] || "gpt-4o-mini",
@@ -20,7 +22,8 @@ export async function GET() {
       hasOpenAIKey: !!process.env.OPENAI_API_KEY,
       hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
       hasGithubToken: !!process.env.GITHUB_TOKEN,
-      hasHfToken: !!process.env.HF_TOKEN,
+      hasHfToken,
+      hfTokenSource: settingsMap["hf_token"] ? "db" : (process.env.HF_TOKEN ? "env" : null),
       hasAIKey: !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY,
       openaiBaseUrl: process.env.OPENAI_BASE_URL || "",
       anthropicBaseUrl: process.env.ANTHROPIC_BASE_URL || "",

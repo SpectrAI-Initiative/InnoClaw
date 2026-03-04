@@ -150,7 +150,7 @@ export const hfDatasets = sqliteTable("hf_datasets", {
   revision: text("revision"), // branch/tag, null = default
   sourceConfig: text("source_config"), // JSON: { allowPatterns, ignorePatterns }
   status: text("status", {
-    enum: ["pending", "downloading", "ready", "failed", "cancelled"],
+    enum: ["pending", "downloading", "paused", "ready", "failed", "cancelled"],
   })
     .notNull()
     .default("pending"),

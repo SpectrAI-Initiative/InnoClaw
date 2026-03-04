@@ -4,7 +4,7 @@ import { hfDatasets } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { downloadRepo } from "@/lib/hf-datasets/downloader";
 import { buildManifest, computeStats } from "@/lib/hf-datasets/manifest";
-import { setProgress, markFinished } from "@/lib/hf-datasets/progress";
+import { setProgress, markFinished, removeProgress } from "@/lib/hf-datasets/progress";
 import type { HfRepoType, HfDatasetSourceConfig } from "@/types";
 
 type RouteParams = { params: Promise<{ datasetId: string }> };
@@ -45,6 +45,9 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       })
       .where(eq(hfDatasets.id, datasetId));
 
+    // Clean up any stale in-memory progress (e.g. from paused state)
+    removeProgress(datasetId);
+
     // Restart download
     const sourceConfig: HfDatasetSourceConfig | null = dataset.sourceConfig
       ? JSON.parse(dataset.sourceConfig)
@@ -79,7 +82,7 @@ async function startRetryDownload(
   try {
     await db
       .update(hfDatasets)
-      .set({ status: "downloading", updatedAt: new Date().toISOString() })
+      .set({ status: "downloading", progress: 0, updatedAt: new Date().toISOString() })
       .where(eq(hfDatasets.id, datasetId));
 
     setProgress(datasetId, {
@@ -115,18 +118,30 @@ async function startRetryDownload(
     markFinished(datasetId, "ready");
   } catch (error) {
     const message = error instanceof Error ? error.message : "Download failed";
+    const isPauseError = error instanceof Error && error.message === "Download paused";
+    const isCancelError = error instanceof Error && error.message === "Download cancelled";
+
+    if (isPauseError) {
+      await db
+        .update(hfDatasets)
+        .set({
+          status: "paused",
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(hfDatasets.id, datasetId));
+      markFinished(datasetId, "paused");
+      return;
+    }
+
     await db
       .update(hfDatasets)
       .set({
-        status: error instanceof Error && error.message === "Download cancelled" ? "cancelled" : "failed",
+        status: isCancelError ? "cancelled" : "failed",
         lastError: message,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(hfDatasets.id, datasetId));
 
-    markFinished(
-      datasetId,
-      error instanceof Error && error.message === "Download cancelled" ? "cancelled" : "failed"
-    );
+    markFinished(datasetId, isCancelError ? "cancelled" : "failed");
   }
 }

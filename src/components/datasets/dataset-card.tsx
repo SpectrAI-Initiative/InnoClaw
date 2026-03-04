@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Trash2, RotateCcw, X, Database, Box, AppWindow } from "lucide-react";
+import { Eye, Trash2, RotateCcw, X, Database, Box, AppWindow, Pause, Play, RefreshCw } from "lucide-react";
 import type { HfDataset, HfDownloadProgress } from "@/types";
 
 interface DatasetCardProps {
@@ -14,6 +14,8 @@ interface DatasetCardProps {
   onDelete: (dataset: HfDataset) => void;
   onCancel: (dataset: HfDataset) => void;
   onRetry: (dataset: HfDataset) => void;
+  onPause: (dataset: HfDataset) => void;
+  onRefresh: (dataset: HfDataset) => void;
 }
 
 function formatBytes(bytes: number | null): string {
@@ -23,6 +25,22 @@ function formatBytes(bytes: number | null): string {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
+function formatSpeed(bytesPerSecond: number): string {
+  if (bytesPerSecond === 0) return "0 B/s";
+  const k = 1024;
+  const sizes = ["B/s", "KB/s", "MB/s", "GB/s"];
+  const i = Math.floor(Math.log(bytesPerSecond) / Math.log(k));
+  return parseFloat((bytesPerSecond / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
+function formatEta(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.round(seconds / 60)}min`;
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  return `${h}h${m > 0 ? ` ${m}min` : ""}`;
 }
 
 function getRepoTypeIcon(repoType: string) {
@@ -40,16 +58,23 @@ export function DatasetCard({
   onDelete,
   onCancel,
   onRetry,
+  onPause,
+  onRefresh,
 }: DatasetCardProps) {
   const t = useTranslations("datasets");
 
   const isActive = dataset.status === "downloading" || dataset.status === "pending";
-  const progress = liveProgress?.progress ?? dataset.progress;
+  const isPaused = dataset.status === "paused";
+  // For active downloads, only trust live progress (DB value may be stale)
+  const progress = isActive
+    ? (liveProgress?.progress ?? 0)
+    : (liveProgress?.progress ?? dataset.progress);
   const phase = liveProgress?.phase;
 
   const statusVariant = {
     pending: "secondary" as const,
     downloading: "default" as const,
+    paused: "secondary" as const,
     ready: "default" as const,
     failed: "destructive" as const,
     cancelled: "secondary" as const,
@@ -58,6 +83,7 @@ export function DatasetCard({
   const statusLabel = {
     pending: t("statusPending"),
     downloading: t("statusDownloading"),
+    paused: t("statusPaused"),
     ready: t("statusReady"),
     failed: t("statusFailed"),
     cancelled: t("statusCancelled"),
@@ -94,6 +120,40 @@ export function DatasetCard({
           <Progress value={progress} className="h-2" />
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{phaseLabel || t("statusDownloading")}</span>
+            <span>{progress}%</span>
+          </div>
+          {liveProgress && liveProgress.totalBytes > 0 && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>
+                {formatBytes(liveProgress.downloadedBytes)} / {formatBytes(liveProgress.totalBytes)}
+              </span>
+              <span>·</span>
+              <span>
+                {liveProgress.downloadedFiles} / {liveProgress.totalFiles} {t("files")}
+              </span>
+              {liveProgress.speedBytesPerSecond != null && liveProgress.speedBytesPerSecond > 0 && (
+                <>
+                  <span>·</span>
+                  <span>{formatSpeed(liveProgress.speedBytesPerSecond)}</span>
+                </>
+              )}
+              {liveProgress.estimatedSecondsRemaining != null && liveProgress.estimatedSecondsRemaining > 0 && (
+                <>
+                  <span>·</span>
+                  <span>~{formatEta(liveProgress.estimatedSecondsRemaining)} {t("eta")}</span>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Progress bar for paused downloads */}
+      {isPaused && (
+        <div className="space-y-1">
+          <Progress value={progress} className="h-2" />
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{t("statusPaused")}</span>
             <span>{progress}%</span>
           </div>
           {liveProgress && liveProgress.totalBytes > 0 && (
@@ -134,10 +194,16 @@ export function DatasetCard({
       {/* Actions */}
       <div className="flex items-center justify-end gap-1">
         {dataset.status === "ready" && (
-          <Button variant="ghost" size="sm" onClick={() => onPreview(dataset)}>
-            <Eye className="h-4 w-4 mr-1" />
-            {t("preview")}
-          </Button>
+          <>
+            <Button variant="ghost" size="sm" onClick={() => onPreview(dataset)}>
+              <Eye className="h-4 w-4 mr-1" />
+              {t("preview")}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onRefresh(dataset)}>
+              <RefreshCw className="h-4 w-4 mr-1" />
+              {t("refreshStats")}
+            </Button>
+          </>
         )}
         {(dataset.status === "failed" || dataset.status === "cancelled") && (
           <Button variant="ghost" size="sm" onClick={() => onRetry(dataset)}>
@@ -145,13 +211,31 @@ export function DatasetCard({
             {t("retry")}
           </Button>
         )}
-        {isActive && (
-          <Button variant="ghost" size="sm" onClick={() => onCancel(dataset)}>
-            <X className="h-4 w-4 mr-1" />
-            {t("cancelDownload")}
-          </Button>
+        {isPaused && (
+          <>
+            <Button variant="ghost" size="sm" onClick={() => onRetry(dataset)}>
+              <Play className="h-4 w-4 mr-1" />
+              {t("resume")}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onCancel(dataset)}>
+              <X className="h-4 w-4 mr-1" />
+              {t("cancelDownload")}
+            </Button>
+          </>
         )}
-        {!isActive && (
+        {isActive && (
+          <>
+            <Button variant="ghost" size="sm" onClick={() => onPause(dataset)}>
+              <Pause className="h-4 w-4 mr-1" />
+              {t("pause")}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onCancel(dataset)}>
+              <X className="h-4 w-4 mr-1" />
+              {t("cancelDownload")}
+            </Button>
+          </>
+        )}
+        {!isActive && !isPaused && (
           <Button variant="ghost" size="sm" onClick={() => onDelete(dataset)}>
             <Trash2 className="h-4 w-4 mr-1" />
             {t("deleteDataset")}

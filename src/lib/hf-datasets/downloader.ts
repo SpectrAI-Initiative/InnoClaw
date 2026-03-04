@@ -6,9 +6,22 @@ import { listRepoFiles } from "./metadata";
 import {
   setProgress,
   setAbortController,
-  markFinished,
+  isPaused,
 } from "./progress";
+import { getHfToken } from "./token";
+import { db } from "@/lib/db";
+import { hfDatasets } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import type { HfRepoType, HfDatasetSourceConfig } from "@/types";
+
+const TAG = "[HF]";
+
+function fmtBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
 
 export interface DownloadConfig {
   repoId: string;
@@ -40,8 +53,9 @@ export async function downloadRepo(
     token,
   } = config;
 
-  const credentials = token || process.env.HF_TOKEN
-    ? { accessToken: (token || process.env.HF_TOKEN)! }
+  const resolvedToken = token || (await getHfToken());
+  const credentials = resolvedToken
+    ? { accessToken: resolvedToken }
     : undefined;
 
   const abortController = new AbortController();
@@ -74,6 +88,13 @@ export async function downloadRepo(
   const totalBytes = filteredFiles.reduce((sum, f) => sum + f.size, 0);
   const totalFiles = filteredFiles.length;
 
+  console.log(
+    `${TAG} Download started: ${repoId} (${repoType}) → ${totalFiles} files, ${fmtBytes(totalBytes)}`
+  );
+  if (allFiles.length !== totalFiles) {
+    console.log(`${TAG}   Filtered: ${allFiles.length} → ${totalFiles} files`);
+  }
+
   setProgress(datasetId, {
     totalBytes,
     totalFiles,
@@ -87,6 +108,8 @@ export async function downloadRepo(
   // 4. Download files with concurrency control
   let downloadedBytes = 0;
   let downloadedFiles = 0;
+  let lastDbUpdateTime = 0;
+  let lastProgressUpdateTime = 0;
 
   const queue = [...filteredFiles];
   const errors: { path: string; error: Error }[] = [];
@@ -102,7 +125,8 @@ export async function downloadRepo(
       if (stat.size === file.size) {
         downloadedBytes += file.size;
         downloadedFiles++;
-        updateProgress();
+        console.log(`${TAG}   [skip] ${file.path} (${fmtBytes(file.size)}) — already exists`);
+        updateProgress(true);
         return;
       }
     }
@@ -126,27 +150,42 @@ export async function downloadRepo(
           throw new Error(`No response for file: ${file.path}`);
         }
 
-        const buffer = Buffer.from(await response.arrayBuffer());
-        fs.writeFileSync(destPath, buffer);
+        // Stream to disk with real-time byte tracking
+        await streamBlobToFile(response, destPath, (chunkBytes) => {
+          downloadedBytes += chunkBytes;
+          updateProgress();
+        });
 
-        downloadedBytes += file.size;
         downloadedFiles++;
-        updateProgress();
+        console.log(
+          `${TAG}   [done] ${file.path} (${fmtBytes(file.size)}) — ${downloadedFiles}/${totalFiles}`
+        );
+        updateProgress(true);
         return;
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
         if (abortController.signal.aborted) return;
         // Exponential backoff
         if (attempt < retries) {
-          await sleep(Math.pow(2, attempt) * 1000);
+          const delay = Math.pow(2, attempt) * 1000;
+          console.warn(
+            `${TAG}   [retry] ${file.path} attempt ${attempt + 1}/${retries} — ${lastError.message} (wait ${delay}ms)`
+          );
+          await sleep(delay);
         }
       }
     }
 
     errors.push({ path: file.path, error: lastError! });
+    console.error(`${TAG}   [fail] ${file.path} — ${lastError!.message}`);
   }
 
-  function updateProgress() {
+  function updateProgress(force = false) {
+    // Throttle in-memory progress updates (streaming produces many small chunks)
+    const now = Date.now();
+    if (!force && now - lastProgressUpdateTime < 500) return;
+    lastProgressUpdateTime = now;
+
     const pct = totalBytes > 0
       ? Math.round((downloadedBytes / totalBytes) * 100)
       : (totalFiles > 0 ? Math.round((downloadedFiles / totalFiles) * 100) : 0);
@@ -158,6 +197,18 @@ export async function downloadRepo(
       totalBytes,
       totalFiles,
     });
+
+    // Throttled DB progress update + log (every 5 seconds)
+    if (now - lastDbUpdateTime > 5000) {
+      lastDbUpdateTime = now;
+      console.log(
+        `${TAG}   [progress] ${pct}% — ${fmtBytes(downloadedBytes)}/${fmtBytes(totalBytes)}, ${downloadedFiles}/${totalFiles} files`
+      );
+      db.update(hfDatasets)
+        .set({ progress: Math.min(pct, 99), updatedAt: new Date().toISOString() })
+        .where(eq(hfDatasets.id, datasetId))
+        .catch(() => {});
+    }
   }
 
   // Process files with concurrency pool
@@ -179,17 +230,60 @@ export async function downloadRepo(
   await Promise.all(executing);
 
   if (abortController.signal.aborted) {
+    if (isPaused(datasetId)) {
+      console.log(`${TAG} Download paused: ${config.repoId} at ${fmtBytes(downloadedBytes)}/${fmtBytes(totalBytes)}`);
+      throw new Error("Download paused");
+    }
+    console.log(`${TAG} Download cancelled: ${config.repoId}`);
     throw new Error("Download cancelled");
   }
 
   if (errors.length > 0) {
     const failedPaths = errors.map((e) => e.path).join(", ");
+    console.error(`${TAG} Download failed: ${errors.length} file(s): ${failedPaths}`);
     throw new Error(`Failed to download ${errors.length} file(s): ${failedPaths}`);
   }
 
+  console.log(
+    `${TAG} Download complete: ${config.repoId} — ${totalFiles} files, ${fmtBytes(downloadedBytes)}`
+  );
   return { sizeBytes: downloadedBytes, numFiles: downloadedFiles };
 }
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Stream a Blob to a file, calling onChunk with the byte count
+ * of each chunk as it is written to disk.
+ */
+async function streamBlobToFile(
+  blob: Blob,
+  destPath: string,
+  onChunk: (bytes: number) => void
+): Promise<void> {
+  const stream = blob.stream();
+  const reader = stream.getReader();
+  const fileStream = fs.createWriteStream(destPath);
+
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = Buffer.from(value);
+      const canContinue = fileStream.write(chunk);
+      onChunk(chunk.length);
+
+      // Backpressure: wait for drain if the write buffer is full
+      if (!canContinue) {
+        await new Promise<void>((resolve) => fileStream.once("drain", resolve));
+      }
+    }
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      fileStream.end((err: Error | null) => (err ? reject(err) : resolve()));
+    });
+  }
 }

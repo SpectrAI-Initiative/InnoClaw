@@ -131,7 +131,7 @@ export interface SkillParameter {
 
 // ---- HuggingFace Datasets ----
 
-export type HfDatasetStatus = "pending" | "downloading" | "ready" | "failed" | "cancelled";
+export type HfDatasetStatus = "pending" | "downloading" | "paused" | "ready" | "failed" | "cancelled";
 export type HfRepoType = "dataset" | "model" | "space";
 
 export interface HfDataset {
@@ -203,6 +203,8 @@ export interface HfDownloadProgress {
   totalBytes: number;
   downloadedFiles: number;
   totalFiles: number;
+  speedBytesPerSecond?: number;
+  estimatedSecondsRemaining?: number;
 }
 
 // Portable format for sharing skills (no internal IDs or timestamps)

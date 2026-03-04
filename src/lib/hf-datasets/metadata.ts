@@ -1,9 +1,9 @@
 import { listFiles } from "@huggingface/hub";
 import type { HfRepoInfo, HfRepoType } from "@/types";
+import { getHfToken } from "./token";
 
 function getCredentials(token?: string): { accessToken: string } | undefined {
-  const t = token || process.env.HF_TOKEN;
-  return t ? { accessToken: t } : undefined;
+  return token ? { accessToken: token } : undefined;
 }
 
 /**
@@ -14,7 +14,8 @@ export async function getRepoInfo(
   repoType: HfRepoType = "dataset",
   token?: string
 ): Promise<HfRepoInfo> {
-  const credentials = getCredentials(token);
+  const resolvedToken = token || (await getHfToken());
+  const credentials = getCredentials(resolvedToken);
 
   // Use the HF API directly for repo-level info
   const apiUrl = repoType === "model"
@@ -45,6 +46,7 @@ export async function getRepoInfo(
     for await (const file of listFiles({
       repo: { type: repoType, name: repoId },
       revision: "main",
+      recursive: true,
       credentials,
     })) {
       if (file.type === "file") {
@@ -77,12 +79,14 @@ export async function listRepoFiles(
   revision?: string,
   token?: string
 ): Promise<{ path: string; size: number }[]> {
-  const credentials = getCredentials(token);
+  const resolvedToken = token || (await getHfToken());
+  const credentials = getCredentials(resolvedToken);
   const files: { path: string; size: number }[] = [];
 
   for await (const file of listFiles({
     repo: { type: repoType, name: repoId },
     revision: revision || "main",
+    recursive: true,
     credentials,
   })) {
     if (file.type === "file") {

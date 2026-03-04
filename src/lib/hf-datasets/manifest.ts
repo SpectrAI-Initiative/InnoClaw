@@ -58,83 +58,123 @@ function countRowsBestEffort(filePath: string, format: string): number | null {
   return null;
 }
 
+function normalizeSplitName(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower === "validation" || lower === "val" || lower === "dev") return "valid";
+  if (lower === "training") return "train";
+  if (lower === "testing" || lower === "eval") return "test";
+  return lower;
+}
+
+function detectSplitFromFilename(fileName: string): string {
+  const baseName = path.basename(fileName, path.extname(fileName)).toLowerCase();
+  for (const known of KNOWN_SPLIT_NAMES) {
+    if (baseName === known || baseName.startsWith(known + "_") || baseName.startsWith(known + "-") || baseName.startsWith(known + ".")) {
+      return normalizeSplitName(known);
+    }
+  }
+  return "default";
+}
+
+/**
+ * Scan a single directory (non-recursive) and group files by detected split.
+ */
+function scanDirBySplits(
+  dirPath: string,
+  keyPrefix: string
+): Record<string, HfDatasetManifest["splits"][string]> {
+  const result: Record<string, HfDatasetManifest["splits"][string]> = {};
+  const fileEntries = fs.readdirSync(dirPath, { withFileTypes: true }).filter((e) => e.isFile());
+
+  const grouped: Record<string, typeof fileEntries> = {};
+  for (const f of fileEntries) {
+    const splitName = detectSplitFromFilename(f.name);
+    if (!grouped[splitName]) grouped[splitName] = [];
+    grouped[splitName].push(f);
+  }
+
+  for (const [splitName, files] of Object.entries(grouped)) {
+    const key = keyPrefix ? `${keyPrefix}/${splitName}` : splitName;
+    const fileInfos = files.map((f) => {
+      const filePath = path.join(dirPath, f.name);
+      const stat = fs.statSync(filePath);
+      const format = detectFormat(f.name);
+      const rows = countRowsBestEffort(filePath, format);
+      return { path: f.name, format, sizeBytes: stat.size, rows };
+    });
+
+    result[key] = {
+      root: dirPath,
+      files: fileInfos,
+      numFiles: fileInfos.length,
+      numRows: fileInfos.reduce(
+        (sum, f) => (f.rows !== null && sum !== null ? sum + f.rows : null),
+        null as number | null
+      ),
+    };
+  }
+
+  return result;
+}
+
 /**
  * Scan a downloaded dataset directory and build a manifest.
  */
 export function buildManifest(rootDir: string): HfDatasetManifest {
   const splits: Record<string, HfDatasetManifest["splits"][string]> = {};
 
-  // Check for split directories
   const entries = fs.readdirSync(rootDir, { withFileTypes: true });
-  const splitDirs = entries.filter(
-    (e) => e.isDirectory() && KNOWN_SPLIT_NAMES.has(e.name.toLowerCase())
-  );
+  const allDirs = entries.filter((e) => e.isDirectory());
 
+  // Classify directories
+  const splitDirs = allDirs.filter((e) => KNOWN_SPLIT_NAMES.has(e.name.toLowerCase()));
+  const configDirs = allDirs.filter((e) => !KNOWN_SPLIT_NAMES.has(e.name.toLowerCase()));
+
+  // 1. Known split directories (train/, test/, etc.)
   if (splitDirs.length > 0) {
-    // Has explicit split directories
     for (const dir of splitDirs) {
-      const splitName = dir.name.toLowerCase() === "validation" || dir.name.toLowerCase() === "val" || dir.name.toLowerCase() === "dev"
-        ? "valid"
-        : dir.name.toLowerCase() === "training"
-          ? "train"
-          : dir.name.toLowerCase() === "testing" || dir.name.toLowerCase() === "eval"
-            ? "test"
-            : dir.name.toLowerCase();
-      const splitDir = path.join(rootDir, dir.name);
-      splits[splitName] = scanSplitDir(splitDir);
+      const splitName = normalizeSplitName(dir.name);
+      splits[splitName] = scanSplitDir(path.join(rootDir, dir.name));
     }
+  }
 
-    // Also scan root-level files as "default" split (e.g. README.md)
-    const rootFiles = entries.filter(
-      (e) => e.isFile() || (e.isDirectory() && !KNOWN_SPLIT_NAMES.has(e.name.toLowerCase()))
-    );
-    if (rootFiles.some((e) => e.isFile())) {
-      splits["default"] = scanSplitDir(rootDir, true);
-    }
-  } else {
-    // Flat directory: try to detect splits from file names
-    const fileEntries = entries.filter((e) => e.isFile());
-    const splitFiles: Record<string, typeof fileEntries> = {};
+  // 2. Config/subset directories (e.g. wikitext-103-raw-v1/)
+  //    Recurse into them and detect splits from filenames within
+  if (configDirs.length > 0) {
+    for (const dir of configDirs) {
+      const configDir = path.join(rootDir, dir.name);
+      const configEntries = fs.readdirSync(configDir, { withFileTypes: true });
+      const subSplitDirs = configEntries.filter(
+        (e) => e.isDirectory() && KNOWN_SPLIT_NAMES.has(e.name.toLowerCase())
+      );
 
-    for (const f of fileEntries) {
-      const baseName = path.basename(f.name, path.extname(f.name)).toLowerCase();
-      let splitName = "default";
-      for (const known of KNOWN_SPLIT_NAMES) {
-        if (baseName === known || baseName.startsWith(known + "_") || baseName.startsWith(known + "-") || baseName.startsWith(known + ".")) {
-          splitName = known === "validation" || known === "val" || known === "dev" ? "valid"
-            : known === "training" ? "train"
-            : known === "testing" || known === "eval" ? "test"
-            : known;
-          break;
+      if (subSplitDirs.length > 0) {
+        // Config dir has explicit split subdirectories
+        for (const subDir of subSplitDirs) {
+          const splitName = normalizeSplitName(subDir.name);
+          const key = `${dir.name}/${splitName}`;
+          splits[key] = scanSplitDir(path.join(configDir, subDir.name));
         }
+        // Also pick up loose files in config dir root
+        if (configEntries.some((e) => e.isFile())) {
+          Object.assign(splits, scanDirBySplits(configDir, dir.name));
+        }
+      } else {
+        // Flat files within config dir — detect splits from filenames
+        Object.assign(splits, scanDirBySplits(configDir, dir.name));
       }
-      if (!splitFiles[splitName]) splitFiles[splitName] = [];
-      splitFiles[splitName].push(f);
     }
+  }
 
-    for (const [splitName, files] of Object.entries(splitFiles)) {
-      const fileInfos = files.map((f) => {
-        const filePath = path.join(rootDir, f.name);
-        const stat = fs.statSync(filePath);
-        const format = detectFormat(f.name);
-        const rows = countRowsBestEffort(filePath, format);
-        return {
-          path: f.name,
-          format,
-          sizeBytes: stat.size,
-          rows,
-        };
-      });
-
-      splits[splitName] = {
-        root: rootDir,
-        files: fileInfos,
-        numFiles: fileInfos.length,
-        numRows: fileInfos.reduce(
-          (sum, f) => (f.rows !== null && sum !== null ? sum + f.rows : null),
-          null as number | null
-        ),
-      };
+  // 3. Root-level files (README.md, .gitattributes, etc.)
+  const rootFiles = entries.filter((e) => e.isFile());
+  if (rootFiles.length > 0) {
+    if (splitDirs.length === 0 && configDirs.length === 0) {
+      // Pure flat directory — detect splits from filenames
+      Object.assign(splits, scanDirBySplits(rootDir, ""));
+    } else {
+      // Mixed: put root files into "default" split
+      splits["default"] = scanSplitDir(rootDir, true);
     }
   }
 

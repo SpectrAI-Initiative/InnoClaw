@@ -144,7 +144,11 @@
     "botIntegrations": "IM 机器人集成",
     "botIntegrationsDesc": "在 .env.local 中配置飞书和微信机器人密钥。Webhook 端点：/api/bot/feishu、/api/bot/wechat。",
     "feishuBot": "飞书机器人",
-    "wechatBot": "企业微信机器人"
+    "wechatBot": "企业微信机器人",
+    "hfToken": "HuggingFace Token",
+    "hfTokenDesc": "设置 HuggingFace 访问令牌以避免下载数据集时被限流。也可以通过 HF_TOKEN 环境变量设置。",
+    "hfTokenPlaceholder": "输入令牌",
+    "hfTokenClear": "移除已保存的令牌"
   },
   "terminal": {
     "title": "终端",
@@ -317,9 +321,13 @@
     "size": "大小",
     "statusPending": "等待中",
     "statusDownloading": "下载中",
+    "statusPaused": "已暂停",
     "statusReady": "就绪",
     "statusFailed": "失败",
     "statusCancelled": "已取消",
+    "pause": "暂停",
+    "resume": "继续",
+    "eta": "剩余",
     "progress": "进度",
     "speed": "速度",
     "phase": "阶段",
@@ -333,6 +341,11 @@
     "path": "路径",
     "fileList": "文件列表",
     "loadingRepoInfo": "加载仓库信息...",
-    "repoNotFound": "仓库未找到"
+    "repoNotFound": "仓库未找到",
+    "networkDownload": "下载",
+    "networkUpload": "上传",
+    "serverNetwork": "服务器网络",
+    "refreshStats": "刷新",
+    "refreshSuccess": "统计数据已刷新"
   }
 }
