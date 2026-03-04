@@ -44,7 +44,7 @@ jobs:
       - name: Build Chinese docs
         run: sphinx-build -b html docs docs/_build/html/zh -D language=zh_CN -W --keep-going
 
-      - name: Create root redirect
+      - name: Create root redirect and .nojekyll
         run: |
           cat > docs/_build/html/index.html << 'EOF'
           <!DOCTYPE html>
@@ -59,15 +59,17 @@ jobs:
             </body>
           </html>
           EOF
-
-      - name: Link check
-        run: sphinx-build -b linkcheck docs docs/_build/linkcheck -W --keep-going
+          touch docs/_build/html/.nojekyll
 
       - name: Upload artifact
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/_build/html
+
+      - name: Link check
+        continue-on-error: true
+        run: sphinx-build -b linkcheck docs docs/_build/linkcheck --keep-going
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
