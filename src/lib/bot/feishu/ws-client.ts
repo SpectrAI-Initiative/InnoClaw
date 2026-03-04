@@ -88,9 +88,7 @@ export function startFeishuWSClient(): void {
     },
   });
 
-  // Mark as started before calling wsClient.start() to prevent concurrent
-  // start attempts. Reset to false if the connection fails so that a
-  // subsequent call to startFeishuWSClient() can retry.
+  // Set flag before starting to prevent concurrent start attempts
   globalForFeishu.__feishuWsStarted = true;
   console.log("[feishu-ws] WSClient starting...");
 
@@ -101,7 +99,8 @@ export function startFeishuWSClient(): void {
       console.log("[feishu-ws] WSClient connected successfully");
     })
     .catch((err) => {
-      console.error("[feishu-ws] WSClient failed to start:", err);
+      // Reset flag so a subsequent call can retry
       globalForFeishu.__feishuWsStarted = false;
+      console.error("[feishu-ws] WSClient failed to start:", err);
     });
 }
