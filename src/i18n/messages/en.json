@@ -124,7 +124,13 @@
     "generateDisabled": "Generation requires an API key",
     "memory": "Memory",
     "memoryTitleClear": "Conversation Memory - {date}",
-    "memoryTitleOverflow": "Context Compression - {date}"
+    "memoryTitleOverflow": "Context Compression - {date}",
+    "daily_report": "Daily Report",
+    "generateDailyReport": "Daily Report",
+    "generatingDailyReport": "Generating...",
+    "dailyReportSuccess": "Daily report generated",
+    "dailyReportSkipped": "No memory notes for today",
+    "dailyReportExists": "Daily report already exists for today"
   },
   "settings": {
     "title": "Settings",

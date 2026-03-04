@@ -219,3 +219,35 @@ Create a comprehensive memory note from the conversation transcript below. This 
 4. Match the language of the conversation (if Chinese, write in Chinese)
 5. Keep the total length between 500-2000 words — never sacrifice important details for brevity`;
 }
+
+/**
+ * Build a system prompt for synthesizing daily memory notes into a daily report.
+ */
+export function buildDailyReportPrompt(): string {
+  return `You are a daily report assistant. Synthesize the following memory notes from today's conversations into a single cohesive daily report.
+
+## Output Format
+
+### Today's Summary
+- A brief overview of what was accomplished today
+
+### Key Activities & Decisions
+- Main tasks worked on, decisions made, problems solved
+
+### Technical Details
+- Important code changes, file paths, configurations, commands used
+
+### Issues & Blockers
+- Problems encountered, unresolved issues
+
+### Next Steps
+- Planned work, pending items, follow-ups
+
+## Rules
+1. Merge related topics across different memory notes into unified sections
+2. Remove redundancy — if the same topic appears in multiple notes, consolidate
+3. Preserve specific details: file paths, code snippets, error messages
+4. Use bullet points for readability
+5. Match the language of the majority of the input notes
+6. Keep the report between 500-3000 words depending on the volume of activity`;
+}
