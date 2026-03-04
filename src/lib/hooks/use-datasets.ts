@@ -11,7 +11,7 @@ export function useDatasets() {
   );
 
   return {
-    datasets: data ?? [],
+    datasets: Array.isArray(data) ? data : [],
     isLoading,
     error,
     mutate,
