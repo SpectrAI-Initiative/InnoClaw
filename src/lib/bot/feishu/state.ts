@@ -19,7 +19,6 @@ export interface FeishuChatState {
   workspacePath: string | null;
   conversationHistory: UIMessage[];
   mode: AgentMode;
-  activeCardMessageId: string | null;
   lastActivity: number;
   processingLock: boolean;
 }
@@ -97,7 +96,6 @@ export function getChatState(chatId: string): FeishuChatState {
       workspacePath: getDefaultWorkspacePath(),
       conversationHistory: [],
       mode: "agent",
-      activeCardMessageId: null,
       lastActivity: Date.now(),
       processingLock: false,
     };
@@ -131,10 +129,8 @@ export function setChatMode(chatId: string, mode: AgentMode): void {
 export function appendMessage(chatId: string, message: UIMessage): void {
   const state = getChatState(chatId);
   state.conversationHistory.push(message);
-  if (state.conversationHistory.length > MAX_HISTORY_LENGTH) {
-    state.conversationHistory = state.conversationHistory.slice(
-      state.conversationHistory.length - MAX_HISTORY_LENGTH
-    );
+  while (state.conversationHistory.length > MAX_HISTORY_LENGTH) {
+    state.conversationHistory.shift();
   }
 }
 
@@ -158,20 +154,11 @@ export function releaseProcessingLock(chatId: string): void {
 }
 
 /**
- * Set the active card message ID (for patching progress updates).
- */
-export function setActiveCard(chatId: string, messageId: string | null): void {
-  const state = getChatState(chatId);
-  state.activeCardMessageId = messageId;
-}
-
-/**
  * Clear all state for a chat (conversation history, workspace, etc.).
  */
 export function clearChatState(chatId: string): void {
   const state = getChatState(chatId);
   state.conversationHistory = [];
-  state.activeCardMessageId = null;
   // Keep workspace and mode bindings
 }
 

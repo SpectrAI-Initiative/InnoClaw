@@ -73,14 +73,10 @@ function getSystemPrompt(mode: AgentMode, cwd: string): string {
 }
 
 function getTools(mode: AgentMode, cwd: string) {
-  switch (mode) {
-    case "plan":
-      return createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
-    case "ask":
-      return createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
-    default:
-      return createAgentTools(cwd);
+  if (mode === "plan" || mode === "ask") {
+    return createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
   }
+  return createAgentTools(cwd);
 }
 
 // ---------------------------------------------------------------------------

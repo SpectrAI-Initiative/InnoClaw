@@ -20,6 +20,26 @@ import {
 } from "../types";
 
 // ---------------------------------------------------------------------------
+// Shared lark.Client cache (keyed by appId to avoid recreating per request)
+// ---------------------------------------------------------------------------
+
+const clientCache = new Map<string, lark.Client>();
+
+function getLarkClient(config: FeishuBotConfig): lark.Client {
+  let client = clientCache.get(config.appId);
+  if (!client) {
+    client = new lark.Client({
+      appId: config.appId,
+      appSecret: config.appSecret,
+      appType: lark.AppType.SelfBuild,
+      domain: lark.Domain.Feishu,
+    });
+    clientCache.set(config.appId, client);
+  }
+  return client;
+}
+
+// ---------------------------------------------------------------------------
 // File handler
 // ---------------------------------------------------------------------------
 
@@ -125,12 +145,7 @@ function createFeishuFileHandler(client: lark.Client): FileHandler {
  * Create a Feishu bot adapter instance.
  */
 export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
-  const client = new lark.Client({
-    appId: config.appId,
-    appSecret: config.appSecret,
-    appType: lark.AppType.SelfBuild,
-    domain: lark.Domain.Feishu,
-  });
+  const client = getLarkClient(config);
 
   const fileHandler = createFeishuFileHandler(client);
 
