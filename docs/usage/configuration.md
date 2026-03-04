@@ -75,7 +75,16 @@ WORKSPACE_ROOTS=/data/research,/data/projects,/home/user/documents
 
 ## Database Configuration
 
-NotebookLM uses SQLite with the database stored at `./data/notebooklm.db`. This location is set in `drizzle.config.ts` and is not currently configurable via environment variables.
+NotebookLM uses SQLite with the database stored at `./data/notebooklm.db` by default. You can override this path via the `DATABASE_URL` environment variable:
+
+```ini
+# Plain filesystem path (no SQLite URI scheme)
+DATABASE_URL=/tmp/notebooklm/notebooklm.db
+```
+
+:::{note}
+Only plain filesystem paths are accepted (e.g. `/data/notebooklm.db`). SQLite connection strings like `file:./data/notebooklm.db?mode=rwc` are **not** supported — the `file:` prefix will be stripped automatically.
+:::
 
 To use a fresh database:
 

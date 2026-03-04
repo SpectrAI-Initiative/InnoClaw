@@ -61,7 +61,6 @@ export async function downloadAsPdf(report: ReportData) {
           margin: 0 auto;
           padding: 2rem;
           color: #1a1a1a;
-          white-space: pre-wrap;
         }
         h1 { font-size: 1.875em; font-weight: 700; margin-top: 0; margin-bottom: 0.75em; }
         h2 { font-size: 1.375em; font-weight: 600; margin-top: 2em; margin-bottom: 0.5em; }
@@ -93,7 +92,11 @@ export async function downloadAsPdf(report: ReportData) {
   printWindow.addEventListener("afterprint", () => {
     printWindow.close();
   });
-  printWindow.print();
+
+  // Defer print() to ensure the content is fully rendered before the dialog opens.
+  printWindow.addEventListener("load", () => {
+    printWindow.print();
+  });
 }
 
 export async function copyReportContent(report: ReportData): Promise<boolean> {
