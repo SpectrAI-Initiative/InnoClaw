@@ -4,8 +4,11 @@ import * as schema from "./schema";
 import path from "path";
 import fs from "fs";
 
-const DB_PATH = process.env.DATABASE_URL
-  ? path.resolve(process.env.DATABASE_URL)
+// DATABASE_URL accepts plain filesystem paths only (not SQLite URI strings).
+// Strip a leading "file:" prefix if present so that path.resolve() works correctly.
+const rawDbUrl = process.env.DATABASE_URL?.replace(/^file:/, "");
+const DB_PATH = rawDbUrl
+  ? path.resolve(rawDbUrl)
   : path.join(process.cwd(), "data", "notebooklm.db");
 
 // Ensure data directory exists

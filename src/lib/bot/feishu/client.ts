@@ -1,98 +1,64 @@
 /**
  * Feishu (Lark) bot client.
  *
- * Handles tenant access token management, message sending, and file
- * upload/download through the Feishu Open API.
+ * Uses the official @larksuiteoapi/node-sdk for tenant access token
+ * management, message sending, and file upload/download.
  *
  * API docs: https://open.feishu.cn/document/server-docs
  */
 
+import fs from "fs";
 import fsp from "fs/promises";
 import path from "path";
+import * as lark from "@larksuiteoapi/node-sdk";
 import {
   type BotAdapter,
   type BotMessage,
   type FileHandler,
   type FeishuBotConfig,
   MAX_FILE_SIZE,
-  readResponseWithLimit,
 } from "../types";
 
-const FEISHU_API_BASE = "https://open.feishu.cn/open-apis";
-
 // ---------------------------------------------------------------------------
-// Tenant access token cache (keyed by appId to support multiple instances)
+// Shared lark.Client cache (keyed by appId to avoid recreating per request)
 // ---------------------------------------------------------------------------
 
-const tokenCache = new Map<string, { token: string; expiresAt: number }>();
+const clientCache = new Map<string, lark.Client>();
 
-/**
- * Obtain a tenant_access_token. Caches per appId and refreshes automatically.
- */
-async function getTenantAccessToken(config: FeishuBotConfig): Promise<string> {
-  const cached = tokenCache.get(config.appId);
-  if (cached && Date.now() < cached.expiresAt) {
-    return cached.token;
+function getLarkClient(config: FeishuBotConfig): lark.Client {
+  let client = clientCache.get(config.appId);
+  if (!client) {
+    client = new lark.Client({
+      appId: config.appId,
+      appSecret: config.appSecret,
+      appType: lark.AppType.SelfBuild,
+      domain: lark.Domain.Feishu,
+    });
+    clientCache.set(config.appId, client);
   }
-
-  const res = await fetch(
-    `${FEISHU_API_BASE}/auth/v3/tenant_access_token/internal`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        app_id: config.appId,
-        app_secret: config.appSecret,
-      }),
-    }
-  );
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `Feishu token request failed: ${res.status} ${res.statusText} — ${text}`
-    );
-  }
-
-  const data = (await res.json()) as {
-    code: number;
-    msg: string;
-    tenant_access_token: string;
-    expire: number;
-  };
-
-  if (data.code !== 0) {
-    throw new Error(`Feishu token error: ${data.msg}`);
-  }
-
-  tokenCache.set(config.appId, {
-    token: data.tenant_access_token,
-    // Refresh 60s before expiry
-    expiresAt: Date.now() + (data.expire - 60) * 1000,
-  });
-
-  return data.tenant_access_token;
+  return client;
 }
 
 // ---------------------------------------------------------------------------
 // File handler
 // ---------------------------------------------------------------------------
 
-function createFeishuFileHandler(config: FeishuBotConfig): FileHandler {
+function createFeishuFileHandler(client: lark.Client): FileHandler {
   return {
     async downloadFile(
       fileKey: string,
       fileName: string,
       destDir: string
     ): Promise<string> {
-      const token = await getTenantAccessToken(config);
-
       // fileKey is encoded as "image:{imageKey}" or "{messageId}:{fileKey}"
-      // by parseMessages to carry the message_id needed for the download URL.
-      let downloadUrl: string;
+      // by parseMessages to carry the message_id needed for the download.
+      let resp: { writeFile: (filePath: string) => Promise<unknown> };
+
       if (fileKey.startsWith("image:")) {
         const imageKey = fileKey.slice(6);
-        downloadUrl = `${FEISHU_API_BASE}/im/v1/images/${imageKey}`;
+        resp = await client.im.image.get({
+          path: { image_key: imageKey },
+        });
       } else {
         const sepIdx = fileKey.indexOf(":");
         if (sepIdx === -1) {
@@ -100,30 +66,27 @@ function createFeishuFileHandler(config: FeishuBotConfig): FileHandler {
         }
         const msgId = fileKey.slice(0, sepIdx);
         const fKey = fileKey.slice(sepIdx + 1);
-        downloadUrl = `${FEISHU_API_BASE}/im/v1/messages/${msgId}/resources/${fKey}?type=file`;
+        resp = await client.im.messageResource.get({
+          path: { message_id: msgId, file_key: fKey },
+          params: { type: "file" },
+        });
       }
-
-      const res = await fetch(downloadUrl, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        throw new Error(
-          `Feishu file download failed: ${res.status} ${res.statusText}`
-        );
-      }
-
-      // Stream the response and enforce MAX_FILE_SIZE
-      const buffer = await readResponseWithLimit(res, MAX_FILE_SIZE);
 
       await fsp.mkdir(destDir, { recursive: true });
       const safeName = path.basename(fileName) || `file_${Date.now()}`;
       const destPath = path.join(destDir, safeName);
-      await fsp.writeFile(destPath, buffer);
+      await resp.writeFile(destPath);
+
+      const stat = await fsp.stat(destPath);
+      if (stat.size > MAX_FILE_SIZE) {
+        await fsp.unlink(destPath);
+        throw new Error(
+          `File too large: ${stat.size} bytes exceeds ${MAX_FILE_SIZE} byte limit`
+        );
+      }
 
       console.log(
-        `[feishu] Downloaded file: ${destPath} (${buffer.length} bytes)`
+        `[feishu] Downloaded file: ${destPath} (${stat.size} bytes)`
       );
       return destPath;
     },
@@ -133,8 +96,6 @@ function createFeishuFileHandler(config: FeishuBotConfig): FileHandler {
       fileName: string,
       chatId: string
     ): Promise<void> {
-      const token = await getTenantAccessToken(config);
-
       // Check file size
       const stat = await fsp.stat(filePath);
       if (stat.size > MAX_FILE_SIZE) {
@@ -144,51 +105,31 @@ function createFeishuFileHandler(config: FeishuBotConfig): FileHandler {
       }
 
       // Step 1: Upload file to get file_key
-      const formData = new FormData();
-      const fileBuffer = await fsp.readFile(filePath);
-      formData.append("file", new Blob([fileBuffer]), fileName);
-      formData.append("file_type", "stream");
-      formData.append("file_name", fileName);
+      const uploadResp = await client.im.file.create({
+        data: {
+          file_type: "stream",
+          file_name: fileName,
+          file: fs.createReadStream(filePath),
+        },
+      });
 
-      const uploadRes = await fetch(
-        `${FEISHU_API_BASE}/im/v1/files`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
-
-      const uploadData = (await uploadRes.json()) as {
-        code: number;
-        msg: string;
-        data: { file_key: string };
-      };
-
-      if (uploadData.code !== 0) {
-        throw new Error(`Feishu file upload failed: ${uploadData.msg}`);
+      const fileKeyValue = uploadResp?.file_key;
+      if (!fileKeyValue) {
+        throw new Error("Feishu file upload failed: no file_key returned");
       }
 
       // Step 2: Send file message
-      const sendRes = await fetch(
-        `${FEISHU_API_BASE}/im/v1/messages?receive_id_type=chat_id`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            receive_id: chatId,
-            msg_type: "file",
-            content: JSON.stringify({ file_key: uploadData.data.file_key }),
-          }),
-        }
-      );
+      const sendResp = await client.im.message.create({
+        params: { receive_id_type: "chat_id" },
+        data: {
+          receive_id: chatId,
+          msg_type: "file",
+          content: JSON.stringify({ file_key: fileKeyValue }),
+        },
+      });
 
-      const sendData = (await sendRes.json()) as { code: number; msg: string };
-      if (sendData.code !== 0) {
-        throw new Error(`Feishu send file failed: ${sendData.msg}`);
+      if (sendResp.code !== 0) {
+        throw new Error(`Feishu send file failed: ${sendResp.msg}`);
       }
 
       console.log(`[feishu] Sent file "${fileName}" to chat ${chatId}`);
@@ -204,7 +145,9 @@ function createFeishuFileHandler(config: FeishuBotConfig): FileHandler {
  * Create a Feishu bot adapter instance.
  */
 export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
-  const fileHandler = createFeishuFileHandler(config);
+  const client = getLarkClient(config);
+
+  const fileHandler = createFeishuFileHandler(client);
 
   return {
     platform: "feishu",
@@ -312,30 +255,58 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
     },
 
     async sendText(chatId: string, text: string): Promise<void> {
-      const token = await getTenantAccessToken(config);
+      const resp = await client.im.message.create({
+        params: { receive_id_type: "chat_id" },
+        data: {
+          receive_id: chatId,
+          msg_type: "text",
+          content: JSON.stringify({ text }),
+        },
+      });
 
-      const res = await fetch(
-        `${FEISHU_API_BASE}/im/v1/messages?receive_id_type=chat_id`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            receive_id: chatId,
-            msg_type: "text",
-            content: JSON.stringify({ text }),
-          }),
-        }
-      );
-
-      const data = (await res.json()) as { code: number; msg: string };
-      if (data.code !== 0) {
-        throw new Error(`Feishu send text failed: ${data.msg}`);
+      if (resp.code !== 0) {
+        throw new Error(`Feishu send text failed: ${resp.msg}`);
       }
 
       console.log(`[feishu] Sent text to chat ${chatId}`);
+    },
+
+    async sendInteractiveCard(
+      chatId: string,
+      card: Record<string, unknown>
+    ): Promise<string> {
+      const resp = await client.im.message.create({
+        params: { receive_id_type: "chat_id" },
+        data: {
+          receive_id: chatId,
+          msg_type: "interactive",
+          content: JSON.stringify(card),
+        },
+      });
+
+      if (resp.code !== 0) {
+        throw new Error(`Feishu send card failed: ${resp.msg}`);
+      }
+
+      const messageId = resp.data?.message_id || "";
+      console.log(`[feishu] Sent card to chat ${chatId} (msg: ${messageId})`);
+      return messageId;
+    },
+
+    async patchInteractiveCard(
+      messageId: string,
+      card: Record<string, unknown>
+    ): Promise<void> {
+      const resp = await client.im.message.patch({
+        path: { message_id: messageId },
+        data: {
+          content: JSON.stringify(card),
+        },
+      });
+
+      if (resp.code !== 0) {
+        throw new Error(`Feishu patch card failed: ${resp.msg}`);
+      }
     },
 
     fileHandler,

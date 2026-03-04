@@ -174,6 +174,12 @@ export interface BotAdapter {
   /** Send a text reply to the specified chat */
   sendText(chatId: string, text: string): Promise<void>;
 
+  /** Send an interactive card to the specified chat. Returns message_id. */
+  sendInteractiveCard?(chatId: string, card: Record<string, unknown>): Promise<string>;
+
+  /** Update an existing interactive card message. */
+  patchInteractiveCard?(messageId: string, card: Record<string, unknown>): Promise<void>;
+
   /** File handler for download / upload operations */
   fileHandler: FileHandler;
 }

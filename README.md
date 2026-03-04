@@ -20,6 +20,7 @@ This project provides a self-hostable AI research assistant inspired by Google N
 - 🤖 **RAG 增强对话 / RAG-Powered Chat** — AI 基于文档内容回答问题，附带来源引用
 - 📝 **智能笔记生成 / Smart Note Generation** — 自动生成摘要、FAQ、简报、时间线等
 - 🔀 **多模型 & 多语言 / Multi-LLM & i18n** — 支持 OpenAI / Anthropic，中英双语界面，暗色模式
+- 💬 **飞书机器人 / Feishu Bot** — WebSocket 长连接，Agent 工具调用，交互卡片实时更新
 
 _完整功能列表请见 [功能 / Features](#功能--features) / For the full feature list, see [Features](#功能--features)._
 
@@ -32,6 +33,7 @@ _完整功能列表请见 [功能 / Features](#功能--features) / For the full 
 **快速导航 / Quick Links:**
 - [⚡ 快速开始 / Quick Start](#快速开始--quick-start)
 - [📖 使用指南 / Usage Guide](#使用指南--usage-guide)
+- [💬 飞书机器人配置 / Feishu Bot Setup](#飞书机器人配置--feishu-bot-setup)
 - [🏗️ 项目结构 / Project Structure](#项目结构--project-structure)
 - [🔧 RAG 管道架构 / RAG Pipeline](#rag-管道架构--rag-pipeline-architecture)
 - [❓ 常见问题 / FAQ](#常见问题--faq)
@@ -48,6 +50,7 @@ _完整功能列表请见 [功能 / Features](#功能--features) / For the full 
 - **多 LLM 支持** — 可切换 OpenAI GPT / Anthropic Claude
 - **中英双语** — 前端 UI 支持中文/英文切换
 - **暗色模式** — 支持亮色/暗色主题切换
+- **飞书机器人** — 通过 WebSocket 长连接接入飞书，支持 Agent 工具调用、交互卡片、斜杠命令
 
 ---
 
@@ -60,6 +63,7 @@ _完整功能列表请见 [功能 / Features](#功能--features) / For the full 
 | AI | Vercel AI SDK 6 + OpenAI + Anthropic |
 | 数据库 | SQLite (better-sqlite3 + Drizzle ORM) |
 | 向量搜索 | 纯 JS 余弦相似度（无需额外扩展） |
+| IM 机器人 | @larksuiteoapi/node-sdk（飞书 WebSocket 长连接） |
 | i18n | next-intl（中/英） |
 | 主题 | next-themes |
 
@@ -614,6 +618,161 @@ docker-compose up -d
 
 ---
 
+## 飞书机器人配置 / Feishu Bot Setup
+
+本项目支持接入飞书（Lark）机器人，通过 WebSocket 长连接实时接收消息，让用户在飞书中直接与 Agent 交互（支持工具调用、文件操作等完整能力）。
+
+This project supports Feishu (Lark) bot integration via WebSocket long connection. Users can interact with the Agent directly in Feishu, with full tool support (bash, readFile, writeFile, grep, etc.).
+
+### 第 1 步：创建飞书应用
+
+1. 登录 [飞书开发者后台](https://open.feishu.cn/app)
+2. 点击 **"创建企业自建应用"**
+3. 填写应用名称（如 "NotebookLM Agent"）和描述，完成创建
+
+### 第 2 步：获取应用凭证
+
+进入刚创建的应用 → **凭证与基础信息** 页面，记录：
+
+| 字段 | 对应环境变量 |
+|------|-------------|
+| App ID | `FEISHU_APP_ID` |
+| App Secret | `FEISHU_APP_SECRET` |
+
+### 第 3 步：配置事件订阅
+
+1. 进入应用 → **事件与回调** → **事件配置**
+2. 点击 **"编辑"** 添加以下事件：
+   - `im.message.receive_v1` — 接收消息
+3. 在 **加密策略** 中记录：
+
+| 字段 | 对应环境变量 |
+|------|-------------|
+| Verification Token | `FEISHU_VERIFICATION_TOKEN` |
+| Encrypt Key | `FEISHU_ENCRYPT_KEY` |
+
+### 第 4 步：启用长连接
+
+1. 在 **事件与回调** → **事件配置** 页面
+2. 选择 **"使用长连接接收事件"**（不是 Webhook URL 方式）
+3. **注意**：必须先启动服务（`npm run dev`）并确认控制台输出 `[feishu-ws] WSClient connected successfully`，然后再回到飞书开发者后台保存长连接配置
+
+> 如果看到 "未检测到应用连接信息，请确保长连接建立成功后再保存配置"，说明服务未启动或凭证配置有误，请检查 `.env.local` 中的 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET` 是否正确。
+
+### 第 5 步：配置机器人能力
+
+1. 进入应用 → **应用能力** → **机器人**
+2. 启用机器人能力
+
+### 第 6 步：配置权限
+
+进入应用 → **权限管理**，开通以下权限：
+
+| 权限 | 说明 |
+|------|------|
+| `im:message` | 获取与发送消息 |
+| `im:message:send_as_bot` | 以机器人身份发送消息 |
+| `im:resource` | 获取消息中的资源文件 |
+| `im:chat` | 获取群组信息 |
+
+### 第 7 步：发布应用
+
+1. 进入应用 → **版本管理与发布**
+2. 创建版本并提交审核
+3. 管理员在 [飞书管理后台](https://feishu.cn/admin) 审核通过后，应用即可使用
+
+### 第 8 步：配置环境变量
+
+在 `.env.local` 中添加飞书配置：
+
+```env
+# Feishu (Lark) Bot configuration
+FEISHU_BOT_ENABLED=true
+FEISHU_APP_ID=cli_xxxxxxxxxxxxxxxx
+FEISHU_APP_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+FEISHU_VERIFICATION_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+FEISHU_ENCRYPT_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+### 第 9 步：启动并验证
+
+```bash
+npm run dev
+```
+
+在终端中确认以下日志输出：
+
+```
+[feishu-ws] WSClient starting...
+[feishu-ws] WSClient connected successfully
+```
+
+然后在飞书中搜索并打开机器人对话，发送消息即可。
+
+### 飞书机器人命令
+
+机器人支持以下斜杠命令：
+
+| 命令 | 说明 |
+|------|------|
+| `/help` | 显示帮助信息 |
+| `/workspace <path>` | 绑定工作空间目录（需要在 `WORKSPACE_ROOTS` 允许的路径下） |
+| `/workspace` | 查看当前绑定的工作空间 |
+| `/mode <agent\|plan\|ask>` | 切换 Agent 模式 |
+| `/status` | 查看当前聊天状态 |
+| `/clear` | 清空对话历史 |
+
+**Agent 模式说明**：
+
+| 模式 | 权限 | 适用场景 |
+|------|------|---------|
+| `agent` | 完整工具访问（bash, readFile, writeFile, grep 等） | 代码修改、执行命令 |
+| `plan` | 只读（readFile, listDirectory, grep） | 分析代码、制定方案 |
+| `ask` | 只读 | 询问代码相关问题 |
+
+**使用示例**：
+
+```
+/workspace /home/user/projects/my-app   # 绑定工作空间
+/mode plan                               # 切换到只读模式
+请帮我分析这个项目的架构                      # 开始对话
+/clear                                   # 清空历史，开始新话题
+```
+
+> **提示**：如果已在 `WORKSPACE_ROOTS` 中配置了路径，机器人会自动绑定第一个路径作为默认工作空间，无需手动执行 `/workspace` 命令即可直接使用。
+
+### Web → 飞书推送 API
+
+项目还提供了从 Web 端向飞书推送消息的 API：
+
+```bash
+# 发送文本消息
+curl -X POST http://localhost:3000/api/bot/feishu/push \
+  -H "Content-Type: application/json" \
+  -d '{"chatId": "oc_xxx", "content": "Hello from web!", "type": "text"}'
+
+# 发送卡片消息
+curl -X POST http://localhost:3000/api/bot/feishu/push \
+  -H "Content-Type: application/json" \
+  -d '{"chatId": "oc_xxx", "title": "Task Complete", "content": "Build succeeded!"}'
+```
+
+### 常见问题
+
+**Q: 飞书开发者后台提示 "未检测到应用连接信息"？**
+A: 确保服务已启动且 `FEISHU_APP_ID` / `FEISHU_APP_SECRET` 配置正确。查看终端是否有 `[feishu-ws] WSClient connected successfully` 日志。如果看到 `Feishu bot not enabled or missing credentials`，检查 `FEISHU_BOT_ENABLED=true` 是否已设置。
+
+**Q: 机器人回复 "目前无法直接查看" 或类似的无工具回复？**
+A: 说明没有绑定工作空间。确认 `WORKSPACE_ROOTS` 环境变量已正确配置且目录存在，机器人会自动绑定第一个路径。或者手动发送 `/workspace <path>` 命令绑定。
+
+**Q: 机器人报错 "Item with id 'rs_...' not found"？**
+A: 这是因为 OpenAI 兼容代理不支持 Responses API。项目已使用 `openai.chat()` 强制走 Chat Completions API，确保使用最新代码即可。
+
+**Q: 如何获取 chatId 用于推送 API？**
+A: 发送 `/status` 命令，机器人会返回当前的 Chat ID。也可以在飞书开发者后台的消息日志中查看。
+
+---
+
 ## 项目结构 / Project Structure
 
 ```
@@ -627,6 +786,8 @@ src/
 │       ├── files/                # 文件操作（browse/read/write/upload/rename/delete/mkdir）
 │       ├── git/                  # Git 操作（clone/pull/status）
 │       ├── chat/                 # AI 对话（流式）
+│       ├── bot/                  # IM 机器人 API
+│       │   └── feishu/           # 飞书 webhook + 推送 API
 │       ├── generate/             # 笔记生成
 │       ├── notes/                # 笔记 CRUD
 │       └── settings/             # 设置
@@ -643,6 +804,16 @@ src/
 │   ├── ai/                       # AI 提供商配置
 │   ├── rag/                      # RAG 管道（分块/嵌入/检索）
 │   ├── files/                    # 文件系统操作（含路径安全校验）
+│   ├── bot/                      # IM 机器人核心
+│   │   ├── types.ts              # 统一 BotAdapter 接口
+│   │   ├── processor.ts          # 通用消息处理
+│   │   └── feishu/               # 飞书适配器
+│   │       ├── client.ts         # API 客户端（消息/卡片）
+│   │       ├── ws-client.ts      # WebSocket 长连接
+│   │       ├── agent-processor.ts # Agent 工具链处理
+│   │       ├── commands.ts       # 斜杠命令
+│   │       ├── cards.ts          # 交互卡片构建
+│   │       └── state.ts          # 聊天状态管理
 │   ├── git/                      # GitHub 操作
 │   └── hooks/                    # SWR 数据 hooks
 ├── i18n/                         # 国际化

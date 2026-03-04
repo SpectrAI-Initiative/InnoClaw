@@ -1,3 +1,11 @@
+/**
+ * Next.js instrumentation — runs once when the server starts.
+ *
+ * Used to initialise long-running services that must live alongside
+ * the Next.js process, such as the Feishu WebSocket client.
+ */
+
+
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     // Set up HTTP proxy for all fetch() calls (AI SDK, etc.)
@@ -30,5 +38,11 @@ export async function register() {
     // Run database migrations
     const { runMigrations } = await import("@/lib/db/migrate");
     runMigrations();
+
+    // Start the Feishu WebSocket client (if configured)
+    const { startFeishuWSClient } = await import(
+      "@/lib/bot/feishu/ws-client"
+    );
+    startFeishuWSClient();
   }
 }
