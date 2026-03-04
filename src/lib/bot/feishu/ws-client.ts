@@ -89,6 +89,8 @@ export function startFeishuWSClient(): void {
   });
 
   // Start the WebSocket connection
+  globalForFeishu.__feishuWsStarted = true;
+  console.log("[feishu-ws] WSClient starting...");
   wsClient
     .start({ eventDispatcher })
     .then(() => {
@@ -96,8 +98,6 @@ export function startFeishuWSClient(): void {
     })
     .catch((err) => {
       console.error("[feishu-ws] WSClient failed to start:", err);
+      globalForFeishu.__feishuWsStarted = false;
     });
-
-  globalForFeishu.__feishuWsStarted = true;
-  console.log("[feishu-ws] WSClient starting...");
 }

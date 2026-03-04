@@ -10,6 +10,7 @@ import type { FeishuBotConfig } from "../types";
 // ---------------------------------------------------------------------------
 
 const mockMessageCreate = vi.fn();
+const mockMessagePatch = vi.fn();
 const mockFileCreate = vi.fn();
 const mockImageGet = vi.fn();
 const mockMessageResourceGet = vi.fn();
@@ -19,7 +20,7 @@ vi.mock("@larksuiteoapi/node-sdk", () => ({
   Domain: { Feishu: 0 },
   Client: vi.fn().mockImplementation(function (this: Record<string, unknown>) {
     this.im = {
-      message: { create: mockMessageCreate },
+      message: { create: mockMessageCreate, patch: mockMessagePatch },
       file: { create: mockFileCreate },
       image: { get: mockImageGet },
       messageResource: { get: mockMessageResourceGet },
@@ -288,6 +289,77 @@ describe("Feishu adapter", () => {
       await expect(adapter.sendText("oc_chat123", "Hi")).rejects.toThrow(
         "Feishu send text failed: token invalid"
       );
+    });
+  });
+
+  describe("sendInteractiveCard", () => {
+    it("should send an interactive card and return message_id", async () => {
+      mockMessageCreate.mockResolvedValue({
+        code: 0,
+        msg: "success",
+        data: { message_id: "msg_card_001" },
+      });
+
+      const adapter = createFeishuAdapter(testConfig);
+      const card = { config: {}, header: {}, elements: [] };
+      const messageId = await adapter.sendInteractiveCard!("oc_chat123", card);
+
+      expect(mockMessageCreate).toHaveBeenCalledWith({
+        params: { receive_id_type: "chat_id" },
+        data: {
+          receive_id: "oc_chat123",
+          msg_type: "interactive",
+          content: JSON.stringify(card),
+        },
+      });
+      expect(messageId).toBe("msg_card_001");
+    });
+
+    it("should throw when message_id is missing in response", async () => {
+      mockMessageCreate.mockResolvedValue({
+        code: 0,
+        msg: "success",
+        data: {},
+      });
+
+      const adapter = createFeishuAdapter(testConfig);
+      const card = { config: {}, header: {}, elements: [] };
+      await expect(
+        adapter.sendInteractiveCard!("oc_chat123", card)
+      ).rejects.toThrow("Feishu send card failed: missing message_id in response");
+    });
+
+    it("should throw on SDK error response", async () => {
+      mockMessageCreate.mockResolvedValue({ code: 1, msg: "bad request" });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(
+        adapter.sendInteractiveCard!("oc_chat123", {})
+      ).rejects.toThrow("Feishu send card failed: bad request");
+    });
+  });
+
+  describe("patchInteractiveCard", () => {
+    it("should patch an interactive card via SDK", async () => {
+      mockMessagePatch.mockResolvedValue({ code: 0, msg: "success" });
+
+      const adapter = createFeishuAdapter(testConfig);
+      const card = { config: {}, elements: [] };
+      await adapter.patchInteractiveCard!("msg_card_001", card);
+
+      expect(mockMessagePatch).toHaveBeenCalledWith({
+        path: { message_id: "msg_card_001" },
+        data: { content: JSON.stringify(card) },
+      });
+    });
+
+    it("should throw on SDK error response", async () => {
+      mockMessagePatch.mockResolvedValue({ code: 1, msg: "patch failed" });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(
+        adapter.patchInteractiveCard!("msg_card_001", {})
+      ).rejects.toThrow("Feishu patch card failed: patch failed");
     });
   });
 

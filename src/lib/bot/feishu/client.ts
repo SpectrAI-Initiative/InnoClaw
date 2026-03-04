@@ -273,7 +273,10 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
         throw new Error(`Feishu send card failed: ${resp.msg}`);
       }
 
-      const messageId = resp.data?.message_id || "";
+      const messageId = resp.data?.message_id;
+      if (!messageId) {
+        throw new Error("Feishu send card failed: missing message_id in response");
+      }
       console.log(`[feishu] Sent card to chat ${chatId} (msg: ${messageId})`);
       return messageId;
     },
