@@ -4,13 +4,13 @@ import { exec, execFile } from "child_process";
 import path from "path";
 import os from "os";
 import fsp from "fs/promises";
+import { buildSafeExecEnv } from "@/lib/env";
 import {
   validatePath,
   readFile as fsReadFile,
   writeFile as fsWriteFile,
   listDirectory as fsListDirectory,
 } from "@/lib/files/filesystem";
-import { buildSafeExecEnv } from "@/lib/env";
 import {
   searchArticles as doSearchArticles,
   findRelatedArticles,
