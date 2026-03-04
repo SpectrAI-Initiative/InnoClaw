@@ -53,10 +53,12 @@ html_theme_options = {
     ],
 }
 
+html_baseurl = "https://zjowowen.github.io/notebooklm/"
+
 html_context = {
     "languages": [
-        ("English", "en/"),
-        ("简体中文", "zh/"),
+        ("English", "/notebooklm/en/"),
+        ("简体中文", "/notebooklm/zh/"),
     ],
 }
 
