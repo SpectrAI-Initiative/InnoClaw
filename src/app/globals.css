@@ -366,3 +366,148 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+/* ---- Report prose (article-style) ---- */
+.report-prose {
+  line-height: 1.8;
+  word-break: break-word;
+  font-size: 0.9375rem;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.report-prose h1 {
+  font-size: 1.875em;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 0.75em;
+  line-height: 1.2;
+}
+.report-prose h2 {
+  font-size: 1.375em;
+  font-weight: 600;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+.report-prose h3 {
+  font-size: 1.125em;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.4em;
+}
+
+.report-prose p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+.report-prose ul,
+.report-prose ol {
+  padding-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+.report-prose ul { list-style-type: disc; }
+.report-prose ol { list-style-type: decimal; }
+.report-prose li { margin-top: 0.25em; margin-bottom: 0.25em; }
+
+.report-prose blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1em;
+  margin: 0.75em 0;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.report-prose hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5em 0;
+}
+
+.report-prose a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.report-prose a:hover { opacity: 0.8; }
+
+.report-prose strong { font-weight: 600; }
+.report-prose em { font-style: italic; }
+
+.report-prose code:not(pre code) {
+  background: var(--muted);
+  border-radius: 4px;
+  padding: 0.15em 0.35em;
+  font-size: 0.875em;
+  font-family: var(--font-mono);
+}
+
+.report-prose pre {
+  position: relative;
+  border-radius: 8px;
+  margin: 0.75em 0;
+  overflow: hidden;
+}
+.report-prose pre code {
+  display: block;
+  padding: 1em;
+  overflow-x: auto;
+  font-size: 0.8125em;
+  line-height: 1.6;
+  font-family: var(--font-mono);
+}
+
+.report-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  font-size: 0.875em;
+}
+.report-prose thead th {
+  background: var(--muted);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5em 0.75em;
+  border-bottom: 2px solid var(--border);
+}
+.report-prose tbody td {
+  padding: 0.5em 0.75em;
+  border-bottom: 1px solid var(--border);
+}
+.report-prose tbody tr:hover {
+  background: var(--muted);
+}
+
+.report-prose .katex-display {
+  margin: 0.75em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25em 0;
+}
+
+.report-prose img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 0.75em 0;
+}
+
+.report-prose .citation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.7em;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  vertical-align: super;
+  line-height: 1;
+  cursor: pointer;
+  font-weight: 500;
+}
+.report-prose .citation-badge:hover {
+  opacity: 0.85;
+}

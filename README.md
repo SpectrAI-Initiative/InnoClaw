@@ -6,6 +6,9 @@ An AI-powered research assistant web app similar to Google NotebookLM. Users ope
 
 ---
 
+## 文档 / Documentation
+
+📖 **[View the full documentation](https://zjowowen.github.io/notebooklm/)** (English & 简体中文)
 ## 概览 / Overview
 
 本项目旨在提供一个可自托管的、类似 Google NotebookLM 的 AI 研究助手。它让用户将服务器端文件夹作为「工作空间」，利用 RAG（检索增强生成）技术，让 AI 基于用户自有文档进行对话、回答问题并生成笔记，从而显著提升研究和信息整理效率。
@@ -71,8 +74,9 @@ _完整功能列表请见 [功能 / Features](#功能--features) / For the full 
 1. **Node.js >=20.9.0**（推荐最新 LTS 版本）
 2. **npm**（随 Node.js 一起安装）
 3. **Git**（如需 GitHub 克隆/拉取功能）
-4. **AI API Key**（可选，至少配置一个才能使用 AI 对话和生成功能；不配置时其余功能正常可用）
-5. **GitHub Token**（可选，如需克隆/拉取私有仓库）
+4. **kubectl**（如需使用 K8s 集群任务提交功能，Agent 面板的 `submitK8sJob` / `kubectl` 工具依赖此命令）
+5. **AI API Key**（可选，至少配置一个才能使用 AI 对话和生成功能；不配置时其余功能正常可用）
+6. **GitHub Token**（可选，如需克隆/拉取私有仓库）
 
 **环境检查 / Environment Check：**
 
@@ -127,6 +131,14 @@ cp .env.example .env.local
 # 这些目录必须在服务器上真实存在
 WORKSPACE_ROOTS=D:/Data/research,D:/Data/projects
 
+# [可选] 自定义数据库路径（默认为 ./data/notebooklm.db）
+# 如果项目位于网络/共享文件系统（NFS、CIFS 等），建议将数据库指向本地文件系统路径
+# DATABASE_URL=/tmp/notebooklm/notebooklm.db
+
+# [可选] 自定义 Next.js 构建目录（默认为 .next）
+# 如果项目位于网络/共享文件系统，建议指向本地路径以避免 Turbopack 缓存错误
+# NEXT_BUILD_DIR=/tmp/notebooklm-next
+
 # [可选] OpenAI API Key（用于 AI 对话）
 OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -143,20 +155,74 @@ ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
 # EMBEDDING_BASE_URL=https://api.your-embedding-provider.com/v1
 # EMBEDDING_MODEL=text-embedding-3-small
 
+# [可选] HTTP 代理（内网环境需要代理才能访问外部 API 时配置）
+# 配置后所有出站请求（AI API、GitHub 等）都会走代理
+# HTTP_PROXY=http://your-proxy:3128
+# HTTPS_PROXY=http://your-proxy:3128
+# NO_PROXY=localhost,127.0.0.1,10.0.0.0/8
+
 # [可选] GitHub Personal Access Token（如需克隆/拉取私有仓库）
 # 需要 repo scope 权限
 GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxx
+
+# [可选] Kubernetes 配置文件路径（用于 Agent 面板的 kubectl / submitK8sJob 工具）
+# KUBECONFIG_PATH=/path/to/your/kubeconfig
 ```
 
 **重要说明：**
 - `WORKSPACE_ROOTS` 指定的目录必须已经存在于服务器上，应用不会自动创建
+- `DATABASE_URL` 可自定义 SQLite 数据库存放路径。**如果项目位于网络/共享文件系统（NFS、CIFS 等），强烈建议配置此项指向本地文件系统路径**，否则可能因 SQLite WAL 模式不兼容而报错
+- `NEXT_BUILD_DIR` 可自定义 Next.js 构建目录（默认为项目下的 `.next`）。网络文件系统上建议配置此项指向本地路径，以避免 Turbopack 缓存持久化失败的警告
+- `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` 支持为出站请求配置 HTTP 代理。内网环境中如果 Node.js 进程无法直接访问外部 API（如 OpenAI、Anthropic），需配置此项。不需要代理的环境无需配置
 - 不配置任何 API Key 时，工作空间、文件管理、GitHub 克隆等功能正常可用，仅 AI 对话和笔记生成功能会禁用
 - 配置了 `OPENAI_API_KEY` 或 `EMBEDDING_API_KEY` 后，同步文件时会自动生成向量嵌入（embedding），支持 RAG 检索增强对话
 - Embedding API 支持独立配置：如果你的对话模型代理不支持 embedding 接口（如仅提供 Gemini 聊天模型的代理），可以通过 `EMBEDDING_API_KEY`、`EMBEDDING_BASE_URL`、`EMBEDDING_MODEL` 指向一个单独的 embedding 服务
 - `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` 支持指向任何兼容 OpenAI / Anthropic 协议的第三方服务（如自部署代理、国内中转等）
 - 所有 Key 和 URL 仅在服务器端使用，不会暴露给前端浏览器
 
-### 第 3 步：创建工作空间根目录
+### 第 3 步：安装 kubectl（可选，K8s 功能需要）
+
+Agent 面板中的 `kubectl` 和 `submitK8sJob` 工具需要服务器上安装 kubectl 命令行工具。
+
+```bash
+# 检查是否已安装
+kubectl version --client
+
+# 如未安装，根据系统架构下载安装：
+KUBE_VERSION="$(curl -L -s https://dl.k8s.io/release/stable.txt)"
+
+# Linux amd64
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl"
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl.sha256"
+echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+
+# Linux arm64
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/arm64/kubectl"
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/arm64/kubectl.sha256"
+echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+
+# macOS (Apple Silicon)
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/darwin/arm64/kubectl"
+curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/darwin/arm64/kubectl.sha256"
+echo "$(cat kubectl.sha256)  kubectl" | shasum -a 256 --check
+
+# 安装
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/kubectl
+rm -f kubectl.sha256
+
+# 验证
+kubectl version --client
+```
+
+安装后，在 `.env.local` 中配置 `KUBECONFIG_PATH` 指向你的 kubeconfig 文件，并验证连通性：
+
+```bash
+export KUBECONFIG=/path/to/your/kubeconfig
+kubectl cluster-info
+```
+
+### 第 4 步：创建工作空间根目录
 
 确保 `WORKSPACE_ROOTS` 中指定的目录存在：
 
@@ -169,13 +235,33 @@ mkdir D:/Data/projects
 mkdir -p /data/research /data/projects
 ```
 
-### 第 4 步：初始化数据库
+### 第 5 步：初始化数据库
 
 ```bash
+# 创建数据目录（必须手动创建，不会自动生成）
+mkdir -p ./data
+
+# 执行数据库迁移
 npx drizzle-kit migrate
 ```
 
 这会在 `./data/notebooklm.db` 创建 SQLite 数据库并执行迁移。
+
+> **注意：** `./data/` 目录必须在执行迁移前手动创建，SQLite 驱动（better-sqlite3）会自动创建数据库文件，但不会自动创建父目录。如果目录不存在，会报错 `Cannot open database because the directory does not exist`。
+
+**自定义数据库路径：** 如果项目位于网络/共享文件系统（NFS、CIFS 等），建议在 `.env.local` 中将数据库指向本地文件系统，以避免 `SQLITE_IOERR_SHMMAP` 错误：
+
+```env
+DATABASE_URL=/tmp/notebooklm/notebooklm.db
+```
+
+使用自定义路径时，需手动创建父目录后再执行迁移：
+
+```bash
+# 例如 DATABASE_URL=/tmp/notebooklm/notebooklm.db
+mkdir -p /tmp/notebooklm
+npx drizzle-kit migrate
+```
 
 **✅ 验证：** 确认数据库文件已生成：
 
@@ -187,7 +273,7 @@ ls -lh ./data/notebooklm.db
 dir .\data\notebooklm.db
 ```
 
-### 第 5 步：启动开发服务器
+### 第 6 步：启动开发服务器
 
 ```bash
 npm run dev
@@ -215,7 +301,7 @@ npm run dev
 | 1 | `node -v` | 输出 `v20.9.x` 或更高版本 |
 | 2 | `npm -v` | 输出版本号（无报错） |
 | 3 | `node_modules/` 目录存在 | `npm install` 成功完成，无 ERR 报错 |
-| 4 | `./data/notebooklm.db` 文件存在 | `npx drizzle-kit migrate` 成功执行 |
+| 4 | 数据库文件存在（默认 `./data/notebooklm.db`，或 `DATABASE_URL` 指定的路径） | `npx drizzle-kit migrate` 成功执行 |
 | 5 | `npm run dev` 终端输出 `Ready` | 开发服务器正常启动 |
 | 6 | 浏览器访问 `http://localhost:3000` | 显示工作空间列表页面 |
 | 7 | 点击"打开工作空间"可选择目录 | `WORKSPACE_ROOTS` 配置正确，目录存在 |
@@ -265,7 +351,17 @@ npm install --registry=https://registry.npmmirror.com
 ### `npx drizzle-kit migrate` 执行报错
 
 - 确认 `./drizzle/` 目录下存在 SQL 迁移文件（如 `0000_*.sql`）
-- 确认 `./data/` 目录存在（若不存在会自动创建）
+- **确认 `./data/` 目录存在**（不会自动创建！）。如果报错 `Cannot open database because the directory does not exist`，请先手动创建：
+  ```bash
+  # Linux / macOS
+  mkdir -p ./data
+
+  # Windows PowerShell
+  New-Item -ItemType Directory -Force -Path .\data
+
+  # Windows CMD
+  mkdir data
+  ```
 - 若数据库损坏，可删除后重新迁移：
   ```bash
   # Linux / macOS
@@ -281,6 +377,62 @@ npm install --registry=https://registry.npmmirror.com
   ```bash
   npx drizzle-kit migrate
   ```
+
+### 启动报 `SQLITE_IOERR_SHMMAP` / `disk I/O error`
+
+这通常是因为项目位于网络/共享文件系统（NFS、CIFS、FUSE 等），SQLite 的 WAL 模式需要 `mmap` 支持，而网络文件系统往往不支持。
+
+**解决方法：** 在 `.env.local` 中将数据库路径指向本地文件系统：
+
+```env
+DATABASE_URL=/tmp/notebooklm/notebooklm.db
+```
+
+然后重新初始化数据库：
+
+```bash
+# 使用自定义路径时，仍需手动创建父目录
+# 例如 DATABASE_URL=/tmp/notebooklm/notebooklm.db
+mkdir -p /tmp/notebooklm
+npx drizzle-kit migrate
+npm run dev
+```
+
+> 应用代码已内置 WAL 模式降级机制：如果 WAL 模式设置失败，会自动降级为 DELETE 日志模式。但在网络文件系统上，仍建议通过 `DATABASE_URL` 将数据库放在本地磁盘以获得最佳性能和稳定性。
+
+### 启动报 `Persisting failed` / `No such device (os error 19)`
+
+这是 Turbopack（Next.js 打包器）在网络/共享文件系统上无法持久化编译缓存的警告。**不影响应用功能**，但每次冷启动无法复用缓存，首次编译会稍慢。
+
+**解决方法：** 在 `.env.local` 中将构建目录指向本地文件系统：
+
+```env
+NEXT_BUILD_DIR=/tmp/notebooklm-next
+```
+
+然后重启开发服务器即可。
+
+### AI 对话报 `Connect Timeout Error` / 无法连接 API
+
+如果 AI 对话时报错 `Connect Timeout Error` 或 `Cannot connect to API`，通常是因为内网环境中 Node.js 进程无法直接访问外部 API 地址，需要配置 HTTP 代理。
+
+**解决方法：** 在 `.env.local` 中配置代理：
+
+```env
+HTTP_PROXY=http://your-proxy:3128
+HTTPS_PROXY=http://your-proxy:3128
+NO_PROXY=localhost,127.0.0.1,10.0.0.0/8
+```
+
+配置后重启开发服务器即可。`NO_PROXY` 用于指定不走代理的地址（如本地服务）。
+
+> **注意：** Node.js 的 `fetch()` 不会自动读取系统代理设置。即使操作系统或浏览器配置了代理，也需要在 `.env.local` 中显式配置 `HTTP_PROXY` 才能生效。不需要代理的环境无需配置此项。
+
+### 配置代理后报 `Proxy response (403)` / `HTTP Tunneling` 错误
+
+如果配置代理后报错 `Proxy response (403) !== 200 when HTTP Tunneling`，通常是因为代理服务器限制了 CONNECT 方法（仅允许连接 443 端口），而你的 API 端点使用了非标准端口的 HTTP 地址（如 `http://x.x.x.x:3888`）。
+
+此问题已在应用中自动处理：对于 `http://` 目标地址，应用使用 HTTP 正向代理模式（直接转发请求）而非 CONNECT 隧道模式。如果仍然遇到此错误，请确保使用的是最新版本的代码。
 
 ### 启动 `npm run dev` 后端口被占用
 
@@ -326,7 +478,8 @@ npm install
 cp .env.example .env.local
 # 编辑 .env.local
 
-# 3. 初始化数据库
+# 3. 创建数据目录并初始化数据库
+mkdir -p ./data
 npx drizzle-kit migrate
 
 # 4. 构建生产版本
@@ -367,8 +520,15 @@ pm2 save
 ```dockerfile
 FROM node:20-alpine
 
-# 安装 git（GitHub 集成需要）
-RUN apk add --no-cache git python3 make g++
+# 安装 git（GitHub 集成需要）和 kubectl（K8s 任务提交需要）
+RUN apk add --no-cache git python3 make g++ curl \
+    && ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') \
+    && KUBE_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt) \
+    && curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/${ARCH}/kubectl" \
+    && curl -LO "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/${ARCH}/kubectl.sha256" \
+    && echo "$(cat kubectl.sha256)  kubectl" | sha256sum -c \
+    && chmod +x kubectl && mv kubectl /usr/local/bin/ \
+    && rm -f kubectl.sha256
 
 WORKDIR /app
 
@@ -668,10 +828,12 @@ src/
 
 | 数据 | 位置 | 说明 |
 |------|------|------|
-| SQLite 数据库 | `./data/notebooklm.db` | 工作空间、来源索引、对话历史、笔记、设置 |
+| SQLite 数据库 | `./data/notebooklm.db`（可通过 `DATABASE_URL` 自定义） | 工作空间、来源索引、对话历史、笔记、设置 |
 | 工作空间文件 | `WORKSPACE_ROOTS` 指定的目录 | 用户的实际文件，不在项目目录内 |
 
-备份时只需备份 `./data/` 目录和 `.env.local` 文件。
+备份时只需备份数据库文件（默认 `./data/` 目录）和 `.env.local` 文件。
+
+> **网络文件系统注意事项：** 如果项目部署在 NFS、CIFS 等网络/共享文件系统上，SQLite 的 WAL 模式可能因 `mmap` 不支持而报错（`SQLITE_IOERR_SHMMAP`）。应用会自动降级为 DELETE 日志模式，但仍建议通过 `DATABASE_URL` 将数据库指向本地文件系统以获得最佳性能。
 
 ---
 
@@ -796,8 +958,11 @@ A: 可以。将 `WORKSPACE_ROOTS` 设置为 Linux 路径即可，例如 `WORKSPA
 **Q: GitHub 克隆失败？**
 A: 确保服务器已安装 `git` 命令行工具，且 `GITHUB_TOKEN` 配置正确（需要 `repo` scope）。可在终端运行 `git --version` 验证。
 
+**Q: Agent 面板提交 K8s 任务失败？**
+A: 确保服务器已安装 `kubectl` 命令行工具（运行 `kubectl version --client` 检查），并在 `.env.local` 中正确配置了 `KUBECONFIG_PATH`。可通过 `export KUBECONFIG=/path/to/kubeconfig && kubectl cluster-info` 验证集群连通性。
+
 **Q: 如何重置数据库？**
-A: 删除 `./data/notebooklm.db` 文件，然后重新运行 `npx drizzle-kit migrate`。
+A: 删除数据库文件（默认 `./data/notebooklm.db`，如配置了 `DATABASE_URL` 则为对应路径），确保父目录存在，然后重新运行 `npx drizzle-kit migrate`。
 
 ---
 
@@ -815,5 +980,5 @@ npm run lint
 
 # 数据库迁移（修改 schema 后）
 npx drizzle-kit generate
-npx drizzle-kit migrate
+mkdir -p ./data && npx drizzle-kit migrate
 ```

@@ -213,13 +213,6 @@ function parseSkillMd(
   };
 }
 
-interface MarketplaceJson {
-  plugins?: Array<{
-    source?: string;
-    skills?: string[];
-  }>;
-}
-
 interface PluginContentFile {
   path: string;
   fallbackSlug: string;

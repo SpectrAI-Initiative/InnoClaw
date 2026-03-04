@@ -1203,6 +1203,16 @@ export function AgentPanel({
             <Button variant="outline" onClick={handleSelectCancel}>
               {tCommon("cancel")}
             </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setShowMessageSelect(false);
+                setSelectedMessageIds(new Set());
+                setMessages([]);
+              }}
+            >
+              {t("clearAll")}
+            </Button>
             <Button onClick={handleSelectNext} disabled={selectedMessageIds.size === 0}>
               {t("nextStep")}
             </Button>

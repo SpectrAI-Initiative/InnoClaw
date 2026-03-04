@@ -1,0 +1,435 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../getting-started/environment-variables.md:1
+#: 5a837c00362d4adca7bf3c905d5f444d
+msgid "Environment Variables"
+msgstr "环境变量"
+
+#: ../../getting-started/environment-variables.md:3
+#: 7463ab386a16419fba7e9725549f92f6
+msgid "A complete reference of all environment variables used by NotebookLM."
+msgstr "NotebookLM 使用的所有环境变量的完整参考。"
+
+#: ../../getting-started/environment-variables.md:5
+#: 41b57512301049c7bdfd89a92d84d10c
+msgid "Core Configuration"
+msgstr "核心配置"
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:20
+#: 097fd285cd7d437ba015a22ccc365de1 152803de5cb447d684cb6ea9a941eb09
+#: 26f32003f1074945b186d5f053547e52 6bcc72bda05046199d22cf751ff71ad9
+#: ce783a513c4d4b8091ab280170617c42 f66b3a8b4ffe4ac3b85e3624876f34fa
+msgid "Variable"
+msgstr "变量"
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:20
+#: 1adc3531536845bdb9f58f2e2b1be4de 51b6cc6f86264359abb88f3503c558b6
+#: 60ef6ac4a1234e3abbdb5c0fa3b2cdc2 b03d4ca6326d4fc79283d08439a64c14
+#: e98823e09d4549d5a0c6b84c375379db f612de454bb9427e9b802b26acc9fabb
+msgid "Type"
+msgstr "类型"
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:20
+#: 1809b4706bb24fc7b320eb2b3304c48b 2b455c0695e54a31b63c5c97b2ca7d50
+#: 56ecd60b58d944acb9ed2996f4703681 b8e80a9cae77406681aa5a2ef0bc75d5
+#: c34a243ece7e441bb69c56a0efc004f0 d89ee1866c674bf8ba2e4c36eff4e341
+msgid "Required"
+msgstr "必需"
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:20
+#: 2f5f1c98eafd4625a8fc203cfa8cb76e 4377cc39d71449a3aee393bb9982a7c4
+#: 7767d39f8ab24a64ad23522881af2349 7f3d2b20de4d4bc9b1f23310ab5b88ed
+#: c1a4935dc54145e3a5ba9b7ca7131300 d2b86df2daf545aead7fe00cd177e0df
+msgid "Default"
+msgstr "默认值"
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:20
+#: 947a4d56b5b94c45bb245c27f362a6b4 c20dec30f4ae4dfdad7a39f9e8409c6e
+#: cc04c0162dbd4c19bf3d2f7ed107e512 d2e513c599ff448eb530a84b844d8079
+#: d46d53e297d640048e334e0fe4e3d46e eee4e42cb4284098923efd7748eb7d8f
+msgid "Description"
+msgstr "描述"
+
+#: ../../getting-started/environment-variables.md
+#: 786b7b99fd044ecbbcbb699baa48c628
+msgid "`WORKSPACE_ROOTS`"
+msgstr "`WORKSPACE_ROOTS`"
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:20
+#: 07d78c593bbe42978b145533fa7393c9 26242486c46d46959d4c0b930930b49d
+#: 32838fab4bab44698620e3138964ffa0 3df1448b484b4a6ab1bd08dc83657957
+#: 5c922dcc2f0e481f8cfd31bdc2ba4044 72ed3cac94b24fad9deda97e2d2c4913
+#: 825bbda8cc204a289bef7954407c6ee4 84832b9cb4d949f5b6c4fea1eb9e0c4f
+#: a046e53c7f604546b3728f561569b494 a58260b4d72b4083bc920f0744dd7a38
+#: b1456c31b3ed4d68a63bdffc60d34882 b1f847f136864c05ace86ab06f500317
+#: c6c82036d9844e43a22590ad97592b01 cbf0f749f34a4ccb81f031277576ef4b
+#: dad503c67f1b4deb9e846ef1c099e756 e69487c24ee849ad905ebff96c3f77df
+#: eb8501465cea4ef08103f5e87992a093 fb096a0d23274de28097f4abc6415103
+msgid "`string`"
+msgstr "`string`"
+
+#: ../../getting-started/environment-variables.md
+#: e426795f7c9a4a26a34ac23e961e495b
+msgid "**Yes**"
+msgstr "**是**"
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:20
+#: 02aaaef0256d4909904734396364aa1b 39a28adf03d74d8ab9a50241173e905f
+#: 5ca408529fff4e2e819f6d0388a1365c 67f54e10f0904f7a981a0c31468fedb9
+#: 76d86c70eb6b4948a2a16594ef300cdf 912ae88989f146f98131f82b1e6100cb
+#: 9ba71e2b94ce4cab975578bdc0657dd1 9ec288d67c6b42a58cc30698ffb648b3
+#: a1bff4edd811402cae44f078c002b974 b9592961f0974f0d82d11055ca1ab994
+#: c5557e867f4b4ff1af28c9a88aab5079 c7a3d3168d394cb095893287c98696e8
+#: c8fcd10924424e36aa01911ce2139cab
+msgid "—"
+msgstr "—"
+
+#: ../../getting-started/environment-variables.md
+#: 97cdddb0486044a29936fbc257f61de8
+msgid ""
+"Comma-separated absolute paths where workspaces can be created. "
+"Directories must exist on the server."
+msgstr "以逗号分隔的绝对路径，用于创建工作空间。目录必须在服务器上已存在。"
+
+#: ../../getting-started/environment-variables.md:11
+#: 9959a6af5dca4c9db6ee356c07f83739
+msgid "AI Provider Configuration"
+msgstr "AI 提供商配置"
+
+#: ../../getting-started/environment-variables.md
+#: 00bf31a7739a41c095fbc66d31690638
+msgid "`OPENAI_API_KEY`"
+msgstr "`OPENAI_API_KEY`"
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:20
+#: 197771f6e41e4ce588b9d7b46a0a8a99 2f37479f87eb41f988a9fc8bc0400660
+#: 3d646668a6644975b01b383d44402e0c 5231cc260c294c5d9d3f4a3e73c09a08
+#: 55aacdd703c849a78ecc32f2ef00a222 58f4138ee63649e4a3abc2f95f3dec3d
+#: 66a17e9f1e32426fa4e0248893df7668 820bafb97bd64053b1e54b8ab5da9c4e
+#: 846b5faec3f04cfdb4392015e71e6549 91ac9506c8dc444bb317197d6e8e9d35
+#: 9c61e6eac7a14a6b842156fa7e5e2fa3 a67aa7f8376449f8ab76654c5b2c2369
+#: b3029f9b794b4f7f9623ae4559342e96 b3f343b26a314eb0a6443283f9d1875c
+#: b5a149495f174b4da3d647abdb128d99 bf155387fac94e3486fc1ca723825d39
+#: d3d04873aa9b4522ac09fb94c56e4d15 ea296aa8e57f4f9eb76f78964cd6101d
+#: fad573e99e024558a5976da7539d7989
+msgid "No"
+msgstr "否"
+
+#: ../../getting-started/environment-variables.md
+#: a32e2f837a574d4d979c2c7b4d3faca1
+msgid "OpenAI API key for chat and embedding."
+msgstr "用于对话和嵌入的 OpenAI API 密钥。"
+
+#: ../../getting-started/environment-variables.md
+#: 1eae03b03ced4c2fb470167c9c1e2949
+msgid "`ANTHROPIC_API_KEY`"
+msgstr "`ANTHROPIC_API_KEY`"
+
+#: ../../getting-started/environment-variables.md
+#: e09bf3f21d7448c5a6ab64bc78376630
+msgid "Anthropic API key for Claude models."
+msgstr "用于 Claude 模型的 Anthropic API 密钥。"
+
+#: ../../getting-started/environment-variables.md
+#: 21a6a04b209b4d5c8d5644e00acf507b
+msgid "`OPENAI_BASE_URL`"
+msgstr "`OPENAI_BASE_URL`"
+
+#: ../../getting-started/environment-variables.md
+#: ac346c38d73249f79ce29fd27a7634e9
+msgid "`https://api.openai.com/v1`"
+msgstr "`https://api.openai.com/v1`"
+
+#: ../../getting-started/environment-variables.md
+#: 08aa5323f2194a52be7749abd4d36df4
+msgid ""
+"Custom OpenAI-compatible API endpoint (for proxies or third-party "
+"providers)."
+msgstr "自定义 OpenAI 兼容 API 端点（用于代理或第三方提供商）。"
+
+#: ../../getting-started/environment-variables.md
+#: 4a7580aed1124a64ab7fff0d2a161281
+msgid "`ANTHROPIC_BASE_URL`"
+msgstr "`ANTHROPIC_BASE_URL`"
+
+#: ../../getting-started/environment-variables.md
+#: 6ad6b329dc68449dba2ab36587ad3f55
+msgid "`https://api.anthropic.com`"
+msgstr "`https://api.anthropic.com`"
+
+#: ../../getting-started/environment-variables.md
+#: f481fc05fa544162bc40ed17ba71ff84
+msgid "Custom Anthropic API endpoint."
+msgstr "自定义 Anthropic API 端点。"
+
+#: ../../getting-started/environment-variables.md:21
+#: 9892c17e2ef64d278bada5a5a335f23d
+msgid ""
+"At least one AI API key (OpenAI or Anthropic) is needed for AI chat and "
+"note generation features. Without any API key, workspace management, file"
+" browsing, and other non-AI features still work."
+msgstr ""
+"AI 对话和笔记生成功能至少需要一个 AI API 密钥（OpenAI 或 Anthropic）。没有任何 API "
+"密钥时，工作空间管理、文件浏览和其他非 AI 功能仍然可用。"
+
+#: ../../getting-started/environment-variables.md:24
+#: 05aad94b38b24753a54f88d167acc5e4
+msgid "Embedding API Configuration"
+msgstr "Embedding API 配置"
+
+#: ../../getting-started/environment-variables.md:26
+#: 69314d39feb942c387765775614f8302
+msgid ""
+"These allow using a separate service for vector embeddings, independent "
+"of the chat model provider."
+msgstr "这些配置允许使用独立于对话模型提供商的单独服务来生成向量嵌入。"
+
+#: ../../getting-started/environment-variables.md:20
+#: 65b2660fb730446e85885730d03d3ce2
+msgid "`EMBEDDING_API_KEY`"
+msgstr "`EMBEDDING_API_KEY`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 1657aaf7486d413cad81a35dd54986e1
+msgid "Falls back to `OPENAI_API_KEY`"
+msgstr "回退到 `OPENAI_API_KEY`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 8d297674a4064323acb12cb876612641
+msgid "API key for the embedding service."
+msgstr "Embedding 服务的 API 密钥。"
+
+#: ../../getting-started/environment-variables.md:20
+#: 5015edeb75c04cf29f182e438bf5201f
+msgid "`EMBEDDING_BASE_URL`"
+msgstr "`EMBEDDING_BASE_URL`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 7583258702694259a84df2319626edb4
+msgid "Falls back to `OPENAI_BASE_URL`"
+msgstr "回退到 `OPENAI_BASE_URL`"
+
+#: ../../getting-started/environment-variables.md:20
+#: aa3ad417d86d42989ebc3c9cd1d83d39
+msgid "Endpoint for the embedding service."
+msgstr "Embedding 服务的端点。"
+
+#: ../../getting-started/environment-variables.md:20
+#: 50fe459686ec4fae9ef93146067dddbe
+msgid "`EMBEDDING_MODEL`"
+msgstr "`EMBEDDING_MODEL`"
+
+#: ../../getting-started/environment-variables.md:20
+#: d20bdce80e674de79204360aaff36f6c
+msgid "`text-embedding-3-small`"
+msgstr "`text-embedding-3-small`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 322020902fb149289801a6c19173232e
+msgid "Name of the embedding model to use."
+msgstr "要使用的 Embedding 模型名称。"
+
+#: ../../getting-started/environment-variables.md:34
+#: 35f85914bdd941acae97df6693df8e03
+msgid "**Example** — Using a dedicated embedding service:"
+msgstr "**示例** —— 使用专用的 Embedding 服务："
+
+#: ../../getting-started/environment-variables.md:47
+#: cb843ab0064045108fce7fd0e501db02
+msgid "GitHub Integration"
+msgstr "GitHub 集成"
+
+#: ../../getting-started/environment-variables.md:20
+#: ca5cb573a96f4f81a9e1e838410fcc5e
+msgid "`GITHUB_TOKEN`"
+msgstr "`GITHUB_TOKEN`"
+
+#: ../../getting-started/environment-variables.md:20
+#: f19c93bb8f3746fe8d86f2b38b5f291c
+msgid ""
+"GitHub Personal Access Token for cloning/pulling private repositories. "
+"Requires `repo` scope."
+msgstr "用于克隆/拉取私有仓库的 GitHub 个人访问令牌。需要 `repo` 权限范围。"
+
+#: ../../getting-started/environment-variables.md:53
+#: e5a961b7b0af444189fb104b38e4974d
+msgid "Feishu (Lark) Bot Configuration"
+msgstr "飞书机器人配置"
+
+#: ../../getting-started/environment-variables.md:20
+#: 3a2a451dc020479982b29719f6bb6892
+msgid "`FEISHU_BOT_ENABLED`"
+msgstr "`FEISHU_BOT_ENABLED`"
+
+#: ../../getting-started/environment-variables.md:20
+#: a0276af03be04463bc7ae8381bd7e5fe c485c4057ea84107a7d251f50d7da91f
+msgid "`boolean`"
+msgstr "`boolean`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 0427c6e46a3c48aa8af478374e544491 3bcaf00933644f0288ccc8b70d0746f0
+msgid "`false`"
+msgstr "`false`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 036ec606eb6443f5b05806a3ce7b3dc1
+msgid "Enable Feishu bot integration."
+msgstr "启用飞书机器人集成。"
+
+#: ../../getting-started/environment-variables.md:20
+#: 80d8d3dd5f544b95845307ae5fae2cdd
+msgid "`FEISHU_APP_ID`"
+msgstr "`FEISHU_APP_ID`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 63d7f2a4e3944c9e895beaff54dbf4e0
+msgid "Feishu application ID."
+msgstr "飞书应用 ID。"
+
+#: ../../getting-started/environment-variables.md:20
+#: 49994795ce294ed4ac2eeb2f26eccbe4
+msgid "`FEISHU_APP_SECRET`"
+msgstr "`FEISHU_APP_SECRET`"
+
+#: ../../getting-started/environment-variables.md:20
+#: a7f2b91a811f4c7f96d52371d21106b6
+msgid "Feishu application secret."
+msgstr "飞书应用密钥。"
+
+#: ../../getting-started/environment-variables.md:20
+#: de97d1834c7e43c185ba0fdea3614676
+msgid "`FEISHU_VERIFICATION_TOKEN`"
+msgstr "`FEISHU_VERIFICATION_TOKEN`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 2425206e26f849f991fe6b282e62a01f
+msgid "Token for verifying Feishu webhook requests."
+msgstr "用于验证飞书 Webhook 请求的令牌。"
+
+#: ../../getting-started/environment-variables.md:20
+#: b28777a32b8b4077948bc6aa40e2086b
+msgid "`FEISHU_ENCRYPT_KEY`"
+msgstr "`FEISHU_ENCRYPT_KEY`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 54ce4f0d702b4d24b810ea0fd56ba5bc
+msgid "Encryption key for Feishu event payloads."
+msgstr "飞书事件负载的加密密钥。"
+
+#: ../../getting-started/environment-variables.md:63
+#: 41f941da582e456393ab4f419b1f6c2d
+msgid "WeChat Enterprise Bot Configuration"
+msgstr "企业微信机器人配置"
+
+#: ../../getting-started/environment-variables.md:20
+#: ef30104dd8b24ca399028db53d2218d2
+msgid "`WECHAT_BOT_ENABLED`"
+msgstr "`WECHAT_BOT_ENABLED`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 8a2651b600394870a32cade0e4876fa5
+msgid "Enable WeChat Enterprise bot integration."
+msgstr "启用企业微信机器人集成。"
+
+#: ../../getting-started/environment-variables.md:20
+#: 5f6355e4d89c4934a16d01ff1d261cd2
+msgid "`WECHAT_CORP_ID`"
+msgstr "`WECHAT_CORP_ID`"
+
+#: ../../getting-started/environment-variables.md:20
+#: cfe0d032fbc746c1be441bde58a88a90
+msgid "WeChat Enterprise corporation ID."
+msgstr "企业微信企业 ID。"
+
+#: ../../getting-started/environment-variables.md:20
+#: b6dc60c8a6824ea5b854c8bb35b1878d
+msgid "`WECHAT_CORP_SECRET`"
+msgstr "`WECHAT_CORP_SECRET`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 4c4a291124ba4d9bacb020b4287abb60
+msgid "WeChat Enterprise application secret."
+msgstr "企业微信应用密钥。"
+
+#: ../../getting-started/environment-variables.md:20
+#: 134d16a9b9ed41539f7b16ee084181f2
+msgid "`WECHAT_TOKEN`"
+msgstr "`WECHAT_TOKEN`"
+
+#: ../../getting-started/environment-variables.md:20
+#: d584e77baf4d4ee1a1f61220fdd3bdcf
+msgid "Token for verifying WeChat webhook requests."
+msgstr "用于验证企业微信 Webhook 请求的令牌。"
+
+#: ../../getting-started/environment-variables.md:20
+#: 21b3e7cd008b4e0495dca12c0cfaeab6
+msgid "`WECHAT_ENCODING_AES_KEY`"
+msgstr "`WECHAT_ENCODING_AES_KEY`"
+
+#: ../../getting-started/environment-variables.md:20
+#: f1929b459ea34619b19c3017d2e3e4c0
+msgid "AES key for encrypting/decrypting WeChat messages."
+msgstr "用于加密/解密企业微信消息的 AES 密钥。"
+
+#: ../../getting-started/environment-variables.md:20
+#: 62415998111c488c9ca027de61189709
+msgid "`WECHAT_AGENT_ID`"
+msgstr "`WECHAT_AGENT_ID`"
+
+#: ../../getting-started/environment-variables.md:20
+#: 0bbef8da1f804eceb7201ae9f99efc8e
+msgid "WeChat Enterprise agent (application) ID."
+msgstr "企业微信应用（代理）ID。"
+
+#: ../../getting-started/environment-variables.md:74
+#: e264e1b43d11490d8f07762112fe5ca8
+msgid "Security Notes"
+msgstr "安全说明"
+
+#: ../../getting-started/environment-variables.md:76
+#: 0305f08c95414ef186d97786454cf38f
+msgid ""
+"All API keys and tokens are used **server-side only** and are never "
+"exposed to the browser client."
+msgstr "所有 API 密钥和令牌仅在**服务器端**使用，永远不会暴露给浏览器客户端。"
+
+#: ../../getting-started/environment-variables.md:77
+#: f9d1449a96fb47d0b88ea6a036fd931b
+msgid ""
+"Store your `.env.local` file securely and do not commit it to version "
+"control."
+msgstr "请安全地存储您的 `.env.local` 文件，不要将其提交到版本控制系统。"
+
+#: ../../getting-started/environment-variables.md:78
+#: ea83cbc944084e63bc442c0451feaab8
+msgid ""
+"The `.gitignore` file already excludes `.env*` files (except "
+"`.env.example`)."
+msgstr "`.gitignore` 文件已排除 `.env*` 文件（`.env.example` 除外）。"

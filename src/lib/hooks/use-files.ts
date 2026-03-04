@@ -1,7 +1,6 @@
 import useSWR from "swr";
 import type { FileEntry } from "@/types";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from "@/lib/fetcher";
 
 export function useFiles(dirPath: string | null) {
   const { data, error, isLoading, mutate } = useSWR<FileEntry[]>(
@@ -10,7 +9,7 @@ export function useFiles(dirPath: string | null) {
   );
 
   return {
-    files: data || [],
+    files: Array.isArray(data) ? data : [],
     isLoading,
     error,
     mutate,
