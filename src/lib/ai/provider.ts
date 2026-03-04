@@ -59,9 +59,8 @@ export async function getConfiguredModel(): Promise<LanguageModel> {
 
   switch (provider) {
     case "openai":
-      // Use openai.chat() to force the Chat Completions API.
-      // The default openai() uses the Responses API which
-      // third-party proxies (e.g. OPENAI_BASE_URL) may not support.
+      // Use Chat Completions API (not Responses API) for maximum compatibility
+      // with third-party proxies and OpenAI-compatible services.
       return openai.chat(modelId);
     case "anthropic":
       return anthropic(modelId);
