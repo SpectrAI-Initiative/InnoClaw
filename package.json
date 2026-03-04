@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node --input-type=module -e \"await import('rehype-sanitize');await import('better-sqlite3')\" 2>/dev/null || npm install",
+    "predev": "node scripts/check-deps.js",
     "dev": "next dev",
-    "prebuild": "node --input-type=module -e \"await import('rehype-sanitize');await import('better-sqlite3')\" 2>/dev/null || npm install",
+    "prebuild": "node scripts/check-deps.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

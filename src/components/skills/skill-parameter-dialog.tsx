@@ -59,7 +59,7 @@ export function SkillParameterDialog({
       }
       setValues(init);
     }
-  }
+  }, [skill.id, open, params]);
 
   const setValue = (name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));

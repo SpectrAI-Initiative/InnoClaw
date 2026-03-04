@@ -80,11 +80,15 @@ export async function handleFeishuMessage(
     const replies = await processMessage(adapter, message);
     await sendReplies(adapter, message.chatId, replies);
   } catch (error) {
-    console.error(`${logPrefix} Message processing error:`, error);
+    const correlationId = crypto.randomUUID().slice(0, 8);
+    console.error(
+      `${logPrefix} Message processing error (id=${correlationId}):`,
+      error
+    );
     try {
       await adapter.sendText(
         message.chatId,
-        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Something went wrong while processing your request. Please try again later. (error id: ${correlationId})`
       );
     } catch {
       // Last resort — log only
