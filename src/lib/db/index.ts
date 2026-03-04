@@ -27,8 +27,18 @@ if (process.env.NODE_ENV !== "production") {
 // causing SQLITE_IOERR_SHMMAP. Fall back to DELETE journal mode in that case.
 try {
   sqlite.pragma("journal_mode = WAL");
-} catch {
-  sqlite.pragma("journal_mode = DELETE");
+} catch (err) {
+  // Only fall back for the specific mmap-related error; surface others.
+  if (
+    err &&
+    typeof err === "object" &&
+    "code" in err &&
+    (err as { code?: unknown }).code === "SQLITE_IOERR_SHMMAP"
+  ) {
+    sqlite.pragma("journal_mode = DELETE");
+  } else {
+    throw err;
+  }
 }
 sqlite.pragma("foreign_keys = ON");
 

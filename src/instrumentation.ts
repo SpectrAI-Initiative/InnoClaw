@@ -12,10 +12,19 @@ export async function register() {
       process.env.http_proxy ||
       process.env.https_proxy;
     if (proxyUrl) {
-      const { setGlobalDispatcher, EnvHttpProxyAgent } = await import(
-        "undici"
-      );
-      setGlobalDispatcher(new EnvHttpProxyAgent({ proxyTunnel: false }));
+      try {
+        const { setGlobalDispatcher, EnvHttpProxyAgent } = await import(
+          "undici"
+        );
+        setGlobalDispatcher(new EnvHttpProxyAgent({ proxyTunnel: false }));
+      } catch (error) {
+        console.error(
+          'Failed to import "undici" for HTTP proxy configuration. ' +
+            "Proxy environment variables are set, but proxy support is disabled. " +
+            'Please ensure "undici" is installed as a runtime dependency.',
+          error
+        );
+      }
     }
 
     // Run database migrations
