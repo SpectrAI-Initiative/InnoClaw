@@ -305,7 +305,11 @@ export function buildFinalCard(options: {
     const trimmedElements: Record<string, unknown>[] = [];
     if (toolCalls.length > 0) {
       const allSummary = toolCalls
-        .map((tc) => `✅ **${tc.toolName}**`)
+        .map((tc) => {
+          const icon =
+            tc.state === "error" ? "❌" : tc.state === "completed" ? "✅" : "⏳";
+          return `${icon} **${tc.toolName}**`;
+        })
         .join(" | ");
       trimmedElements.push({
         tag: "div",
@@ -318,7 +322,9 @@ export function buildFinalCard(options: {
     }
 
     // Further truncate text if needed
-    const shorterText = finalText.slice(0, 1500) + "\n\n... (truncated)";
+    const shorterText = finalText.length > 1500
+      ? finalText.slice(0, 1500) + "\n\n... (truncated)"
+      : finalText;
     trimmedElements.push({
       tag: "div",
       text: { content: shorterText, tag: "lark_md" },
