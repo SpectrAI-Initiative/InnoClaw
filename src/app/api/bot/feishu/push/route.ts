@@ -10,10 +10,37 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { getFeishuConfig } from "@/lib/bot/types";
 import { createFeishuAdapter } from "@/lib/bot/feishu/client";
 
 export async function POST(req: NextRequest) {
+  const expectedSecret = process.env.FEISHU_PUSH_SECRET;
+  if (!expectedSecret) {
+    console.error(
+      "[feishu-push] Missing FEISHU_PUSH_SECRET; refusing unauthenticated access.",
+    );
+    return NextResponse.json(
+      { error: "Feishu push endpoint is not configured" },
+      { status: 503 },
+    );
+  }
+
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const providedSecret = authHeader.slice(7).trim();
+  const expectedBuf = Buffer.from(expectedSecret);
+  const providedBuf = Buffer.from(providedSecret);
+  if (
+    expectedBuf.length !== providedBuf.length ||
+    !timingSafeEqual(expectedBuf, providedBuf)
+  ) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const config = getFeishuConfig();
   const adapter = createFeishuAdapter(config);
 

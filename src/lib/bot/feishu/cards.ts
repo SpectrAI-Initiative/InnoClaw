@@ -304,9 +304,7 @@ export function buildFinalCard(options: {
     // Remove detailed tool calls, keep only summary
     const trimmedElements: Record<string, unknown>[] = [];
     if (toolCalls.length > 0) {
-      const allSummary = toolCalls
-        .map((tc) => `✅ **${tc.toolName}**`)
-        .join(" | ");
+      const allSummary = summaryLines.join(" | ");
       trimmedElements.push({
         tag: "div",
         text: {
@@ -318,7 +316,10 @@ export function buildFinalCard(options: {
     }
 
     // Further truncate text if needed
-    const shorterText = finalText.slice(0, 1500) + "\n\n... (truncated)";
+    const shorterText =
+      finalText.length > 1500
+        ? finalText.slice(0, 1500) + "\n\n... (truncated)"
+        : finalText;
     trimmedElements.push({
       tag: "div",
       text: { content: shorterText, tag: "lark_md" },
