@@ -304,13 +304,7 @@ export function buildFinalCard(options: {
     // Remove detailed tool calls, keep only summary
     const trimmedElements: Record<string, unknown>[] = [];
     if (toolCalls.length > 0) {
-      const allSummary = toolCalls
-        .map((tc) => {
-          const icon =
-            tc.state === "error" ? "❌" : tc.state === "completed" ? "✅" : "⏳";
-          return `${icon} **${tc.toolName}**`;
-        })
-        .join(" | ");
+      const allSummary = summaryLines.join(" | ");
       trimmedElements.push({
         tag: "div",
         text: {
