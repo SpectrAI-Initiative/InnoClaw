@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { PROVIDERS } from "@/lib/ai/models";
+import { ScheduledTasksCard } from "@/components/scheduled-tasks/scheduled-tasks-card";
 
 interface Settings {
   llmProvider: string;
@@ -164,7 +165,7 @@ export default function SettingsPage() {
     PROVIDERS[provider as keyof typeof PROVIDERS]?.models || [];
 
   // Merge hardcoded models with remote models, avoiding duplicates
-  const hardcodedIds = new Set(providerModels.map((m) => m.id));
+  const hardcodedIds = new Set<string>(providerModels.map((m) => m.id));
   const extraRemote = remoteModels.filter((m) => !hardcodedIds.has(m.id));
 
   return (
@@ -434,6 +435,9 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Scheduled Tasks */}
+          <ScheduledTasksCard />
         </div>
       </main>
     </div>
