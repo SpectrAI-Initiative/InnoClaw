@@ -224,12 +224,12 @@ Create a comprehensive memory note from the conversation transcript below. This 
  * Build a system prompt for synthesizing daily memory notes into a daily report.
  */
 export function buildDailyReportPrompt(): string {
-  return `You are a daily report assistant. Synthesize the following memory notes from today's conversations into a single cohesive daily report.
+  return `You are a daily report assistant. Synthesize the following memory notes from the target day's conversations into a single cohesive daily report.
 
 ## Output Format
 
-### Today's Summary
-- A brief overview of what was accomplished today
+### Day Summary
+- A brief overview of what was accomplished
 
 ### Key Activities & Decisions
 - Main tasks worked on, decisions made, problems solved
