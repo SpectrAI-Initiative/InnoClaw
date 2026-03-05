@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4c26e185-2ae8-453b-abe9-afdca0dbe0f8",
-  "prevId": "9a8efc8e-9193-4697-b08c-99fd8b4cd027",
+  "id": "2ad9c0c7-a8b5-4481-853a-9055a3be6981",
+  "prevId": "b8a1f38a-b07e-44a3-9081-8bfbfa60907b",
   "tables": {
     "app_settings": {
       "name": "app_settings",
@@ -95,8 +95,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "hf_datasets": {
-      "name": "hf_datasets",
+    "cluster_operations": {
+      "name": "cluster_operations",
       "columns": {
         "id": {
           "name": "id",
@@ -105,37 +105,36 @@
           "notNull": true,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "repo_id": {
-          "name": "repo_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "repo_type": {
-          "name": "repo_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'dataset'"
-        },
-        "revision": {
-          "name": "revision",
+        "workspace_id": {
+          "name": "workspace_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "source_config": {
-          "name": "source_config",
+        "tool_name": {
+          "name": "tool_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subcommand": {
+          "name": "subcommand",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "job_name": {
+          "name": "job_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "namespace": {
+          "name": "namespace",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -146,61 +145,31 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "'pending'"
-        },
-        "progress": {
-          "name": "progress",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "last_error": {
-          "name": "last_error",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
           "autoincrement": false
         },
-        "local_path": {
-          "name": "local_path",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "size_bytes": {
-          "name": "size_bytes",
+        "exit_code": {
+          "name": "exit_code",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "num_files": {
-          "name": "num_files",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "manifest": {
-          "name": "manifest",
+        "summary": {
+          "name": "summary",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "stats": {
-          "name": "stats",
+        "input_json": {
+          "name": "input_json",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "last_sync_at": {
-          "name": "last_sync_at",
+        "output_json": {
+          "name": "output_json",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -213,26 +182,40 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(datetime('now'))"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(datetime('now'))"
-        },
-        "source": {
-          "name": "source",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'huggingface'"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "cluster_ops_ws_created_idx": {
+          "name": "cluster_ops_ws_created_idx",
+          "columns": [
+            "workspace_id",
+            "created_at"
+          ],
+          "isUnique": false
+        },
+        "cluster_ops_created_idx": {
+          "name": "cluster_ops_created_idx",
+          "columns": [
+            "created_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "cluster_operations_workspace_id_workspaces_id_fk": {
+          "name": "cluster_operations_workspace_id_workspaces_id_fk",
+          "tableFrom": "cluster_operations",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -276,6 +259,13 @@
           "autoincrement": false,
           "default": "'manual'"
         },
+        "report_date": {
+          "name": "report_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "text",
@@ -293,7 +283,17 @@
           "default": "(datetime('now'))"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "notes_daily_report_unique_idx": {
+          "name": "notes_daily_report_unique_idx",
+          "columns": [
+            "workspace_id",
+            "type",
+            "report_date"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "notes_workspace_id_workspaces_id_fk": {
           "name": "notes_workspace_id_workspaces_id_fk",
@@ -700,8 +700,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "dataset_workspace_links": {
-      "name": "dataset_workspace_links",
+    "hf_datasets": {
+      "name": "hf_datasets",
       "columns": {
         "id": {
           "name": "id",
@@ -710,18 +710,105 @@
           "notNull": true,
           "autoincrement": false
         },
-        "dataset_id": {
-          "name": "dataset_id",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "workspace_id": {
-          "name": "workspace_id",
+        "repo_id": {
+          "name": "repo_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "repo_type": {
+          "name": "repo_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'dataset'"
+        },
+        "revision": {
+          "name": "revision",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "source_config": {
+          "name": "source_config",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "progress": {
+          "name": "progress",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "last_error": {
+          "name": "last_error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "local_path": {
+          "name": "local_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "size_bytes": {
+          "name": "size_bytes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "num_files": {
+          "name": "num_files",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "manifest": {
+          "name": "manifest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "stats": {
+          "name": "stats",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_sync_at": {
+          "name": "last_sync_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "created_at": {
@@ -731,46 +818,18 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(datetime('now'))"
-        }
-      },
-      "indexes": {
-        "dataset_workspace_unique_idx": {
-          "name": "dataset_workspace_unique_idx",
-          "columns": [
-            "dataset_id",
-            "workspace_id"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {
-        "dataset_workspace_links_dataset_id_hf_datasets_id_fk": {
-          "name": "dataset_workspace_links_dataset_id_hf_datasets_id_fk",
-          "tableFrom": "dataset_workspace_links",
-          "tableTo": "hf_datasets",
-          "columnsFrom": [
-            "dataset_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
         },
-        "dataset_workspace_links_workspace_id_workspaces_id_fk": {
-          "name": "dataset_workspace_links_workspace_id_workspaces_id_fk",
-          "tableFrom": "dataset_workspace_links",
-          "tableTo": "workspaces",
-          "columnsFrom": [
-            "workspace_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
         }
       },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}

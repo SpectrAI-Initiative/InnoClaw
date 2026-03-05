@@ -2,9 +2,34 @@
  * Unit tests for Feishu bot adapter.
  */
 
-import { describe, it, expect } from "vitest";
-import { createFeishuAdapter } from "./client";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { Readable } from "stream";
 import type { FeishuBotConfig } from "../types";
+
+// ---------------------------------------------------------------------------
+// Mock the SDK before importing the adapter
+// ---------------------------------------------------------------------------
+
+const mockMessageCreate = vi.fn();
+const mockMessagePatch = vi.fn();
+const mockFileCreate = vi.fn();
+const mockImageGet = vi.fn();
+const mockMessageResourceGet = vi.fn();
+
+vi.mock("@larksuiteoapi/node-sdk", () => ({
+  AppType: { SelfBuild: 0 },
+  Domain: { Feishu: 0 },
+  Client: vi.fn().mockImplementation(function (this: Record<string, unknown>) {
+    this.im = {
+      message: { create: mockMessageCreate, patch: mockMessagePatch },
+      file: { create: mockFileCreate },
+      image: { get: mockImageGet },
+      messageResource: { get: mockMessageResourceGet },
+    };
+  }),
+}));
+
+import { createFeishuAdapter } from "./client";
 
 const testConfig: FeishuBotConfig = {
   appId: "cli_test123",
@@ -13,6 +38,10 @@ const testConfig: FeishuBotConfig = {
   encryptKey: "encrypt_key_xyz",
   enabled: true,
 };
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe("Feishu adapter", () => {
   describe("isEnabled", () => {
@@ -231,6 +260,265 @@ describe("Feishu adapter", () => {
       const adapter = createFeishuAdapter(testConfig);
       expect(adapter.parseMessages({})).toHaveLength(0);
       expect(adapter.parseMessages({ header: {} })).toHaveLength(0);
+    });
+  });
+
+  describe("sendText", () => {
+    it("should send text message via SDK", async () => {
+      mockMessageCreate.mockResolvedValue({ code: 0, msg: "success" });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await adapter.sendText("oc_chat123", "Hello!");
+
+      expect(mockMessageCreate).toHaveBeenCalledWith({
+        params: { receive_id_type: "chat_id" },
+        data: {
+          receive_id: "oc_chat123",
+          msg_type: "text",
+          content: JSON.stringify({ text: "Hello!" }),
+        },
+      });
+    });
+
+    it("should throw on SDK error response", async () => {
+      mockMessageCreate.mockResolvedValue({
+        code: 99991,
+        msg: "token invalid",
+      });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(adapter.sendText("oc_chat123", "Hi")).rejects.toThrow(
+        "Feishu send text failed: token invalid"
+      );
+    });
+  });
+
+  describe("sendFile", () => {
+    it("should upload file then send file message via SDK", async () => {
+      mockFileCreate.mockResolvedValue({ file_key: "fk_uploaded_001" });
+      mockMessageCreate.mockResolvedValue({ code: 0, msg: "success" });
+
+      const adapter = createFeishuAdapter(testConfig);
+      // Use a real temp file for the test
+      const os = await import("os");
+      const fsp = await import("fs/promises");
+      const tmpFile = `${os.default.tmpdir()}/feishu_test_upload_${Date.now()}.txt`;
+      await fsp.default.writeFile(tmpFile, "test content");
+
+      await adapter.fileHandler.sendFile(tmpFile, "test.txt", "oc_chat456");
+
+      // Verify file upload was called
+      expect(mockFileCreate).toHaveBeenCalledTimes(1);
+      const uploadCall = mockFileCreate.mock.calls[0][0];
+      expect(uploadCall.data.file_type).toBe("stream");
+      expect(uploadCall.data.file_name).toBe("test.txt");
+
+      // Verify send message was called with the uploaded file_key
+      expect(mockMessageCreate).toHaveBeenCalledWith({
+        params: { receive_id_type: "chat_id" },
+        data: {
+          receive_id: "oc_chat456",
+          msg_type: "file",
+          content: JSON.stringify({ file_key: "fk_uploaded_001" }),
+        },
+      });
+
+      // Delay cleanup to avoid ENOENT from lazy ReadStream open
+      setTimeout(() => fsp.default.unlink(tmpFile).catch(() => {}), 100);
+    });
+
+    it("should throw when file upload returns no file_key", async () => {
+      mockFileCreate.mockResolvedValue(null);
+
+      const adapter = createFeishuAdapter(testConfig);
+      const os = await import("os");
+      const fsp = await import("fs/promises");
+      const tmpFile = `${os.default.tmpdir()}/feishu_test_nofk_${Date.now()}.txt`;
+      await fsp.default.writeFile(tmpFile, "test");
+
+      await expect(
+        adapter.fileHandler.sendFile(tmpFile, "test.txt", "oc_chat")
+      ).rejects.toThrow("no file_key returned");
+
+      // Delay cleanup to avoid ENOENT from lazy ReadStream open
+      setTimeout(() => fsp.default.unlink(tmpFile).catch(() => {}), 100);
+    });
+  });
+
+  describe("sendInteractiveCard", () => {
+    it("should send an interactive card and return the message ID", async () => {
+      mockMessageCreate.mockResolvedValue({
+        code: 0,
+        msg: "success",
+        data: { message_id: "msg_card_001" },
+      });
+
+      const adapter = createFeishuAdapter(testConfig);
+      const card = { config: { wide_screen_mode: true }, elements: [] };
+      const messageId = await adapter.sendInteractiveCard!("oc_chat123", card);
+
+      expect(mockMessageCreate).toHaveBeenCalledWith({
+        params: { receive_id_type: "chat_id" },
+        data: {
+          receive_id: "oc_chat123",
+          msg_type: "interactive",
+          content: JSON.stringify(card),
+        },
+      });
+      expect(messageId).toBe("msg_card_001");
+    });
+
+    it("should throw when response has no data field", async () => {
+      mockMessageCreate.mockResolvedValue({ code: 0, msg: "success" });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(
+        adapter.sendInteractiveCard!("oc_chat123", {})
+      ).rejects.toThrow("Feishu send card failed: missing message_id in response");
+    });
+
+    it("should throw when data.message_id is absent", async () => {
+      mockMessageCreate.mockResolvedValue({
+        code: 0,
+        msg: "success",
+        data: {},
+      });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(
+        adapter.sendInteractiveCard!("oc_chat123", {})
+      ).rejects.toThrow("Feishu send card failed: missing message_id in response");
+    });
+
+    it("should throw on SDK error response", async () => {
+      mockMessageCreate.mockResolvedValue({ code: 19001, msg: "card invalid" });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(
+        adapter.sendInteractiveCard!("oc_chat123", {})
+      ).rejects.toThrow("Feishu send card failed: card invalid");
+    });
+  });
+
+  describe("patchInteractiveCard", () => {
+    it("should patch an interactive card successfully", async () => {
+      mockMessagePatch.mockResolvedValue({ code: 0, msg: "success" });
+
+      const adapter = createFeishuAdapter(testConfig);
+      const card = { config: { wide_screen_mode: true }, elements: [] };
+      await adapter.patchInteractiveCard!("msg_card_001", card);
+
+      expect(mockMessagePatch).toHaveBeenCalledWith({
+        path: { message_id: "msg_card_001" },
+        data: { content: JSON.stringify(card) },
+      });
+    });
+
+    it("should throw on SDK error response", async () => {
+      mockMessagePatch.mockResolvedValue({ code: 19002, msg: "patch failed" });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(
+        adapter.patchInteractiveCard!("msg_card_001", {})
+      ).rejects.toThrow("Feishu patch card failed: patch failed");
+    });
+  });
+
+  describe("downloadFile", () => {
+    it("should download image via SDK image.get", async () => {
+      const fsp = await import("fs/promises");
+      const os = await import("os");
+      const destDir = `${os.default.tmpdir()}/feishu_test_dl_img_${Date.now()}`;
+
+      mockImageGet.mockResolvedValue({
+        getReadableStream: () =>
+          Readable.from([Buffer.from("fake image data")]),
+      });
+
+      const adapter = createFeishuAdapter(testConfig);
+      const result = await adapter.fileHandler.downloadFile(
+        "image:img_key_abc",
+        "photo.jpg",
+        destDir
+      );
+
+      expect(mockImageGet).toHaveBeenCalledWith({
+        path: { image_key: "img_key_abc" },
+      });
+      expect(result).toContain("photo.jpg");
+
+      // Cleanup
+      await fsp.default.rm(destDir, { recursive: true }).catch(() => {});
+    });
+
+    it("should download file via SDK messageResource.get", async () => {
+      const fsp = await import("fs/promises");
+      const os = await import("os");
+      const destDir = `${os.default.tmpdir()}/feishu_test_dl_file_${Date.now()}`;
+
+      mockMessageResourceGet.mockResolvedValue({
+        getReadableStream: () =>
+          Readable.from([Buffer.from("fake file data")]),
+      });
+
+      const adapter = createFeishuAdapter(testConfig);
+      const result = await adapter.fileHandler.downloadFile(
+        "msg_001:fk_002",
+        "report.xlsx",
+        destDir
+      );
+
+      expect(mockMessageResourceGet).toHaveBeenCalledWith({
+        path: { message_id: "msg_001", file_key: "fk_002" },
+        params: { type: "file" },
+      });
+      expect(result).toContain("report.xlsx");
+
+      // Cleanup
+      await fsp.default.rm(destDir, { recursive: true }).catch(() => {});
+    });
+
+    it("should throw on invalid file key format", async () => {
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(
+        adapter.fileHandler.downloadFile("invalid_no_colon", "file.txt", "/tmp")
+      ).rejects.toThrow("Invalid Feishu file key format");
+    });
+
+    it("should abort early and delete partial file when stream exceeds MAX_FILE_SIZE", async () => {
+      const fsp = await import("fs/promises");
+      const os = await import("os");
+      const { MAX_FILE_SIZE } = await import("../types");
+      const destDir = `${os.default.tmpdir()}/feishu_test_sizelimit_${Date.now()}`;
+
+      // Yield many small chunks that collectively exceed MAX_FILE_SIZE,
+      // avoiding a single huge Buffer allocation that could OOM in CI.
+      const chunkSize = 64 * 1024; // 64 KB
+      const totalBytes = MAX_FILE_SIZE + 1;
+      function* oversizedChunks() {
+        let remaining = totalBytes;
+        while (remaining > 0) {
+          const size = Math.min(chunkSize, remaining);
+          yield Buffer.alloc(size, 0x41);
+          remaining -= size;
+        }
+      }
+      mockMessageResourceGet.mockResolvedValue({
+        getReadableStream: () => Readable.from(oversizedChunks()),
+      });
+
+      const adapter = createFeishuAdapter(testConfig);
+      await expect(
+        adapter.fileHandler.downloadFile("msg_big:fk_big", "big.bin", destDir)
+      ).rejects.toThrow("File too large");
+
+      // Directory is created by downloadFile before streaming; verify the partial file is cleaned up
+      const exists = await fsp.default.access(destDir).then(() => true).catch(() => false);
+      expect(exists).toBe(true);
+      const files = await fsp.default.readdir(destDir);
+      expect(files).toHaveLength(0);
+
+      await fsp.default.rm(destDir, { recursive: true }).catch(() => {});
     });
   });
 });

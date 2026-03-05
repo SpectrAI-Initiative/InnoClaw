@@ -1,0 +1,230 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../development/contributing.md:1 60c529d25cd94260bd80928306bbb222
+msgid "Contributing"
+msgstr "贡献指南"
+
+#: ../../development/contributing.md:3 6736fb2430344dd591e56e9274a0beca
+msgid ""
+"Thank you for your interest in contributing to NotebookLM! This guide "
+"explains how to get involved."
+msgstr "感谢您有兴趣为 NotebookLM 做出贡献！本指南介绍如何参与。"
+
+#: ../../development/contributing.md:5 a58734115662459faf001650cd5f1343
+msgid "Getting Started"
+msgstr "快速入门"
+
+#: ../../development/contributing.md:7 f77b3d38011e42c599d96d3346c44d30
+msgid "**Fork** the repository on GitHub"
+msgstr "在 GitHub 上 **Fork** 仓库"
+
+#: ../../development/contributing.md:8 f0372a707a2b4315a68fd173f4957002
+msgid "**Clone** your fork locally:"
+msgstr "在本地**克隆**您的 Fork："
+
+#: ../../development/contributing.md:13 a4bcb931451246e985887b338e512be4
+msgid "**Install** dependencies:"
+msgstr "**安装**依赖："
+
+#: ../../development/contributing.md:17 b5cd27b8d117418a851ac46da7cd3886
+msgid ""
+"Follow the [Installation Guide](../getting-started/installation.md) to "
+"set up your development environment"
+msgstr "按照[安装指南](../getting-started/installation.md)搭建开发环境"
+
+#: ../../development/contributing.md:19 a15241293ff2456d8b526e76ec25b0ce
+msgid "Branching Strategy"
+msgstr "分支策略"
+
+#: ../../development/contributing.md:21 b548b45d4ee14d62aff7f89826e38ebd
+msgid "`main` — Stable production branch"
+msgstr "`main` —— 稳定的生产分支"
+
+#: ../../development/contributing.md:22 23bde497b3b240c182fa92f285d83b46
+msgid "Feature branches — Created from `main` for new features or bug fixes"
+msgstr "功能分支 —— 从 `main` 创建，用于新功能或错误修复"
+
+#: ../../development/contributing.md:24 6ca5c35193a7430bbf123bd3ff0e7d0d
+msgid "Branch Naming Convention"
+msgstr "分支命名规范"
+
+#: ../../development/contributing.md:32 7bf146197915464189c910841d4e7dff
+msgid "Commit Conventions"
+msgstr "提交规范"
+
+#: ../../development/contributing.md:34 510fbd99444e4f9da1b7e2afdbfeb135
+msgid "We follow [Conventional Commits](https://www.conventionalcommits.org/):"
+msgstr "我们遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范："
+
+#: ../../development/contributing.md:42 3f9455efd72d41bea6cff4ed3b247382
+msgid "Commit Types"
+msgstr "提交类型"
+
+#: ../../development/contributing.md 1f7fa74052d54b4286fb2f4abb83206f
+msgid "Type"
+msgstr "类型"
+
+#: ../../development/contributing.md 6ae282657f44494c85acd96d1f675f9f
+msgid "Description"
+msgstr "描述"
+
+#: ../../development/contributing.md 6ad4ca875ec949a596b205a071a4e42e
+msgid "`feat`"
+msgstr "`feat`"
+
+#: ../../development/contributing.md cce5bb2486bf45a298706c655d433a1b
+msgid "A new feature"
+msgstr "新功能"
+
+#: ../../development/contributing.md 06db8bf4da1741b3a0f39741da8f95a9
+msgid "`fix`"
+msgstr "`fix`"
+
+#: ../../development/contributing.md fb8a6dccda2d4e02b07e38a76fdab5da
+msgid "A bug fix"
+msgstr "错误修复"
+
+#: ../../development/contributing.md ad3bbbe3269740fe91c3cdbd1d150f57
+msgid "`docs`"
+msgstr "`docs`"
+
+#: ../../development/contributing.md e6a17bf5e31a4924811eb395d0a7475d
+msgid "Documentation changes"
+msgstr "文档变更"
+
+#: ../../development/contributing.md 03b97d9d84104540b6d1480a1215958c
+msgid "`style`"
+msgstr "`style`"
+
+#: ../../development/contributing.md 84d2220cf624404eb86631ce08a2e9b8
+msgid "Code style changes (formatting, no logic change)"
+msgstr "代码风格变更（格式化，无逻辑变更）"
+
+#: ../../development/contributing.md c3226dc2cd6f409cb5f35c72e8c932c6
+msgid "`refactor`"
+msgstr "`refactor`"
+
+#: ../../development/contributing.md 01270f202c344d79965d7e30e1716034
+msgid "Code refactoring (no feature or fix)"
+msgstr "代码重构（无新功能或修复）"
+
+#: ../../development/contributing.md 59ec0ff0f6794c888c9e3cb915568a3c
+msgid "`test`"
+msgstr "`test`"
+
+#: ../../development/contributing.md 89d88989bbd044d58fb8c96d0cdcfc24
+msgid "Adding or updating tests"
+msgstr "添加或更新测试"
+
+#: ../../development/contributing.md 409c45c4b8bf42b4908ebffcd13c1c38
+msgid "`chore`"
+msgstr "`chore`"
+
+#: ../../development/contributing.md b0e2c6b8d07f4140815e92df524d1402
+msgid "Build process or auxiliary tool changes"
+msgstr "构建流程或辅助工具变更"
+
+#: ../../development/contributing.md:54 71706ac533204322916664748cdf9634
+msgid "Examples"
+msgstr "示例"
+
+#: ../../development/contributing.md:62 804797447b194801892726af734ef1b3
+msgid "Pull Request Process"
+msgstr "Pull Request 流程"
+
+#: ../../development/contributing.md:64 b63f337a634048dcaf43693bc92b8f84
+msgid "**Create a branch** from `main` with a descriptive name"
+msgstr "从 `main` **创建分支**，使用描述性名称"
+
+#: ../../development/contributing.md:65 293a78b97cf046dba61e235c59cc8aac
+msgid "**Make your changes** and commit with conventional commit messages"
+msgstr "**进行更改**并使用规范的提交消息进行提交"
+
+#: ../../development/contributing.md:66 07f298058d144421af22b41ce733a788
+msgid "**Run checks** before submitting:"
+msgstr "提交之前**运行检查**："
+
+#: ../../development/contributing.md:72 f3331d7d54fb4ddb92ca3ea0b4d491dc
+msgid "**Push** your branch and open a Pull Request"
+msgstr "**推送**您的分支并打开 Pull Request"
+
+#: ../../development/contributing.md:73 8aa0c1af678a4a93a4c469a637fe8e1b
+msgid "**Describe** your changes clearly in the PR description"
+msgstr "在 PR 描述中**清楚地描述**您的更改"
+
+#: ../../development/contributing.md:74 cca3cf06e54f4fdab58c37e7426ab649
+msgid "**Wait for review** — maintainers will review your code"
+msgstr "**等待审核** —— 维护者将审查您的代码"
+
+#: ../../development/contributing.md:76 c4883b7a162e4456a979e28d054bd8d1
+msgid "PR Checklist"
+msgstr "PR 检查清单"
+
+#: ../../development/contributing.md:78 e241e30c5fbb4e49a31ab341ed13dc7e
+msgid "Code follows the project's coding style"
+msgstr "代码遵循项目的编码风格"
+
+#: ../../development/contributing.md:79 3b57d18e85ee4960acf04a704c077dd0
+msgid "Tests pass (`npm test`)"
+msgstr "测试通过（`npm test`）"
+
+#: ../../development/contributing.md:80 792a05abb3d745eb99ea666bdc3a847d
+msgid "Lint passes (`npm run lint`)"
+msgstr "Lint 通过（`npm run lint`）"
+
+#: ../../development/contributing.md:81 7225b7bfaeb449df99ebeb6cfbb7e814
+msgid "Build succeeds (`npm run build`)"
+msgstr "构建成功（`npm run build`）"
+
+#: ../../development/contributing.md:82 8bb9dd4f9f9a4a7b97709ff1506199ef
+msgid "Documentation updated (if applicable)"
+msgstr "文档已更新（如适用）"
+
+#: ../../development/contributing.md:84 b6aa5e3b06514fb19e290b3554509d12
+msgid "Code of Conduct"
+msgstr "行为准则"
+
+#: ../../development/contributing.md:86 f0da427d576a43f59d25050e3aa89aed
+msgid ""
+"Please be respectful and constructive in all interactions. We aim to "
+"create a welcoming and inclusive community."
+msgstr "请在所有互动中保持尊重和建设性。我们致力于创建一个友好和包容的社区。"
+
+#: ../../development/contributing.md:88 d22a4c47e83c40b5b68d3e96fa771f87
+msgid "Reporting Issues"
+msgstr "报告问题"
+
+#: ../../development/contributing.md:90 e9bf47fa3e2f43e18771dc0444ccf697
+msgid ""
+"Use [GitHub Issues](https://github.com/zjowowen/notebooklm/issues) to "
+"report bugs or request features (when enabled)"
+msgstr ""
+"使用 [GitHub Issues](https://github.com/zjowowen/notebooklm/issues) "
+"报告错误或请求功能（启用后可用）"
+
+#: ../../development/contributing.md:91 e633e59a00b6442ca5036ad4921161d2
+msgid "Include clear steps to reproduce any bugs"
+msgstr "包含清晰的错误复现步骤"
+
+#: ../../development/contributing.md:92 a314a95cd156486b8fabcaf0c6dca631
+msgid "Provide environment details (OS, Node.js version, browser)"
+msgstr "提供环境详情（操作系统、Node.js 版本、浏览器）"

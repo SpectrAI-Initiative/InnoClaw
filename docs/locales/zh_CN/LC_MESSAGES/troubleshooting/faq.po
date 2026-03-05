@@ -1,0 +1,258 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../troubleshooting/faq.md:1 f2801b22b10c417f97834f49514ab679
+msgid "Troubleshooting & FAQ"
+msgstr "故障排除与常见问题"
+
+#: ../../troubleshooting/faq.md:3 5a075cab6bcf4949a0cff18c9a2eb2f0
+msgid "Frequently Asked Questions"
+msgstr "常见问题"
+
+#: ../../troubleshooting/faq.md:5 94dd00828b0d485781203b844148ba3f
+msgid "Can I use NotebookLM without an API key?"
+msgstr "我可以在没有 API 密钥的情况下使用 NotebookLM 吗？"
+
+#: ../../troubleshooting/faq.md:7 86d26dceca7742cdbe3ca02bc638c330
+msgid ""
+"**Yes.** Workspace management, file browsing, uploading, editing, and "
+"GitHub cloning features work without any API key. Only AI chat and note "
+"generation features require an API key. The UI will display a prompt "
+"indicating that AI features are unavailable."
+msgstr ""
+"**可以。** 工作空间管理、文件浏览、上传、编辑和 GitHub 克隆功能无需 API 密钥即可使用。只有 AI 对话和笔记生成功能需要 "
+"API 密钥。界面会显示提示，说明 AI 功能不可用。"
+
+#: ../../troubleshooting/faq.md:9 4fcdeca514cb4ee1ad435a7891e2a0d1
+msgid ""
+"How do I use third-party compatible services (proxies, self-hosted "
+"models)?"
+msgstr "如何使用第三方兼容服务（代理、自托管模型）？"
+
+#: ../../troubleshooting/faq.md:11 b3b2ed80e39a4488ab6bd3c4716c853c
+msgid ""
+"Set `OPENAI_BASE_URL` or `ANTHROPIC_BASE_URL` in your `.env.local` file "
+"to point to any API-compatible endpoint:"
+msgstr ""
+"在 `.env.local` 文件中将 `OPENAI_BASE_URL` 或 `ANTHROPIC_BASE_URL` 设置为任何 API "
+"兼容的端点："
+
+#: ../../troubleshooting/faq.md:18 49d24181a9274edb9fa4f47aa3188f1f
+msgid ""
+"If your proxy doesn't support the embedding endpoint, configure a "
+"separate embedding service:"
+msgstr "如果您的代理不支持 Embedding 端点，请配置单独的 Embedding 服务："
+
+#: ../../troubleshooting/faq.md:26 de372da5bdb04a2da295fb65e0531015
+msgid "What file formats are supported for RAG indexing?"
+msgstr "RAG 索引支持哪些文件格式？"
+
+#: ../../troubleshooting/faq.md 33a4aa66a93c49228bab0ea86adf058f
+msgid "Category"
+msgstr "分类"
+
+#: ../../troubleshooting/faq.md fdfbe9a96d844a56880ac03c54c9d17e
+msgid "Extensions"
+msgstr "扩展名"
+
+#: ../../troubleshooting/faq.md 4268b2171a36450ba87f50a44ccdd7f2
+msgid "Documents"
+msgstr "文档"
+
+#: ../../troubleshooting/faq.md 78bc66a73be74a8b92e5fea42bb88625
+msgid "`.pdf`, `.txt`, `.md`, `.html`"
+msgstr "`.pdf`、`.txt`、`.md`、`.html`"
+
+#: ../../troubleshooting/faq.md 7300124ad7a245cc914db2222d15511c
+msgid "Data"
+msgstr "数据"
+
+#: ../../troubleshooting/faq.md 9d212acbb38e4b228843e999dd4fc3fe
+msgid "`.json`, `.csv`"
+msgstr "`.json`、`.csv`"
+
+#: ../../troubleshooting/faq.md eddade1b3fe546c38290d9e3a964b36a
+msgid "Code"
+msgstr "代码"
+
+#: ../../troubleshooting/faq.md 4dbc7344b2314b1caef99c4c590cdda5
+msgid ""
+"`.js`, `.ts`, `.py`, `.java`, `.go`, `.rs`, `.cpp`, `.c`, `.rb`, `.php`, "
+"and more"
+msgstr "`.js`、`.ts`、`.py`、`.java`、`.go`、`.rs`、`.cpp`、`.c`、`.rb`、`.php` 等"
+
+#: ../../troubleshooting/faq.md:34 6e36c2226f274bfd82a96c298825407c
+msgid "Is indexing slow for large workspaces?"
+msgstr "大型工作空间的索引速度慢吗？"
+
+#: ../../troubleshooting/faq.md:36 08f4c2589cf74ea99119b6962c96b5ac
+msgid ""
+"The first sync processes all files (extract text → chunk → generate "
+"embeddings), which depends on the number and size of files. Subsequent "
+"syncs only process new or modified files (based on file hash comparison),"
+" making them significantly faster."
+msgstr ""
+"首次同步会处理所有文件（提取文本 → 分块 → "
+"生成嵌入），速度取决于文件的数量和大小。后续同步仅处理新增或修改的文件（基于文件哈希比较），因此速度会显著加快。"
+
+#: ../../troubleshooting/faq.md:38 88fb965914a746139c22d89cc93ead01
+msgid "Can I run NotebookLM on Linux?"
+msgstr "我可以在 Linux 上运行 NotebookLM 吗？"
+
+#: ../../troubleshooting/faq.md:40 2b04e709e199455e9dce5fbd1bf9af35
+msgid "**Yes.** Set `WORKSPACE_ROOTS` to Linux paths:"
+msgstr "**可以。** 将 `WORKSPACE_ROOTS` 设置为 Linux 路径："
+
+#: ../../troubleshooting/faq.md:46 427f5a44e1dc4f02bd9f09f94d3da129
+msgid "GitHub clone fails — what should I check?"
+msgstr "GitHub 克隆失败 —— 我应该检查什么？"
+
+#: ../../troubleshooting/faq.md:48 92862828d1fb4bfbb4b05fb40eaae7e0
+msgid "Verify that `git` is installed: `git --version`"
+msgstr "验证 `git` 已安装：`git --version`"
+
+#: ../../troubleshooting/faq.md:49 2c17b0385d9f4736a207d8e4e449de48
+msgid "Check that `GITHUB_TOKEN` is set correctly in `.env.local`"
+msgstr "检查 `.env.local` 中的 `GITHUB_TOKEN` 是否设置正确"
+
+#: ../../troubleshooting/faq.md:50 0b29757a99e946d39bff88cc0d53c1e5
+msgid "Ensure the token has the `repo` scope for private repositories"
+msgstr "确保令牌具有用于私有仓库的 `repo` 权限范围"
+
+#: ../../troubleshooting/faq.md:51 91372707fc9440f79ecd3f1244b81712
+msgid "Check network connectivity to `github.com`"
+msgstr "检查到 `github.com` 的网络连通性"
+
+#: ../../troubleshooting/faq.md:53 328c31dfc1b643a58bd6e289f6bc884f
+msgid "How do I reset the database?"
+msgstr "如何重置数据库？"
+
+#: ../../troubleshooting/faq.md:63 5e897836275045fdb51e3c6015602731
+msgid ""
+"This creates a fresh database. All workspaces, chat history, notes, and "
+"settings will be lost, but workspace files on disk are not affected."
+msgstr "这将创建一个全新的数据库。所有工作空间、对话历史、笔记和设置都将丢失，但磁盘上的工作空间文件不受影响。"
+
+#: ../../troubleshooting/faq.md:65 cd97ec2d0b4a417bac5caf48f0d4b6df
+msgid "How do I back up my data?"
+msgstr "如何备份我的数据？"
+
+#: ../../troubleshooting/faq.md:67 83561d0d9ce14f50b3a27c92b14a7c99
+msgid "Back up the following:"
+msgstr "备份以下内容："
+
+#: ../../troubleshooting/faq.md 96804f072ad24bc0a488340213770c8d
+msgid "Item"
+msgstr "项目"
+
+#: ../../troubleshooting/faq.md ba62467c9ef94b3499777e9d3a5b4369
+msgid "Location"
+msgstr "位置"
+
+#: ../../troubleshooting/faq.md d627177b689641cdbf4d88de417519ed
+msgid "Database"
+msgstr "数据库"
+
+#: ../../troubleshooting/faq.md ed0a5b751b2c4dd09a3b749cc7828339
+msgid "`./data/notebooklm.db`"
+msgstr "`./data/notebooklm.db`"
+
+#: ../../troubleshooting/faq.md 334b174c74da42899690381a3ef0169c
+msgid "Configuration"
+msgstr "配置"
+
+#: ../../troubleshooting/faq.md d8fb35ceb05844f49e78d690de8831cb
+msgid "`.env.local`"
+msgstr "`.env.local`"
+
+#: ../../troubleshooting/faq.md d1c5b82a754e49d18f194ca94d958e4d
+msgid "Workspace files"
+msgstr "工作空间文件"
+
+#: ../../troubleshooting/faq.md 215229aa8e9c444b9858402baeb9baaa
+msgid "Directories listed in `WORKSPACE_ROOTS`"
+msgstr "`WORKSPACE_ROOTS` 中列出的目录"
+
+#: ../../troubleshooting/faq.md:75 41c8e21f90054598aeb5fb44b0d95f0d
+msgid "The development server won't start"
+msgstr "开发服务器无法启动"
+
+#: ../../troubleshooting/faq.md:77 f10279b7075e415ca232c7f880c59e7b
+msgid "Ensure Node.js 18+ is installed: `node --version`"
+msgstr "确保已安装 Node.js 18+：`node --version`"
+
+#: ../../troubleshooting/faq.md:78 272be70528fb41aba0a0a3a5fd0362ea
+msgid "Ensure dependencies are installed: `npm install`"
+msgstr "确保已安装依赖：`npm install`"
+
+#: ../../troubleshooting/faq.md:79 6f1df2436e99454d9b109ac424d40242
+msgid "Ensure the database is initialized: `npx drizzle-kit migrate`"
+msgstr "确保数据库已初始化：`npx drizzle-kit migrate`"
+
+#: ../../troubleshooting/faq.md:80 1130182754ff4ffba4b70063068a76dc
+msgid "Ensure `WORKSPACE_ROOTS` directories exist on disk"
+msgstr "确保 `WORKSPACE_ROOTS` 目录在磁盘上存在"
+
+#: ../../troubleshooting/faq.md:81 67ecbb7805c4497a921b6bc5fd9c4dac
+msgid "Check for port conflicts on port 3000"
+msgstr "检查端口 3000 是否有冲突"
+
+#: ../../troubleshooting/faq.md:83 f5519f3f7b0c4a9da33ce7d5b20cc70c
+msgid "Build fails with font-related errors"
+msgstr "构建因字体相关错误而失败"
+
+#: ../../troubleshooting/faq.md:85 536fbe0f22c04b6caafe958aab801c63
+msgid ""
+"If `npm run build` fails with errors about fetching Google Fonts, this is"
+" a network issue. Ensure your build environment has internet access, or "
+"configure Next.js to use local fonts."
+msgstr ""
+"如果 `npm run build` 因获取 Google Fonts 的错误而失败，这是网络问题。请确保构建环境可以访问互联网，或者配置 "
+"Next.js 使用本地字体。"
+
+#: ../../troubleshooting/faq.md:87 89db2b1b4afb4050ae0d0d0850730241
+msgid "How do I change the port?"
+msgstr "如何更改端口？"
+
+#: ../../troubleshooting/faq.md:97 62112a28d8c04c918c4c3ae4c749a5c6
+msgid "Getting Help"
+msgstr "获取帮助"
+
+#: ../../troubleshooting/faq.md:99 d1cc4475b44740329751efcd394accbe
+msgid ""
+"**GitHub Issues** — [Report bugs or request "
+"features](https://github.com/zjowowen/notebooklm/issues) (when enabled)"
+msgstr ""
+"**GitHub Issues** —— "
+"[报告错误或请求功能](https://github.com/zjowowen/notebooklm/issues)（启用后可用）"
+
+#: ../../troubleshooting/faq.md:100 7098e82b6fb44e92b38e5cbdbe1bcf21
+msgid ""
+"**Documentation** — You're reading it! Check other sections for specific "
+"topics"
+msgstr "**文档** —— 您正在阅读！查看其他章节了解具体主题"
+
+#: ../../troubleshooting/faq.md:101 d5f51ea695454073bde9b8e4b83e3800
+msgid ""
+"**Source Code** — The code is well-structured and documented; see "
+"[Project Structure](../development/project-structure.md)"
+msgstr ""
+"**源代码** —— 代码结构良好且有文档记录；请参阅[项目结构](../development/project-structure.md)"

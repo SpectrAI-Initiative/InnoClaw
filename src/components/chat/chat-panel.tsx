@@ -7,7 +7,7 @@ import { TextStreamChatTransport } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot, User, AlertCircle, FileText, Check, Circle, Copy, CheckCheck } from "lucide-react";
+import { Send, Bot, User, AlertCircle, Check, Circle, CheckCheck } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import {
   markdownComponents,
@@ -422,7 +422,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
             rows={1}
             disabled={!aiEnabled}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                 e.preventDefault();
                 handleSend();
               }

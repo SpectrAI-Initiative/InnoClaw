@@ -18,9 +18,10 @@ import { useWorkspace } from "@/lib/hooks/use-workspaces";
 import { useReport } from "@/lib/hooks/use-report";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Bot, FileText } from "lucide-react";
+import { Bot, FileText, Server } from "lucide-react";
+import { ClusterPanel } from "@/components/cluster/cluster-panel";
 
-type MiddlePanel = "agent" | "report";
+type MiddlePanel = "agent" | "report" | "cluster";
 
 export default function WorkspacePage({
   params,
@@ -33,6 +34,7 @@ export default function WorkspacePage({
   const [middlePanel, setMiddlePanel] = useState<MiddlePanel>("agent");
   const { report, isAvailable: reportAvailable } = useReport(workspaceId);
   const t = useTranslations("report");
+  const tc = useTranslations("cluster");
 
   if (isLoading) {
     return (
@@ -100,6 +102,15 @@ export default function WorkspacePage({
                     >
                       <FileText className="h-3 w-3" />
                     </Button>
+                    <Button
+                      variant={middlePanel === "cluster" ? "default" : "outline"}
+                      size="icon-xs"
+                      onClick={() => setMiddlePanel("cluster")}
+                      title={tc("clusterToggle")}
+                      aria-label={tc("clusterToggle")}
+                    >
+                      <Server className="h-3 w-3" />
+                    </Button>
                   </div>
 
                   {/* Keep both mounted for state preservation */}
@@ -112,6 +123,9 @@ export default function WorkspacePage({
                   </div>
                   <div className={middlePanel === "report" ? "h-full" : "hidden"}>
                     <ReportPanel report={report} />
+                  </div>
+                  <div className={middlePanel === "cluster" ? "h-full" : "hidden"}>
+                    <ClusterPanel workspaceId={workspaceId} />
                   </div>
                 </div>
               </ResizablePanel>

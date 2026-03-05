@@ -121,7 +121,9 @@ export function processChildren(children: React.ReactNode): React.ReactNode {
     return children.map((child, i) => {
       const processed = processChildren(child);
       if (processed !== child && typeof processed === "object") {
-        return <span key={i}>{processed}</span>;
+        // Use child content + index as a more stable key than index alone
+        const keyHint = typeof child === "string" ? child.slice(0, 32) : String(i);
+        return <span key={`${keyHint}-${i}`}>{processed}</span>;
       }
       return processed;
     });
