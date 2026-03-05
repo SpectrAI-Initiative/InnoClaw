@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BookOpen, Settings, Zap, FolderOpen } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
@@ -10,6 +10,7 @@ import { LanguageToggle } from "./language-toggle";
 export function Header() {
   const t = useTranslations("common");
   const pathname = usePathname();
+  const router = useRouter();
 
   // Extract workspaceId from URL like /workspace/xxx
   const workspaceMatch = pathname.match(/^\/workspace\/([^/]+)/);
@@ -42,13 +43,23 @@ export function Header() {
             <Zap className="h-4 w-4" />
             <span className="sr-only">{t("skills")}</span>
           </Link>
-          <Link
-            href="/settings"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-          >
-            <Settings className="h-4 w-4" />
-            <span className="sr-only">{t("settings")}</span>
-          </Link>
+          {pathname === "/settings" ? (
+            <button
+              onClick={() => router.back()}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-primary bg-primary/10 hover:bg-accent hover:text-accent-foreground p-0"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="sr-only">{t("settings")}</span>
+            </button>
+          ) : (
+            <Link
+              href="/settings"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="sr-only">{t("settings")}</span>
+            </Link>
+          )}
         </div>
       </div>
     </header>

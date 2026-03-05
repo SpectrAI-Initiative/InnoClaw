@@ -8,6 +8,7 @@ import { WorkspaceList } from "@/components/workspaces/workspace-list";
 import { OpenWorkspaceDialog } from "@/components/workspaces/open-workspace-dialog";
 import { CloneRepoDialog } from "@/components/git/clone-repo-dialog";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useWorkspaces } from "@/lib/hooks/use-workspaces";
 import { toast } from "sonner";
 
@@ -40,9 +41,10 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex h-screen flex-col bg-background">
       <Header />
-      <main className="container px-4 py-8">
+      <ScrollArea className="flex-1">
+        <main className="container px-4 py-8">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{t("title")}</h1>
           <div className="flex gap-2">
@@ -78,7 +80,8 @@ export default function HomePage() {
         ) : (
           <WorkspaceList workspaces={workspaces} onDelete={handleDelete} />
         )}
-      </main>
+        </main>
+      </ScrollArea>
     </div>
   );
 }

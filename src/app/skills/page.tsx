@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useSkills } from "@/lib/hooks/use-skills";
@@ -118,9 +119,10 @@ export default function SkillsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex h-screen flex-col bg-background">
       <Header />
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <ScrollArea className="flex-1">
+        <main className="mx-auto max-w-4xl px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">{t("title")}</h1>
           <div className="flex items-center gap-2">
@@ -154,7 +156,8 @@ export default function SkillsPage() {
           onOpenChange={setImportOpen}
           onImported={() => mutate()}
         />
-      </main>
+        </main>
+      </ScrollArea>
     </div>
   );
 }

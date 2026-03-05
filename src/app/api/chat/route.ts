@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!isAIAvailable()) {
-      return new Response("AI is not configured. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env.local.", { status: 503 });
+      return new Response("AI is not configured. Please set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY in .env.local.", { status: 503 });
     }
 
     // Extract text from the latest user message
