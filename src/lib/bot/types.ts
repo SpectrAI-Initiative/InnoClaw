@@ -47,7 +47,21 @@ export interface BotFileMessage {
   text?: string;
 }
 
-export type BotMessage = BotTextMessage | BotFileMessage;
+/** Represents an audio/voice message received from an IM platform. */
+export interface BotAudioMessage {
+  type: "audio";
+  messageId: string;
+  senderId: string;
+  chatId: string;
+  isGroup: boolean;
+  timestamp: string;
+  /** Duration in milliseconds (if available from platform) */
+  duration?: number;
+  /** Platform-specific key to download the audio file */
+  fileKey: string;
+}
+
+export type BotMessage = BotTextMessage | BotFileMessage | BotAudioMessage;
 
 // ---------------------------------------------------------------------------
 // Reply types
@@ -182,6 +196,9 @@ export interface BotAdapter {
 
   /** File handler for download / upload operations */
   fileHandler: FileHandler;
+
+  /** Transcribe an audio file to text (speech-to-text). Platform-specific. */
+  transcribeAudio?(fileKey: string): Promise<string>;
 }
 
 // ---------------------------------------------------------------------------

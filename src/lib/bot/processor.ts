@@ -106,7 +106,7 @@ export async function processMessage(
       } catch {
         // Best-effort cleanup; ignore if file was already removed
       }
-    } else {
+    } else if (message.type === "text") {
       // Text message — forward to AI
       const aiResponse = await callAI(message.text);
       replies.push({ type: "text", text: aiResponse });

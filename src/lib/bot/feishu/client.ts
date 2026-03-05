@@ -9,6 +9,7 @@
 
 import fs from "fs";
 import fsp from "fs/promises";
+import os from "os";
 import path from "path";
 import { Transform } from "stream";
 import { pipeline } from "stream/promises";
@@ -251,6 +252,18 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
             isGroup: chatType === "group",
             timestamp,
           });
+        } else if (msgType === "audio") {
+          const rawKey = (content.file_key as string) || "";
+          messages.push({
+            type: "audio",
+            messageId,
+            senderId,
+            chatId,
+            isGroup: chatType === "group",
+            timestamp,
+            duration: Number(content.duration || 0),
+            fileKey: `${messageId}:${rawKey}`,
+          });
         } else if (msgType === "file" || msgType === "image") {
           // Encode messageId into fileKey so downloadFile can build the
           // correct Feishu API URL (files need message_id + file_key;
@@ -333,6 +346,44 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
 
       if (resp.code !== 0) {
         throw new Error(`Feishu patch card failed: ${resp.msg}`);
+      }
+    },
+
+    async transcribeAudio(fileKey: string): Promise<string> {
+      const destDir = path.join(os.tmpdir(), "notebooklm-bot-audio");
+      const localPath = await fileHandler.downloadFile(
+        fileKey,
+        `audio_${Date.now()}.ogg`,
+        destDir
+      );
+
+      try {
+        const audioBuffer = await fsp.readFile(localPath);
+        const base64Audio = audioBuffer.toString("base64");
+
+        const resp = await client.speech_to_text.speech.fileRecognize({
+          data: {
+            speech: { speech: base64Audio },
+            config: {
+              file_id: `audio_${Date.now()}`,
+              format: "ogg_opus",
+              engine_type: "16k_auto",
+            },
+          },
+        });
+
+        if (resp.code !== 0 || !resp.data?.recognition_text) {
+          throw new Error(
+            `Speech recognition failed: ${resp.msg || "no text returned"}`
+          );
+        }
+
+        console.log(
+          `[feishu] Transcribed audio: "${resp.data.recognition_text.slice(0, 100)}..."`
+        );
+        return resp.data.recognition_text;
+      } finally {
+        await fsp.unlink(localPath).catch(() => {});
       }
     },
 
