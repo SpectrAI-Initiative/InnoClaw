@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { notes, workspaces } from "@/lib/db/schema";
-import { eq, and, like } from "drizzle-orm";
+import { eq, and, gte, lt, like } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { generateText } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
@@ -37,13 +37,19 @@ async function dailyReportExists(
 }
 
 /**
- * Get all memory notes for a workspace created on the given date.
- * Matches notes whose createdAt starts with the date string (ISO format).
+ * Get all memory notes for a workspace created on the given UTC date.
+ * Uses a range query (>= dateStr, < nextDay) for reliable matching against
+ * ISO-formatted createdAt timestamps.
  */
 async function getMemoryNotesForDate(
   workspaceId: string,
   dateStr: string
 ) {
+  // Compute the next day from the YYYY-MM-DD string for an exclusive upper bound
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const nextDay = new Date(Date.UTC(year, month - 1, day + 1));
+  const nextDayStr = nextDay.toISOString().slice(0, 10);
+
   return db
     .select()
     .from(notes)
@@ -51,7 +57,8 @@ async function getMemoryNotesForDate(
       and(
         eq(notes.workspaceId, workspaceId),
         eq(notes.type, "memory"),
-        like(notes.createdAt, `${dateStr}%`)
+        gte(notes.createdAt, dateStr),
+        lt(notes.createdAt, nextDayStr)
       )
     )
     .orderBy(notes.createdAt);

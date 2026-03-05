@@ -26,7 +26,12 @@ export async function POST(req: NextRequest) {
     );
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
+      const status =
+        typeof result.error === "string" &&
+        result.error.toLowerCase().includes("ai not configured")
+          ? 503
+          : 500;
+      return NextResponse.json({ error: result.error }, { status });
     }
 
     if (result.skipped) {
