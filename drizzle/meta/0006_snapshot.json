@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2ad9c0c7-a8b5-4481-853a-9055a3be6981",
-  "prevId": "b8a1f38a-b07e-44a3-9081-8bfbfa60907b",
+  "id": "c6e04672-ad9e-48f9-b041-54c315b2d739",
+  "prevId": "2ad9c0c7-a8b5-4481-853a-9055a3be6981",
   "tables": {
     "app_settings": {
       "name": "app_settings",
@@ -826,6 +826,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(datetime('now'))"
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'huggingface'"
         }
       },
       "indexes": {},

@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2ad9c0c7-a8b5-4481-853a-9055a3be6981",
-  "prevId": "b8a1f38a-b07e-44a3-9081-8bfbfa60907b",
+  "id": "30f84d1a-fe45-4de0-ac6e-9616596c9751",
+  "prevId": "c6e04672-ad9e-48f9-b041-54c315b2d739",
   "tables": {
     "app_settings": {
       "name": "app_settings",
@@ -826,10 +826,93 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(datetime('now'))"
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'huggingface'"
         }
       },
       "indexes": {},
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "dataset_workspace_links": {
+      "name": "dataset_workspace_links",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dataset_id": {
+          "name": "dataset_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        }
+      },
+      "indexes": {
+        "dataset_workspace_unique_idx": {
+          "name": "dataset_workspace_unique_idx",
+          "columns": [
+            "dataset_id",
+            "workspace_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "dataset_workspace_links_dataset_id_hf_datasets_id_fk": {
+          "name": "dataset_workspace_links_dataset_id_hf_datasets_id_fk",
+          "tableFrom": "dataset_workspace_links",
+          "tableTo": "hf_datasets",
+          "columnsFrom": [
+            "dataset_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "dataset_workspace_links_workspace_id_workspaces_id_fk": {
+          "name": "dataset_workspace_links_workspace_id_workspaces_id_fk",
+          "tableFrom": "dataset_workspace_links",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
