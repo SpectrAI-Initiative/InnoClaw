@@ -154,7 +154,9 @@
     "botIntegrations": "IM Bot Integrations",
     "botIntegrationsDesc": "Configure Feishu and WeChat bot credentials in .env.local. Webhook endpoints: /api/bot/feishu, /api/bot/wechat.",
     "feishuBot": "Feishu (Lark) Bot",
-    "wechatBot": "WeChat (Enterprise) Bot"
+    "wechatBot": "WeChat (Enterprise) Bot",
+    "customModel": "Custom...",
+    "customModelPlaceholder": "Enter model name, e.g. qwen-plus"
   },
   "terminal": {
     "title": "Terminal",

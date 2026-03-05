@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [provider, setProvider] = useState("openai");
   const [model, setModel] = useState("gpt-4o-mini");
+  const [customModel, setCustomModel] = useState("");
 
   useEffect(() => {
     fetch("/api/settings")
@@ -49,18 +51,35 @@ export default function SettingsPage() {
       .then((data) => {
         setSettings(data);
         setProvider(data.llmProvider || "openai");
-        setModel(data.llmModel || "gpt-4o-mini");
+        const m = data.llmModel || "gpt-4o-mini";
+        const known = (
+          PROVIDERS[(data.llmProvider || "openai") as keyof typeof PROVIDERS]?.models || []
+        ).some((pm) => pm.id === m);
+        if (known) {
+          setModel(m);
+          setCustomModel("");
+        } else {
+          setModel("__custom__");
+          setCustomModel(m);
+        }
       });
   }, []);
 
+  /** The model ID that will be saved */
+  const effectiveModel = model === "__custom__" ? customModel : model;
+
   const handleSave = async () => {
+    if (!effectiveModel.trim()) {
+      toast.error(tCommon("error"));
+      return;
+    }
     try {
       await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           llm_provider: provider,
-          llm_model: model,
+          llm_model: effectiveModel,
         }),
       });
       toast.success(tCommon("success"));
@@ -96,7 +115,10 @@ export default function SettingsPage() {
                     setProvider(v);
                     const firstModel =
                       PROVIDERS[v as keyof typeof PROVIDERS]?.models[0]?.id;
-                    if (firstModel) setModel(firstModel);
+                    if (firstModel) {
+                      setModel(firstModel);
+                      setCustomModel("");
+                    }
                   }}
                 >
                   <SelectTrigger>
@@ -114,7 +136,13 @@ export default function SettingsPage() {
 
               <div className="space-y-2">
                 <Label>{t("model")}</Label>
-                <Select value={model} onValueChange={setModel}>
+                <Select
+                  value={model}
+                  onValueChange={(v) => {
+                    setModel(v);
+                    if (v !== "__custom__") setCustomModel("");
+                  }}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -124,8 +152,18 @@ export default function SettingsPage() {
                         {m.name}
                       </SelectItem>
                     ))}
+                    <SelectItem value="__custom__">
+                      {t("customModel")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
+                {model === "__custom__" && (
+                  <Input
+                    value={customModel}
+                    onChange={(e) => setCustomModel(e.target.value)}
+                    placeholder={t("customModelPlaceholder")}
+                  />
+                )}
               </div>
 
               <Button onClick={handleSave}>{tCommon("save")}</Button>

@@ -65,6 +65,8 @@ export async function getConfiguredModel(): Promise<LanguageModel> {
     case "anthropic":
       return anthropic(modelId);
     default:
-      return openai.chat(DEFAULT_MODEL);
+      // Use the configured modelId even for unknown providers – the user may be
+      // pointing OPENAI_BASE_URL at a third-party OpenAI-compatible service.
+      return openai.chat(modelId);
   }
 }

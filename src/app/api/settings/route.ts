@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getWorkspaceRoots } from "@/lib/files/filesystem";
+import { updateEnvLocal } from "@/lib/env-file";
 
 export async function GET() {
   try {
@@ -64,6 +65,16 @@ export async function PATCH(request: NextRequest) {
       } else {
         await db.insert(appSettings).values({ key, value });
       }
+    }
+
+    // Persist LLM settings to .env.local so they survive restarts
+    const envUpdates: Record<string, string> = {};
+    if (typeof body.llm_provider === "string")
+      envUpdates.LLM_PROVIDER = body.llm_provider;
+    if (typeof body.llm_model === "string")
+      envUpdates.LLM_MODEL = body.llm_model;
+    if (Object.keys(envUpdates).length > 0) {
+      updateEnvLocal(envUpdates);
     }
 
     return NextResponse.json({ success: true });
