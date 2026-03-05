@@ -162,7 +162,10 @@
     "hfToken": "HuggingFace Token",
     "hfTokenDesc": "设置 HuggingFace 访问令牌以避免下载数据集时被限流。也可以通过 HF_TOKEN 环境变量设置。",
     "hfTokenPlaceholder": "输入令牌",
-    "hfTokenClear": "移除已保存的令牌"
+    "hfTokenClear": "移除已保存的令牌",
+    "fetchModels": "拉取模型列表",
+    "fetchingModels": "拉取中...",
+    "fetchModelsSuccess": "已从供应商获取 {count} 个模型"
   },
   "terminal": {
     "title": "终端",

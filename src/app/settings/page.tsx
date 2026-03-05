@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import {
@@ -48,6 +48,33 @@ export default function SettingsPage() {
   const [customModel, setCustomModel] = useState("");
   const [hfToken, setHfToken] = useState("");
   const [hfTokenSaving, setHfTokenSaving] = useState(false);
+  const [remoteModels, setRemoteModels] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [fetchingModels, setFetchingModels] = useState(false);
+
+  const fetchRemoteModels = useCallback(
+    async (prov: string) => {
+      setFetchingModels(true);
+      try {
+        const res = await fetch(`/api/models?provider=${prov}`);
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.models)) {
+          setRemoteModels(data.models);
+          toast.success(
+            t("fetchModelsSuccess", { count: data.models.length }),
+          );
+        } else {
+          toast.error(data.error || tCommon("error"));
+        }
+      } catch {
+        toast.error(tCommon("error"));
+      } finally {
+        setFetchingModels(false);
+      }
+    },
+    [t, tCommon],
+  );
 
   useEffect(() => {
     fetch("/api/settings")
@@ -136,6 +163,10 @@ export default function SettingsPage() {
   const providerModels =
     PROVIDERS[provider as keyof typeof PROVIDERS]?.models || [];
 
+  // Merge hardcoded models with remote models, avoiding duplicates
+  const hardcodedIds = new Set(providerModels.map((m) => m.id));
+  const extraRemote = remoteModels.filter((m) => !hardcodedIds.has(m.id));
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -158,6 +189,7 @@ export default function SettingsPage() {
                   value={provider}
                   onValueChange={(v) => {
                     setProvider(v);
+                    setRemoteModels([]);
                     const firstModel =
                       PROVIDERS[v as keyof typeof PROVIDERS]?.models[0]?.id;
                     if (firstModel) {
@@ -180,7 +212,19 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>{t("model")}</Label>
+                <div className="flex items-center justify-between">
+                  <Label>{t("model")}</Label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={fetchingModels}
+                    onClick={() => fetchRemoteModels(provider)}
+                  >
+                    {fetchingModels
+                      ? t("fetchingModels")
+                      : t("fetchModels")}
+                  </Button>
+                </div>
                 <Select
                   value={model}
                   onValueChange={(v) => {
@@ -193,6 +237,11 @@ export default function SettingsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {providerModels.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                    {extraRemote.map((m) => (
                       <SelectItem key={m.id} value={m.id}>
                         {m.name}
                       </SelectItem>

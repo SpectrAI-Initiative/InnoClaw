@@ -162,7 +162,10 @@
     "hfToken": "HuggingFace Token",
     "hfTokenDesc": "Set a HuggingFace access token to avoid rate limiting when downloading datasets. You can also set it via the HF_TOKEN environment variable.",
     "hfTokenPlaceholder": "Enter token",
-    "hfTokenClear": "Remove saved token"
+    "hfTokenClear": "Remove saved token",
+    "fetchModels": "Fetch Models",
+    "fetchingModels": "Fetching...",
+    "fetchModelsSuccess": "Fetched {count} models from provider"
   },
   "terminal": {
     "title": "Terminal",
