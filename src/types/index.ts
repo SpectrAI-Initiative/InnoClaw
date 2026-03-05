@@ -133,10 +133,12 @@ export interface SkillParameter {
 
 export type HfDatasetStatus = "pending" | "downloading" | "paused" | "ready" | "failed" | "cancelled";
 export type HfRepoType = "dataset" | "model" | "space";
+export type DatasetSource = "huggingface" | "modelscope" | "local";
 
 export interface HfDataset {
   id: string;
   name: string;
+  source: DatasetSource;
   repoId: string;
   repoType: HfRepoType;
   revision: string | null;
@@ -205,6 +207,13 @@ export interface HfDownloadProgress {
   totalFiles: number;
   speedBytesPerSecond?: number;
   estimatedSecondsRemaining?: number;
+}
+
+export interface DatasetWorkspaceLink {
+  id: string;
+  datasetId: string;
+  workspaceId: string;
+  createdAt: string;
 }
 
 // Portable format for sharing skills (no internal IDs or timestamps)

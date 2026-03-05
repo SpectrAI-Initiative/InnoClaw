@@ -53,13 +53,17 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       ? JSON.parse(dataset.sourceConfig)
       : null;
 
+    if (!dataset.localPath) {
+      return NextResponse.json({ error: "Dataset has no local path" }, { status: 400 });
+    }
+
     startRetryDownload(datasetId, {
       repoId: dataset.repoId,
       repoType: dataset.repoType as HfRepoType,
       revision: dataset.revision || undefined,
       allowPatterns: sourceConfig?.allowPatterns,
       ignorePatterns: sourceConfig?.ignorePatterns,
-    }, dataset.localPath!);
+    }, dataset.localPath);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -91,7 +95,7 @@ async function startRetryDownload(
       progress: 0,
     });
 
-    const { sizeBytes, numFiles } = await downloadRepo(datasetId, config, localPath);
+    const { numFiles } = await downloadRepo(datasetId, config, localPath);
 
     setProgress(datasetId, { phase: "building_manifest", progress: 90 });
     const manifest = buildManifest(localPath);

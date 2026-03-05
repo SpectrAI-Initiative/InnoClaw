@@ -14,6 +14,11 @@ export async function previewItems(
 ): Promise<{ columns: string[]; rows: Record<string, unknown>[]; format: string; totalRows: number | null }> {
   // Find the split directory or files
   const splitDir = path.join(rootDir, split);
+  // Guard against path traversal via split parameter
+  const resolvedRoot = path.resolve(rootDir);
+  if (!path.resolve(splitDir).startsWith(resolvedRoot + path.sep) && path.resolve(splitDir) !== resolvedRoot) {
+    return { columns: [], rows: [], format: "unknown", totalRows: null };
+  }
   let scanDir = rootDir;
   if (fs.existsSync(splitDir) && fs.statSync(splitDir).isDirectory()) {
     scanDir = splitDir;

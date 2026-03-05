@@ -12,7 +12,7 @@ import { getHfToken } from "./token";
 import { db } from "@/lib/db";
 import { hfDatasets } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import type { HfRepoType, HfDatasetSourceConfig } from "@/types";
+import type { HfRepoType } from "@/types";
 
 const TAG = "[HF]";
 
@@ -118,6 +118,12 @@ export async function downloadRepo(
     if (abortController.signal.aborted) return;
 
     const destPath = path.join(targetDir, file.path);
+    // Guard against path traversal from malicious repo file paths
+    const resolvedTarget = path.resolve(targetDir);
+    if (!path.resolve(destPath).startsWith(resolvedTarget + path.sep) && path.resolve(destPath) !== resolvedTarget) {
+      console.warn(`${TAG}   [skip] ${file.path} — path traversal detected`);
+      return;
+    }
 
     // Resume: skip if file already exists with correct size
     if (fs.existsSync(destPath)) {

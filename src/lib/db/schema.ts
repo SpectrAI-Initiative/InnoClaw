@@ -147,6 +147,7 @@ export const hfDatasets = sqliteTable("hf_datasets", {
   name: text("name").notNull(),
   repoId: text("repo_id").notNull(),
   repoType: text("repo_type").notNull().default("dataset"), // dataset | model | space
+  source: text("source").notNull().default("huggingface"), // huggingface | modelscope | local
   revision: text("revision"), // branch/tag, null = default
   sourceConfig: text("source_config"), // JSON: { allowPatterns, ignorePatterns }
   status: text("status", {
@@ -169,3 +170,21 @@ export const hfDatasets = sqliteTable("hf_datasets", {
     .notNull()
     .default(sql`(datetime('now'))`),
 });
+
+// ============================================================
+// DATASET-WORKSPACE LINKS (many-to-many)
+// ============================================================
+export const datasetWorkspaceLinks = sqliteTable("dataset_workspace_links", {
+  id: text("id").primaryKey(),
+  datasetId: text("dataset_id")
+    .notNull()
+    .references(() => hfDatasets.id, { onDelete: "cascade" }),
+  workspaceId: text("workspace_id")
+    .notNull()
+    .references(() => workspaces.id, { onDelete: "cascade" }),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+}, (table) => [
+  uniqueIndex("dataset_workspace_unique_idx").on(table.datasetId, table.workspaceId),
+]);

@@ -47,12 +47,15 @@ export async function GET() {
   }
 }
 
+const ALLOWED_KEYS = new Set(["llm_provider", "llm_model", "hf_token"]);
+
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
 
     for (const [key, value] of Object.entries(body)) {
       if (typeof value !== "string") continue;
+      if (!ALLOWED_KEYS.has(key)) continue;
 
       const existing = await db
         .select()

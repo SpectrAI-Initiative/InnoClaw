@@ -175,7 +175,7 @@ export default function DatasetsPage() {
             trigger={
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                {t("newDownload")}
+                {t("addDataset")}
               </Button>
             }
             onDownloadStarted={() => mutate()}

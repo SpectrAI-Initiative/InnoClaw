@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Trash2, RotateCcw, X, Database, Box, AppWindow, Pause, Play, RefreshCw } from "lucide-react";
+import { Eye, Trash2, RotateCcw, X, Database, Box, AppWindow, Pause, Play, RefreshCw, FolderOpen } from "lucide-react";
 import type { HfDataset, HfDownloadProgress } from "@/types";
 
 interface DatasetCardProps {
@@ -105,10 +105,22 @@ export function DatasetCard({
             <h3 className="font-medium truncate">{dataset.name}</h3>
           </div>
           <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              {getRepoTypeIcon(dataset.repoType)}
-              {dataset.repoId}
-            </span>
+            {dataset.source === "local" ? (
+              <span className="flex items-center gap-1">
+                <FolderOpen className="h-3.5 w-3.5" />
+                <span className="font-mono text-xs">{dataset.repoId}</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                {getRepoTypeIcon(dataset.repoType)}
+                {dataset.repoId}
+              </span>
+            )}
+            {dataset.source && dataset.source !== "huggingface" && (
+              <Badge variant="outline" className="text-xs ml-1">
+                {dataset.source === "modelscope" ? "ModelScope" : dataset.source === "local" ? t("sourceLocal") : ""}
+              </Badge>
+            )}
           </div>
         </div>
         <Badge variant={statusVariant}>{statusLabel}</Badge>

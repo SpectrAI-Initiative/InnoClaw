@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRepoInfo } from "@/lib/hf-datasets/metadata";
+import { getModelScopeRepoInfo } from "@/lib/modelscope/metadata";
 import type { HfRepoType } from "@/types";
 
-const VALID_REPO_TYPES = new Set(["dataset", "model", "space"]);
+const VALID_REPO_TYPES = new Set(["dataset", "model"]);
 
 /**
- * GET /api/datasets/repo-info?repoId=X&repoType=Y
- * Fetch HuggingFace repo metadata for the download dialog preview.
+ * GET /api/datasets/modelscope-info?repoId=X&repoType=Y
  */
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing repoId" }, { status: 400 });
     }
 
-    const info = await getRepoInfo(repoId, repoType);
+    const info = await getModelScopeRepoInfo(repoId, repoType);
     return NextResponse.json(info);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch repo info";

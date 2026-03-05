@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/check-deps.js",
     "dev": "next dev",
+    "prebuild": "node scripts/check-deps.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -14,6 +16,7 @@
     "@ai-sdk/openai": "^3.0.33",
     "@ai-sdk/react": "^3.0.101",
     "@huggingface/hub": "^2.10.5",
+    "@larksuiteoapi/node-sdk": "^1.59.0",
     "ai": "^6.0.99",
     "better-sqlite3": "^12.6.2",
     "cheerio": "^1.2.0",

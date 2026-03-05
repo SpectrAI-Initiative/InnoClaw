@@ -14,7 +14,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { datasetId } = await params;
     const { searchParams } = new URL(request.url);
     const split = searchParams.get("split") || "default";
-    const n = parseInt(searchParams.get("n") || "20", 10);
+    const parsedN = parseInt(searchParams.get("n") || "20", 10);
+    const n = Number.isNaN(parsedN) ? 20 : Math.max(1, Math.min(parsedN, 1000));
 
     const rows = await db
       .select()

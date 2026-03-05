@@ -4,8 +4,8 @@ import { hfDatasets } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
 import { eq, desc } from "drizzle-orm";
 import * as path from "path";
-import * as fs from "fs";
 import { downloadRepo } from "@/lib/hf-datasets/downloader";
+import { downloadModelScopeRepo } from "@/lib/modelscope/downloader";
 import { buildManifest, computeStats } from "@/lib/hf-datasets/manifest";
 import { setProgress, markFinished } from "@/lib/hf-datasets/progress";
 import type { HfRepoType } from "@/types";
@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
       name,
       allowPatterns,
       ignorePatterns,
+      source = "huggingface",
     } = body as {
       repoId: string;
       repoType?: HfRepoType;
@@ -52,10 +53,16 @@ export async function POST(request: NextRequest) {
       name?: string;
       allowPatterns?: string[];
       ignorePatterns?: string[];
+      source?: string;
     };
 
     if (!repoId) {
       return NextResponse.json({ error: "Missing repoId" }, { status: 400 });
+    }
+
+    const validSources = new Set(["huggingface", "modelscope"]);
+    if (!validSources.has(source)) {
+      return NextResponse.json({ error: "Invalid source" }, { status: 400 });
     }
 
     // Derive display name from repoId
@@ -78,6 +85,7 @@ export async function POST(request: NextRequest) {
       name: displayName,
       repoId,
       repoType,
+      source,
       revision: revision || null,
       sourceConfig,
       status: "pending",
@@ -94,6 +102,7 @@ export async function POST(request: NextRequest) {
       revision,
       allowPatterns,
       ignorePatterns,
+      source,
     }, localPath);
 
     const dataset = await db
@@ -117,6 +126,7 @@ async function startDownload(
     revision?: string;
     allowPatterns?: string[];
     ignorePatterns?: string[];
+    source?: string;
   },
   localPath: string
 ) {
@@ -133,8 +143,16 @@ async function startDownload(
       progress: 0,
     });
 
-    // Download files
-    const { sizeBytes, numFiles } = await downloadRepo(datasetId, config, localPath);
+    // Download files using the appropriate downloader
+    let result: { sizeBytes: number; numFiles: number };
+
+    if (config.source === "modelscope") {
+      result = await downloadModelScopeRepo(datasetId, config, localPath);
+    } else {
+      result = await downloadRepo(datasetId, config, localPath);
+    }
+
+    const { numFiles } = result;
 
     // Build manifest
     setProgress(datasetId, { phase: "building_manifest", progress: 90 });
