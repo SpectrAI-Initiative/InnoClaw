@@ -19,8 +19,9 @@ This project provides a self-hostable AI research assistant inspired by Google N
 - 🗂️ **工作空间 + 文件管理 / Workspace & File Management** — 映射服务器文件夹，支持浏览、上传、编辑
 - 🤖 **RAG 增强对话 / RAG-Powered Chat** — AI 基于文档内容回答问题，附带来源引用
 - 📝 **智能笔记生成 / Smart Note Generation** — 自动生成摘要、FAQ、简报、时间线等
-- 🔀 **多模型 & 多语言 / Multi-LLM & i18n** — 支持 OpenAI / Anthropic，中英双语界面，暗色模式
+- 🔀 **多模型 & 多语言 / Multi-LLM & i18n** — 支持 OpenAI / Anthropic / Google Gemini，中英双语界面，暗色模式
 - 💬 **飞书机器人 / Feishu Bot** — WebSocket 长连接，Agent 工具调用，交互卡片实时更新
+- 🧠 **上下文管理 / Context Management** — MAX 模式自动摘要防止上下文溢出，可配置上下文策略（保守/标准/扩展）
 
 _完整功能列表请见 [功能 / Features](#功能--features) / For the full feature list, see [Features](#功能--features)._
 
@@ -47,9 +48,10 @@ _完整功能列表请见 [功能 / Features](#功能--features) / For the full 
 - **GitHub 集成** — 克隆/拉取 GitHub 仓库（支持私有仓库）
 - **RAG 对话** — AI 基于工作空间文件内容回答问题，带来源引用
 - **笔记生成** — 自动生成摘要、FAQ、简报、时间线等
-- **多 LLM 支持** — 可切换 OpenAI GPT / Anthropic Claude
+- **多 LLM 支持** — 可切换 OpenAI GPT / Anthropic Claude / Google Gemini
 - **中英双语** — 前端 UI 支持中文/英文切换
 - **暗色模式** — 支持亮色/暗色主题切换
+- **上下文溢出保护** — MAX 模式开启后，对话接近上下文限制时自动摘要保存，避免 API 报错；可选保守（60%）/标准（80%）/扩展（95%）上下文策略
 - **飞书机器人** — 通过 WebSocket 长连接接入飞书，支持 Agent 工具调用、交互卡片、斜杠命令
 
 ---
@@ -60,7 +62,7 @@ _完整功能列表请见 [功能 / Features](#功能--features) / For the full 
 |------|------|
 | 框架 | Next.js 16 (App Router) + TypeScript |
 | UI | Tailwind CSS 4 + shadcn/ui + Radix UI |
-| AI | Vercel AI SDK 6 + OpenAI + Anthropic |
+| AI | Vercel AI SDK 6 + OpenAI + Anthropic + Google Gemini |
 | 数据库 | SQLite (better-sqlite3 + Drizzle ORM) |
 | 向量搜索 | 纯 JS 余弦相似度（无需额外扩展） |
 | IM 机器人 | @larksuiteoapi/node-sdk（飞书 WebSocket 长连接） |
@@ -145,9 +147,13 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
 # [可选] Anthropic API Key（如需使用 Claude 模型）
 ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
 
+# [可选] Google Gemini API Key（如需使用 Gemini 模型）
+GEMINI_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxx
+
 # [可选] 自定义 API Base URL（用于第三方兼容服务/代理）
 # OPENAI_BASE_URL=https://api.your-provider.com/v1
 # ANTHROPIC_BASE_URL=https://api.your-provider.com
+# GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta
 
 # [可选] 独立的 Embedding API 配置（如与对话模型使用不同的服务商/密钥）
 # 若不配置，默认使用 OPENAI_API_KEY 和 OPENAI_BASE_URL
@@ -177,7 +183,7 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxx
 - 不配置任何 API Key 时，工作空间、文件管理、GitHub 克隆等功能正常可用，仅 AI 对话和笔记生成功能会禁用
 - 配置了 `OPENAI_API_KEY` 或 `EMBEDDING_API_KEY` 后，同步文件时会自动生成向量嵌入（embedding），支持 RAG 检索增强对话
 - Embedding API 支持独立配置：如果你的对话模型代理不支持 embedding 接口（如仅提供 Gemini 聊天模型的代理），可以通过 `EMBEDDING_API_KEY`、`EMBEDDING_BASE_URL`、`EMBEDDING_MODEL` 指向一个单独的 embedding 服务
-- `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` 支持指向任何兼容 OpenAI / Anthropic 协议的第三方服务（如自部署代理、国内中转等）
+- `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` / `GEMINI_BASE_URL` 支持指向任何兼容 OpenAI / Anthropic / Gemini 协议的第三方服务（如自部署代理、国内中转等）
 - 所有 Key 和 URL 仅在服务器端使用，不会暴露给前端浏览器
 
 ### 第 3 步：安装 kubectl（可选，K8s 功能需要）
@@ -608,7 +614,9 @@ docker-compose up -d
 ### 5. 设置
 
 访问 `/settings` 页面：
-- 切换 AI 提供商（OpenAI / Anthropic）和模型
+- 切换 AI 提供商（OpenAI / Anthropic / Google Gemini）和模型
+- MAX 模式开关：启用后对话接近上下文限制时自动摘要保存，关闭后无上下文保护
+- 上下文策略：保守（60%）/ 标准（80%）/ 扩展（95%），控制触发自动摘要的阈值
 - 查看 API Key 配置状态
 - 查看工作空间根目录配置
 
@@ -931,10 +939,10 @@ EMBEDDING_MODEL=google/gemini-embedding-001
 ## 常见问题 / FAQ
 
 **Q: 不配置 API Key 可以使用吗？**
-A: 可以。工作空间管理、文件浏览、上传、编辑、GitHub 克隆等功能均不需要 API Key。只有 AI 对话和笔记生成功能会被禁用，界面上会显示相应提示。
+A: 可以。工作空间管理、文件浏览、上传、编辑、GitHub 克隆等功能均不需要 API Key。只有 AI 对话和笔记生成功能会被禁用，界面上会显示相应提示。支持 OpenAI、Anthropic、Google Gemini 三家 API Key，至少配置一个即可。
 
 **Q: 如何使用第三方兼容服务（如国内中转/自部署代理）？**
-A: 在 `.env.local` 中设置 `OPENAI_BASE_URL` 或 `ANTHROPIC_BASE_URL` 即可。只要服务兼容对应的 API 协议即可正常使用。如果代理不支持 embedding 接口，可以通过 `EMBEDDING_API_KEY`、`EMBEDDING_BASE_URL`、`EMBEDDING_MODEL` 单独配置 embedding 服务。例如：
+A: 在 `.env.local` 中设置 `OPENAI_BASE_URL`、`ANTHROPIC_BASE_URL` 或 `GEMINI_BASE_URL` 即可。只要服务兼容对应的 API 协议即可正常使用。如果代理不支持 embedding 接口，可以通过 `EMBEDDING_API_KEY`、`EMBEDDING_BASE_URL`、`EMBEDDING_MODEL` 单独配置 embedding 服务。例如：
 ```env
 # 对话模型
 OPENAI_BASE_URL=https://api.your-proxy.com/v1
