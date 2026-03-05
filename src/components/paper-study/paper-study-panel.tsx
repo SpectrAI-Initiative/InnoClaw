@@ -116,7 +116,7 @@ export function PaperStudyPanel({
       } else {
         const errData = await sumRes.json().catch(() => ({}));
         setSearchErrors({
-          summarize: errData.error || `Summarization failed (${sumRes.status})`,
+          summarize: errData.error || t("summarizeError"),
         });
       }
     } catch (err) {
@@ -127,7 +127,7 @@ export function PaperStudyPanel({
       }
       setIsSummarizing(false);
     }
-  }, [articles, checkedIds]);
+  }, [articles, checkedIds, t]);
 
   /** Keyword-based search across arXiv / HuggingFace. */
   const handleSearch = useCallback(async () => {
@@ -193,7 +193,20 @@ export function PaperStudyPanel({
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || t("fetchError"));
+        const code = data.error;
+        let msg: string;
+        switch (code) {
+          case "MISSING_INPUT":
+            msg = t("fetchErrorMissingInput");
+            break;
+          case "NOT_FOUND":
+            msg = t("fetchError");
+            break;
+          default:
+            msg = t("fetchError");
+            break;
+        }
+        throw new Error(msg);
       }
 
       const data = await res.json();

@@ -24,6 +24,7 @@ export function PaperSummarySection({
   onStop,
 }: PaperSummarySectionProps) {
   const t = useTranslations("paperStudy");
+  const tCommon = useTranslations("common");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -39,7 +40,7 @@ export function PaperSummarySection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId,
-          title: `论文研读摘要 - ${dateStr}`,
+          title: `${t("summaryNoteTitle")} - ${dateStr}`,
           content: summary,
           type: "summary",
         }),
@@ -52,7 +53,7 @@ export function PaperSummarySection({
       onSaved?.();
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save summary");
+      toast.error(err instanceof Error ? err.message : tCommon("error"));
     } finally {
       setSaving(false);
     }
