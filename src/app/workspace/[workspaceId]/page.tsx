@@ -16,10 +16,13 @@ import { NotesPanel } from "@/components/notes/notes-panel";
 import { FilePreviewPanel } from "@/components/preview/file-preview-panel";
 import { useWorkspace } from "@/lib/hooks/use-workspaces";
 import { useReport } from "@/lib/hooks/use-report";
+import { useMinimalMode } from "@/lib/hooks/use-minimal-mode";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Bot, FileText, Server } from "lucide-react";
+import { Bot, FileText, Server, Maximize2 } from "lucide-react";
 import { ClusterPanel } from "@/components/cluster/cluster-panel";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { LanguageToggle } from "@/components/layout/language-toggle";
 
 type MiddlePanel = "agent" | "report" | "cluster";
 
@@ -33,8 +36,10 @@ export default function WorkspacePage({
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [middlePanel, setMiddlePanel] = useState<MiddlePanel>("agent");
   const { report, isAvailable: reportAvailable } = useReport(workspaceId);
+  const { isMinimal, toggleMinimalMode } = useMinimalMode();
   const t = useTranslations("report");
   const tc = useTranslations("cluster");
+  const tCommon = useTranslations("common");
 
   if (isLoading) {
     return (
@@ -58,9 +63,39 @@ export default function WorkspacePage({
     );
   }
 
+  if (isMinimal) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Floating toolbar in minimal mode */}
+        <nav className="fixed top-3 right-3 z-50 flex items-center gap-1" aria-label={tCommon("exitMinimalMode")}>
+          <LanguageToggle />
+          <ThemeToggle />
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-9 w-9"
+            onClick={toggleMinimalMode}
+            title={tCommon("exitMinimalMode")}
+          >
+            <Maximize2 className="h-4 w-4" />
+            <span className="sr-only">{tCommon("exitMinimalMode")}</span>
+          </Button>
+        </nav>
+        {/* Full-screen agent panel */}
+        <div className="mx-auto h-screen w-full max-w-4xl">
+          <AgentPanel
+            workspaceId={workspaceId}
+            workspaceName={workspace.name}
+            folderPath={workspace.folderPath}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header showMinimalToggle onToggleMinimalMode={toggleMinimalMode} />
       <div className="h-[calc(100vh-3.5rem)] overflow-hidden">
         <ResizablePanelGroup orientation="horizontal">
           {/* Left: FileBrowser */}

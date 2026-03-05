@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { PROVIDERS } from "@/lib/ai/models";
+import { ScheduledTasksCard } from "@/components/scheduled-tasks/scheduled-tasks-card";
 
 interface Settings {
   llmProvider: string;
@@ -434,6 +435,9 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Scheduled Tasks */}
+          <ScheduledTasksCard />
         </div>
       </main>
     </div>

@@ -129,6 +129,23 @@ export interface SkillParameter {
   placeholder?: string;
 }
 
+// ---- Scheduled Tasks ----
+
+export interface ScheduledTask {
+  id: string;
+  name: string;
+  taskType: "daily_report" | "weekly_report" | "git_sync" | "source_sync" | "custom";
+  schedule: string; // cron expression
+  workspaceId: string | null;
+  config: string | null; // JSON
+  isEnabled: boolean;
+  lastRunAt: string | null;
+  lastRunStatus: "success" | "error" | "running" | null;
+  lastRunError: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ---- HuggingFace Datasets ----
 
 export type HfDatasetStatus = "pending" | "downloading" | "paused" | "ready" | "failed" | "cancelled";
