@@ -223,6 +223,76 @@ Create a comprehensive memory note from the conversation transcript below. This 
 }
 
 /**
+ * Build a system prompt for Paper Study mode — summarizing academic articles.
+ */
+export function buildPaperSummarizationPrompt(
+  articles: Array<{
+    title: string;
+    authors: string[];
+    publishedDate: string;
+    source: string;
+    abstract: string;
+  }>
+): string {
+  const articlesText = articles
+    .map(
+      (a, i) =>
+        `## Paper ${i + 1}: ${a.title}\n\n**Authors:** ${a.authors.join(", ")}\n**Date:** ${a.publishedDate}\n**Source:** ${a.source}\n\n### Abstract\n${a.abstract}`
+    )
+    .join("\n\n---\n\n");
+
+  return `你是一名学术研究助手。请分析以下论文，并为每篇论文提供结构化的中文总结。
+
+请用中文对每篇论文进行以下分析：
+1. **研究动机 (Motivation)**：为什么要开展这项研究？它试图解决什么问题？
+2. **方法创新 (Method Innovation)**：提出了哪些新颖的贡献或方法？这种方法的独特之处是什么？
+3. **关键结果 (Key Results)**：主要发现、指标或结论是什么？
+
+在所有论文总结之后，请提供一个简短的 **总体趋势 (Overall Trends)** 部分，指出这些论文之间的共同主题。
+
+请务必使用中文回答。
+
+## 论文列表
+
+${articlesText}`;
+}
+
+/**
+ * Build a system prompt for chatting/discussing a specific paper.
+ */
+export function buildPaperChatPrompt(article: {
+  title: string;
+  authors: string[];
+  publishedDate: string;
+  source: string;
+  abstract: string;
+}): string {
+  return `你是一名学术研究助手，专门帮助用户深入理解和讨论学术论文。
+
+以下是用户正在阅读的论文信息：
+
+## 论文信息
+- **标题**: ${article.title}
+- **作者**: ${article.authors.join(", ")}
+- **发表日期**: ${article.publishedDate}
+- **来源**: ${article.source}
+
+### 摘要
+${article.abstract}
+
+## 你的任务
+基于上述论文信息，回答用户关于这篇论文的任何问题。你可以：
+1. 深入解释论文的研究动机和背景
+2. 详细分析方法的创新点和技术细节
+3. 讨论实验结果和结论
+4. 分析论文的局限性和未来方向
+5. 将论文与相关研究进行比较
+6. 解释论文中涉及的专业术语和概念
+
+请始终用中文回答，即使论文本身是英文的。回答要准确、专业且有深度。`;
+}
+
+/**
  * Build a system prompt for synthesizing daily memory notes into a daily report.
  */
 export function buildDailyReportPrompt(): string {

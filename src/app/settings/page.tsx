@@ -38,6 +38,8 @@ interface Settings {
   hasAnthropicKey: boolean;
   hasGeminiKey: boolean;
   hasGithubToken: boolean;
+  hasHfToken: boolean;
+  hfTokenSource: "db" | "env" | null;
   openaiBaseUrl: string;
   anthropicBaseUrl: string;
   geminiBaseUrl: string;
@@ -52,6 +54,8 @@ export default function SettingsPage() {
   const [provider, setProvider] = useState("openai");
   const [model, setModel] = useState("gpt-4o-mini");
   const [customModel, setCustomModel] = useState("");
+  const [hfToken, setHfToken] = useState("");
+  const [hfTokenSaving, setHfTokenSaving] = useState(false);
   const [remoteModels, setRemoteModels] = useState<
     { id: string; name: string }[]
   >([]);
@@ -127,6 +131,47 @@ export default function SettingsPage() {
       toast.success(tCommon("success"));
     } catch {
       toast.error(tCommon("error"));
+    }
+  };
+
+  const handleHfTokenSave = async () => {
+    setHfTokenSaving(true);
+    try {
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hf_token: hfToken }),
+      });
+      setSettings((prev) =>
+        prev ? { ...prev, hasHfToken: !!hfToken, hfTokenSource: hfToken ? "db" : prev.hfTokenSource } : prev
+      );
+      setHfToken("");
+      toast.success(tCommon("success"));
+    } catch {
+      toast.error(tCommon("error"));
+    } finally {
+      setHfTokenSaving(false);
+    }
+  };
+
+  const handleHfTokenClear = async () => {
+    setHfTokenSaving(true);
+    try {
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hf_token: "" }),
+      });
+      // Re-fetch settings to get updated hasHfToken from server
+      const res = await fetch("/api/settings");
+      const data = await res.json();
+      setSettings(data);
+      setHfToken("");
+      toast.success(tCommon("success"));
+    } catch {
+      toast.error(tCommon("error"));
+    } finally {
+      setHfTokenSaving(false);
     }
   };
 
@@ -346,6 +391,55 @@ export default function SettingsPage() {
                       ? t("configured")
                       : t("notConfigured")}
                   </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* HuggingFace Token */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("hfToken")}</CardTitle>
+                <CardDescription>
+                  {t("hfTokenDesc")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">{t("hfToken")}</span>
+                  <Badge
+                    variant={settings?.hasHfToken ? "default" : "secondary"}
+                  >
+                    {settings?.hasHfToken
+                      ? `${t("configured")}${settings?.hfTokenSource === "env" ? " (env)" : ""}`
+                      : t("notConfigured")}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("hfTokenPlaceholder")}</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="password"
+                      placeholder="hf_..."
+                      value={hfToken}
+                      onChange={(e) => setHfToken(e.target.value)}
+                    />
+                    <Button
+                      onClick={handleHfTokenSave}
+                      disabled={!hfToken || hfTokenSaving}
+                    >
+                      {tCommon("save")}
+                    </Button>
+                  </div>
+                  {settings?.hfTokenSource === "db" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleHfTokenClear}
+                      disabled={hfTokenSaving}
+                    >
+                      {t("hfTokenClear")}
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

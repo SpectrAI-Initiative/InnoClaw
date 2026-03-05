@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, FileText, Trash2, Calendar, CalendarDays } from "lucide-react";
+import { Plus, Sparkles, FileText, Trash2, Pencil, Calendar, CalendarDays } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -52,6 +52,12 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
+
+  // Editing state
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const handleGenerate = async (type: string) => {
     setGenerating(true);
@@ -160,6 +166,36 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
     }
   };
 
+  const handleOpenEdit = (note: Note) => {
+    setEditingNote(note);
+    setEditTitle(note.title);
+    setEditContent(note.content);
+    setViewingNote(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingNote || !editTitle) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/notes/${editingNote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: editTitle, content: editContent }),
+      });
+      if (!res.ok) {
+        toast.error(tCommon("error"));
+        return;
+      }
+      setEditingNote(null);
+      mutate();
+      toast.success(tCommon("success"));
+    } catch {
+      toast.error(tCommon("error"));
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   return (
     <div className="flex h-full min-w-0 flex-col">
       {/* Header */}
@@ -244,17 +280,30 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-sm">{note.title}</CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteNote(note.id);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    <div className="flex gap-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEdit(note);
+                        }}
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteNote(note.id);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                   <CardDescription className="text-xs">
                     {t(note.type)} &middot;{" "}
@@ -287,7 +336,7 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label>Content</Label>
+              <Label>{t("content")}</Label>
               <Textarea
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
@@ -316,10 +365,67 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
       >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{viewingNote?.title}</DialogTitle>
+            <div className="flex items-center justify-between pr-6">
+              <DialogTitle>{viewingNote?.title}</DialogTitle>
+              {viewingNote && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => handleOpenEdit(viewingNote)}
+                >
+                  <Pencil className="h-3 w-3" />
+                  {t("editNote")}
+                </Button>
+              )}
+            </div>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap text-sm">
             {viewingNote?.content}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Note Dialog */}
+      <Dialog
+        open={!!editingNote}
+        onOpenChange={() => setEditingNote(null)}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t("editNote")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t("noteTitle")}</Label>
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("content")}</Label>
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={12}
+                className="font-mono text-sm"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setEditingNote(null)}
+              >
+                {tCommon("cancel")}
+              </Button>
+              <Button
+                onClick={handleSaveEdit}
+                disabled={!editTitle || savingEdit}
+              >
+                {savingEdit ? "..." : t("saveEdit")}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

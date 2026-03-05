@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { BookOpen, Settings, Zap, FolderOpen, Minimize2 } from "lucide-react";
+import { BookOpen, Settings, Zap, FolderOpen, Minimize2, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageToggle } from "./language-toggle";
@@ -54,6 +54,13 @@ export function Header({ onToggleMinimalMode, showMinimalToggle }: HeaderProps) 
           )}
           <LanguageToggle />
           <ThemeToggle />
+          <Link
+            href="/datasets"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+          >
+            <Database className="h-4 w-4" />
+            <span className="sr-only">{t("datasets")}</span>
+          </Link>
           <Link
             href="/skills"
             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"

@@ -9,6 +9,9 @@ import type { Article, SearchParams } from "./types";
 
 const HF_API_URL = "https://huggingface.co/api/daily_papers";
 
+/** Request timeout in milliseconds. */
+const TIMEOUT_MS = 15_000;
+
 /**
  * Fetch daily papers from Hugging Face and filter by keywords and date.
  */
@@ -19,7 +22,29 @@ export async function searchHuggingFace(
 
   if (!keywords.length) return [];
 
-  const response = await fetch(HF_API_URL);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(HF_API_URL, {
+      headers: {
+        "User-Agent": "notebooklm-paper-study/1.0",
+        Accept: "application/json",
+      },
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("Hugging Face API request timed out");
+    }
+    throw new Error(
+      `Hugging Face API network error: ${err instanceof Error ? err.message : String(err)}`
+    );
+  } finally {
+    clearTimeout(timer);
+  }
+
   if (!response.ok) {
     throw new Error(
       `Hugging Face API error: ${response.status} ${response.statusText}`

@@ -1,0 +1,151 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { hfDatasets } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { downloadRepo } from "@/lib/hf-datasets/downloader";
+import { buildManifest, computeStats } from "@/lib/hf-datasets/manifest";
+import { setProgress, markFinished, removeProgress } from "@/lib/hf-datasets/progress";
+import type { HfRepoType, HfDatasetSourceConfig } from "@/types";
+
+type RouteParams = { params: Promise<{ datasetId: string }> };
+
+/**
+ * POST /api/datasets/[datasetId]/retry - Retry a failed download
+ */
+export async function POST(_request: NextRequest, { params }: RouteParams) {
+  try {
+    const { datasetId } = await params;
+
+    const rows = await db
+      .select()
+      .from(hfDatasets)
+      .where(eq(hfDatasets.id, datasetId))
+      .limit(1);
+
+    if (rows.length === 0) {
+      return NextResponse.json({ error: "Dataset not found" }, { status: 404 });
+    }
+
+    const dataset = rows[0];
+    if (dataset.status === "downloading") {
+      return NextResponse.json(
+        { error: "Dataset is already downloading" },
+        { status: 400 }
+      );
+    }
+
+    // Reset status
+    await db
+      .update(hfDatasets)
+      .set({
+        status: "pending",
+        progress: 0,
+        lastError: null,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(hfDatasets.id, datasetId));
+
+    // Clean up any stale in-memory progress (e.g. from paused state)
+    removeProgress(datasetId);
+
+    // Restart download
+    const sourceConfig: HfDatasetSourceConfig | null = dataset.sourceConfig
+      ? JSON.parse(dataset.sourceConfig)
+      : null;
+
+    if (!dataset.localPath) {
+      return NextResponse.json({ error: "Dataset has no local path" }, { status: 400 });
+    }
+
+    startRetryDownload(datasetId, {
+      repoId: dataset.repoId,
+      repoType: dataset.repoType as HfRepoType,
+      revision: dataset.revision || undefined,
+      allowPatterns: sourceConfig?.allowPatterns,
+      ignorePatterns: sourceConfig?.ignorePatterns,
+    }, dataset.localPath);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to retry download";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+async function startRetryDownload(
+  datasetId: string,
+  config: {
+    repoId: string;
+    repoType: HfRepoType;
+    revision?: string;
+    allowPatterns?: string[];
+    ignorePatterns?: string[];
+  },
+  localPath: string
+) {
+  try {
+    await db
+      .update(hfDatasets)
+      .set({ status: "downloading", progress: 0, updatedAt: new Date().toISOString() })
+      .where(eq(hfDatasets.id, datasetId));
+
+    setProgress(datasetId, {
+      status: "downloading",
+      phase: "downloading",
+      progress: 0,
+    });
+
+    const { numFiles } = await downloadRepo(datasetId, config, localPath);
+
+    setProgress(datasetId, { phase: "building_manifest", progress: 90 });
+    const manifest = buildManifest(localPath);
+
+    setProgress(datasetId, { phase: "computing_stats", progress: 95 });
+    const stats = computeStats(localPath, manifest);
+
+    const now = new Date().toISOString();
+    await db
+      .update(hfDatasets)
+      .set({
+        status: "ready",
+        progress: 100,
+        sizeBytes: stats.sizeBytes,
+        numFiles,
+        manifest: JSON.stringify(manifest),
+        stats: JSON.stringify(stats),
+        lastSyncAt: now,
+        updatedAt: now,
+        lastError: null,
+      })
+      .where(eq(hfDatasets.id, datasetId));
+
+    markFinished(datasetId, "ready");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Download failed";
+    const isPauseError = error instanceof Error && error.message === "Download paused";
+    const isCancelError = error instanceof Error && error.message === "Download cancelled";
+
+    if (isPauseError) {
+      await db
+        .update(hfDatasets)
+        .set({
+          status: "paused",
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(hfDatasets.id, datasetId));
+      markFinished(datasetId, "paused");
+      return;
+    }
+
+    await db
+      .update(hfDatasets)
+      .set({
+        status: isCancelError ? "cancelled" : "failed",
+        lastError: message,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(hfDatasets.id, datasetId));
+
+    markFinished(datasetId, isCancelError ? "cancelled" : "failed");
+  }
+}
