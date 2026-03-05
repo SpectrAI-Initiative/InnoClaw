@@ -84,6 +84,20 @@ export function summarizeToolResult(
     }
     case "submitK8sJob":
       return result.success ? "Job submitted" : `Failed: ${result.error || "unknown"}`;
+    case "collectJobResults": {
+      const jr = result.jobStatus as Record<string, unknown> | undefined;
+      if (!result.success) {
+        const error = result["error"];
+        const stderr = result["stderr"];
+        const parts: string[] = [];
+        if (error) parts.push(String(error));
+        if (stderr) parts.push(`stderr: ${String(stderr)}`);
+        const detail =
+          parts.length > 0 ? `: ${truncate(parts.join(" | "), 200)}` : "";
+        return `Failed to collect results${detail}`;
+      }
+      return `Job ${result.jobName || ""}: succeeded=${jr?.succeeded ?? "?"}, failed=${jr?.failed ?? "?"}`;
+    }
     default:
       return truncate(JSON.stringify(result), MAX_TOOL_SUMMARY_CHARS);
   }
@@ -118,6 +132,9 @@ function formatToolCallMd(tc: ToolCallEvent): string {
       break;
     case "submitK8sJob":
       header = `**🚀 submitK8sJob** \`${String(args.jobName || "")}\` (${args.gpuCount || 4} GPUs)`;
+      break;
+    case "collectJobResults":
+      header = `**📋 collectJobResults** \`${String(args.jobName || "")}\``;
       break;
     default:
       header = `**⚙️ ${tc.toolName}**`;

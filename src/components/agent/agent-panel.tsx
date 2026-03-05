@@ -200,6 +200,12 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
               <div className="text-agent-success">$ {String(args.command)}</div>
             </div>
           )}
+          {toolName === "collectJobResults" && args && (
+            <div className="text-agent-muted space-y-0.5">
+              <div>📋 Collecting results for: <span className="text-agent-accent">{String(args.jobName)}</span></div>
+              {args.namespace ? <div>Namespace: <span className="text-agent-foreground">{String(args.namespace)}</span></div> : null}
+            </div>
+          )}
 
           {/* Error */}
           {isError && part.errorText && (
@@ -343,6 +349,34 @@ function renderToolResult(
           {result.error != null && (
             <div className="text-agent-error">{String(result.error)}</div>
           )}
+        </div>
+      );
+    }
+    case "collectJobResults": {
+      const crSuccess = Boolean(result.success);
+      const crLogs = String(result.logs || "");
+      const crJobStatus = result.jobStatus as Record<string, unknown> | undefined;
+      return (
+        <div className="space-y-1">
+          <div className={crSuccess ? "text-agent-success" : "text-agent-error"}>
+            {crSuccess ? "Results collected" : "Failed to collect results"}
+            {result.jobName ? ` — ${String(result.jobName)}` : ""}
+          </div>
+          {crJobStatus && (
+            <div className="text-agent-muted text-xs">
+              Active: {String(crJobStatus.active ?? 0)} | Succeeded: {String(crJobStatus.succeeded ?? 0)} | Failed: {String(crJobStatus.failed ?? 0)}
+            </div>
+          )}
+          {crLogs && (
+            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed max-h-[400px] overflow-auto">
+              {crLogs}
+            </pre>
+          )}
+          {result.logsError ? (
+            <pre className="whitespace-pre-wrap text-agent-error leading-relaxed">
+              {String(result.logsError)}
+            </pre>
+          ) : null}
         </div>
       );
     }
@@ -1083,6 +1117,7 @@ export function AgentPanel({
               if (
                 e.key === "Enter" &&
                 !e.shiftKey &&
+                !e.nativeEvent.isComposing &&
                 !showAutocomplete
               ) {
                 e.preventDefault();

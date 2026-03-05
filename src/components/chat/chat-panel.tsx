@@ -515,7 +515,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
             rows={1}
             disabled={!aiEnabled || isSummarizing}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                 e.preventDefault();
                 handleSend();
               }

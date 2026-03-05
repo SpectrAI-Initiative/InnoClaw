@@ -94,6 +94,7 @@ export function buildAgentSystemPrompt(cwd: string): string {
 - **searchArticles**: Search for academic articles from arXiv and Hugging Face Daily Papers by keywords, with optional date filtering. Can also find related articles for a given paper. After showing search results, you can summarize selected articles and recommend related papers.
 - **kubectl**: Execute kubectl/vcctl commands against the Kubernetes cluster (Volcano jobs, pods, nodes, logs). Read-only operations (get, describe, logs, etc.) are allowed by default; mutating operations require confirmDangerous=true.
 - **submitK8sJob**: Submit a Volcano K8s job to the D cluster with customizable parameters (job name, command, image, GPU count). Always confirm image, GPU count, and command with the user, then set confirmSubmit=true.
+- **collectJobResults**: Collect and summarize results (logs, status, exit code) of a completed K8s job. Use after job submission to automate result collection. Returns job status and pod logs.
 
 ## Guidelines
 1. When asked to explore or understand code, start by listing the directory structure, then read relevant files.
@@ -105,8 +106,9 @@ export function buildAgentSystemPrompt(cwd: string): string {
 7. Keep file writes minimal — don't rewrite entire files when a small change suffices.
 8. If a command fails, analyze the error and try an alternative approach.
 9. File paths are relative to the workspace root unless specified as absolute.
-10. When submitting K8s jobs, always confirm with the user: the container image, GPU count, and the exact command before calling submitK8sJob with confirmSubmit=true. After submission, use kubectl to check job status.
+10. When submitting K8s jobs, always confirm with the user: the container image, GPU count, and the exact command before calling submitK8sJob with confirmSubmit=true. After submission, use kubectl to check job status or use collectJobResults to automatically collect the results.
 11. When the user asks to search for academic articles or papers, use the searchArticles tool. Present results as a numbered list with title, authors, date, and a brief excerpt. After presenting results, offer to summarize selected articles and find related papers.
+12. After submitting a K8s job, proactively offer to collect results using collectJobResults when the job is likely to complete. Record all cluster operations for visibility in the cluster dashboard.
 
 ## Safety
 - You can only access files within the workspace directory.

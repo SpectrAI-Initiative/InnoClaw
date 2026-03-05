@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,6 +66,10 @@ export default function SettingsPage() {
   }, []);
 
   const handleSave = async () => {
+    if (!model.trim()) {
+      toast.error(tCommon("error"));
+      return;
+    }
     try {
       await fetch("/api/settings", {
         method: "PATCH",

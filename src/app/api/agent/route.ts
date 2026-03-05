@@ -54,19 +54,19 @@ export async function POST(req: NextRequest) {
       }
 
       systemPrompt = buildSkillSystemPrompt(skill, cwd, paramValues || {});
-      tools = createAgentTools(cwd, skill.allowedTools);
+      tools = createAgentTools(cwd, skill.allowedTools, workspaceId);
     } else if (mode === "plan") {
       // Plan mode: read-only tools, focus on analysis and planning
       systemPrompt = buildPlanSystemPrompt(cwd);
-      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
+      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"], workspaceId);
     } else if (mode === "ask") {
       // Ask mode: read-only tools, can read files but never write or execute
       systemPrompt = buildAskSystemPrompt(cwd);
-      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
+      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"], workspaceId);
     } else {
       // Default agent mode
       systemPrompt = buildAgentSystemPrompt(cwd);
-      tools = createAgentTools(cwd);
+      tools = createAgentTools(cwd, undefined, workspaceId);
     }
 
     const modelMessages = await convertToModelMessages(

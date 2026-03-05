@@ -29,6 +29,13 @@
       "when": 1772675445272,
       "tag": "0003_notes_daily_report_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1772870412711,
+      "tag": "0004_cluster_operations",
+      "breakpoints": true
     }
   ]
 }
