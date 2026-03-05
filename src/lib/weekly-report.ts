@@ -8,8 +8,12 @@ import { buildWeeklyReportPrompt } from "@/lib/ai/prompts";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-function formatDate(d: Date): string {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+/**
+ * Format a Date as YYYY-MM-DD using UTC components.
+ * This aligns with `createdAt = new Date().toISOString()` stored in UTC.
+ */
+function formatDateUTC(d: Date): string {
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 }
 
 /**
@@ -17,7 +21,7 @@ function formatDate(d: Date): string {
  *
  * Given a reference date (defaults to today), computes:
  * - startDate: the most recent Saturday (going back from reference)
- * - endDate: the Thursday following that Saturday (6 days after Saturday)
+ * - endDate: the Thursday following that Saturday (5 days after Saturday)
  *
  * For a Friday reference: last Saturday = 6 days ago, Thursday = 1 day ago.
  */
@@ -27,27 +31,23 @@ export function getWeekRange(referenceDate?: Date): {
   weekLabel: string;
 } {
   const ref = referenceDate || new Date();
-  const dayOfWeek = ref.getDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat
+  const dayOfWeek = ref.getUTCDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat
 
-  // Find the most recent Saturday (before or on ref)
-  // Saturday = 6. Days since last Saturday:
-  // If ref is Friday (5): (5 - 6 + 7) % 7 = 6
-  // If ref is Saturday (6): (6 - 6 + 7) % 7 = 0 (today is Saturday)
-  // If ref is Thursday (4): (4 - 6 + 7) % 7 = 5
+  // Find the most recent Saturday (before or on ref) using UTC
   const daysSinceSat = (dayOfWeek - 6 + 7) % 7;
   const saturday = new Date(ref);
-  saturday.setDate(ref.getDate() - daysSinceSat);
-  saturday.setHours(0, 0, 0, 0);
+  saturday.setUTCDate(ref.getUTCDate() - daysSinceSat);
+  saturday.setUTCHours(0, 0, 0, 0);
 
   // Thursday = Saturday + 5 days
   const thursday = new Date(saturday);
-  thursday.setDate(saturday.getDate() + 5);
+  thursday.setUTCDate(saturday.getUTCDate() + 5);
 
-  const startDate = formatDate(saturday);
-  const endDate = formatDate(thursday);
+  const startDate = formatDateUTC(saturday);
+  const endDate = formatDateUTC(thursday);
 
-  // Week label: MM.DD-MM.DD
-  const weekLabel = `${pad(saturday.getMonth() + 1)}.${pad(saturday.getDate())}-${pad(thursday.getMonth() + 1)}.${pad(thursday.getDate())}`;
+  // Week label: MM.DD-MM.DD (UTC)
+  const weekLabel = `${pad(saturday.getUTCMonth() + 1)}.${pad(saturday.getUTCDate())}-${pad(thursday.getUTCMonth() + 1)}.${pad(thursday.getUTCDate())}`;
 
   return { startDate, endDate, weekLabel };
 }
@@ -83,9 +83,10 @@ async function getMemoryNotesForRange(
   endDate: string
 ) {
   // endDate is inclusive, so we query < endDate+1day
-  const endDateObj = new Date(endDate);
-  endDateObj.setDate(endDateObj.getDate() + 1);
-  const endDateExclusive = formatDate(endDateObj);
+  // Parse as explicit UTC to avoid timezone mismatch
+  const [year, month, day] = endDate.split("-").map(Number);
+  const endDateObj = new Date(Date.UTC(year, month - 1, day + 1));
+  const endDateExclusive = formatDateUTC(endDateObj);
 
   return db
     .select()

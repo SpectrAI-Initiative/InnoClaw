@@ -7,12 +7,19 @@ import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { buildDailyReportPrompt } from "@/lib/ai/prompts";
 
 /**
- * Get the YYYY-MM-DD date string for "today" (server local time).
+ * Get the YYYY-MM-DD date string for a given Date in UTC.
+ * Using UTC matches the date prefix of timestamps stored via toISOString().
+ */
+export function getUTCDateString(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+/**
+ * Get the YYYY-MM-DD date string for "today" in UTC.
+ * This matches the date prefix of timestamps stored via toISOString().
  */
 export function getTodayDateString(): string {
-  const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  return getUTCDateString(new Date());
 }
 
 /**
@@ -29,7 +36,7 @@ async function dailyReportExists(
       and(
         eq(notes.workspaceId, workspaceId),
         eq(notes.type, "daily_report"),
-        like(notes.title, `%${dateStr}%`)
+        eq(notes.reportDate, dateStr)
       )
     )
     .limit(1);
@@ -61,6 +68,7 @@ export interface DailyReportResult {
   success: boolean;
   noteId?: string;
   error?: string;
+  errorCode?: string;
   skipped?: boolean;
   reason?: string;
 }
@@ -85,7 +93,7 @@ export async function generateDailyReport(
   }
 
   if (!isAIAvailable()) {
-    return { success: false, error: "AI not configured" };
+    return { success: false, error: "AI not configured", errorCode: "ai_not_configured" };
   }
 
   const combined = memoryNotes
@@ -109,21 +117,35 @@ export async function generateDailyReport(
   const id = nanoid();
   const isoNow = new Date().toISOString();
 
-  await db.insert(notes).values({
-    id,
-    workspaceId,
-    title,
-    content: text,
-    type: "daily_report",
-    createdAt: isoNow,
-    updatedAt: isoNow,
-  });
+  const inserted = await db
+    .insert(notes)
+    .values({
+      id,
+      workspaceId,
+      title,
+      content: text,
+      type: "daily_report",
+      reportDate: date,
+      createdAt: isoNow,
+      updatedAt: isoNow,
+    })
+    .onConflictDoNothing({
+      target: [notes.workspaceId, notes.type, notes.reportDate],
+    })
+    .returning({ insertedId: notes.id });
+
+  // If another concurrent request already inserted the report, treat as skipped
+  if (inserted.length === 0) {
+    return { success: true, skipped: true, reason: "exists" };
+  }
 
   return { success: true, noteId: id };
 }
 
 /**
  * Generate daily reports for ALL workspaces (used by the midnight scheduler).
+ * Processes workspaces in parallel with bounded concurrency to balance
+ * throughput vs. rate limits.
  */
 export async function generateAllDailyReports(
   dateStr?: string
@@ -131,22 +153,26 @@ export async function generateAllDailyReports(
   const date = dateStr || getTodayDateString();
   const allWorkspaces = await db.select().from(workspaces);
 
-  for (const ws of allWorkspaces) {
-    try {
-      const result = await generateDailyReport(ws.id, date);
-      if (result.skipped) {
-        console.log(
-          `[daily-report] Skipped workspace ${ws.id}: ${result.reason}`
-        );
-      } else if (result.success) {
-        console.log(`[daily-report] Generated report for workspace ${ws.id}`);
+  const CONCURRENCY = 5;
+  for (let i = 0; i < allWorkspaces.length; i += CONCURRENCY) {
+    const batch = allWorkspaces.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(
+      batch.map((ws) => generateDailyReport(ws.id, date))
+    );
+    results.forEach((outcome, idx) => {
+      const ws = batch[idx];
+      if (outcome.status === "rejected") {
+        console.error(`[daily-report] Error for workspace ${ws.id}:`, outcome.reason);
       } else {
-        console.error(
-          `[daily-report] Failed for workspace ${ws.id}: ${result.error}`
-        );
+        const result = outcome.value;
+        if (result.skipped) {
+          console.log(`[daily-report] Skipped workspace ${ws.id}: ${result.reason}`);
+        } else if (result.success) {
+          console.log(`[daily-report] Generated report for workspace ${ws.id}`);
+        } else {
+          console.error(`[daily-report] Failed for workspace ${ws.id}: ${result.error}`);
+        }
       }
-    } catch (err) {
-      console.error(`[daily-report] Error for workspace ${ws.id}:`, err);
-    }
+    });
   }
 }
