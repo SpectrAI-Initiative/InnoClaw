@@ -293,5 +293,29 @@
     "exportDownload": "下载 JSON",
     "deleteStep": "删除步骤",
     "removeParameter": "移除参数"
+  },
+  "cluster": {
+    "clusterToggle": "集群",
+    "tabStatus": "状态",
+    "tabJobs": "任务",
+    "tabHistory": "历史",
+    "loading": "加载中…",
+    "error": "错误",
+    "refresh": "刷新",
+    "notConfigured": "集群未配置。请在 .env.local 中设置 KUBECONFIG_PATH 以启用集群管理。",
+    "nodesReady": "{ready}/{total} 节点就绪",
+    "nodes": "节点",
+    "noNodes": "未找到节点。",
+    "activePods": "活跃 Pod",
+    "noPods": "无活跃 Pod。",
+    "clusterJobs": "集群任务",
+    "noJobs": "未找到任务。",
+    "operationHistory": "操作历史",
+    "noHistory": "暂无集群操作记录。请通过智能体与集群交互。",
+    "submitJob": "提交任务",
+    "collectResults": "收取结果",
+    "ready": "就绪",
+    "notReady": "未就绪",
+    "active": "活跃"
   }
 }

@@ -12,6 +12,8 @@ import {
   Search,
   FolderOpen,
   Circle,
+  Server,
+  Container,
 } from "lucide-react";
 import type { ReportProcessStep } from "@/types/report";
 
@@ -21,6 +23,9 @@ const TOOL_ICONS: Record<string, React.ElementType> = {
   writeFile: FileText,
   listDirectory: FolderOpen,
   grep: Search,
+  kubectl: Server,
+  submitK8sJob: Container,
+  collectJobResults: Container,
 };
 
 function StepStatusIcon({ status }: { status: ReportProcessStep["status"] }) {

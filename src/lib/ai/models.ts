@@ -77,8 +77,15 @@ export const PROVIDERS = {
 } as const;
 
 export type ProviderId = keyof typeof PROVIDERS;
-export const DEFAULT_PROVIDER: ProviderId = "openai";
-export const DEFAULT_MODEL = "gpt-4o-mini";
+
+/**
+ * Read default provider / model from environment variables.
+ * Falls back to hardcoded values when the env vars are not set.
+ */
+export const DEFAULT_PROVIDER: ProviderId =
+  (process.env.LLM_PROVIDER as ProviderId) || "openai";
+export const DEFAULT_MODEL =
+  process.env.LLM_MODEL || "gpt-4o-mini";
 
 export const CONTEXT_MODES = {
   conservative: { id: "conservative", ratio: 0.6 },

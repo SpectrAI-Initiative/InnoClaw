@@ -5,6 +5,7 @@ import path from "path";
 import os from "os";
 import fsp from "fs/promises";
 import { buildSafeExecEnv } from "@/lib/env";
+import { recordClusterOp } from "@/lib/cluster/operations";
 import {
   validatePath,
   readFile as fsReadFile,
@@ -267,7 +268,8 @@ spec:
 
 export function createAgentTools(
   workspaceCwd: string,
-  allowedTools?: string[] | null
+  allowedTools?: string[] | null,
+  workspaceId?: string | null
 ) {
   const validatedCwd = validatePath(workspaceCwd);
 
@@ -415,6 +417,18 @@ export function createAgentTools(
         );
 
         if (!isReadOnly && !confirmDangerous) {
+          // Record blocked attempt
+          const blockedBin = useVcctl ? "vcctl" : "kubectl";
+          recordClusterOp({
+            workspaceId,
+            toolName: "kubectl",
+            subcommand,
+            namespace,
+            status: "blocked",
+            summary: `Blocked: ${blockedBin} ${subcommand.slice(0, 80)}`,
+            input: { subcommand, namespace, useVcctl },
+          }).catch(() => {});
+
           return {
             stdout: "",
             stderr: `SAFETY BLOCK: "${subcommand}" may modify the cluster. Set confirmDangerous=true to proceed.`,
@@ -430,6 +444,18 @@ export function createAgentTools(
         ];
 
         if (forbiddenPatterns.some((p) => p.test(subcommand.trim()))) {
+          // Record forbidden attempt
+          const forbiddenBin = useVcctl ? "vcctl" : "kubectl";
+          recordClusterOp({
+            workspaceId,
+            toolName: "kubectl",
+            subcommand,
+            namespace,
+            status: "blocked",
+            summary: `Forbidden: ${forbiddenBin} ${subcommand.slice(0, 80)}`,
+            input: { subcommand, namespace, useVcctl },
+          }).catch(() => {});
+
           return {
             stdout: "",
             stderr: `FORBIDDEN: "${subcommand}" is permanently blocked for safety.`,
@@ -492,7 +518,7 @@ export function createAgentTools(
               },
             },
             (error: Error | null, stdout: string, stderr: string) => {
-              resolve({
+              const result = {
                 stdout: (stdout || "").slice(0, 10000),
                 stderr: (stderr || "").slice(0, 5000),
                 exitCode: (error as NodeJS.ErrnoException)?.code
@@ -500,7 +526,22 @@ export function createAgentTools(
                   : error
                     ? 1
                     : 0,
-              });
+              };
+
+              // Record operation asynchronously (fire and forget)
+              recordClusterOp({
+                workspaceId,
+                toolName: "kubectl",
+                subcommand,
+                namespace,
+                status: result.exitCode === 0 ? "success" : "error",
+                exitCode: result.exitCode,
+                summary: `${bin} ${subcommand.slice(0, 80)}`,
+                input: { subcommand, namespace, useVcctl },
+                output: { exitCode: result.exitCode, stdoutLen: result.stdout.length },
+              }).catch(() => {});
+
+              resolve(result);
             }
           );
         });
@@ -658,6 +699,19 @@ export function createAgentTools(
             );
           });
 
+          // Record operation with actual result status
+          recordClusterOp({
+            workspaceId,
+            toolName: "submitK8sJob",
+            jobName,
+            namespace: resolvedNamespace,
+            status: result.exitCode === 0 ? "success" : "error",
+            exitCode: result.exitCode,
+            summary: `Submit ${jobName} (${resolvedGpuCount} GPUs)`,
+            input: { jobName, command, image: resolvedImage, gpuCount: resolvedGpuCount },
+            output: { exitCode: result.exitCode, success: result.exitCode === 0 },
+          }).catch(() => {});
+
           return {
             success: result.exitCode === 0,
             jobName,
@@ -708,6 +762,154 @@ export function createAgentTools(
           matches: result.stdout.slice(0, 20000) || result.stderr,
           exitCode: result.exitCode,
         };
+      },
+    }),
+
+    collectJobResults: tool({
+      description:
+        "Collect and summarize the results (logs, status, exit code) of a completed K8s job. " +
+        "Useful for automated result collection after job submission. " +
+        "Returns the job status and the last N lines of logs from the job's pods.",
+      inputSchema: z.object({
+        jobName: z
+          .string()
+          .describe("Name of the K8s job to collect results from"),
+        namespace: z
+          .string()
+          .optional()
+          .describe("Kubernetes namespace. Default: 'default'."),
+        tailLines: z
+          .number()
+          .optional()
+          .describe("Number of log lines to fetch (default: 200, max: 2000)"),
+      }),
+      execute: async ({ jobName, namespace, tailLines }) => {
+        const resolvedNamespace = namespace || "default";
+        const resolvedTailLines = Math.max(1, Math.min(tailLines ?? 200, 2000));
+
+        // Validate jobName
+        if (!isValidDnsLabel(jobName)) {
+          return {
+            success: false,
+            error: "Invalid jobName: must be a valid DNS label.",
+          };
+        }
+
+        // Validate namespace
+        if (!isValidDnsLabel(resolvedNamespace)) {
+          return {
+            success: false,
+            error: "Invalid namespace: must be a valid DNS label.",
+          };
+        }
+
+        // 1. Get job status
+        const statusResult = await new Promise<{
+          stdout: string;
+          stderr: string;
+          exitCode: number;
+        }>((resolve) => {
+          execFile(
+            "kubectl",
+            [
+              "get", "job", jobName,
+              "-n", resolvedNamespace,
+              "-o", "json",
+              "--kubeconfig", kubeconfigPath,
+            ],
+            {
+              cwd: validatedCwd,
+              timeout: 15_000,
+              maxBuffer: 1024 * 1024,
+              env: { ...baseExecEnv, KUBECONFIG: kubeconfigPath },
+            },
+            (error: Error | null, stdout: string, stderr: string) => {
+              resolve({
+                stdout: (stdout || "").slice(0, 20000),
+                stderr: (stderr || "").slice(0, 5000),
+                exitCode: error ? 1 : 0,
+              });
+            }
+          );
+        });
+
+        // 2. Get pod logs for the job
+        const logsResult = await new Promise<{
+          stdout: string;
+          stderr: string;
+          exitCode: number;
+        }>((resolve) => {
+          execFile(
+            "kubectl",
+            [
+              "logs",
+              `job/${jobName}`,
+              "-n", resolvedNamespace,
+              `--tail=${resolvedTailLines}`,
+              "--kubeconfig", kubeconfigPath,
+            ],
+            {
+              cwd: validatedCwd,
+              timeout: 30_000,
+              maxBuffer: 2 * 1024 * 1024,
+              env: { ...baseExecEnv, KUBECONFIG: kubeconfigPath },
+            },
+            (error: Error | null, stdout: string, stderr: string) => {
+              resolve({
+                stdout: (stdout || "").slice(0, 30000),
+                stderr: (stderr || "").slice(0, 5000),
+                exitCode: error ? 1 : 0,
+              });
+            }
+          );
+        });
+
+        // Parse job status
+        let jobStatus: Record<string, unknown> = {};
+        try {
+          const parsed = JSON.parse(statusResult.stdout);
+          const s = parsed?.status ?? {};
+          jobStatus = {
+            active: s.active ?? 0,
+            succeeded: s.succeeded ?? 0,
+            failed: s.failed ?? 0,
+            startTime: s.startTime ?? null,
+            completionTime: s.completionTime ?? null,
+            conditions: (s.conditions ?? []).map(
+              (c: Record<string, string>) => ({
+                type: c.type,
+                status: c.status,
+                reason: c.reason,
+              })
+            ),
+          };
+        } catch {
+          jobStatus = { raw: statusResult.stdout.slice(0, 2000) };
+        }
+
+        const result = {
+          success: statusResult.exitCode === 0,
+          jobName,
+          namespace: resolvedNamespace,
+          jobStatus,
+          logs: logsResult.stdout,
+          logsError: logsResult.stderr || undefined,
+        };
+
+        // Record operation
+        recordClusterOp({
+          workspaceId,
+          toolName: "collectJobResults",
+          jobName,
+          namespace: resolvedNamespace,
+          status: statusResult.exitCode === 0 ? "success" : "error",
+          exitCode: statusResult.exitCode,
+          summary: `Collect results for ${jobName}`,
+          input: { jobName, namespace: resolvedNamespace, tailLines: resolvedTailLines },
+          output: { jobStatus, logsLength: logsResult.stdout.length },
+        }).catch(() => {});
+
+        return result;
       },
     }),
 

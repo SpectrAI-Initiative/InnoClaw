@@ -293,5 +293,29 @@
     "exportDownload": "Download JSON",
     "deleteStep": "Delete step",
     "removeParameter": "Remove parameter"
+  },
+  "cluster": {
+    "clusterToggle": "Cluster",
+    "tabStatus": "Status",
+    "tabJobs": "Jobs",
+    "tabHistory": "History",
+    "loading": "Loading…",
+    "error": "Error",
+    "refresh": "Refresh",
+    "notConfigured": "Cluster not configured. Set KUBECONFIG_PATH in your .env.local to enable cluster management.",
+    "nodesReady": "{ready}/{total} Nodes Ready",
+    "nodes": "Nodes",
+    "noNodes": "No nodes found.",
+    "activePods": "Active Pods",
+    "noPods": "No active pods.",
+    "clusterJobs": "Cluster Jobs",
+    "noJobs": "No jobs found.",
+    "operationHistory": "Operation History",
+    "noHistory": "No cluster operations recorded yet. Use the Agent to interact with the cluster.",
+    "submitJob": "Submit Job",
+    "collectResults": "Collect Results",
+    "ready": "Ready",
+    "notReady": "NotReady",
+    "active": "Active"
   }
 }

@@ -14,6 +14,7 @@ const TOOL_LABEL_MAP: Record<string, string> = {
   grep: "Searched files",
   kubectl: "Ran kubectl",
   submitK8sJob: "Submitted job",
+  collectJobResults: "Collected job results",
 };
 
 function getToolLabel(toolName: string, args: Record<string, unknown>): string {
