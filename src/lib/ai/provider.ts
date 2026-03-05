@@ -1,4 +1,5 @@
 import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
@@ -10,7 +11,11 @@ import type { LanguageModel } from "ai";
  * Check if any AI API key is configured.
  */
 export function isAIAvailable(): boolean {
-  return !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY;
+  return (
+    !!process.env.OPENAI_API_KEY ||
+    !!process.env.ANTHROPIC_API_KEY ||
+    !!process.env.GEMINI_API_KEY
+  );
 }
 
 /**
@@ -38,6 +43,13 @@ const anthropic = createAnthropic({
   baseURL: getAnthropicBaseURL(),
 });
 
+// Create a dedicated OpenAI-compatible provider for Gemini models,
+// using separate GEMINI_API_KEY / GEMINI_BASE_URL env vars.
+const gemini = createOpenAI({
+  apiKey: process.env.GEMINI_API_KEY || "",
+  baseURL: process.env.GEMINI_BASE_URL,
+});
+
 /**
  * Get the currently configured LLM model based on settings
  */
@@ -62,6 +74,9 @@ export async function getConfiguredModel(): Promise<LanguageModel> {
       // Use Chat Completions API (not Responses API) for maximum compatibility
       // with third-party proxies and OpenAI-compatible services.
       return openai.chat(modelId);
+    case "gemini":
+      // Gemini models served via a separate OpenAI-compatible proxy
+      return gemini.chat(modelId);
     case "anthropic":
       return anthropic(modelId);
     default:

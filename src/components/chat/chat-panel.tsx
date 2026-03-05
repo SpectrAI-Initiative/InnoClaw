@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { TextStreamChatTransport } from "ai";
+import type { UIMessage } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot, User, AlertCircle, Check, Circle, CheckCheck } from "lucide-react";
+import { Send, Bot, User, AlertCircle, Check, Circle, CheckCheck, Brain } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import {
   markdownComponents,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/markdown/shared-components";
 import useSWR from "swr";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getOverflowThresholdChars, getMessageTextLength } from "@/lib/ai/models";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -275,13 +277,17 @@ interface ChatPanelProps {
 
 export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
   const t = useTranslations("chat");
+  const locale = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const summarizingRef = useRef(false);
+  const failedAtCountRef = useRef(-1);
 
   const { data: settings } = useSWR("/api/settings", fetcher);
   const aiEnabled = settings?.hasAIKey ?? false;
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, setMessages, status } = useChat({
     transport: new TextStreamChatTransport({
       api: "/api/chat",
       body: { workspaceId },
@@ -289,6 +295,87 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
   });
 
   const isLoading = status === "submitted" || status === "streaming";
+
+  // --- Auto-memory: summarize and evict when context overflows ---
+  const overflowThreshold = getOverflowThresholdChars(
+    settings?.llmProvider ?? "openai",
+    settings?.llmModel ?? "gpt-4o-mini",
+    settings?.contextMode ?? "normal"
+  );
+
+  const summarizeAndEvict = useCallback(async (
+    messagesToSummarize: UIMessage[],
+    messagesToKeep: UIMessage[]
+  ) => {
+    if (summarizingRef.current) return;
+    summarizingRef.current = true;
+    failedAtCountRef.current = -1;
+    setIsSummarizing(true);
+
+    try {
+      const res = await fetch("/api/agent/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspaceId,
+          messages: messagesToSummarize,
+          trigger: "overflow",
+          locale,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Summarization failed");
+      }
+
+      const memoryMarker = {
+        id: `memory-${Date.now()}`,
+        role: "assistant" as const,
+        parts: [{ type: "text" as const, text: t("memorySaved") }],
+      } as UIMessage;
+      setMessages([memoryMarker, ...messagesToKeep]);
+    } catch {
+      // On failure: do NOT evict messages; record count to prevent infinite retry
+      failedAtCountRef.current = messagesToSummarize.length + messagesToKeep.length;
+    } finally {
+      setIsSummarizing(false);
+      summarizingRef.current = false;
+    }
+  }, [workspaceId, locale, t, setMessages]);
+
+  useEffect(() => {
+    if (settings?.maxMode === false) return;
+    if (isSummarizing) return;
+    if (status !== "ready" && status !== "error") return;
+    if (messages.length < 4) return;
+    if (messages.length === failedAtCountRef.current) return;
+
+    const messageSizes = messages.map((m) => getMessageTextLength(m));
+    const totalChars = messageSizes.reduce((sum, s) => sum + s, 0);
+    if (totalChars <= overflowThreshold) return;
+
+    // Keep newest ~20% by character count
+    let keepFromIndex = messages.length;
+    let accumulatedChars = 0;
+    const targetKeepChars = totalChars * 0.2;
+
+    for (let i = messages.length - 1; i >= 0; i--) {
+      accumulatedChars += messageSizes[i];
+      if (accumulatedChars >= targetKeepChars) {
+        keepFromIndex = i;
+        break;
+      }
+    }
+
+    keepFromIndex = Math.min(keepFromIndex, messages.length - 2);
+    if (keepFromIndex <= 0) return;
+
+    const toSummarize = messages.slice(0, keepFromIndex);
+    const toKeep = messages.slice(keepFromIndex);
+
+    summarizeAndEvict(toSummarize, toKeep);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, status, isSummarizing]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -304,7 +391,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || isLoading || !aiEnabled) return;
+    if (!text || isLoading || !aiEnabled || isSummarizing) return;
     setInput("");
     await sendMessage({ text });
   };
@@ -407,6 +494,12 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                 </div>
               </div>
             )}
+            {isSummarizing && (
+              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-4 py-2 text-xs text-muted-foreground">
+                <Brain className="h-3.5 w-3.5 animate-pulse" />
+                {t("summarizing")}
+              </div>
+            )}
           </div>
         )}
       </ScrollArea>
@@ -420,7 +513,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
             placeholder={aiEnabled ? t("placeholder") : t("disabledState")}
             className="min-h-[40px] max-h-[120px] resize-none"
             rows={1}
-            disabled={!aiEnabled}
+            disabled={!aiEnabled || isSummarizing}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                 e.preventDefault();
@@ -428,7 +521,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
               }
             }}
           />
-          <Button size="icon" disabled={!aiEnabled || isLoading || !input.trim()} onClick={handleSend}>
+          <Button size="icon" disabled={!aiEnabled || isLoading || isSummarizing || !input.trim()} onClick={handleSend}>
             <Send className="h-4 w-4" />
           </Button>
         </div>

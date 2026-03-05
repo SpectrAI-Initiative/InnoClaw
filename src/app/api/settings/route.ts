@@ -19,15 +19,19 @@ export async function GET() {
     return NextResponse.json({
       llmProvider: settingsMap["llm_provider"] || "openai",
       llmModel: settingsMap["llm_model"] || "gpt-4o-mini",
+      contextMode: settingsMap["context_mode"] || "normal",
+      maxMode: settingsMap["max_mode"] !== "false",
       workspaceRoots: getWorkspaceRoots(),
       hasOpenAIKey: !!process.env.OPENAI_API_KEY,
       hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
+      hasGeminiKey: !!process.env.GEMINI_API_KEY,
       hasGithubToken: !!process.env.GITHUB_TOKEN,
       hasHfToken,
       hfTokenSource: settingsMap["hf_token"] ? "db" : (process.env.HF_TOKEN ? "env" : null),
-      hasAIKey: !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY,
+      hasAIKey: !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY || !!process.env.GEMINI_API_KEY,
       openaiBaseUrl: process.env.OPENAI_BASE_URL || "",
       anthropicBaseUrl: process.env.ANTHROPIC_BASE_URL || "",
+      geminiBaseUrl: process.env.GEMINI_BASE_URL || "",
       feishuBotEnabled:
         process.env.FEISHU_BOT_ENABLED === "true" &&
         !!process.env.FEISHU_APP_ID &&

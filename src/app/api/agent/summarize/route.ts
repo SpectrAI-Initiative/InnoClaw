@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { buildMemorySummarizationPrompt } from "@/lib/ai/prompts";
+import { getSummarizationLimitChars } from "@/lib/ai/models";
 import { db } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
+import { appSettings } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import enMessages from "@/i18n/messages/en.json";
@@ -83,8 +85,15 @@ export async function POST(req: NextRequest) {
     }
 
     const transcript = messagesToTranscript(messages);
-    // Limit transcript to ~100K chars to leave room for the system prompt
-    const truncatedTranscript = transcript.slice(0, 100_000);
+
+    // Compute dynamic transcript limit based on configured model's context window
+    const providerSetting = await db.select().from(appSettings).where(eq(appSettings.key, "llm_provider")).limit(1);
+    const modelSetting = await db.select().from(appSettings).where(eq(appSettings.key, "llm_model")).limit(1);
+    const transcriptLimit = getSummarizationLimitChars(
+      providerSetting[0]?.value || "openai",
+      modelSetting[0]?.value || "gpt-4o-mini"
+    );
+    const truncatedTranscript = transcript.slice(0, transcriptLimit);
 
     const model = await getConfiguredModel();
     const systemPrompt = buildMemorySummarizationPrompt(

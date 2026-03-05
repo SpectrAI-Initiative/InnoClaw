@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useSkills } from "@/lib/hooks/use-skills";
+import { getOverflowThresholdChars, getMessageTextLength } from "@/lib/ai/models";
 import { SkillAutocomplete } from "@/components/skills/skill-autocomplete";
 import { SkillParameterDialog } from "@/components/skills/skill-parameter-dialog";
 import {
@@ -494,6 +495,7 @@ export function AgentPanel({
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const summarizingRef = useRef(false);
+  const failedAtCountRef = useRef(-1);
 
   // Memory preview dialog state
   const [showMessageSelect, setShowMessageSelect] = useState(false);
@@ -683,7 +685,11 @@ export function AgentPanel({
   }, [messages, storageKey, status]);
 
   // --- Auto-memory: summarize and evict ---
-  const OVERFLOW_THRESHOLD_CHARS = 640_000; // ~160K tokens (80% of 200K context)
+  const overflowThreshold = getOverflowThresholdChars(
+    settings?.llmProvider ?? "openai",
+    settings?.llmModel ?? "gpt-4o-mini",
+    settings?.contextMode ?? "normal"
+  );
 
   const summarizeAndEvict = async (
     messagesToSummarize: UIMessage[],
@@ -692,6 +698,7 @@ export function AgentPanel({
   ) => {
     if (summarizingRef.current) return;
     summarizingRef.current = true;
+    failedAtCountRef.current = -1;
     setIsSummarizing(true);
     setSummaryError(null);
 
@@ -725,7 +732,10 @@ export function AgentPanel({
       }
     } catch (err) {
       setSummaryError(err instanceof Error ? err.message : "Summarization failed");
-      // On failure: do NOT evict messages
+      // On failure: do NOT evict messages; record count to prevent infinite retry
+      if (trigger === "overflow") {
+        failedAtCountRef.current = messagesToSummarize.length + messagesToKeep.length;
+      }
     } finally {
       setIsSummarizing(false);
       summarizingRef.current = false;
@@ -734,14 +744,16 @@ export function AgentPanel({
 
   // Detect context overflow after messages stabilize (not during streaming)
   useEffect(() => {
+    if (settings?.maxMode === false) return;
     if (restoreGenRef.current > 0 || isSummarizing) return;
     if (status !== "ready" && status !== "error") return;
     if (messages.length < 4) return;
+    if (messages.length === failedAtCountRef.current) return;
 
     // Pre-compute per-message sizes once to avoid repeated serialization
-    const messageSizes = messages.map((m) => JSON.stringify(m).length);
+    const messageSizes = messages.map((m) => getMessageTextLength(m));
     const totalChars = messageSizes.reduce((sum, s) => sum + s, 0);
-    if (totalChars <= OVERFLOW_THRESHOLD_CHARS) return;
+    if (totalChars <= overflowThreshold) return;
 
     // Find split point: keep newest ~20% by character count
     let keepFromIndex = messages.length;
@@ -831,7 +843,7 @@ export function AgentPanel({
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || isLoading || !aiEnabled) return;
+    if (!text || isLoading || !aiEnabled || isSummarizing) return;
 
     // Check if input matches a skill slug
     if (text.startsWith("/")) {
@@ -1112,7 +1124,7 @@ export function AgentPanel({
                 handleSend();
               }
             }}
-            disabled={!aiEnabled}
+            disabled={!aiEnabled || isSummarizing}
             placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
             className="flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono"
             autoFocus

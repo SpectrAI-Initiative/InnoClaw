@@ -97,7 +97,7 @@
   "chat": {
     "placeholder": "Type your question...",
     "emptyState": "Ask questions about your workspace files and get AI-powered answers with citations.",
-    "disabledState": "AI chat requires an API key. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env.local.",
+    "disabledState": "AI chat requires an API key. Please set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY in .env.local.",
     "citedFrom": "Cited from",
     "send": "Send",
     "suggested": {
@@ -111,7 +111,9 @@
     "confirmSelection": "Confirm Selection",
     "selectionConfirmed": "Selection confirmed",
     "selectionSingle": "I selected the following option:",
-    "selectionMulti": "I selected the following options:"
+    "selectionMulti": "I selected the following options:",
+    "memorySaved": "Previous conversation saved to memory notes.",
+    "summarizing": "Saving conversation to memory..."
   },
   "notes": {
     "title": "Notes",
@@ -159,6 +161,13 @@
     "botIntegrationsDesc": "Configure Feishu and WeChat bot credentials in .env.local. Webhook endpoints: /api/bot/feishu, /api/bot/wechat.",
     "feishuBot": "Feishu (Lark) Bot",
     "wechatBot": "WeChat (Enterprise) Bot",
+    "contextMode": "Context Length Mode",
+    "contextModeDesc": "Controls how much of the model's context window is used before auto-summarization kicks in.",
+    "contextMode_conservative": "Conservative (60%)",
+    "contextMode_normal": "Normal (80%)",
+    "contextMode_extended": "Extended (95%)",
+    "maxMode": "MAX Mode",
+    "maxModeDesc": "When enabled, conversations are automatically summarized when approaching the context limit. When disabled, no auto-summarization occurs.",
     "customModel": "Custom...",
     "customModelPlaceholder": "Enter model name, e.g. qwen-plus",
     "hfToken": "HuggingFace Token",

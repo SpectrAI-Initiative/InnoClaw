@@ -97,7 +97,7 @@
   "chat": {
     "placeholder": "输入你的问题...",
     "emptyState": "向 AI 提问关于工作空间文件的问题，获取带引用的回答。",
-    "disabledState": "AI 对话功能需要配置 API Key。请在 .env.local 中设置 OPENAI_API_KEY 或 ANTHROPIC_API_KEY。",
+    "disabledState": "AI 对话功能需要配置 API Key。请在 .env.local 中设置 OPENAI_API_KEY、ANTHROPIC_API_KEY 或 GEMINI_API_KEY。",
     "citedFrom": "引用自",
     "send": "发送",
     "suggested": {
@@ -111,7 +111,9 @@
     "confirmSelection": "确认选择",
     "selectionConfirmed": "已确认选择",
     "selectionSingle": "我选择了以下选项：",
-    "selectionMulti": "我选择了以下选项："
+    "selectionMulti": "我选择了以下选项：",
+    "memorySaved": "之前的对话已保存到记忆笔记。",
+    "summarizing": "正在将对话保存到记忆中..."
   },
   "notes": {
     "title": "笔记",
@@ -162,6 +164,13 @@
     "botIntegrationsDesc": "在 .env.local 中配置飞书和微信机器人密钥。Webhook 端点：/api/bot/feishu、/api/bot/wechat。",
     "feishuBot": "飞书机器人",
     "wechatBot": "企业微信机器人",
+    "contextMode": "上下文长度模式",
+    "contextModeDesc": "控制模型上下文窗口的使用比例，超出后会自动摘要保存。",
+    "contextMode_conservative": "保守 (60%)",
+    "contextMode_normal": "标准 (80%)",
+    "contextMode_extended": "扩展 (95%)",
+    "maxMode": "MAX 模式",
+    "maxModeDesc": "启用时，对话接近上下文限制时会自动摘要保存。关闭时，对话将无限增长直到模型报错。",
     "customModel": "自定义...",
     "customModelPlaceholder": "输入模型名称，例如 qwen-plus",
     "hfToken": "HuggingFace Token",

@@ -42,6 +42,38 @@ export const PROVIDERS = {
     ],
     envKey: "ANTHROPIC_API_KEY",
   },
+  gemini: {
+    id: "gemini",
+    name: "Gemini",
+    models: [
+      {
+        id: "gemini-2.5-flash",
+        name: "Gemini 2.5 Flash",
+        contextWindow: 1048576,
+      },
+      {
+        id: "gemini-2.5-pro",
+        name: "Gemini 2.5 Pro",
+        contextWindow: 1048576,
+      },
+      {
+        id: "gemini-3-flash-preview",
+        name: "Gemini 3 Flash",
+        contextWindow: 1048576,
+      },
+      {
+        id: "gemini-3-pro-preview",
+        name: "Gemini 3 Pro",
+        contextWindow: 1048576,
+      },
+      {
+        id: "gemini-3.1-pro-preview-thinking",
+        name: "Gemini 3.1 Pro (Thinking)",
+        contextWindow: 1048576,
+      },
+    ],
+    envKey: "GEMINI_API_KEY",
+  },
 } as const;
 
 export type ProviderId = keyof typeof PROVIDERS;
@@ -54,3 +86,56 @@ export const DEFAULT_PROVIDER: ProviderId =
   (process.env.LLM_PROVIDER as ProviderId) || "openai";
 export const DEFAULT_MODEL =
   process.env.LLM_MODEL || "gpt-4o-mini";
+
+export const CONTEXT_MODES = {
+  conservative: { id: "conservative", ratio: 0.6 },
+  normal: { id: "normal", ratio: 0.8 },
+  extended: { id: "extended", ratio: 0.95 },
+} as const;
+
+export type ContextModeId = keyof typeof CONTEXT_MODES;
+export const DEFAULT_CONTEXT_MODE: ContextModeId = "normal";
+
+/**
+ * Compute the overflow threshold (in characters) for a given provider/model/mode.
+ * Uses ~4 chars per token and the mode's ratio of the model's context window.
+ */
+export function getOverflowThresholdChars(
+  providerId: string,
+  modelId: string,
+  contextMode: string = "normal"
+): number {
+  const provider = PROVIDERS[providerId as ProviderId];
+  const model = provider?.models.find((m) => m.id === modelId);
+  const contextWindow = model?.contextWindow ?? 200_000;
+  const ratio = CONTEXT_MODES[contextMode as ContextModeId]?.ratio ?? 0.8;
+  return Math.floor(contextWindow * 4 * ratio);
+}
+
+/**
+ * Compute the maximum transcript length (in characters) the summarization
+ * endpoint should process.  Uses ~75% of the model's context window in chars,
+ * leaving room for the system prompt and generated summary.
+ */
+export function getSummarizationLimitChars(
+  providerId: string,
+  modelId: string
+): number {
+  const provider = PROVIDERS[providerId as ProviderId];
+  const model = provider?.models.find((m) => m.id === modelId);
+  const contextWindow = model?.contextWindow ?? 200_000;
+  return Math.floor(contextWindow * 3);
+}
+
+/**
+ * Measure the text-only character length of a UI message (ignoring JSON
+ * metadata like id, role, parts structure).
+ */
+export function getMessageTextLength(
+  message: { parts?: Array<{ type: string; text?: string }> }
+): number {
+  if (!message.parts) return 0;
+  return message.parts
+    .filter((p) => p.type === "text")
+    .reduce((sum, p) => sum + (p.text?.length ?? 0), 0);
+}
