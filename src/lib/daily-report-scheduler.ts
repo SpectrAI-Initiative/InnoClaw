@@ -47,11 +47,10 @@ export function startDailyReportScheduler(): void {
         const { generateAllDailyReports } = await import(
           "@/lib/daily-report"
         );
-        // At midnight of day N+1, generate report for day N (yesterday)
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
+        // At local midnight of day N+1, generate report for the previous UTC day
+        const utcYesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const pad = (n: number) => String(n).padStart(2, "0");
-        const dateStr = `${yesterday.getFullYear()}-${pad(yesterday.getMonth() + 1)}-${pad(yesterday.getDate())}`;
+        const dateStr = `${utcYesterday.getUTCFullYear()}-${pad(utcYesterday.getUTCMonth() + 1)}-${pad(utcYesterday.getUTCDate())}`;
         await generateAllDailyReports(dateStr);
       } catch (err) {
         console.error("[daily-report-scheduler] Error:", err);
