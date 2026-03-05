@@ -12,13 +12,14 @@ const globalForScheduler = globalThis as unknown as {
 };
 
 /**
- * Calculate milliseconds until the next midnight (00:00:00).
+ * Calculate milliseconds until the next UTC midnight (00:00:00 UTC).
+ * Using UTC midnight ensures consistency with UTC-based date strings.
  */
 function msUntilNextMidnight(): number {
   const now = new Date();
   const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  tomorrow.setUTCHours(0, 0, 0, 0);
   return tomorrow.getTime() - now.getTime();
 }
 
@@ -44,13 +45,13 @@ export function startDailyReportScheduler(): void {
     const timer = setTimeout(async () => {
       console.log("[daily-report-scheduler] Midnight trigger fired");
       try {
-        const { generateAllDailyReports } = await import(
+        const { generateAllDailyReports, getUTCDateString } = await import(
           "@/lib/daily-report"
         );
-        // At local midnight of day N+1, generate report for the previous UTC day
-        const utcYesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        const pad = (n: number) => String(n).padStart(2, "0");
-        const dateStr = `${utcYesterday.getUTCFullYear()}-${pad(utcYesterday.getUTCMonth() + 1)}-${pad(utcYesterday.getUTCDate())}`;
+        // At midnight of day N+1, generate report for day N (yesterday)
+        const yesterday = new Date();
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+        const dateStr = getUTCDateString(yesterday);
         await generateAllDailyReports(dateStr);
       } catch (err) {
         console.error("[daily-report-scheduler] Error:", err);

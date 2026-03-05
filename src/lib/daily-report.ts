@@ -1,18 +1,25 @@
 import { db } from "@/lib/db";
 import { notes, workspaces } from "@/lib/db/schema";
-import { eq, and, gte, lt, like } from "drizzle-orm";
+import { eq, and, like } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { generateText } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { buildDailyReportPrompt } from "@/lib/ai/prompts";
 
 /**
- * Get the YYYY-MM-DD date string for "today" based on the current ISO (UTC) date.
- * Uses the date portion of `toISOString()` so it matches ISO-formatted `createdAt` prefixes.
+ * Get the YYYY-MM-DD date string for a given Date in UTC.
+ * Using UTC matches the date prefix of timestamps stored via toISOString().
  */
-export function getTodayDateString(now: Date = new Date()): string {
-  // `toISOString()` is always in UTC and starts with "YYYY-MM-DD"
-  return now.toISOString().slice(0, 10);
+export function getUTCDateString(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+/**
+ * Get the YYYY-MM-DD date string for "today" in UTC.
+ * This matches the date prefix of timestamps stored via toISOString().
+ */
+export function getTodayDateString(): string {
+  return getUTCDateString(new Date());
 }
 
 /**
@@ -29,7 +36,7 @@ async function dailyReportExists(
       and(
         eq(notes.workspaceId, workspaceId),
         eq(notes.type, "daily_report"),
-        like(notes.title, `%${dateStr}%`)
+        eq(notes.reportDate, dateStr)
       )
     )
     .limit(1);
@@ -37,19 +44,13 @@ async function dailyReportExists(
 }
 
 /**
- * Get all memory notes for a workspace created on the given UTC date.
- * Uses a range query (>= dateStr, < nextDay) for reliable matching against
- * ISO-formatted createdAt timestamps.
+ * Get all memory notes for a workspace created on the given date.
+ * Matches notes whose createdAt starts with the date string (ISO format).
  */
 async function getMemoryNotesForDate(
   workspaceId: string,
   dateStr: string
 ) {
-  // Compute the next day from the YYYY-MM-DD string for an exclusive upper bound
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const nextDay = new Date(Date.UTC(year, month - 1, day + 1));
-  const nextDayStr = nextDay.toISOString().slice(0, 10);
-
   return db
     .select()
     .from(notes)
@@ -57,8 +58,7 @@ async function getMemoryNotesForDate(
       and(
         eq(notes.workspaceId, workspaceId),
         eq(notes.type, "memory"),
-        gte(notes.createdAt, dateStr),
-        lt(notes.createdAt, nextDayStr)
+        like(notes.createdAt, `${dateStr}%`)
       )
     )
     .orderBy(notes.createdAt);
@@ -68,6 +68,7 @@ export interface DailyReportResult {
   success: boolean;
   noteId?: string;
   error?: string;
+  errorCode?: string;
   skipped?: boolean;
   reason?: string;
 }
@@ -92,7 +93,7 @@ export async function generateDailyReport(
   }
 
   if (!isAIAvailable()) {
-    return { success: false, error: "AI not configured" };
+    return { success: false, error: "AI not configured", errorCode: "ai_not_configured" };
   }
 
   const combined = memoryNotes
@@ -116,21 +117,35 @@ export async function generateDailyReport(
   const id = nanoid();
   const isoNow = new Date().toISOString();
 
-  await db.insert(notes).values({
-    id,
-    workspaceId,
-    title,
-    content: text,
-    type: "daily_report",
-    createdAt: isoNow,
-    updatedAt: isoNow,
-  });
+  const inserted = await db
+    .insert(notes)
+    .values({
+      id,
+      workspaceId,
+      title,
+      content: text,
+      type: "daily_report",
+      reportDate: date,
+      createdAt: isoNow,
+      updatedAt: isoNow,
+    })
+    .onConflictDoNothing({
+      target: [notes.workspaceId, notes.type, notes.reportDate],
+    })
+    .returning({ insertedId: notes.id });
+
+  // If another concurrent request already inserted the report, treat as skipped
+  if (inserted.length === 0) {
+    return { success: true, skipped: true, reason: "exists" };
+  }
 
   return { success: true, noteId: id };
 }
 
 /**
  * Generate daily reports for ALL workspaces (used by the midnight scheduler).
+ * Processes workspaces in parallel with bounded concurrency to balance
+ * throughput vs. rate limits.
  */
 export async function generateAllDailyReports(
   dateStr?: string
@@ -138,22 +153,26 @@ export async function generateAllDailyReports(
   const date = dateStr || getTodayDateString();
   const allWorkspaces = await db.select().from(workspaces);
 
-  for (const ws of allWorkspaces) {
-    try {
-      const result = await generateDailyReport(ws.id, date);
-      if (result.skipped) {
-        console.log(
-          `[daily-report] Skipped workspace ${ws.id}: ${result.reason}`
-        );
-      } else if (result.success) {
-        console.log(`[daily-report] Generated report for workspace ${ws.id}`);
+  const CONCURRENCY = 5;
+  for (let i = 0; i < allWorkspaces.length; i += CONCURRENCY) {
+    const batch = allWorkspaces.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(
+      batch.map((ws) => generateDailyReport(ws.id, date))
+    );
+    results.forEach((outcome, idx) => {
+      const ws = batch[idx];
+      if (outcome.status === "rejected") {
+        console.error(`[daily-report] Error for workspace ${ws.id}:`, outcome.reason);
       } else {
-        console.error(
-          `[daily-report] Failed for workspace ${ws.id}: ${result.error}`
-        );
+        const result = outcome.value;
+        if (result.skipped) {
+          console.log(`[daily-report] Skipped workspace ${ws.id}: ${result.reason}`);
+        } else if (result.success) {
+          console.log(`[daily-report] Generated report for workspace ${ws.id}`);
+        } else {
+          console.error(`[daily-report] Failed for workspace ${ws.id}: ${result.error}`);
+        }
       }
-    } catch (err) {
-      console.error(`[daily-report] Error for workspace ${ws.id}:`, err);
-    }
+    });
   }
 }

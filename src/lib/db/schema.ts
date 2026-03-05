@@ -95,13 +95,18 @@ export const notes = sqliteTable("notes", {
   })
     .notNull()
     .default("manual"),
+  reportDate: text("report_date"),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(datetime('now'))`),
-});
+}, (table) => [
+  // Only daily_report rows set reportDate, so the constraint effectively
+  // scopes to that type — SQLite treats NULLs as distinct in unique indexes.
+  uniqueIndex("notes_daily_report_unique_idx").on(table.workspaceId, table.type, table.reportDate),
+]);
 
 // ============================================================
 // APP SETTINGS
