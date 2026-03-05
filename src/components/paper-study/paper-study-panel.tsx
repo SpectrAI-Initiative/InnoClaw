@@ -102,6 +102,7 @@ export function PaperStudyPanel({
 
     setIsSummarizing(true);
     setSummary("");
+    setSearchErrors(undefined);
     try {
       const sumRes = await fetch("/api/paper-study/summarize", {
         method: "POST",

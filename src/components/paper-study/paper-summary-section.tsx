@@ -34,7 +34,7 @@ export function PaperSummarySection({
     try {
       const now = new Date();
       const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-      await fetch("/api/notes", {
+      const res = await fetch("/api/notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -44,11 +44,15 @@ export function PaperSummarySection({
           type: "summary",
         }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Save failed (${res.status})`);
+      }
       setSaved(true);
       onSaved?.();
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      toast.error("Failed to save summary");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save summary");
     } finally {
       setSaving(false);
     }
