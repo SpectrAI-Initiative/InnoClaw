@@ -26,6 +26,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { PROVIDERS, CONTEXT_MODES } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
+import { ScheduledTasksCard } from "@/components/scheduled-tasks/scheduled-tasks-card";
 
 interface Settings {
   llmProvider: string;
@@ -408,6 +409,9 @@ export default function SettingsPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Scheduled Tasks */}
+            <ScheduledTasksCard />
           </div>
         </main>
       </ScrollArea>

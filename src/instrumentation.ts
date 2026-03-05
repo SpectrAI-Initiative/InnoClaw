@@ -60,5 +60,9 @@ export async function register() {
       "@/lib/weekly-report-scheduler"
     );
     startWeeklyReportScheduler();
+
+    // Start the generic task scheduler (user-defined cron tasks)
+    const { startTaskScheduler } = await import("@/lib/scheduler");
+    startTaskScheduler();
   }
 }
