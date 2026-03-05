@@ -35,7 +35,6 @@ export async function searchHuggingFace(
       signal: controller.signal,
     });
   } catch (err) {
-    clearTimeout(timer);
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new Error("Hugging Face API request timed out");
     }

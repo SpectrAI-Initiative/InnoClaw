@@ -13,9 +13,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const validSources: ArticleSource[] | undefined = sources?.filter(
-      (s: string) => s === "arxiv" || s === "huggingface"
-    );
+    const validSources: ArticleSource[] | undefined = Array.isArray(sources)
+      ? sources.filter(
+          (s: unknown): s is ArticleSource => s === "arxiv" || s === "huggingface"
+        )
+      : undefined;
 
     const result = await searchArticles({
       keywords,

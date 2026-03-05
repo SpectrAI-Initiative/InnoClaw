@@ -116,16 +116,20 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
     if (!editingNote || !editTitle) return;
     setSavingEdit(true);
     try {
-      await fetch(`/api/notes/${editingNote.id}`, {
+      const res = await fetch(`/api/notes/${editingNote.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: editTitle, content: editContent }),
       });
+      if (!res.ok) {
+        toast.error(tCommon("error"));
+        return;
+      }
       setEditingNote(null);
       mutate();
       toast.success(tCommon("success"));
     } catch {
-      toast.error("Failed to update note");
+      toast.error(tCommon("error"));
     } finally {
       setSavingEdit(false);
     }

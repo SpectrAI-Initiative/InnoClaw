@@ -1,5 +1,6 @@
 "use client";
 
+import { type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import { ExternalLink, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -43,12 +44,22 @@ export function ArticleCard({
       ? article.url.replace("/abs/", "/pdf/")
       : null);
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSelect(article);
+    }
+  };
+
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={`cursor-pointer rounded-lg border p-3 transition-colors hover:bg-accent/50 ${
         isSelected ? "border-primary bg-accent/30" : "border-border"
       }`}
       onClick={() => onSelect(article)}
+      onKeyDown={handleKeyDown}
     >
       <div className="mb-1 flex items-start justify-between gap-2">
         <div className="flex items-start gap-2 min-w-0">

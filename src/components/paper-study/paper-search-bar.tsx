@@ -141,7 +141,7 @@ export function PaperSearchBar({
       {/* Divider */}
       <div className="flex items-center gap-2">
         <div className="flex-1 border-t" />
-        <span className="text-[10px] text-muted-foreground">or</span>
+        <span className="text-[10px] text-muted-foreground">{t("or")}</span>
         <div className="flex-1 border-t" />
       </div>
 
