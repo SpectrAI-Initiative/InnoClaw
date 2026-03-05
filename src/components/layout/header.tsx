@@ -3,11 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { BookOpen, Settings, Zap, FolderOpen } from "lucide-react";
+import { BookOpen, Settings, Zap, FolderOpen, Minimize2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageToggle } from "./language-toggle";
 
-export function Header() {
+interface HeaderProps {
+  onToggleMinimalMode?: () => void;
+  showMinimalToggle?: boolean;
+}
+
+export function Header({ onToggleMinimalMode, showMinimalToggle }: HeaderProps) {
   const t = useTranslations("common");
   const pathname = usePathname();
 
@@ -24,6 +30,18 @@ export function Header() {
         </Link>
         <div className="flex-1" />
         <div className="flex items-center gap-2">
+          {showMinimalToggle && onToggleMinimalMode && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9"
+              onClick={onToggleMinimalMode}
+              title={t("minimalMode")}
+            >
+              <Minimize2 className="h-4 w-4" />
+              <span className="sr-only">{t("minimalMode")}</span>
+            </Button>
+          )}
           {workspaceId && pathname !== `/workspace/${workspaceId}` && (
             <Link
               href={`/workspace/${workspaceId}`}
