@@ -7,12 +7,12 @@ import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { buildDailyReportPrompt } from "@/lib/ai/prompts";
 
 /**
- * Get the YYYY-MM-DD date string for "today" (server local time).
+ * Get the YYYY-MM-DD date string for "today" based on the current ISO (UTC) date.
+ * Uses the date portion of `toISOString()` so it matches ISO-formatted `createdAt` prefixes.
  */
-export function getTodayDateString(): string {
-  const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+export function getTodayDateString(now: Date = new Date()): string {
+  // `toISOString()` is always in UTC and starts with "YYYY-MM-DD"
+  return now.toISOString().slice(0, 10);
 }
 
 /**
