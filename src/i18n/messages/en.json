@@ -156,7 +156,10 @@
     "feishuBot": "Feishu (Lark) Bot",
     "wechatBot": "WeChat (Enterprise) Bot",
     "customModel": "Custom...",
-    "customModelPlaceholder": "Enter model name, e.g. qwen-plus"
+    "customModelPlaceholder": "Enter model name, e.g. qwen-plus",
+    "fetchModels": "Fetch Models",
+    "fetchingModels": "Fetching...",
+    "fetchModelsSuccess": "Fetched {count} models from provider"
   },
   "terminal": {
     "title": "Terminal",
