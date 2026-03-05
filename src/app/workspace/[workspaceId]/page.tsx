@@ -20,10 +20,11 @@ import { useWorkspace } from "@/lib/hooks/use-workspaces";
 import { useReport } from "@/lib/hooks/use-report";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Bot, FileText, GraduationCap } from "lucide-react";
+import { Bot, FileText, GraduationCap, Server } from "lucide-react";
+import { ClusterPanel } from "@/components/cluster/cluster-panel";
 import type { Article } from "@/lib/article-search/types";
 
-type MiddlePanel = "agent" | "report" | "paperStudy";
+type MiddlePanel = "agent" | "report" | "paperStudy" | "cluster";
 
 export default function WorkspacePage({
   params,
@@ -37,6 +38,7 @@ export default function WorkspacePage({
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const { report, isAvailable: reportAvailable } = useReport(workspaceId);
   const t = useTranslations("report");
+  const tc = useTranslations("cluster");
 
   if (isLoading) {
     return (
@@ -113,6 +115,15 @@ export default function WorkspacePage({
                     >
                       <GraduationCap className="h-3 w-3" />
                     </Button>
+                    <Button
+                      variant={middlePanel === "cluster" ? "default" : "outline"}
+                      size="icon-xs"
+                      onClick={() => setMiddlePanel("cluster")}
+                      title={tc("clusterToggle")}
+                      aria-label={tc("clusterToggle")}
+                    >
+                      <Server className="h-3 w-3" />
+                    </Button>
                   </div>
 
                   {/* Keep all mounted for state preservation */}
@@ -131,6 +142,9 @@ export default function WorkspacePage({
                       workspaceId={workspaceId}
                       onArticleSelect={setSelectedArticle}
                     />
+                  </div>
+                  <div className={middlePanel === "cluster" ? "h-full" : "hidden"}>
+                    <ClusterPanel workspaceId={workspaceId} />
                   </div>
                 </div>
               </ResizablePanel>

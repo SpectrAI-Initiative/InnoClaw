@@ -94,6 +94,7 @@ export function buildAgentSystemPrompt(cwd: string): string {
 - **searchArticles**: Search for academic articles from arXiv and Hugging Face Daily Papers by keywords, with optional date filtering. Can also find related articles for a given paper. After showing search results, you can summarize selected articles and recommend related papers.
 - **kubectl**: Execute kubectl/vcctl commands against the Kubernetes cluster (Volcano jobs, pods, nodes, logs). Read-only operations (get, describe, logs, etc.) are allowed by default; mutating operations require confirmDangerous=true.
 - **submitK8sJob**: Submit a Volcano K8s job to the D cluster with customizable parameters (job name, command, image, GPU count). Always confirm image, GPU count, and command with the user, then set confirmSubmit=true.
+- **collectJobResults**: Collect and summarize results (logs, status, exit code) of a completed K8s job. Use after job submission to automate result collection. Returns job status and pod logs.
 
 ## Guidelines
 1. When asked to explore or understand code, start by listing the directory structure, then read relevant files.
@@ -105,8 +106,9 @@ export function buildAgentSystemPrompt(cwd: string): string {
 7. Keep file writes minimal — don't rewrite entire files when a small change suffices.
 8. If a command fails, analyze the error and try an alternative approach.
 9. File paths are relative to the workspace root unless specified as absolute.
-10. When submitting K8s jobs, always confirm with the user: the container image, GPU count, and the exact command before calling submitK8sJob with confirmSubmit=true. After submission, use kubectl to check job status.
+10. When submitting K8s jobs, always confirm with the user: the container image, GPU count, and the exact command before calling submitK8sJob with confirmSubmit=true. After submission, use kubectl to check job status or use collectJobResults to automatically collect the results.
 11. When the user asks to search for academic articles or papers, use the searchArticles tool. Present results as a numbered list with title, authors, date, and a brief excerpt. After presenting results, offer to summarize selected articles and find related papers.
+12. After submitting a K8s job, proactively offer to collect results using collectJobResults when the job is likely to complete. Record all cluster operations for visibility in the cluster dashboard.
 
 ## Safety
 - You can only access files within the workspace directory.
@@ -288,4 +290,69 @@ ${article.abstract}
 6. 解释论文中涉及的专业术语和概念
 
 请始终用中文回答，即使论文本身是英文的。回答要准确、专业且有深度。`;
+}
+
+/**
+ * Build a system prompt for synthesizing daily memory notes into a daily report.
+ */
+export function buildDailyReportPrompt(): string {
+  return `You are a daily report assistant. Synthesize the following memory notes from the target day's conversations into a single cohesive daily report.
+
+## Output Format
+
+### Day Summary
+- A brief overview of what was accomplished
+
+### Key Activities & Decisions
+- Main tasks worked on, decisions made, problems solved
+
+### Technical Details
+- Important code changes, file paths, configurations, commands used
+
+### Issues & Blockers
+- Problems encountered, unresolved issues
+
+### Next Steps
+- Planned work, pending items, follow-ups
+
+## Rules
+1. Merge related topics across different memory notes into unified sections
+2. Remove redundancy — if the same topic appears in multiple notes, consolidate
+3. Preserve specific details: file paths, code snippets, error messages
+4. Use bullet points for readability
+5. Match the language of the majority of the input notes
+6. Keep the report between 500-3000 words depending on the volume of activity`;
+}
+
+/**
+ * Build a system prompt for synthesizing a week's memory notes into a weekly report.
+ */
+export function buildWeeklyReportPrompt(dateRange: string): string {
+  return `You are a weekly report assistant. Synthesize the following memory notes from the week (${dateRange}) into a single cohesive weekly report.
+
+## Output Format
+
+### Week Overview
+- A brief summary of the week's overall progress and themes
+
+### Key Accomplishments
+- Major tasks completed, features delivered, milestones reached
+
+### Technical Progress
+- Important code changes, architecture decisions, infrastructure updates, file paths
+
+### Challenges & Solutions
+- Problems encountered during the week and how they were resolved
+
+### Next Week Plans
+- Planned work, carry-over items, upcoming priorities
+
+## Rules
+1. Merge related topics across different days and memory notes into unified sections
+2. Remove redundancy — consolidate repeated themes across different days
+3. Highlight the most significant achievements and decisions of the week
+4. Preserve specific details: file paths, code snippets, key error messages
+5. Use bullet points for readability
+6. Match the language of the majority of the input notes
+7. Keep the report between 800-4000 words depending on the volume of activity`;
 }

@@ -124,7 +124,19 @@
     "generateDisabled": "Generation requires an API key",
     "memory": "Memory",
     "memoryTitleClear": "Conversation Memory - {date}",
-    "memoryTitleOverflow": "Context Compression - {date}"
+    "memoryTitleOverflow": "Context Compression - {date}",
+    "daily_report": "Daily Report",
+    "generateDailyReport": "Daily Report",
+    "generatingDailyReport": "Generating...",
+    "dailyReportSuccess": "Daily report generated",
+    "dailyReportSkipped": "No memory notes for today",
+    "dailyReportExists": "Daily report already exists for today",
+    "weekly_report": "Weekly Report",
+    "generateWeeklyReport": "Weekly Report",
+    "generatingWeeklyReport": "Generating...",
+    "weeklyReportSuccess": "Weekly report generated",
+    "weeklyReportSkipped": "No memory notes for this week",
+    "weeklyReportExists": "Weekly report already exists"
   },
   "settings": {
     "title": "Settings",
@@ -142,7 +154,9 @@
     "botIntegrations": "IM Bot Integrations",
     "botIntegrationsDesc": "Configure Feishu and WeChat bot credentials in .env.local. Webhook endpoints: /api/bot/feishu, /api/bot/wechat.",
     "feishuBot": "Feishu (Lark) Bot",
-    "wechatBot": "WeChat (Enterprise) Bot"
+    "wechatBot": "WeChat (Enterprise) Bot",
+    "customModel": "Custom...",
+    "customModelPlaceholder": "Enter model name, e.g. qwen-plus"
   },
   "terminal": {
     "title": "Terminal",
@@ -192,7 +206,7 @@
     "tabSources": "Sources",
     "statusPending": "Pending",
     "statusRunning": "Running",
-    "statusCompleted": "Final",
+    "statusCompleted": "Completed",
     "statusError": "Error",
     "downloadPdf": "Download PDF",
     "downloadMd": "Download Markdown",
@@ -343,5 +357,29 @@
     "exportDownload": "Download JSON",
     "deleteStep": "Delete step",
     "removeParameter": "Remove parameter"
+  },
+  "cluster": {
+    "clusterToggle": "Cluster",
+    "tabStatus": "Status",
+    "tabJobs": "Jobs",
+    "tabHistory": "History",
+    "loading": "Loading…",
+    "error": "Error",
+    "refresh": "Refresh",
+    "notConfigured": "Cluster not configured. Set KUBECONFIG_PATH in your .env.local to enable cluster management.",
+    "nodesReady": "{ready}/{total} Nodes Ready",
+    "nodes": "Nodes",
+    "noNodes": "No nodes found.",
+    "activePods": "Active Pods",
+    "noPods": "No active pods.",
+    "clusterJobs": "Cluster Jobs",
+    "noJobs": "No jobs found.",
+    "operationHistory": "Operation History",
+    "noHistory": "No cluster operations recorded yet. Use the Agent to interact with the cluster.",
+    "submitJob": "Submit Job",
+    "collectResults": "Collect Results",
+    "ready": "Ready",
+    "notReady": "NotReady",
+    "active": "Active"
   }
 }

@@ -1,0 +1,198 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../getting-started/overview.md:1 85ccce458f5d4739bf0f5ed78e1dd862
+msgid "Overview"
+msgstr "概述"
+
+#: ../../getting-started/overview.md:3 66ced06868b442ebb38a0ed0b5959ac0
+msgid "What is NotebookLM?"
+msgstr "什么是 NotebookLM？"
+
+#: ../../getting-started/overview.md:5 9078981815fa4a5199dcce75e48697ce
+msgid ""
+"NotebookLM is an AI-powered research assistant web application similar to"
+" Google NotebookLM. It lets you open server-side folders as "
+"**workspaces**, browse and manage files, and chat with AI grounded in "
+"your workspace files via **RAG** (Retrieval-Augmented Generation)."
+msgstr ""
+"NotebookLM 是一个类似于 Google NotebookLM 的 AI 驱动的研究助手 Web "
+"应用程序。它允许您将服务器端文件夹作为**工作空间**打开，浏览和管理文件，并通过 **RAG**（检索增强生成）与基于工作空间文件的 AI "
+"进行对话。"
+
+#: ../../getting-started/overview.md:7 6d90ba0d5943423b83c5547985e49126
+msgid "Key Features"
+msgstr "核心功能"
+
+#: ../../getting-started/overview.md:9 c38049e4804a4a67a3a35cad0083581d
+msgid "**Workspace Management** — Map server folders as persistent workspaces"
+msgstr "**工作空间管理** —— 将服务器文件夹映射为持久化工作空间"
+
+#: ../../getting-started/overview.md:10 b7530b2c85e547e8b23f3bebcb571f00
+msgid "**File Browser** — Tree view with upload, create, edit, rename, and delete"
+msgstr "**文件浏览器** —— 树形视图，支持上传、创建、编辑、重命名和删除"
+
+#: ../../getting-started/overview.md:11 ea85798a03f94e77b153787b2ad5dda2
+msgid ""
+"**GitHub Integration** — Clone and pull GitHub repositories (including "
+"private ones)"
+msgstr "**GitHub 集成** —— 克隆和拉取 GitHub 仓库（包括私有仓库）"
+
+#: ../../getting-started/overview.md:12 41fb30c8e4cd43ddb31005588de2357e
+msgid ""
+"**RAG Chat** — AI answers questions based on workspace file content with "
+"source citations"
+msgstr "**RAG 对话** —— AI 基于工作空间文件内容回答问题，并附带来源引用"
+
+#: ../../getting-started/overview.md:13 240631d41a6b4e2681b0fcbaab55b4cb
+msgid "**Note Generation** — Auto-generate summaries, FAQs, briefs, and timelines"
+msgstr "**笔记生成** —— 自动生成摘要、常见问题、简报和时间线"
+
+#: ../../getting-started/overview.md:14 0e9964022bf24937a68391a185ca398a
+msgid "**Multi-LLM Support** — Switch between OpenAI GPT and Anthropic Claude"
+msgstr "**多 LLM 支持** —— 在 OpenAI GPT 和 Anthropic Claude 之间切换"
+
+#: ../../getting-started/overview.md:15 350697090e1e48989db28256a763f2b4
+msgid "**Bilingual UI** — Chinese / English toggle"
+msgstr "**双语界面** —— 中文 / 英文切换"
+
+#: ../../getting-started/overview.md:16 d62e9f6331ed4962be26ddd4572f5b36
+msgid "**Dark Mode** — Light and dark theme support"
+msgstr "**暗色模式** —— 支持浅色和深色主题"
+
+#: ../../getting-started/overview.md:17 ac8dd06e52474a54a4b1f3b77d679622
+msgid "**Bot Integrations** — Feishu (Lark) and WeChat Enterprise bot support"
+msgstr "**机器人集成** —— 支持飞书和企业微信机器人"
+
+#: ../../getting-started/overview.md:18 8a7581d0ab224312b6cd29b393c24da8
+msgid ""
+"**Agent Mode** — Autonomous AI agent with tool usage (bash, file "
+"operations, kubectl)"
+msgstr "**Agent 模式** —— 具备工具调用能力的自主 AI 代理（bash、文件操作、kubectl）"
+
+#: ../../getting-started/overview.md:19 0c09e6288c2d4c7e8ed48c5513e53ea3
+msgid "**Skills** — Reusable prompt templates for common tasks"
+msgstr "**技能** —— 用于常见任务的可复用提示词模板"
+
+#: ../../getting-started/overview.md:21 2e8570b2d14b46bcb870a5ce1709e82a
+msgid "Architecture"
+msgstr "架构"
+
+#: ../../getting-started/overview.md:23 a0b08d4ae087467daf1f2eeeafa2cb5e
+msgid "The following diagram shows the high-level architecture of NotebookLM:"
+msgstr "下图展示了 NotebookLM 的高层架构："
+
+#: ../../getting-started/overview.md:64 2b48b3653b8847428d6de32caa2eff76
+msgid "Tech Stack"
+msgstr "技术栈"
+
+#: ../../getting-started/overview.md:25 bd68e380e1cb4129ab283c2c12103568
+msgid "Category"
+msgstr "分类"
+
+#: ../../getting-started/overview.md:25 9a74b551defd4df48f677e14a93b9e92
+msgid "Technology"
+msgstr "技术"
+
+#: ../../getting-started/overview.md:25 1fb01b7c89404372ab3dc7140ba7eaf0
+msgid "Framework"
+msgstr "框架"
+
+#: ../../getting-started/overview.md:25 e283f4cbb48a4e93af1be3a64a5779c2
+msgid "Next.js 16 (App Router) + TypeScript"
+msgstr "Next.js 16 (App Router) + TypeScript"
+
+#: ../../getting-started/overview.md:25 368146562904483481427acd8a19368d
+msgid "UI"
+msgstr "UI"
+
+#: ../../getting-started/overview.md:25 aadd0569ef2f48598f8b02192fb09a1e
+msgid "Tailwind CSS 4 + shadcn/ui + Radix UI"
+msgstr "Tailwind CSS 4 + shadcn/ui + Radix UI"
+
+#: ../../getting-started/overview.md:25 b2866c3ce45b44f0b09d01ad11c74ba6
+msgid "AI"
+msgstr "AI"
+
+#: ../../getting-started/overview.md:25 766ddf5428684dfdbec4d4c273d6b290
+msgid "Vercel AI SDK 6 + OpenAI + Anthropic"
+msgstr "Vercel AI SDK 6 + OpenAI + Anthropic"
+
+#: ../../getting-started/overview.md:25 4c8b3e7541f347ca83bc120ef529d093
+msgid "Database"
+msgstr "数据库"
+
+#: ../../getting-started/overview.md:25 fbdd5d9a518d40ce9bf811bc8dbaf09d
+msgid "SQLite (better-sqlite3 + Drizzle ORM)"
+msgstr "SQLite (better-sqlite3 + Drizzle ORM)"
+
+#: ../../getting-started/overview.md:25 f69590a6dc704363b583c6263899e6e0
+msgid "Vector Search"
+msgstr "向量搜索"
+
+#: ../../getting-started/overview.md:25 1f76f842695e44658d1be885e757c1b9
+msgid "Pure JS cosine similarity (no extensions needed)"
+msgstr "纯 JS 余弦相似度（无需额外扩展）"
+
+#: ../../getting-started/overview.md:25 af41944050d24eb38defa5c1a69e46cd
+msgid "i18n"
+msgstr "国际化"
+
+#: ../../getting-started/overview.md:25 f5e2af23eac0458d83ee0abcf357c7f2
+msgid "next-intl (Chinese / English)"
+msgstr "next-intl（中文 / 英文）"
+
+#: ../../getting-started/overview.md:25 a9ab5f3abfb04565b1ea0c41951a7d1c
+msgid "Theme"
+msgstr "主题"
+
+#: ../../getting-started/overview.md:25 f064a0fd61ed4c74b7ddcbd9efa57cc5
+msgid "next-themes"
+msgstr "next-themes"
+
+#: ../../getting-started/overview.md:76 ee428acab1e84f84b75e828f2d2dd15c
+msgid "RAG Pipeline"
+msgstr "RAG 流水线"
+
+#: ../../getting-started/overview.md:78 9fa7c3c5aaae4fc2b77bcbd759a67916
+msgid ""
+"The core feature of NotebookLM is RAG-based AI chat. The pipeline works "
+"in three stages:"
+msgstr "NotebookLM 的核心功能是基于 RAG 的 AI 对话。流水线分为三个阶段："
+
+#: ../../getting-started/overview.md:103 b85eac1ba9af438fb46c321400d49476
+msgid ""
+"**Indexing** — When the user clicks \"Sync\", files are scanned, text is "
+"extracted, chunked, and embedded into vectors stored in SQLite."
+msgstr "**索引** —— 当用户点击\"同步\"时，扫描文件，提取文本，分块，并将向量嵌入存储到 SQLite 中。"
+
+#: ../../getting-started/overview.md:104 0b72a2dd8be24ec4af0c2b088e4def62
+msgid ""
+"**Retrieval** — When the user asks a question, the question is embedded "
+"and compared against all stored vectors using cosine similarity to find "
+"the top 8 most relevant chunks."
+msgstr "**检索** —— 当用户提问时，将问题向量化，并使用余弦相似度与所有存储的向量进行比较，找到最相关的前 8 个文本块。"
+
+#: ../../getting-started/overview.md:105 d5a324c3d5014ff0a620155036821976
+msgid ""
+"**Generation** — The relevant chunks and the user's question are sent to "
+"the LLM, which generates a streaming answer with source citations."
+msgstr "**生成** —— 将相关文本块和用户的问题发送给 LLM，生成带有来源引用的流式回答。"

@@ -1,0 +1,247 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../usage/api-reference.md:1 d9d0dc045101456486f6d77064da9ff7
+msgid "API Reference"
+msgstr "API 参考"
+
+#: ../../usage/api-reference.md:3 5b12af823c8c45b7934bd53f0c0eaec8
+msgid ""
+"NotebookLM provides a set of REST API endpoints served by Next.js API "
+"routes. All endpoints are under the `/api/` path."
+msgstr "NotebookLM 提供了一组由 Next.js API 路由提供的 REST API 端点。所有端点都位于 `/api/` 路径下。"
+
+#: ../../usage/api-reference.md:5 8febfac0ea56495ba89007bba2d36da7
+msgid "Workspaces"
+msgstr "工作空间"
+
+#: ../../usage/api-reference.md:7 0db738cba10f491a96cf327338833548
+msgid "List Workspaces"
+msgstr "获取工作空间列表"
+
+#: ../../usage/api-reference.md:13 746551dc84a74720865fea0aead99140
+msgid "Returns all workspaces."
+msgstr "返回所有工作空间。"
+
+#: ../../usage/api-reference.md:15 8c417d357f03463a9cbcc0bffb8a439b
+msgid "**Response:**"
+msgstr "**响应：**"
+
+#: ../../usage/api-reference.md:28 ca4f54c876674cd2b574c543abb879e4
+msgid "Create Workspace"
+msgstr "创建工作空间"
+
+#: ../../usage/api-reference.md:34 ../../usage/api-reference.md:74
+#: ../../usage/api-reference.md:98 ../../usage/api-reference.md:113
+#: ../../usage/api-reference.md:129 ../../usage/api-reference.md:148
+#: ../../usage/api-reference.md:175 ../../usage/api-reference.md:205
+#: ../../usage/api-reference.md:224 ../../usage/api-reference.md:239
+#: 10642337117c4ebb919edaa7608f9d30 3bb22b6eef1c479098bc95a4b60d9659
+#: 52aaf47f59794c91a8ec8761c4209546 60f1188e120643fa86631204106886f1
+#: 644913ba518145028d4ba2f28a7c08f3 75d6460400364bd99c5a5a6fafe50e3f
+#: 8459b072dba34bc09dc75454f3748070 b961d557d52849659394392c95e73e89
+#: dc4cdb21749f4e4388c8ec015a208c5a e17be2644a054f8488f98c5e745e6d8f
+msgid "**Request Body:**"
+msgstr "**请求体：**"
+
+#: ../../usage/api-reference.md:42 729e75b7a1a24aba9718a9028f773244
+msgid "Delete Workspace"
+msgstr "删除工作空间"
+
+#: ../../usage/api-reference.md:48 b3e8d9a200d242239c2303538a6acc14
+msgid ""
+"Removes the workspace record from the database. Files on disk are **not**"
+" deleted."
+msgstr "从数据库中删除工作空间记录。磁盘上的文件**不会**被删除。"
+
+#: ../../usage/api-reference.md:50 090e979a8125472eb89a93a9f4874c06
+msgid "Files"
+msgstr "文件"
+
+#: ../../usage/api-reference.md:52 42654d322abd41d9b1ddd1eab0a75689
+msgid "Browse Directory"
+msgstr "浏览目录"
+
+#: ../../usage/api-reference.md:58 ced1713159b1414a854491a0628de48b
+msgid "Returns the file listing for a directory within a workspace."
+msgstr "返回工作空间内目录的文件列表。"
+
+#: ../../usage/api-reference.md:60 e3ffad07e4b145e0b4fad077b44697f4
+msgid "Read File"
+msgstr "读取文件"
+
+#: ../../usage/api-reference.md:66 ffacb20c32e048bba1e93114c7c5010b
+msgid "Returns the content of a file."
+msgstr "返回文件的内容。"
+
+#: ../../usage/api-reference.md:68 9a57674e7eed4aefa1bf1dbca9ddc42a
+msgid "Write File"
+msgstr "写入文件"
+
+#: ../../usage/api-reference.md:84 2cdff69dfa464504a662a333a52892f0
+msgid "Upload File"
+msgstr "上传文件"
+
+#: ../../usage/api-reference.md:90 3bea99463e08403ca6f9c8e7df1d5c98
+msgid ""
+"Accepts `multipart/form-data` with `file`, `workspaceId`, and `path` "
+"fields."
+msgstr "接受包含 `file`、`workspaceId` 和 `path` 字段的 `multipart/form-data`。"
+
+#: ../../usage/api-reference.md:92 0f997a6f72364dd79658d9c4fafb8a58
+msgid "Delete File"
+msgstr "删除文件"
+
+#: ../../usage/api-reference.md:107 0ec1375bd4c14fed94f3193547d55611
+msgid "Rename File"
+msgstr "重命名文件"
+
+#: ../../usage/api-reference.md:123 45a93cb3b07941d88990e9d231ec55ee
+msgid "Create Directory"
+msgstr "创建目录"
+
+#: ../../usage/api-reference.md:138 2b85d2f97a5d4bab8cff7c44ccd1de01
+msgid "Chat"
+msgstr "对话"
+
+#: ../../usage/api-reference.md:140 01df8325da604bbf926974c6e7d8ff3c
+msgid "Send Message (Streaming)"
+msgstr "发送消息（流式）"
+
+#: ../../usage/api-reference.md:146 a4ec6f9fb2944210af34f3fc174c5a11
+msgid "Sends a message and receives a streaming AI response."
+msgstr "发送消息并接收流式 AI 响应。"
+
+#: ../../usage/api-reference.md:159 cdac77757fba4e07b1e3fe3b4bfa8c35
+msgid "**Response:** Server-Sent Events (SSE) stream with AI response tokens."
+msgstr "**响应：** 包含 AI 响应令牌的 Server-Sent Events (SSE) 流。"
+
+#: ../../usage/api-reference.md:161 a17c3ed3ff0942ca8fc823fefcfb23a5
+msgid "Notes"
+msgstr "备注"
+
+#: ../../usage/api-reference.md:163 b587262515224d93833bade94a0f3e39
+msgid "List Notes"
+msgstr "获取笔记列表"
+
+#: ../../usage/api-reference.md:169 dbf5b63d47a143d999017f7d9361b453
+msgid "Create Note"
+msgstr "创建笔记"
+
+#: ../../usage/api-reference.md:185 aa110ea7a4484f2881092920f5264c1a
+msgid "Update Note"
+msgstr "更新笔记"
+
+#: ../../usage/api-reference.md:191 41f129b144904aec96e72a6a8508ab4e
+msgid "Delete Note"
+msgstr "删除笔记"
+
+#: ../../usage/api-reference.md:197 ee6c2e3d7a91456d8de76de3c3b0fbdf
+msgid "Generate"
+msgstr "生成"
+
+#: ../../usage/api-reference.md:199 15797d9fe7144d9daf801552c8aa2a66
+msgid "Generate Note Content"
+msgstr "生成笔记内容"
+
+#: ../../usage/api-reference.md:214 cca0999a07fe4ac38c31da3eca5be682
+msgid "Supported types: `summary`, `faq`, `brief`, `timeline`."
+msgstr "支持的类型：`summary`、`faq`、`brief`、`timeline`。"
+
+#: ../../usage/api-reference.md:216 8edf1ddcd17143c3bcaf6b79ecbfb6db
+msgid "Git"
+msgstr "Git"
+
+#: ../../usage/api-reference.md:218 5beb0ef7995b46a18f4e8c3bcc043026
+msgid "Clone Repository"
+msgstr "克隆仓库"
+
+#: ../../usage/api-reference.md:233 32cba1d5d6ab40f9984889bcde1bd9b3
+msgid "Pull Repository"
+msgstr "拉取仓库"
+
+#: ../../usage/api-reference.md:247 fdaabad237a34438b9e1bdf41a69e830
+msgid "Get Git Status"
+msgstr "获取 Git 状态"
+
+#: ../../usage/api-reference.md:253 090b89c3f72043479779522bb907e3b2
+msgid "Settings"
+msgstr "设置"
+
+#: ../../usage/api-reference.md:255 368dc05b7f06473fa95abd4e5c866a2d
+msgid "Get Settings"
+msgstr "获取设置"
+
+#: ../../usage/api-reference.md:261 95f7caf34cc04b859366c78da223e007
+msgid "Update Settings"
+msgstr "更新设置"
+
+#: ../../usage/api-reference.md:267 0777734cb31947a0a0de887dccd16a72
+msgid "Error Handling"
+msgstr "错误处理"
+
+#: ../../usage/api-reference.md:269 519b190f189f4f4e86cc5ac332f282e3
+msgid "All API endpoints return standard HTTP status codes:"
+msgstr "所有 API 端点返回标准 HTTP 状态码："
+
+#: ../../usage/api-reference.md abf88ee43f2841de90c1c9093f3dee34
+msgid "Status"
+msgstr "状态码"
+
+#: ../../usage/api-reference.md f315d3a764034e6889cbe5f248b0dc9e
+msgid "Description"
+msgstr "描述"
+
+#: ../../usage/api-reference.md b41e9b2c9b2f4fa68387f167062b10b5
+msgid "`200`"
+msgstr "`200`"
+
+#: ../../usage/api-reference.md 6b744b2083dc444aa79758497b64b009
+msgid "Success"
+msgstr "成功"
+
+#: ../../usage/api-reference.md 5a76b1e3980a45b5a0ab730f07b02ea7
+msgid "`400`"
+msgstr "`400`"
+
+#: ../../usage/api-reference.md 32a07266dc754146b3adcffbda27df25
+msgid "Bad request (missing or invalid parameters)"
+msgstr "请求错误（缺少或无效的参数）"
+
+#: ../../usage/api-reference.md f8a8900706ef4904b56abc98e4a08e45
+msgid "`404`"
+msgstr "`404`"
+
+#: ../../usage/api-reference.md a7f02ef2e1e945e5ba62fc576da282c5
+msgid "Resource not found"
+msgstr "资源未找到"
+
+#: ../../usage/api-reference.md d78fc37155724a5e87130e41689559dd
+msgid "`500`"
+msgstr "`500`"
+
+#: ../../usage/api-reference.md 8ac87e9157d044dd9e5345758cfff302
+msgid "Internal server error"
+msgstr "服务器内部错误"
+
+#: ../../usage/api-reference.md:278 bb3f153db3ff4d049ca46daf93e695e5
+msgid "Error responses include a JSON body:"
+msgstr "错误响应包含 JSON 正文："

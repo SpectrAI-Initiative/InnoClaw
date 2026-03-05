@@ -1,7 +1,6 @@
 import useSWR from "swr";
 import type { Workspace } from "@/types";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from "@/lib/fetcher";
 
 export function useWorkspaces() {
   const { data, error, isLoading, mutate } = useSWR<Workspace[]>(
@@ -10,7 +9,7 @@ export function useWorkspaces() {
   );
 
   return {
-    workspaces: data || [],
+    workspaces: Array.isArray(data) ? data : [],
     isLoading,
     error,
     mutate,

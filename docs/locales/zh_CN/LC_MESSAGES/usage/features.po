@@ -1,0 +1,354 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, NotebookLM Contributors
+# This file is distributed under the same license as the NotebookLM package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: NotebookLM \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../usage/features.md:1 e9046ce4d5de44d2a32e2d41e7c0760a
+msgid "Core Features"
+msgstr "核心功能"
+
+#: ../../usage/features.md:3 9f59185771684d6cb8d105c3630ffa37
+msgid ""
+"NotebookLM provides a rich set of features for AI-powered research and "
+"file management."
+msgstr "NotebookLM 提供了丰富的 AI 驱动研究和文件管理功能。"
+
+#: ../../usage/features.md:5 d8c916a2fb314c5cabe488ee7de07235
+msgid "Workspace Management"
+msgstr "工作空间管理"
+
+#: ../../usage/features.md:7 1941e8b1bbd74fbfb0d7c77d2a01cafb
+msgid ""
+"Workspaces map server-side folders into the application. Each workspace "
+"is a persistent container for files, chat history, and notes."
+msgstr "工作空间将服务器端文件夹映射到应用程序中。每个工作空间是文件、对话历史和笔记的持久化容器。"
+
+#: ../../usage/features.md:9 499699a4ec3d4491bca3c24d2d22c3a5
+msgid ""
+"**Create** workspaces from any allowed root directory (configured via "
+"`WORKSPACE_ROOTS`)"
+msgstr "从任何允许的根目录（通过 `WORKSPACE_ROOTS` 配置）**创建**工作空间"
+
+#: ../../usage/features.md:10 536713e48f9d40c5a75391c6ccce42f5
+msgid "**Open** existing workspaces from the home page"
+msgstr "从首页**打开**已有的工作空间"
+
+#: ../../usage/features.md:11 856b41bfd21946c28535b424a0c0424d
+msgid ""
+"**Delete** workspaces (removes only the database record; files on disk "
+"are preserved)"
+msgstr "**删除**工作空间（仅删除数据库记录；磁盘上的文件会被保留）"
+
+#: ../../usage/features.md:12 5433820fa126488ea774717656fb5e38
+msgid "**GitHub Clone** — Clone a GitHub repository directly as a new workspace"
+msgstr "**GitHub 克隆** —— 直接将 GitHub 仓库克隆为新的工作空间"
+
+#: ../../usage/features.md:14 b32fc4b68a0e4c15b63dad4c36503027
+msgid "File Browser"
+msgstr "文件浏览器"
+
+#: ../../usage/features.md:16 3dc26183d4f74492a096173f28b61ed6
+msgid "The file browser provides full file management within a workspace:"
+msgstr "文件浏览器提供工作空间内的完整文件管理功能："
+
+#: ../../usage/features.md:18 2d15b696e40941fbb1d7d861983498ad
+msgid "**Tree View** — Hierarchical directory browsing with expand/collapse"
+msgstr "**树形视图** —— 支持展开/折叠的层级目录浏览"
+
+#: ../../usage/features.md:19 9f92370552a04b4db649be64b3e8bef9
+msgid "**Upload** — Drag-and-drop or click to upload files"
+msgstr "**上传** —— 拖放或点击上传文件"
+
+#: ../../usage/features.md:20 8f3961970b6c45ee9c1cc97256ecfa22
+msgid "**Create** — New files and folders"
+msgstr "**创建** —— 新建文件和文件夹"
+
+#: ../../usage/features.md:21 b1e0c8a898314380813c7d7fe1e7817c
+msgid "**Edit** — Open files in the built-in editor"
+msgstr "**编辑** —— 在内置编辑器中打开文件"
+
+#: ../../usage/features.md:22 afe0846b02a145cc86679b4ca1a6d07b
+msgid "**Rename / Delete** — Right-click context menu"
+msgstr "**重命名 / 删除** —— 右键上下文菜单"
+
+#: ../../usage/features.md:23 c7711c533f0e42f3a3099ff20c84423b
+msgid ""
+"**Preview** — Preview images, PDFs, 3D models (STL, OBJ, GLTF, etc.), and"
+" more"
+msgstr "**预览** —— 预览图片、PDF、3D 模型（STL、OBJ、GLTF 等）及更多格式"
+
+#: ../../usage/features.md:24 877109a348764f83b2b89131415207ba
+msgid "**Sync** — Trigger RAG indexing to enable AI-powered search"
+msgstr "**同步** —— 触发 RAG 索引以启用 AI 搜索"
+
+#: ../../usage/features.md:26 481b63e4678248e58d490f2fba60b009
+msgid "RAG Chat"
+msgstr "RAG 对话"
+
+#: ../../usage/features.md:28 6f99f2f2c9a04df2beba0c66b53dc476
+msgid ""
+"The AI chat interface uses Retrieval-Augmented Generation to answer "
+"questions based on your workspace files:"
+msgstr "AI 对话界面使用检索增强生成技术，基于您的工作空间文件回答问题："
+
+#: ../../usage/features.md:30 3f476665b702482eb03e7b64dc48df1f
+msgid "**Sync** your workspace to index files into the vector store"
+msgstr "**同步**工作空间以将文件索引到向量存储中"
+
+#: ../../usage/features.md:31 370400e5866e4b72ac93e2c9c8db2eaf
+msgid "**Ask questions** in the chat panel"
+msgstr "在对话面板中**提问**"
+
+#: ../../usage/features.md:32 dc7ee73a59f146beb1bf643cb710f4bc
+msgid ""
+"**Receive answers** with `[Source: filename]` citations pointing to the "
+"relevant files"
+msgstr "**接收回答**，附带 `[Source: filename]` 引用指向相关文件"
+
+#: ../../usage/features.md:33 fdfcab4c00c54352a610411824ab0ba8
+msgid "**Multi-turn conversations** — Context is maintained across messages"
+msgstr "**多轮对话** —— 上下文在消息之间保持连续"
+
+#: ../../usage/features.md:35 92c52b2b589c4a0297c571c6ae33c09c
+msgid "Supported File Types for RAG"
+msgstr "RAG 支持的文件类型"
+
+#: ../../usage/features.md:37 b6ac274044194a08ba581f31d8959bc3
+msgid "The following file types are supported for text extraction and indexing:"
+msgstr "以下文件类型支持文本提取和索引："
+
+#: ../../usage/features.md 8ed9d45259a74ea4ba9ceb648ae03c9c
+msgid "Category"
+msgstr "分类"
+
+#: ../../usage/features.md e53532f7884e4411a0f3632036f1b3fb
+msgid "Extensions"
+msgstr "扩展名"
+
+#: ../../usage/features.md 509ab24de35a4348b959bbb1a761f4e2
+msgid "Documents"
+msgstr "文档"
+
+#: ../../usage/features.md 9e8c77596e4c43939d89c58debe25811
+msgid "`.pdf`, `.txt`, `.md`, `.html`"
+msgstr "`.pdf`、`.txt`、`.md`、`.html`"
+
+#: ../../usage/features.md 3fd180551cf04fbab046099ad765d013
+msgid "Data"
+msgstr "数据"
+
+#: ../../usage/features.md 53a21b81f69543b5aa3a74027f9516f8
+msgid "`.json`, `.csv`"
+msgstr "`.json`、`.csv`"
+
+#: ../../usage/features.md 49d78c8739534d8bbea68f5d414ce982
+msgid "Code"
+msgstr "代码"
+
+#: ../../usage/features.md f5a24279a1c548e7b4cdecc4daad16c8
+msgid ""
+"`.js`, `.ts`, `.py`, `.java`, `.go`, `.rs`, `.cpp`, `.c`, `.rb`, `.php`, "
+"and more"
+msgstr "`.js`、`.ts`、`.py`、`.java`、`.go`、`.rs`、`.cpp`、`.c`、`.rb`、`.php` 等"
+
+#: ../../usage/features.md:45 ba044bdae75d49f5a559a201d684b146
+msgid "Note Generation"
+msgstr "笔记生成"
+
+#: ../../usage/features.md:47 b45c96c632234817b7e3844581a1663b
+msgid "Automatically generate structured notes from your workspace content:"
+msgstr "从工作空间内容自动生成结构化笔记："
+
+#: ../../usage/features.md 0bf2c41522164acf9bb2d488dc14b7c5
+msgid "Type"
+msgstr "类型"
+
+#: ../../usage/features.md 7af34985b97346c08a0d465b98847e81
+msgid "Description"
+msgstr "描述"
+
+#: ../../usage/features.md b9f7d233dfc44a61be4a7ba3bd65fcbb
+msgid "**Summary**"
+msgstr "**摘要**"
+
+#: ../../usage/features.md effa1ee8ad5342c0835198c8f5a207ac
+msgid "Concise overview of key points"
+msgstr "关键要点的简明概述"
+
+#: ../../usage/features.md 43df6e75e8744be3af15aabc77ebbd1e
+msgid "**FAQ**"
+msgstr "**常见问题**"
+
+#: ../../usage/features.md 7f0888016d5e4a68a236a456ce033399
+msgid "Frequently asked questions with answers"
+msgstr "包含答案的常见问题"
+
+#: ../../usage/features.md 27d5caa588a34f34b190f3e188908ee8
+msgid "**Brief**"
+msgstr "**简报**"
+
+#: ../../usage/features.md 9ec5c26a258f4200a57f1ac187615ce1
+msgid "Executive-style briefing document"
+msgstr "高管风格的简报文档"
+
+#: ../../usage/features.md 4b8f8ea9631a4d089cdf03d7afda86e3
+msgid "**Timeline**"
+msgstr "**时间线**"
+
+#: ../../usage/features.md c706e6e921ff4304a03c9898036d7375
+msgid "Chronological sequence of events"
+msgstr "按时间顺序排列的事件"
+
+#: ../../usage/features.md:56 d12daf0ccac84edebb1d2aec8c78e3cf
+msgid "Notes can also be created and edited manually."
+msgstr "笔记也可以手动创建和编辑。"
+
+#: ../../usage/features.md:58 00057bb2c6504b1993b39a09e63a1cdd
+msgid "Agent Mode"
+msgstr "Agent 模式"
+
+#: ../../usage/features.md:60 e2efd68834a546b3b542bdc4f45d8b6c
+msgid ""
+"The Agent mode provides an autonomous AI assistant with access to system "
+"tools:"
+msgstr "Agent 模式提供一个可访问系统工具的自主 AI 助手："
+
+#: ../../usage/features.md:62 f681bc7d86c741048e17cbf16ec176cc
+msgid "**Bash** — Execute shell commands"
+msgstr "**Bash** —— 执行 Shell 命令"
+
+#: ../../usage/features.md:63 39361537c7b94cadb7bd2fe99f0f8e75
+msgid "**File Operations** — Read, write, and list directory contents"
+msgstr "**文件操作** —— 读取、写入和列出目录内容"
+
+#: ../../usage/features.md:64 e11ac746edbd407e8531a90587885cd4
+msgid "**Grep** — Search file contents with regular expressions"
+msgstr "**Grep** —— 使用正则表达式搜索文件内容"
+
+#: ../../usage/features.md:65 338586ff39b94ea1b1ce67ee9d3259c3
+msgid "**kubectl** — Kubernetes cluster management (when configured)"
+msgstr "**kubectl** —— Kubernetes 集群管理（配置后可用）"
+
+#: ../../usage/features.md:67 ef574b29969341d3b273b1754a73e08b
+msgid ""
+"Agent mode is useful for tasks that require interacting with the file "
+"system or running commands."
+msgstr "Agent 模式适用于需要与文件系统交互或运行命令的任务。"
+
+#: ../../usage/features.md:69 4b1005dee2f94ebba6a956d79c17bb13
+msgid "Skills"
+msgstr "技能"
+
+#: ../../usage/features.md:71 9baf033d7a84465cbcbbaee157639c0a
+msgid "Skills are reusable prompt templates for common tasks:"
+msgstr "技能是用于常见任务的可复用提示词模板："
+
+#: ../../usage/features.md:73 c82ea0361a8f467e9a88fb71b62ee77f
+msgid "Create custom skills with specific instructions"
+msgstr "创建具有特定指令的自定义技能"
+
+#: ../../usage/features.md:74 6e36878c4b444e0aaf311eff6056e45f
+msgid "Configure which tools a skill can access"
+msgstr "配置技能可以访问的工具"
+
+#: ../../usage/features.md:75 9313ed9140394d009eb8c839ca3dfd58
+msgid "Skills can be triggered from the chat interface"
+msgstr "可以从对话界面触发技能"
+
+#: ../../usage/features.md:76 1e040ab7c0e94610923efbae799a4e20
+msgid "Built-in skills for common operations"
+msgstr "内置常用操作技能"
+
+#: ../../usage/features.md:78 8dc5ea74385e45c8b92da24567ee1738
+msgid "Multi-LLM Support"
+msgstr "多 LLM 支持"
+
+#: ../../usage/features.md:80 c62e1d910bc040f997f27fabff8bd81f
+msgid "Switch between different AI providers and models:"
+msgstr "在不同的 AI 提供商和模型之间切换："
+
+#: ../../usage/features.md 923a9d67c275471795733a9065a7b73b
+msgid "Provider"
+msgstr "提供商"
+
+#: ../../usage/features.md e37a743d2b384980aaf979f1c8fc16e4
+msgid "Models"
+msgstr "模型"
+
+#: ../../usage/features.md 693bae1c6c8d418ca49cc06f2827fcd3
+msgid "**OpenAI**"
+msgstr "**OpenAI**"
+
+#: ../../usage/features.md ab62362083e54645866ae6ae2437c12f
+msgid "GPT-4o, GPT-4, GPT-3.5, and compatible models"
+msgstr "GPT-4o、GPT-4、GPT-3.5 及兼容模型"
+
+#: ../../usage/features.md 9b75322a8e1d44d8a8bf0e4908c3228e
+msgid "**Anthropic**"
+msgstr "**Anthropic**"
+
+#: ../../usage/features.md 5adf2d87adb5405fa48bfc9780b9e265
+msgid "Claude 3.5, Claude 3, and compatible models"
+msgstr "Claude 3.5、Claude 3 及兼容模型"
+
+#: ../../usage/features.md:87 cdc2a602efbb4f038865f7d9beb58cef
+msgid ""
+"Custom endpoints are supported via `OPENAI_BASE_URL` and "
+"`ANTHROPIC_BASE_URL` for third-party providers."
+msgstr "通过 `OPENAI_BASE_URL` 和 `ANTHROPIC_BASE_URL` 支持第三方提供商的自定义端点。"
+
+#: ../../usage/features.md:89 ac0f9b45e86e48d793ea6dcc3eb4cc6f
+msgid "Bilingual UI"
+msgstr "双语界面"
+
+#: ../../usage/features.md:91 92763469a1ac466584362a560608c4ce
+msgid "The user interface supports both Chinese and English:"
+msgstr "用户界面同时支持中文和英文："
+
+#: ../../usage/features.md:93 9fef91deb6084541b14a11b37eaed147
+msgid "Click the **language toggle** in the top navigation bar"
+msgstr "点击顶部导航栏中的**语言切换**按钮"
+
+#: ../../usage/features.md:94 133d63b559184171a3ea973a48cc1c49
+msgid "All UI elements, labels, and messages are translated"
+msgstr "所有 UI 元素、标签和消息均已翻译"
+
+#: ../../usage/features.md:95 c1abf662e1204a71b42fd112924291dd
+msgid "Language preference is persisted across sessions"
+msgstr "语言偏好在会话之间持久保存"
+
+#: ../../usage/features.md:97 d2940db4c969457b94fa9681c7e90131
+msgid "Dark Mode"
+msgstr "暗色模式"
+
+#: ../../usage/features.md:99 8df9ed95b49547cca13bf06b50595c47
+msgid "Toggle between light and dark themes:"
+msgstr "在浅色和深色主题之间切换："
+
+#: ../../usage/features.md:101 548b366c862b4fe184cb2b0d2e6a4aa1
+msgid "Click the **theme toggle** in the top navigation bar"
+msgstr "点击顶部导航栏中的**主题切换**按钮"
+
+#: ../../usage/features.md:102 9f41e76743ef45ac9455f24691552a23
+msgid "Applies to all panels including the file browser, chat, and editor"
+msgstr "应用于所有面板，包括文件浏览器、对话和编辑器"
+
+#: ../../usage/features.md:103 f9a1729e00ad466692d4324916abf7f4
+msgid "Theme preference is persisted across sessions"
+msgstr "主题偏好在会话之间持久保存"

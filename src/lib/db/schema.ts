@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
 // ============================================================
@@ -91,17 +91,22 @@ export const notes = sqliteTable("notes", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   type: text("type", {
-    enum: ["manual", "summary", "faq", "briefing", "timeline", "memory"],
+    enum: ["manual", "summary", "faq", "briefing", "timeline", "memory", "daily_report", "weekly_report"],
   })
     .notNull()
     .default("manual"),
+  reportDate: text("report_date"),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(datetime('now'))`),
-});
+}, (table) => [
+  // Only daily_report rows set reportDate, so the constraint effectively
+  // scopes to that type — SQLite treats NULLs as distinct in unique indexes.
+  uniqueIndex("notes_daily_report_unique_idx").on(table.workspaceId, table.type, table.reportDate),
+]);
 
 // ============================================================
 // APP SETTINGS
@@ -137,4 +142,31 @@ export const skills = sqliteTable("skills", {
     .default(sql`(datetime('now'))`),
 }, (table) => [
   uniqueIndex("skills_slug_workspace_idx").on(table.slug, table.workspaceId),
+]);
+
+// ============================================================
+// CLUSTER OPERATIONS (agent cluster action history)
+// ============================================================
+export const clusterOperations = sqliteTable("cluster_operations", {
+  id: text("id").primaryKey(),
+  workspaceId: text("workspace_id").references(() => workspaces.id, {
+    onDelete: "cascade",
+  }),
+  toolName: text("tool_name").notNull(), // "kubectl" | "submitK8sJob" | "collectJobResults"
+  subcommand: text("subcommand"), // e.g. "get pods -n default"
+  jobName: text("job_name"), // for submitK8sJob / collectJobResults
+  namespace: text("namespace"),
+  status: text("status", {
+    enum: ["success", "error", "blocked"],
+  }).notNull(),
+  exitCode: integer("exit_code"),
+  summary: text("summary"), // human-readable one-liner
+  inputJson: text("input_json"), // JSON of tool input params
+  outputJson: text("output_json"), // JSON of truncated tool output
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+}, (table) => [
+  index("cluster_ops_ws_created_idx").on(table.workspaceId, table.createdAt),
+  index("cluster_ops_created_idx").on(table.createdAt),
 ]);
