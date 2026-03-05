@@ -145,6 +145,38 @@ export const skills = sqliteTable("skills", {
 ]);
 
 // ============================================================
+// SCHEDULED TASKS (user-defined cron/interval tasks)
+// ============================================================
+export const scheduledTasks = sqliteTable("scheduled_tasks", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  taskType: text("task_type", {
+    enum: ["daily_report", "weekly_report", "git_sync", "source_sync", "custom"],
+  }).notNull(),
+  schedule: text("schedule").notNull(), // cron expression, e.g. "0 0 * * *"
+  workspaceId: text("workspace_id").references(() => workspaces.id, {
+    onDelete: "cascade",
+  }), // null = global task
+  config: text("config"), // JSON for task-specific configuration
+  isEnabled: integer("is_enabled", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  lastRunAt: text("last_run_at"),
+  lastRunStatus: text("last_run_status", {
+    enum: ["success", "error", "running"],
+  }),
+  lastRunError: text("last_run_error"),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+}, (table) => [
+  index("scheduled_tasks_enabled_idx").on(table.isEnabled),
+]);
+
+// ============================================================
 // CLUSTER OPERATIONS (agent cluster action history)
 // ============================================================
 export const clusterOperations = sqliteTable("cluster_operations", {
