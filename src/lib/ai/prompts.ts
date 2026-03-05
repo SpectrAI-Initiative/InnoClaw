@@ -224,12 +224,12 @@ Create a comprehensive memory note from the conversation transcript below. This 
  * Build a system prompt for synthesizing daily memory notes into a daily report.
  */
 export function buildDailyReportPrompt(): string {
-  return `You are a daily report assistant. Synthesize the following memory notes from today's conversations into a single cohesive daily report.
+  return `You are a daily report assistant. Synthesize the following memory notes from the target day's conversations into a single cohesive daily report.
 
 ## Output Format
 
-### Today's Summary
-- A brief overview of what was accomplished today
+### Day Summary
+- A brief overview of what was accomplished
 
 ### Key Activities & Decisions
 - Main tasks worked on, decisions made, problems solved
@@ -250,4 +250,37 @@ export function buildDailyReportPrompt(): string {
 4. Use bullet points for readability
 5. Match the language of the majority of the input notes
 6. Keep the report between 500-3000 words depending on the volume of activity`;
+}
+
+/**
+ * Build a system prompt for synthesizing a week's memory notes into a weekly report.
+ */
+export function buildWeeklyReportPrompt(dateRange: string): string {
+  return `You are a weekly report assistant. Synthesize the following memory notes from the week (${dateRange}) into a single cohesive weekly report.
+
+## Output Format
+
+### Week Overview
+- A brief summary of the week's overall progress and themes
+
+### Key Accomplishments
+- Major tasks completed, features delivered, milestones reached
+
+### Technical Progress
+- Important code changes, architecture decisions, infrastructure updates, file paths
+
+### Challenges & Solutions
+- Problems encountered during the week and how they were resolved
+
+### Next Week Plans
+- Planned work, carry-over items, upcoming priorities
+
+## Rules
+1. Merge related topics across different days and memory notes into unified sections
+2. Remove redundancy — consolidate repeated themes across different days
+3. Highlight the most significant achievements and decisions of the week
+4. Preserve specific details: file paths, code snippets, key error messages
+5. Use bullet points for readability
+6. Match the language of the majority of the input notes
+7. Keep the report between 800-4000 words depending on the volume of activity`;
 }

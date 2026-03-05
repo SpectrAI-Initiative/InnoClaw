@@ -130,7 +130,13 @@
     "generatingDailyReport": "Generating...",
     "dailyReportSuccess": "Daily report generated",
     "dailyReportSkipped": "No memory notes for today",
-    "dailyReportExists": "Daily report already exists for today"
+    "dailyReportExists": "Daily report already exists for today",
+    "weekly_report": "Weekly Report",
+    "generateWeeklyReport": "Weekly Report",
+    "generatingWeeklyReport": "Generating...",
+    "weeklyReportSuccess": "Weekly report generated",
+    "weeklyReportSkipped": "No memory notes for this week",
+    "weeklyReportExists": "Weekly report already exists"
   },
   "settings": {
     "title": "Settings",

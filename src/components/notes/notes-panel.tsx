@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, FileText, Trash2, Calendar } from "lucide-react";
+import { Plus, Sparkles, FileText, Trash2, Calendar, CalendarDays } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -47,6 +47,7 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
   const aiEnabled = settings?.hasAIKey ?? false;
   const [generating, setGenerating] = useState(false);
   const [generatingDailyReport, setGeneratingDailyReport] = useState(false);
+  const [generatingWeeklyReport, setGeneratingWeeklyReport] = useState(false);
   const [showNewNote, setShowNewNote] = useState(false);
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
@@ -96,6 +97,35 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
       );
     } finally {
       setGeneratingDailyReport(false);
+    }
+  };
+
+  const handleGenerateWeeklyReport = async () => {
+    setGeneratingWeeklyReport(true);
+    try {
+      const res = await fetch("/api/weekly-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId, locale }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Generation failed");
+      if (data.skipped) {
+        toast.info(
+          data.reason === "exists"
+            ? t("weeklyReportExists")
+            : t("weeklyReportSkipped")
+        );
+      } else {
+        toast.success(t("weeklyReportSuccess"));
+      }
+      mutate();
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to generate weekly report"
+      );
+    } finally {
+      setGeneratingWeeklyReport(false);
     }
   };
 
@@ -164,6 +194,15 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
                 {generatingDailyReport
                   ? t("generatingDailyReport")
                   : t("generateDailyReport")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleGenerateWeeklyReport}
+                disabled={generatingWeeklyReport}
+              >
+                <CalendarDays className="mr-1 h-4 w-4" />
+                {generatingWeeklyReport
+                  ? t("generatingWeeklyReport")
+                  : t("generateWeeklyReport")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
