@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -50,23 +50,65 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [provider, setProvider] = useState("openai");
   const [model, setModel] = useState("gpt-4o-mini");
+  const [customModel, setCustomModel] = useState("");
+  const [remoteModels, setRemoteModels] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [fetchingModels, setFetchingModels] = useState(false);
   const [contextMode, setContextMode] = useState("normal");
   const [maxMode, setMaxMode] = useState(true);
+
+  const fetchRemoteModels = useCallback(
+    async (prov: string) => {
+      setFetchingModels(true);
+      try {
+        const res = await fetch(`/api/models?provider=${prov}`);
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.models)) {
+          setRemoteModels(data.models);
+          toast.success(
+            t("fetchModelsSuccess", { count: data.models.length }),
+          );
+        } else {
+          toast.error(data.error || tCommon("error"));
+        }
+      } catch {
+        toast.error(tCommon("error"));
+      } finally {
+        setFetchingModels(false);
+      }
+    },
+    [t, tCommon],
+  );
 
   useEffect(() => {
     fetch("/api/settings")
       .then((res) => res.json())
       .then((data) => {
         setSettings(data);
-        setProvider(data.llmProvider || "openai");
-        setModel(data.llmModel || "gpt-4o-mini");
+        const prov = data.llmProvider || "openai";
+        setProvider(prov);
+        const m = data.llmModel || "gpt-4o-mini";
+        const known = (
+          PROVIDERS[prov as keyof typeof PROVIDERS]?.models || []
+        ).some((pm) => pm.id === m);
+        if (known) {
+          setModel(m);
+          setCustomModel("");
+        } else {
+          setModel("__custom__");
+          setCustomModel(m);
+        }
         setContextMode(data.contextMode || "normal");
         setMaxMode(data.maxMode ?? true);
       });
   }, []);
 
+  /** The model ID that will be saved */
+  const effectiveModel = model === "__custom__" ? customModel : model;
+
   const handleSave = async () => {
-    if (!model.trim()) {
+    if (!effectiveModel.trim()) {
       toast.error(tCommon("error"));
       return;
     }
@@ -76,7 +118,7 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           llm_provider: provider,
-          llm_model: model,
+          llm_model: effectiveModel,
           context_mode: contextMode,
           max_mode: maxMode ? "true" : "false",
         }),
@@ -89,6 +131,10 @@ export default function SettingsPage() {
 
   const providerModels =
     PROVIDERS[provider as keyof typeof PROVIDERS]?.models || [];
+
+  // Merge hardcoded models with remote models, avoiding duplicates
+  const hardcodedIds = new Set<string>(providerModels.map((m) => m.id));
+  const extraRemote = remoteModels.filter((m) => !hardcodedIds.has(m.id));
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -113,9 +159,13 @@ export default function SettingsPage() {
                     value={provider}
                     onValueChange={(v) => {
                       setProvider(v);
+                      setRemoteModels([]);
                       const firstModel =
                         PROVIDERS[v as keyof typeof PROVIDERS]?.models[0]?.id;
-                      if (firstModel) setModel(firstModel);
+                      if (firstModel) {
+                        setModel(firstModel);
+                        setCustomModel("");
+                      }
                     }}
                   >
                     <SelectTrigger>
@@ -132,8 +182,26 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t("model")}</Label>
-                  <Select value={model} onValueChange={setModel}>
+                  <div className="flex items-center justify-between">
+                    <Label>{t("model")}</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={fetchingModels}
+                      onClick={() => fetchRemoteModels(provider)}
+                    >
+                      {fetchingModels
+                        ? t("fetchingModels")
+                        : t("fetchModels")}
+                    </Button>
+                  </div>
+                  <Select
+                    value={model}
+                    onValueChange={(v) => {
+                      setModel(v);
+                      if (v !== "__custom__") setCustomModel("");
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -143,8 +211,23 @@ export default function SettingsPage() {
                           {m.name}
                         </SelectItem>
                       ))}
+                      {extraRemote.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__custom__">
+                        {t("customModel")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
+                  {model === "__custom__" && (
+                    <Input
+                      value={customModel}
+                      onChange={(e) => setCustomModel(e.target.value)}
+                      placeholder={t("customModelPlaceholder")}
+                    />
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between">

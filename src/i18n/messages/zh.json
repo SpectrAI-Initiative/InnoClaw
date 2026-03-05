@@ -163,7 +163,12 @@
     "contextMode_normal": "标准 (80%)",
     "contextMode_extended": "扩展 (95%)",
     "maxMode": "MAX 模式",
-    "maxModeDesc": "启用时，对话接近上下文限制时会自动摘要保存。关闭时，对话将无限增长直到模型报错。"
+    "maxModeDesc": "启用时，对话接近上下文限制时会自动摘要保存。关闭时，对话将无限增长直到模型报错。",
+    "customModel": "自定义...",
+    "customModelPlaceholder": "输入模型名称，例如 qwen-plus",
+    "fetchModels": "拉取模型列表",
+    "fetchingModels": "拉取中...",
+    "fetchModelsSuccess": "已从供应商获取 {count} 个模型"
   },
   "terminal": {
     "title": "终端",

@@ -163,7 +163,12 @@
     "contextMode_normal": "Normal (80%)",
     "contextMode_extended": "Extended (95%)",
     "maxMode": "MAX Mode",
-    "maxModeDesc": "When enabled, conversations are automatically summarized when approaching the context limit. When disabled, no auto-summarization occurs."
+    "maxModeDesc": "When enabled, conversations are automatically summarized when approaching the context limit. When disabled, no auto-summarization occurs.",
+    "customModel": "Custom...",
+    "customModelPlaceholder": "Enter model name, e.g. qwen-plus",
+    "fetchModels": "Fetch Models",
+    "fetchingModels": "Fetching...",
+    "fetchModelsSuccess": "Fetched {count} models from provider"
   },
   "terminal": {
     "title": "Terminal",
