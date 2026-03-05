@@ -32,6 +32,7 @@ interface ArticlePreviewProps {
 
 export function ArticlePreview({ article, workspaceId, onClose }: ArticlePreviewProps) {
   const t = useTranslations("paperStudy");
+  const tCommon = useTranslations("common");
   const [activeTab, setActiveTab] = useState("detail");
   const [chatInput, setChatInput] = useState("");
   const [importedDiscussion, setImportedDiscussion] = useState(false);
@@ -51,7 +52,12 @@ export function ArticlePreview({ article, workspaceId, onClose }: ArticlePreview
     [article]
   );
 
-  const { messages, sendMessage, status } = useChat({ transport });
+  const { messages, sendMessage, status, setMessages } = useChat({ transport });
+
+  // Reset chat messages when the article changes
+  useEffect(() => {
+    setMessages([]);
+  }, [article, setMessages]);
 
   const isLoading = status === "streaming" || status === "submitted";
 
@@ -87,11 +93,12 @@ export function ArticlePreview({ article, workspaceId, onClose }: ArticlePreview
 
   const handleImportDiscussion = async () => {
     if (messages.length === 0) return;
-    setImportedDiscussion(true);
 
+    const userLabel = t("discussionRoleUser");
+    const aiLabel = t("discussionRoleAI");
     const content = messages
       .map((m) => {
-        const role = m.role === "user" ? "**我**" : "**AI**";
+        const role = m.role === "user" ? `**${userLabel}**` : `**${aiLabel}**`;
         const text =
           m.parts
             ?.filter(
@@ -106,19 +113,24 @@ export function ArticlePreview({ article, workspaceId, onClose }: ArticlePreview
     try {
       const now = new Date();
       const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-      await fetch("/api/notes", {
+      const res = await fetch("/api/notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId,
-          title: `论文讨论: ${article.title.slice(0, 60)} - ${dateStr}`,
+          title: `${t("discussionNoteTitle")}: ${article.title.slice(0, 60)} - ${dateStr}`,
           content,
           type: "manual",
         }),
       });
+      if (!res.ok) {
+        toast.error(tCommon("error"));
+        return;
+      }
+      setImportedDiscussion(true);
       toast.success(t("imported"));
     } catch {
-      toast.error("Failed to import");
+      toast.error(tCommon("error"));
     } finally {
       setTimeout(() => setImportedDiscussion(false), 3000);
     }
