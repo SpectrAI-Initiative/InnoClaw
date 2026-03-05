@@ -18,7 +18,9 @@
     "success": "成功",
     "modified": "已修改",
     "workspace": "工作区",
-    "datasets": "数据集"
+    "datasets": "数据集",
+    "minimalMode": "极简模式",
+    "exitMinimalMode": "退出极简模式"
   },
   "home": {
     "title": "我的工作空间",
@@ -413,5 +415,40 @@
     "selectWorkspace": "选择工作空间...",
     "linkSuccess": "数据集已关联到工作空间",
     "unlinkSuccess": "数据集已取消关联工作空间"
+  },
+  "scheduledTasks": {
+    "title": "定时任务",
+    "description": "配置使用 cron 表达式自动运行的任务。",
+    "name": "任务名称",
+    "taskType": "任务类型",
+    "schedule": "调度规则 (Cron)",
+    "enabled": "启用",
+    "lastRun": "上次运行",
+    "status": "状态",
+    "create": "创建任务",
+    "edit": "编辑任务",
+    "deleteConfirm": "确定要删除此定时任务吗？",
+    "noTasks": "暂无定时任务。",
+    "cronHelp": "Cron 语法：分 时 日 月 周（例如 0 0 * * * = 每天午夜）",
+    "taskTypes": {
+      "daily_report": "每日日报",
+      "weekly_report": "每周周报",
+      "git_sync": "Git 同步",
+      "source_sync": "资料同步",
+      "custom": "自定义"
+    },
+    "statusSuccess": "成功",
+    "statusError": "错误",
+    "statusRunning": "运行中",
+    "enabledLabel": "已启用",
+    "disabledLabel": "已暂停",
+    "namePlaceholder": "例如：每晚同步",
+    "schedulePlaceholder": "例如：0 0 * * *",
+    "workspaceOptional": "工作空间（可选）",
+    "allWorkspaces": "所有工作空间",
+    "invalidCron": "无效的 cron 表达式",
+    "createSuccess": "定时任务已创建",
+    "updateSuccess": "定时任务已更新",
+    "deleteSuccess": "定时任务已删除"
   }
 }

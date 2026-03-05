@@ -18,7 +18,9 @@
     "success": "Success",
     "modified": "Modified",
     "workspace": "Workspace",
-    "datasets": "Datasets"
+    "datasets": "Datasets",
+    "minimalMode": "Minimal Mode",
+    "exitMinimalMode": "Exit Minimal Mode"
   },
   "home": {
     "title": "My Workspaces",
@@ -413,5 +415,40 @@
     "selectWorkspace": "Select workspace...",
     "linkSuccess": "Dataset linked to workspace",
     "unlinkSuccess": "Dataset unlinked from workspace"
+  },
+  "scheduledTasks": {
+    "title": "Scheduled Tasks",
+    "description": "Configure tasks to run automatically on a schedule using cron expressions.",
+    "name": "Task Name",
+    "taskType": "Task Type",
+    "schedule": "Schedule (Cron)",
+    "enabled": "Enabled",
+    "lastRun": "Last Run",
+    "status": "Status",
+    "create": "Create Task",
+    "edit": "Edit Task",
+    "deleteConfirm": "Are you sure you want to delete this scheduled task?",
+    "noTasks": "No scheduled tasks configured.",
+    "cronHelp": "Cron syntax: minute hour day month weekday (e.g. 0 0 * * * = daily at midnight)",
+    "taskTypes": {
+      "daily_report": "Daily Report",
+      "weekly_report": "Weekly Report",
+      "git_sync": "Git Sync",
+      "source_sync": "Source Sync",
+      "custom": "Custom"
+    },
+    "statusSuccess": "Success",
+    "statusError": "Error",
+    "statusRunning": "Running",
+    "enabledLabel": "Active",
+    "disabledLabel": "Paused",
+    "namePlaceholder": "e.g. Nightly sync",
+    "schedulePlaceholder": "e.g. 0 0 * * *",
+    "workspaceOptional": "Workspace (optional)",
+    "allWorkspaces": "All workspaces",
+    "invalidCron": "Invalid cron expression",
+    "createSuccess": "Scheduled task created",
+    "updateSuccess": "Scheduled task updated",
+    "deleteSuccess": "Scheduled task deleted"
   }
 }
