@@ -82,3 +82,13 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Check deployment result
+        if: steps.deployment.outcome == 'failure'
+        run: |
+          echo "::error::GitHub Pages deployment failed. Please ensure GitHub Pages is enabled in your repository settings:"
+          echo "::error::  1. Go to https://github.com/${{ github.repository }}/settings/pages"
+          echo "::error::  2. Under 'Build and deployment', set Source to 'GitHub Actions'"
+          echo "::error::  3. For private repos, a GitHub Pro/Team/Enterprise plan is required."
+          exit 1

@@ -236,6 +236,12 @@ export function buildFinalCard(options: {
   const elements: Record<string, unknown>[] = [];
 
   // Tool calls summary (collapsed if many)
+  const summaryLines = toolCalls.map((tc) => {
+    const icon =
+      tc.state === "error" ? "❌" : tc.state === "completed" ? "✅" : "⏳";
+    return `${icon} **${tc.toolName}**`;
+  });
+
   if (toolCalls.length > 0) {
     // Show first few tool calls in detail, collapse the rest
     const detailedCount = Math.min(toolCalls.length, 5);
@@ -305,9 +311,7 @@ export function buildFinalCard(options: {
     // Remove detailed tool calls, keep only summary
     const trimmedElements: Record<string, unknown>[] = [];
     if (toolCalls.length > 0) {
-      const allSummary = toolCalls
-        .map((tc) => `✅ **${tc.toolName}**`)
-        .join(" | ");
+      const allSummary = summaryLines.join(" | ");
       trimmedElements.push({
         tag: "div",
         text: {
@@ -319,7 +323,11 @@ export function buildFinalCard(options: {
     }
 
     // Further truncate text if needed
-    const shorterText = finalText.slice(0, 1500) + "\n\n... (truncated)";
+    const FALLBACK_MAX_CHARS = 1500;
+    const shorterText =
+      finalText.length > FALLBACK_MAX_CHARS
+        ? finalText.slice(0, FALLBACK_MAX_CHARS) + "\n\n... (truncated)"
+        : finalText;
     trimmedElements.push({
       tag: "div",
       text: { content: shorterText, tag: "lark_md" },

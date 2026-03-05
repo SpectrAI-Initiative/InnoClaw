@@ -124,7 +124,19 @@
     "generateDisabled": "生成功能需要配置 API Key",
     "memory": "记忆",
     "memoryTitleClear": "对话记忆 - {date}",
-    "memoryTitleOverflow": "上下文压缩 - {date}"
+    "memoryTitleOverflow": "上下文压缩 - {date}",
+    "daily_report": "每日日报",
+    "generateDailyReport": "每日日报",
+    "generatingDailyReport": "生成中...",
+    "dailyReportSuccess": "每日日报已生成",
+    "dailyReportSkipped": "今天没有记忆笔记",
+    "dailyReportExists": "今天的每日日报已存在",
+    "weekly_report": "每周周报",
+    "generateWeeklyReport": "每周周报",
+    "generatingWeeklyReport": "生成中...",
+    "weeklyReportSuccess": "每周周报已生成",
+    "weeklyReportSkipped": "本周没有记忆笔记",
+    "weeklyReportExists": "本周的每周周报已存在"
   },
   "settings": {
     "title": "设置",

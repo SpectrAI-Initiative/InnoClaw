@@ -44,5 +44,17 @@ export async function register() {
       "@/lib/bot/feishu/ws-client"
     );
     startFeishuWSClient();
+
+    // Start the daily report scheduler (auto-generate at midnight)
+    const { startDailyReportScheduler } = await import(
+      "@/lib/daily-report-scheduler"
+    );
+    startDailyReportScheduler();
+
+    // Start the weekly report scheduler (auto-generate every Friday at noon)
+    const { startWeeklyReportScheduler } = await import(
+      "@/lib/weekly-report-scheduler"
+    );
+    startWeeklyReportScheduler();
   }
 }

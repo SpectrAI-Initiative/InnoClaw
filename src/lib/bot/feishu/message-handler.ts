@@ -5,7 +5,7 @@
  * and the WebSocket client to avoid duplicating the same flow.
  */
 
-import type { BotAdapter, BotMessage } from "../types";
+import type { BotAdapter, BotMessage, BotTextMessage } from "../types";
 import { parseAndHandleCommand } from "./commands";
 import { processAgentMessage } from "./agent-processor";
 import { processMessage, sendReplies } from "../processor";
@@ -30,6 +30,56 @@ export async function handleFeishuMessage(
     console.log(
       `${logPrefix} Processing ${message.type} message from ${message.senderId}`
     );
+
+    // --- Audio messages: transcribe to text, then process as text ---
+    if (message.type === "audio") {
+      if (!adapter.transcribeAudio) {
+        await adapter.sendText(
+          message.chatId,
+          "Voice messages are not supported by this adapter."
+        );
+        return;
+      }
+
+      let transcribedText: string;
+      try {
+        transcribedText = await adapter.transcribeAudio(message.fileKey);
+      } catch (err) {
+        const errMsg =
+          err instanceof Error ? err.message : "Unknown error";
+        console.error(`${logPrefix} Audio transcription failed:`, errMsg);
+        await adapter.sendText(
+          message.chatId,
+          `Failed to process voice message: ${errMsg}`
+        );
+        return;
+      }
+
+      if (!transcribedText.trim()) {
+        await adapter.sendText(
+          message.chatId,
+          "Could not recognize any speech in the voice message."
+        );
+        return;
+      }
+
+      console.log(
+        `${logPrefix} Transcribed audio → "${transcribedText.slice(0, 80)}..."`
+      );
+
+      // Convert to a text message and re-process through the full pipeline
+      const textMessage: BotTextMessage = {
+        type: "text",
+        messageId: message.messageId,
+        text: transcribedText,
+        senderId: message.senderId,
+        chatId: message.chatId,
+        isGroup: message.isGroup,
+        timestamp: message.timestamp,
+      };
+
+      return handleFeishuMessage(adapter, textMessage, logPrefix);
+    }
 
     // --- Text messages: check for commands or agent processing ---
     if (message.type === "text") {
@@ -80,11 +130,15 @@ export async function handleFeishuMessage(
     const replies = await processMessage(adapter, message);
     await sendReplies(adapter, message.chatId, replies);
   } catch (error) {
-    console.error(`${logPrefix} Message processing error:`, error);
+    const correlationId = crypto.randomUUID().slice(0, 8);
+    console.error(
+      `${logPrefix} Message processing error (id=${correlationId}):`,
+      error
+    );
     try {
       await adapter.sendText(
         message.chatId,
-        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Something went wrong while processing your request. Please try again later. (error id: ${correlationId})`
       );
     } catch {
       // Last resort — log only

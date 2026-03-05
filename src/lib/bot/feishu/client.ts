@@ -9,7 +9,10 @@
 
 import fs from "fs";
 import fsp from "fs/promises";
+import os from "os";
 import path from "path";
+import { Transform } from "stream";
+import { pipeline } from "stream/promises";
 import * as lark from "@larksuiteoapi/node-sdk";
 import {
   type BotAdapter,
@@ -52,7 +55,7 @@ function createFeishuFileHandler(client: lark.Client): FileHandler {
     ): Promise<string> {
       // fileKey is encoded as "image:{imageKey}" or "{messageId}:{fileKey}"
       // by parseMessages to carry the message_id needed for the download.
-      let resp: { writeFile: (filePath: string) => Promise<unknown> };
+      let resp: { getReadableStream: () => import("stream").Readable };
 
       if (fileKey.startsWith("image:")) {
         const imageKey = fileKey.slice(6);
@@ -75,18 +78,40 @@ function createFeishuFileHandler(client: lark.Client): FileHandler {
       await fsp.mkdir(destDir, { recursive: true });
       const safeName = path.basename(fileName) || `file_${Date.now()}`;
       const destPath = path.join(destDir, safeName);
-      await resp.writeFile(destPath);
 
-      const stat = await fsp.stat(destPath);
-      if (stat.size > MAX_FILE_SIZE) {
-        await fsp.unlink(destPath);
-        throw new Error(
-          `File too large: ${stat.size} bytes exceeds ${MAX_FILE_SIZE} byte limit`
+      // Stream the response and abort early if MAX_FILE_SIZE is exceeded,
+      // avoiding writing the full file to disk before the size check.
+      let bytesReceived = 0;
+      const sizeLimiter = new Transform({
+        transform(chunk: Buffer, _encoding, callback) {
+          bytesReceived += chunk.length;
+          if (bytesReceived > MAX_FILE_SIZE) {
+            callback(
+              new Error(
+                `File too large: ${bytesReceived} bytes exceeds ${MAX_FILE_SIZE} byte limit`
+              )
+            );
+          } else {
+            callback(null, chunk);
+          }
+        },
+      });
+
+      try {
+        await pipeline(
+          resp.getReadableStream(),
+          sizeLimiter,
+          fs.createWriteStream(destPath)
         );
+      } catch (err) {
+        await fsp.unlink(destPath).catch((cleanupErr) => {
+          console.warn(`[feishu] Failed to remove partial file ${destPath}:`, cleanupErr);
+        });
+        throw err;
       }
 
       console.log(
-        `[feishu] Downloaded file: ${destPath} (${stat.size} bytes)`
+        `[feishu] Downloaded file: ${destPath} (${bytesReceived} bytes)`
       );
       return destPath;
     },
@@ -227,6 +252,18 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
             isGroup: chatType === "group",
             timestamp,
           });
+        } else if (msgType === "audio") {
+          const rawKey = (content.file_key as string) || "";
+          messages.push({
+            type: "audio",
+            messageId,
+            senderId,
+            chatId,
+            isGroup: chatType === "group",
+            timestamp,
+            duration: Number(content.duration || 0),
+            fileKey: `${messageId}:${rawKey}`,
+          });
         } else if (msgType === "file" || msgType === "image") {
           // Encode messageId into fileKey so downloadFile can build the
           // correct Feishu API URL (files need message_id + file_key;
@@ -288,7 +325,10 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
         throw new Error(`Feishu send card failed: ${resp.msg}`);
       }
 
-      const messageId = resp.data?.message_id || "";
+      const messageId = resp.data?.message_id;
+      if (!messageId) {
+        throw new Error("Feishu send card failed: missing message_id in response");
+      }
       console.log(`[feishu] Sent card to chat ${chatId} (msg: ${messageId})`);
       return messageId;
     },
@@ -306,6 +346,44 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
 
       if (resp.code !== 0) {
         throw new Error(`Feishu patch card failed: ${resp.msg}`);
+      }
+    },
+
+    async transcribeAudio(fileKey: string): Promise<string> {
+      const destDir = path.join(os.tmpdir(), "notebooklm-bot-audio");
+      const localPath = await fileHandler.downloadFile(
+        fileKey,
+        `audio_${Date.now()}.ogg`,
+        destDir
+      );
+
+      try {
+        const audioBuffer = await fsp.readFile(localPath);
+        const base64Audio = audioBuffer.toString("base64");
+
+        const resp = await client.speech_to_text.speech.fileRecognize({
+          data: {
+            speech: { speech: base64Audio },
+            config: {
+              file_id: `audio_${Date.now()}`,
+              format: "ogg_opus",
+              engine_type: "16k_auto",
+            },
+          },
+        });
+
+        if (resp.code !== 0 || !resp.data?.recognition_text) {
+          throw new Error(
+            `Speech recognition failed: ${resp.msg || "no text returned"}`
+          );
+        }
+
+        console.log(
+          `[feishu] Transcribed audio: "${resp.data.recognition_text.slice(0, 100)}..."`
+        );
+        return resp.data.recognition_text;
+      } finally {
+        await fsp.unlink(localPath).catch(() => {});
       }
     },
 
