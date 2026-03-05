@@ -36,6 +36,13 @@
       "when": 1772870412711,
       "tag": "0004_cluster_operations",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1772956686494,
+      "tag": "0005_scheduled_tasks",
+      "breakpoints": true
     }
   ]
 }
