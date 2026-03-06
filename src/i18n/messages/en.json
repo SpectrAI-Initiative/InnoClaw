@@ -186,7 +186,9 @@
   "preview": {
     "title": "Preview",
     "emptyState": "Select a file to preview",
-    "unsupported": "Preview not available for this file type"
+    "unsupported": "Preview not available for this file type",
+    "editMode": "Edit",
+    "previewMode": "Preview"
   },
   "agent": {
     "title": "Claude Code",
@@ -323,7 +325,7 @@
     "description": "Description",
     "descriptionPlaceholder": "Brief description of what this skill does",
     "systemPrompt": "System Prompt",
-    "systemPromptPlaceholder": "Custom instructions for the AI. Use {{parameter}} for variables.",
+    "systemPromptPlaceholder": "Custom instructions for the AI. Use '{{parameter}}' for variables.",
     "scope": "Scope",
     "scopeGlobal": "Global (all workspaces)",
     "scopeWorkspace": "Workspace only",

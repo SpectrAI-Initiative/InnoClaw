@@ -189,7 +189,9 @@
   "preview": {
     "title": "预览",
     "emptyState": "选择一个文件以预览",
-    "unsupported": "此文件类型不支持预览"
+    "unsupported": "此文件类型不支持预览",
+    "editMode": "编辑",
+    "previewMode": "预览"
   },
   "agent": {
     "title": "Claude Code",
@@ -306,7 +308,7 @@
     "description": "描述",
     "descriptionPlaceholder": "简要描述此技能的功能",
     "systemPrompt": "系统提示词",
-    "systemPromptPlaceholder": "AI 的自定义指令。使用 {{参数名}} 作为变量。",
+    "systemPromptPlaceholder": "AI 的自定义指令。使用 '{{参数名}}' 作为变量。",
     "scope": "范围",
     "scopeGlobal": "全局（所有工作空间）",
     "scopeWorkspace": "仅当前工作空间",
