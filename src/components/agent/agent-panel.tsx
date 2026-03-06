@@ -503,6 +503,8 @@ export function AgentPanel({
   const [showMemoryPreview, setShowMemoryPreview] = useState(false);
   const [memoryPreviewTitle, setMemoryPreviewTitle] = useState("");
   const [memoryPreviewContent, setMemoryPreviewContent] = useState("");
+  // Track overflow-triggered dialog: stores messages to keep after memory save
+  const overflowKeepRef = useRef<UIMessage[] | null>(null);
 
   // Draggable + resizable dialog state
   const [dialogPos, setDialogPos] = useState({ x: 0, y: 0 });
@@ -775,7 +777,10 @@ export function AgentPanel({
     const toSummarize = messages.slice(0, keepFromIndex);
     const toKeep = messages.slice(keepFromIndex);
 
-    summarizeAndEvict(toSummarize, toKeep, "overflow");
+    // Show message selection dialog instead of auto-summarizing
+    overflowKeepRef.current = toKeep;
+    setSelectedMessageIds(new Set(toSummarize.map((m) => m.id)));
+    setShowMessageSelect(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, status, isSummarizing]);
 
@@ -884,6 +889,7 @@ export function AgentPanel({
     if (status === "streaming" || status === "submitted") stop();
     if (messages.length > 0 && aiEnabled) {
       // Show message selection dialog first
+      overflowKeepRef.current = null; // null = manual clear (not overflow)
       setSelectedMessageIds(new Set(messages.map((m) => m.id)));
       setShowMessageSelect(true);
     } else {
@@ -937,6 +943,15 @@ export function AgentPanel({
   const handleSelectCancel = () => {
     setShowMessageSelect(false);
     setSelectedMessageIds(new Set());
+    if (overflowKeepRef.current) {
+      // User cancelled during overflow — fall back to silent auto-summarize
+      const toKeep = overflowKeepRef.current;
+      const toSummarize = messages.filter(
+        (m) => !toKeep.some((k) => k.id === m.id)
+      );
+      overflowKeepRef.current = null;
+      summarizeAndEvict(toSummarize, toKeep, "overflow");
+    }
   };
 
   const handleMemoryConfirm = async () => {
@@ -959,7 +974,19 @@ export function AgentPanel({
           errData && typeof errData.error === "string" ? errData.error : t("memoryError");
         throw new Error(errorMessage);
       }
-      setMessages([]);
+      if (overflowKeepRef.current) {
+        // Overflow: keep recent messages, inject memory marker
+        const memoryMarker = {
+          id: `memory-${Date.now()}`,
+          role: "assistant" as const,
+          parts: [{ type: "text" as const, text: t("memorySaved") }],
+        } as UIMessage;
+        setMessages([memoryMarker, ...overflowKeepRef.current]);
+        overflowKeepRef.current = null;
+      } else {
+        // Manual clear: empty all messages
+        setMessages([]);
+      }
     } catch (err) {
       setSummaryError(err instanceof Error && err.message ? err.message : t("memoryError"));
     } finally {
@@ -971,6 +998,15 @@ export function AgentPanel({
     setShowMemoryPreview(false);
     setMemoryPreviewTitle("");
     setMemoryPreviewContent("");
+    if (overflowKeepRef.current) {
+      // User cancelled memory preview during overflow — fall back to silent auto-summarize
+      const toKeep = overflowKeepRef.current;
+      const toSummarize = messages.filter(
+        (m) => !toKeep.some((k) => k.id === m.id)
+      );
+      overflowKeepRef.current = null;
+      summarizeAndEvict(toSummarize, toKeep, "overflow");
+    }
   };
 
   // Switch mode: update body synchronously and clear stale conversation
