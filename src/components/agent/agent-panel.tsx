@@ -686,7 +686,53 @@ export function AgentPanel({
     }
   }, [messages, storageKey, status]);
 
-  // --- Auto-memory: summarize and evict ---
+  // --- Auto-continue: automatically continue when task is incomplete ---
+  const prevStatusRef = useRef(status);
+  const autoContinueCountRef = useRef(0);
+  const MAX_AUTO_CONTINUES = 5; // Prevent infinite loops
+
+  useEffect(() => {
+    const wasStreaming = prevStatusRef.current === "streaming" || prevStatusRef.current === "submitted";
+    const isNowReady = status === "ready";
+    prevStatusRef.current = status;
+
+    // Only trigger on transition from streaming to ready
+    if (!wasStreaming || !isNowReady) {
+      // Reset counter when user sends a new message
+      if (status === "submitted") {
+        autoContinueCountRef.current = 0;
+      }
+      return;
+    }
+
+    // Check if we've hit the auto-continue limit
+    if (autoContinueCountRef.current >= MAX_AUTO_CONTINUES) {
+      return;
+    }
+
+    // Check if the last assistant message ends with a tool call (task incomplete)
+    const lastMessage = messages[messages.length - 1];
+    if (!lastMessage || lastMessage.role !== "assistant") return;
+
+    const parts = lastMessage.parts || [];
+    const hasToolCall = parts.some((p: { type?: string }) =>
+      p.type?.startsWith("tool-") || p.type === "dynamic-tool"
+    );
+
+    // If the last part is a tool call result, the agent was likely interrupted mid-task
+    if (hasToolCall) {
+      const lastPart = parts[parts.length - 1] as { type?: string };
+      const endsWithTool = lastPart?.type?.startsWith("tool-") || lastPart?.type === "dynamic-tool";
+
+      if (endsWithTool) {
+        autoContinueCountRef.current++;
+        // Auto-send continue message
+        setTimeout(() => {
+          sendMessage({ text: "继续" });
+        }, 500);
+      }
+    }
+  }, [status, messages, sendMessage]);
   const overflowThreshold = getOverflowThresholdChars(
     settings?.llmProvider ?? "openai",
     settings?.llmModel ?? "gpt-4o-mini",
