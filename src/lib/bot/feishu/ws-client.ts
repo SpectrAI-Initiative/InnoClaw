@@ -95,6 +95,31 @@ export function createSdkLogger(callbacks: {
 }
 
 // ---------------------------------------------------------------------------
+// Cleanup helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Centralised cleanup for the WSClient singleton.
+ *
+ * Closes the existing client (if any), clears the global reference, and resets
+ * the started flag so a future call to `startFeishuWSClient()` can retry.
+ */
+function cleanupWsClient(reason: string, err?: unknown): void {
+  try {
+    globalForFeishu.__feishuWsClient?.close({ force: true });
+  } catch (e) {
+    console.debug("[feishu-ws] Ignoring error during WSClient cleanup:", e);
+  }
+  globalForFeishu.__feishuWsClient = undefined;
+  globalForFeishu.__feishuWsStarted = false;
+  if (err) {
+    console.error(`[feishu-ws] ${reason}:`, err);
+  } else {
+    console.error(`[feishu-ws] ${reason}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -219,14 +244,6 @@ export function startFeishuWSClient(): void {
       );
     })
     .catch((err) => {
-      // Clean up instance and reset flag so a subsequent call can retry
-      try {
-        globalForFeishu.__feishuWsClient?.close({ force: true });
-      } catch (e) {
-        console.debug("[feishu-ws] Ignoring error during WSClient cleanup:", e);
-      }
-      globalForFeishu.__feishuWsClient = undefined;
-      globalForFeishu.__feishuWsStarted = false;
-      console.error("[feishu-ws] WSClient failed to start:", err);
+      cleanupWsClient("WSClient failed to start", err);
     });
 }
