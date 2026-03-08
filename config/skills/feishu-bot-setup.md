@@ -1,7 +1,7 @@
 ---
 name: Feishu Bot Setup Guide
 description: Step-by-step guide for connecting a Feishu (Lark) bot to NotebookLM using persistent WebSocket connection mode. Covers app creation, credentials, event subscription, permissions, and troubleshooting the "App connection info not detected" error.
-allowed-tools: Bash(cat:*), Bash(echo:*), Bash(grep:*), ReadFile, WriteFile, ListDirectory
+allowed-tools: Bash(cat:*), Bash(echo:*), Bash(grep:*), readFile, writeFile, listDirectory
 ---
 
 # Feishu (Lark) Bot Connection Skill
