@@ -131,7 +131,7 @@ function main() {
           content = content.replaceAll("<YOUR_SCP_HUB_API_KEY>", scpHubApiKey);
         }
 
-        const parsed = parseSkillMd(content, dir.name);
+        const parsed = parseSkillMd(content, slug);
         if (!parsed) {
           failed++;
           continue;
