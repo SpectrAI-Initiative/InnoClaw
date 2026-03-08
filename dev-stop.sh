@@ -72,9 +72,19 @@ if [ -n "$orphan_pids" ]; then
         # Check if process is related to this project
         cwd=$(readlink -f /proc/$pid/cwd 2>/dev/null)
         if [ "$cwd" = "$PROJECT_DIR" ]; then
-            echo "Killed orphan next dev process: $pid"
             kill $pid 2>/dev/null
-            stopped=true
+            sleep 2
+            if ps -p $pid > /dev/null 2>&1; then
+                echo "Force killing orphan next dev process: $pid"
+                kill -9 $pid 2>/dev/null
+                sleep 1
+            fi
+            if ! ps -p $pid > /dev/null 2>&1; then
+                echo "Killed orphan next dev process: $pid"
+                stopped=true
+            else
+                echo "Failed to kill orphan next dev process: $pid"
+            fi
         fi
     done
 fi
