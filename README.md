@@ -633,7 +633,27 @@ docker-compose up -d
 
 本项目支持接入飞书（Lark）机器人，通过 WebSocket 长连接实时接收消息，让用户在飞书中直接与 Agent 交互（支持工具调用、文件操作等完整能力）。
 
-This project supports Feishu (Lark) bot integration via WebSocket long connection. Users can interact with the Agent directly in Feishu, with full tool support (bash, readFile, writeFile, grep, etc.).
+This project supports Feishu (Lark) bot integration via WebSocket persistent connection. Users can interact with the Agent directly in Feishu, with full tool support (bash, readFile, writeFile, grep, etc.).
+
+### 架构概述 / Architecture Overview
+
+```
+┌──────────────┐     WebSocket (persistent)     ┌──────────────────┐
+│  Feishu App  │ ◄══════════════════════════════►│  NotebookLM Bot  │
+│  (Lark SDK)  │     im.message.receive_v1       │  (WSClient)      │
+└──────┬───────┘                                 └───────┬──────────┘
+       │                                                 │
+       │  Messages / Cards                               │  Agent Pipeline
+       │                                                 │
+┌──────▼───────┐                                 ┌───────▼──────────┐
+│  Feishu Chat │                                 │  AI Provider     │
+│  (User)      │                                 │  (OpenAI, etc.)  │
+└──────────────┘                                 └──────────────────┘
+```
+
+**连接方式 / Connection Mode**: 使用 `@larksuiteoapi/node-sdk` 的 `WSClient` 建立**长连接**（persistent connection），而非 Webhook 回调方式。服务端主动与飞书建立 WebSocket 连接，无需公网 IP 或域名。
+
+Uses `@larksuiteoapi/node-sdk` `WSClient` to establish a **persistent WebSocket connection** (not Webhook callbacks). The server initiates the connection to Feishu — no public IP or domain required.
 
 ### 第 1 步：创建飞书应用
 
@@ -722,7 +742,7 @@ npm run dev
 
 ```
 [feishu-ws] WSClient starting...
-[feishu-ws] WSClient start() initiated — waiting for connection to be established...
+[feishu-ws] WSClient start() initiated — waiting for connection to be established (watch for ✅ or ❌ above)...
 [feishu-ws] ✅ WSClient connected successfully — Feishu Developer Console should now detect the connection.
 ```
 
@@ -779,19 +799,54 @@ curl -X POST http://localhost:3000/api/bot/feishu/push \
   -d '{"chatId": "oc_xxx", "title": "Task Complete", "content": "Build succeeded!"}'
 ```
 
-### 常见问题
+### 常见问题 / Troubleshooting
 
-**Q: 飞书开发者后台提示 "未检测到应用连接信息"？**
-A: 确保服务已启动且 `FEISHU_APP_ID` / `FEISHU_APP_SECRET` 配置正确。查看终端是否有 `[feishu-ws] WSClient connected successfully` 日志。如果看到 `Feishu bot not enabled or missing credentials`，检查 `FEISHU_BOT_ENABLED=true` 是否已设置。
+**Q: 飞书开发者后台提示 "未检测到应用连接信息"？ / Feishu console shows "App connection info not detected"?**
 
-**Q: 机器人回复 "目前无法直接查看" 或类似的无工具回复？**
+A: 此问题通常有以下几个原因：
+
+1. **服务未启动或凭证错误** — 确保 `.env.local` 中的 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET` 与飞书开发者后台完全一致。
+2. **看日志中的 ✅ 或 ❌ 标志** — `WSClient start() initiated` 日志**不代表连接成功**，必须等到 `✅ WSClient connected successfully` 出现。
+3. **先启动服务，后保存配置** — 必须先运行 `npm run dev` 并确认连接成功，然后再到飞书后台保存长连接配置。
+4. **开启调试日志** — 在 `.env.local` 中设置 `FEISHU_LOG_LEVEL=debug` 查看详细的 SDK 日志。
+5. **检查 `FEISHU_BOT_ENABLED=true`** — 如果日志显示 `Feishu bot not enabled or missing credentials`，说明开关未开启。
+
+This is usually caused by:
+1. **Service not running or wrong credentials** — Verify `FEISHU_APP_ID` / `FEISHU_APP_SECRET` match the Feishu Developer Console exactly.
+2. **Check for ✅ or ❌ in logs** — `WSClient start() initiated` does **NOT** mean connected. Wait for `✅ WSClient connected successfully`.
+3. **Start service FIRST, then save config** — Run `npm run dev`, confirm `✅` in logs, then save the persistent connection config in the Feishu console.
+4. **Enable debug logging** — Set `FEISHU_LOG_LEVEL=debug` in `.env.local` for detailed SDK logs.
+5. **Verify `FEISHU_BOT_ENABLED=true`** — If logs show `Feishu bot not enabled or missing credentials`, the toggle is off.
+
+**Q: 机器人回复 "目前无法直接查看" 或类似的无工具回复？ / Bot replies with "unable to view directly" or no-tool responses?**
+
 A: 说明没有绑定工作空间。确认 `WORKSPACE_ROOTS` 环境变量已正确配置且目录存在，机器人会自动绑定第一个路径。或者手动发送 `/workspace <path>` 命令绑定。
 
-**Q: 机器人报错 "Item with id 'rs_...' not found"？**
+Workspace is not bound. Ensure `WORKSPACE_ROOTS` is set and the directory exists. The bot auto-binds the first path, or manually use `/workspace <path>`.
+
+**Q: 机器人报错 "Item with id 'rs_...' not found"？ / Bot shows "Item with id 'rs_...' not found" error?**
+
 A: 这是因为 OpenAI 兼容代理不支持 Responses API。项目已使用 `openai.chat()` 强制走 Chat Completions API，确保使用最新代码即可。
 
-**Q: 如何获取 chatId 用于推送 API？**
+The OpenAI-compatible proxy does not support the Responses API. This project uses `openai.chat()` to force the Chat Completions API. Update to the latest code.
+
+**Q: 如何获取 chatId 用于推送 API？ / How to get chatId for the push API?**
+
 A: 发送 `/status` 命令，机器人会返回当前的 Chat ID。也可以在飞书开发者后台的消息日志中查看。
+
+Send `/status` command — the bot will reply with the current Chat ID. You can also find it in the Feishu Developer Console message logs.
+
+### 环境变量速查 / Environment Variables Quick Reference
+
+| 变量 / Variable | 必需 / Required | 说明 / Description |
+|--------|----------|-------------|
+| `FEISHU_BOT_ENABLED` | ✅ | 设为 `true` 启用飞书机器人 / Set to `true` to enable |
+| `FEISHU_APP_ID` | ✅ | 应用 ID / Application ID from Developer Console |
+| `FEISHU_APP_SECRET` | ✅ | 应用密钥 / Application Secret |
+| `FEISHU_VERIFICATION_TOKEN` | ✅ | 验证令牌 / Verification Token from event config |
+| `FEISHU_ENCRYPT_KEY` | ⬜ | 加密密钥 / Encrypt Key (optional, for encrypted payloads) |
+| `FEISHU_LOG_LEVEL` | ⬜ | SDK 日志级别 / SDK log level: `error`/`warn`/`info`/`debug`/`trace` (default: `info`) |
+| `WORKSPACE_ROOTS` | ⬜ | 工作空间路径 / Workspace paths for Agent tool access |
 
 ---
 

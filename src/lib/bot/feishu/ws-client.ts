@@ -28,6 +28,7 @@ import { handleFeishuMessage } from "./message-handler";
 // Use globalThis to prevent multiple WSClient instances during Next.js HMR
 const globalForFeishu = globalThis as unknown as {
   __feishuWsStarted?: boolean;
+  __feishuWsClient?: InstanceType<typeof lark.WSClient>;
 };
 
 // ---------------------------------------------------------------------------
@@ -120,7 +121,7 @@ export function startFeishuWSClient(): void {
   const adapter = createFeishuAdapter(config);
 
   // Determine SDK log level from env (default: info)
-  const envLogLevel = (process.env.FEISHU_LOG_LEVEL || "info").toLowerCase();
+  const envLogLevel = (process.env.FEISHU_LOG_LEVEL || "info").toLowerCase().trim();
   const logLevelMap: Record<string, lark.LoggerLevel> = {
     error: lark.LoggerLevel.error,
     warn: lark.LoggerLevel.warn,
@@ -128,6 +129,12 @@ export function startFeishuWSClient(): void {
     debug: lark.LoggerLevel.debug,
     trace: lark.LoggerLevel.trace,
   };
+  if (!(envLogLevel in logLevelMap)) {
+    console.warn(
+      `[feishu-ws] Unknown FEISHU_LOG_LEVEL="${envLogLevel}", ` +
+        `expected one of: ${Object.keys(logLevelMap).join(", ")}. Falling back to "info".`
+    );
+  }
   const loggerLevel = logLevelMap[envLogLevel] ?? lark.LoggerLevel.info;
 
   // Custom logger to detect actual connection status from SDK internals
@@ -139,7 +146,14 @@ export function startFeishuWSClient(): void {
       );
     },
     onConnectFailed() {
-      // Reset flag so a subsequent call can retry
+      // Close the existing client before allowing retry to avoid duplicate
+      // WSClient instances (the SDK may keep retrying internally).
+      try {
+        globalForFeishu.__feishuWsClient?.close({ force: true });
+      } catch {
+        // Ignore — close may fail if already disposed
+      }
+      globalForFeishu.__feishuWsClient = undefined;
       globalForFeishu.__feishuWsStarted = false;
       console.error(
         "[feishu-ws] ❌ WSClient connection failed — " +
@@ -192,8 +206,9 @@ export function startFeishuWSClient(): void {
     },
   });
 
-  // Set flag before starting to prevent concurrent start attempts
+  // Set flag and store instance before starting to prevent concurrent start attempts
   globalForFeishu.__feishuWsStarted = true;
+  globalForFeishu.__feishuWsClient = wsClient;
   console.log("[feishu-ws] WSClient starting...");
 
   // Start the WebSocket connection.
@@ -209,7 +224,13 @@ export function startFeishuWSClient(): void {
       );
     })
     .catch((err) => {
-      // Reset flag so a subsequent call can retry
+      // Clean up instance and reset flag so a subsequent call can retry
+      try {
+        globalForFeishu.__feishuWsClient?.close({ force: true });
+      } catch {
+        // Ignore — close may fail if already disposed
+      }
+      globalForFeishu.__feishuWsClient = undefined;
       globalForFeishu.__feishuWsStarted = false;
       console.error("[feishu-ws] WSClient failed to start:", err);
     });
