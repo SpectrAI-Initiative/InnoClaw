@@ -146,22 +146,15 @@ export function startFeishuWSClient(): void {
       );
     },
     onConnectFailed() {
-      // Close the existing client before allowing retry to avoid duplicate
-      // WSClient instances (the SDK may keep retrying internally).
-      // force: true → uses ws.terminate() for immediate shutdown instead
-      // of ws.close() which waits for a graceful close handshake.
-      try {
-        globalForFeishu.__feishuWsClient?.close({ force: true });
-      } catch (e) {
-        console.debug("[feishu-ws] Ignoring error during WSClient cleanup:", e);
-      }
-      globalForFeishu.__feishuWsClient = undefined;
-      globalForFeishu.__feishuWsStarted = false;
+      // Do not close or reset the WSClient here: the SDK manages its own
+      // internal reconnect loop. We only log the failure so operators can
+      // investigate, while allowing the client to keep retrying.
       console.error(
         "[feishu-ws] ❌ WSClient connection failed — " +
           "please verify FEISHU_APP_ID and FEISHU_APP_SECRET in .env.local. " +
           "The Feishu Developer Console will show \"App connection info not detected\" " +
-          "until the connection is established successfully."
+          "until the connection is established successfully. " +
+          "The SDK will continue attempting to reconnect automatically."
       );
     },
   });
