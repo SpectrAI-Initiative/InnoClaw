@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NotebookLM Dev Stop Script
+# Jarvis Dev Stop Script
 cd "$(dirname "$0")"
 
 PORT=3000
