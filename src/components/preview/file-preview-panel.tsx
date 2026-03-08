@@ -175,6 +175,9 @@ function MarkdownPreview({ filePath }: { filePath: string }) {
           onKeyDown={(e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === "s") {
               e.preventDefault();
+              if (saving || !modified) {
+                return;
+              }
               handleSave();
             }
           }}
