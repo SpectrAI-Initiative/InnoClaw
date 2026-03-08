@@ -500,9 +500,19 @@ export function AgentPanel({
   // Memory preview dialog state
   const [showMessageSelect, setShowMessageSelect] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+  const toggleMessage = useCallback((id: string) => {
+    setSelectedMessageIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
   const [showMemoryPreview, setShowMemoryPreview] = useState(false);
   const [memoryPreviewTitle, setMemoryPreviewTitle] = useState("");
   const [memoryPreviewContent, setMemoryPreviewContent] = useState("");
+  // Track overflow-triggered dialog: stores messages to keep after memory save
+  const overflowKeepRef = useRef<UIMessage[] | null>(null);
 
   // Draggable + resizable dialog state
   const [dialogPos, setDialogPos] = useState({ x: 0, y: 0 });
@@ -746,6 +756,7 @@ export function AgentPanel({
   useEffect(() => {
     if (settings?.maxMode === false) return;
     if (restoreGenRef.current > 0 || isSummarizing) return;
+    if (showMessageSelect || showMemoryPreview) return; // Don't trigger while dialog is open
     if (status !== "ready" && status !== "error") return;
     if (messages.length < 4) return;
     if (messages.length === failedAtCountRef.current) return;
@@ -775,9 +786,15 @@ export function AgentPanel({
     const toSummarize = messages.slice(0, keepFromIndex);
     const toKeep = messages.slice(keepFromIndex);
 
-    summarizeAndEvict(toSummarize, toKeep, "overflow");
+    // Show message selection dialog instead of auto-summarizing
+    overflowKeepRef.current = toKeep;
+    // Only pre-select messages with renderable text content
+    setSelectedMessageIds(new Set(
+      toSummarize.filter((m) => getMessageTextLength(m) > 0).map((m) => m.id)
+    ));
+    setShowMessageSelect(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, status, isSummarizing]);
+  }, [messages, status, isSummarizing, showMessageSelect, showMemoryPreview]);
 
   const isLoading = status === "submitted" || status === "streaming";
 
@@ -880,24 +897,31 @@ export function AgentPanel({
     }, 100);
   };
 
-  const handleClear = () => {
-    if (status === "streaming" || status === "submitted") stop();
-    if (messages.length > 0 && aiEnabled) {
-      // Show message selection dialog first
-      setSelectedMessageIds(new Set(messages.map((m) => m.id)));
-      setShowMessageSelect(true);
-    } else {
-      setMessages([]);
-    }
-    setInput("");
-  };
-
   // Helper: extract plain text from a message
   const getMessageText = (message: UIMessage) =>
     message.parts
       ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
       .map((p) => p.text)
       .join("") ?? "";
+
+  // Messages that have renderable text content (used for selection UI)
+  const selectableMessages = useMemo(
+    () => messages.filter((m) => getMessageTextLength(m) > 0),
+    [messages]
+  );
+
+  const handleClear = () => {
+    if (status === "streaming" || status === "submitted") stop();
+    if (messages.length > 0 && aiEnabled) {
+      // Show message selection dialog first
+      overflowKeepRef.current = null; // null = manual clear (not overflow)
+      setSelectedMessageIds(new Set(selectableMessages.map((m) => m.id)));
+      setShowMessageSelect(true);
+    } else {
+      setMessages([]);
+    }
+    setInput("");
+  };
 
   // Step 2: generate preview from selected messages
   const handleSelectNext = async () => {
@@ -937,6 +961,15 @@ export function AgentPanel({
   const handleSelectCancel = () => {
     setShowMessageSelect(false);
     setSelectedMessageIds(new Set());
+    if (overflowKeepRef.current) {
+      // User cancelled during overflow — fall back to silent auto-summarize
+      const toKeep = overflowKeepRef.current;
+      const toSummarize = messages.filter(
+        (m) => !toKeep.some((k) => k.id === m.id)
+      );
+      overflowKeepRef.current = null;
+      summarizeAndEvict(toSummarize, toKeep, "overflow");
+    }
   };
 
   const handleMemoryConfirm = async () => {
@@ -959,7 +992,19 @@ export function AgentPanel({
           errData && typeof errData.error === "string" ? errData.error : t("memoryError");
         throw new Error(errorMessage);
       }
-      setMessages([]);
+      if (overflowKeepRef.current) {
+        // Overflow: keep recent messages, inject memory marker
+        const memoryMarker = {
+          id: `memory-${Date.now()}`,
+          role: "assistant" as const,
+          parts: [{ type: "text" as const, text: t("memorySaved") }],
+        } as UIMessage;
+        setMessages([memoryMarker, ...overflowKeepRef.current]);
+        overflowKeepRef.current = null;
+      } else {
+        // Manual clear: empty all messages
+        setMessages([]);
+      }
     } catch (err) {
       setSummaryError(err instanceof Error && err.message ? err.message : t("memoryError"));
     } finally {
@@ -971,6 +1016,15 @@ export function AgentPanel({
     setShowMemoryPreview(false);
     setMemoryPreviewTitle("");
     setMemoryPreviewContent("");
+    if (overflowKeepRef.current) {
+      // User cancelled memory preview during overflow — fall back to silent auto-summarize
+      const toKeep = overflowKeepRef.current;
+      const toSummarize = messages.filter(
+        (m) => !toKeep.some((k) => k.id === m.id)
+      );
+      overflowKeepRef.current = null;
+      summarizeAndEvict(toSummarize, toKeep, "overflow");
+    }
   };
 
   // Switch mode: update body synchronously and clear stale conversation
@@ -1189,7 +1243,7 @@ export function AgentPanel({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSelectedMessageIds(new Set(messages.map((m) => m.id)))}
+              onClick={() => setSelectedMessageIds(new Set(selectableMessages.map((m) => m.id)))}
             >
               {t("selectAll")}
             </Button>
@@ -1201,48 +1255,52 @@ export function AgentPanel({
               {t("selectNone")}
             </Button>
             <span className="text-xs text-muted-foreground ml-auto">
-              {selectedMessageIds.size} / {messages.length}
+              {selectedMessageIds.size} / {selectableMessages.length}
             </span>
           </div>
 
           <ScrollArea className="flex-1 min-h-0 px-6">
-            <div className="space-y-2 py-2 pr-4">
+            <div className="space-y-2 py-2 pr-4" role="listbox" aria-multiselectable="true">
               {messages.map((msg) => {
                 const text = getMessageText(msg);
                 if (!text) return null;
                 const checked = selectedMessageIds.has(msg.id);
                 return (
-                  <label
+                  <div
                     key={msg.id}
+                    role="option"
+                    aria-selected={checked}
+                    tabIndex={0}
                     className={`flex items-start gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
                       checked
                         ? "border-[#7aa2f7]/50 bg-[#7aa2f7]/5"
                         : "border-[#30363d] hover:border-[#484f58]"
                     }`}
+                    onClick={() => toggleMessage(msg.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleMessage(msg.id);
+                      }
+                    }}
                   >
                     <Checkbox
                       checked={checked}
-                      onCheckedChange={(v) => {
-                        setSelectedMessageIds((prev) => {
-                          const next = new Set(prev);
-                          if (v) next.add(msg.id);
-                          else next.delete(msg.id);
-                          return next;
-                        });
-                      }}
+                      onCheckedChange={() => toggleMessage(msg.id)}
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
                       className="mt-0.5 shrink-0"
                     />
                     <div className="min-w-0 flex-1">
                       <span className={`text-xs font-medium ${
                         msg.role === "user" ? "text-[#bb9af7]" : "text-[#7aa2f7]"
                       }`}>
-                        {msg.role === "user" ? "User" : "Assistant"}
+                        {msg.role === "user" ? t("roleUser") : t("roleAssistant")}
                       </span>
                       <p className="text-xs text-[#c9d1d9] line-clamp-3 mt-0.5 whitespace-pre-wrap">
                         {text}
                       </p>
                     </div>
-                  </label>
+                  </div>
                 );
               })}
             </div>

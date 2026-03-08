@@ -113,7 +113,21 @@
     "selectionSingle": "I selected the following option:",
     "selectionMulti": "I selected the following options:",
     "memorySaved": "Previous conversation saved to memory notes.",
-    "summarizing": "Saving conversation to memory..."
+    "summarizing": "Saving conversation to memory...",
+    "selectMessagesTitle": "Select Messages",
+    "selectMessagesDesc": "Context is getting full. Choose which messages to save as memory.",
+    "selectAll": "Select All",
+    "selectNone": "Deselect All",
+    "nextStep": "Next",
+    "cancel": "Cancel",
+    "memoryPreviewTitle": "Memory Preview",
+    "memoryPreviewDesc": "Review and edit the conversation memory before saving.",
+    "memoryNoteTitle": "Title",
+    "memoryNoteContent": "Content",
+    "memoryConfirm": "Confirm",
+    "memoryError": "Failed to save memory",
+    "roleUser": "User",
+    "roleAssistant": "Assistant"
   },
   "notes": {
     "title": "Notes",
@@ -220,7 +234,9 @@
     "memoryNoteTitle": "Title",
     "memoryNoteContent": "Content",
     "dismiss": "Dismiss",
-    "clearAll": "Clear All"
+    "clearAll": "Clear All",
+    "roleUser": "User",
+    "roleAssistant": "Assistant"
   },
   "report": {
     "tabReport": "Research report",

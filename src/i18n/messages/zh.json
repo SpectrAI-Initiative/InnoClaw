@@ -113,7 +113,21 @@
     "selectionSingle": "我选择了以下选项：",
     "selectionMulti": "我选择了以下选项：",
     "memorySaved": "之前的对话已保存到记忆笔记。",
-    "summarizing": "正在将对话保存到记忆中..."
+    "summarizing": "正在将对话保存到记忆中...",
+    "selectMessagesTitle": "选择对话",
+    "selectMessagesDesc": "上下文即将溢出，请选择需要保存为记忆的对话内容。",
+    "selectAll": "全选",
+    "selectNone": "取消全选",
+    "nextStep": "下一步",
+    "cancel": "取消",
+    "memoryPreviewTitle": "记忆预览",
+    "memoryPreviewDesc": "保存前查看并编辑对话记忆。",
+    "memoryNoteTitle": "标题",
+    "memoryNoteContent": "内容",
+    "memoryConfirm": "确认",
+    "memoryError": "保存记忆失败",
+    "roleUser": "用户",
+    "roleAssistant": "助手"
   },
   "notes": {
     "title": "笔记",
@@ -223,7 +237,9 @@
     "memoryNoteTitle": "标题",
     "memoryNoteContent": "内容",
     "dismiss": "关闭",
-    "clearAll": "直接清除"
+    "clearAll": "直接清除",
+    "roleUser": "用户",
+    "roleAssistant": "助手"
   },
   "report": {
     "tabReport": "研究报告",

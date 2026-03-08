@@ -22,6 +22,7 @@ This project provides a self-hostable AI research assistant inspired by Google N
 - 🔀 **多模型 & 多语言 / Multi-LLM & i18n** — 支持 OpenAI / Anthropic / Google Gemini，中英双语界面，暗色模式
 - 💬 **飞书机器人 / Feishu Bot** — WebSocket 长连接，Agent 工具调用，交互卡片实时更新
 - 🧠 **上下文管理 / Context Management** — MAX 模式自动摘要防止上下文溢出，可配置上下文策略（保守/标准/扩展）
+- 🔬 **SCP 科学技能 / SCP Scientific Skills** — 集成 206 个科学技能，覆盖药物发现、基因组学、蛋白质工程等 8 大领域
 
 _完整功能列表请见 [功能 / Features](#功能--features) / For the full feature list, see [Features](#功能--features)._
 
@@ -35,6 +36,7 @@ _完整功能列表请见 [功能 / Features](#功能--features) / For the full 
 - [⚡ 快速开始 / Quick Start](#快速开始--quick-start)
 - [📖 使用指南 / Usage Guide](#使用指南--usage-guide)
 - [💬 飞书机器人配置 / Feishu Bot Setup](#飞书机器人配置--feishu-bot-setup)
+- [🔬 SCP 科学技能 / SCP Scientific Skills](#scp-科学技能--scp-scientific-skills)
 - [🏗️ 项目结构 / Project Structure](#项目结构--project-structure)
 - [🔧 RAG 管道架构 / RAG Pipeline](#rag-管道架构--rag-pipeline-architecture)
 - [❓ 常见问题 / FAQ](#常见问题--faq)
@@ -53,6 +55,7 @@ _完整功能列表请见 [功能 / Features](#功能--features) / For the full 
 - **暗色模式** — 支持亮色/暗色主题切换
 - **上下文溢出保护** — MAX 模式开启后，对话接近上下文限制时自动摘要保存，避免 API 报错；可选保守（60%）/标准（80%）/扩展（95%）上下文策略
 - **飞书机器人** — 通过 WebSocket 长连接接入飞书，支持 Agent 工具调用、交互卡片、斜杠命令
+- **SCP 科学技能** — 集成 [SCP](https://github.com/InternScience/scp) 206 个科学技能，通过 Intern-Discovery 平台连接 2200+ 科学工具，覆盖药物发现、基因组学、蛋白质工程、化学、物理等 8 大领域
 
 ---
 
@@ -779,6 +782,101 @@ A: 这是因为 OpenAI 兼容代理不支持 Responses API。项目已使用 `op
 
 **Q: 如何获取 chatId 用于推送 API？**
 A: 发送 `/status` 命令，机器人会返回当前的 Chat ID。也可以在飞书开发者后台的消息日志中查看。
+
+---
+
+## SCP 科学技能 / SCP Scientific Skills
+
+本项目集成了 [SCP（Science Context Protocol）](https://github.com/InternScience/scp) 科学技能系统，提供 **206 个预置科学技能**，覆盖药物发现、基因组学、蛋白质工程、化学、物理等 8 大科学领域。这些技能通过 [Intern-Discovery 平台](https://scphub.intern-ai.org.cn/) 连接到真实的科学计算服务端点。
+
+This project integrates [SCP (Science Context Protocol)](https://github.com/InternScience/scp) scientific skills — **206 pre-built skills** covering 8 major scientific domains including drug discovery, genomics, protein engineering, chemistry, and physics. These skills connect to live scientific computing endpoints via the [Intern-Discovery Platform](https://scphub.intern-ai.org.cn/).
+
+### 技能概览 / Skill Overview
+
+| 领域 / Domain | 技能数 / Skills | 代表性能力 / Representative Capabilities |
+|-------|:------:|------|
+| 💊 药物发现与药理学 | 71 | 靶点识别、ADMET 预测、虚拟筛选、分子对接、药物安全性分析 |
+| 🧬 基因组学与遗传分析 | 41 | 变异致病性评估、癌症基因组学、群体遗传学、病毒基因组学 |
+| 🧬 蛋白质科学与工程 | 38 | 结构预测（ESMFold/AlphaFold）、结合位点分析、突变影响评估 |
+| 🧪 化学与分子科学 | 24 | 结构分析、分子指纹、构效关系、天然产物分析 |
+| ⚙️ 物理与工程计算 | 18 | 电路分析、热力学、光学、单位换算 |
+| 🔬 实验自动化与文献挖掘 | 7 | 实验方案生成、PubMed 搜索、文献挖掘 |
+| 🌍 地球与环境科学 | 5 | 大气科学、海洋学、地震波处理 |
+| 📊 其他 | 2 | 纳米尺度换算、地震波形处理 |
+
+### 配置 / Configuration
+
+#### 第 1 步：获取 SCP Hub API Key
+
+1. 访问 [SCP Platform](https://scphub.intern-ai.org.cn/) 注册账号
+2. 获取你的 SCP Hub API Key
+
+#### 第 2 步：配置环境变量
+
+在 `.env.local` 中添加：
+
+```env
+# SCP Hub (Intern-discovery) API Key
+SCP_HUB_API_KEY=sk-your-scp-hub-api-key
+```
+
+#### 第 3 步：导入 SCP 技能
+
+**方式一：通过 Web UI 导入（推荐）**
+
+1. 启动应用后访问 `/skills` 页面
+2. 点击 **"导入技能"** 按钮
+3. 输入 GitHub 仓库地址：`https://github.com/InternScience/scp/tree/main`
+4. 确认导入，系统会自动发现并导入 206 个技能，API Key 占位符会被自动替换为配置的真实 Key
+
+**方式二：通过 API 导入**
+
+```bash
+# 导入全部 206 个 SCP 技能
+curl -X POST http://localhost:3000/api/skills/import \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://github.com/InternScience/scp/tree/main"}'
+
+# 导入单个技能（例如药物靶点识别）
+curl -X POST http://localhost:3000/api/skills/import \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://github.com/InternScience/scp/tree/main/skills/drug_target_identification"}'
+```
+
+导入时，技能中的 `<YOUR_SCP_HUB_API_KEY>` 占位符会自动替换为 `SCP_HUB_API_KEY` 环境变量的值。
+
+During import, the `<YOUR_SCP_HUB_API_KEY>` placeholder in each skill is automatically replaced with the `SCP_HUB_API_KEY` environment variable value.
+
+### 使用 / Usage
+
+导入后，在 AI 对话中直接用自然语言描述你的研究目标，系统会自动选择并调用相应的 SCP 技能：
+
+```
+# 药物靶点识别
+> 我想识别肺癌（EFO_0000311）的潜在药物靶点，找到 TOP 靶点后从 ChEMBL 获取详细信息，再从 UniProt 获取蛋白质数据。
+
+# 蛋白质结构分析
+> 分析 p53 蛋白的结构（PDB: 1TUP），下载结构、提取链序列、计算结构几何参数并评估质量指标。
+
+# 变异致病性评估
+> 评估 TP53 变异 p.Arg175His 的致病性，使用 VEP 预测效应，检查 ClinVar 记录，获取表型关联信息。
+
+# 化学结构比较
+> 比较阿司匹林和布洛芬的化学结构，将名称转换为 SMILES，分析结构、计算相似度并获取 PubChem 数据。
+```
+
+### 常见问题 / FAQ
+
+**Q: 导入报 "No skills found" 错误？**
+A: 确保使用的 URL 包含 `/tree/main` 路径，例如 `https://github.com/InternScience/scp/tree/main`。如果是私有仓库，确保 `GITHUB_TOKEN` 已配置。
+
+**Q: 如何更新已导入的技能？**
+A: 目前重新导入会创建新的技能副本（slug 自动去重）。如需更新，建议先在 `/skills` 页面删除旧技能，再重新导入。
+
+**Q: 技能调用超时怎么办？**
+A: 部分科学计算（如 TCGA 差异表达分析、蛋白质结构预测）可能耗时较长，这是正常现象。
+
+> 💡 更多技能详情和完整列表请参阅 [SCP Skills 仓库](https://github.com/InternScience/scp/tree/main/skills) 和 [SCP Skills Tutorial](https://github.com/InternScience/scp/blob/main/tutorial%20for%20skills.md)。
 
 ---
 
