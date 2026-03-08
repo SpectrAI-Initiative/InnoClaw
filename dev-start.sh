@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NotebookLM Dev Start Script
+# Jarvis Dev Start Script
 cd "$(dirname "$0")"
 
 PORT=3000
