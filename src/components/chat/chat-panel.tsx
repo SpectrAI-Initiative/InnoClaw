@@ -297,6 +297,14 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
   // Memory selection dialog state
   const [showMessageSelect, setShowMessageSelect] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+  const toggleMessage = useCallback((id: string) => {
+    setSelectedMessageIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
   const [showMemoryPreview, setShowMemoryPreview] = useState(false);
   const [memoryPreviewTitle, setMemoryPreviewTitle] = useState("");
   const [memoryPreviewContent, setMemoryPreviewContent] = useState("");
@@ -678,28 +686,32 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
             </Button>
           </div>
           <ScrollArea className="flex-1 min-h-0 max-h-[50vh] pr-2">
-            <div className="space-y-1.5">
+            <div className="space-y-1.5" role="listbox" aria-multiselectable="true">
               {messages.map((msg) => {
                 const text = getMessageText(msg);
                 if (!text) return null;
                 const isSelected = selectedMessageIds.has(msg.id);
                 return (
-                  <label
+                  <div
                     key={msg.id}
+                    role="option"
+                    aria-selected={isSelected}
+                    tabIndex={0}
                     className={`flex items-start gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
                       isSelected ? "border-primary bg-primary/5" : "border-transparent hover:bg-muted/50"
                     }`}
+                    onClick={() => toggleMessage(msg.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleMessage(msg.id);
+                      }
+                    }}
                   >
                     <Checkbox
                       checked={isSelected}
-                      onCheckedChange={(checked) => {
-                        setSelectedMessageIds((prev) => {
-                          const next = new Set(prev);
-                          if (checked) next.add(msg.id);
-                          else next.delete(msg.id);
-                          return next;
-                        });
-                      }}
+                      onCheckedChange={() => toggleMessage(msg.id)}
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
                       className="mt-0.5"
                     />
                     <div className="flex-1 min-w-0">
@@ -710,7 +722,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                         {text.slice(0, 300)}{text.length > 300 ? "..." : ""}
                       </div>
                     </div>
-                  </label>
+                  </div>
                 );
               })}
             </div>
