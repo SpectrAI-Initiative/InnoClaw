@@ -40,7 +40,8 @@ export function useFileContent({ filePath, onLoad }: UseFileContentOptions) {
     return () => {
       canceled = true;
     };
-    // onLoad is intentionally excluded — callers should memoize or inline it
+    // onLoad is intentionally excluded from deps — callers should pass a stable callback
+    // (e.g., via useCallback) if they rely on the latest closure values
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filePath]);
 
