@@ -49,11 +49,15 @@ export function createSdkLogger(callbacks: {
 
   /** Check whether any argument contains a target substring. */
   function includes(args: unknown[], target: string): boolean {
-    return args.some(
-      (a) =>
-        (typeof a === "string" && a.includes(target)) ||
-        (Array.isArray(a) && a.some((v) => typeof v === "string" && v.includes(target)))
-    );
+    for (const a of args) {
+      if (typeof a === "string" && a.includes(target)) return true;
+      if (Array.isArray(a)) {
+        for (const v of a) {
+          if (typeof v === "string" && v.includes(target)) return true;
+        }
+      }
+    }
+    return false;
   }
 
   function handleArgs(args: unknown[]) {
@@ -117,16 +121,14 @@ export function startFeishuWSClient(): void {
 
   // Determine SDK log level from env (default: info)
   const envLogLevel = (process.env.FEISHU_LOG_LEVEL || "info").toLowerCase();
-  const loggerLevel =
-    envLogLevel === "debug"
-      ? lark.LoggerLevel.debug
-      : envLogLevel === "trace"
-        ? lark.LoggerLevel.trace
-        : envLogLevel === "warn"
-          ? lark.LoggerLevel.warn
-          : envLogLevel === "error"
-            ? lark.LoggerLevel.error
-            : lark.LoggerLevel.info;
+  const logLevelMap: Record<string, lark.LoggerLevel> = {
+    error: lark.LoggerLevel.error,
+    warn: lark.LoggerLevel.warn,
+    info: lark.LoggerLevel.info,
+    debug: lark.LoggerLevel.debug,
+    trace: lark.LoggerLevel.trace,
+  };
+  const loggerLevel = logLevelMap[envLogLevel] ?? lark.LoggerLevel.info;
 
   // Custom logger to detect actual connection status from SDK internals
   const logger = createSdkLogger({
