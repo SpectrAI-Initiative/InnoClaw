@@ -684,11 +684,21 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                 if (!text) return null;
                 const isSelected = selectedMessageIds.has(msg.id);
                 return (
-                  <label
+                  <div
                     key={msg.id}
+                    role="option"
+                    aria-selected={isSelected}
                     className={`flex items-start gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
                       isSelected ? "border-primary bg-primary/5" : "border-transparent hover:bg-muted/50"
                     }`}
+                    onClick={() => {
+                      setSelectedMessageIds((prev) => {
+                        const next = new Set(prev);
+                        if (isSelected) next.delete(msg.id);
+                        else next.add(msg.id);
+                        return next;
+                      });
+                    }}
                   >
                     <Checkbox
                       checked={isSelected}
@@ -710,7 +720,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                         {text.slice(0, 300)}{text.length > 300 ? "..." : ""}
                       </div>
                     </div>
-                  </label>
+                  </div>
                 );
               })}
             </div>

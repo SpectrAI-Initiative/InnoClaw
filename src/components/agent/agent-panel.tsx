@@ -1258,13 +1258,23 @@ export function AgentPanel({
                 if (!text) return null;
                 const checked = selectedMessageIds.has(msg.id);
                 return (
-                  <label
+                  <div
                     key={msg.id}
+                    role="option"
+                    aria-selected={checked}
                     className={`flex items-start gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
                       checked
                         ? "border-[#7aa2f7]/50 bg-[#7aa2f7]/5"
                         : "border-[#30363d] hover:border-[#484f58]"
                     }`}
+                    onClick={() => {
+                      setSelectedMessageIds((prev) => {
+                        const next = new Set(prev);
+                        if (checked) next.delete(msg.id);
+                        else next.add(msg.id);
+                        return next;
+                      });
+                    }}
                   >
                     <Checkbox
                       checked={checked}
@@ -1288,7 +1298,7 @@ export function AgentPanel({
                         {text}
                       </p>
                     </div>
-                  </label>
+                  </div>
                 );
               })}
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 
 interface UseFileContentOptions {
@@ -13,6 +13,7 @@ export function useFileContent({ filePath, onLoad }: UseFileContentOptions) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [modified, setModified] = useState(false);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     let canceled = false;
@@ -46,7 +47,8 @@ export function useFileContent({ filePath, onLoad }: UseFileContentOptions) {
   }, [filePath]);
 
   const handleSave = useCallback(async () => {
-    if (saving || !modified) return;
+    if (savingRef.current || !modified) return;
+    savingRef.current = true;
     setSaving(true);
     try {
       const res = await fetch("/api/files/write", {
@@ -61,9 +63,10 @@ export function useFileContent({ filePath, onLoad }: UseFileContentOptions) {
       toast.error("Failed to save file");
       return false;
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
-  }, [saving, modified, filePath, content]);
+  }, [modified, filePath, content]);
 
   const updateContent = useCallback((value: string) => {
     setContent(value);
