@@ -99,7 +99,7 @@ export function createSdkLogger(callbacks: {
 // ---------------------------------------------------------------------------
 
 /**
- * Centralised cleanup for the WSClient singleton.
+ * Centralized cleanup for the WSClient singleton.
  *
  * Closes the existing client (if any), clears the global reference, and resets
  * the started flag so a future call to `startFeishuWSClient()` can retry.
