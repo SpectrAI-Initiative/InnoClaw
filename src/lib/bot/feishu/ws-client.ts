@@ -148,10 +148,12 @@ export function startFeishuWSClient(): void {
     onConnectFailed() {
       // Close the existing client before allowing retry to avoid duplicate
       // WSClient instances (the SDK may keep retrying internally).
+      // force: true → uses ws.terminate() for immediate shutdown instead
+      // of ws.close() which waits for a graceful close handshake.
       try {
         globalForFeishu.__feishuWsClient?.close({ force: true });
-      } catch {
-        // Ignore — close may fail if already disposed
+      } catch (e) {
+        console.debug("[feishu-ws] Ignoring error during WSClient cleanup:", e);
       }
       globalForFeishu.__feishuWsClient = undefined;
       globalForFeishu.__feishuWsStarted = false;
@@ -227,8 +229,8 @@ export function startFeishuWSClient(): void {
       // Clean up instance and reset flag so a subsequent call can retry
       try {
         globalForFeishu.__feishuWsClient?.close({ force: true });
-      } catch {
-        // Ignore — close may fail if already disposed
+      } catch (e) {
+        console.debug("[feishu-ws] Ignoring error during WSClient cleanup:", e);
       }
       globalForFeishu.__feishuWsClient = undefined;
       globalForFeishu.__feishuWsStarted = false;
