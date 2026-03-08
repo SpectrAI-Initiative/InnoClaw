@@ -297,12 +297,19 @@ export function createAgentTools(
   const allTools = {
     bash: tool({
       description:
-        "Execute a shell command in the workspace directory. Use for running builds, tests, git operations, package management, etc.",
+        "Execute a shell command in the workspace directory. Use for running builds, tests, git operations, package management, etc. For long-running scientific computations, you can set a longer timeout (default: 30s, max: 300s).",
       inputSchema: z.object({
         command: z.string().describe("The shell command to execute"),
+        timeout: z
+          .number()
+          .optional()
+          .describe(
+            "Timeout in seconds for the command (default: 30, max: 300). Use a higher value for long-running computations like ADMET prediction, molecular docking, etc."
+          ),
       }),
-      execute: async ({ command }) => {
-        return execInWorkspace(command, validatedCwd);
+      execute: async ({ command, timeout }) => {
+        const timeoutMs = Math.min((timeout ?? 30) * 1000, 300_000);
+        return execInWorkspace(command, validatedCwd, { timeout: timeoutMs });
       },
     }),
 

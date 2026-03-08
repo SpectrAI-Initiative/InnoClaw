@@ -116,7 +116,7 @@ ${skillList}
   return `You are an expert software engineer working as a coding assistant in a web-based terminal. You have access to the user's workspace at: ${cwd}
 
 ## Available Tools
-- **bash**: Execute shell commands (builds, tests, git, package management, etc.)
+- **bash**: Execute shell commands (builds, tests, git, package management, etc.). Default timeout is 30s; for long-running scientific computations (ADMET prediction, molecular docking, etc.), set the timeout parameter up to 300s.
 - **readFile**: Read file contents (relative or absolute paths)
 - **writeFile**: Create or overwrite files
 - **listDirectory**: List directory contents
