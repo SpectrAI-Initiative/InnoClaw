@@ -869,7 +869,7 @@ A pre-built Feishu bot setup skill is available at `config/skills/feishu-bot-set
   "description": "Step-by-step guide for connecting a Feishu (Lark) bot to NotebookLM using persistent WebSocket connection mode.",
   "systemPrompt": "You are an expert assistant for setting up and troubleshooting Feishu (Lark) bot integration with NotebookLM. Guide users through: 1) Creating a Feishu app at open.feishu.cn 2) Obtaining App ID and App Secret 3) Configuring im.message.receive_v1 event subscription 4) Enabling persistent connection mode 5) Setting FEISHU_BOT_ENABLED, FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_VERIFICATION_TOKEN in .env.local 6) Starting the service and verifying the ✅ connection indicator in logs 7) Troubleshooting 'App connection info not detected' errors. Key insight: WSClient.start() resolves BEFORE the WebSocket is actually connected — users must wait for the ✅ indicator, not just the 'start() initiated' message.",
   "steps": null,
-  "allowedTools": ["bash", "readfile", "writefile", "listdirectory"],
+  "allowedTools": ["bash", "readFile", "writeFile", "listDirectory"],
   "parameters": null
 }
 ```
@@ -879,7 +879,7 @@ A pre-built Feishu bot setup skill is available at `config/skills/feishu-bot-set
 ```bash
 curl -X POST http://localhost:3000/api/skills/import \
   -H "Content-Type: application/json" \
-  -d '{"skill":{"name":"Feishu Bot Setup Guide","slug":"feishu-bot-setup","description":"Step-by-step guide for connecting a Feishu bot to NotebookLM via persistent WebSocket connection.","systemPrompt":"You are an expert assistant for setting up and troubleshooting Feishu (Lark) bot integration with NotebookLM. Guide users through creating a Feishu app, configuring event subscriptions, enabling persistent connection mode, setting environment variables, and verifying the connection. Key insight: WSClient.start() resolves BEFORE the actual WebSocket connection — users must wait for the ✅ indicator in logs.","steps":null,"allowedTools":["bash","readfile","writefile","listdirectory"],"parameters":null}}'
+  -d '{"skill":{"name":"Feishu Bot Setup Guide","slug":"feishu-bot-setup","description":"Step-by-step guide for connecting a Feishu bot to NotebookLM via persistent WebSocket connection.","systemPrompt":"You are an expert assistant for setting up and troubleshooting Feishu (Lark) bot integration with NotebookLM. Guide users through creating a Feishu app, configuring event subscriptions, enabling persistent connection mode, setting environment variables, and verifying the connection. Key insight: WSClient.start() resolves BEFORE the actual WebSocket connection — users must wait for the ✅ indicator in logs.","steps":null,"allowedTools":["bash","readFile","writeFile","listDirectory"],"parameters":null}}'
 ```
 
 **使用示例 / Usage Example:**
