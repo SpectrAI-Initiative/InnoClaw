@@ -271,7 +271,7 @@ async function discoverPluginContent(
       }
 
       // Match: */agents/*.md but NOT inside skills/*/agents/ (those are skill sub-agents)
-      if (/(?:^|\/)agents\/[^/]+\.md$/.test(p) && !/\/skills\/[^/]+\/agents\//.test(p)) {
+      if (/(?:^|\/)agents\/[^/]+\.md$/.test(p) && !/(?:^|\/)skills\/[^/]+\/agents\//.test(p)) {
         const agentSlug = p.match(/(?:^|\/)agents\/([^/]+)\.md$/)?.[1];
         if (agentSlug) {
           results.push({ path: p, fallbackSlug: agentSlug });
