@@ -84,7 +84,7 @@ describe("createSdkLogger", () => {
 
     logger.info("[ws]", "some other message");
     // "ws connect success" is intentionally different from "ws client ready"
-    // to verify only the exact SDK status phrases trigger callbacks.
+    // to verify that similar but different SDK status phrases do not trigger callbacks.
     logger.debug("[ws]", "ws connect success");
 
     expect(onReady).not.toHaveBeenCalled();
