@@ -500,6 +500,14 @@ export function AgentPanel({
   // Memory preview dialog state
   const [showMessageSelect, setShowMessageSelect] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+  const toggleMessage = useCallback((id: string) => {
+    setSelectedMessageIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
   const [showMemoryPreview, setShowMemoryPreview] = useState(false);
   const [memoryPreviewTitle, setMemoryPreviewTitle] = useState("");
   const [memoryPreviewContent, setMemoryPreviewContent] = useState("");
@@ -1268,36 +1276,18 @@ export function AgentPanel({
                         ? "border-[#7aa2f7]/50 bg-[#7aa2f7]/5"
                         : "border-[#30363d] hover:border-[#484f58]"
                     }`}
-                    onClick={() => {
-                      setSelectedMessageIds((prev) => {
-                        const next = new Set(prev);
-                        if (checked) next.delete(msg.id);
-                        else next.add(msg.id);
-                        return next;
-                      });
-                    }}
+                    onClick={() => toggleMessage(msg.id)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setSelectedMessageIds((prev) => {
-                          const next = new Set(prev);
-                          if (checked) next.delete(msg.id);
-                          else next.add(msg.id);
-                          return next;
-                        });
+                        toggleMessage(msg.id);
                       }
                     }}
                   >
                     <Checkbox
                       checked={checked}
-                      onCheckedChange={(v) => {
-                        setSelectedMessageIds((prev) => {
-                          const next = new Set(prev);
-                          if (v) next.add(msg.id);
-                          else next.delete(msg.id);
-                          return next;
-                        });
-                      }}
+                      onCheckedChange={() => toggleMessage(msg.id)}
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
                       className="mt-0.5 shrink-0"
                     />
                     <div className="min-w-0 flex-1">
