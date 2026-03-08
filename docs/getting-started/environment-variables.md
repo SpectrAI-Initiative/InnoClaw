@@ -59,6 +59,7 @@ EMBEDDING_MODEL=google/gemini-embedding-001
 | `FEISHU_APP_SECRET` | `string` | No | — | Feishu application secret. |
 | `FEISHU_VERIFICATION_TOKEN` | `string` | No | — | Token for verifying Feishu webhook requests. |
 | `FEISHU_ENCRYPT_KEY` | `string` | No | — | Encryption key for Feishu event payloads. |
+| `FEISHU_LOG_LEVEL` | `string` | No | `info` | SDK log verbosity: `error`, `warn`, `info`, `debug`, `trace`. |
 
 ## WeChat Enterprise Bot Configuration
 

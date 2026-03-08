@@ -666,9 +666,16 @@ This project supports Feishu (Lark) bot integration via WebSocket long connectio
 
 1. 在 **事件与回调** → **事件配置** 页面
 2. 选择 **"使用长连接接收事件"**（不是 Webhook URL 方式）
-3. **注意**：必须先启动服务（`npm run dev`）并确认控制台输出 `[feishu-ws] WSClient connected successfully`，然后再回到飞书开发者后台保存长连接配置
+3. **注意**：必须先启动服务（`npm run dev`）并确认控制台输出 `[feishu-ws] ✅ WSClient connected successfully`，然后再回到飞书开发者后台保存长连接配置
 
-> 如果看到 "未检测到应用连接信息，请确保长连接建立成功后再保存配置"，说明服务未启动或凭证配置有误，请检查 `.env.local` 中的 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET` 是否正确。
+> ⚠️ 如果看到 "未检测到应用连接信息，请确保长连接建立成功后再保存配置"：
+>
+> 1. 确认 `.env.local` 中 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET` 正确
+> 2. 在控制台日志中找到 ✅ 或 ❌ 标志来确认**真实**连接状态：
+>    - `[feishu-ws] ✅ WSClient connected successfully` — 连接成功，可以保存配置
+>    - `[feishu-ws] ❌ WSClient connection failed` — 连接失败，请检查凭证
+> 3. 如需更详细的调试日志，在 `.env.local` 中设置 `FEISHU_LOG_LEVEL=debug`
+> 4. 注意：`WSClient start() initiated` 日志**不代表**连接已建立，请等待 ✅ 出现后再保存配置
 
 ### 第 5 步：配置机器人能力
 
@@ -715,8 +722,12 @@ npm run dev
 
 ```
 [feishu-ws] WSClient starting...
-[feishu-ws] WSClient connected successfully
+[feishu-ws] WSClient start() initiated — waiting for connection to be established...
+[feishu-ws] ✅ WSClient connected successfully — Feishu Developer Console should now detect the connection.
 ```
+
+> 注意：只有看到 ✅ 标志才表示连接真正建立成功。如果看到 ❌ 标志，请检查凭证配置。
+> 可通过 `FEISHU_LOG_LEVEL=debug` 环境变量开启更详细的 SDK 日志。
 
 然后在飞书中搜索并打开机器人对话，发送消息即可。
 
