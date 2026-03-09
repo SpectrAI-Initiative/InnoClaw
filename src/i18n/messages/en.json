@@ -206,7 +206,7 @@
     "previewMode": "Preview"
   },
   "agent": {
-    "title": "Claude Code",
+    "title": "Agent",
     "placeholder": "Ask me to code...",
     "placeholderPlan": "Describe what you want to build...",
     "placeholderAsk": "Ask a question about your code...",
