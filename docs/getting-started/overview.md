@@ -2,7 +2,7 @@
 
 ## What is VibeLab?
 
-VibeLab is an AI-powered research assistant web application similar to Google VibeLab. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
+VibeLab is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
 
 ## Key Features
 
