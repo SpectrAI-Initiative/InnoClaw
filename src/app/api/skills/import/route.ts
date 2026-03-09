@@ -172,7 +172,7 @@ function parseSkillMd(
   }
 
   const frontmatter = fmMatch[1];
-  let body = fmMatch[2].trim();
+  const body = fmMatch[2].trim();
 
   if (!body) return null;
 
