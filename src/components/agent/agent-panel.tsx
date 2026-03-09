@@ -500,6 +500,14 @@ export function AgentPanel({
   // Memory preview dialog state
   const [showMessageSelect, setShowMessageSelect] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+  const toggleMessage = useCallback((id: string) => {
+    setSelectedMessageIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
   const [showMemoryPreview, setShowMemoryPreview] = useState(false);
   const [memoryPreviewTitle, setMemoryPreviewTitle] = useState("");
   const [memoryPreviewContent, setMemoryPreviewContent] = useState("");
@@ -686,7 +694,60 @@ export function AgentPanel({
     }
   }, [messages, storageKey, status]);
 
-  // --- Auto-memory: summarize and evict ---
+  // --- Auto-continue: automatically continue when task is incomplete ---
+  const prevStatusRef = useRef(status);
+  const autoContinueCountRef = useRef(0);
+  const autoContinueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const MAX_AUTO_CONTINUES = 5; // Prevent infinite loops
+
+  useEffect(() => {
+    const wasStreaming = prevStatusRef.current === "streaming" || prevStatusRef.current === "submitted";
+    const isNowReady = status === "ready";
+    prevStatusRef.current = status;
+
+    // Only trigger on transition from streaming to ready
+    if (!wasStreaming || !isNowReady) {
+      // Reset counter when user sends a new message
+      if (status === "submitted") {
+        autoContinueCountRef.current = 0;
+      }
+      return;
+    }
+
+    // Check if we've hit the auto-continue limit
+    if (autoContinueCountRef.current >= MAX_AUTO_CONTINUES) {
+      return;
+    }
+
+    // Check if the last assistant message ends with a tool call (task incomplete)
+    const lastMessage = messages[messages.length - 1];
+    if (!lastMessage || lastMessage.role !== "assistant") return;
+
+    const parts = lastMessage.parts || [];
+    const hasToolCall = parts.some((p: { type?: string }) =>
+      p.type?.startsWith("tool-") || p.type === "dynamic-tool"
+    );
+
+    // If the last part is a tool call result, the agent was likely interrupted mid-task
+    if (hasToolCall) {
+      const lastPart = parts[parts.length - 1] as { type?: string };
+      const endsWithTool = lastPart?.type?.startsWith("tool-") || lastPart?.type === "dynamic-tool";
+
+      if (endsWithTool) {
+        autoContinueCountRef.current++;
+        autoContinueTimerRef.current = setTimeout(() => {
+          sendMessage({ text: t("autoContinue") });
+        }, 500);
+      }
+    }
+
+    return () => {
+      if (autoContinueTimerRef.current) {
+        clearTimeout(autoContinueTimerRef.current);
+        autoContinueTimerRef.current = null;
+      }
+    };
+  }, [status, messages, sendMessage, t]);
   const overflowThreshold = getOverflowThresholdChars(
     settings?.llmProvider ?? "openai",
     settings?.llmModel ?? "gpt-4o-mini",
@@ -1252,30 +1313,34 @@ export function AgentPanel({
           </div>
 
           <ScrollArea className="flex-1 min-h-0 px-6">
-            <div className="space-y-2 py-2 pr-4">
+            <div className="space-y-2 py-2 pr-4" role="listbox" aria-multiselectable="true">
               {messages.map((msg) => {
                 const text = getMessageText(msg);
                 if (!text) return null;
                 const checked = selectedMessageIds.has(msg.id);
                 return (
-                  <label
+                  <div
                     key={msg.id}
+                    role="option"
+                    aria-selected={checked}
+                    tabIndex={0}
                     className={`flex items-start gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
                       checked
                         ? "border-[#7aa2f7]/50 bg-[#7aa2f7]/5"
                         : "border-[#30363d] hover:border-[#484f58]"
                     }`}
+                    onClick={() => toggleMessage(msg.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleMessage(msg.id);
+                      }
+                    }}
                   >
                     <Checkbox
                       checked={checked}
-                      onCheckedChange={(v) => {
-                        setSelectedMessageIds((prev) => {
-                          const next = new Set(prev);
-                          if (v) next.add(msg.id);
-                          else next.delete(msg.id);
-                          return next;
-                        });
-                      }}
+                      onCheckedChange={() => toggleMessage(msg.id)}
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
                       className="mt-0.5 shrink-0"
                     />
                     <div className="min-w-0 flex-1">
@@ -1288,7 +1353,7 @@ export function AgentPanel({
                         {text}
                       </p>
                     </div>
-                  </label>
+                  </div>
                 );
               })}
             </div>

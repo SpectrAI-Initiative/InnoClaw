@@ -1,6 +1,6 @@
 # Notifications & Bot Integrations
 
-NotebookLM supports integration with messaging platforms through bot adapters. This allows users to interact with their workspaces directly from chat applications.
+VibeLab supports integration with messaging platforms through bot adapters. This allows users to interact with their workspaces directly from chat applications.
 
 ## Supported Channels
 
@@ -15,7 +15,7 @@ NotebookLM supports integration with messaging platforms through bot adapters. T
 sequenceDiagram
     participant User
     participant Platform as Feishu / WeChat
-    participant Webhook as NotebookLM Webhook
+    participant Webhook as VibeLab Webhook
     participant Processor as Bot Processor
     participant AI as AI Provider
 

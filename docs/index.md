@@ -1,6 +1,6 @@
-# NotebookLM Documentation
+# VibeLab Documentation
 
-Welcome to the **NotebookLM** documentation — an AI-powered research assistant web application similar to Google NotebookLM.
+Welcome to the **VibeLab** documentation — an AI-powered research assistant web application similar to Google NotebookLM.
 
 Users open server-side folders as workspaces, browse and manage files, and chat with AI grounded in workspace files via RAG (Retrieval-Augmented Generation).
 

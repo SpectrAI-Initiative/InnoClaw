@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, NotebookLM Contributors
-# This file is distributed under the same license as the NotebookLM package.
+# Copyright (C) 2025, VibeLab Contributors
+# This file is distributed under the same license as the VibeLab package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NotebookLM \n"
+"Project-Id-Version: VibeLab \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -24,8 +24,8 @@ msgid "Deployment"
 msgstr "部署"
 
 #: ../../getting-started/deployment.md:3 1656e148dbc647b39515276e62555f88
-msgid "This guide covers deploying NotebookLM in production environments."
-msgstr "本指南介绍如何在生产环境中部署 NotebookLM。"
+msgid "This guide covers deploying VibeLab in production environments."
+msgstr "本指南介绍如何在生产环境中部署 VibeLab。"
 
 #: ../../getting-started/deployment.md:5 2f262310fde546e780841fd27f689479
 msgid "Deployment Architecture"
@@ -102,8 +102,8 @@ msgid "SQLite Database"
 msgstr "SQLite 数据库"
 
 #: ../../getting-started/deployment.md:7 03ede5004c67483b962ed95c3e3bda7e
-msgid "`./data/notebooklm.db`"
-msgstr "`./data/notebooklm.db`"
+msgid "`./data/vibelab.db`"
+msgstr "`./data/vibelab.db`"
 
 #: ../../getting-started/deployment.md:7 556fed63c446420685a2b97b822a8600
 msgid "Workspaces, source index, chat history, notes, settings"

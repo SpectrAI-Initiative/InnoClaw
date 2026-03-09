@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
@@ -9,11 +8,29 @@ import { Eye, X, Save, FileDown, AlertCircle, Loader2 } from "lucide-react";
 import { getFileName } from "@/lib/utils";
 import { PdfViewer } from "@/components/files/pdf-viewer";
 import { MolViewer } from "@/components/files/mol-viewer";
+import { useFileContent } from "@/lib/hooks/use-file-content";
 import { toast } from "sonner";
 
 // Lazy-load CadViewer so Three.js is only fetched when a CAD file is opened
 const CadViewer = dynamic(
   () => import("@/components/files/cad-viewer").then((mod) => mod.CadViewer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    ),
+  },
+);
+
+// Lazy-load MarkdownPreview so react-markdown / remark / rehype / katex
+// are only fetched when a .md file is opened
+const MarkdownPreview = dynamic(
+  () =>
+    import("@/components/preview/markdown-preview").then(
+      (mod) => mod.MarkdownPreview,
+    ),
   {
     ssr: false,
     loading: () => (
@@ -30,7 +47,7 @@ interface FilePreviewPanelProps {
 }
 
 const EDITABLE_EXTS = [
-  "txt", "md", "json", "csv", "html", "css", "js", "ts", "tsx", "jsx",
+  "txt", "json", "csv", "html", "css", "js", "ts", "tsx", "jsx",
   "py", "yaml", "yml", "xml", "toml", "ini", "cfg", "env", "sh", "bat",
   "log", "conf", "c", "cpp", "h", "hpp", "java", "go", "rs", "rb", "php",
 ];
@@ -41,6 +58,7 @@ const IMAGE_EXTS = ["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp", "ico"];
 function getFileType(filePath: string) {
   const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
   if (ext === "pdf") return "pdf" as const;
+  if (ext === "md" || ext === "markdown") return "markdown" as const;
   if (MOL_EXTS.includes(ext)) return "mol" as const;
   if (CAD_EXTS.includes(ext)) return "cad" as const;
   if (IMAGE_EXTS.includes(ext)) return "image" as const;
@@ -78,52 +96,12 @@ function ImagePreview({ filePath }: { filePath: string }) {
 function TextPreview({ filePath }: { filePath: string }) {
   const t = useTranslations("files");
   const tCommon = useTranslations("common");
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [modified, setModified] = useState(false);
+  const { content, loading, saving, modified, handleSave, updateContent } =
+    useFileContent({ filePath });
 
-  useEffect(() => {
-    let canceled = false;
-    setLoading(true);
-    setModified(false);
-
-    fetch(`/api/files/read?path=${encodeURIComponent(filePath)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load file");
-        return res.json();
-      })
-      .then((data) => {
-        if (!canceled) setContent(data.content);
-      })
-      .catch(() => {
-        if (!canceled) toast.error("Failed to load file");
-      })
-      .finally(() => {
-        if (!canceled) setLoading(false);
-      });
-
-    return () => { canceled = true; };
-  }, [filePath]);
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const res = await fetch("/api/files/write", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: filePath, content }),
-      });
-      if (!res.ok) {
-        throw new Error("Failed to save file");
-      }
-      setModified(false);
-      toast.success(t("saved"));
-    } catch {
-      toast.error("Failed to save file");
-    } finally {
-      setSaving(false);
-    }
+  const onSave = async () => {
+    const ok = await handleSave();
+    if (ok) toast.success(t("saved"));
   };
 
   if (loading) {
@@ -140,7 +118,7 @@ function TextPreview({ filePath }: { filePath: string }) {
         {modified && (
           <span className="text-xs text-muted-foreground">{tCommon("modified")}</span>
         )}
-        <Button size="sm" onClick={handleSave} disabled={saving || !modified}>
+        <Button size="sm" onClick={onSave} disabled={saving || !modified}>
           <Save className="mr-2 h-4 w-4" />
           {saving ? t("saving") : tCommon("save")}
         </Button>
@@ -148,14 +126,11 @@ function TextPreview({ filePath }: { filePath: string }) {
       <Textarea
         className="flex-1 resize-none font-mono text-sm"
         value={content}
-        onChange={(e) => {
-          setContent(e.target.value);
-          setModified(true);
-        }}
+        onChange={(e) => updateContent(e.target.value)}
         onKeyDown={(e) => {
           if ((e.ctrlKey || e.metaKey) && e.key === "s") {
             e.preventDefault();
-            handleSave();
+            onSave();
           }
         }}
       />
@@ -219,6 +194,8 @@ export function FilePreviewPanel({ filePath, onClose }: FilePreviewPanelProps) {
           </div>
         ) : fileType === "pdf" ? (
           <PdfViewer filePath={filePath} />
+        ) : fileType === "markdown" ? (
+          <MarkdownPreview filePath={filePath} />
         ) : fileType === "mol" ? (
           <MolViewer filePath={filePath} />
         ) : fileType === "cad" ? (

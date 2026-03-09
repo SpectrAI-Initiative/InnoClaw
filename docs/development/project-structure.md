@@ -1,6 +1,6 @@
 # Project Structure
 
-This page describes the directory layout and module organization of NotebookLM.
+This page describes the directory layout and module organization of VibeLab.
 
 ## High-Level Structure
 
@@ -41,7 +41,7 @@ graph TB
 ## Directory Layout
 
 ```
-notebooklm/
+vibelab/
 ├── src/
 │   ├── app/                          # Next.js App Router
 │   │   ├── page.tsx                  # Home page (workspace list)
