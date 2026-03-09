@@ -128,14 +128,41 @@ export function getSummarizationLimitChars(
 }
 
 /**
- * Measure the text-only character length of a UI message (ignoring JSON
- * metadata like id, role, parts structure).
+ * Measure the approximate character length of a UI message across ALL part
+ * types — text, reasoning, and tool invocations (input args + output).
+ *
+ * Tool payloads (JSON, code, file contents) tokenize at ~2-3 chars/token,
+ * while the overflow threshold assumes ~4 chars/token (natural text).
+ * We apply a 0.5× discount to tool content so that character counts stay
+ * comparable to the threshold without triggering too aggressively.
  */
+const TOOL_CONTENT_DISCOUNT = 0.5;
+
 export function getMessageTextLength(
-  message: { parts?: Array<{ type: string; text?: string }> }
+  message: { parts?: Array<Record<string, unknown>> }
 ): number {
   if (!message.parts) return 0;
-  return message.parts
-    .filter((p) => p.type === "text")
-    .reduce((sum, p) => sum + (p.text?.length ?? 0), 0);
+  let total = 0;
+  for (const part of message.parts) {
+    const type = part.type as string;
+    if (type === "text" || type === "reasoning") {
+      total += ((part.text as string) ?? "").length;
+    } else if (type.startsWith("tool-") || type === "dynamic-tool") {
+      let toolChars = 0;
+      // Tool input (arguments)
+      if (part.input != null) {
+        toolChars += typeof part.input === "string"
+          ? part.input.length
+          : JSON.stringify(part.input).length;
+      }
+      // Tool output (results) — can be very large (file contents, bash output)
+      if (part.output != null) {
+        toolChars += typeof part.output === "string"
+          ? part.output.length
+          : JSON.stringify(part.output).length;
+      }
+      total += Math.floor(toolChars * TOOL_CONTENT_DISCOUNT);
+    }
+  }
+  return total;
 }

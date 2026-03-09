@@ -621,22 +621,25 @@ export function AgentPanel({
   );
 
   // Scrub any in-progress tool invocations to a terminal state.
-  // Used after stop() and on restore from localStorage.
+  // Used after stop(), on restore from localStorage, and after overflow eviction.
   function scrubStuckToolParts(msgs: UIMessage[]): UIMessage[] {
     const isToolPart = (type?: string) =>
       type !== undefined && (type.startsWith("tool-") || type === "dynamic-tool");
-    const isStuck = (p: { type?: string; state?: string }) =>
-      isToolPart(p.type) && p.state && p.state !== "output-available" && p.state !== "output-error";
+    const isStuck = (p: { type?: string; state?: string; input?: unknown }) =>
+      isToolPart(p.type) && (
+        (p.state && p.state !== "output-available" && p.state !== "output-error") ||
+        p.input === undefined
+      );
 
     const needsScrub = msgs.some((msg) =>
-      msg.parts?.some((part) => isStuck(part as { type?: string; state?: string }))
+      msg.parts?.some((part) => isStuck(part as { type?: string; state?: string; input?: unknown }))
     );
     if (!needsScrub) return msgs;
     return msgs.map((msg) => ({
       ...msg,
       parts: msg.parts?.map((part) => {
-        if (isStuck(part as { type?: string; state?: string })) {
-          return { ...part, state: "output-error", errorText: "Stopped" };
+        if (isStuck(part as { type?: string; state?: string; input?: unknown })) {
+          return { ...part, state: "output-error", input: (part as Record<string, unknown>).input ?? {}, errorText: "Stopped" };
         }
         return part;
       }),
@@ -1052,7 +1055,7 @@ export function AgentPanel({
           role: "assistant" as const,
           parts: [{ type: "text" as const, text: t("memorySaved") }],
         } as UIMessage;
-        setMessages([memoryMarker, ...overflowKeepRef.current]);
+        setMessages([memoryMarker, ...scrubStuckToolParts(overflowKeepRef.current)]);
         overflowKeepRef.current = null;
       } else {
         // Manual clear: empty all messages

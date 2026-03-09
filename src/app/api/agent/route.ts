@@ -96,9 +96,21 @@ export async function POST(req: NextRequest) {
       tools = createAgentTools(cwd, undefined, workspaceId);
     }
 
-    const modelMessages = await convertToModelMessages(
-      uiMessages as UIMessage[]
-    );
+    // Sanitize UI messages: remove tool invocation parts with missing input
+    // to prevent 400 errors from the API (tool_use.input: Field required)
+    const sanitizedMessages = (uiMessages as UIMessage[]).map((msg) => ({
+      ...msg,
+      parts: msg.parts?.filter((part) => {
+        const p = part as Record<string, unknown>;
+        const type = p.type as string | undefined;
+        if (type && (type.startsWith("tool-") || type === "dynamic-tool")) {
+          return p.input !== undefined;
+        }
+        return true;
+      }),
+    })) as UIMessage[];
+
+    const modelMessages = await convertToModelMessages(sanitizedMessages);
 
     const DEFAULT_MAX_STEPS = 10;
     const MAX_STEPS_UPPER_BOUND = 100;
