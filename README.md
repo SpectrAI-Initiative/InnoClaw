@@ -152,13 +152,16 @@ node scripts/import-local-skills.mjs
 
 1. 登录 [飞书开发者后台](https://open.feishu.cn/app) → 创建企业自建应用
 2. 记录 **App ID** 和 **App Secret**（凭证与基础信息页面）
-3. **事件与回调** → 添加事件 `im.message.receive_v1`，记录 **Verification Token** 和 **Encrypt Key**
-4. **事件与回调** → 选择 **"使用长连接接收事件"**
-5. **应用能力** → 启用 **机器人**
-6. **权限管理** → 开通：`im:message`, `im:message:send_as_bot`, `im:resource`, `im:chat`
-7. **版本管理与发布** → 创建版本并提交审核
+3. **应用能力** → 启用 **机器人**
+4. **权限管理** → 开通：`im:message`, `im:message:send_as_bot`, `im:resource`, `im:chat`
 
-**第 2 步：配置环境变量**
+> **注意：** 此时**不要**配置长连接和事件回调，需要先建立连接后才能保存这些配置。
+
+**第 2 步：发布应用**
+
+**版本管理与发布** → 创建版本并提交审核，等待审核通过。
+
+**第 3 步：配置环境变量并建立长连接**
 
 在 `.env.local` 中添加：
 
@@ -166,21 +169,35 @@ node scripts/import-local-skills.mjs
 FEISHU_BOT_ENABLED=true
 FEISHU_APP_ID=cli_xxxxxxxxxxxxxxxx
 FEISHU_APP_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-FEISHU_VERIFICATION_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-FEISHU_ENCRYPT_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-**第 3 步：启动并验证**
-
-重启服务，确认终端输出：
+启动（或重启）服务，确认终端输出：
 
 ```
 [feishu-ws] WSClient connected successfully
 ```
 
-在飞书中搜索并打开机器人对话即可使用。
+**第 4 步：配置长连接和事件回调**
 
-> **注意：** 必须先启动服务并看到连接成功日志后，再回到飞书开发者后台保存长连接配置。
+回到飞书开发者后台：
+
+1. **事件与回调** → 选择 **"使用长连接接收事件"** 并保存
+2. **事件与回调** → 添加事件 `im.message.receive_v1`
+3. 在 **事件与回调** → **加密策略** 中记录 **Verification Token** 和 **Encrypt Key**
+4. **版本管理与发布** → 创建新版本并重新发布
+
+**第 5 步：补充环境变量并验证**
+
+将获取到的值补充到 `.env.local`：
+
+```env
+FEISHU_VERIFICATION_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+FEISHU_ENCRYPT_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# 可选：用于 Web → 飞书推送 API 的自定义密钥
+# FEISHU_PUSH_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+重启服务，在飞书中搜索并打开机器人对话，发送消息验证通讯正常。
 
 **飞书机器人命令：**
 
