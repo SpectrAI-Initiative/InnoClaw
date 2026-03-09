@@ -689,6 +689,7 @@ export function AgentPanel({
   // --- Auto-continue: automatically continue when task is incomplete ---
   const prevStatusRef = useRef(status);
   const autoContinueCountRef = useRef(0);
+  const autoContinueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const MAX_AUTO_CONTINUES = 5; // Prevent infinite loops
 
   useEffect(() => {
@@ -726,13 +727,19 @@ export function AgentPanel({
 
       if (endsWithTool) {
         autoContinueCountRef.current++;
-        // Auto-send continue message
-        setTimeout(() => {
-          sendMessage({ text: "继续" });
+        autoContinueTimerRef.current = setTimeout(() => {
+          sendMessage({ text: t("autoContinue") });
         }, 500);
       }
     }
-  }, [status, messages, sendMessage]);
+
+    return () => {
+      if (autoContinueTimerRef.current) {
+        clearTimeout(autoContinueTimerRef.current);
+        autoContinueTimerRef.current = null;
+      }
+    };
+  }, [status, messages, sendMessage, t]);
   const overflowThreshold = getOverflowThresholdChars(
     settings?.llmProvider ?? "openai",
     settings?.llmModel ?? "gpt-4o-mini",
