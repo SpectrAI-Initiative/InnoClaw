@@ -28,7 +28,25 @@ A self-hostable AI research assistant inspired by Google NotebookLM. Turn server
 
 > **前置要求：** Node.js >=20.9.0, npm, Git
 
-### 第 1 步：克隆并安装 / Clone & Install
+### 方式一：Claude Code 自动安装（推荐） / Auto Setup via Claude Code (Recommended)
+
+如果你已安装 [Claude Code](https://docs.anthropic.com/en/docs/claude-code)，只需 3 条命令即可完成全部配置：
+
+If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed, just 3 commands to get everything configured:
+
+```bash
+git clone https://github.com/zjowowen/notebooklm.git
+cd notebooklm
+claude /setup
+```
+
+`/setup` 会交互式引导你完成：依赖安装 → 环境配置（工作空间路径、AI API Key 等）→ 数据库初始化 → 启动服务。
+
+The `/setup` skill interactively guides you through: dependency installation → environment configuration (workspace paths, AI API keys, etc.) → database initialization → server startup.
+
+### 方式二：手动安装 / Manual Setup
+
+#### 第 1 步：克隆并安装 / Clone & Install
 
 ```bash
 git clone https://github.com/zjowowen/notebooklm.git
@@ -36,7 +54,7 @@ cd notebooklm
 npm install
 ```
 
-### 第 2 步：最小配置 / Minimal Configuration
+#### 第 2 步：最小配置 / Minimal Configuration
 
 ```bash
 cp .env.example .env.local
@@ -56,7 +74,7 @@ OPENAI_API_KEY=sk-xxx
 
 > 完整环境变量列表见 [环境变量参考](#环境变量参考--environment-variables)。
 
-### 第 3 步：初始化并启动 / Init & Start
+#### 第 3 步：初始化并启动 / Init & Start
 
 ```bash
 # 创建数据目录 + 初始化数据库
