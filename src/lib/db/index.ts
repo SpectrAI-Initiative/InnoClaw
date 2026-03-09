@@ -9,7 +9,7 @@ import fs from "fs";
 const rawDbUrl = process.env.DATABASE_URL?.replace(/^file:/, "");
 const DB_PATH = rawDbUrl
   ? path.resolve(rawDbUrl)
-  : path.join(process.cwd(), "data", "labclaw.db");
+  : path.join(process.cwd(), "data", "innoclaw.db");
 
 // Ensure data directory exists
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });

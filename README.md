@@ -1,10 +1,10 @@
-# LabClaw
+# InnoClaw
 
 一个可自托管的 AI 研究助手，灵感来自 Google NotebookLM。将服务器文件夹作为工作空间，基于 RAG 与 AI 对话，内置 206 个科学技能。
 
 A self-hostable AI research assistant inspired by Google NotebookLM. Turn server-side folders into workspaces, chat with AI grounded in your documents via RAG, and leverage 206 built-in scientific skills.
 
-📖 **[完整文档 / Full Documentation](https://zjowowen.github.io/notebooklm/)** (English & 简体中文)
+📖 **[完整文档 / Full Documentation](https://zjowowen.github.io/InnoClaw/)** (English & 简体中文)
 
 ---
 
@@ -35,8 +35,8 @@ A self-hostable AI research assistant inspired by Google NotebookLM. Turn server
 If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed, just 3 commands to get everything configured:
 
 ```bash
-git clone https://github.com/zjowowen/notebooklm.git
-cd notebooklm
+git clone https://github.com/zjowowen/InnoClaw.git
+cd InnoClaw
 claude /setup
 ```
 
@@ -49,8 +49,8 @@ The `/setup` skill interactively guides you through: dependency installation →
 #### 第 1 步：克隆并安装 / Clone & Install
 
 ```bash
-git clone https://github.com/zjowowen/notebooklm.git
-cd notebooklm
+git clone https://github.com/zjowowen/InnoClaw.git
+cd InnoClaw
 npm install
 ```
 
@@ -90,7 +90,7 @@ npm run dev
 
 ## 通过 Skills 配置高级功能 / Setup Advanced Features via Skills
 
-LabClaw 的 **Skills 系统**是配置和扩展高级功能的首选方式。启动应用后，访问 `/skills` 页面即可导入和管理技能。
+InnoClaw 的 **Skills 系统**是配置和扩展高级功能的首选方式。启动应用后，访问 `/skills` 页面即可导入和管理技能。
 
 The **Skills system** is the preferred way to configure and extend advanced features. After starting the app, visit `/skills` to import and manage skills.
 
@@ -152,13 +152,16 @@ node scripts/import-local-skills.mjs
 
 1. 登录 [飞书开发者后台](https://open.feishu.cn/app) → 创建企业自建应用
 2. 记录 **App ID** 和 **App Secret**（凭证与基础信息页面）
-3. **事件与回调** → 添加事件 `im.message.receive_v1`，记录 **Verification Token** 和 **Encrypt Key**
-4. **事件与回调** → 选择 **"使用长连接接收事件"**
-5. **应用能力** → 启用 **机器人**
-6. **权限管理** → 开通：`im:message`, `im:message:send_as_bot`, `im:resource`, `im:chat`
-7. **版本管理与发布** → 创建版本并提交审核
+3. **应用能力** → 启用 **机器人**
+4. **权限管理** → 开通：`im:message`, `im:message:send_as_bot`, `im:resource`, `im:chat`
 
-**第 2 步：配置环境变量**
+> **注意：** 此时**不要**配置长连接和事件回调，需要先建立连接后才能保存这些配置。
+
+**第 2 步：发布应用**
+
+**版本管理与发布** → 创建版本并提交审核，等待审核通过。
+
+**第 3 步：配置环境变量并建立长连接**
 
 在 `.env.local` 中添加：
 
@@ -166,21 +169,35 @@ node scripts/import-local-skills.mjs
 FEISHU_BOT_ENABLED=true
 FEISHU_APP_ID=cli_xxxxxxxxxxxxxxxx
 FEISHU_APP_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-FEISHU_VERIFICATION_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-FEISHU_ENCRYPT_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-**第 3 步：启动并验证**
-
-重启服务，确认终端输出：
+启动（或重启）服务，确认终端输出：
 
 ```
 [feishu-ws] WSClient connected successfully
 ```
 
-在飞书中搜索并打开机器人对话即可使用。
+**第 4 步：配置长连接和事件回调**
 
-> **注意：** 必须先启动服务并看到连接成功日志后，再回到飞书开发者后台保存长连接配置。
+回到飞书开发者后台：
+
+1. **事件与回调** → 选择 **"使用长连接接收事件"** 并保存
+2. **事件与回调** → 添加事件 `im.message.receive_v1`
+3. 在 **事件与回调** → **加密策略** 中记录 **Verification Token** 和 **Encrypt Key**
+4. **版本管理与发布** → 创建新版本并重新发布
+
+**第 5 步：补充环境变量并验证**
+
+将获取到的值补充到 `.env.local`：
+
+```env
+FEISHU_VERIFICATION_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+FEISHU_ENCRYPT_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# 可选：用于 Web → 飞书推送 API 的自定义密钥
+# FEISHU_PUSH_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+重启服务，在飞书中搜索并打开机器人对话，发送消息验证通讯正常。
 
 **飞书机器人命令：**
 
@@ -256,7 +273,7 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 | 变量 | 必填 | 说明 | 默认值 |
 |------|:----:|------|--------|
 | `WORKSPACE_ROOTS` | ✅ | 工作空间根目录（逗号分隔绝对路径，目录必须已存在） | — |
-| `DATABASE_URL` | | SQLite 数据库路径。网络文件系统（NFS/CIFS）上建议指向本地路径 | `./data/labclaw.db` |
+| `DATABASE_URL` | | SQLite 数据库路径。网络文件系统（NFS/CIFS）上建议指向本地路径 | `./data/innoclaw.db` |
 | `NEXT_BUILD_DIR` | | Next.js 构建目录。网络文件系统上建议指向本地路径 | `.next` |
 
 ### AI 模型
@@ -336,7 +353,7 @@ npm run start               # 默认端口 3000，PORT=8080 可自定义
 ```bash
 npm install -g pm2
 npm run build
-pm2 start npm --name "labclaw" -- start
+pm2 start npm --name "innoclaw" -- start
 pm2 startup && pm2 save     # 开机自启
 ```
 
@@ -358,7 +375,7 @@ CMD ["sh", "-c", "npx drizzle-kit migrate && npm run start"]
 # docker-compose.yml
 version: '3.8'
 services:
-  labclaw:
+  innoclaw:
     build: .
     ports: ["3000:3000"]
     volumes:
@@ -438,13 +455,13 @@ src/
 使用镜像源：`npm install --registry=https://registry.npmmirror.com`
 
 **`npx drizzle-kit migrate` 报错？**
-确认 `./data/` 目录已存在（`mkdir -p ./data`）。数据库损坏可删除后重建：`rm -f ./data/labclaw.db && npx drizzle-kit migrate`。
+确认 `./data/` 目录已存在（`mkdir -p ./data`）。数据库损坏可删除后重建：`rm -f ./data/innoclaw.db && npx drizzle-kit migrate`。
 
 **`SQLITE_IOERR_SHMMAP` / `disk I/O error`？**
-项目位于网络文件系统（NFS/CIFS）时常见。在 `.env.local` 中设置 `DATABASE_URL=/tmp/labclaw/labclaw.db`，然后 `mkdir -p /tmp/labclaw && npx drizzle-kit migrate`。
+项目位于网络文件系统（NFS/CIFS）时常见。在 `.env.local` 中设置 `DATABASE_URL=/tmp/innoclaw/innoclaw.db`，然后 `mkdir -p /tmp/innoclaw && npx drizzle-kit migrate`。
 
 **`Persisting failed` / `No such device`？**
-Turbopack 在网络文件系统上的缓存警告，不影响功能。可设置 `NEXT_BUILD_DIR=/tmp/labclaw-next` 消除。
+Turbopack 在网络文件系统上的缓存警告，不影响功能。可设置 `NEXT_BUILD_DIR=/tmp/innoclaw-next` 消除。
 
 **端口被占用？**
 `PORT=3001 npm run dev`
@@ -470,7 +487,7 @@ Turbopack 在网络文件系统上的缓存警告，不影响功能。可设置 
 确保已安装 `kubectl`（`kubectl version --client`），且 `KUBECONFIG_PATH` 配置正确。
 
 **如何重置数据库？**
-`rm -f ./data/labclaw.db && npx drizzle-kit migrate`
+`rm -f ./data/innoclaw.db && npx drizzle-kit migrate`
 
 ---
 

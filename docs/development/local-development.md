@@ -1,6 +1,6 @@
 # Local Development
 
-This guide covers running, debugging, and iterating on LabClaw locally.
+This guide covers running, debugging, and iterating on InnoClaw locally.
 
 ## Starting the Development Server
 
@@ -15,6 +15,34 @@ This starts the Next.js development server with hot module replacement (HMR). Th
 - **Hot Reload** — Changes to components and pages are reflected immediately
 - **API Route Reload** — Server-side API changes take effect on the next request
 - **Error Overlay** — Build errors and runtime errors are displayed in the browser
+
+## Dev Helper Scripts
+
+Three shell scripts are provided for managing the development server in the background:
+
+### Start the Dev Server
+
+```bash
+bash dev-start.sh
+```
+
+This script checks for port conflicts, installs dependencies if needed, runs database migrations, and starts the dev server in the background. Logs are written to `logs/dev.log` and the server PID is tracked for later use.
+
+### Check Server Status
+
+```bash
+bash dev-status.sh
+```
+
+Reports whether the dev server is currently running.
+
+### Stop the Dev Server
+
+```bash
+bash dev-stop.sh
+```
+
+Stops the dev server using the stored PID.
 
 ## Common Development Tasks
 

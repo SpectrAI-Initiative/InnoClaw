@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, LabClaw Contributors
-# This file is distributed under the same license as the LabClaw package.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: LabClaw \n"
+"Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -24,8 +24,8 @@ msgid "Testing"
 msgstr "测试"
 
 #: ../../development/testing.md:3 f08e96f7903a4d518ee9cc841a0fba06
-msgid "This guide covers how to write and run tests for LabClaw."
-msgstr "本指南介绍如何为 LabClaw 编写和运行测试。"
+msgid "This guide covers how to write and run tests for InnoClaw."
+msgstr "本指南介绍如何为 InnoClaw 编写和运行测试。"
 
 #: ../../development/testing.md:5 826440b5f3874f0fb100bfa4b327698a
 msgid "Test Framework"
@@ -33,10 +33,10 @@ msgstr "测试框架"
 
 #: ../../development/testing.md:7 b8d96105ea1845c4b1301c5b387cdfa7
 msgid ""
-"LabClaw uses [Vitest](https://vitest.dev/) (v4+) as its test "
+"InnoClaw uses [Vitest](https://vitest.dev/) (v4+) as its test "
 "framework, configured in `vitest.config.ts`."
 msgstr ""
-"LabClaw 使用 [Vitest](https://vitest.dev/)（v4+）作为测试框架，配置在 "
+"InnoClaw 使用 [Vitest](https://vitest.dev/)（v4+）作为测试框架，配置在 "
 "`vitest.config.ts` 中。"
 
 #: ../../development/testing.md:9 94008c1f9273483abe305cb7b5d84467

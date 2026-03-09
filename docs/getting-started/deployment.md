@@ -1,6 +1,6 @@
 # Deployment
 
-This guide covers deploying LabClaw in production environments.
+This guide covers deploying InnoClaw in production environments.
 
 ## Deployment Architecture
 
@@ -14,15 +14,17 @@ graph TB
 
     subgraph Host["Production Server"]
         Proxy["Reverse Proxy<br/>(Nginx / Caddy)"]
-        App["LabClaw<br/>(Next.js)"]
-        SQLite["SQLite DB<br/>./data/labclaw.db"]
+        App["InnoClaw<br/>(Next.js)"]
+        SQLite["SQLite DB<br/>./data/innoclaw.db"]
         Workspace["Workspace Files<br/>WORKSPACE_ROOTS"]
     end
 
     subgraph External["External Services"]
         OpenAI["OpenAI API"]
         Anthropic["Anthropic API"]
+        Gemini["Gemini API"]
         GitHub["GitHub API"]
+        HF["HuggingFace Hub"]
     end
 
     Browser --> Proxy
@@ -33,7 +35,9 @@ graph TB
     App --> Workspace
     App --> OpenAI
     App --> Anthropic
+    App --> Gemini
     App --> GitHub
+    App --> HF
 ```
 
 ## Option 1: Direct Deployment (Recommended for Self-Hosting)
@@ -69,13 +73,13 @@ npm install -g pm2
 
 # Build and start
 npm run build
-pm2 start npm --name "labclaw" -- start
+pm2 start npm --name "innoclaw" -- start
 
 # Check status
 pm2 status
 
 # View logs
-pm2 logs labclaw
+pm2 logs innoclaw
 
 # Enable auto-start on boot
 pm2 startup
@@ -117,7 +121,7 @@ Create a `docker-compose.yml`:
 ```yaml
 version: '3.8'
 services:
-  labclaw:
+  innoclaw:
     build: .
     ports:
       - "3000:3000"
@@ -131,7 +135,13 @@ services:
       - WORKSPACE_ROOTS=/data/research,/data/projects
       - OPENAI_API_KEY=sk-xxx
       - ANTHROPIC_API_KEY=sk-ant-xxx
+      - GEMINI_API_KEY=your-gemini-key
       - GITHUB_TOKEN=ghp_xxx
+      - LLM_PROVIDER=openai
+      - LLM_MODEL=gpt-4o-mini
+      - AGENT_MAX_STEPS=10
+      # - HTTP_PROXY=http://your-proxy:3128
+      # - HTTPS_PROXY=http://your-proxy:3128
     restart: unless-stopped
 ```
 
@@ -175,7 +185,7 @@ your-domain.com {
 
 | Data | Location | Description |
 |------|----------|-------------|
-| SQLite Database | `./data/labclaw.db` | Workspaces, source index, chat history, notes, settings |
+| SQLite Database | `./data/innoclaw.db` | Workspaces, source index, chat history, notes, settings |
 | Workspace Files | `WORKSPACE_ROOTS` directories | User's actual files (outside the project directory) |
 | Configuration | `.env.local` | Environment variables and API keys |
 

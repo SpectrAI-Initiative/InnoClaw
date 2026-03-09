@@ -1,8 +1,8 @@
 # Overview
 
-## What is LabClaw?
+## What is InnoClaw?
 
-LabClaw is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
+InnoClaw is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
 
 ## Key Features
 
@@ -10,17 +10,21 @@ LabClaw is an AI-powered research assistant web application similar to Google No
 - **File Browser** — Tree view with upload, create, edit, rename, and delete
 - **GitHub Integration** — Clone and pull GitHub repositories (including private ones)
 - **RAG Chat** — AI answers questions based on workspace file content with source citations
-- **Note Generation** — Auto-generate summaries, FAQs, briefs, and timelines
-- **Multi-LLM Support** — Switch between OpenAI GPT and Anthropic Claude
+- **Note Generation** — Auto-generate summaries, FAQs, briefs, timelines, and daily/weekly reports
+- **Multi-LLM Support** — Switch between OpenAI GPT, Anthropic Claude, and Google Gemini
 - **Bilingual UI** — Chinese / English toggle
 - **Dark Mode** — Light and dark theme support
 - **Bot Integrations** — Feishu (Lark) and WeChat Enterprise bot support
-- **Agent Mode** — Autonomous AI agent with tool usage (bash, file operations, kubectl)
-- **Skills** — Reusable prompt templates for common tasks
+- **Agent Mode** — Autonomous AI agent with tool usage (bash, file operations, kubectl, article search)
+- **Skills** — 206 built-in SCP scientific skills plus custom workflow templates
+- **Article / Paper Search** — Search arXiv and Hugging Face Daily Papers
+- **Scheduled Tasks** — Cron-based automated tasks (daily/weekly reports, git sync, source sync)
+- **Dataset Management** — Download and manage datasets from HuggingFace Hub and ModelScope
+- **Cluster Integration** — Kubernetes cluster management with Volcano GPU job submission
 
 ## Architecture
 
-The following diagram shows the high-level architecture of LabClaw:
+The following diagram shows the high-level architecture of InnoClaw:
 
 ```{mermaid}
 graph TB
@@ -36,11 +40,13 @@ graph TB
         DB["SQLite + Drizzle ORM"]
         FS["File System"]
         Git["Git Operations"]
+        Scheduler["Task Scheduler"]
     end
 
     subgraph AI["AI Providers"]
         OpenAI["OpenAI API"]
         Anthropic["Anthropic API"]
+        Gemini["Gemini API"]
         Embed["Embedding API"]
     end
 
@@ -49,15 +55,28 @@ graph TB
         WeChat["WeChat Enterprise"]
     end
 
+    subgraph External["External Services"]
+        HF["HuggingFace Hub"]
+        ModelScope["ModelScope"]
+        ArXiv["arXiv"]
+        K8s["Kubernetes Cluster"]
+    end
+
     UI --> API
     API --> RAG
     API --> DB
     API --> FS
     API --> Git
+    API --> Scheduler
     RAG --> Embed
     RAG --> DB
     API --> OpenAI
     API --> Anthropic
+    API --> Gemini
+    API --> HF
+    API --> ModelScope
+    API --> ArXiv
+    API --> K8s
     Bots --> API
 ```
 
@@ -67,7 +86,7 @@ graph TB
 |----------|------------|
 | Framework | Next.js 16 (App Router) + TypeScript |
 | UI | Tailwind CSS 4 + shadcn/ui + Radix UI |
-| AI | Vercel AI SDK 6 + OpenAI + Anthropic |
+| AI | Vercel AI SDK 6 + OpenAI + Anthropic + Gemini |
 | Database | SQLite (better-sqlite3 + Drizzle ORM) |
 | Vector Search | Pure JS cosine similarity (no extensions needed) |
 | i18n | next-intl (Chinese / English) |
@@ -75,7 +94,7 @@ graph TB
 
 ## RAG Pipeline
 
-The core feature of LabClaw is RAG-based AI chat. The pipeline works in three stages:
+The core feature of InnoClaw is RAG-based AI chat. The pipeline works in three stages:
 
 ```{mermaid}
 flowchart LR
@@ -95,7 +114,7 @@ flowchart LR
 
     subgraph Generate["Generation"]
         TopK --> Prompt["System Prompt + Chunks + Question"]
-        Prompt --> LLM["LLM (GPT / Claude)"]
+        Prompt --> LLM["LLM (GPT / Claude / Gemini)"]
         LLM --> Answer["Streaming Answer with Source Citations"]
     end
 ```

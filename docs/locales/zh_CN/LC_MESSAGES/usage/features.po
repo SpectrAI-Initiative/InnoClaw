@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, LabClaw Contributors
-# This file is distributed under the same license as the LabClaw package.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: LabClaw \n"
+"Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -25,9 +25,9 @@ msgstr "核心功能"
 
 #: ../../usage/features.md:3 9f59185771684d6cb8d105c3630ffa37
 msgid ""
-"LabClaw provides a rich set of features for AI-powered research and "
+"InnoClaw provides a rich set of features for AI-powered research and "
 "file management."
-msgstr "LabClaw 提供了丰富的 AI 驱动研究和文件管理功能。"
+msgstr "InnoClaw 提供了丰富的 AI 驱动研究和文件管理功能。"
 
 #: ../../usage/features.md:5 d8c916a2fb314c5cabe488ee7de07235
 msgid "Workspace Management"

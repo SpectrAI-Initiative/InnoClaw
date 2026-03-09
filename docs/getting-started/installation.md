@@ -1,6 +1,6 @@
 # Installation
 
-This guide walks you through setting up LabClaw locally for development or self-hosting.
+This guide walks you through setting up InnoClaw locally for development or self-hosting.
 
 ## Prerequisites
 
@@ -16,14 +16,14 @@ Optional:
 
 | Requirement | Notes |
 |-------------|-------|
-| **AI API Key** | At least one (OpenAI or Anthropic) for AI chat and note generation |
+| **AI API Key** | At least one (OpenAI, Anthropic, or Gemini) for AI chat and note generation |
 | **GitHub Token** | For cloning/pulling private repositories |
 
 ## Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/zjowowen/notebooklm.git
-cd notebooklm
+git clone https://github.com/zjowowen/InnoClaw.git
+cd InnoClaw
 ```
 
 ## Step 2: Install Dependencies
@@ -53,6 +53,9 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
 
 # [Optional] Anthropic API Key
 ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
+
+# [Optional] Gemini API Key
+GEMINI_API_KEY=your-gemini-key
 ```
 
 See [Environment Variables](environment-variables.md) for a complete reference of all available options.
@@ -82,7 +85,7 @@ Run the database migration to create the SQLite database:
 npx drizzle-kit migrate
 ```
 
-This creates the database file at `./data/labclaw.db` with all required tables.
+This creates the database file at `./data/innoclaw.db` with all required tables.
 
 ## Step 6: Start the Development Server
 
@@ -90,7 +93,7 @@ This creates the database file at `./data/labclaw.db` with all required tables.
 npm run dev
 ```
 
-Open your browser and navigate to **http://localhost:3000** to start using LabClaw.
+Open your browser and navigate to **http://localhost:3000** to start using InnoClaw.
 
 ## Verifying Your Setup
 

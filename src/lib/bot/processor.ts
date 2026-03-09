@@ -14,7 +14,7 @@ import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import type { BotAdapter, BotMessage, BotReply } from "./types";
 
 /** Directory where downloaded bot files are stored */
-const BOT_FILES_DIR = path.join(os.tmpdir(), "labclaw-bot-files");
+const BOT_FILES_DIR = path.join(os.tmpdir(), "innoclaw-bot-files");
 
 /** Maximum size for reading text file content inline (100 KB) */
 const MAX_TEXT_READ_SIZE = 100_000;

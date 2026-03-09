@@ -1,6 +1,6 @@
 # Core Features
 
-LabClaw provides a rich set of features for AI-powered research and file management.
+InnoClaw provides a rich set of features for AI-powered research and file management.
 
 ## Workspace Management
 
@@ -20,7 +20,7 @@ The file browser provides full file management within a workspace:
 - **Create** — New files and folders
 - **Edit** — Open files in the built-in editor
 - **Rename / Delete** — Right-click context menu
-- **Preview** — Preview images, PDFs, 3D models (STL, OBJ, GLTF, etc.), and more
+- **Preview** — Preview images, PDFs, 3D models (STL, OBJ, GLTF, etc.), and molecular structures (MOL)
 - **Sync** — Trigger RAG indexing to enable AI-powered search
 
 ## RAG Chat
@@ -52,6 +52,9 @@ Automatically generate structured notes from your workspace content:
 | **FAQ** | Frequently asked questions with answers |
 | **Brief** | Executive-style briefing document |
 | **Timeline** | Chronological sequence of events |
+| **Memory** | Agent conversation memory summaries |
+| **Daily Report** | Auto-generated daily workspace activity report |
+| **Weekly Report** | Auto-generated weekly workspace activity report |
 
 Notes can also be created and edited manually.
 
@@ -59,21 +62,95 @@ Notes can also be created and edited manually.
 
 The Agent mode provides an autonomous AI assistant with access to system tools:
 
-- **Bash** — Execute shell commands
-- **File Operations** — Read, write, and list directory contents
-- **Grep** — Search file contents with regular expressions
-- **kubectl** — Kubernetes cluster management (when configured)
+| Tool | Description |
+|------|-------------|
+| **bash** | Execute shell commands (configurable timeout up to 300s) |
+| **readFile** | Read file contents within workspace |
+| **writeFile** | Create or overwrite files |
+| **listDirectory** | List directory contents with metadata |
+| **grep** | Search file contents with regular expressions |
+| **searchArticles** | Search arXiv and Hugging Face Daily Papers |
+| **getSkillInstructions** | Load SCP scientific skill workflows |
+| **kubectl** | Kubernetes cluster management (read-only by default) |
+| **submitK8sJob** | Submit Volcano K8s jobs to Ascend 910B NPU clusters |
+| **collectJobResults** | Collect K8s job logs and status |
 
-Agent mode is useful for tasks that require interacting with the file system or running commands.
+Agent mode supports three sub-modes:
+
+| Mode | Tools Available | Use Case |
+|------|----------------|----------|
+| **Agent** | All tools | Full autonomous execution |
+| **Plan** | readFile, listDirectory, grep | Read-only analysis and planning |
+| **Ask** | readFile, listDirectory, grep | Simple question answering |
 
 ## Skills
 
-Skills are reusable prompt templates for common tasks:
+Skills are reusable AI workflow templates:
 
-- Create custom skills with specific instructions
-- Configure which tools a skill can access
-- Skills can be triggered from the chat interface
-- Built-in skills for common operations
+- **206 built-in SCP (Science Context Protocol) skills** from the Intern-Discovery Platform, covering 8 research domains:
+  - Drug Discovery & Pharmacology (71 skills)
+  - Genomics & Genetic Analysis (41 skills)
+  - Protein Science & Engineering (38 skills)
+  - Chemistry & Molecular Science (24 skills)
+  - Physics & Engineering Computation (18 skills)
+  - Experimental Automation & Literature Mining (7 skills)
+  - Earth & Environmental Science (5 skills)
+  - Cross-domain utility skills (2 skills)
+- Create **custom skills** with specific system prompts and instructions
+- Configure **allowed tools** per skill to control access
+- Define **parameters** with `{{paramName}}` template injection
+- Define **multi-step workflows** with tool hints per step
+- **Import/export** skills as JSON for sharing
+
+Skills can be triggered from the Agent panel or auto-matched based on user intent.
+
+## Article / Paper Search
+
+Search and study academic papers directly from the application:
+
+- **Search Sources** — arXiv and Hugging Face Daily Papers
+- **Filter** by keywords, date range, and source
+- **Related Articles** — Find papers related to a given article
+- **Paper Study UI** — Dedicated interface for searching, fetching, summarizing, and chatting about papers
+- **Agent Integration** — The `searchArticles` tool is available in Agent mode
+
+## Scheduled Tasks
+
+Automate recurring operations with cron-based scheduled tasks:
+
+| Task Type | Description |
+|-----------|-------------|
+| `daily_report` | Generate daily workspace activity report |
+| `weekly_report` | Generate weekly workspace activity report |
+| `git_sync` | Automatically pull Git repositories |
+| `source_sync` | Re-index workspace files |
+| `custom` | User-defined workflows |
+
+Tasks can be global or workspace-specific, with execution tracking (status, errors, last run time).
+
+## Dataset Management
+
+Download and manage datasets from HuggingFace Hub and ModelScope:
+
+- **Download** datasets, models, or spaces from HuggingFace or ModelScope
+- **Import** existing local directories as datasets
+- **Lifecycle** — Pause, resume, cancel, and retry downloads
+- **Progress Tracking** — Real-time download progress monitoring (0–100%)
+- **File Preview** — Preview dataset contents with split selection
+- **Workspace Linking** — Link datasets to workspaces (many-to-many)
+- **File Filtering** — Specify allow/ignore patterns for selective downloads
+
+## Cluster / Kubernetes Integration
+
+Monitor and manage Kubernetes clusters for GPU-accelerated workloads:
+
+- **Cluster Status** — View nodes, jobs, and pods at a glance
+- **kubectl / vcctl** — Execute cluster commands via Agent mode
+- **Volcano Job Submission** — Submit jobs to Ascend 910B NPU clusters
+- **Result Collection** — Collect job logs, status, and exit codes
+- **Audit Trail** — Full operation history with workspace-level filtering
+
+Requires `KUBECONFIG_PATH` and related `K8S_*` environment variables to be configured.
 
 ## Multi-LLM Support
 
@@ -81,10 +158,11 @@ Switch between different AI providers and models:
 
 | Provider | Models |
 |----------|--------|
-| **OpenAI** | GPT-4o, GPT-4, GPT-3.5, and compatible models |
-| **Anthropic** | Claude 3.5, Claude 3, and compatible models |
+| **OpenAI** | GPT-5.2, GPT-4.1, GPT-4.1 Mini, GPT-4.1 Nano, GPT-4o, GPT-4o Mini, o3, o3 Mini, o4 Mini |
+| **Anthropic** | Claude Opus 4.6, Claude Sonnet 4, Claude 3.7 Sonnet, Claude 3.5 Haiku |
+| **Gemini** | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3 Flash, Gemini 3 Pro, Gemini 3.1 Pro (Thinking) |
 
-Custom endpoints are supported via `OPENAI_BASE_URL` and `ANTHROPIC_BASE_URL` for third-party providers.
+Custom endpoints are supported via `OPENAI_BASE_URL`, `ANTHROPIC_BASE_URL`, and `GEMINI_BASE_URL` for third-party providers or self-hosted models.
 
 ## Bilingual UI
 

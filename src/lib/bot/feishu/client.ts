@@ -350,7 +350,7 @@ export function createFeishuAdapter(config: FeishuBotConfig): BotAdapter {
     },
 
     async transcribeAudio(fileKey: string): Promise<string> {
-      const destDir = path.join(os.tmpdir(), "labclaw-bot-audio");
+      const destDir = path.join(os.tmpdir(), "innoclaw-bot-audio");
       const localPath = await fileHandler.downloadFile(
         fileKey,
         `audio_${Date.now()}.ogg`,

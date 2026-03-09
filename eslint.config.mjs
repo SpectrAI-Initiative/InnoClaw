@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Third-party vendor libraries in public/ should not be linted
     "public/**",
+    // Sphinx documentation build artifacts
+    "docs/_build/**",
   ]),
 ]);
 

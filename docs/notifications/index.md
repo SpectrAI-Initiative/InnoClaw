@@ -1,6 +1,6 @@
 # Notifications & Bot Integrations
 
-LabClaw supports integration with messaging platforms through bot adapters. This allows users to interact with their workspaces directly from chat applications.
+InnoClaw supports integration with messaging platforms through bot adapters. This allows users to interact with their workspaces directly from chat applications.
 
 ## Supported Channels
 
@@ -15,7 +15,7 @@ LabClaw supports integration with messaging platforms through bot adapters. This
 sequenceDiagram
     participant User
     participant Platform as Feishu / WeChat
-    participant Webhook as LabClaw Webhook
+    participant Webhook as InnoClaw Webhook
     participant Processor as Bot Processor
     participant AI as AI Provider
 
@@ -41,6 +41,7 @@ FEISHU_APP_ID=cli_your_app_id
 FEISHU_APP_SECRET=your_app_secret
 FEISHU_VERIFICATION_TOKEN=your_verification_token
 FEISHU_ENCRYPT_KEY=your_encrypt_key
+FEISHU_PUSH_SECRET=your_push_secret
 ```
 
 3. Set the webhook URL in your Feishu app configuration:
@@ -48,12 +49,75 @@ FEISHU_ENCRYPT_KEY=your_encrypt_key
    https://your-domain.com/api/bot/feishu
    ```
 
+### Connection Modes
+
+Feishu supports two connection modes:
+
+| Mode | Description |
+|------|-------------|
+| **HTTP Webhook** | Feishu sends HTTP POST events to your webhook URL. Requires public URL. |
+| **WebSocket** | Long-lived connection using `@larksuiteoapi/node-sdk` WSClient. Started automatically in `instrumentation.ts`. No public URL needed. |
+
 ### Features
 
 - Receive and respond to text messages
-- Download and process file attachments
+- Download and process file attachments (text files < 100 KB)
+- Audio message transcription
+- Interactive card responses with real-time agent progress tracking
+- Agent mode integration (full tool access)
 - Support for encrypted event payloads
 - Automatic webhook verification
+
+### Bot Commands
+
+Users can interact with the bot using slash commands:
+
+| Command | Parameters | Description |
+|---------|------------|-------------|
+| `/workspace` | `<path>` (optional) | Bind a workspace directory, or show the current binding |
+| `/mode` | `<agent\|plan\|ask>` | Switch the agent mode for this chat |
+| `/status` | — | Show chat state (workspace, mode, history count, chat ID) |
+| `/clear` | — | Clear conversation history (preserves workspace and mode) |
+| `/help` | — | Show available commands and modes |
+
+### Agent Modes in Feishu
+
+| Mode | Tools Available | Description |
+|------|----------------|-------------|
+| **agent** | All tools (bash, readFile, writeFile, grep, kubectl, etc.) | Full autonomous execution |
+| **plan** | readFile, listDirectory, grep | Read-only analysis and planning |
+| **ask** | readFile, listDirectory, grep | Simple question answering |
+
+### Interactive Cards
+
+The Feishu bot uses interactive cards for rich progress display:
+
+- **Progress Card** — Shows real-time agent execution progress with tool call status
+- **Final Card** — Displays completed execution with tool call summary and response text
+- **Error Card** — Shows agent execution error with details
+- **Command Response Card** — Used for slash command responses
+
+### Push API
+
+The Push API enables sending messages from the web application to Feishu chats:
+
+```
+POST /api/bot/feishu/push
+Authorization: Bearer <FEISHU_PUSH_SECRET>
+```
+
+**Request Body:**
+
+```json
+{
+  "chatId": "oc_xxxxxxxxxxxx",
+  "title": "Agent Message",
+  "content": "Message content here",
+  "type": "card"
+}
+```
+
+This enables bidirectional communication between the web UI and Feishu. The `chatId` can be obtained via the `/status` command.
 
 ### Event Handling
 
@@ -107,6 +171,8 @@ WeChat Enterprise supports two webhook verification modes:
 
 Bot integrations process messages using the RAG pipeline from a configured workspace. The bot processor routes incoming messages to the appropriate workspace and AI provider.
 
+For Feishu, use the `/workspace <path>` command to bind a workspace. New chats are automatically bound to the first directory in `WORKSPACE_ROOTS`.
+
 ### Security
 
 - All webhook requests are verified using platform-specific signature/token validation
@@ -117,7 +183,18 @@ Bot integrations process messages using the RAG pipeline from a configured works
 
 Bot responses follow each platform's native message format:
 
-**Feishu:**
+**Feishu (Interactive Card):**
+```json
+{
+  "msg_type": "interactive",
+  "card": {
+    "header": { "title": { "tag": "plain_text", "content": "Agent Response" } },
+    "elements": [{ "tag": "markdown", "content": "AI response content" }]
+  }
+}
+```
+
+**Feishu (Text):**
 ```json
 {
   "msg_type": "text",

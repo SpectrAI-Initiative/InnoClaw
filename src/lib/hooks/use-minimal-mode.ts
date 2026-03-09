@@ -1,24 +1,32 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useSyncExternalStore } from "react";
 
-const STORAGE_KEY = "labclaw-minimal-mode";
+const STORAGE_KEY = "innoclaw-minimal-mode";
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
+
+function getIsClient() {
+  return true;
+}
+
+function getIsServer() {
+  return false;
+}
 
 export function useMinimalMode() {
-  const [isMinimal, setIsMinimal] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const isLoaded = useSyncExternalStore(subscribe, getIsClient, getIsServer);
 
-  useEffect(() => {
+  const [isMinimal, setIsMinimal] = useState(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === "true") {
-        setIsMinimal(true);
-      }
+      return typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY) === "true";
     } catch {
-      // localStorage not available
+      return false;
     }
-    setIsLoaded(true);
-  }, []);
+  });
 
   const toggleMinimalMode = useCallback(() => {
     setIsMinimal((prev) => {
