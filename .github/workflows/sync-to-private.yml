@@ -11,6 +11,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Push to private repo
         run: |
           git remote add private https://x-access-token:${{ secrets.SYNC_TOKEN }}@github.com/zjowowen/notebooklm.git
