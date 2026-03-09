@@ -2,10 +2,12 @@
 name: setup
 description: Interactive setup wizard for VibeLab. Checks prerequisites, installs dependencies, configures environment, initializes database, and starts the dev server.
 allowed-tools:
-  - Bash(npm install:*)
+  - Bash(node --version)
   - Bash(node -e:*)
-  - Bash(npx drizzle-kit:*)
+  - Bash(npm --version)
+  - Bash(npm install:*)
   - Bash(npm run dev:*)
+  - Bash(npx drizzle-kit:*)
   - Bash(mkdir:*)
   - Bash(cp:*)
   - Bash(cat:*)
