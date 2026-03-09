@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, LabClaw Contributors
-# This file is distributed under the same license as the LabClaw package.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: LabClaw \n"
+"Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -25,9 +25,9 @@ msgstr "配置"
 
 #: ../../usage/configuration.md:3 89cb0612a7ff423fa7649b14cc61cc18
 msgid ""
-"This page describes how to customize LabClaw's behavior through "
+"This page describes how to customize InnoClaw's behavior through "
 "configuration options."
-msgstr "本页介绍如何通过配置选项自定义 LabClaw 的行为。"
+msgstr "本页介绍如何通过配置选项自定义 InnoClaw 的行为。"
 
 #: ../../usage/configuration.md:5 ddce840b5e624b878b8b1e2ecfefa5ac
 msgid "Environment-Based Configuration"
@@ -52,9 +52,9 @@ msgstr "选择提供商"
 
 #: ../../usage/configuration.md:13 8c34f1c1d465412694c3bff057e9d4e8
 msgid ""
-"LabClaw supports multiple AI providers. Configure your preferred "
+"InnoClaw supports multiple AI providers. Configure your preferred "
 "provider by setting the appropriate API key:"
-msgstr "LabClaw 支持多个 AI 提供商。通过设置相应的 API 密钥来配置您偏好的提供商："
+msgstr "InnoClaw 支持多个 AI 提供商。通过设置相应的 API 密钥来配置您偏好的提供商："
 
 #: ../../usage/configuration.md:25 e527eb820d1e4c889be8d867c8d57bbd
 msgid "Using Custom Endpoints"
@@ -130,11 +130,11 @@ msgstr "数据库配置"
 
 #: ../../usage/configuration.md:78 4229a1c2278f484783e9db113abe94ab
 msgid ""
-"LabClaw uses SQLite with the database stored at "
-"`./data/labclaw.db`. This location is set in `drizzle.config.ts` and "
+"InnoClaw uses SQLite with the database stored at "
+"`./data/innoclaw.db`. This location is set in `drizzle.config.ts` and "
 "is not currently configurable via environment variables."
 msgstr ""
-"LabClaw 使用 SQLite，数据库存储在 `./data/labclaw.db`。该位置在 "
+"InnoClaw 使用 SQLite，数据库存储在 `./data/innoclaw.db`。该位置在 "
 "`drizzle.config.ts` 中设置，目前不支持通过环境变量配置。"
 
 #: ../../usage/configuration.md:80 0ed19419eacf40be83dbeab410888411

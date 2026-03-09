@@ -1,8 +1,8 @@
 # Overview
 
-## What is LabClaw?
+## What is InnoClaw?
 
-LabClaw is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
+InnoClaw is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
 
 ## Key Features
 
@@ -24,7 +24,7 @@ LabClaw is an AI-powered research assistant web application similar to Google No
 
 ## Architecture
 
-The following diagram shows the high-level architecture of LabClaw:
+The following diagram shows the high-level architecture of InnoClaw:
 
 ```{mermaid}
 graph TB
@@ -94,7 +94,7 @@ graph TB
 
 ## RAG Pipeline
 
-The core feature of LabClaw is RAG-based AI chat. The pipeline works in three stages:
+The core feature of InnoClaw is RAG-based AI chat. The pipeline works in three stages:
 
 ```{mermaid}
 flowchart LR

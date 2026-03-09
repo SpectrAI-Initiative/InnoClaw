@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, LabClaw Contributors
-# This file is distributed under the same license as the LabClaw package.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: LabClaw \n"
+"Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -25,9 +25,9 @@ msgstr "贡献指南"
 
 #: ../../development/contributing.md:3 6736fb2430344dd591e56e9274a0beca
 msgid ""
-"Thank you for your interest in contributing to LabClaw! This guide "
+"Thank you for your interest in contributing to InnoClaw! This guide "
 "explains how to get involved."
-msgstr "感谢您有兴趣为 LabClaw 做出贡献！本指南介绍如何参与。"
+msgstr "感谢您有兴趣为 InnoClaw 做出贡献！本指南介绍如何参与。"
 
 #: ../../development/contributing.md:5 a58734115662459faf001650cd5f1343
 msgid "Getting Started"
@@ -215,10 +215,10 @@ msgstr "报告问题"
 
 #: ../../development/contributing.md:90 e9bf47fa3e2f43e18771dc0444ccf697
 msgid ""
-"Use [GitHub Issues](https://github.com/zjowowen/LabClaw/issues) to "
+"Use [GitHub Issues](https://github.com/zjowowen/InnoClaw/issues) to "
 "report bugs or request features (when enabled)"
 msgstr ""
-"使用 [GitHub Issues](https://github.com/zjowowen/LabClaw/issues) "
+"使用 [GitHub Issues](https://github.com/zjowowen/InnoClaw/issues) "
 "报告错误或请求功能（启用后可用）"
 
 #: ../../development/contributing.md:91 e633e59a00b6442ca5036ad4921161d2

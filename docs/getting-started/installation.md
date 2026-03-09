@@ -1,6 +1,6 @@
 # Installation
 
-This guide walks you through setting up LabClaw locally for development or self-hosting.
+This guide walks you through setting up InnoClaw locally for development or self-hosting.
 
 ## Prerequisites
 
@@ -22,8 +22,8 @@ Optional:
 ## Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/zjowowen/LabClaw.git
-cd LabClaw
+git clone https://github.com/zjowowen/InnoClaw.git
+cd InnoClaw
 ```
 
 ## Step 2: Install Dependencies
@@ -85,7 +85,7 @@ Run the database migration to create the SQLite database:
 npx drizzle-kit migrate
 ```
 
-This creates the database file at `./data/labclaw.db` with all required tables.
+This creates the database file at `./data/innoclaw.db` with all required tables.
 
 ## Step 6: Start the Development Server
 
@@ -93,7 +93,7 @@ This creates the database file at `./data/labclaw.db` with all required tables.
 npm run dev
 ```
 
-Open your browser and navigate to **http://localhost:3000** to start using LabClaw.
+Open your browser and navigate to **http://localhost:3000** to start using InnoClaw.
 
 ## Verifying Your Setup
 

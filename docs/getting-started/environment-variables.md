@@ -1,13 +1,13 @@
 # Environment Variables
 
-A complete reference of all environment variables used by LabClaw.
+A complete reference of all environment variables used by InnoClaw.
 
 ## Core Configuration
 
 | Variable | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
 | `WORKSPACE_ROOTS` | `string` | **Yes** | — | Comma-separated absolute paths where workspaces can be created. Directories must exist on the server. |
-| `DATABASE_URL` | `string` | No | `./data/labclaw.db` | SQLite database filesystem path. Set to a local path when the project resides on NFS or another network filesystem. |
+| `DATABASE_URL` | `string` | No | `./data/innoclaw.db` | SQLite database filesystem path. Set to a local path when the project resides on NFS or another network filesystem. |
 | `NEXT_BUILD_DIR` | `string` | No | `.next` | Next.js build output directory. Set to a local filesystem path to avoid Turbopack cache errors on network/shared filesystems. |
 
 ## AI Provider Configuration

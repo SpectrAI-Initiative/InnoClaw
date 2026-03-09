@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, LabClaw Contributors
-# This file is distributed under the same license as the LabClaw package.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: LabClaw \n"
+"Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -28,8 +28,8 @@ msgid "Frequently Asked Questions"
 msgstr "常见问题"
 
 #: ../../troubleshooting/faq.md:5 94dd00828b0d485781203b844148ba3f
-msgid "Can I use LabClaw without an API key?"
-msgstr "我可以在没有 API 密钥的情况下使用 LabClaw 吗？"
+msgid "Can I use InnoClaw without an API key?"
+msgstr "我可以在没有 API 密钥的情况下使用 InnoClaw 吗？"
 
 #: ../../troubleshooting/faq.md:7 86d26dceca7742cdbe3ca02bc638c330
 msgid ""
@@ -114,8 +114,8 @@ msgstr ""
 "生成嵌入），速度取决于文件的数量和大小。后续同步仅处理新增或修改的文件（基于文件哈希比较），因此速度会显著加快。"
 
 #: ../../troubleshooting/faq.md:38 88fb965914a746139c22d89cc93ead01
-msgid "Can I run LabClaw on Linux?"
-msgstr "我可以在 Linux 上运行 LabClaw 吗？"
+msgid "Can I run InnoClaw on Linux?"
+msgstr "我可以在 Linux 上运行 InnoClaw 吗？"
 
 #: ../../troubleshooting/faq.md:40 2b04e709e199455e9dce5fbd1bf9af35
 msgid "**Yes.** Set `WORKSPACE_ROOTS` to Linux paths:"
@@ -172,8 +172,8 @@ msgid "Database"
 msgstr "数据库"
 
 #: ../../troubleshooting/faq.md ed0a5b751b2c4dd09a3b749cc7828339
-msgid "`./data/labclaw.db`"
-msgstr "`./data/labclaw.db`"
+msgid "`./data/innoclaw.db`"
+msgstr "`./data/innoclaw.db`"
 
 #: ../../troubleshooting/faq.md 334b174c74da42899690381a3ef0169c
 msgid "Configuration"
@@ -239,10 +239,10 @@ msgstr "获取帮助"
 #: ../../troubleshooting/faq.md:99 d1cc4475b44740329751efcd394accbe
 msgid ""
 "**GitHub Issues** — [Report bugs or request "
-"features](https://github.com/zjowowen/LabClaw/issues) (when enabled)"
+"features](https://github.com/zjowowen/InnoClaw/issues) (when enabled)"
 msgstr ""
 "**GitHub Issues** —— "
-"[报告错误或请求功能](https://github.com/zjowowen/LabClaw/issues)（启用后可用）"
+"[报告错误或请求功能](https://github.com/zjowowen/InnoClaw/issues)（启用后可用）"
 
 #: ../../troubleshooting/faq.md:100 7098e82b6fb44e92b38e5cbdbe1bcf21
 msgid ""

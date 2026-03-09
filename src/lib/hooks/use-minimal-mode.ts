@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useSyncExternalStore } from "react";
 
-const STORAGE_KEY = "labclaw-minimal-mode";
+const STORAGE_KEY = "innoclaw-minimal-mode";
 
 function subscribe(callback: () => void) {
   window.addEventListener("storage", callback);

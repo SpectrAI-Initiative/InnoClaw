@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, LabClaw Contributors
-# This file is distributed under the same license as the LabClaw package.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: LabClaw \n"
+"Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -103,10 +103,10 @@ msgstr "MyST Markdown 语法"
 
 #: ../../development/documentation.md:90 0abe526f08e64f7db9df57a32bd09913
 msgid ""
-"LabClaw docs use [MyST-Parser](https://myst-parser.readthedocs.io/) "
+"InnoClaw docs use [MyST-Parser](https://myst-parser.readthedocs.io/) "
 "for Markdown support in Sphinx."
 msgstr ""
-"LabClaw 文档使用 [MyST-Parser](https://myst-parser.readthedocs.io/) 在 "
+"InnoClaw 文档使用 [MyST-Parser](https://myst-parser.readthedocs.io/) 在 "
 "Sphinx 中支持 Markdown。"
 
 #: ../../development/documentation.md:92 0ae795db3b76476eb9d7702de52a129c
@@ -131,9 +131,9 @@ msgstr "翻译工作流"
 
 #: ../../development/documentation.md:137 ef5776757dd24ac58cd31a78663c51bc
 msgid ""
-"LabClaw documentation uses Sphinx's built-in internationalization "
+"InnoClaw documentation uses Sphinx's built-in internationalization "
 "(i18n) with `sphinx-intl`."
-msgstr "LabClaw 文档使用 Sphinx 内置的国际化（i18n）功能和 `sphinx-intl`。"
+msgstr "InnoClaw 文档使用 Sphinx 内置的国际化（i18n）功能和 `sphinx-intl`。"
 
 #: ../../development/documentation.md:139 92dd2fc3b3294fcbb4b82187f075c9f8
 msgid "How It Works"

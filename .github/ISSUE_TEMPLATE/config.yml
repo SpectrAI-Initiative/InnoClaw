@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: Documentation
-    url: https://zjowowen.github.io/LabClaw/
+    url: https://zjowowen.github.io/InnoClaw/
     about: Check our documentation for guides and API reference
   - name: Discussions
-    url: https://github.com/zjowowen/LabClaw/discussions
+    url: https://github.com/zjowowen/InnoClaw/discussions
     about: Ask questions and discuss ideas with the community

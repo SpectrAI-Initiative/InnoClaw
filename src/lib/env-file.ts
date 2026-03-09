@@ -28,7 +28,7 @@ export function ensureEnvLocal(): void {
   } else {
     fs.writeFileSync(
       target,
-      "# LabClaw configuration – edit values as needed\n",
+      "# InnoClaw configuration – edit values as needed\n",
       "utf-8",
     );
   }

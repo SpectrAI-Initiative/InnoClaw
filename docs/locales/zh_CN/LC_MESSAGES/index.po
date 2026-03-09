@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, LabClaw Contributors
-# This file is distributed under the same license as the LabClaw package.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: LabClaw \n"
+"Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -40,15 +40,15 @@ msgid "Troubleshooting"
 msgstr "故障排除"
 
 #: ../../index.md:1 cca7508f1c2749b4a40d62755f0a0e72
-msgid "LabClaw Documentation"
-msgstr "LabClaw 文档"
+msgid "InnoClaw Documentation"
+msgstr "InnoClaw 文档"
 
 #: ../../index.md:3 d66d453028114d289663c2c6542ce305
 msgid ""
-"Welcome to the **LabClaw** documentation — an AI-powered research "
+"Welcome to the **InnoClaw** documentation — an AI-powered research "
 "assistant web application similar to Google NotebookLM."
 msgstr ""
-"欢迎阅读 **LabClaw** 文档 —— 一个类似于 Google NotebookLM 的 AI 驱动的研究助手 Web "
+"欢迎阅读 **InnoClaw** 文档 —— 一个类似于 Google NotebookLM 的 AI 驱动的研究助手 Web "
 "应用程序。"
 
 #: ../../index.md:5 46be3e8b729d4f89919c5e1fb08fd3cc

@@ -8,7 +8,7 @@
 
 ## Reporting a Vulnerability
 
-We take the security of LabClaw seriously. If you discover a security vulnerability, please report it responsibly.
+We take the security of InnoClaw seriously. If you discover a security vulnerability, please report it responsibly.
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
@@ -25,7 +25,7 @@ When reporting a vulnerability, please include:
 - A description of the vulnerability and its potential impact
 - Steps to reproduce the issue
 - Any proof-of-concept code (if applicable)
-- The version(s) of LabClaw affected
+- The version(s) of InnoClaw affected
 - Your suggested fix (if any)
 
 ### Response Timeline
@@ -42,7 +42,7 @@ When reporting a vulnerability, please include:
 
 ## Security Best Practices for Deployment
 
-When deploying LabClaw, please follow these security practices:
+When deploying InnoClaw, please follow these security practices:
 
 1. **Environment Variables**: Never commit `.env` files or API keys to version control. Use `.env.example` as a reference template.
 2. **API Keys**: Rotate your API keys regularly and use the minimum required permissions.

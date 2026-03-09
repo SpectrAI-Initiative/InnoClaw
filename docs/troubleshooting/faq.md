@@ -2,7 +2,7 @@
 
 ## Frequently Asked Questions
 
-### Can I use LabClaw without an API key?
+### Can I use InnoClaw without an API key?
 
 **Yes.** Workspace management, file browsing, uploading, editing, and GitHub cloning features work without any API key. Only AI chat and note generation features require an API key. The UI will display a prompt indicating that AI features are unavailable.
 
@@ -61,7 +61,7 @@ LLM_MODEL=gemini-2.5-flash
 
 The first sync processes all files (extract text → chunk → generate embeddings), which depends on the number and size of files. Subsequent syncs only process new or modified files (based on file hash comparison), making them significantly faster.
 
-### Can I run LabClaw on Linux?
+### Can I run InnoClaw on Linux?
 
 **Yes.** Set `WORKSPACE_ROOTS` to Linux paths:
 
@@ -112,13 +112,13 @@ All outbound `fetch()` calls (AI API, GitHub, HuggingFace, etc.) will route thro
 SQLite requires a local filesystem for reliable locking. If the project is on NFS/CIFS, set `DATABASE_URL` to a local path:
 
 ```ini
-DATABASE_URL=/tmp/labclaw/labclaw.db
+DATABASE_URL=/tmp/innoclaw/innoclaw.db
 ```
 
 Also set `NEXT_BUILD_DIR` to avoid Turbopack cache errors:
 
 ```ini
-NEXT_BUILD_DIR=/tmp/labclaw-next
+NEXT_BUILD_DIR=/tmp/innoclaw-next
 ```
 
 ### How do I submit K8s / GPU jobs?
@@ -146,7 +146,7 @@ See [Environment Variables](../getting-started/environment-variables.md) for all
 
 ```bash
 # Remove the database file
-rm ./data/labclaw.db
+rm ./data/innoclaw.db
 
 # Re-run migrations
 npx drizzle-kit migrate
@@ -160,7 +160,7 @@ Back up the following:
 
 | Item | Location |
 |------|----------|
-| Database | `./data/labclaw.db` |
+| Database | `./data/innoclaw.db` |
 | Configuration | `.env.local` |
 | Workspace files | Directories listed in `WORKSPACE_ROOTS` |
 
@@ -188,6 +188,6 @@ PORT=8080 npm run start
 
 ## Getting Help
 
-- **GitHub Issues** — [Report bugs or request features](https://github.com/zjowowen/LabClaw/issues)
+- **GitHub Issues** — [Report bugs or request features](https://github.com/zjowowen/InnoClaw/issues)
 - **Documentation** — You're reading it! Check other sections for specific topics
 - **Source Code** — The code is well-structured and documented; see [Project Structure](../development/project-structure.md)

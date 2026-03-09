@@ -1,6 +1,6 @@
 # Core Features
 
-LabClaw provides a rich set of features for AI-powered research and file management.
+InnoClaw provides a rich set of features for AI-powered research and file management.
 
 ## Workspace Management
 

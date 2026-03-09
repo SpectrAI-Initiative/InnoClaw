@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LabClaw",
+  title: "InnoClaw",
   description: "AI-powered research assistant for your workspace files",
 };
 

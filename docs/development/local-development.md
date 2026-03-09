@@ -1,6 +1,6 @@
 # Local Development
 
-This guide covers running, debugging, and iterating on LabClaw locally.
+This guide covers running, debugging, and iterating on InnoClaw locally.
 
 ## Starting the Development Server
 

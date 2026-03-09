@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to LabClaw! This guide explains how to get involved.
+Thank you for your interest in contributing to InnoClaw! This guide explains how to get involved.
 
 ## Getting Started
 
@@ -87,6 +87,6 @@ Please be respectful and constructive in all interactions. We aim to create a we
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/zjowowen/LabClaw/issues) to report bugs or request features
+- Use [GitHub Issues](https://github.com/zjowowen/InnoClaw/issues) to report bugs or request features
 - Include clear steps to reproduce any bugs
 - Provide environment details (OS, Node.js version, browser)

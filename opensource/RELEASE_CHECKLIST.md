@@ -1,4 +1,4 @@
-# LabClaw 开源发布检查清单
+# InnoClaw 开源发布检查清单
 
 > 发布前逐项确认，确保所有关键事项已完成。
 
@@ -20,7 +20,7 @@
 
 ### 仓库配置
 - [x] `.gitignore` 移除 `opensource/` 忽略规则
-- [x] 确定新仓库名称和 GitHub 组织 → `zjowowen/LabClaw`
+- [x] 确定新仓库名称和 GitHub 组织 → `zjowowen/InnoClaw`
 - [x] 更新 `docs/conf.py` 中的仓库 URL（第 48、56、60-61、70 行）
 - [x] 更新 `README.md` 中的仓库 URL（git clone 地址、文档链接等）
 - [x] 更新 `.github/ISSUE_TEMPLATE/config.yml` 中的 URL
@@ -48,7 +48,7 @@
 ### 版本管理
 - [x] 添加 `CHANGELOG.md`（v0.1.0 初始版本）
 - [x] 创建 git tag `v0.1.0`
-- [x] 创建 GitHub Release（v0.1.0）→ https://github.com/zjowowen/LabClaw/releases/tag/v0.1.0
+- [x] 创建 GitHub Release（v0.1.0）→ https://github.com/zjowowen/InnoClaw/releases/tag/v0.1.0
 
 ---
 
@@ -76,7 +76,7 @@
 
 ## 发布执行
 
-- [x] 创建新 GitHub 仓库 → https://github.com/zjowowen/LabClaw
+- [x] 创建新 GitHub 仓库 → https://github.com/zjowowen/InnoClaw
 - [x] 推送代码（含完整 git 历史）
 - [ ] 配置 GitHub Pages（Settings → Pages → Source: GitHub Actions）
 - [ ] 设置 branch protection rules（main 分支）

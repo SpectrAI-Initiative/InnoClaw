@@ -34,7 +34,7 @@ body:
     id: area
     attributes:
       label: Feature Area
-      description: Which area of LabClaw does this relate to?
+      description: Which area of InnoClaw does this relate to?
       options:
         - AI / Chat / Agent
         - RAG / Document Processing

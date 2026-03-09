@@ -1,6 +1,6 @@
 # Project Structure
 
-This page describes the directory layout and module organization of LabClaw.
+This page describes the directory layout and module organization of InnoClaw.
 
 ## High-Level Structure
 
@@ -54,7 +54,7 @@ graph TB
 ## Directory Layout
 
 ```
-labclaw/
+innoclaw/
 ├── src/
 │   ├── app/                          # Next.js App Router
 │   │   ├── page.tsx                  # Home page (workspace list)
