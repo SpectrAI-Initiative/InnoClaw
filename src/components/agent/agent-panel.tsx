@@ -140,7 +140,7 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
   const result = part.output as Record<string, unknown> | undefined;
 
   return (
-    <div className="my-1.5 rounded border border-agent-border bg-agent-card-bg text-xs font-mono overflow-hidden">
+    <div className="my-1.5 rounded border border-agent-border bg-agent-card-bg text-xs font-mono overflow-hidden break-all">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
@@ -214,7 +214,7 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
 
           {/* Result */}
           {isDone && result && (
-            <div className="max-h-[300px] overflow-auto">
+            <div className="max-h-[300px] overflow-y-auto overflow-x-hidden">
               {renderToolResult(toolName, result)}
             </div>
           )}
@@ -368,7 +368,7 @@ function renderToolResult(
             </div>
           )}
           {crLogs && (
-            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed max-h-[400px] overflow-auto">
+            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed max-h-[400px] overflow-y-auto overflow-x-hidden">
               {crLogs}
             </pre>
           )}
@@ -423,7 +423,7 @@ function AgentMessage({ message }: { message: UIMessage }) {
           return (
             <div
               key={i}
-              className="prose prose-sm max-w-none text-agent-foreground [&_p]:my-1 [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_code]:text-agent-code [&_h1]:text-agent-foreground [&_h2]:text-agent-foreground [&_h3]:text-agent-foreground [&_a]:text-agent-accent [&_strong]:text-agent-foreground dark:prose-invert"
+              className="prose prose-sm max-w-none text-agent-foreground [&_p]:my-1 [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:text-agent-code [&_code]:break-all [&_h1]:text-agent-foreground [&_h2]:text-agent-foreground [&_h3]:text-agent-foreground [&_a]:text-agent-accent [&_strong]:text-agent-foreground dark:prose-invert"
             >
               <ReactMarkdown>{text}</ReactMarkdown>
             </div>
@@ -1105,8 +1105,8 @@ export function AgentPanel({
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1" ref={scrollRef}>
-        <div className="p-3 space-y-3">
+      <ScrollArea className="flex-1 [&_[data-slot=scroll-area-viewport]]:!overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:hidden" ref={scrollRef}>
+        <div className="p-3 space-y-3 overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
           {!aiEnabled ? (
             <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
               <AlertCircle className="h-8 w-8 text-agent-muted" />
