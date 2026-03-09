@@ -1,4 +1,4 @@
-# VibeLab
+# LabClaw
 
 一个可自托管的 AI 研究助手，灵感来自 Google NotebookLM。将服务器文件夹作为工作空间，基于 RAG 与 AI 对话，内置 206 个科学技能。
 
@@ -90,7 +90,7 @@ npm run dev
 
 ## 通过 Skills 配置高级功能 / Setup Advanced Features via Skills
 
-VibeLab 的 **Skills 系统**是配置和扩展高级功能的首选方式。启动应用后，访问 `/skills` 页面即可导入和管理技能。
+LabClaw 的 **Skills 系统**是配置和扩展高级功能的首选方式。启动应用后，访问 `/skills` 页面即可导入和管理技能。
 
 The **Skills system** is the preferred way to configure and extend advanced features. After starting the app, visit `/skills` to import and manage skills.
 
@@ -256,7 +256,7 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 | 变量 | 必填 | 说明 | 默认值 |
 |------|:----:|------|--------|
 | `WORKSPACE_ROOTS` | ✅ | 工作空间根目录（逗号分隔绝对路径，目录必须已存在） | — |
-| `DATABASE_URL` | | SQLite 数据库路径。网络文件系统（NFS/CIFS）上建议指向本地路径 | `./data/vibelab.db` |
+| `DATABASE_URL` | | SQLite 数据库路径。网络文件系统（NFS/CIFS）上建议指向本地路径 | `./data/labclaw.db` |
 | `NEXT_BUILD_DIR` | | Next.js 构建目录。网络文件系统上建议指向本地路径 | `.next` |
 
 ### AI 模型
@@ -336,7 +336,7 @@ npm run start               # 默认端口 3000，PORT=8080 可自定义
 ```bash
 npm install -g pm2
 npm run build
-pm2 start npm --name "vibelab" -- start
+pm2 start npm --name "labclaw" -- start
 pm2 startup && pm2 save     # 开机自启
 ```
 
@@ -358,7 +358,7 @@ CMD ["sh", "-c", "npx drizzle-kit migrate && npm run start"]
 # docker-compose.yml
 version: '3.8'
 services:
-  vibelab:
+  labclaw:
     build: .
     ports: ["3000:3000"]
     volumes:
@@ -438,13 +438,13 @@ src/
 使用镜像源：`npm install --registry=https://registry.npmmirror.com`
 
 **`npx drizzle-kit migrate` 报错？**
-确认 `./data/` 目录已存在（`mkdir -p ./data`）。数据库损坏可删除后重建：`rm -f ./data/vibelab.db && npx drizzle-kit migrate`。
+确认 `./data/` 目录已存在（`mkdir -p ./data`）。数据库损坏可删除后重建：`rm -f ./data/labclaw.db && npx drizzle-kit migrate`。
 
 **`SQLITE_IOERR_SHMMAP` / `disk I/O error`？**
-项目位于网络文件系统（NFS/CIFS）时常见。在 `.env.local` 中设置 `DATABASE_URL=/tmp/vibelab/vibelab.db`，然后 `mkdir -p /tmp/vibelab && npx drizzle-kit migrate`。
+项目位于网络文件系统（NFS/CIFS）时常见。在 `.env.local` 中设置 `DATABASE_URL=/tmp/labclaw/labclaw.db`，然后 `mkdir -p /tmp/labclaw && npx drizzle-kit migrate`。
 
 **`Persisting failed` / `No such device`？**
-Turbopack 在网络文件系统上的缓存警告，不影响功能。可设置 `NEXT_BUILD_DIR=/tmp/vibelab-next` 消除。
+Turbopack 在网络文件系统上的缓存警告，不影响功能。可设置 `NEXT_BUILD_DIR=/tmp/labclaw-next` 消除。
 
 **端口被占用？**
 `PORT=3001 npm run dev`
@@ -470,7 +470,7 @@ Turbopack 在网络文件系统上的缓存警告，不影响功能。可设置 
 确保已安装 `kubectl`（`kubectl version --client`），且 `KUBECONFIG_PATH` 配置正确。
 
 **如何重置数据库？**
-`rm -f ./data/vibelab.db && npx drizzle-kit migrate`
+`rm -f ./data/labclaw.db && npx drizzle-kit migrate`
 
 ---
 

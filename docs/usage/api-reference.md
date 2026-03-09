@@ -1,6 +1,6 @@
 # API Reference
 
-VibeLab provides a set of REST API endpoints served by Next.js API routes. All endpoints are under the `/api/` path.
+LabClaw provides a set of REST API endpoints served by Next.js API routes. All endpoints are under the `/api/` path.
 
 ## Workspaces
 

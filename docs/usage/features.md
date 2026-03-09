@@ -1,6 +1,6 @@
 # Core Features
 
-VibeLab provides a rich set of features for AI-powered research and file management.
+LabClaw provides a rich set of features for AI-powered research and file management.
 
 ## Workspace Management
 

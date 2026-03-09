@@ -1,6 +1,6 @@
 # Notifications & Bot Integrations
 
-VibeLab supports integration with messaging platforms through bot adapters. This allows users to interact with their workspaces directly from chat applications.
+LabClaw supports integration with messaging platforms through bot adapters. This allows users to interact with their workspaces directly from chat applications.
 
 ## Supported Channels
 
@@ -15,7 +15,7 @@ VibeLab supports integration with messaging platforms through bot adapters. This
 sequenceDiagram
     participant User
     participant Platform as Feishu / WeChat
-    participant Webhook as VibeLab Webhook
+    participant Webhook as LabClaw Webhook
     participant Processor as Bot Processor
     participant AI as AI Provider
 

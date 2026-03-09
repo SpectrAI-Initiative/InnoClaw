@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to VibeLab! This guide explains how to get involved.
+Thank you for your interest in contributing to LabClaw! This guide explains how to get involved.
 
 ## Getting Started
 

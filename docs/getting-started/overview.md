@@ -1,8 +1,8 @@
 # Overview
 
-## What is VibeLab?
+## What is LabClaw?
 
-VibeLab is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
+LabClaw is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
 
 ## Key Features
 
@@ -20,7 +20,7 @@ VibeLab is an AI-powered research assistant web application similar to Google No
 
 ## Architecture
 
-The following diagram shows the high-level architecture of VibeLab:
+The following diagram shows the high-level architecture of LabClaw:
 
 ```{mermaid}
 graph TB
@@ -75,7 +75,7 @@ graph TB
 
 ## RAG Pipeline
 
-The core feature of VibeLab is RAG-based AI chat. The pipeline works in three stages:
+The core feature of LabClaw is RAG-based AI chat. The pipeline works in three stages:
 
 ```{mermaid}
 flowchart LR

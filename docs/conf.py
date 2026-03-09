@@ -4,9 +4,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Project information -----------------------------------------------------
-project = "VibeLab"
-copyright = "2025, VibeLab Contributors"
-author = "VibeLab Contributors"
+project = "LabClaw"
+copyright = "2025, LabClaw Contributors"
+author = "LabClaw Contributors"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -63,7 +63,7 @@ html_context = {
 }
 
 html_static_path = ["_static"]
-html_title = "VibeLab Documentation"
+html_title = "LabClaw Documentation"
 
 # -- Options for linkcheck ---------------------------------------------------
 linkcheck_ignore = [

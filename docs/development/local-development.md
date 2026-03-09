@@ -1,6 +1,6 @@
 # Local Development
 
-This guide covers running, debugging, and iterating on VibeLab locally.
+This guide covers running, debugging, and iterating on LabClaw locally.
 
 ## Starting the Development Server
 

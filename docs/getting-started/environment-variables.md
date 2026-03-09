@@ -1,6 +1,6 @@
 # Environment Variables
 
-A complete reference of all environment variables used by VibeLab.
+A complete reference of all environment variables used by LabClaw.
 
 ## Core Configuration
 

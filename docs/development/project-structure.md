@@ -1,6 +1,6 @@
 # Project Structure
 
-This page describes the directory layout and module organization of VibeLab.
+This page describes the directory layout and module organization of LabClaw.
 
 ## High-Level Structure
 
@@ -41,7 +41,7 @@ graph TB
 ## Directory Layout
 
 ```
-vibelab/
+labclaw/
 ├── src/
 │   ├── app/                          # Next.js App Router
 │   │   ├── page.tsx                  # Home page (workspace list)
