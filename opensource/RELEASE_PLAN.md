@@ -34,13 +34,13 @@
 
 ## 待办事项
 
-1. ~~**更新所有仓库 URL**~~ ✅ 已完成（package.json、docs/conf.py、README.md、Issue 模板、docs、locale 翻译文件）
-2. **Git 历史清理**（如需要，使用 git-filter-repo）
-3. ~~**创建新仓库**~~ ✅ 已创建 https://github.com/zjowowen/LabClaw
-4. **推送代码到新仓库**
-5. **创建 git tag `v0.1.0`**
-6. **创建 GitHub Release**
-7. **配置 GitHub Pages 和 branch protection**
+1. ~~**更新所有仓库 URL**~~ ✅ 已完成
+2. ~~**Git 历史清理**~~ ✅ 已验证无敏感信息
+3. ~~**创建新仓库**~~ ✅ https://github.com/zjowowen/LabClaw
+4. ~~**推送代码到新仓库**~~ ✅ 已推送 main 分支
+5. ~~**创建 git tag `v0.1.0`**~~ ✅ 已创建并推送
+6. ~~**创建 GitHub Release**~~ ✅ https://github.com/zjowowen/LabClaw/releases/tag/v0.1.0
+7. **配置 GitHub Pages 和 branch protection** — 需在仓库 Settings 中手动操作
 8. **旧仓库添加迁移说明**
 
 ---

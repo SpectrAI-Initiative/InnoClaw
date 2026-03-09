@@ -47,8 +47,8 @@
 
 ### 版本管理
 - [x] 添加 `CHANGELOG.md`（v0.1.0 初始版本）
-- [ ] 创建 git tag `v0.1.0`
-- [ ] 创建 GitHub Release（v0.1.0）
+- [x] 创建 git tag `v0.1.0`
+- [x] 创建 GitHub Release（v0.1.0）→ https://github.com/zjowowen/LabClaw/releases/tag/v0.1.0
 
 ---
 
@@ -76,8 +76,8 @@
 
 ## 发布执行
 
-- [ ] 创建新 GitHub 仓库 → ~~已创建~~ https://github.com/zjowowen/LabClaw
-- [ ] 推送代码（含清理后的完整 git 历史）
+- [x] 创建新 GitHub 仓库 → https://github.com/zjowowen/LabClaw
+- [x] 推送代码（含完整 git 历史）
 - [ ] 配置 GitHub Pages（Settings → Pages → Source: GitHub Actions）
 - [ ] 设置 branch protection rules（main 分支）
 - [ ] 开启 GitHub Discussions（可选）
