@@ -31,11 +31,11 @@ function loadEnv() {
 }
 
 // Parse SKILL.md frontmatter + body
-function parseSkillMd(content, fallbackSlug) {
+function parseSkillMd(content, fallbackName, fallbackSlug) {
   const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
   if (!fmMatch) {
     return {
-      name: fallbackSlug,
+      name: fallbackName,
       slug: fallbackSlug,
       description: null,
       systemPrompt: content.trim(),
@@ -58,7 +58,7 @@ function parseSkillMd(content, fallbackSlug) {
     return raw.replace(/^["']|["']$/g, "");
   };
 
-  const name = getQuotedValue("name") || fallbackSlug;
+  const name = getQuotedValue("name") || fallbackName;
   const description = getQuotedValue("description") || null;
 
   // Parse allowed-tools as YAML list
@@ -116,6 +116,7 @@ function main() {
       if (!fs.existsSync(skillMdPath)) continue;
 
       const slug = dir.name.replace(/_/g, "-"); // normalize to kebab-case
+      const fallbackName = dir.name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
       // Skip if already exists (by original or normalized slug)
       if (existingSlugs.has(slug) || existingSlugs.has(dir.name)) {
@@ -131,7 +132,7 @@ function main() {
           content = content.replaceAll("<YOUR_SCP_HUB_API_KEY>", scpHubApiKey);
         }
 
-        const parsed = parseSkillMd(content, dir.name);
+        const parsed = parseSkillMd(content, fallbackName, slug);
         if (!parsed) {
           failed++;
           continue;

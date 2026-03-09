@@ -6,7 +6,7 @@ import { buildAgentSystemPrompt, buildPlanSystemPrompt, buildAskSystemPrompt } f
 import { buildSkillSystemPrompt } from "@/lib/ai/skill-prompt";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
-import { eq, or, isNull } from "drizzle-orm";
+import { and, eq, or, isNull } from "drizzle-orm";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 
 export async function POST(req: NextRequest) {
@@ -75,12 +75,15 @@ export async function POST(req: NextRequest) {
           })
           .from(skills)
           .where(
-            workspaceId
-              ? or(
-                  isNull(skills.workspaceId),
-                  eq(skills.workspaceId, workspaceId)
-                )
-              : isNull(skills.workspaceId)
+            and(
+              eq(skills.isEnabled, true),
+              workspaceId
+                ? or(
+                    isNull(skills.workspaceId),
+                    eq(skills.workspaceId, workspaceId)
+                  )
+                : isNull(skills.workspaceId)
+            )
           );
         if (skillRows.length > 0) {
           skillCatalog = skillRows;
