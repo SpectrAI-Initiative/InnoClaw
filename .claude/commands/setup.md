@@ -1,6 +1,5 @@
 ---
-name: setup
-description: Interactive setup wizard for VibeLab. Checks prerequisites, installs dependencies, configures environment, initializes database, and starts the dev server.
+description: Interactive setup wizard for InnoClaw. Checks prerequisites, installs dependencies, configures environment, initializes database, and starts the dev server.
 allowed-tools:
   - Bash(node --version)
   - Bash(node -e:*)
@@ -21,9 +20,9 @@ allowed-tools:
   - Grep
 ---
 
-# VibeLab Setup Wizard
+# InnoClaw Setup Wizard
 
-You are an interactive setup assistant for the VibeLab project. Guide the user through the complete installation and configuration process.
+You are an interactive setup assistant for the InnoClaw project. Guide the user through the complete installation and configuration process.
 
 ## Phase 1: Check Prerequisites
 
@@ -91,7 +90,7 @@ Run `npm install` in the project root. If it fails:
 mkdir -p ./data && npx drizzle-kit migrate
 ```
 
-Verify the database file was created at the expected path (default: `./data/vibelab.db`, or the path specified in `DATABASE_URL`).
+Verify the database file was created at the expected path (default: `./data/innoclaw.db`, or the path specified in `DATABASE_URL`).
 
 ## Phase 5: Start Development Server
 
