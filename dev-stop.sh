@@ -12,7 +12,7 @@ kill_port_process() {
     local pids=$(lsof -t -i:$port 2>/dev/null)
     if [ -n "$pids" ]; then
         for pid in $pids; do
-            local cmdline=$(ps -p $pid -o args= 2>/dev/null)
+            local cmdline=$(ps -p "$pid" -o args= 2>/dev/null)
             # Skip VSCode related processes
             if echo "$cmdline" | grep -qE "(vscode|code-server|sshd)"; then
                 echo "Skipping VSCode/SSH process: $pid"
@@ -21,11 +21,11 @@ kill_port_process() {
             # Only kill node/next related processes
             if echo "$cmdline" | grep -qE "(node|next|npm)"; then
                 echo "Found process $pid on port $port, killing..."
-                kill $pid 2>/dev/null
+                kill "$pid" 2>/dev/null
                 sleep 2
-                if ps -p $pid > /dev/null 2>&1; then
+                if ps -p "$pid" > /dev/null 2>&1; then
                     echo "Force killing..."
-                    kill -9 $pid 2>/dev/null
+                    kill -9 "$pid" 2>/dev/null
                     sleep 1
                 fi
             fi
@@ -73,16 +73,16 @@ orphan_pids=$(pgrep -f "next dev" 2>/dev/null)
 if [ -n "$orphan_pids" ]; then
     for pid in $orphan_pids; do
         # Check if process is related to this project
-        cwd=$(readlink -f /proc/$pid/cwd 2>/dev/null)
+        cwd=$(readlink -f /proc/"$pid"/cwd 2>/dev/null)
         if [ "$cwd" = "$PROJECT_DIR" ]; then
-            kill $pid 2>/dev/null
+            kill "$pid" 2>/dev/null
             sleep 2
-            if ps -p $pid > /dev/null 2>&1; then
+            if ps -p "$pid" > /dev/null 2>&1; then
                 echo "Force killing orphan next dev process: $pid"
-                kill -9 $pid 2>/dev/null
+                kill -9 "$pid" 2>/dev/null
                 sleep 1
             fi
-            if ! ps -p $pid > /dev/null 2>&1; then
+            if ! ps -p "$pid" > /dev/null 2>&1; then
                 echo "Killed orphan next dev process: $pid"
                 stopped=true
             else

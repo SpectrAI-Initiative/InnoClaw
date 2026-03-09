@@ -25,7 +25,7 @@ check_port() {
     local pid=$(lsof -t -i:$port 2>/dev/null)
     if [ -n "$pid" ]; then
         echo "Port $port is occupied by process: $pid"
-        local process_name=$(ps -p $pid -o comm= 2>/dev/null)
+        local process_name=$(ps -p "$pid" -o comm= 2>/dev/null)
         echo "Process name: $process_name"
         return 0
     fi
@@ -38,7 +38,7 @@ kill_port_process() {
     local pids=$(lsof -t -i:$port 2>/dev/null)
     if [ -n "$pids" ]; then
         for pid in $pids; do
-            local cmdline=$(ps -p $pid -o args= 2>/dev/null)
+            local cmdline=$(ps -p "$pid" -o args= 2>/dev/null)
             # Skip VSCode related processes
             if echo "$cmdline" | grep -qE "(vscode|code-server|sshd)"; then
                 echo "Skipping VSCode/SSH process: $pid ($cmdline)"
@@ -47,11 +47,11 @@ kill_port_process() {
             # Only kill node/next related processes
             if echo "$cmdline" | grep -qE "(node|next|npm)"; then
                 echo "Killing process $pid on port $port ($cmdline)..."
-                kill $pid 2>/dev/null
+                kill "$pid" 2>/dev/null
                 sleep 2
-                if ps -p $pid > /dev/null 2>&1; then
+                if ps -p "$pid" > /dev/null 2>&1; then
                     echo "Force killing..."
-                    kill -9 $pid 2>/dev/null
+                    kill -9 "$pid" 2>/dev/null
                     sleep 1
                 fi
             fi
@@ -59,7 +59,7 @@ kill_port_process() {
         if lsof -t -i:$port > /dev/null 2>&1; then
             # Check if remaining process is VSCode
             local remaining=$(lsof -t -i:$port 2>/dev/null | head -1)
-            local remaining_cmd=$(ps -p $remaining -o args= 2>/dev/null)
+            local remaining_cmd=$(ps -p "$remaining" -o args= 2>/dev/null)
             if echo "$remaining_cmd" | grep -qE "(vscode|code-server|sshd)"; then
                 echo "Port $port still used by VSCode (safe to ignore)"
                 return 0
