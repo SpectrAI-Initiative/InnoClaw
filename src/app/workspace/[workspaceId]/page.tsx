@@ -95,7 +95,11 @@ export default function WorkspacePage({
       {/* Layout wrapper — collapsed to h-0 in minimal mode to hide panels,
           but stays mounted so all component state (including AgentPanel's useChat) is preserved.
           The AgentPanel escapes via position:fixed when in minimal mode. */}
-      <div className={isMinimal ? "h-0 overflow-hidden" : "h-[calc(100vh-3.5rem)] overflow-hidden"}>
+      <div
+        className={isMinimal ? "h-0 overflow-hidden" : "h-[calc(100vh-3.5rem)] overflow-hidden"}
+        aria-hidden={isMinimal}
+        inert={isMinimal ? true : undefined}
+      >
         <ResizablePanelGroup orientation="horizontal">
           {/* Left: FileBrowser */}
           <ResizablePanel defaultSize={25} minSize={10} className="overflow-hidden">
