@@ -1,26 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
-import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Eye, X, Save, FileDown, AlertCircle, Loader2, Edit3 } from "lucide-react";
+import { Eye, X, Save, FileDown, AlertCircle, Loader2 } from "lucide-react";
 import { getFileName } from "@/lib/utils";
 import { PdfViewer } from "@/components/files/pdf-viewer";
 import { MolViewer } from "@/components/files/mol-viewer";
+import { useFileContent } from "@/lib/hooks/use-file-content";
 import { toast } from "sonner";
-import {
-  markdownComponents,
-  remarkPlugins,
-  rehypePlugins,
-} from "@/lib/markdown/shared-components";
 
 // Lazy-load CadViewer so Three.js is only fetched when a CAD file is opened
 const CadViewer = dynamic(
   () => import("@/components/files/cad-viewer").then((mod) => mod.CadViewer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    ),
+  },
+);
+
+// Lazy-load MarkdownPreview so react-markdown / remark / rehype / katex
+// are only fetched when a .md file is opened
+const MarkdownPreview = dynamic(
+  () =>
+    import("@/components/preview/markdown-preview").then(
+      (mod) => mod.MarkdownPreview,
+    ),
   {
     ssr: false,
     loading: () => (
@@ -37,7 +47,7 @@ interface FilePreviewPanelProps {
 }
 
 const EDITABLE_EXTS = [
-  "txt", "md", "json", "csv", "html", "css", "js", "ts", "tsx", "jsx",
+  "txt", "json", "csv", "html", "css", "js", "ts", "tsx", "jsx",
   "py", "yaml", "yml", "xml", "toml", "ini", "cfg", "env", "sh", "bat",
   "log", "conf", "c", "cpp", "h", "hpp", "java", "go", "rs", "rb", "php",
 ];
@@ -83,171 +93,15 @@ function ImagePreview({ filePath }: { filePath: string }) {
   );
 }
 
-function MarkdownPreview({ filePath }: { filePath: string }) {
-  const t = useTranslations("files");
-  const tCommon = useTranslations("common");
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [modified, setModified] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    let canceled = false;
-    setLoading(true);
-    setModified(false);
-
-    fetch(`/api/files/read?path=${encodeURIComponent(filePath)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load file");
-        return res.json();
-      })
-      .then((data) => {
-        if (!canceled) setContent(data.content);
-      })
-      .catch(() => {
-        if (!canceled) toast.error("Failed to load file");
-      })
-      .finally(() => {
-        if (!canceled) setLoading(false);
-      });
-
-    return () => { canceled = true; };
-  }, [filePath]);
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const res = await fetch("/api/files/write", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: filePath, content }),
-      });
-      if (!res.ok) {
-        throw new Error("Failed to save file");
-      }
-      setModified(false);
-      toast.success(t("saved"));
-    } catch {
-      toast.error("Failed to save file");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex h-full items-center justify-center text-muted-foreground">
-        {tCommon("loading")}
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex h-full flex-col gap-2 p-3">
-      <div className="flex items-center justify-end gap-2">
-        {modified && (
-          <span className="text-xs text-muted-foreground">{tCommon("modified")}</span>
-        )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          {isEditing ? <Eye className="mr-2 h-4 w-4" /> : <Edit3 className="mr-2 h-4 w-4" />}
-          {isEditing ? tCommon("preview") : tCommon("edit")}
-        </Button>
-        {isEditing && (
-          <Button size="sm" onClick={handleSave} disabled={saving || !modified}>
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? t("saving") : tCommon("save")}
-          </Button>
-        )}
-      </div>
-      {isEditing ? (
-        <Textarea
-          className="flex-1 resize-none font-mono text-sm"
-          value={content}
-          onChange={(e) => {
-            setContent(e.target.value);
-            setModified(true);
-          }}
-          onKeyDown={(e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-              e.preventDefault();
-              if (saving || !modified) {
-                return;
-              }
-              handleSave();
-            }
-          }}
-        />
-      ) : (
-        <ScrollArea className="flex-1">
-          <div className="prose prose-sm dark:prose-invert max-w-none p-2">
-            <ReactMarkdown
-              remarkPlugins={remarkPlugins}
-              rehypePlugins={rehypePlugins}
-              components={markdownComponents}
-            >
-              {content}
-            </ReactMarkdown>
-          </div>
-        </ScrollArea>
-      )}
-    </div>
-  );
-}
-
 function TextPreview({ filePath }: { filePath: string }) {
   const t = useTranslations("files");
   const tCommon = useTranslations("common");
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [modified, setModified] = useState(false);
+  const { content, loading, saving, modified, handleSave, updateContent } =
+    useFileContent({ filePath });
 
-  useEffect(() => {
-    let canceled = false;
-    setLoading(true);
-    setModified(false);
-
-    fetch(`/api/files/read?path=${encodeURIComponent(filePath)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load file");
-        return res.json();
-      })
-      .then((data) => {
-        if (!canceled) setContent(data.content);
-      })
-      .catch(() => {
-        if (!canceled) toast.error("Failed to load file");
-      })
-      .finally(() => {
-        if (!canceled) setLoading(false);
-      });
-
-    return () => { canceled = true; };
-  }, [filePath]);
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const res = await fetch("/api/files/write", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: filePath, content }),
-      });
-      if (!res.ok) {
-        throw new Error("Failed to save file");
-      }
-      setModified(false);
-      toast.success(t("saved"));
-    } catch {
-      toast.error("Failed to save file");
-    } finally {
-      setSaving(false);
-    }
+  const onSave = async () => {
+    const ok = await handleSave();
+    if (ok) toast.success(t("saved"));
   };
 
   if (loading) {
@@ -264,7 +118,7 @@ function TextPreview({ filePath }: { filePath: string }) {
         {modified && (
           <span className="text-xs text-muted-foreground">{tCommon("modified")}</span>
         )}
-        <Button size="sm" onClick={handleSave} disabled={saving || !modified}>
+        <Button size="sm" onClick={onSave} disabled={saving || !modified}>
           <Save className="mr-2 h-4 w-4" />
           {saving ? t("saving") : tCommon("save")}
         </Button>
@@ -272,14 +126,11 @@ function TextPreview({ filePath }: { filePath: string }) {
       <Textarea
         className="flex-1 resize-none font-mono text-sm"
         value={content}
-        onChange={(e) => {
-          setContent(e.target.value);
-          setModified(true);
-        }}
+        onChange={(e) => updateContent(e.target.value)}
         onKeyDown={(e) => {
           if ((e.ctrlKey || e.metaKey) && e.key === "s") {
             e.preventDefault();
-            handleSave();
+            onSave();
           }
         }}
       />

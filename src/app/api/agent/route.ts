@@ -6,7 +6,7 @@ import { buildAgentSystemPrompt, buildPlanSystemPrompt, buildAskSystemPrompt } f
 import { buildSkillSystemPrompt } from "@/lib/ai/skill-prompt";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, or, isNull } from "drizzle-orm";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 
 export async function POST(req: NextRequest) {
@@ -64,8 +64,35 @@ export async function POST(req: NextRequest) {
       systemPrompt = buildAskSystemPrompt(cwd);
       tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"], workspaceId);
     } else {
-      // Default agent mode
-      systemPrompt = buildAgentSystemPrompt(cwd);
+      // Default agent mode: load skill catalog for auto-matching
+      let skillCatalog: { slug: string; name: string; description: string | null }[] | undefined;
+      try {
+        const skillRows = await db
+          .select({
+            slug: skills.slug,
+            name: skills.name,
+            description: skills.description,
+          })
+          .from(skills)
+          .where(
+            and(
+              eq(skills.isEnabled, true),
+              workspaceId
+                ? or(
+                    isNull(skills.workspaceId),
+                    eq(skills.workspaceId, workspaceId)
+                  )
+                : isNull(skills.workspaceId)
+            )
+          );
+        if (skillRows.length > 0) {
+          skillCatalog = skillRows;
+        }
+      } catch {
+        // Skills table might not exist yet; proceed without catalog
+      }
+
+      systemPrompt = buildAgentSystemPrompt(cwd, skillCatalog);
       tools = createAgentTools(cwd, undefined, workspaceId);
     }
 
