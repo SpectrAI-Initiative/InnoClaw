@@ -1,4 +1,4 @@
-# NotebookLM Clone
+# Jarvis
 
 一个类似 Google NotebookLM 的 AI 研究助手 Web 应用。用户可以打开服务器端文件夹作为工作空间，浏览/管理文件，并与 AI 进行基于 RAG（检索增强生成）的对话。
 
@@ -640,7 +640,7 @@ This project supports Feishu (Lark) bot integration via WebSocket long connectio
 
 1. 登录 [飞书开发者后台](https://open.feishu.cn/app)
 2. 点击 **"创建企业自建应用"**
-3. 填写应用名称（如 "NotebookLM Agent"）和描述，完成创建
+3. 填写应用名称（如 "Jarvis Agent"）和描述，完成创建
 
 ### 第 2 步：获取应用凭证
 

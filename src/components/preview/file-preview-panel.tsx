@@ -58,7 +58,7 @@ const IMAGE_EXTS = ["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp", "ico"];
 function getFileType(filePath: string) {
   const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
   if (ext === "pdf") return "pdf" as const;
-  if (ext === "md") return "markdown" as const;
+  if (ext === "md" || ext === "markdown") return "markdown" as const;
   if (MOL_EXTS.includes(ext)) return "mol" as const;
   if (CAD_EXTS.includes(ext)) return "cad" as const;
   if (IMAGE_EXTS.includes(ext)) return "image" as const;
@@ -194,14 +194,14 @@ export function FilePreviewPanel({ filePath, onClose }: FilePreviewPanelProps) {
           </div>
         ) : fileType === "pdf" ? (
           <PdfViewer filePath={filePath} />
+        ) : fileType === "markdown" ? (
+          <MarkdownPreview filePath={filePath} />
         ) : fileType === "mol" ? (
           <MolViewer filePath={filePath} />
         ) : fileType === "cad" ? (
           <CadViewer filePath={filePath} />
         ) : fileType === "image" ? (
           <ImagePreview filePath={filePath} />
-        ) : fileType === "markdown" ? (
-          <MarkdownPreview filePath={filePath} />
         ) : fileType === "text" ? (
           <TextPreview filePath={filePath} />
         ) : (

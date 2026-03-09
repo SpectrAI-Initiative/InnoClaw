@@ -12,6 +12,7 @@
     "open": "打开",
     "close": "关闭",
     "edit": "编辑",
+    "preview": "预览",
     "back": "返回",
     "refresh": "刷新",
     "error": "错误",
@@ -239,7 +240,8 @@
     "dismiss": "关闭",
     "clearAll": "直接清除",
     "roleUser": "用户",
-    "roleAssistant": "助手"
+    "roleAssistant": "助手",
+    "autoContinue": "继续"
   },
   "report": {
     "tabReport": "研究报告",

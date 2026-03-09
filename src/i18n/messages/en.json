@@ -12,6 +12,7 @@
     "open": "Open",
     "close": "Close",
     "edit": "Edit",
+    "preview": "Preview",
     "back": "Back",
     "refresh": "Refresh",
     "error": "Error",
@@ -236,7 +237,8 @@
     "dismiss": "Dismiss",
     "clearAll": "Clear All",
     "roleUser": "User",
-    "roleAssistant": "Assistant"
+    "roleAssistant": "Assistant",
+    "autoContinue": "Continue"
   },
   "report": {
     "tabReport": "Research report",

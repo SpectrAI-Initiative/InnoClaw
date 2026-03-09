@@ -100,13 +100,20 @@ export async function POST(req: NextRequest) {
       uiMessages as UIMessage[]
     );
 
+    const DEFAULT_MAX_STEPS = 10;
+    const MAX_STEPS_UPPER_BOUND = 100;
+    const parsedSteps = parseInt(process.env.AGENT_MAX_STEPS || "", 10);
+    const maxSteps = Number.isFinite(parsedSteps) && parsedSteps > 0
+      ? Math.min(parsedSteps, MAX_STEPS_UPPER_BOUND)
+      : DEFAULT_MAX_STEPS;
+
     const result = streamText({
       model,
       system: systemPrompt,
       messages: modelMessages,
       tools,
       abortSignal: req.signal,
-      stopWhen: stepCountIs(10),
+      stopWhen: stepCountIs(maxSteps),
       onError({ error }) {
         console.error("Agent stream error:", error);
       },
