@@ -1,6 +1,6 @@
 # Deployment
 
-This guide covers deploying NotebookLM in production environments.
+This guide covers deploying VibeLab in production environments.
 
 ## Deployment Architecture
 
@@ -14,8 +14,8 @@ graph TB
 
     subgraph Host["Production Server"]
         Proxy["Reverse Proxy<br/>(Nginx / Caddy)"]
-        App["NotebookLM<br/>(Next.js)"]
-        SQLite["SQLite DB<br/>./data/notebooklm.db"]
+        App["VibeLab<br/>(Next.js)"]
+        SQLite["SQLite DB<br/>./data/vibelab.db"]
         Workspace["Workspace Files<br/>WORKSPACE_ROOTS"]
     end
 
@@ -69,13 +69,13 @@ npm install -g pm2
 
 # Build and start
 npm run build
-pm2 start npm --name "notebooklm" -- start
+pm2 start npm --name "vibelab" -- start
 
 # Check status
 pm2 status
 
 # View logs
-pm2 logs notebooklm
+pm2 logs vibelab
 
 # Enable auto-start on boot
 pm2 startup
@@ -117,7 +117,7 @@ Create a `docker-compose.yml`:
 ```yaml
 version: '3.8'
 services:
-  notebooklm:
+  vibelab:
     build: .
     ports:
       - "3000:3000"
@@ -175,7 +175,7 @@ your-domain.com {
 
 | Data | Location | Description |
 |------|----------|-------------|
-| SQLite Database | `./data/notebooklm.db` | Workspaces, source index, chat history, notes, settings |
+| SQLite Database | `./data/vibelab.db` | Workspaces, source index, chat history, notes, settings |
 | Workspace Files | `WORKSPACE_ROOTS` directories | User's actual files (outside the project directory) |
 | Configuration | `.env.local` | Environment variables and API keys |
 

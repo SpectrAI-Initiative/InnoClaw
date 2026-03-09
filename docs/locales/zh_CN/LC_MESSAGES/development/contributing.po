@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, NotebookLM Contributors
-# This file is distributed under the same license as the NotebookLM package.
+# Copyright (C) 2025, VibeLab Contributors
+# This file is distributed under the same license as the VibeLab package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NotebookLM \n"
+"Project-Id-Version: VibeLab \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -25,9 +25,9 @@ msgstr "贡献指南"
 
 #: ../../development/contributing.md:3 6736fb2430344dd591e56e9274a0beca
 msgid ""
-"Thank you for your interest in contributing to NotebookLM! This guide "
+"Thank you for your interest in contributing to VibeLab! This guide "
 "explains how to get involved."
-msgstr "感谢您有兴趣为 NotebookLM 做出贡献！本指南介绍如何参与。"
+msgstr "感谢您有兴趣为 VibeLab 做出贡献！本指南介绍如何参与。"
 
 #: ../../development/contributing.md:5 a58734115662459faf001650cd5f1343
 msgid "Getting Started"

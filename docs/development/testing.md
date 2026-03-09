@@ -1,10 +1,10 @@
 # Testing
 
-This guide covers how to write and run tests for NotebookLM.
+This guide covers how to write and run tests for VibeLab.
 
 ## Test Framework
 
-NotebookLM uses [Vitest](https://vitest.dev/) (v4+) as its test framework, configured in `vitest.config.ts`.
+VibeLab uses [Vitest](https://vitest.dev/) (v4+) as its test framework, configured in `vitest.config.ts`.
 
 ### Configuration
 

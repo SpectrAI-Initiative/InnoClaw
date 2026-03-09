@@ -2,7 +2,7 @@
 
 ## Frequently Asked Questions
 
-### Can I use NotebookLM without an API key?
+### Can I use VibeLab without an API key?
 
 **Yes.** Workspace management, file browsing, uploading, editing, and GitHub cloning features work without any API key. Only AI chat and note generation features require an API key. The UI will display a prompt indicating that AI features are unavailable.
 
@@ -35,7 +35,7 @@ EMBEDDING_MODEL=text-embedding-3-small
 
 The first sync processes all files (extract text → chunk → generate embeddings), which depends on the number and size of files. Subsequent syncs only process new or modified files (based on file hash comparison), making them significantly faster.
 
-### Can I run NotebookLM on Linux?
+### Can I run VibeLab on Linux?
 
 **Yes.** Set `WORKSPACE_ROOTS` to Linux paths:
 
@@ -54,7 +54,7 @@ WORKSPACE_ROOTS=/home/user/research,/home/user/projects
 
 ```bash
 # Remove the database file
-rm ./data/notebooklm.db
+rm ./data/vibelab.db
 
 # Re-run migrations
 npx drizzle-kit migrate
@@ -68,7 +68,7 @@ Back up the following:
 
 | Item | Location |
 |------|----------|
-| Database | `./data/notebooklm.db` |
+| Database | `./data/vibelab.db` |
 | Configuration | `.env.local` |
 | Workspace files | Directories listed in `WORKSPACE_ROOTS` |
 

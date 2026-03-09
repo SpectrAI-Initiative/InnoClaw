@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-const STORAGE_KEY = "notebooklm-minimal-mode";
+const STORAGE_KEY = "vibelab-minimal-mode";
 
 export function useMinimalMode() {
   const [isMinimal, setIsMinimal] = useState(false);

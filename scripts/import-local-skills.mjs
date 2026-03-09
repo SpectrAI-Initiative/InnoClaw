@@ -13,7 +13,7 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 const SKILLS_DIR = path.join(PROJECT_ROOT, ".claude", "skills");
-const DB_PATH = path.join(PROJECT_ROOT, "data", "notebooklm.db");
+const DB_PATH = path.join(PROJECT_ROOT, "data", "vibelab.db");
 
 // Load SCP_HUB_API_KEY from .env.local
 function loadEnv() {

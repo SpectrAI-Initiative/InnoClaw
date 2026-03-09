@@ -1,6 +1,6 @@
 # Installation
 
-This guide walks you through setting up NotebookLM locally for development or self-hosting.
+This guide walks you through setting up VibeLab locally for development or self-hosting.
 
 ## Prerequisites
 
@@ -82,7 +82,7 @@ Run the database migration to create the SQLite database:
 npx drizzle-kit migrate
 ```
 
-This creates the database file at `./data/notebooklm.db` with all required tables.
+This creates the database file at `./data/vibelab.db` with all required tables.
 
 ## Step 6: Start the Development Server
 
@@ -90,7 +90,7 @@ This creates the database file at `./data/notebooklm.db` with all required table
 npm run dev
 ```
 
-Open your browser and navigate to **http://localhost:3000** to start using NotebookLM.
+Open your browser and navigate to **http://localhost:3000** to start using VibeLab.
 
 ## Verifying Your Setup
 

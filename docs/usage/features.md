@@ -1,6 +1,6 @@
 # Core Features
 
-NotebookLM provides a rich set of features for AI-powered research and file management.
+VibeLab provides a rich set of features for AI-powered research and file management.
 
 ## Workspace Management
 

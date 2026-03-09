@@ -1,6 +1,6 @@
 # Configuration
 
-This page describes how to customize NotebookLM's behavior through configuration options.
+This page describes how to customize VibeLab's behavior through configuration options.
 
 ## Environment-Based Configuration
 
@@ -10,7 +10,7 @@ All configuration is done through environment variables in your `.env.local` fil
 
 ### Selecting a Provider
 
-NotebookLM supports multiple AI providers. Configure your preferred provider by setting the appropriate API key:
+VibeLab supports multiple AI providers. Configure your preferred provider by setting the appropriate API key:
 
 ```ini
 # Use OpenAI
@@ -75,22 +75,22 @@ WORKSPACE_ROOTS=/data/research,/data/projects,/home/user/documents
 
 ## Database Configuration
 
-NotebookLM uses SQLite with the database stored at `./data/notebooklm.db` by default. You can override this path via the `DATABASE_URL` environment variable:
+VibeLab uses SQLite with the database stored at `./data/vibelab.db` by default. You can override this path via the `DATABASE_URL` environment variable:
 
 ```ini
 # Plain filesystem path (no SQLite URI scheme)
-DATABASE_URL=/tmp/notebooklm/notebooklm.db
+DATABASE_URL=/tmp/vibelab/vibelab.db
 ```
 
 :::{note}
-Only plain filesystem paths are accepted (e.g. `/data/notebooklm.db`). SQLite connection strings like `file:./data/notebooklm.db?mode=rwc` are **not** supported — the `file:` prefix will be stripped automatically.
+Only plain filesystem paths are accepted (e.g. `/data/vibelab.db`). SQLite connection strings like `file:./data/vibelab.db?mode=rwc` are **not** supported — the `file:` prefix will be stripped automatically.
 :::
 
 To use a fresh database:
 
 ```bash
 # Remove existing database
-rm ./data/notebooklm.db
+rm ./data/vibelab.db
 
 # Re-run migrations
 npx drizzle-kit migrate

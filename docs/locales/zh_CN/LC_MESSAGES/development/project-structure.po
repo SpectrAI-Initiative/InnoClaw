@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, NotebookLM Contributors
-# This file is distributed under the same license as the NotebookLM package.
+# Copyright (C) 2025, VibeLab Contributors
+# This file is distributed under the same license as the VibeLab package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NotebookLM \n"
+"Project-Id-Version: VibeLab \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -26,8 +26,8 @@ msgstr "项目结构"
 #: ../../development/project-structure.md:3 9b518c762701422a959a9e61b2c9af59
 msgid ""
 "This page describes the directory layout and module organization of "
-"NotebookLM."
-msgstr "本页介绍 NotebookLM 的目录布局和模块组织。"
+"VibeLab."
+msgstr "本页介绍 VibeLab 的目录布局和模块组织。"
 
 #: ../../development/project-structure.md:5 0f470eed110549a991e32f9393b5919d
 msgid "High-Level Structure"

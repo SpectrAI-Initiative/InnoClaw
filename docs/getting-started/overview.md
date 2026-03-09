@@ -1,8 +1,8 @@
 # Overview
 
-## What is NotebookLM?
+## What is VibeLab?
 
-NotebookLM is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
+VibeLab is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
 
 ## Key Features
 
@@ -20,7 +20,7 @@ NotebookLM is an AI-powered research assistant web application similar to Google
 
 ## Architecture
 
-The following diagram shows the high-level architecture of NotebookLM:
+The following diagram shows the high-level architecture of VibeLab:
 
 ```{mermaid}
 graph TB
@@ -75,7 +75,7 @@ graph TB
 
 ## RAG Pipeline
 
-The core feature of NotebookLM is RAG-based AI chat. The pipeline works in three stages:
+The core feature of VibeLab is RAG-based AI chat. The pipeline works in three stages:
 
 ```{mermaid}
 flowchart LR

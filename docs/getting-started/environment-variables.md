@@ -1,6 +1,6 @@
 # Environment Variables
 
-A complete reference of all environment variables used by NotebookLM.
+A complete reference of all environment variables used by VibeLab.
 
 ## Core Configuration
 

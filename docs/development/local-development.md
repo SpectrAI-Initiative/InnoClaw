@@ -1,6 +1,6 @@
 # Local Development
 
-This guide covers running, debugging, and iterating on NotebookLM locally.
+This guide covers running, debugging, and iterating on VibeLab locally.
 
 ## Starting the Development Server
 

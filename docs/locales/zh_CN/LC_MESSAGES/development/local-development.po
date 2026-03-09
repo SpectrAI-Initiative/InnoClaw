@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, NotebookLM Contributors
-# This file is distributed under the same license as the NotebookLM package.
+# Copyright (C) 2025, VibeLab Contributors
+# This file is distributed under the same license as the VibeLab package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NotebookLM \n"
+"Project-Id-Version: VibeLab \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -24,8 +24,8 @@ msgid "Local Development"
 msgstr "本地开发"
 
 #: ../../development/local-development.md:3 4c40bd020cbf4d96a7805b0a270f728f
-msgid "This guide covers running, debugging, and iterating on NotebookLM locally."
-msgstr "本指南介绍如何在本地运行、调试和迭代 NotebookLM。"
+msgid "This guide covers running, debugging, and iterating on VibeLab locally."
+msgstr "本指南介绍如何在本地运行、调试和迭代 VibeLab。"
 
 #: ../../development/local-development.md:5 6c20a6efbad24cb4b78eded1310095a3
 msgid "Starting the Development Server"

@@ -29,7 +29,7 @@ export async function searchHuggingFace(
   try {
     response = await fetch(HF_API_URL, {
       headers: {
-        "User-Agent": "notebooklm-paper-study/1.0",
+        "User-Agent": "vibelab/1.0",
         Accept: "application/json",
       },
       signal: controller.signal,
