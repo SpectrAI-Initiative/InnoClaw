@@ -232,6 +232,7 @@
     "abstract": "Abstract",
     "errors": "Some sources had errors",
     "presetKeywords": "Quick tags",
+    "addKeyword": "Add",
     "titlePlaceholder": "Enter paper title to find...",
     "fetch": "Find",
     "fetching": "Finding...",

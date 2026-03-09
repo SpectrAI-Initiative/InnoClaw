@@ -235,6 +235,7 @@
     "abstract": "摘要",
     "errors": "部分来源出现错误",
     "presetKeywords": "快速标签",
+    "addKeyword": "添加",
     "titlePlaceholder": "输入论文标题查找...",
     "fetch": "查找",
     "fetching": "查找中...",
