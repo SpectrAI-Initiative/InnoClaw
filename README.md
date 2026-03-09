@@ -30,19 +30,42 @@ A self-hostable AI research assistant inspired by Google NotebookLM. Turn server
 
 ### 方式一：Claude Code 自动安装（推荐） / Auto Setup via Claude Code (Recommended)
 
-如果你已安装 [Claude Code](https://docs.anthropic.com/en/docs/claude-code)，只需 3 条命令即可完成全部配置：
+如果你已安装 [Claude Code](https://docs.anthropic.com/en/docs/claude-code)，按照以下步骤操作：
 
-If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed, just 3 commands to get everything configured:
+If you have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed, follow these steps:
+
+**第 1 步：克隆仓库 / Step 1: Clone the Repository**
 
 ```bash
 git clone https://github.com/zjowowen/InnoClaw.git
 cd InnoClaw
-claude /setup
 ```
 
-`/setup` 会交互式引导你完成：依赖安装 → 环境配置（工作空间路径、AI API Key 等）→ 数据库初始化 → 启动服务。
+**第 2 步：启动 Claude Code / Step 2: Launch Claude Code**
 
-The `/setup` skill interactively guides you through: dependency installation → environment configuration (workspace paths, AI API keys, etc.) → database initialization → server startup.
+```bash
+claude
+```
+
+**第 3 步：在 Claude Code 中运行安装向导 / Step 3: Run the Setup Wizard Inside Claude Code**
+
+在 Claude Code 交互界面中输入：
+
+Type the following in the Claude Code interactive prompt:
+
+```
+/project:setup
+```
+
+> **⚠️ 注意 / Note:**
+> - 请勿直接在终端运行 `claude /setup`，这会导致 `unknown skill` 错误。
+> - Do NOT run `claude /setup` directly in the terminal — this will cause an `unknown skill` error.
+> - 正确的做法是先用 `claude` 命令进入 Claude Code，再在其中输入 `/project:setup`。
+> - The correct approach is to first enter Claude Code with the `claude` command, then type `/project:setup` inside it.
+
+`/project:setup` 会交互式引导你完成：依赖安装 → 环境配置（工作空间路径、AI API Key 等）→ 数据库初始化 → 启动服务。
+
+The `/project:setup` command interactively guides you through: dependency installation → environment configuration (workspace paths, AI API keys, etc.) → database initialization → server startup.
 
 ### 方式二：手动安装 / Manual Setup
 
