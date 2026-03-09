@@ -128,7 +128,8 @@
     "memoryConfirm": "确认",
     "memoryError": "保存记忆失败",
     "roleUser": "用户",
-    "roleAssistant": "助手"
+    "roleAssistant": "助手",
+    "autoContinue": "继续"
   },
   "notes": {
     "title": "笔记",

@@ -27,7 +27,7 @@ export function Header({ onToggleMinimalMode, showMinimalToggle }: HeaderProps) 
       <div className="flex h-14 w-full items-center px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <BookOpen className="h-5 w-5" />
-          <span>Jarvis</span>
+          <span>NotebookLM</span>
         </Link>
         <div className="flex-1" />
         <div className="flex items-center gap-2">

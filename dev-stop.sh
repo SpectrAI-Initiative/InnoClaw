@@ -40,13 +40,16 @@ stopped=false
 # Try to stop by PID file first
 if [ -f .dev.pid ]; then
     PID=$(cat .dev.pid)
-    if ps -p $PID > /dev/null 2>&1; then
+    if ! echo "$PID" | grep -qE '^[0-9]+$'; then
+        echo "Invalid PID in .dev.pid, removing file"
+        rm -f .dev.pid
+    elif ps -p "$PID" > /dev/null 2>&1; then
         echo "Stopping dev server (PID: $PID)..."
-        kill $PID
+        kill "$PID"
         sleep 2
-        if ps -p $PID > /dev/null 2>&1; then
+        if ps -p "$PID" > /dev/null 2>&1; then
             echo "Force stopping..."
-            kill -9 $PID
+            kill -9 "$PID"
         fi
         stopped=true
         echo "Dev server stopped"

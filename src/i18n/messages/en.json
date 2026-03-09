@@ -128,7 +128,8 @@
     "memoryConfirm": "Confirm",
     "memoryError": "Failed to save memory",
     "roleUser": "User",
-    "roleAssistant": "Assistant"
+    "roleAssistant": "Assistant",
+    "autoContinue": "Continue"
   },
   "notes": {
     "title": "Notes",

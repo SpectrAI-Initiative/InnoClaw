@@ -8,7 +8,10 @@ PORT=3000
 # Check if already running
 if [ -f .dev.pid ]; then
     PID=$(cat .dev.pid)
-    if ps -p $PID > /dev/null 2>&1; then
+    if ! echo "$PID" | grep -qE '^[0-9]+$'; then
+        echo "Invalid PID in .dev.pid, removing file"
+        rm -f .dev.pid
+    elif ps -p "$PID" > /dev/null 2>&1; then
         echo "Dev server is already running (PID: $PID)"
         exit 1
     else
