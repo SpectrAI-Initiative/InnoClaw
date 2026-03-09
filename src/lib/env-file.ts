@@ -28,7 +28,7 @@ export function ensureEnvLocal(): void {
   } else {
     fs.writeFileSync(
       target,
-      "# VibeLab configuration – edit values as needed\n",
+      "# LabClaw configuration – edit values as needed\n",
       "utf-8",
     );
   }
