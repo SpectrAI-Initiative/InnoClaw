@@ -81,7 +81,7 @@ Run `npm install` in the project root. If it fails:
      - `K8S_PVC_USER` — PVC claim name for user storage
      - `K8S_PVC_AI4S_A2` — PVC claim name for AI4S-A2 storage
      - `K8S_MOUNT_USER` — Mount directory name under `/mnt/` (defaults to submitter name)
-   - Network proxy (`HTTP_PROXY`, `HTTPS_PROXY`) — Only if they are in an internal network
+   - Network proxy (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`) — Only if they are in an internal network
 
 3. Write the final `.env.local` file with all configured values. Comment out unused optional variables.
 
