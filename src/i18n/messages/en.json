@@ -235,7 +235,8 @@
     "dismiss": "Dismiss",
     "clearAll": "Clear All",
     "roleUser": "User",
-    "roleAssistant": "Assistant"
+    "roleAssistant": "Assistant",
+    "autoContinue": "Continue"
   },
   "report": {
     "tabReport": "Research report",
