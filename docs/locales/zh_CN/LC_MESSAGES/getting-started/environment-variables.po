@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, NotebookLM Contributors
-# This file is distributed under the same license as the NotebookLM package.
+# Copyright (C) 2025, VibeLab Contributors
+# This file is distributed under the same license as the VibeLab package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NotebookLM \n"
+"Project-Id-Version: VibeLab \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -26,8 +26,8 @@ msgstr "环境变量"
 
 #: ../../getting-started/environment-variables.md:3
 #: 7463ab386a16419fba7e9725549f92f6
-msgid "A complete reference of all environment variables used by NotebookLM."
-msgstr "NotebookLM 使用的所有环境变量的完整参考。"
+msgid "A complete reference of all environment variables used by VibeLab."
+msgstr "VibeLab 使用的所有环境变量的完整参考。"
 
 #: ../../getting-started/environment-variables.md:5
 #: 41b57512301049c7bdfd89a92d84d10c

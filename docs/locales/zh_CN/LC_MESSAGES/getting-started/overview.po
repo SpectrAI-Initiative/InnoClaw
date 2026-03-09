@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, NotebookLM Contributors
-# This file is distributed under the same license as the NotebookLM package.
+# Copyright (C) 2025, VibeLab Contributors
+# This file is distributed under the same license as the VibeLab package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NotebookLM \n"
+"Project-Id-Version: VibeLab \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -24,17 +24,17 @@ msgid "Overview"
 msgstr "概述"
 
 #: ../../getting-started/overview.md:3 66ced06868b442ebb38a0ed0b5959ac0
-msgid "What is NotebookLM?"
-msgstr "什么是 NotebookLM？"
+msgid "What is VibeLab?"
+msgstr "什么是 VibeLab？"
 
 #: ../../getting-started/overview.md:5 9078981815fa4a5199dcce75e48697ce
 msgid ""
-"NotebookLM is an AI-powered research assistant web application similar to"
+"VibeLab is an AI-powered research assistant web application similar to"
 " Google NotebookLM. It lets you open server-side folders as "
 "**workspaces**, browse and manage files, and chat with AI grounded in "
 "your workspace files via **RAG** (Retrieval-Augmented Generation)."
 msgstr ""
-"NotebookLM 是一个类似于 Google NotebookLM 的 AI 驱动的研究助手 Web "
+"VibeLab 是一个类似于 Google NotebookLM 的 AI 驱动的研究助手 Web "
 "应用程序。它允许您将服务器端文件夹作为**工作空间**打开，浏览和管理文件，并通过 **RAG**（检索增强生成）与基于工作空间文件的 AI "
 "进行对话。"
 
@@ -97,8 +97,8 @@ msgid "Architecture"
 msgstr "架构"
 
 #: ../../getting-started/overview.md:23 a0b08d4ae087467daf1f2eeeafa2cb5e
-msgid "The following diagram shows the high-level architecture of NotebookLM:"
-msgstr "下图展示了 NotebookLM 的高层架构："
+msgid "The following diagram shows the high-level architecture of VibeLab:"
+msgstr "下图展示了 VibeLab 的高层架构："
 
 #: ../../getting-started/overview.md:64 2b48b3653b8847428d6de32caa2eff76
 msgid "Tech Stack"
@@ -174,9 +174,9 @@ msgstr "RAG 流水线"
 
 #: ../../getting-started/overview.md:78 9fa7c3c5aaae4fc2b77bcbd759a67916
 msgid ""
-"The core feature of NotebookLM is RAG-based AI chat. The pipeline works "
+"The core feature of VibeLab is RAG-based AI chat. The pipeline works "
 "in three stages:"
-msgstr "NotebookLM 的核心功能是基于 RAG 的 AI 对话。流水线分为三个阶段："
+msgstr "VibeLab 的核心功能是基于 RAG 的 AI 对话。流水线分为三个阶段："
 
 #: ../../getting-started/overview.md:103 b85eac1ba9af438fb46c321400d49476
 msgid ""

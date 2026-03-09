@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, NotebookLM Contributors
-# This file is distributed under the same license as the NotebookLM package.
+# Copyright (C) 2025, VibeLab Contributors
+# This file is distributed under the same license as the VibeLab package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NotebookLM \n"
+"Project-Id-Version: VibeLab \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -25,9 +25,9 @@ msgstr "安装"
 
 #: ../../getting-started/installation.md:3 403fb892175a49fa9136a58ccd04035f
 msgid ""
-"This guide walks you through setting up NotebookLM locally for "
+"This guide walks you through setting up VibeLab locally for "
 "development or self-hosting."
-msgstr "本指南将引导您在本地搭建 NotebookLM，用于开发或自托管。"
+msgstr "本指南将引导您在本地搭建 VibeLab，用于开发或自托管。"
 
 #: ../../getting-started/installation.md:5 6a52d44d3c0346f3b900d0e2fb0aa90b
 msgid "Prerequisites"
@@ -165,9 +165,9 @@ msgstr "运行数据库迁移以创建 SQLite 数据库："
 
 #: ../../getting-started/installation.md:85 4dc8f4f4458a4056a601887d916fc621
 msgid ""
-"This creates the database file at `./data/notebooklm.db` with all "
+"This creates the database file at `./data/vibelab.db` with all "
 "required tables."
-msgstr "这将在 `./data/notebooklm.db` 创建包含所有必需表的数据库文件。"
+msgstr "这将在 `./data/vibelab.db` 创建包含所有必需表的数据库文件。"
 
 #: ../../getting-started/installation.md:87 279315102f4740e9b4fdf7ad5a21f964
 msgid "Step 6: Start the Development Server"
@@ -176,8 +176,8 @@ msgstr "步骤 6：启动开发服务器"
 #: ../../getting-started/installation.md:93 fe80a682196548b0a566cfe0d4eddb3a
 msgid ""
 "Open your browser and navigate to **http://localhost:3000** to start "
-"using NotebookLM."
-msgstr "打开浏览器并访问 **http://localhost:3000** 即可开始使用 NotebookLM。"
+"using VibeLab."
+msgstr "打开浏览器并访问 **http://localhost:3000** 即可开始使用 VibeLab。"
 
 #: ../../getting-started/installation.md:95 a3e8372124c140519ac535b368b7d8bd
 msgid "Verifying Your Setup"

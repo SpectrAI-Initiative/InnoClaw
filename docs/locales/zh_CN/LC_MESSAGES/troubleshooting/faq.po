@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, NotebookLM Contributors
-# This file is distributed under the same license as the NotebookLM package.
+# Copyright (C) 2025, VibeLab Contributors
+# This file is distributed under the same license as the VibeLab package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NotebookLM \n"
+"Project-Id-Version: VibeLab \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -28,8 +28,8 @@ msgid "Frequently Asked Questions"
 msgstr "常见问题"
 
 #: ../../troubleshooting/faq.md:5 94dd00828b0d485781203b844148ba3f
-msgid "Can I use NotebookLM without an API key?"
-msgstr "我可以在没有 API 密钥的情况下使用 NotebookLM 吗？"
+msgid "Can I use VibeLab without an API key?"
+msgstr "我可以在没有 API 密钥的情况下使用 VibeLab 吗？"
 
 #: ../../troubleshooting/faq.md:7 86d26dceca7742cdbe3ca02bc638c330
 msgid ""
@@ -114,8 +114,8 @@ msgstr ""
 "生成嵌入），速度取决于文件的数量和大小。后续同步仅处理新增或修改的文件（基于文件哈希比较），因此速度会显著加快。"
 
 #: ../../troubleshooting/faq.md:38 88fb965914a746139c22d89cc93ead01
-msgid "Can I run NotebookLM on Linux?"
-msgstr "我可以在 Linux 上运行 NotebookLM 吗？"
+msgid "Can I run VibeLab on Linux?"
+msgstr "我可以在 Linux 上运行 VibeLab 吗？"
 
 #: ../../troubleshooting/faq.md:40 2b04e709e199455e9dce5fbd1bf9af35
 msgid "**Yes.** Set `WORKSPACE_ROOTS` to Linux paths:"
@@ -172,8 +172,8 @@ msgid "Database"
 msgstr "数据库"
 
 #: ../../troubleshooting/faq.md ed0a5b751b2c4dd09a3b749cc7828339
-msgid "`./data/notebooklm.db`"
-msgstr "`./data/notebooklm.db`"
+msgid "`./data/vibelab.db`"
+msgstr "`./data/vibelab.db`"
 
 #: ../../troubleshooting/faq.md 334b174c74da42899690381a3ef0169c
 msgid "Configuration"

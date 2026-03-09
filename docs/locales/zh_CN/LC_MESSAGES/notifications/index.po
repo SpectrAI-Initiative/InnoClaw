@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2025, NotebookLM Contributors
-# This file is distributed under the same license as the NotebookLM package.
+# Copyright (C) 2025, VibeLab Contributors
+# This file is distributed under the same license as the VibeLab package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NotebookLM \n"
+"Project-Id-Version: VibeLab \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-03 12:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -25,10 +25,10 @@ msgstr "通知与机器人集成"
 
 #: ../../notifications/index.md:3 d810a647b5b842599c63da676c4f0723
 msgid ""
-"NotebookLM supports integration with messaging platforms through bot "
+"VibeLab supports integration with messaging platforms through bot "
 "adapters. This allows users to interact with their workspaces directly "
 "from chat applications."
-msgstr "NotebookLM 通过机器人适配器支持与消息平台的集成。这使用户可以直接从聊天应用程序与其工作空间进行交互。"
+msgstr "VibeLab 通过机器人适配器支持与消息平台的集成。这使用户可以直接从聊天应用程序与其工作空间进行交互。"
 
 #: ../../notifications/index.md:5 0c45d8f95e1c404eb1a3e9c04818f333
 msgid "Supported Channels"
