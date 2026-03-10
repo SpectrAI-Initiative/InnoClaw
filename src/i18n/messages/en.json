@@ -201,7 +201,8 @@
     "fontSizeReset": "Reset",
     "fontSizeValue": "{size}px",
     "fontFamily": "Font",
-    "fontFamilyDesc": "Choose the font family for the application"
+    "fontFamilyDesc": "Choose the font family for the application",
+    "fontFamilyReset": "Reset"
   },
   "terminal": {
     "title": "Terminal",
