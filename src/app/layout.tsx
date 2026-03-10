@@ -5,6 +5,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { buildFontInitScript } from "@/lib/font-constants";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,7 +36,7 @@ export default async function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=localStorage.getItem("innoclaw-font-size");if(s){var n=Number(s);if(n>=12&&n<=24)document.documentElement.style.fontSize=n+"px"}var f=localStorage.getItem("innoclaw-font-family");if(f&&f!=="geist"){var m={"system":"-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif","inter":"'Inter',sans-serif","noto-sans":"'Noto Sans','Noto Sans SC',sans-serif","roboto":"'Roboto',sans-serif","lato":"'Lato',sans-serif","source-han":"'Source Han Sans SC','Noto Sans SC',sans-serif"};var v=m[f];if(v){document.documentElement.style.setProperty("--font-override",v);var u={"inter":"Inter:wght@300;400;500;600;700","noto-sans":"Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700","roboto":"Roboto:wght@300;400;500;700","lato":"Lato:wght@300;400;700","source-han":"Noto+Sans+SC:wght@300;400;500;700"};if(u[f]){var l=document.createElement("link");l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family="+u[f]+"&display=swap";document.head.appendChild(l)}}}}catch(e){}})();`,
+            __html: buildFontInitScript(),
           }}
         />
       </head>

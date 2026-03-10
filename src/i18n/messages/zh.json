@@ -204,7 +204,8 @@
     "fontSizeReset": "重置",
     "fontSizeValue": "{size}px",
     "fontFamily": "字体",
-    "fontFamilyDesc": "选择应用的显示字体"
+    "fontFamilyDesc": "选择应用的显示字体",
+    "fontFamilyReset": "重置"
   },
   "terminal": {
     "title": "终端",

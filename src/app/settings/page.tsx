@@ -257,7 +257,7 @@ export default function SettingsPage() {
                   </Select>
                   <Button variant="ghost" size="sm" onClick={resetFont}>
                     <RotateCcw className="mr-1 h-3.5 w-3.5" />
-                    {t("fontSizeReset")}
+                    {t("fontFamilyReset")}
                   </Button>
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground" style={{ fontFamily: FONT_OPTIONS.find((f) => f.id === fontFamily)?.value }}>
