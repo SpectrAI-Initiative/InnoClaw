@@ -39,6 +39,7 @@ export function PaperStudyPanel({
 
   // Loading states
   const [isSearching, setIsSearching] = useState(false);
+  const [isAISearching, setIsAISearching] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -173,6 +174,70 @@ export function PaperStudyPanel({
     }
   }, [keywords, dateFrom, dateTo, sources, onArticleSelect]);
 
+  /** AI-powered search: expand keywords via LLM then search all sources. */
+  const handleAISearch = useCallback(async (question: string) => {
+    if (!question.trim()) return;
+
+    setIsAISearching(true);
+    setArticles([]);
+    setSummary("");
+    setSearchErrors(undefined);
+    setHasSearched(true);
+    setSelectedArticle(null);
+    setCheckedIds(new Set());
+    onArticleSelect(null);
+
+    try {
+      // Step 1: Expand query via AI
+      const expandRes = await fetch("/api/paper-study/expand-query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+
+      if (!expandRes.ok) {
+        const errData = await expandRes.json().catch(() => ({}));
+        throw new Error(errData.error || "Query expansion failed");
+      }
+
+      const { keywords: expandedKeywords } = await expandRes.json();
+
+      // Update keywords in the UI so user can see what the AI produced
+      setKeywords(expandedKeywords);
+
+      // Step 2: Search all sources with expanded keywords
+      const allSources: ArticleSource[] = ["arxiv", "huggingface", "semantic-scholar"];
+      setSources(allSources);
+
+      const searchRes = await fetch("/api/paper-study/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          keywords: expandedKeywords,
+          dateFrom: dateFrom || undefined,
+          dateTo: dateTo || undefined,
+          sources: allSources,
+          maxResults: 10,
+        }),
+      });
+
+      if (!searchRes.ok) {
+        const data = await searchRes.json().catch(() => ({}));
+        throw new Error(data.error || `Search failed (${searchRes.status})`);
+      }
+
+      const result = await searchRes.json();
+      setArticles(result.articles || []);
+      setSearchErrors(result.errors);
+    } catch (error) {
+      setSearchErrors({
+        aiSearch: error instanceof Error ? error.message : "AI search failed",
+      });
+    } finally {
+      setIsAISearching(false);
+    }
+  }, [dateFrom, dateTo, onArticleSelect]);
+
   /** Fetch articles by title/URL/ID, show candidates for user to select. */
   const handleFetchTitle = useCallback(async (title: string) => {
     setIsFetching(true);
@@ -251,8 +316,10 @@ export function PaperStudyPanel({
         sources={sources}
         onSourcesChange={setSources}
         onSearch={handleSearch}
+        onAISearch={handleAISearch}
         onFetchTitle={handleFetchTitle}
         isSearching={isSearching}
+        isAISearching={isAISearching}
         isFetching={isFetching}
       />
 

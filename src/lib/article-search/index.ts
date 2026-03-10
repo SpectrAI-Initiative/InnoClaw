@@ -8,6 +8,7 @@
 import type { Article, SearchParams, SearchResult } from "./types";
 import { searchArxiv } from "./arxiv";
 import { searchHuggingFace } from "./huggingface";
+import { searchSemanticScholar } from "./semantic-scholar";
 import { SearchCache } from "./cache";
 
 export type { Article, SearchParams, SearchResult, ArticleSource } from "./types";
@@ -43,8 +44,12 @@ export async function searchArticles(
       let articles: Article[];
       if (source === "arxiv") {
         articles = await searchArxiv(params);
-      } else {
+      } else if (source === "huggingface") {
         articles = await searchHuggingFace(params);
+      } else if (source === "semantic-scholar") {
+        articles = await searchSemanticScholar(params);
+      } else {
+        articles = [];
       }
       cache.set(cacheKey, articles);
       return { source, articles };

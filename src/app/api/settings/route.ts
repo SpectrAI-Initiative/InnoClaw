@@ -44,6 +44,7 @@ export async function GET() {
         !!process.env.WECHAT_TOKEN &&
         !!process.env.WECHAT_ENCODING_AES_KEY &&
         !!process.env.WECHAT_AGENT_ID,
+      styleTheme: settingsMap["style_theme"] || "default",
     });
   } catch (error) {
     const message =

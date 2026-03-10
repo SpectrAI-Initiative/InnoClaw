@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     const validSources: ArticleSource[] | undefined = Array.isArray(sources)
       ? sources.filter(
-          (s: unknown): s is ArticleSource => s === "arxiv" || s === "huggingface"
+          (s: unknown): s is ArticleSource => s === "arxiv" || s === "huggingface" || s === "semantic-scholar"
         )
       : undefined;
 
