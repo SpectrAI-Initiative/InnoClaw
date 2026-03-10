@@ -26,6 +26,15 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { FileEntry } from "@/types";
@@ -129,6 +138,7 @@ function TreeNode({
   const [renaming, setRenaming] = useState(false);
   const [newName, setNewName] = useState(entry.name);
   const [dragOver, setDragOver] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const clipboard = useClipboard();
 
@@ -231,7 +241,6 @@ function TreeNode({
   };
 
   const handleDelete = async () => {
-    if (!confirm(t("deleteConfirm", { name: entry.name }))) return;
     try {
       await fetch("/api/files/delete", {
         method: "POST",
@@ -241,6 +250,8 @@ function TreeNode({
       onRefresh();
     } catch {
       toast.error("Failed to delete");
+    } finally {
+      setConfirmingDelete(false);
     }
   };
 
@@ -481,13 +492,33 @@ function TreeNode({
           <ContextMenuSeparator />
           <ContextMenuItem
             className="text-destructive"
-            onClick={handleDelete}
+            onClick={() => setConfirmingDelete(true)}
           >
             <Trash2 className="mr-2 h-4 w-4" />
             {t("delete")}
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
+
+      {/* Delete confirmation dialog — must be outside ContextMenu */}
+      <Dialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{t("delete")}</DialogTitle>
+            <DialogDescription>
+              {t("deleteConfirm", { name: entry.name })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setConfirmingDelete(false)}>
+              {tCommon("cancel")}
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              {t("delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {expanded && isDirectory && (
         <div>
