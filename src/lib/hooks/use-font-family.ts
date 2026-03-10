@@ -49,16 +49,29 @@ export function useFontFamily() {
   const [fontFamily, setFontFamily] = useState<FontId>(DEFAULT_FONT);
 
   useEffect(() => {
-    const stored = localStorage.getItem(FONT_FAMILY_KEY) as FontId | null;
-    if (stored && FONT_OPTIONS.some((f) => f.id === stored)) {
-      setFontFamily(stored);
-      applyFont(stored);
+    try {
+      if (typeof window === "undefined" || !window.localStorage) {
+        return;
+      }
+      const stored = window.localStorage.getItem(FONT_FAMILY_KEY) as FontId | null;
+      if (stored && FONT_OPTIONS.some((f) => f.id === stored)) {
+        setFontFamily(stored);
+        applyFont(stored);
+      }
+    } catch {
+      // Ignore storage errors and fall back to default font
     }
   }, []);
 
   const updateFontFamily = useCallback((id: FontId) => {
     setFontFamily(id);
-    localStorage.setItem(FONT_FAMILY_KEY, id);
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem(FONT_FAMILY_KEY, id);
+      }
+    } catch {
+      // Ignore storage errors; font will still be applied for this session
+    }
     applyFont(id);
   }, []);
 
