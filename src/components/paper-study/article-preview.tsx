@@ -43,7 +43,6 @@ interface ArticlePreviewProps {
 
 export function ArticlePreview({
   article,
-  workspaceId,
   onClose,
   notesDir = "",
   onSetNotesDir,
