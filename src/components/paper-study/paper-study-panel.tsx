@@ -169,6 +169,10 @@ export function PaperStudyPanel({
         papersToRoast = articles.filter(
           (a) => checkedIds.has(`${a.source}-${a.id}`)
         );
+      } else if (articles.length > 0) {
+        // Articles already loaded (from a previous search) — roast them all
+        papersToRoast = articles;
+        setCheckedIds(new Set(articles.map((a) => `${a.source}-${a.id}`)));
       } else {
         // Auto-search: use keywords if set, otherwise fetch all HF daily papers
         const today = new Date().toISOString().slice(0, 10);

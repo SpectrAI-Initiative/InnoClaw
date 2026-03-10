@@ -16,11 +16,11 @@ const S2_API_URL = "https://api.semanticscholar.org/graph/v1/paper/search";
 /** Request timeout in milliseconds. */
 const TIMEOUT_MS = 15_000;
 
-/** Max retries on 429 rate-limit responses. */
-const MAX_RETRIES = 2;
+/** Max retries on transient errors (429, 5xx, network). */
+const MAX_RETRIES = 3;
 
-/** Base delay (ms) before retrying after a 429. Doubles on each retry. */
-const RETRY_BASE_DELAY_MS = 2_000;
+/** Base delay (ms) before retrying. Doubles on each retry. */
+const RETRY_BASE_DELAY_MS = 3_000;
 
 /** Fields to request from the API. */
 const FIELDS = "paperId,title,abstract,authors,year,externalIds,url,openAccessPdf";
@@ -75,20 +75,31 @@ export async function searchSemanticScholar(
     } catch (err) {
       clearTimeout(timer);
       if (err instanceof DOMException && err.name === "AbortError") {
-        throw new Error("Semantic Scholar API request timed out");
+        lastError = new Error("Semantic Scholar API request timed out");
+      } else {
+        lastError = new Error(
+          `Semantic Scholar API network error: ${err instanceof Error ? err.message : String(err)}`
+        );
       }
-      throw new Error(
-        `Semantic Scholar API network error: ${err instanceof Error ? err.message : String(err)}`
-      );
+      // Retry on transient network errors
+      if (attempt < MAX_RETRIES) {
+        await new Promise((r) => setTimeout(r, RETRY_BASE_DELAY_MS * Math.pow(2, attempt)));
+        continue;
+      }
+      throw lastError;
     } finally {
       clearTimeout(timer);
     }
 
-    if (response.status === 429 && attempt < MAX_RETRIES) {
-      // Rate-limited — wait with exponential backoff then retry
+    // Retry on rate-limit (429) and server errors (5xx)
+    if ((response.status === 429 || response.status >= 500) && attempt < MAX_RETRIES) {
       const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
       await new Promise((r) => setTimeout(r, delay));
-      lastError = new Error("Semantic Scholar API rate limited (429)");
+      lastError = new Error(
+        response.status === 429
+          ? "Semantic Scholar API rate limited (429)"
+          : `Semantic Scholar API server error (${response.status})`
+      );
       response = undefined;
       continue;
     }
