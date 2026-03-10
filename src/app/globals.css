@@ -1408,6 +1408,21 @@
   animation: breathe 3s infinite ease-in-out;
 }
 
+/* Breathing effect for agent panel title when agent is working */
+@keyframes title-breathe {
+  0%, 100% {
+    opacity: 0.7;
+    text-shadow: 0 0 4px rgba(139, 92, 246, 0.0);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+  }
+}
+.animate-title-breathe {
+  animation: title-breathe 2s infinite ease-in-out;
+}
+
 /* Cyber button styles */
 .cyber-btn {
   position: relative;
