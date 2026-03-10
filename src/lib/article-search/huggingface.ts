@@ -7,10 +7,26 @@
 
 import type { Article, SearchParams } from "./types";
 
-const HF_API_URL = "https://huggingface.co/api/daily_papers";
+const HF_DEFAULT_URL = "https://huggingface.co/api/daily_papers";
+
+/**
+ * Resolve the Hugging Face API URL.
+ * If `HF_MIRROR` is set (e.g. `https://hf-mirror.com`), the daily-papers
+ * endpoint is derived from it automatically.
+ */
+function getHfApiUrl(): string {
+  const mirror = process.env.HF_MIRROR?.replace(/\/+$/, "");
+  if (mirror) {
+    return `${mirror}/api/daily_papers`;
+  }
+  return HF_DEFAULT_URL;
+}
 
 /** Request timeout in milliseconds. */
 const TIMEOUT_MS = 15_000;
+
+/** Maximum number of retry attempts for transient network errors. */
+const MAX_RETRIES = 1;
 
 /**
  * Fetch daily papers from Hugging Face and filter by keywords and date.
@@ -20,36 +36,68 @@ export async function searchHuggingFace(
 ): Promise<Article[]> {
   const { keywords, maxResults = 10, dateFrom, dateTo } = params;
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const apiUrl = getHfApiUrl();
+  let lastError: Error | undefined;
 
-  let response: Response;
-  try {
-    response = await fetch(HF_API_URL, {
-      headers: {
-        "User-Agent": "innoclaw/1.0",
-        Accept: "application/json",
-      },
-      signal: controller.signal,
-    });
-  } catch (err) {
-    if (err instanceof DOMException && err.name === "AbortError") {
-      throw new Error("Hugging Face API request timed out");
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+    let response: Response;
+    try {
+      response = await fetch(apiUrl, {
+        headers: {
+          "User-Agent": "innoclaw/1.0",
+          Accept: "application/json",
+        },
+        signal: controller.signal,
+      });
+    } catch (err) {
+      clearTimeout(timer);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        lastError = new Error("Hugging Face API request timed out");
+      } else {
+        lastError = new Error(
+          `Hugging Face API network error: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+      // Retry on transient network errors
+      if (attempt < MAX_RETRIES) {
+        await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        continue;
+      }
+      throw lastError;
+    } finally {
+      clearTimeout(timer);
     }
-    throw new Error(
-      `Hugging Face API network error: ${err instanceof Error ? err.message : String(err)}`
-    );
-  } finally {
-    clearTimeout(timer);
+
+    if (!response.ok) {
+      lastError = new Error(
+        `Hugging Face API error: ${response.status} ${response.statusText}`
+      );
+      // Retry on server errors (5xx)
+      if (response.status >= 500 && attempt < MAX_RETRIES) {
+        await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        continue;
+      }
+      throw lastError;
+    }
+
+    const data: HFPaper[] = await response.json();
+    return filterAndMap(data, keywords, maxResults, dateFrom, dateTo);
   }
 
-  if (!response.ok) {
-    throw new Error(
-      `Hugging Face API error: ${response.status} ${response.statusText}`
-    );
-  }
+  throw lastError ?? new Error("Hugging Face API request failed");
+}
 
-  const data: HFPaper[] = await response.json();
+/** Filter HF papers by keywords and date, then map to Article[]. */
+function filterAndMap(
+  data: HFPaper[],
+  keywords: string[],
+  maxResults: number,
+  dateFrom?: string,
+  dateTo?: string,
+): Article[] {
 
   // Filter by keywords if provided (case-insensitive, match title or abstract)
   // When no keywords, return all daily papers

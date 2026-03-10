@@ -43,11 +43,18 @@ async function respectRateLimit(): Promise<void> {
 /**
  * Build the arXiv query string from keywords.
  * Combines keywords with AND for the "all" field search.
- * Each keyword is URL-encoded to handle spaces and special characters.
+ * Multi-word keywords are wrapped in quotes for phrase matching.
  */
 function buildQuery(keywords: string[]): string {
-  const terms = keywords.map((kw) => `all:${encodeURIComponent(kw)}`);
-  return terms.join("+AND+");
+  const terms = keywords.map((kw) => {
+    const trimmed = kw.trim();
+    // Wrap multi-word keywords in double quotes so arXiv treats them as phrases
+    const quoted = trimmed.includes(" ")
+      ? `"${trimmed}"`
+      : trimmed;
+    return `all:${encodeURIComponent(quoted)}`;
+  });
+  return terms.join("+OR+");
 }
 
 /**
