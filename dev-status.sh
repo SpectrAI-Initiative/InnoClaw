@@ -1,11 +1,15 @@
 #!/bin/bash
 
-# NotebookLM Dev Status Script
+# Jarvis Dev Status Script
 cd "$(dirname "$0")"
 
 if [ -f .dev.pid ]; then
     PID=$(cat .dev.pid)
-    if ps -p $PID > /dev/null 2>&1; then
+    if ! echo "$PID" | grep -qE '^[0-9]+$'; then
+        echo "Invalid PID in .dev.pid, removing file"
+        rm -f .dev.pid
+        echo "Dev server is not running"
+    elif ps -p "$PID" > /dev/null 2>&1; then
         echo "Dev server is running (PID: $PID)"
         echo "URL: http://localhost:3000"
         echo ""
