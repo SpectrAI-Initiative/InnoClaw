@@ -51,11 +51,11 @@ jobs:
           <html>
             <head>
               <meta charset="utf-8">
-              <meta http-equiv="refresh" content="0; url=en/">
+              <meta http-equiv="refresh" content="0; url=zh/">
               <title>Redirecting...</title>
             </head>
             <body>
-              <p>Redirecting to <a href="en/">English documentation</a>...</p>
+              <p>Redirecting to <a href="zh/">中文文档</a>... | <a href="en/">English</a></p>
             </body>
           </html>
           EOF

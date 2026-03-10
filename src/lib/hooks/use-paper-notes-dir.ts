@@ -1,19 +1,16 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 
 const STORAGE_KEY = "paperStudy.notesDir";
 
-export function usePaperNotesDir() {
-  const [notesDir, setNotesDirState] = useState("");
+function getStoredNotesDir(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(STORAGE_KEY) || "";
+}
 
-  // Read from localStorage after mount to avoid SSR hydration mismatch
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY) || "";
-    if (saved) {
-      setNotesDirState(saved);
-    }
-  }, []);
+export function usePaperNotesDir() {
+  const [notesDir, setNotesDirState] = useState(getStoredNotesDir);
 
   const setNotesDir = useCallback((dir: string) => {
     const trimmed = dir.trim();

@@ -1,1 +1,20 @@
 /* Custom styles for InnoClaw documentation */
+
+/* Make the language switcher more prominent in the nav bar */
+.nav-languages button span.md\:hidden {
+  display: inline !important;
+  font-weight: 500;
+}
+
+.nav-languages button {
+  border: 1px solid var(--sy-c-divider);
+  border-radius: 6px;
+  padding: 4px 10px;
+  gap: 6px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.nav-languages button:hover {
+  border-color: var(--sy-c-link);
+  background-color: var(--sy-c-bg-mute);
+}
