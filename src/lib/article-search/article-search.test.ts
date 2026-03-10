@@ -107,6 +107,7 @@ describe("arxiv", () => {
 describe("huggingface", () => {
   beforeEach(() => {
     mockFetch.mockReset();
+    vi.stubGlobal("fetch", mockFetch);
     vi.resetModules();
   });
 
