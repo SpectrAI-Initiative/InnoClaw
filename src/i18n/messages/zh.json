@@ -204,7 +204,14 @@
     "styleTheme_default": "默认",
     "styleTheme_cartoon": "卡通",
     "styleTheme_cyberpunk": "赛博像素",
-    "styleTheme_retro": "复古掌机"
+    "styleTheme_retro": "复古掌机",
+    "fontSize": "字号",
+    "fontSizeDesc": "调整整个应用的基准字号大小",
+    "fontSizeReset": "重置",
+    "fontSizeValue": "{size}px",
+    "fontFamily": "字体",
+    "fontFamilyDesc": "选择应用的显示字体",
+    "fontFamilyReset": "重置"
   },
   "terminal": {
     "title": "终端",

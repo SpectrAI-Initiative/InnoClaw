@@ -26,6 +26,15 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { FileEntry } from "@/types";
@@ -129,6 +138,7 @@ function TreeNode({
   const [renaming, setRenaming] = useState(false);
   const [newName, setNewName] = useState(entry.name);
   const [dragOver, setDragOver] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const clipboard = useClipboard();
 
@@ -231,7 +241,6 @@ function TreeNode({
   };
 
   const handleDelete = async () => {
-    if (!confirm(t("deleteConfirm", { name: entry.name }))) return;
     try {
       await fetch("/api/files/delete", {
         method: "POST",
@@ -241,6 +250,8 @@ function TreeNode({
       onRefresh();
     } catch {
       toast.error("Failed to delete");
+    } finally {
+      setConfirmingDelete(false);
     }
   };
 
@@ -394,9 +405,9 @@ function TreeNode({
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div
-            className={`flex cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1.5 text-sm hover:bg-accent min-w-0 ${
-              isSelected ? "bg-accent" : ""
-            } ${dragOver ? "bg-accent/60 ring-1 ring-primary" : ""}`}
+            className={`flex cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1.5 text-sm hover:bg-muted min-w-0 ${
+              isSelected ? "bg-primary/10 text-primary" : ""
+            } ${dragOver ? "bg-primary/10 ring-1 ring-primary" : ""}`}
             style={{ paddingLeft: `${depth * 16 + 8}px` }}
             onClick={handleClick}
             tabIndex={0}
@@ -481,13 +492,35 @@ function TreeNode({
           <ContextMenuSeparator />
           <ContextMenuItem
             className="text-destructive"
-            onClick={handleDelete}
+            onClick={() => setConfirmingDelete(true)}
           >
             <Trash2 className="mr-2 h-4 w-4" />
             {t("delete")}
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
+
+      {/* Delete confirmation dialog — must be outside ContextMenu */}
+      <Dialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{t("delete")}</DialogTitle>
+            <DialogDescription>
+              {isDirectory
+                ? t("deleteConfirmDir", { name: entry.name })
+                : t("deleteConfirm", { name: entry.name })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setConfirmingDelete(false)}>
+              {tCommon("cancel")}
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              {t("delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {expanded && isDirectory && (
         <div>

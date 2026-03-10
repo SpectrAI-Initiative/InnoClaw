@@ -201,7 +201,14 @@
     "styleTheme_default": "Default",
     "styleTheme_cartoon": "Cartoon",
     "styleTheme_cyberpunk": "Cyberpunk Pixel",
-    "styleTheme_retro": "Retro Handheld"
+    "styleTheme_retro": "Retro Handheld",
+    "fontSize": "Font Size",
+    "fontSizeDesc": "Adjust the base font size for the entire application",
+    "fontSizeReset": "Reset",
+    "fontSizeValue": "{size}px",
+    "fontFamily": "Font",
+    "fontFamilyDesc": "Choose the font family for the application",
+    "fontFamilyReset": "Reset"
   },
   "terminal": {
     "title": "Terminal",

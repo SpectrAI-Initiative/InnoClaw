@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Article } from "@/lib/article-search/types";
 
 const ARXIV_API_URL = "https://export.arxiv.org/api/query";
+const HF_API_URL = "https://huggingface.co/api/daily_papers";
 
 /** Common English stopwords to filter out from AND queries. */
 const STOPWORDS = new Set([
@@ -106,13 +107,31 @@ function getSignificantWords(title: string): string[] {
 }
 
 /**
+ * Compute a simple relevance score between query words and text.
+ * Returns a value between 0 and 1 based on word overlap.
+ */
+function computeRelevance(queryWords: string[], text: string): number {
+  const textWords = new Set(getSignificantWords(text));
+  if (textWords.size === 0 || queryWords.length === 0) return 0;
+  let matches = 0;
+  for (const w of queryWords) {
+    if (textWords.has(w)) matches++;
+  }
+  return matches / queryWords.length;
+}
+
+/**
  * Search arXiv by paper title and return candidate matches.
  *
  * Strategy:
  * 1. Exact phrase search: ti:"full title" — best for known titles
- * 2. AND keyword search: ti:word1 AND ti:word2 AND ... — fallback for partial titles
+ * 2. OR keyword search on title: ti:word1 OR ti:word2 — fuzzy title match
+ * 3. OR keyword search on all fields: all:word1 OR all:word2 — broadest search
+ * Results are sorted by relevance (word overlap) then by recency.
  */
 async function searchArxivByTitle(title: string): Promise<Article[]> {
+  const words = getSignificantWords(title);
+
   // --- Pass 1: exact phrase match ---
   const quotedQuery = `ti:"${title}"`;
   const url1 = `${ARXIV_API_URL}?search_query=${encodeURIComponent(quotedQuery)}&start=0&max_results=5&sortBy=relevance&sortOrder=descending`;
@@ -124,30 +143,172 @@ async function searchArxivByTitle(title: string): Promise<Article[]> {
     if (articles1.length > 0) return articles1;
   }
 
-  // --- Pass 2: AND of significant words ---
-  const words = getSignificantWords(title);
   if (words.length === 0) return [];
 
-  const andQuery = words.map((w) => `ti:${w}`).join("+AND+");
-  const url2 = `${ARXIV_API_URL}?search_query=${andQuery}&start=0&max_results=10&sortBy=relevance&sortOrder=descending`;
+  // --- Pass 2: OR of significant words on title ---
+  const orTitleQuery = words.map((w) => `ti:${w}`).join("+OR+");
+  const url2 = `${ARXIV_API_URL}?search_query=${orTitleQuery}&start=0&max_results=20&sortBy=relevance&sortOrder=descending`;
 
   const res2 = await fetch(url2);
-  if (!res2.ok) return [];
+  let titleResults: Article[] = [];
+  if (res2.ok) {
+    const xml2 = await res2.text();
+    titleResults = parseEntries(xml2);
+  }
 
-  const xml2 = await res2.text();
-  const articles2 = parseEntries(xml2);
+  // --- Pass 3: OR of significant words on all fields (title + abstract + authors) ---
+  const orAllQuery = words.map((w) => `all:${w}`).join("+OR+");
+  const url3 = `${ARXIV_API_URL}?search_query=${orAllQuery}&start=0&max_results=15&sortBy=relevance&sortOrder=descending`;
 
-  if (articles2.length === 0) return [];
+  const res3 = await fetch(url3);
+  let allResults: Article[] = [];
+  if (res3.ok) {
+    const xml3 = await res3.text();
+    allResults = parseEntries(xml3);
+  }
 
-  // Sort: exact title match first, then by relevance (API order)
+  // Merge and deduplicate
+  const seen = new Set<string>();
+  const merged: Article[] = [];
+  for (const a of [...titleResults, ...allResults]) {
+    if (!seen.has(a.id)) {
+      seen.add(a.id);
+      merged.push(a);
+    }
+  }
+
+  if (merged.length === 0) return [];
+
+  // Sort by relevance (word overlap with title+abstract) descending, then by date (newest first)
   const lowerInput = title.toLowerCase().replace(/\s+/g, " ").trim();
-  articles2.sort((a, b) => {
-    const aExact = a.title.toLowerCase().replace(/\s+/g, " ").trim() === lowerInput ? 0 : 1;
-    const bExact = b.title.toLowerCase().replace(/\s+/g, " ").trim() === lowerInput ? 0 : 1;
-    return aExact - bExact;
+  merged.sort((a, b) => {
+    // Exact title match always comes first
+    const aExact = a.title.toLowerCase().replace(/\s+/g, " ").trim() === lowerInput ? 1 : 0;
+    const bExact = b.title.toLowerCase().replace(/\s+/g, " ").trim() === lowerInput ? 1 : 0;
+    if (aExact !== bExact) return bExact - aExact;
+
+    // Then by combined relevance (title weight 0.7, abstract weight 0.3)
+    const aRel = computeRelevance(words, a.title) * 0.7 + computeRelevance(words, a.abstract) * 0.3;
+    const bRel = computeRelevance(words, b.title) * 0.7 + computeRelevance(words, b.abstract) * 0.3;
+    if (Math.abs(aRel - bRel) > 0.05) return bRel - aRel;
+
+    // Then by date (newest first)
+    const aDate = a.publishedDate ? new Date(a.publishedDate).getTime() : 0;
+    const bDate = b.publishedDate ? new Date(b.publishedDate).getTime() : 0;
+    return bDate - aDate;
   });
 
-  return articles2;
+  return merged;
+}
+
+/** Shape of a Hugging Face Daily Papers API response item. */
+interface HFPaper {
+  title?: string;
+  paper?: {
+    id?: string;
+    title?: string;
+    summary?: string;
+    authors?: { name?: string; user?: { fullname?: string } }[];
+    publishedAt?: string;
+  };
+  publishedAt?: string;
+}
+
+/** Convert a HF paper to our Article type. */
+function hfToArticle(paper: HFPaper): Article {
+  const p = paper.paper;
+  const id = p?.id || "";
+  const authors =
+    p?.authors?.map((a) => a.user?.fullname || a.name || "Unknown") || [];
+
+  return {
+    id,
+    title: p?.title || paper.title || "",
+    authors,
+    abstract: p?.summary || "",
+    url: id ? `https://huggingface.co/papers/${id}` : "",
+    pdfUrl: undefined,
+    publishedDate: paper.publishedAt || p?.publishedAt || "",
+    source: "huggingface",
+  };
+}
+
+/**
+ * Search HuggingFace Daily Papers by title keywords (fuzzy match).
+ */
+async function searchHuggingFaceByTitle(title: string): Promise<Article[]> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15_000);
+
+  try {
+    const response = await fetch(HF_API_URL, {
+      headers: { "User-Agent": "innoclaw/1.0", Accept: "application/json" },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) return [];
+
+    const data: HFPaper[] = await response.json();
+    const queryWords = getSignificantWords(title);
+    if (queryWords.length === 0) return [];
+
+    // Fuzzy match: any query word appears in title or abstract
+    const matched = data.filter((paper) => {
+      const paperTitle = (paper.paper?.title || paper.title || "").toLowerCase();
+      const paperAbstract = (paper.paper?.summary || "").toLowerCase();
+      const combined = paperTitle + " " + paperAbstract;
+      return queryWords.some((w) => combined.includes(w));
+    });
+
+    // Convert to Article and compute relevance
+    const articles = matched.map(hfToArticle);
+
+    // Sort by relevance then recency
+    articles.sort((a, b) => {
+      const aRel = computeRelevance(queryWords, a.title) * 0.7 + computeRelevance(queryWords, a.abstract) * 0.3;
+      const bRel = computeRelevance(queryWords, b.title) * 0.7 + computeRelevance(queryWords, b.abstract) * 0.3;
+      if (Math.abs(aRel - bRel) > 0.05) return bRel - aRel;
+
+      const aDate = a.publishedDate ? new Date(a.publishedDate).getTime() : 0;
+      const bDate = b.publishedDate ? new Date(b.publishedDate).getTime() : 0;
+      return bDate - aDate;
+    });
+
+    return articles.slice(0, 15);
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Merge articles from multiple sources, deduplicating by arXiv ID.
+ * arXiv articles take priority over HF articles with the same ID.
+ */
+function mergeAndDeduplicate(arxivArticles: Article[], hfArticles: Article[]): Article[] {
+  const seen = new Set<string>();
+  const result: Article[] = [];
+
+  // arXiv results first (higher priority)
+  for (const a of arxivArticles) {
+    const normalizedId = a.id.replace(/v\d+$/, "");
+    if (!seen.has(normalizedId)) {
+      seen.add(normalizedId);
+      result.push(a);
+    }
+  }
+
+  // Then HF results
+  for (const a of hfArticles) {
+    const normalizedId = a.id.replace(/v\d+$/, "");
+    if (!seen.has(normalizedId)) {
+      seen.add(normalizedId);
+      result.push(a);
+    }
+  }
+
+  return result;
 }
 
 export async function POST(req: NextRequest) {
@@ -190,14 +351,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Treat as paper title — search arXiv by title
-    const articles = await searchArxivByTitle(input);
+    // 3. Search both arXiv and HuggingFace in parallel
+    const [arxivArticles, hfArticles] = await Promise.all([
+      searchArxivByTitle(input),
+      searchHuggingFaceByTitle(input),
+    ]);
+
+    const articles = mergeAndDeduplicate(arxivArticles, hfArticles);
+
     if (articles.length === 0) {
       return NextResponse.json(
         { error: "NOT_FOUND" },
         { status: 404 }
       );
     }
+
+    // Final sort: relevance then recency across all sources
+    const queryWords = getSignificantWords(input);
+    articles.sort((a, b) => {
+      const aRel = computeRelevance(queryWords, a.title) * 0.7 + computeRelevance(queryWords, a.abstract) * 0.3;
+      const bRel = computeRelevance(queryWords, b.title) * 0.7 + computeRelevance(queryWords, b.abstract) * 0.3;
+      if (Math.abs(aRel - bRel) > 0.05) return bRel - aRel;
+
+      const aDate = a.publishedDate ? new Date(a.publishedDate).getTime() : 0;
+      const bDate = b.publishedDate ? new Date(b.publishedDate).getTime() : 0;
+      return bDate - aDate;
+    });
+
     return NextResponse.json({ articles });
   } catch (error) {
     console.error("Paper fetch error:", error);
