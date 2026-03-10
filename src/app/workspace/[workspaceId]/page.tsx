@@ -12,6 +12,8 @@ import { Header } from "@/components/layout/header";
 import { FileBrowser } from "@/components/files/file-browser";
 import { AgentPanel } from "@/components/agent/agent-panel";
 import { ReportPanel } from "@/components/report/report-panel";
+import { PaperStudyPanel } from "@/components/paper-study/paper-study-panel";
+import { ArticlePreview } from "@/components/paper-study/article-preview";
 import { NotesPanel } from "@/components/notes/notes-panel";
 import { FilePreviewPanel } from "@/components/preview/file-preview-panel";
 import { useWorkspace } from "@/lib/hooks/use-workspaces";
@@ -19,11 +21,13 @@ import { useReport } from "@/lib/hooks/use-report";
 import { useMinimalMode } from "@/lib/hooks/use-minimal-mode";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Bot, FileText, Maximize2 } from "lucide-react";
+import { Bot, FileText, GraduationCap, Server, Maximize2 } from "lucide-react";
+import { ClusterPanel } from "@/components/cluster/cluster-panel";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LanguageToggle } from "@/components/layout/language-toggle";
+import type { Article } from "@/lib/article-search/types";
 
-type MiddlePanel = "agent" | "report";
+type MiddlePanel = "agent" | "report" | "paperStudy" | "cluster";
 
 export default function WorkspacePage({
   params,
@@ -34,9 +38,11 @@ export default function WorkspacePage({
   const { workspace, isLoading } = useWorkspace(workspaceId);
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [middlePanel, setMiddlePanel] = useState<MiddlePanel>("agent");
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const { report, isAvailable: reportAvailable } = useReport(workspaceId);
   const { isMinimal, toggleMinimalMode } = useMinimalMode();
   const t = useTranslations("report");
+  const tc = useTranslations("cluster");
   const tCommon = useTranslations("common");
 
   if (isLoading) {
@@ -61,10 +67,10 @@ export default function WorkspacePage({
     );
   }
 
-  if (isMinimal) {
-    return (
-      <div className="min-h-screen bg-background">
-        {/* Floating toolbar in minimal mode */}
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Minimal mode: floating toolbar */}
+      {isMinimal && (
         <nav className="fixed top-3 right-3 z-50 flex items-center gap-1" aria-label={tCommon("exitMinimalMode")}>
           <LanguageToggle />
           <ThemeToggle />
@@ -79,22 +85,21 @@ export default function WorkspacePage({
             <span className="sr-only">{tCommon("exitMinimalMode")}</span>
           </Button>
         </nav>
-        {/* Full-screen agent panel */}
-        <div className="mx-auto h-screen w-full max-w-4xl">
-          <AgentPanel
-            workspaceId={workspaceId}
-            workspaceName={workspace.name}
-            folderPath={workspace.folderPath}
-          />
-        </div>
-      </div>
-    );
-  }
+      )}
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header showMinimalToggle onToggleMinimalMode={toggleMinimalMode} />
-      <div className="h-[calc(100vh-3.5rem)] overflow-hidden">
+      {/* Normal mode: header */}
+      {!isMinimal && (
+        <Header showMinimalToggle onToggleMinimalMode={toggleMinimalMode} />
+      )}
+
+      {/* Layout wrapper — collapsed to h-0 in minimal mode to hide panels,
+          but stays mounted so all component state (including AgentPanel's useChat) is preserved.
+          The AgentPanel escapes via position:fixed when in minimal mode. */}
+      <div
+        className={isMinimal ? "h-0 overflow-hidden" : "h-[calc(100vh-3.5rem)] overflow-hidden"}
+        aria-hidden={isMinimal}
+        inert={isMinimal ? true : undefined}
+      >
         <ResizablePanelGroup orientation="horizontal">
           {/* Left: FileBrowser */}
           <ResizablePanel defaultSize={25} minSize={10} className="overflow-hidden">
@@ -114,43 +119,84 @@ export default function WorkspacePage({
             <ResizablePanelGroup orientation="horizontal">
               <ResizablePanel defaultSize={60} minSize={10} className="overflow-hidden">
                 <div className="relative h-full">
-                  {/* Panel toggle buttons - positioned above the agent panel header */}
-                  <div className="absolute top-1 right-3 z-50 flex gap-1 bg-background/90 backdrop-blur-md rounded-lg p-1 border border-border/50 shadow-lg">
-                    <Button
-                      variant={middlePanel === "agent" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setMiddlePanel("agent")}
-                      title={t("agentToggle")}
-                      aria-label={t("agentToggle")}
-                      className="h-7 px-2 gap-1"
-                    >
-                      <Bot className="h-3.5 w-3.5" />
-                      <span className="text-xs hidden lg:inline">Agent</span>
-                    </Button>
-                    <Button
-                      variant={middlePanel === "report" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setMiddlePanel("report")}
-                      disabled={!reportAvailable}
-                      title={t("reportToggle")}
-                      aria-label={t("reportToggle")}
-                      className="h-7 px-2 gap-1"
-                    >
-                      <FileText className="h-3.5 w-3.5" />
-                      <span className="text-xs hidden lg:inline">Report</span>
-                    </Button>
-                  </div>
+                  {/* Panel toggle buttons — hidden in minimal mode */}
+                  {!isMinimal && (
+                    <div className="absolute top-1 right-3 z-50 flex gap-1 bg-background/90 backdrop-blur-md rounded-lg p-1 border border-border/50 shadow-lg">
+                      <Button
+                        variant={middlePanel === "agent" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setMiddlePanel("agent")}
+                        title={t("agentToggle")}
+                        aria-label={t("agentToggle")}
+                        className="h-7 px-2 gap-1"
+                      >
+                        <Bot className="h-3.5 w-3.5" />
+                        <span className="text-xs hidden lg:inline">Agent</span>
+                      </Button>
+                      <Button
+                        variant={middlePanel === "report" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setMiddlePanel("report")}
+                        disabled={!reportAvailable}
+                        title={t("reportToggle")}
+                        aria-label={t("reportToggle")}
+                        className="h-7 px-2 gap-1"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span className="text-xs hidden lg:inline">Report</span>
+                      </Button>
+                      <Button
+                        variant={middlePanel === "paperStudy" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setMiddlePanel("paperStudy")}
+                        title={t("paperStudyToggle")}
+                        aria-label={t("paperStudyToggle")}
+                        className="h-7 px-2 gap-1"
+                      >
+                        <GraduationCap className="h-3.5 w-3.5" />
+                        <span className="text-xs hidden lg:inline">Paper</span>
+                      </Button>
+                      <Button
+                        variant={middlePanel === "cluster" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setMiddlePanel("cluster")}
+                        title={tc("clusterToggle")}
+                        aria-label={tc("clusterToggle")}
+                        className="h-7 px-2 gap-1"
+                      >
+                        <Server className="h-3.5 w-3.5" />
+                        <span className="text-xs hidden lg:inline">Cluster</span>
+                      </Button>
+                    </div>
+                  )}
 
-                  {/* Keep all mounted for state preservation */}
-                  <div className={middlePanel === "agent" ? "h-full" : "hidden"}>
-                    <AgentPanel
-                      workspaceId={workspaceId}
-                      workspaceName={workspace.name}
-                      folderPath={workspace.folderPath}
-                    />
+                  {/* AgentPanel — single instance, never remounted.
+                      In minimal mode the wrapper becomes a fixed full-screen overlay;
+                      in normal mode it sits inside the panel layout as before. */}
+                  <div className={
+                    isMinimal
+                      ? "fixed inset-0 z-40 bg-background"
+                      : (middlePanel === "agent" ? "h-full" : "hidden")
+                  }>
+                    <div className={isMinimal ? "mx-auto h-screen w-full max-w-4xl" : "h-full"}>
+                      <AgentPanel
+                        workspaceId={workspaceId}
+                        workspaceName={workspace.name}
+                        folderPath={workspace.folderPath}
+                      />
+                    </div>
                   </div>
                   <div className={middlePanel === "report" ? "h-full" : "hidden"}>
                     <ReportPanel report={report} />
+                  </div>
+                  <div className={middlePanel === "paperStudy" ? "h-full" : "hidden"}>
+                    <PaperStudyPanel
+                      workspaceId={workspaceId}
+                      onArticleSelect={setSelectedArticle}
+                    />
+                  </div>
+                  <div className={middlePanel === "cluster" ? "h-full" : "hidden"}>
+                    <ClusterPanel workspaceId={workspaceId} />
                   </div>
                 </div>
               </ResizablePanel>
@@ -164,10 +210,18 @@ export default function WorkspacePage({
                     <TabsTrigger value="notes">Notes</TabsTrigger>
                   </TabsList>
                   <TabsContent value="preview" className="flex-1 overflow-hidden mt-0">
-                    <FilePreviewPanel
-                      filePath={selectedFilePath}
-                      onClose={() => setSelectedFilePath(null)}
-                    />
+                    {middlePanel === "paperStudy" && selectedArticle ? (
+                      <ArticlePreview
+                        article={selectedArticle}
+                        workspaceId={workspaceId}
+                        onClose={() => setSelectedArticle(null)}
+                      />
+                    ) : (
+                      <FilePreviewPanel
+                        filePath={selectedFilePath}
+                        onClose={() => setSelectedFilePath(null)}
+                      />
+                    )}
                   </TabsContent>
                   <TabsContent value="notes" className="flex-1 overflow-hidden mt-0">
                     <NotesPanel workspaceId={workspaceId} />

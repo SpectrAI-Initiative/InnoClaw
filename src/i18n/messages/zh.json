@@ -30,7 +30,7 @@
     "cloneFromGithub": "从 GitHub 克隆",
     "empty": "还没有工作空间。打开一个文件夹或克隆一个仓库开始吧。",
     "noWorkspaces": "暂无工作空间",
-    "noWorkspacesDesc": "创建或打开一个工作空间，开始使用 Jarvis",
+    "noWorkspacesDesc": "创建或打开一个工作空间，开始使用 InnoClaw",
     "lastOpened": "上次打开",
     "open": "打开",
     "files": "个文件",
@@ -213,7 +213,7 @@
     "previewMode": "预览"
   },
   "agent": {
-    "title": "Claude Code",
+    "title": "Agent",
     "placeholder": "让我帮你编程...",
     "placeholderPlan": "描述你想要实现的功能...",
     "placeholderAsk": "问一个关于代码的问题...",

@@ -39,7 +39,7 @@ export function Header({ onToggleMinimalMode, showMinimalToggle }: HeaderProps) 
               <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-accent opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-30" />
             </div>
             <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent transition-all duration-300 group-hover:from-primary group-hover:to-accent">
-              Jarvis
+              InnoClaw
             </span>
           </Link>
 

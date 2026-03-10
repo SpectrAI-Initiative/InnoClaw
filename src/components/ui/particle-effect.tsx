@@ -222,7 +222,7 @@ export function ParticleEffect({
 }
 
 // Simpler CSS-based thinking indicator
-export function ThinkingIndicator({ className = "", label = "Jarvis thinking" }: { className?: string; label?: string }) {
+export function ThinkingIndicator({ className = "", label = "InnoClaw thinking" }: { className?: string; label?: string }) {
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <div className="relative flex items-center justify-center">

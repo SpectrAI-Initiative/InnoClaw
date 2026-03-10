@@ -1,0 +1,18 @@
+name: Sync to private repo
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Push to private repo
+        run: |
+          git remote add private https://x-access-token:${{ secrets.SYNC_TOKEN }}@github.com/zjowowen/notebooklm.git
+          git push private main

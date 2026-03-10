@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Jarvis Dev Status Script
+# InnoClaw Dev Status Script
 cd "$(dirname "$0")"
 
 if [ -f .dev.pid ]; then
