@@ -520,6 +520,31 @@ export function AgentPanel({
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<AgentMode>("agent");
 
+  // Draggable input area height
+  const [inputHeight, setInputHeight] = useState(80);
+  const dragRef = useRef<{ startY: number; startH: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragRef.current = { startY: e.clientY, startH: inputHeight };
+    const onMove = (ev: MouseEvent) => {
+      if (!dragRef.current || !containerRef.current) return;
+      const containerH = containerRef.current.getBoundingClientRect().height;
+      const maxH = containerH * 0.7;
+      const delta = dragRef.current.startY - ev.clientY;
+      const newH = Math.max(60, Math.min(maxH, dragRef.current.startH + delta));
+      setInputHeight(newH);
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, [inputHeight]);
+
   // Skills state
   const { skills: availableSkills } = useSkills(workspaceId);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -1125,7 +1150,7 @@ export function AgentPanel({
   const slashQuery = input.startsWith("/") ? input.slice(1) : "";
 
   return (
-    <div className="relative flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm overflow-hidden">
+    <div ref={containerRef} className="relative flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm overflow-hidden">
       {/* Header */}
       <div className="relative z-10 flex items-center gap-2 border-b border-agent-border px-3 py-2 bg-agent-bg/80 backdrop-blur-sm">
         {mode === "agent" && <Bot className="h-4 w-4 text-agent-accent" />}
@@ -1221,8 +1246,17 @@ export function AgentPanel({
         </div>
       )}
 
+      {/* Draggable divider */}
+      <div
+        className="relative z-20 h-1.5 cursor-row-resize group shrink-0 flex items-center justify-center"
+        onMouseDown={handleDragStart}
+      >
+        <div className="absolute inset-x-0 top-0 h-px bg-agent-border" />
+        <div className="h-0.5 w-8 rounded-full bg-muted-foreground/30 group-hover:bg-primary/50 transition-colors" />
+      </div>
+
       {/* Input area with autocomplete */}
-      <div className="relative z-10 border-t border-agent-border bg-agent-bg/80 backdrop-blur-sm">
+      <div className="relative z-10 bg-agent-bg/80 backdrop-blur-sm shrink-0 overflow-hidden" style={{ height: inputHeight }}>
         {/* Slash command autocomplete */}
         {showAutocomplete && availableSkills.length > 0 && (
           <SkillAutocomplete
@@ -1233,7 +1267,7 @@ export function AgentPanel({
           />
         )}
 
-        <div className="flex items-start gap-2 px-3 py-2">
+        <div className="flex items-start gap-2 px-3 py-2 h-full">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors mt-1.5">
@@ -1274,9 +1308,6 @@ export function AgentPanel({
             value={input}
             onChange={(e) => {
               handleInputChange(e.target.value);
-              // Auto-resize textarea
-              e.target.style.height = 'auto';
-              e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
             }}
             onKeyDown={(e) => {
               // Enter without Shift sends message, Shift+Enter creates new line
@@ -1287,7 +1318,7 @@ export function AgentPanel({
             }}
             disabled={!aiEnabled || isSummarizing}
             placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
-            className="flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono resize-none min-h-[24px] max-h-[200px] leading-6"
+            className="flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono resize-none h-full leading-6"
             rows={1}
             autoFocus
           />
