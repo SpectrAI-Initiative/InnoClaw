@@ -209,7 +209,7 @@
     "previewMode": "预览"
   },
   "agent": {
-    "title": "Claude Code",
+    "title": "Agent",
     "placeholder": "让我帮你编程...",
     "placeholderPlan": "描述你想要实现的功能...",
     "placeholderAsk": "问一个关于代码的问题...",

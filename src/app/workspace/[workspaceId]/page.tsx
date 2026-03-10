@@ -67,10 +67,10 @@ export default function WorkspacePage({
     );
   }
 
-  if (isMinimal) {
-    return (
-      <div className="min-h-screen bg-background">
-        {/* Floating toolbar in minimal mode */}
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Minimal mode: floating toolbar */}
+      {isMinimal && (
         <nav className="fixed top-3 right-3 z-50 flex items-center gap-1" aria-label={tCommon("exitMinimalMode")}>
           <LanguageToggle />
           <ThemeToggle />
@@ -85,22 +85,21 @@ export default function WorkspacePage({
             <span className="sr-only">{tCommon("exitMinimalMode")}</span>
           </Button>
         </nav>
-        {/* Full-screen agent panel */}
-        <div className="mx-auto h-screen w-full max-w-4xl">
-          <AgentPanel
-            workspaceId={workspaceId}
-            workspaceName={workspace.name}
-            folderPath={workspace.folderPath}
-          />
-        </div>
-      </div>
-    );
-  }
+      )}
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header showMinimalToggle onToggleMinimalMode={toggleMinimalMode} />
-      <div className="h-[calc(100vh-3.5rem)] overflow-hidden">
+      {/* Normal mode: header */}
+      {!isMinimal && (
+        <Header showMinimalToggle onToggleMinimalMode={toggleMinimalMode} />
+      )}
+
+      {/* Layout wrapper — collapsed to h-0 in minimal mode to hide panels,
+          but stays mounted so all component state (including AgentPanel's useChat) is preserved.
+          The AgentPanel escapes via position:fixed when in minimal mode. */}
+      <div
+        className={isMinimal ? "h-0 overflow-hidden" : "h-[calc(100vh-3.5rem)] overflow-hidden"}
+        aria-hidden={isMinimal}
+        inert={isMinimal ? true : undefined}
+      >
         <ResizablePanelGroup orientation="horizontal">
           {/* Left: FileBrowser */}
           <ResizablePanel defaultSize={25} minSize={10} className="overflow-hidden">
@@ -120,54 +119,64 @@ export default function WorkspacePage({
             <ResizablePanelGroup orientation="horizontal">
               <ResizablePanel defaultSize={60} minSize={10} className="overflow-hidden">
                 <div className="relative h-full">
-                  {/* Panel toggle buttons */}
-                  <div className="absolute top-2 right-2 z-10 flex gap-1">
-                    <Button
-                      variant={middlePanel === "agent" ? "default" : "outline"}
-                      size="icon-xs"
-                      onClick={() => setMiddlePanel("agent")}
-                      title={t("agentToggle")}
-                      aria-label={t("agentToggle")}
-                    >
-                      <Bot className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant={middlePanel === "report" ? "default" : "outline"}
-                      size="icon-xs"
-                      onClick={() => setMiddlePanel("report")}
-                      disabled={!reportAvailable}
-                      title={t("reportToggle")}
-                      aria-label={t("reportToggle")}
-                    >
-                      <FileText className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant={middlePanel === "paperStudy" ? "default" : "outline"}
-                      size="icon-xs"
-                      onClick={() => setMiddlePanel("paperStudy")}
-                      title={t("paperStudyToggle")}
-                      aria-label={t("paperStudyToggle")}
-                    >
-                      <GraduationCap className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant={middlePanel === "cluster" ? "default" : "outline"}
-                      size="icon-xs"
-                      onClick={() => setMiddlePanel("cluster")}
-                      title={tc("clusterToggle")}
-                      aria-label={tc("clusterToggle")}
-                    >
-                      <Server className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  {/* Panel toggle buttons — hidden in minimal mode */}
+                  {!isMinimal && (
+                    <div className="absolute top-2 right-2 z-10 flex gap-1">
+                      <Button
+                        variant={middlePanel === "agent" ? "default" : "outline"}
+                        size="icon-xs"
+                        onClick={() => setMiddlePanel("agent")}
+                        title={t("agentToggle")}
+                        aria-label={t("agentToggle")}
+                      >
+                        <Bot className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant={middlePanel === "report" ? "default" : "outline"}
+                        size="icon-xs"
+                        onClick={() => setMiddlePanel("report")}
+                        disabled={!reportAvailable}
+                        title={t("reportToggle")}
+                        aria-label={t("reportToggle")}
+                      >
+                        <FileText className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant={middlePanel === "paperStudy" ? "default" : "outline"}
+                        size="icon-xs"
+                        onClick={() => setMiddlePanel("paperStudy")}
+                        title={t("paperStudyToggle")}
+                        aria-label={t("paperStudyToggle")}
+                      >
+                        <GraduationCap className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant={middlePanel === "cluster" ? "default" : "outline"}
+                        size="icon-xs"
+                        onClick={() => setMiddlePanel("cluster")}
+                        title={tc("clusterToggle")}
+                        aria-label={tc("clusterToggle")}
+                      >
+                        <Server className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
 
-                  {/* Keep all mounted for state preservation */}
-                  <div className={middlePanel === "agent" ? "h-full" : "hidden"}>
-                    <AgentPanel
-                      workspaceId={workspaceId}
-                      workspaceName={workspace.name}
-                      folderPath={workspace.folderPath}
-                    />
+                  {/* AgentPanel — single instance, never remounted.
+                      In minimal mode the wrapper becomes a fixed full-screen overlay;
+                      in normal mode it sits inside the panel layout as before. */}
+                  <div className={
+                    isMinimal
+                      ? "fixed inset-0 z-40 bg-background"
+                      : (middlePanel === "agent" ? "h-full" : "hidden")
+                  }>
+                    <div className={isMinimal ? "mx-auto h-screen w-full max-w-4xl" : "h-full"}>
+                      <AgentPanel
+                        workspaceId={workspaceId}
+                        workspaceName={workspace.name}
+                        folderPath={workspace.folderPath}
+                      />
+                    </div>
                   </div>
                   <div className={middlePanel === "report" ? "h-full" : "hidden"}>
                     <ReportPanel report={report} />
