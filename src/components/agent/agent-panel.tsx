@@ -507,6 +507,7 @@ interface AgentPanelProps {
   folderPath: string;
   sessionId: string;
   sessionName?: string;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
 export function AgentPanel({
@@ -515,6 +516,7 @@ export function AgentPanel({
   folderPath,
   sessionId,
   sessionName,
+  onLoadingChange,
 }: AgentPanelProps) {
   const t = useTranslations("agent");
   const tCommon = useTranslations("common");
@@ -919,6 +921,13 @@ export function AgentPanel({
 
   const isLoading = status === "submitted" || status === "streaming";
 
+  // Notify parent of loading state changes (use ref to avoid effect re-triggering)
+  const onLoadingChangeRef = useRef(onLoadingChange);
+  onLoadingChangeRef.current = onLoadingChange;
+  useEffect(() => {
+    onLoadingChangeRef.current?.(isLoading);
+  }, [isLoading]);
+
   // Auto-scroll to bottom when messages update
   useEffect(() => {
     if (scrollRef.current) {
@@ -1160,19 +1169,6 @@ export function AgentPanel({
 
   return (
     <div ref={containerRef} className="relative flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm overflow-hidden">
-      {/* Header */}
-      <div className="relative z-10 flex items-center gap-2 border-b border-agent-border px-3 py-2 bg-agent-bg/80 backdrop-blur-sm">
-        {mode === "agent" && <Bot className={`h-4 w-4 text-agent-accent ${isLoading ? "animate-pulse" : ""}`} />}
-        {mode === "plan" && <ClipboardList className={`h-4 w-4 text-agent-success ${isLoading ? "animate-pulse" : ""}`} />}
-        {mode === "ask" && <MessageCircleQuestion className={`h-4 w-4 text-agent-purple ${isLoading ? "animate-pulse" : ""}`} />}
-        <span className={`text-xs font-semibold text-agent-foreground ${isLoading ? "animate-title-breathe" : ""}`}>
-          {t("title")}
-        </span>
-        <span className="text-xs text-agent-muted ml-auto truncate">
-          {workspaceName}
-        </span>
-      </div>
-
       {/* Messages */}
       <ScrollArea className="relative z-10 flex-1 [&_[data-slot=scroll-area-viewport]]:!overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:hidden" ref={scrollRef}>
         <div className="p-3 space-y-5 overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
