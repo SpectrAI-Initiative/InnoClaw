@@ -92,7 +92,6 @@ export default function HomePage() {
                 <span className="inline-block animate-slide-in-up bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
                   Welcome to{" "}
                 </span>
-                <span>{" "}</span>
                 <span className="relative inline-block animate-slide-in-up [animation-delay:100ms]">
                   <span className="relative z-10 bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-[gradient-rotate_3s_linear_infinite]">
                     InnoClaw
