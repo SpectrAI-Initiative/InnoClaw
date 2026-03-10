@@ -506,7 +506,9 @@ function TreeNode({
           <DialogHeader>
             <DialogTitle>{t("delete")}</DialogTitle>
             <DialogDescription>
-              {t("deleteConfirm", { name: entry.name })}
+              {isDirectory
+                ? t("deleteConfirmDir", { name: entry.name })
+                : t("deleteConfirm", { name: entry.name })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
