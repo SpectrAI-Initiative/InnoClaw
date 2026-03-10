@@ -421,18 +421,21 @@ function AgentMessage({ message }: { message: UIMessage }) {
         .join("") ?? "";
 
     return (
-      <div className="group flex gap-3 items-start p-3 rounded-lg bg-gradient-to-r from-primary/5 to-transparent border border-primary/10 hover:border-primary/20 transition-all duration-300">
-        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
-          <span className="text-xs font-bold">&gt;</span>
+      <div className="group flex gap-3 items-start justify-end animate-slide-in-up">
+        <div className="max-w-[85%] rounded-2xl rounded-tr-sm px-4 py-2.5 bg-blue-500/25 border border-blue-500/35 hover:border-blue-500/50 transition-all duration-300 shadow-sm shadow-blue-500/10">
+          <span className="text-agent-foreground whitespace-pre-wrap leading-relaxed text-sm">{text}</span>
         </div>
-        <span className="text-agent-foreground whitespace-pre-wrap leading-relaxed">{text}</span>
       </div>
     );
   }
 
   // Assistant message — render parts
   return (
-    <div className="space-y-2 pl-0 animate-slide-in-up">
+    <div className="flex gap-2.5 items-start animate-slide-in-up">
+      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground mt-0.5">
+        <Bot className="h-3.5 w-3.5" />
+      </div>
+      <div className="min-w-0 flex-1 space-y-2 rounded-2xl rounded-tl-sm px-4 py-2.5 bg-muted/50 border border-border/60">
       {message.parts?.map((part, i) => {
         if (part.type === "text") {
           const text = (part as { type: "text"; text: string }).text;
@@ -491,6 +494,7 @@ function AgentMessage({ message }: { message: UIMessage }) {
 
         return null;
       })}
+      </div>
     </div>
   );
 }
@@ -1137,7 +1141,7 @@ export function AgentPanel({
 
       {/* Messages */}
       <ScrollArea className="relative z-10 flex-1 [&_[data-slot=scroll-area-viewport]]:!overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:hidden" ref={scrollRef}>
-        <div className="p-3 space-y-3 overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+        <div className="p-3 space-y-5 overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
           {!aiEnabled ? (
             <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
               <AlertCircle className="h-8 w-8 text-agent-muted" />

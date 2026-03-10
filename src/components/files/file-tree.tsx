@@ -394,9 +394,9 @@ function TreeNode({
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div
-            className={`flex cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1.5 text-sm hover:bg-accent min-w-0 ${
-              isSelected ? "bg-accent" : ""
-            } ${dragOver ? "bg-accent/60 ring-1 ring-primary" : ""}`}
+            className={`flex cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1.5 text-sm hover:bg-muted min-w-0 ${
+              isSelected ? "bg-primary/10 text-primary" : ""
+            } ${dragOver ? "bg-primary/10 ring-1 ring-primary" : ""}`}
             style={{ paddingLeft: `${depth * 16 + 8}px` }}
             onClick={handleClick}
             tabIndex={0}
