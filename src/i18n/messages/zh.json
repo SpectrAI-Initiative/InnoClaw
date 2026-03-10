@@ -25,10 +25,14 @@
   },
   "home": {
     "title": "我的工作空间",
+    "subtitle": "智能研究、编码和知识管理工作空间",
     "openWorkspace": "打开工作空间",
     "cloneFromGithub": "从 GitHub 克隆",
     "empty": "还没有工作空间。打开一个文件夹或克隆一个仓库开始吧。",
+    "noWorkspaces": "暂无工作空间",
+    "noWorkspacesDesc": "创建或打开一个工作空间，开始使用 InnoClaw",
     "lastOpened": "上次打开",
+    "open": "打开",
     "files": "个文件",
     "deleteConfirm": "确定要删除此工作空间吗？这只会从列表中移除，不会删除实际文件。",
     "hfDatasets": "HF 数据集"

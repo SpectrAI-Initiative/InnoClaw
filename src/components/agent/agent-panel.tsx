@@ -51,6 +51,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ParticleEffect, ThinkingIndicator, FloatingOrbs, ThinkingParticles, BreathingBorder } from "@/components/ui/particle-effect";
 import type { Skill } from "@/types";
 
 type AgentMode = "agent" | "plan" | "ask";
@@ -140,28 +141,44 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
   const result = part.output as Record<string, unknown> | undefined;
 
   return (
-    <div className="my-1.5 rounded border border-agent-border bg-agent-card-bg text-xs font-mono overflow-hidden break-all">
+    <div className={`my-2 rounded-lg border text-xs font-mono overflow-hidden break-all transition-all duration-300 ${
+      isRunning
+        ? "border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5 shadow-[0_0_15px_rgba(139,92,246,0.1)]"
+        : isError
+          ? "border-destructive/30 bg-destructive/5"
+          : "border-agent-border bg-agent-card-bg"
+    }`}>
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-agent-card-hover transition-colors"
+        className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-agent-card-hover transition-colors"
       >
         {expanded ? (
-          <ChevronDown className="h-3 w-3 shrink-0 text-agent-muted" />
+          <ChevronDown className="h-3.5 w-3.5 shrink-0 text-agent-muted" />
         ) : (
-          <ChevronRight className="h-3 w-3 shrink-0 text-agent-muted" />
+          <ChevronRight className="h-3.5 w-3.5 shrink-0 text-agent-muted" />
         )}
-        <span className="text-agent-accent">{icon}</span>
-        <span className="font-semibold text-agent-accent">{toolName}</span>
+        <span className={`${isRunning ? "text-primary" : "text-agent-accent"}`}>{icon}</span>
+        <span className={`font-semibold ${isRunning ? "text-primary" : "text-agent-accent"}`}>{toolName}</span>
         <span className="text-agent-muted truncate flex-1">{summary}</span>
         {isRunning && (
-          <Loader2 className="h-3 w-3 shrink-0 animate-spin text-agent-accent" />
+          <div className="flex items-center gap-2">
+            <span className="text-primary/70 text-[10px]">Running</span>
+            <div className="relative">
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
+              <div className="absolute inset-0 h-4 w-4 animate-ping rounded-full bg-primary/20" />
+            </div>
+          </div>
         )}
         {isDone && !isError && (
-          <Check className="h-3 w-3 shrink-0 text-agent-success" />
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-agent-success/20">
+            <Check className="h-3 w-3 shrink-0 text-agent-success" />
+          </div>
         )}
         {isDone && isError && (
-          <AlertCircle className="h-3 w-3 shrink-0 text-agent-error" />
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-agent-error/20">
+            <AlertCircle className="h-3 w-3 shrink-0 text-agent-error" />
+          </div>
         )}
       </button>
 
@@ -404,18 +421,18 @@ function AgentMessage({ message }: { message: UIMessage }) {
         .join("") ?? "";
 
     return (
-      <div className="flex gap-2 items-start">
-        <span className="text-agent-purple shrink-0 font-bold select-none">
-          &gt;
-        </span>
-        <span className="text-agent-foreground whitespace-pre-wrap">{text}</span>
+      <div className="group flex gap-3 items-start p-3 rounded-lg bg-gradient-to-r from-primary/5 to-transparent border border-primary/10 hover:border-primary/20 transition-all duration-300">
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+          <span className="text-xs font-bold">&gt;</span>
+        </div>
+        <span className="text-agent-foreground whitespace-pre-wrap leading-relaxed">{text}</span>
       </div>
     );
   }
 
   // Assistant message — render parts
   return (
-    <div className="space-y-1 pl-0">
+    <div className="space-y-2 pl-0 animate-slide-in-up">
       {message.parts?.map((part, i) => {
         if (part.type === "text") {
           const text = (part as { type: "text"; text: string }).text;
@@ -423,7 +440,7 @@ function AgentMessage({ message }: { message: UIMessage }) {
           return (
             <div
               key={i}
-              className="prose prose-sm max-w-none text-agent-foreground [&_p]:my-1 [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:text-agent-code [&_code]:break-all [&_h1]:text-agent-foreground [&_h2]:text-agent-foreground [&_h3]:text-agent-foreground [&_a]:text-agent-accent [&_strong]:text-agent-foreground dark:prose-invert"
+              className="prose prose-sm max-w-none text-agent-foreground [&_p]:my-1.5 [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_pre]:rounded-lg [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:text-agent-code [&_code]:break-all [&_h1]:text-agent-foreground [&_h2]:text-agent-foreground [&_h3]:text-agent-foreground [&_a]:text-agent-accent [&_strong]:text-agent-foreground [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-0.5 dark:prose-invert"
             >
               <ReactMarkdown>{text}</ReactMarkdown>
             </div>
@@ -447,14 +464,28 @@ function AgentMessage({ message }: { message: UIMessage }) {
         if (part.type === "reasoning") {
           const reasoning = (part as { type: "reasoning"; text: string }).text;
           return (
-            <details key={i} className="text-agent-muted text-xs">
-              <summary className="cursor-pointer hover:text-agent-accent">
-                Thinking...
-              </summary>
-              <pre className="whitespace-pre-wrap mt-1 pl-2 border-l border-agent-border">
-                {reasoning}
-              </pre>
-            </details>
+            <BreathingBorder key={i} isActive={true}>
+              <details className="text-agent-muted text-xs rounded-lg p-2 relative min-h-[60px]">
+                <ThinkingParticles isActive={true} />
+                <summary className="cursor-pointer hover:text-agent-accent flex items-center gap-2 relative z-10">
+                  <div className="relative flex items-center justify-center">
+                    {/* Rotating ring */}
+                    <div className="absolute h-5 w-5 animate-spin rounded-full border border-transparent border-t-purple-500/60" style={{ animationDuration: '1.5s' }} />
+                    {/* Pulsing core */}
+                    <span className="inline-block h-2.5 w-2.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 animate-pulse" />
+                  </div>
+                  <span className="font-medium text-purple-400">Thinking...</span>
+                  <div className="flex gap-0.5 ml-1">
+                    <span className="h-1 w-1 animate-bounce rounded-full bg-purple-400 [animation-delay:-0.3s]" />
+                    <span className="h-1 w-1 animate-bounce rounded-full bg-purple-400 [animation-delay:-0.15s]" />
+                    <span className="h-1 w-1 animate-bounce rounded-full bg-purple-400" />
+                  </div>
+                </summary>
+                <pre className="whitespace-pre-wrap mt-2 pl-3 border-l-2 border-purple-500/30 text-agent-muted relative z-10">
+                  {reasoning}
+                </pre>
+              </details>
+            </BreathingBorder>
           );
         }
 
@@ -481,7 +512,7 @@ export function AgentPanel({
   const tCommon = useTranslations("common");
   const locale = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<AgentMode>("agent");
 
@@ -1093,9 +1124,9 @@ export function AgentPanel({
   const slashQuery = input.startsWith("/") ? input.slice(1) : "";
 
   return (
-    <div className="flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm">
+    <div className="relative flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-agent-border px-3 py-2">
+      <div className="relative z-10 flex items-center gap-2 border-b border-agent-border px-3 py-2 bg-agent-bg/80 backdrop-blur-sm">
         {mode === "agent" && <Bot className="h-4 w-4 text-agent-accent" />}
         {mode === "plan" && <ClipboardList className="h-4 w-4 text-agent-success" />}
         {mode === "ask" && <MessageCircleQuestion className="h-4 w-4 text-agent-purple" />}
@@ -1108,7 +1139,7 @@ export function AgentPanel({
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 [&_[data-slot=scroll-area-viewport]]:!overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:hidden" ref={scrollRef}>
+      <ScrollArea className="relative z-10 flex-1 [&_[data-slot=scroll-area-viewport]]:!overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:hidden" ref={scrollRef}>
         <div className="p-3 space-y-3 overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
           {!aiEnabled ? (
             <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
@@ -1125,18 +1156,37 @@ export function AgentPanel({
               </p>
             </div>
           ) : (
-            messages.map((message) => (
-              <AgentMessage key={message.id} message={message} />
-            ))
+            messages.map((message) => {
+              // Filter out auto-continue messages (user messages with only "继续")
+              if (message.role === "user") {
+                const text = message.parts
+                  ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
+                  .map((p) => p.text)
+                  .join("")
+                  .trim();
+                if (text === "继续") return null;
+              }
+              return <AgentMessage key={message.id} message={message} />;
+            })
           )}
 
-          {/* Loading indicator */}
+          {/* Loading indicator with enhanced effects */}
           {isLoading &&
             messages.length > 0 &&
             messages[messages.length - 1].role === "user" && (
-              <div className="flex items-center gap-2 text-agent-muted">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                <span className="text-xs">Thinking...</span>
+              <div className="relative my-4">
+                <div className="relative flex items-center gap-3 rounded-lg border border-primary/30 bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 p-4 backdrop-blur-sm animate-glow-pulse overflow-hidden">
+                  {/* Animated gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/10 to-primary/5 animate-[gradient-rotate_3s_linear_infinite] bg-[length:200%_100%]" />
+                  {/* Scanning line effect */}
+                  <div className="absolute inset-x-0 top-0 h-full overflow-hidden">
+                    <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent animate-[scan-line_2s_linear_infinite]" />
+                  </div>
+                  {/* Glow orbs */}
+                  <div className="absolute -left-4 -top-4 h-16 w-16 rounded-full bg-primary/20 blur-xl animate-pulse" />
+                  <div className="absolute -right-4 -bottom-4 h-12 w-12 rounded-full bg-accent/20 blur-xl animate-pulse [animation-delay:0.5s]" />
+                  <ThinkingIndicator label="InnoClaw thinking" />
+                </div>
               </div>
             )}
 
@@ -1171,7 +1221,7 @@ export function AgentPanel({
       )}
 
       {/* Input area with autocomplete */}
-      <div className="relative border-t border-agent-border">
+      <div className="relative z-10 border-t border-agent-border bg-agent-bg/80 backdrop-blur-sm">
         {/* Slash command autocomplete */}
         {showAutocomplete && availableSkills.length > 0 && (
           <SkillAutocomplete
@@ -1182,10 +1232,10 @@ export function AgentPanel({
           />
         )}
 
-        <div className="flex items-center gap-2 px-3 py-2">
+        <div className="flex items-start gap-2 px-3 py-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors">
+              <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors mt-1.5">
                 {t(MODE_LABEL_KEYS[mode])}
                 <ChevronDown className="h-3 w-3" />
               </button>
@@ -1215,31 +1265,33 @@ export function AgentPanel({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <span className="text-agent-purple font-bold shrink-0 select-none">
+          <span className="text-agent-purple font-bold shrink-0 select-none mt-1.5">
             &gt;
           </span>
-          <input
+          <textarea
             ref={inputRef}
-            type="text"
             value={input}
-            onChange={(e) => handleInputChange(e.target.value)}
+            onChange={(e) => {
+              handleInputChange(e.target.value);
+              // Auto-resize textarea
+              e.target.style.height = 'auto';
+              e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+            }}
             onKeyDown={(e) => {
-              if (
-                e.key === "Enter" &&
-                !e.shiftKey &&
-                !e.nativeEvent.isComposing &&
-                !showAutocomplete
-              ) {
+              // Enter without Shift sends message, Shift+Enter creates new line
+              if (e.key === "Enter" && !e.shiftKey && !showAutocomplete) {
                 e.preventDefault();
                 handleSend();
               }
             }}
             disabled={!aiEnabled || isSummarizing}
             placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
-            className="flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono"
+            className="flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono resize-none min-h-[24px] max-h-[200px] leading-6"
+            rows={1}
             autoFocus
           />
-          {isLoading && (
+          <div className="flex items-center gap-1 shrink-0 mt-1">
+            {isLoading && (
             <button
               onClick={handleStop}
               title={t("stop")}
@@ -1257,6 +1309,7 @@ export function AgentPanel({
               <Brain className="h-4 w-4" />
             </button>
           )}
+          </div>
         </div>
       </div>
 
@@ -1459,6 +1512,12 @@ export function AgentPanel({
           <div className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize" onPointerDown={(e) => onEdgeResizeStart(e, "se")} />
         </DialogContent>
       </Dialog>
+
+      {/* Particle effects overlay - renders on top of content but allows click-through */}
+      <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+        <FloatingOrbs isActive={isLoading} />
+        <ParticleEffect isActive={isLoading} particleCount={80} density={0.0003} colors={["#8b5cf6", "#6366f1", "#3b82f6", "#06b6d4", "#a855f7", "#ec4899"]} />
+      </div>
     </div>
   );
 }
