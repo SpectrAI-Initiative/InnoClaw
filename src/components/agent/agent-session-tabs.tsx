@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, X, Check, Pencil } from "lucide-react";
+import { Plus, X, Check, Pencil, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -14,6 +14,7 @@ import type { AgentSession } from "@/lib/hooks/use-agent-sessions";
 interface AgentSessionTabsProps {
   sessions: AgentSession[];
   activeSessionId: string;
+  loadingSessions?: Record<string, boolean>;
   onSelect: (id: string) => void;
   onClose: (id: string) => void;
   onCreate: () => void;
@@ -23,6 +24,7 @@ interface AgentSessionTabsProps {
 export function AgentSessionTabs({
   sessions,
   activeSessionId,
+  loadingSessions = {},
   onSelect,
   onClose,
   onCreate,
@@ -87,10 +89,17 @@ export function AgentSessionTabs({
     setEditingId(null);
   }, [editingId, editValue, onRename]);
 
-  // With only one session, show just the "+" button (no tab needed)
+  // With only one session, show just the icon + "+" button (no tab needed)
   if (sessions.length <= 1) {
+    const singleSessionLoading = sessions.length === 1 && loadingSessions[sessions[0].id];
     return (
-      <div className="flex items-center px-1 py-0.5 shrink-0">
+      <div className="flex items-center gap-1.5 px-2 py-1 shrink-0 border-b border-border/50 bg-muted/30">
+        <Bot className={`h-3.5 w-3.5 text-agent-accent ${singleSessionLoading ? "animate-pulse" : ""}`} />
+        {singleSessionLoading && (
+          <span className="text-xs text-agent-accent animate-title-breathe font-medium">
+            {sessions[0]?.name || "Agent"}
+          </span>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -116,6 +125,7 @@ export function AgentSessionTabs({
         const isActive = session.id === activeSessionId;
         const isConfirming = confirmingId === session.id;
         const isEditing = editingId === session.id;
+        const isSessionLoading = !!loadingSessions[session.id];
 
         return (
           <div
@@ -124,10 +134,11 @@ export function AgentSessionTabs({
               isActive
                 ? "bg-background text-foreground shadow-sm border border-border/50"
                 : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-            }`}
+            } ${isSessionLoading ? "animate-breathe" : ""}`}
             onClick={() => onSelect(session.id)}
             onDoubleClick={() => handleDoubleClick(session.id, session.name)}
           >
+            <Bot className={`h-3 w-3 shrink-0 ${isSessionLoading ? "text-agent-accent animate-pulse" : "text-muted-foreground"}`} />
             {isEditing ? (
               <input
                 ref={editInputRef}

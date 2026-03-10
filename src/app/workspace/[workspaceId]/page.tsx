@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import {
   ResizableHandle,
@@ -54,6 +54,11 @@ export default function WorkspacePage({
   const t = useTranslations("report");
   const tc = useTranslations("cluster");
   const tCommon = useTranslations("common");
+  const [loadingSessions, setLoadingSessions] = useState<Record<string, boolean>>({});
+
+  const handleSessionLoadingChange = useCallback((sessionId: string, loading: boolean) => {
+    setLoadingSessions((prev) => ({ ...prev, [sessionId]: loading }));
+  }, []);
 
   if (isLoading) {
     return (
@@ -192,6 +197,7 @@ export default function WorkspacePage({
                       <AgentSessionTabs
                         sessions={sessions}
                         activeSessionId={activeSessionId}
+                        loadingSessions={loadingSessions}
                         onSelect={setActiveSessionId}
                         onClose={closeSession}
                         onCreate={createSession}
@@ -209,6 +215,7 @@ export default function WorkspacePage({
                               folderPath={workspace.folderPath}
                               sessionId={session.id}
                               sessionName={session.name}
+                              onLoadingChange={(loading) => handleSessionLoadingChange(session.id, loading)}
                             />
                           </div>
                         ))}
