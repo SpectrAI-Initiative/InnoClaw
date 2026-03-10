@@ -394,7 +394,7 @@ function TreeNode({
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div
-            className={`flex cursor-pointer items-center gap-1 rounded-sm px-2 py-1 text-sm hover:bg-accent ${
+            className={`flex cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1.5 text-sm hover:bg-accent min-w-0 ${
               isSelected ? "bg-accent" : ""
             } ${dragOver ? "bg-accent/60 ring-1 ring-primary" : ""}`}
             style={{ paddingLeft: `${depth * 16 + 8}px` }}

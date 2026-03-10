@@ -121,43 +121,51 @@ export default function WorkspacePage({
                 <div className="relative h-full">
                   {/* Panel toggle buttons — hidden in minimal mode */}
                   {!isMinimal && (
-                    <div className="absolute top-2 right-2 z-10 flex gap-1">
+                    <div className="absolute top-1 right-3 z-50 flex gap-1 bg-background/90 backdrop-blur-md rounded-lg p-1 border border-border/50 shadow-lg">
                       <Button
-                        variant={middlePanel === "agent" ? "default" : "outline"}
-                        size="icon-xs"
+                        variant={middlePanel === "agent" ? "default" : "ghost"}
+                        size="sm"
                         onClick={() => setMiddlePanel("agent")}
                         title={t("agentToggle")}
                         aria-label={t("agentToggle")}
+                        className="h-7 px-2 gap-1"
                       >
-                        <Bot className="h-3 w-3" />
+                        <Bot className="h-3.5 w-3.5" />
+                        <span className="text-xs hidden lg:inline">Agent</span>
                       </Button>
                       <Button
-                        variant={middlePanel === "report" ? "default" : "outline"}
-                        size="icon-xs"
+                        variant={middlePanel === "report" ? "default" : "ghost"}
+                        size="sm"
                         onClick={() => setMiddlePanel("report")}
                         disabled={!reportAvailable}
                         title={t("reportToggle")}
                         aria-label={t("reportToggle")}
+                        className="h-7 px-2 gap-1"
                       >
-                        <FileText className="h-3 w-3" />
+                        <FileText className="h-3.5 w-3.5" />
+                        <span className="text-xs hidden lg:inline">Report</span>
                       </Button>
                       <Button
-                        variant={middlePanel === "paperStudy" ? "default" : "outline"}
-                        size="icon-xs"
+                        variant={middlePanel === "paperStudy" ? "default" : "ghost"}
+                        size="sm"
                         onClick={() => setMiddlePanel("paperStudy")}
                         title={t("paperStudyToggle")}
                         aria-label={t("paperStudyToggle")}
+                        className="h-7 px-2 gap-1"
                       >
-                        <GraduationCap className="h-3 w-3" />
+                        <GraduationCap className="h-3.5 w-3.5" />
+                        <span className="text-xs hidden lg:inline">Paper</span>
                       </Button>
                       <Button
-                        variant={middlePanel === "cluster" ? "default" : "outline"}
-                        size="icon-xs"
+                        variant={middlePanel === "cluster" ? "default" : "ghost"}
+                        size="sm"
                         onClick={() => setMiddlePanel("cluster")}
                         title={tc("clusterToggle")}
                         aria-label={tc("clusterToggle")}
+                        className="h-7 px-2 gap-1"
                       >
-                        <Server className="h-3 w-3" />
+                        <Server className="h-3.5 w-3.5" />
+                        <span className="text-xs hidden lg:inline">Cluster</span>
                       </Button>
                     </div>
                   )}

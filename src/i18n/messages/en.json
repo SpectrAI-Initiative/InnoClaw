@@ -25,10 +25,14 @@
   },
   "home": {
     "title": "My Workspaces",
+    "subtitle": "Your intelligent workspace for research, coding, and knowledge management",
     "openWorkspace": "Open Workspace",
     "cloneFromGithub": "Clone from GitHub",
     "empty": "No workspaces yet. Open a folder or clone a repository to get started.",
+    "noWorkspaces": "No workspaces yet",
+    "noWorkspacesDesc": "Create or open a workspace to get started with InnoClaw",
     "lastOpened": "Last opened",
+    "open": "Open",
     "files": "files",
     "deleteConfirm": "Are you sure you want to delete this workspace? This will only remove it from the list, not delete the actual files.",
     "hfDatasets": "HF Datasets"

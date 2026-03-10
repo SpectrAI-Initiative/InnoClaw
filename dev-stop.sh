@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Jarvis Dev Stop Script
+# InnoClaw Dev Stop Script
 cd "$(dirname "$0")"
 
 PORT=3000
