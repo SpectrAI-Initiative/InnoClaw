@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { PROVIDERS, CONTEXT_MODES } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
 import { ScheduledTasksCard } from "@/components/scheduled-tasks/scheduled-tasks-card";
+import { useStyleTheme } from "@/lib/hooks/use-style-theme";
 
 interface Settings {
   llmProvider: string;
@@ -62,6 +63,7 @@ export default function SettingsPage() {
   const [fetchingModels, setFetchingModels] = useState(false);
   const [contextMode, setContextMode] = useState("normal");
   const [maxMode, setMaxMode] = useState(true);
+  const { styleTheme, setStyleTheme } = useStyleTheme();
 
   const fetchRemoteModels = useCallback(
     async (prov: string) => {
@@ -190,6 +192,33 @@ export default function SettingsPage() {
           <h1 className="mb-8 text-2xl font-bold">{t("title")}</h1>
 
           <div className="space-y-6">
+            {/* Theme Style */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("styleTheme")}</CardTitle>
+                <CardDescription>{t("styleThemeDesc")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Label>{t("styleTheme")}</Label>
+                  <Select
+                    value={styleTheme}
+                    onValueChange={(v) => setStyleTheme(v as "default" | "cartoon" | "cyberpunk-pixel" | "retro-handheld")}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">{t("styleTheme_default")}</SelectItem>
+                      <SelectItem value="cartoon">{t("styleTheme_cartoon")}</SelectItem>
+                      <SelectItem value="cyberpunk-pixel">{t("styleTheme_cyberpunk")}</SelectItem>
+                      <SelectItem value="retro-handheld">{t("styleTheme_retro")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* AI Provider Settings */}
             <Card>
               <CardHeader>

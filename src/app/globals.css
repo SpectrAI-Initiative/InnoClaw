@@ -197,6 +197,616 @@
   --glow-success: oklch(0.7 0.2 160);
 }
 
+/* ---- Cartoon style theme (light) ---- */
+[data-style="cartoon"] {
+  --radius: 0.75rem;
+  --background: oklch(0.97 0.01 80);
+  --foreground: oklch(0.2 0.02 50);
+  --card: oklch(0.99 0.005 80);
+  --card-foreground: oklch(0.2 0.02 50);
+  --popover: oklch(0.99 0.005 80);
+  --popover-foreground: oklch(0.2 0.02 50);
+  --primary: oklch(0.53 0.24 27);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.94 0.015 80);
+  --secondary-foreground: oklch(0.25 0.02 50);
+  --muted: oklch(0.94 0.01 80);
+  --muted-foreground: oklch(0.5 0.02 50);
+  --accent: oklch(0.65 0.15 230);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.53 0.24 27);
+  --border: oklch(0.88 0.02 80);
+  --input: oklch(0.92 0.015 80);
+  --ring: oklch(0.53 0.24 27);
+  --chart-1: oklch(0.53 0.24 27);
+  --chart-2: oklch(0.65 0.15 230);
+  --chart-3: oklch(0.6 0.2 130);
+  --chart-4: oklch(0.55 0.2 310);
+  --chart-5: oklch(0.6 0.18 60);
+  --sidebar: oklch(0.96 0.01 80);
+  --sidebar-foreground: oklch(0.2 0.02 50);
+  --sidebar-primary: oklch(0.53 0.24 27);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.94 0.015 80);
+  --sidebar-accent-foreground: oklch(0.25 0.02 50);
+  --sidebar-border: oklch(0.88 0.02 80);
+  --sidebar-ring: oklch(0.53 0.24 27);
+
+  /* Terminal panel */
+  --terminal-bg: oklch(0.96 0.01 80);
+  --terminal-foreground: oklch(0.2 0.02 50);
+  --terminal-border: oklch(0.86 0.02 80);
+  --terminal-muted: oklch(0.5 0.02 50);
+  --terminal-muted-dim: oklch(0.65 0.01 50);
+  --terminal-prompt: oklch(0.53 0.24 27);
+  --terminal-stdout: oklch(0.25 0.02 50);
+  --terminal-stderr: oklch(0.53 0.24 27);
+
+  /* Agent panel */
+  --agent-bg: oklch(0.96 0.01 80);
+  --agent-foreground: oklch(0.2 0.02 50);
+  --agent-border: oklch(0.86 0.02 80);
+  --agent-accent: oklch(0.53 0.24 27);
+  --agent-success: oklch(0.5 0.2 150);
+  --agent-purple: oklch(0.55 0.2 310);
+  --agent-muted: oklch(0.5 0.02 50);
+  --agent-error: oklch(0.53 0.24 27);
+  --agent-card-bg: oklch(0.94 0.01 80);
+  --agent-card-hover: oklch(0.92 0.015 80);
+  --agent-code: oklch(0.2 0.02 50);
+
+  /* Glow colors */
+  --glow-primary: oklch(0.53 0.28 27);
+  --glow-accent: oklch(0.65 0.2 230);
+  --glow-success: oklch(0.55 0.22 150);
+}
+
+/* ---- Cartoon style theme (dark) ---- */
+.dark[data-style="cartoon"] {
+  --radius: 0.75rem;
+  --background: oklch(0.18 0.02 50);
+  --foreground: oklch(0.93 0.01 80);
+  --card: oklch(0.22 0.02 50);
+  --card-foreground: oklch(0.93 0.01 80);
+  --popover: oklch(0.2 0.02 50);
+  --popover-foreground: oklch(0.93 0.01 80);
+  --primary: oklch(0.6 0.24 27);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.28 0.03 50);
+  --secondary-foreground: oklch(0.93 0.01 80);
+  --muted: oklch(0.28 0.02 50);
+  --muted-foreground: oklch(0.65 0.01 50);
+  --accent: oklch(0.7 0.17 230);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.6 0.24 27);
+  --border: oklch(0.38 0.04 50);
+  --input: oklch(0.25 0.03 50);
+  --ring: oklch(0.6 0.24 27);
+  --chart-1: oklch(0.6 0.24 27);
+  --chart-2: oklch(0.7 0.17 230);
+  --chart-3: oklch(0.7 0.18 130);
+  --chart-4: oklch(0.65 0.2 310);
+  --chart-5: oklch(0.7 0.18 60);
+  --sidebar: oklch(0.19 0.02 50);
+  --sidebar-foreground: oklch(0.93 0.01 80);
+  --sidebar-primary: oklch(0.6 0.24 27);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.28 0.03 50);
+  --sidebar-accent-foreground: oklch(0.93 0.01 80);
+  --sidebar-border: oklch(0.38 0.04 50);
+  --sidebar-ring: oklch(0.6 0.24 27);
+
+  /* Terminal panel */
+  --terminal-bg: oklch(0.16 0.02 50);
+  --terminal-foreground: oklch(0.88 0.08 27);
+  --terminal-border: oklch(0.38 0.06 27);
+  --terminal-muted: oklch(0.5 0.04 50);
+  --terminal-muted-dim: oklch(0.38 0.03 50);
+  --terminal-prompt: oklch(0.7 0.2 27);
+  --terminal-stdout: oklch(0.88 0.08 27);
+  --terminal-stderr: oklch(0.7 0.2 0);
+
+  /* Agent panel */
+  --agent-bg: oklch(0.15 0.02 50);
+  --agent-foreground: oklch(0.9 0.01 80);
+  --agent-border: oklch(0.38 0.08 27);
+  --agent-accent: oklch(0.65 0.22 27);
+  --agent-success: oklch(0.7 0.18 150);
+  --agent-purple: oklch(0.65 0.2 310);
+  --agent-muted: oklch(0.5 0.04 50);
+  --agent-error: oklch(0.65 0.22 0);
+  --agent-card-bg: oklch(0.2 0.03 50);
+  --agent-card-hover: oklch(0.24 0.04 50);
+  --agent-code: oklch(0.88 0.08 27);
+
+  /* Glow colors */
+  --glow-primary: oklch(0.6 0.28 27);
+  --glow-accent: oklch(0.7 0.22 230);
+  --glow-success: oklch(0.65 0.2 150);
+}
+
+/* ---- Cyberpunk-Pixel style theme (light) ---- */
+[data-style="cyberpunk-pixel"] {
+  --radius: 0.25rem;
+  --background: oklch(0.94 0.02 230);
+  --foreground: oklch(0.15 0.03 250);
+  --card: oklch(0.96 0.015 230);
+  --card-foreground: oklch(0.15 0.03 250);
+  --popover: oklch(0.96 0.015 230);
+  --popover-foreground: oklch(0.15 0.03 250);
+  --primary: oklch(0.7 0.18 195);
+  --primary-foreground: oklch(0.1 0.03 250);
+  --secondary: oklch(0.9 0.02 230);
+  --secondary-foreground: oklch(0.2 0.03 250);
+  --muted: oklch(0.9 0.015 230);
+  --muted-foreground: oklch(0.45 0.03 250);
+  --accent: oklch(0.6 0.25 330);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.55 0.25 25);
+  --border: oklch(0.7 0.12 195);
+  --input: oklch(0.92 0.02 230);
+  --ring: oklch(0.7 0.18 195);
+  --chart-1: oklch(0.7 0.18 195);
+  --chart-2: oklch(0.6 0.25 330);
+  --chart-3: oklch(0.7 0.2 60);
+  --chart-4: oklch(0.6 0.2 130);
+  --chart-5: oklch(0.65 0.2 280);
+  --sidebar: oklch(0.92 0.02 230);
+  --sidebar-foreground: oklch(0.15 0.03 250);
+  --sidebar-primary: oklch(0.7 0.18 195);
+  --sidebar-primary-foreground: oklch(0.1 0.03 250);
+  --sidebar-accent: oklch(0.88 0.02 230);
+  --sidebar-accent-foreground: oklch(0.2 0.03 250);
+  --sidebar-border: oklch(0.7 0.12 195);
+  --sidebar-ring: oklch(0.7 0.18 195);
+
+  --terminal-bg: oklch(0.92 0.02 230);
+  --terminal-foreground: oklch(0.7 0.18 195);
+  --terminal-border: oklch(0.7 0.12 195);
+  --terminal-muted: oklch(0.5 0.03 250);
+  --terminal-muted-dim: oklch(0.6 0.02 250);
+  --terminal-prompt: oklch(0.6 0.25 330);
+  --terminal-stdout: oklch(0.2 0.03 250);
+  --terminal-stderr: oklch(0.55 0.25 25);
+
+  --agent-bg: oklch(0.92 0.02 230);
+  --agent-foreground: oklch(0.15 0.03 250);
+  --agent-border: oklch(0.7 0.12 195);
+  --agent-accent: oklch(0.7 0.18 195);
+  --agent-success: oklch(0.6 0.2 160);
+  --agent-purple: oklch(0.6 0.25 330);
+  --agent-muted: oklch(0.5 0.03 250);
+  --agent-error: oklch(0.55 0.25 25);
+  --agent-card-bg: oklch(0.9 0.02 230);
+  --agent-card-hover: oklch(0.88 0.025 230);
+  --agent-code: oklch(0.7 0.18 195);
+
+  --glow-primary: oklch(0.7 0.22 195);
+  --glow-accent: oklch(0.6 0.3 330);
+  --glow-success: oklch(0.6 0.22 160);
+}
+
+/* ---- Cyberpunk-Pixel style theme (dark) ---- */
+.dark[data-style="cyberpunk-pixel"] {
+  --radius: 0.25rem;
+  --background: oklch(0.12 0.04 260);
+  --foreground: oklch(0.9 0.04 195);
+  --card: oklch(0.16 0.04 260);
+  --card-foreground: oklch(0.9 0.04 195);
+  --popover: oklch(0.14 0.04 260);
+  --popover-foreground: oklch(0.9 0.04 195);
+  --primary: oklch(0.75 0.18 195);
+  --primary-foreground: oklch(0.08 0.03 260);
+  --secondary: oklch(0.22 0.04 260);
+  --secondary-foreground: oklch(0.88 0.04 195);
+  --muted: oklch(0.22 0.03 260);
+  --muted-foreground: oklch(0.6 0.04 195);
+  --accent: oklch(0.65 0.28 330);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.65 0.25 25);
+  --border: oklch(0.4 0.12 195);
+  --input: oklch(0.18 0.04 260);
+  --ring: oklch(0.75 0.18 195);
+  --chart-1: oklch(0.75 0.18 195);
+  --chart-2: oklch(0.65 0.28 330);
+  --chart-3: oklch(0.75 0.2 60);
+  --chart-4: oklch(0.65 0.2 130);
+  --chart-5: oklch(0.7 0.2 280);
+  --sidebar: oklch(0.13 0.04 260);
+  --sidebar-foreground: oklch(0.9 0.04 195);
+  --sidebar-primary: oklch(0.75 0.18 195);
+  --sidebar-primary-foreground: oklch(0.08 0.03 260);
+  --sidebar-accent: oklch(0.22 0.04 260);
+  --sidebar-accent-foreground: oklch(0.88 0.04 195);
+  --sidebar-border: oklch(0.4 0.12 195);
+  --sidebar-ring: oklch(0.75 0.18 195);
+
+  --terminal-bg: oklch(0.1 0.04 260);
+  --terminal-foreground: oklch(0.75 0.18 195);
+  --terminal-border: oklch(0.4 0.15 195);
+  --terminal-muted: oklch(0.45 0.05 260);
+  --terminal-muted-dim: oklch(0.3 0.04 260);
+  --terminal-prompt: oklch(0.65 0.28 330);
+  --terminal-stdout: oklch(0.75 0.18 195);
+  --terminal-stderr: oklch(0.7 0.25 25);
+
+  --agent-bg: oklch(0.1 0.04 260);
+  --agent-foreground: oklch(0.88 0.04 195);
+  --agent-border: oklch(0.4 0.15 195);
+  --agent-accent: oklch(0.75 0.18 195);
+  --agent-success: oklch(0.7 0.2 160);
+  --agent-purple: oklch(0.65 0.28 330);
+  --agent-muted: oklch(0.45 0.05 260);
+  --agent-error: oklch(0.7 0.25 25);
+  --agent-card-bg: oklch(0.15 0.05 260);
+  --agent-card-hover: oklch(0.18 0.06 260);
+  --agent-code: oklch(0.75 0.18 195);
+
+  --glow-primary: oklch(0.75 0.25 195);
+  --glow-accent: oklch(0.65 0.32 330);
+  --glow-success: oklch(0.7 0.22 160);
+}
+
+/* ---- Cyberpunk-Pixel header styles ---- */
+[data-style="cyberpunk-pixel"] header {
+  background: oklch(0.92 0.025 230);
+  border-bottom: 2px solid oklch(0.7 0.18 195);
+  box-shadow: 0 2px 0 oklch(0.6 0.25 330 / 0.3);
+  backdrop-filter: none;
+}
+
+.dark[data-style="cyberpunk-pixel"] header {
+  background: oklch(0.1 0.05 260);
+  border-bottom: 2px solid oklch(0.75 0.18 195);
+  box-shadow:
+    0 2px 0 oklch(0.65 0.28 330 / 0.4),
+    0 0 20px oklch(0.75 0.18 195 / 0.15);
+}
+
+[data-style="cyberpunk-pixel"] header nav button,
+[data-style="cyberpunk-pixel"] header nav a button {
+  border-radius: 0.25rem;
+}
+
+/* ---- Cyberpunk-Pixel effects ---- */
+
+/* Scanline overlay — only in dark mode for immersion */
+.dark[data-style="cyberpunk-pixel"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    oklch(0 0 0 / 0.03) 2px,
+    oklch(0 0 0 / 0.03) 4px
+  );
+}
+
+/* Crisp pixel borders on cards */
+[data-style="cyberpunk-pixel"] [class*="rounded"] {
+  border-radius: 0.25rem !important;
+}
+
+/* Pixel-art image rendering helper */
+.pixel-art {
+  image-rendering: pixelated;
+}
+
+/* Subtle neon glow on focus for cyberpunk */
+[data-style="cyberpunk-pixel"] button:focus-visible,
+[data-style="cyberpunk-pixel"] a:focus-visible,
+[data-style="cyberpunk-pixel"] input:focus-visible,
+[data-style="cyberpunk-pixel"] textarea:focus-visible,
+[data-style="cyberpunk-pixel"] select:focus-visible {
+  outline: 2px solid oklch(0.7 0.18 195);
+  outline-offset: 2px;
+  box-shadow: 0 0 8px oklch(0.7 0.18 195 / 0.5);
+}
+
+.dark[data-style="cyberpunk-pixel"] button:focus-visible,
+.dark[data-style="cyberpunk-pixel"] a:focus-visible,
+.dark[data-style="cyberpunk-pixel"] input:focus-visible,
+.dark[data-style="cyberpunk-pixel"] textarea:focus-visible,
+.dark[data-style="cyberpunk-pixel"] select:focus-visible {
+  box-shadow: 0 0 12px oklch(0.75 0.18 195 / 0.6);
+}
+
+/* Glitch hover effect on nav buttons */
+@keyframes cyberpunk-glitch {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-1px, 1px); }
+  40% { transform: translate(1px, -1px); }
+  60% { transform: translate(-1px, 0); }
+  80% { transform: translate(1px, 1px); }
+}
+
+[data-style="cyberpunk-pixel"] header nav button:hover,
+[data-style="cyberpunk-pixel"] header nav a button:hover {
+  animation: cyberpunk-glitch 0.3s ease;
+  text-shadow: 0 0 6px oklch(0.75 0.18 195 / 0.6);
+}
+
+/* Neon text shadow on logo for cyberpunk */
+.dark[data-style="cyberpunk-pixel"] header a span {
+  text-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.5);
+}
+
+/* ---- Cartoon header styles ---- */
+[data-style="cartoon"] header {
+  background: linear-gradient(
+    90deg,
+    oklch(0.95 0.04 27) 0%,
+    oklch(0.96 0.03 60) 25%,
+    oklch(0.97 0.03 130) 50%,
+    oklch(0.96 0.04 230) 75%,
+    oklch(0.95 0.04 310) 100%
+  );
+  border-bottom: 3px solid;
+  border-image: linear-gradient(90deg, oklch(0.53 0.24 27), oklch(0.6 0.2 60), oklch(0.55 0.2 130), oklch(0.65 0.15 230), oklch(0.55 0.2 310)) 1;
+  backdrop-filter: none;
+}
+
+.dark[data-style="cartoon"] header {
+  background: linear-gradient(
+    90deg,
+    oklch(0.22 0.04 27) 0%,
+    oklch(0.23 0.03 60) 25%,
+    oklch(0.22 0.03 130) 50%,
+    oklch(0.23 0.04 230) 75%,
+    oklch(0.22 0.04 310) 100%
+  );
+  border-image: linear-gradient(90deg, oklch(0.6 0.24 27), oklch(0.65 0.2 60), oklch(0.6 0.2 130), oklch(0.7 0.17 230), oklch(0.6 0.2 310)) 1;
+}
+
+[data-style="cartoon"] header nav button,
+[data-style="cartoon"] header nav a button {
+  border-radius: 9999px;
+}
+
+[data-style="cartoon"] header nav button:hover,
+[data-style="cartoon"] header nav a button:hover {
+  transform: scale(1.1);
+}
+
+/* ============================================================
+   Retro-Handheld style theme
+   Cheerful pastel + candy palette, pixel borders, toy-like feel
+   ============================================================ */
+
+/* ---- Retro-Handheld tokens (light) ---- */
+[data-style="retro-handheld"] {
+  --radius: 0.5rem;
+  --background: oklch(0.96 0.02 160);
+  --foreground: oklch(0.2 0.03 250);
+  --card: oklch(0.98 0.01 160);
+  --card-foreground: oklch(0.2 0.03 250);
+  --popover: oklch(0.98 0.01 160);
+  --popover-foreground: oklch(0.2 0.03 250);
+  --primary: oklch(0.65 0.15 195);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.92 0.025 160);
+  --secondary-foreground: oklch(0.25 0.03 250);
+  --muted: oklch(0.92 0.02 160);
+  --muted-foreground: oklch(0.45 0.03 250);
+  --accent: oklch(0.65 0.2 15);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.55 0.25 25);
+  --border: oklch(0.35 0.03 250);
+  --input: oklch(0.94 0.02 160);
+  --ring: oklch(0.65 0.15 195);
+  --chart-1: oklch(0.65 0.15 195);
+  --chart-2: oklch(0.65 0.2 15);
+  --chart-3: oklch(0.8 0.15 90);
+  --chart-4: oklch(0.65 0.18 280);
+  --chart-5: oklch(0.7 0.12 50);
+  --sidebar: oklch(0.94 0.025 160);
+  --sidebar-foreground: oklch(0.2 0.03 250);
+  --sidebar-primary: oklch(0.65 0.15 195);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.9 0.03 160);
+  --sidebar-accent-foreground: oklch(0.25 0.03 250);
+  --sidebar-border: oklch(0.35 0.03 250);
+  --sidebar-ring: oklch(0.65 0.15 195);
+
+  --terminal-bg: oklch(0.94 0.02 160);
+  --terminal-foreground: oklch(0.25 0.03 250);
+  --terminal-border: oklch(0.35 0.03 250);
+  --terminal-muted: oklch(0.5 0.03 250);
+  --terminal-muted-dim: oklch(0.6 0.02 250);
+  --terminal-prompt: oklch(0.65 0.15 195);
+  --terminal-stdout: oklch(0.25 0.03 250);
+  --terminal-stderr: oklch(0.55 0.25 25);
+
+  --agent-bg: oklch(0.94 0.02 160);
+  --agent-foreground: oklch(0.2 0.03 250);
+  --agent-border: oklch(0.35 0.03 250);
+  --agent-accent: oklch(0.65 0.15 195);
+  --agent-success: oklch(0.6 0.18 150);
+  --agent-purple: oklch(0.6 0.18 280);
+  --agent-muted: oklch(0.5 0.03 250);
+  --agent-error: oklch(0.55 0.25 25);
+  --agent-card-bg: oklch(0.92 0.02 160);
+  --agent-card-hover: oklch(0.9 0.025 160);
+  --agent-code: oklch(0.25 0.03 250);
+
+  --glow-primary: oklch(0.65 0.2 195);
+  --glow-accent: oklch(0.65 0.25 15);
+  --glow-success: oklch(0.6 0.2 150);
+}
+
+/* ---- Retro-Handheld tokens (dark) ---- */
+.dark[data-style="retro-handheld"] {
+  --radius: 0.5rem;
+  --background: oklch(0.18 0.03 250);
+  --foreground: oklch(0.92 0.02 160);
+  --card: oklch(0.22 0.03 250);
+  --card-foreground: oklch(0.92 0.02 160);
+  --popover: oklch(0.2 0.03 250);
+  --popover-foreground: oklch(0.92 0.02 160);
+  --primary: oklch(0.72 0.14 195);
+  --primary-foreground: oklch(0.1 0.03 250);
+  --secondary: oklch(0.26 0.03 250);
+  --secondary-foreground: oklch(0.9 0.02 160);
+  --muted: oklch(0.26 0.025 250);
+  --muted-foreground: oklch(0.6 0.03 160);
+  --accent: oklch(0.7 0.2 15);
+  --accent-foreground: oklch(0.1 0.02 15);
+  --destructive: oklch(0.65 0.25 25);
+  --border: oklch(0.5 0.06 195);
+  --input: oklch(0.24 0.03 250);
+  --ring: oklch(0.72 0.14 195);
+  --chart-1: oklch(0.72 0.14 195);
+  --chart-2: oklch(0.7 0.2 15);
+  --chart-3: oklch(0.82 0.15 90);
+  --chart-4: oklch(0.68 0.18 280);
+  --chart-5: oklch(0.75 0.12 50);
+  --sidebar: oklch(0.19 0.03 250);
+  --sidebar-foreground: oklch(0.92 0.02 160);
+  --sidebar-primary: oklch(0.72 0.14 195);
+  --sidebar-primary-foreground: oklch(0.1 0.03 250);
+  --sidebar-accent: oklch(0.26 0.03 250);
+  --sidebar-accent-foreground: oklch(0.9 0.02 160);
+  --sidebar-border: oklch(0.5 0.06 195);
+  --sidebar-ring: oklch(0.72 0.14 195);
+
+  --terminal-bg: oklch(0.16 0.03 250);
+  --terminal-foreground: oklch(0.72 0.14 195);
+  --terminal-border: oklch(0.5 0.06 195);
+  --terminal-muted: oklch(0.45 0.04 250);
+  --terminal-muted-dim: oklch(0.35 0.03 250);
+  --terminal-prompt: oklch(0.7 0.2 15);
+  --terminal-stdout: oklch(0.72 0.14 195);
+  --terminal-stderr: oklch(0.65 0.25 25);
+
+  --agent-bg: oklch(0.16 0.03 250);
+  --agent-foreground: oklch(0.9 0.02 160);
+  --agent-border: oklch(0.5 0.06 195);
+  --agent-accent: oklch(0.72 0.14 195);
+  --agent-success: oklch(0.68 0.18 150);
+  --agent-purple: oklch(0.68 0.18 280);
+  --agent-muted: oklch(0.45 0.04 250);
+  --agent-error: oklch(0.65 0.25 25);
+  --agent-card-bg: oklch(0.2 0.035 250);
+  --agent-card-hover: oklch(0.24 0.04 250);
+  --agent-code: oklch(0.72 0.14 195);
+
+  --glow-primary: oklch(0.72 0.2 195);
+  --glow-accent: oklch(0.7 0.25 15);
+  --glow-success: oklch(0.68 0.2 150);
+}
+
+/* ---- Retro-Handheld header ---- */
+[data-style="retro-handheld"] header {
+  background: oklch(0.94 0.03 160);
+  border-bottom: 3px solid oklch(0.35 0.03 250);
+  box-shadow: inset 0 -3px 0 oklch(0.65 0.15 195 / 0.25);
+  backdrop-filter: none;
+}
+
+.dark[data-style="retro-handheld"] header {
+  background: oklch(0.19 0.035 250);
+  border-bottom: 3px solid oklch(0.5 0.06 195);
+  box-shadow: inset 0 -3px 0 oklch(0.72 0.14 195 / 0.2);
+}
+
+/* Chunky rounded-rect nav buttons */
+[data-style="retro-handheld"] header nav button,
+[data-style="retro-handheld"] header nav a button {
+  border-radius: 0.5rem;
+  border: 2px solid oklch(0.35 0.03 250 / 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dark[data-style="retro-handheld"] header nav button,
+.dark[data-style="retro-handheld"] header nav a button {
+  border-color: oklch(0.5 0.06 195 / 0.4);
+}
+
+[data-style="retro-handheld"] header nav button:hover,
+[data-style="retro-handheld"] header nav a button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 0 oklch(0.35 0.03 250 / 0.3);
+}
+
+.dark[data-style="retro-handheld"] header nav button:hover,
+.dark[data-style="retro-handheld"] header nav a button:hover {
+  box-shadow: 0 3px 0 oklch(0.5 0.06 195 / 0.3);
+}
+
+/* ---- Retro-Handheld component effects ---- */
+
+/* Pixel-style crisp borders on cards */
+[data-style="retro-handheld"] [class*="border"] {
+  border-width: 2px;
+}
+
+/* Chunky buttons with toy-like inner shadow */
+[data-style="retro-handheld"] button {
+  border-width: 2px;
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.2);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+[data-style="retro-handheld"] button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.25),
+    0 2px 0 oklch(0.35 0.03 250 / 0.2);
+}
+
+[data-style="retro-handheld"] button:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 0 oklch(0 0 0 / 0.1);
+}
+
+.dark[data-style="retro-handheld"] button {
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+
+.dark[data-style="retro-handheld"] button:hover {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.1),
+    0 2px 0 oklch(0.72 0.14 195 / 0.15);
+}
+
+/* Playful focus ring */
+[data-style="retro-handheld"] button:focus-visible,
+[data-style="retro-handheld"] a:focus-visible,
+[data-style="retro-handheld"] input:focus-visible,
+[data-style="retro-handheld"] textarea:focus-visible,
+[data-style="retro-handheld"] select:focus-visible {
+  outline: 3px solid oklch(0.8 0.15 90);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px oklch(0.8 0.15 90 / 0.2);
+}
+
+/* Dotted pattern on cards (light only, subtle) */
+[data-style="retro-handheld"] [class*="Card"],
+[data-style="retro-handheld"] [class*="card"] {
+  border-width: 2px;
+  border-style: solid;
+}
+
+/* Subtle scanline overlay (dark mode only, <= 4% opacity) */
+.dark[data-style="retro-handheld"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    oklch(0 0 0 / 0.025) 3px,
+    oklch(0 0 0 / 0.025) 6px
+  );
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
@@ -35,6 +36,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Script id="style-theme-init" strategy="beforeInteractive">{`try{var s=localStorage.getItem('style-theme');if(s&&s!=='default')document.documentElement.dataset.style=s}catch(e){}`}</Script>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
