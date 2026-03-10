@@ -1,29 +1,16 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import {
+  FONT_FAMILY_KEY,
+  DEFAULT_FONT,
+  FONT_OPTIONS,
+  WEB_FONT_URLS,
+  type FontId,
+} from "@/lib/font-constants";
 
-const FONT_FAMILY_KEY = "innoclaw-font-family";
-const DEFAULT_FONT = "geist";
-
-export const FONT_OPTIONS = [
-  { id: "geist", name: "Geist", value: "var(--font-geist-sans), sans-serif" },
-  { id: "system", name: "System", value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" },
-  { id: "inter", name: "Inter", value: "'Inter', sans-serif" },
-  { id: "noto-sans", name: "Noto Sans", value: "'Noto Sans', 'Noto Sans SC', sans-serif" },
-  { id: "roboto", name: "Roboto", value: "'Roboto', sans-serif" },
-  { id: "lato", name: "Lato", value: "'Lato', sans-serif" },
-  { id: "source-han", name: "Source Han Sans", value: "'Source Han Sans SC', 'Noto Sans SC', sans-serif" },
-] as const;
-
-export type FontId = (typeof FONT_OPTIONS)[number]["id"];
-
-const WEB_FONT_URLS: Partial<Record<FontId, string>> = {
-  inter: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
-  "noto-sans": "https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap",
-  roboto: "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap",
-  lato: "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",
-  "source-han": "https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap",
-};
+export type { FontId } from "@/lib/font-constants";
+export { FONT_OPTIONS } from "@/lib/font-constants";
 
 function loadWebFont(fontId: FontId) {
   const url = WEB_FONT_URLS[fontId];
