@@ -220,7 +220,7 @@ export function ClusterPanel({ workspaceId }: ClusterPanelProps) {
           )}
         </div>
 
-        {/* Center: Tabs */}
+        {/* Tabs */}
         <div className="flex-1 flex justify-start">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
             <TabsList variant="line">
