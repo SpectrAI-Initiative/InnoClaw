@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { FolderOpen, GitBranch, Sparkles, Cpu, Zap, Brain, Code2, GraduationCap, Server } from "lucide-react";
 import Link from "next/link";
@@ -18,11 +18,11 @@ export default function HomePage() {
   const t = useTranslations("home");
   const { workspaces, isLoading, mutate } = useWorkspaces();
   const [workspaceRoots, setWorkspaceRoots] = useState<string[]>([]);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    (cb) => { cb(); return () => {}; },
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
     // Fetch workspace roots from settings API
