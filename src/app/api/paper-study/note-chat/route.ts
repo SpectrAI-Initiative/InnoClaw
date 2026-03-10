@@ -1,14 +1,14 @@
 import { NextRequest } from "next/server";
 import { streamText, convertToModelMessages, UIMessage } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
-import { buildPaperChatPrompt, buildPaperChatWithNotesPrompt } from "@/lib/ai/prompts";
+import { buildNoteChatPrompt } from "@/lib/ai/prompts";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages: uiMessages, article, relatedNotes } = await req.json();
+    const { messages: uiMessages, noteTitle, noteContent } = await req.json();
 
-    if (!article || !article.title) {
-      return new Response("Missing article data", { status: 400 });
+    if (!noteTitle || !noteContent) {
+      return new Response("Missing note data", { status: 400 });
     }
 
     if (!isAIAvailable()) {
@@ -19,19 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     const model = await getConfiguredModel();
-    const articleData = {
-      title: article.title,
-      authors: Array.isArray(article.authors) ? article.authors : [],
-      publishedDate: article.publishedDate || "",
-      source: article.source || "",
-      abstract: article.abstract || "",
-    };
-
-    // Use enhanced prompt if related notes are available
-    const systemPrompt =
-      relatedNotes && Array.isArray(relatedNotes) && relatedNotes.length > 0
-        ? buildPaperChatWithNotesPrompt(articleData, relatedNotes)
-        : buildPaperChatPrompt(articleData);
+    const systemPrompt = buildNoteChatPrompt(noteTitle, noteContent);
 
     const modelMessages = await convertToModelMessages(
       uiMessages as UIMessage[]
@@ -43,13 +31,13 @@ export async function POST(req: NextRequest) {
       messages: modelMessages,
       abortSignal: req.signal,
       onError({ error }) {
-        console.error("Paper chat stream error:", error);
+        console.error("Note chat stream error:", error);
       },
     });
 
     return result.toUIMessageStreamResponse();
   } catch (error) {
-    console.error("Paper chat error:", error);
+    console.error("Note chat error:", error);
     return new Response(
       error instanceof Error ? error.message : "Chat failed",
       { status: 500 }

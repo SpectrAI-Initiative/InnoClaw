@@ -2,12 +2,13 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { GraduationCap, AlertCircle, Sparkles, CheckSquare } from "lucide-react";
+import { GraduationCap, AlertCircle, Sparkles, CheckSquare, Flame } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { PaperSearchBar } from "./paper-search-bar";
 import { ArticleCard } from "./article-card";
 import { PaperSummarySection } from "./paper-summary-section";
+import { PaperRoastSection } from "./paper-roast-section";
 import type { Article, ArticleSource } from "@/lib/article-search/types";
 
 /** Composite key for identifying an article across sources. */
@@ -16,11 +17,13 @@ const articleKey = (a: Article) => `${a.source}-${a.id}`;
 interface PaperStudyPanelProps {
   workspaceId: string;
   onArticleSelect: (article: Article | null) => void;
+  notesDir?: string;
 }
 
 export function PaperStudyPanel({
   workspaceId,
   onArticleSelect,
+  notesDir,
 }: PaperStudyPanelProps) {
   const t = useTranslations("paperStudy");
 
@@ -46,6 +49,11 @@ export function PaperStudyPanel({
 
   // Abort controller for summarization
   const summarizeAbortRef = useRef<AbortController | null>(null);
+
+  // Roast state
+  const [roast, setRoast] = useState("");
+  const [isRoasting, setIsRoasting] = useState(false);
+  const roastAbortRef = useRef<AbortController | null>(null);
 
   /** Click card → preview in right panel. */
   const handleSelectArticle = useCallback(
@@ -130,6 +138,99 @@ export function PaperStudyPanel({
     }
   }, [articles, checkedIds, t]);
 
+  /** Stop ongoing roast generation. */
+  const handleStopRoast = useCallback(() => {
+    roastAbortRef.current?.abort();
+    roastAbortRef.current = null;
+    setIsRoasting(false);
+  }, []);
+
+  /**
+   * Generate sharp review (今日锐评).
+   * If articles are already loaded and some are checked, roast checked articles.
+   * Otherwise, auto-search today's papers (with keywords if set, or all HF daily papers),
+   * then roast all results.
+   */
+  const handleRoast = useCallback(async () => {
+    // Abort any previous roast
+    roastAbortRef.current?.abort();
+    const controller = new AbortController();
+    roastAbortRef.current = controller;
+
+    setIsRoasting(true);
+    setRoast("");
+    setSearchErrors(undefined);
+
+    try {
+      let papersToRoast: Article[];
+
+      // If we have checked articles, use those
+      if (checkedIds.size > 0 && articles.length > 0) {
+        papersToRoast = articles.filter(
+          (a) => checkedIds.has(`${a.source}-${a.id}`)
+        );
+      } else {
+        // Auto-search: use keywords if set, otherwise fetch all HF daily papers
+        const today = new Date().toISOString().slice(0, 10);
+        const searchRes = await fetch("/api/paper-study/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            keywords: keywords.length > 0 ? keywords : [],
+            dateFrom: keywords.length > 0 ? (dateFrom || today) : undefined,
+            dateTo: keywords.length > 0 ? (dateTo || today) : undefined,
+            sources: keywords.length > 0 ? sources : ["huggingface"],
+            maxResults: 20,
+          }),
+          signal: controller.signal,
+        });
+
+        if (!searchRes.ok) {
+          const errData = await searchRes.json().catch(() => ({}));
+          throw new Error(errData.error || "Search failed");
+        }
+
+        const searchResult = await searchRes.json();
+        const fetchedArticles: Article[] = searchResult.articles || [];
+
+        // Update the article list in the panel
+        setArticles(fetchedArticles);
+        setHasSearched(true);
+        setCheckedIds(new Set(fetchedArticles.map((a) => `${a.source}-${a.id}`)));
+        if (searchResult.errors) setSearchErrors(searchResult.errors);
+
+        papersToRoast = fetchedArticles;
+      }
+
+      if (papersToRoast.length === 0) {
+        setIsRoasting(false);
+        return;
+      }
+
+      // Now generate the roast
+      const res = await fetch("/api/paper-study/roast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ articles: papersToRoast }),
+        signal: controller.signal,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setRoast(data.roast || "");
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      setSearchErrors({
+        roast: err instanceof Error ? err.message : "Roast generation failed",
+      });
+    } finally {
+      if (roastAbortRef.current === controller) {
+        roastAbortRef.current = null;
+      }
+      setIsRoasting(false);
+    }
+  }, [articles, checkedIds, keywords, dateFrom, dateTo, sources]);
+
   /** Keyword-based search across arXiv / HuggingFace. */
   const handleSearch = useCallback(async () => {
     if (keywords.length === 0) return;
@@ -137,6 +238,7 @@ export function PaperStudyPanel({
     setIsSearching(true);
     setArticles([]);
     setSummary("");
+    setRoast("");
     setSearchErrors(undefined);
     setHasSearched(true);
     setSelectedArticle(null);
@@ -243,6 +345,7 @@ export function PaperStudyPanel({
     setIsFetching(true);
     setArticles([]);
     setSummary("");
+    setRoast("");
     setSearchErrors(undefined);
     setHasSearched(true);
     setSelectedArticle(null);
@@ -323,6 +426,27 @@ export function PaperStudyPanel({
         isFetching={isFetching}
       />
 
+      {/* 今日锐评 — always visible */}
+      <div className="flex items-center justify-between border-b px-3 py-1.5">
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={handleRoast}
+          disabled={isRoasting}
+          className="gap-1.5 text-xs"
+        >
+          <Flame className="h-3.5 w-3.5" />
+          {isRoasting ? t("roasting") : keywords.length > 0
+            ? t("roastSelected", { count: checkedIds.size > 0 ? checkedIds.size : "?" })
+            : t("roastAll")}
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          {keywords.length > 0
+            ? t("roastHintKeywords")
+            : t("roastHintAll")}
+        </p>
+      </div>
+
       {/* Results area */}
       <ScrollArea className="flex-1">
         {/* Error banner */}
@@ -367,15 +491,17 @@ export function PaperStudyPanel({
                 {allChecked ? t("deselectAll") : t("selectAll")}
               </Button>
             </div>
-            <Button
-              size="xs"
-              onClick={handleSummarize}
-              disabled={checkedCount === 0 || isSummarizing}
-              className="gap-1 text-xs"
-            >
-              <Sparkles className="h-3 w-3" />
-              {t("summarizeSelected", { count: checkedCount })}
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                size="xs"
+                onClick={handleSummarize}
+                disabled={checkedCount === 0 || isSummarizing}
+                className="gap-1 text-xs"
+              >
+                <Sparkles className="h-3 w-3" />
+                {t("summarizeSelected", { count: checkedCount })}
+              </Button>
+            </div>
           </div>
         )}
 
@@ -403,7 +529,19 @@ export function PaperStudyPanel({
           summary={summary}
           isSummarizing={isSummarizing}
           workspaceId={workspaceId}
+          notesDir={notesDir}
           onStop={handleStopSummarize}
+        />
+
+        {/* Sharp Review (今日锐评) */}
+        <PaperRoastSection
+          roast={roast}
+          isRoasting={isRoasting}
+          workspaceId={workspaceId}
+          notesDir={notesDir}
+          articles={articles}
+          onArticleSelect={handleSelectArticle}
+          onStop={handleStopRoast}
         />
       </ScrollArea>
     </div>

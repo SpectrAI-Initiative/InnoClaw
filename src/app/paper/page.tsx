@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { PaperStudyPanel } from "@/components/paper-study/paper-study-panel";
 import { ArticlePreview } from "@/components/paper-study/article-preview";
@@ -10,11 +9,12 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { usePaperNotesDir } from "@/lib/hooks/use-paper-notes-dir";
 import type { Article } from "@/lib/article-search/types";
 
 export default function PaperPage() {
-  const t = useTranslations("paperStudy");
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const { notesDir, setNotesDir } = usePaperNotesDir();
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -25,21 +25,18 @@ export default function PaperPage() {
             <PaperStudyPanel
               workspaceId=""
               onArticleSelect={setSelectedArticle}
+              notesDir={notesDir}
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={40} minSize={20}>
-            {selectedArticle ? (
-              <ArticlePreview
-                article={selectedArticle}
-                workspaceId=""
-                onClose={() => setSelectedArticle(null)}
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-muted-foreground">
-                <p>{t("selectArticleToPreview") || "Select an article to preview"}</p>
-              </div>
-            )}
+            <ArticlePreview
+              article={selectedArticle}
+              workspaceId=""
+              onClose={() => setSelectedArticle(null)}
+              notesDir={notesDir}
+              onSetNotesDir={setNotesDir}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

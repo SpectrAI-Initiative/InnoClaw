@@ -20,8 +20,6 @@ export async function searchHuggingFace(
 ): Promise<Article[]> {
   const { keywords, maxResults = 10, dateFrom, dateTo } = params;
 
-  if (!keywords.length) return [];
-
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -53,15 +51,21 @@ export async function searchHuggingFace(
 
   const data: HFPaper[] = await response.json();
 
-  // Filter by keywords (case-insensitive, match title or abstract)
-  const lowerKeywords = keywords.map((k) => k.toLowerCase());
-  let filtered = data.filter((paper) => {
-    const title = (paper.title || "").toLowerCase();
-    const abstract = (paper.paper?.summary || "").toLowerCase();
-    return lowerKeywords.some(
-      (kw) => title.includes(kw) || abstract.includes(kw)
-    );
-  });
+  // Filter by keywords if provided (case-insensitive, match title or abstract)
+  // When no keywords, return all daily papers
+  let filtered: HFPaper[];
+  if (keywords.length > 0) {
+    const lowerKeywords = keywords.map((k) => k.toLowerCase());
+    filtered = data.filter((paper) => {
+      const title = (paper.title || "").toLowerCase();
+      const abstract = (paper.paper?.summary || "").toLowerCase();
+      return lowerKeywords.some(
+        (kw) => title.includes(kw) || abstract.includes(kw)
+      );
+    });
+  } else {
+    filtered = [...data];
+  }
 
   // Filter by date
   if (dateFrom || dateTo) {
