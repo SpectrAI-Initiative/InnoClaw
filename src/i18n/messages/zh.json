@@ -198,7 +198,13 @@
     "hfTokenClear": "移除已保存的令牌",
     "fetchModels": "拉取模型列表",
     "fetchingModels": "拉取中...",
-    "fetchModelsSuccess": "已从供应商获取 {count} 个模型"
+    "fetchModelsSuccess": "已从供应商获取 {count} 个模型",
+    "fontSize": "字号",
+    "fontSizeDesc": "调整整个应用的基准字号大小",
+    "fontSizeReset": "重置",
+    "fontSizeValue": "{size}px",
+    "fontFamily": "字体",
+    "fontFamilyDesc": "选择应用的显示字体"
   },
   "terminal": {
     "title": "终端",
@@ -315,7 +321,8 @@
     "discussionRoleAI": "AI",
     "or": "或",
     "selectAll": "全选",
-    "deselectAll": "取消全选"
+    "deselectAll": "取消全选",
+    "selectArticleToPreview": "选择一篇文章以预览"
   },
   "skills": {
     "title": "技能",

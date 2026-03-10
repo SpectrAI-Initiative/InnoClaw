@@ -27,6 +27,9 @@ import { toast } from "sonner";
 import { PROVIDERS, CONTEXT_MODES } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
 import { ScheduledTasksCard } from "@/components/scheduled-tasks/scheduled-tasks-card";
+import { useFontSize } from "@/lib/hooks/use-font-size";
+import { useFontFamily, FONT_OPTIONS } from "@/lib/hooks/use-font-family";
+import { Minus, Plus, RotateCcw } from "lucide-react";
 
 interface Settings {
   llmProvider: string;
@@ -62,6 +65,8 @@ export default function SettingsPage() {
   const [fetchingModels, setFetchingModels] = useState(false);
   const [contextMode, setContextMode] = useState("normal");
   const [maxMode, setMaxMode] = useState(true);
+  const { fontSize, increase, decrease, reset, min, max } = useFontSize();
+  const { fontFamily, setFontFamily: setFont, reset: resetFont } = useFontFamily();
 
   const fetchRemoteModels = useCallback(
     async (prov: string) => {
@@ -190,6 +195,77 @@ export default function SettingsPage() {
           <h1 className="mb-8 text-2xl font-bold">{t("title")}</h1>
 
           <div className="space-y-6">
+            {/* Font Size */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("fontSize")}</CardTitle>
+                <CardDescription>{t("fontSizeDesc")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={decrease}
+                    disabled={fontSize <= min}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="min-w-[4rem] text-center text-lg font-medium tabular-nums">
+                    {t("fontSizeValue", { size: fontSize })}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={increase}
+                    disabled={fontSize >= max}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={reset}
+                    className="ml-2"
+                  >
+                    <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                    {t("fontSizeReset")}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Font Family */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("fontFamily")}</CardTitle>
+                <CardDescription>{t("fontFamilyDesc")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <Select value={fontFamily} onValueChange={(v) => setFont(v as typeof fontFamily)}>
+                    <SelectTrigger className="w-[240px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FONT_OPTIONS.map((f) => (
+                        <SelectItem key={f.id} value={f.id}>
+                          {f.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button variant="ghost" size="sm" onClick={resetFont}>
+                    <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                    {t("fontSizeReset")}
+                  </Button>
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground" style={{ fontFamily: FONT_OPTIONS.find((f) => f.id === fontFamily)?.value }}>
+                  The quick brown fox jumps over the lazy dog. 敏捷的棕色狐狸跳过了懒狗。
+                </p>
+              </CardContent>
+            </Card>
+
             {/* AI Provider Settings */}
             <Card>
               <CardHeader>

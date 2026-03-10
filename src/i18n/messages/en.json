@@ -195,7 +195,13 @@
     "hfTokenClear": "Remove saved token",
     "fetchModels": "Fetch Models",
     "fetchingModels": "Fetching...",
-    "fetchModelsSuccess": "Fetched {count} models from provider"
+    "fetchModelsSuccess": "Fetched {count} models from provider",
+    "fontSize": "Font Size",
+    "fontSizeDesc": "Adjust the base font size for the entire application",
+    "fontSizeReset": "Reset",
+    "fontSizeValue": "{size}px",
+    "fontFamily": "Font",
+    "fontFamilyDesc": "Choose the font family for the application"
   },
   "terminal": {
     "title": "Terminal",
@@ -312,7 +318,8 @@
     "discussionRoleAI": "AI",
     "or": "or",
     "selectAll": "Select All",
-    "deselectAll": "Deselect All"
+    "deselectAll": "Deselect All",
+    "selectArticleToPreview": "Select an article to preview"
   },
   "notes": {
     "title": "Notes",
