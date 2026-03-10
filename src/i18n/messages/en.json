@@ -30,7 +30,7 @@
     "cloneFromGithub": "Clone from GitHub",
     "empty": "No workspaces yet. Open a folder or clone a repository to get started.",
     "noWorkspaces": "No workspaces yet",
-    "noWorkspacesDesc": "Create or open a workspace to get started with Jarvis",
+    "noWorkspacesDesc": "Create or open a workspace to get started with InnoClaw",
     "lastOpened": "Last opened",
     "open": "Open",
     "files": "files",
@@ -210,7 +210,7 @@
     "previewMode": "Preview"
   },
   "agent": {
-    "title": "Claude Code",
+    "title": "Agent",
     "placeholder": "Ask me to code...",
     "placeholderPlan": "Describe what you want to build...",
     "placeholderAsk": "Ask a question about your code...",

@@ -20,7 +20,7 @@ export default function PaperPage() {
     <div className="flex h-screen flex-col bg-background">
       <Header />
       <div className="flex-1 overflow-hidden">
-        <ResizablePanelGroup direction="horizontal">
+        <ResizablePanelGroup orientation="horizontal">
           <ResizablePanel defaultSize={60} minSize={30}>
             <PaperStudyPanel
               workspaceId=""

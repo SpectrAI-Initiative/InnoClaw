@@ -1,10 +1,10 @@
 # Testing
 
-This guide covers how to write and run tests for NotebookLM.
+This guide covers how to write and run tests for InnoClaw.
 
 ## Test Framework
 
-NotebookLM uses [Vitest](https://vitest.dev/) (v4+) as its test framework, configured in `vitest.config.ts`.
+InnoClaw uses [Vitest](https://vitest.dev/) (v4+) as its test framework, configured in `vitest.config.ts`.
 
 ### Configuration
 

@@ -141,7 +141,7 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
   const result = part.output as Record<string, unknown> | undefined;
 
   return (
-    <div className={`my-2 rounded-lg border text-xs font-mono overflow-hidden transition-all duration-300 ${
+    <div className={`my-2 rounded-lg border text-xs font-mono overflow-hidden break-all transition-all duration-300 ${
       isRunning
         ? "border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5 shadow-[0_0_15px_rgba(139,92,246,0.1)]"
         : isError
@@ -231,7 +231,7 @@ function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
 
           {/* Result */}
           {isDone && result && (
-            <div className="max-h-[300px] overflow-auto">
+            <div className="max-h-[300px] overflow-y-auto overflow-x-hidden">
               {renderToolResult(toolName, result)}
             </div>
           )}
@@ -385,7 +385,7 @@ function renderToolResult(
             </div>
           )}
           {crLogs && (
-            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed max-h-[400px] overflow-auto">
+            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed max-h-[400px] overflow-y-auto overflow-x-hidden">
               {crLogs}
             </pre>
           )}
@@ -440,7 +440,7 @@ function AgentMessage({ message }: { message: UIMessage }) {
           return (
             <div
               key={i}
-              className="prose prose-sm max-w-none text-agent-foreground [&_p]:my-1.5 [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_pre]:rounded-lg [&_code]:text-agent-code [&_h1]:text-agent-foreground [&_h2]:text-agent-foreground [&_h3]:text-agent-foreground [&_a]:text-agent-accent [&_strong]:text-agent-foreground [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-0.5 dark:prose-invert"
+              className="prose prose-sm max-w-none text-agent-foreground [&_p]:my-1.5 [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_pre]:rounded-lg [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:text-agent-code [&_code]:break-all [&_h1]:text-agent-foreground [&_h2]:text-agent-foreground [&_h3]:text-agent-foreground [&_a]:text-agent-accent [&_strong]:text-agent-foreground [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-0.5 dark:prose-invert"
             >
               <ReactMarkdown>{text}</ReactMarkdown>
             </div>
@@ -1136,8 +1136,8 @@ export function AgentPanel({
       </div>
 
       {/* Messages */}
-      <ScrollArea className="relative z-10 flex-1" ref={scrollRef}>
-        <div className="p-3 space-y-3">
+      <ScrollArea className="relative z-10 flex-1 [&_[data-slot=scroll-area-viewport]]:!overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:hidden" ref={scrollRef}>
+        <div className="p-3 space-y-3 overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
           {!aiEnabled ? (
             <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
               <AlertCircle className="h-8 w-8 text-agent-muted" />
@@ -1182,7 +1182,7 @@ export function AgentPanel({
                   {/* Glow orbs */}
                   <div className="absolute -left-4 -top-4 h-16 w-16 rounded-full bg-primary/20 blur-xl animate-pulse" />
                   <div className="absolute -right-4 -bottom-4 h-12 w-12 rounded-full bg-accent/20 blur-xl animate-pulse [animation-delay:0.5s]" />
-                  <ThinkingIndicator label="Jarvis thinking" />
+                  <ThinkingIndicator label="InnoClaw thinking" />
                 </div>
               </div>
             )}

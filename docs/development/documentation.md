@@ -87,7 +87,7 @@ make clean
 
 ## MyST Markdown Syntax
 
-NotebookLM docs use [MyST-Parser](https://myst-parser.readthedocs.io/) for Markdown support in Sphinx.
+InnoClaw docs use [MyST-Parser](https://myst-parser.readthedocs.io/) for Markdown support in Sphinx.
 
 ### Admonitions
 
@@ -134,7 +134,7 @@ See [Installation Guide](getting-started/installation.md) for details.
 
 ## Translation Workflow
 
-NotebookLM documentation uses Sphinx's built-in internationalization (i18n) with `sphinx-intl`.
+InnoClaw documentation uses Sphinx's built-in internationalization (i18n) with `sphinx-intl`.
 
 ### How It Works
 
@@ -164,8 +164,8 @@ Open the `.po` files in `docs/locales/zh/LC_MESSAGES/` with a text editor or a P
 
 ```po
 #: ../../getting-started/overview.md:3
-msgid "What is NotebookLM?"
-msgstr "什么是 NotebookLM？"
+msgid "What is InnoClaw?"
+msgstr "什么是 InnoClaw？"
 ```
 
 Each entry has:
