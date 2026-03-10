@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 import {
   FONT_FAMILY_KEY,
   DEFAULT_FONT,
@@ -32,21 +32,44 @@ function applyFont(fontId: FontId) {
   document.body.style.fontFamily = option.value;
 }
 
-export function useFontFamily() {
-  const [fontFamily, setFontFamily] = useState<FontId>(DEFAULT_FONT);
+let listeners: Array<() => void> = [];
+function emitChange() {
+  for (const l of listeners) l();
+}
+function subscribe(cb: () => void) {
+  listeners = [...listeners, cb];
+  return () => {
+    listeners = listeners.filter((l) => l !== cb);
+  };
+}
 
-  useEffect(() => {
+function getSnapshot(): FontId {
+  try {
     const stored = localStorage.getItem(FONT_FAMILY_KEY) as FontId | null;
     if (stored && FONT_OPTIONS.some((f) => f.id === stored)) {
-      setFontFamily(stored);
-      applyFont(stored);
+      return stored;
     }
-  }, []);
+  } catch {
+    // Ignore storage errors
+  }
+  return DEFAULT_FONT;
+}
+
+function getServerSnapshot(): FontId {
+  return DEFAULT_FONT;
+}
+
+export function useFontFamily() {
+  const fontFamily = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const updateFontFamily = useCallback((id: FontId) => {
-    setFontFamily(id);
-    localStorage.setItem(FONT_FAMILY_KEY, id);
+    try {
+      localStorage.setItem(FONT_FAMILY_KEY, id);
+    } catch {
+      // Ignore storage errors; font will still be applied for this session
+    }
     applyFont(id);
+    emitChange();
   }, []);
 
   const reset = useCallback(() => {
