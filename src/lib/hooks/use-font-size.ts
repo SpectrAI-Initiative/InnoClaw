@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { FONT_SIZE_KEY, MIN_FONT_SIZE, MAX_FONT_SIZE } from "@/lib/font-constants";
 
-const FONT_SIZE_KEY = "innoclaw-font-size";
 const DEFAULT_FONT_SIZE = 16;
-const MIN_FONT_SIZE = 12;
-const MAX_FONT_SIZE = 24;
 const STEP = 2;
 
 export function useFontSize() {
