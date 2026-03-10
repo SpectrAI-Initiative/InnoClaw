@@ -151,7 +151,7 @@ export async function deleteFile(filePath: string): Promise<void> {
   const stat = await fsp.stat(validated);
 
   if (stat.isDirectory()) {
-    await fsp.rmdir(validated);
+    await fsp.rm(validated, { recursive: true });
   } else {
     await fsp.unlink(validated);
   }
