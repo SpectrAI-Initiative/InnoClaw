@@ -1162,10 +1162,10 @@ export function AgentPanel({
     <div ref={containerRef} className="relative flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm overflow-hidden">
       {/* Header */}
       <div className="relative z-10 flex items-center gap-2 border-b border-agent-border px-3 py-2 bg-agent-bg/80 backdrop-blur-sm">
-        {mode === "agent" && <Bot className="h-4 w-4 text-agent-accent" />}
-        {mode === "plan" && <ClipboardList className="h-4 w-4 text-agent-success" />}
-        {mode === "ask" && <MessageCircleQuestion className="h-4 w-4 text-agent-purple" />}
-        <span className="text-xs font-semibold text-agent-foreground">
+        {mode === "agent" && <Bot className={`h-4 w-4 text-agent-accent ${isLoading ? "animate-pulse" : ""}`} />}
+        {mode === "plan" && <ClipboardList className={`h-4 w-4 text-agent-success ${isLoading ? "animate-pulse" : ""}`} />}
+        {mode === "ask" && <MessageCircleQuestion className={`h-4 w-4 text-agent-purple ${isLoading ? "animate-pulse" : ""}`} />}
+        <span className={`text-xs font-semibold text-agent-foreground ${isLoading ? "animate-title-breathe" : ""}`}>
           {t("title")}
         </span>
         <span className="text-xs text-agent-muted ml-auto truncate">

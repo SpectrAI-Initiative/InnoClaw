@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, X, Pencil } from "lucide-react";
+import { Plus, X, Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -53,8 +53,7 @@ export function AgentSessionTabs({
   const handleClose = useCallback(
     (id: string, e: React.MouseEvent) => {
       e.stopPropagation();
-
-      if (sessions.length <= 1) return; // can't close the last one
+      if (sessions.length <= 1) return;
 
       if (confirmingId === id) {
         // Second click — actually close
@@ -166,23 +165,17 @@ export function AgentSessionTabs({
             )}
 
             {sessions.length > 1 && !isEditing && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    className={`ml-0.5 rounded p-0.5 transition-colors ${
-                      isConfirming
-                        ? "text-destructive bg-destructive/10"
-                        : "opacity-0 group-hover:opacity-100 hover:bg-muted text-muted-foreground hover:text-foreground"
-                    }`}
-                    onClick={(e) => handleClose(session.id, e)}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs">
-                  {isConfirming ? t("closeConfirm") : t("closeSession")}
-                </TooltipContent>
-              </Tooltip>
+              <button
+                className={`ml-0.5 rounded p-0.5 transition-colors ${
+                  isConfirming
+                    ? "text-destructive bg-destructive/10"
+                    : "opacity-0 group-hover:opacity-100 hover:bg-muted text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={(e) => handleClose(session.id, e)}
+                title={isConfirming ? t("closeConfirm") : t("closeSession")}
+              >
+                {isConfirming ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+              </button>
             )}
           </div>
         );
