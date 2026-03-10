@@ -505,12 +505,16 @@ interface AgentPanelProps {
   workspaceId: string;
   workspaceName: string;
   folderPath: string;
+  sessionId: string;
+  sessionName?: string;
 }
 
 export function AgentPanel({
   workspaceId,
   workspaceName,
   folderPath,
+  sessionId,
+  sessionName,
 }: AgentPanelProps) {
   const t = useTranslations("agent");
   const tCommon = useTranslations("common");
@@ -681,22 +685,25 @@ export function AgentPanel({
   );
 
   // Scrub any in-progress tool invocations to a terminal state.
-  // Used after stop() and on restore from localStorage.
+  // Used after stop(), on restore from localStorage, and after overflow eviction.
   function scrubStuckToolParts(msgs: UIMessage[]): UIMessage[] {
     const isToolPart = (type?: string) =>
       type !== undefined && (type.startsWith("tool-") || type === "dynamic-tool");
-    const isStuck = (p: { type?: string; state?: string }) =>
-      isToolPart(p.type) && p.state && p.state !== "output-available" && p.state !== "output-error";
+    const isStuck = (p: { type?: string; state?: string; input?: unknown }) =>
+      isToolPart(p.type) && (
+        (p.state && p.state !== "output-available" && p.state !== "output-error") ||
+        p.input === undefined
+      );
 
     const needsScrub = msgs.some((msg) =>
-      msg.parts?.some((part) => isStuck(part as { type?: string; state?: string }))
+      msg.parts?.some((part) => isStuck(part as { type?: string; state?: string; input?: unknown }))
     );
     if (!needsScrub) return msgs;
     return msgs.map((msg) => ({
       ...msg,
       parts: msg.parts?.map((part) => {
-        if (isStuck(part as { type?: string; state?: string })) {
-          return { ...part, state: "output-error", errorText: "Stopped" };
+        if (isStuck(part as { type?: string; state?: string; input?: unknown })) {
+          return { ...part, state: "output-error", input: (part as Record<string, unknown>).input ?? {}, errorText: "Stopped" };
         }
         return part;
       }),
@@ -706,7 +713,7 @@ export function AgentPanel({
   const { messages, sendMessage, setMessages, stop, status, error: chatError } = useChat({ transport });
 
   // --- Message persistence via localStorage ---
-  const storageKey = `agent-messages:${workspaceId}:${mode}`;
+  const storageKey = `agent-messages:${workspaceId}:${sessionId}:${mode}`;
   // Counter-based gate: incremented on restore, decremented in the save effect
   // that sees the restored messages. Avoids save-during-restore race.
   const restoreGenRef = useRef(0);
@@ -834,6 +841,7 @@ export function AgentPanel({
           messages: messagesToSummarize,
           trigger,
           locale,
+          sessionName,
         }),
       });
 
@@ -1054,6 +1062,7 @@ export function AgentPanel({
           trigger: "clear",
           preview: true,
           locale,
+          sessionName,
         }),
       });
       if (!res.ok) {
@@ -1112,7 +1121,7 @@ export function AgentPanel({
           role: "assistant" as const,
           parts: [{ type: "text" as const, text: t("memorySaved") }],
         } as UIMessage;
-        setMessages([memoryMarker, ...overflowKeepRef.current]);
+        setMessages([memoryMarker, ...scrubStuckToolParts(overflowKeepRef.current)]);
         overflowKeepRef.current = null;
       } else {
         // Manual clear: empty all messages
@@ -1311,7 +1320,7 @@ export function AgentPanel({
             }}
             onKeyDown={(e) => {
               // Enter without Shift sends message, Shift+Enter creates new line
-              if (e.key === "Enter" && !e.shiftKey && !showAutocomplete) {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && !showAutocomplete) {
                 e.preventDefault();
                 handleSend();
               }

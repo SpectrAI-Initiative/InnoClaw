@@ -172,7 +172,9 @@ export function ArticlePreview({ article, workspaceId, onClose }: ArticlePreview
               <Badge variant="secondary" className="text-xs">
                 {article.source === "arxiv"
                   ? t("sourceArxiv")
-                  : t("sourceHuggingFace")}
+                  : article.source === "semantic-scholar"
+                    ? t("sourceSemanticScholar")
+                    : t("sourceHuggingFace")}
               </Badge>
               {date && (
                 <span className="text-xs text-muted-foreground">

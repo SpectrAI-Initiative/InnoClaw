@@ -357,6 +357,30 @@ export function buildDailyReportPrompt(): string {
 }
 
 /**
+ * Build a system prompt for AI-powered query expansion.
+ *
+ * The LLM receives a natural language question and returns optimized search
+ * keywords for academic paper search plus a refined semantic query.
+ */
+export function buildQueryExpansionPrompt(): string {
+  return `You are an academic search query optimizer. The user will provide a natural language question or description of the papers they are looking for. Your job is to extract optimized search terms.
+
+Return a JSON object with exactly two fields:
+- "keywords": an array of 3-6 concise keyword phrases optimized for academic paper search (arXiv-style). Each keyword should be a specific technical term or short phrase (1-3 words). Avoid vague terms.
+- "query": a refined natural language query suitable for semantic search engines like Semantic Scholar.
+
+Rules:
+1. Keywords should cover the core technical concepts mentioned or implied.
+2. Include both specific terms and slightly broader related terms to maximize recall.
+3. Keep keywords concise and academic — use terms that would appear in paper titles or abstracts.
+4. The query should be a clear, well-formed sentence that captures the user's search intent.
+5. Return ONLY the JSON object, no markdown fences, no explanation.
+
+Example input: "I want to find papers about using diffusion models for video generation"
+Example output: {"keywords":["diffusion model","video generation","video synthesis","text-to-video","temporal diffusion"],"query":"diffusion models for video generation and synthesis"}`;
+}
+
+/**
  * Build a system prompt for synthesizing a week's memory notes into a weekly report.
  */
 export function buildWeeklyReportPrompt(dateRange: string): string {

@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/header";
 import { FileBrowser } from "@/components/files/file-browser";
 import { AgentPanel } from "@/components/agent/agent-panel";
+import { AgentSessionTabs } from "@/components/agent/agent-session-tabs";
 import { ReportPanel } from "@/components/report/report-panel";
 import { PaperStudyPanel } from "@/components/paper-study/paper-study-panel";
 import { ArticlePreview } from "@/components/paper-study/article-preview";
@@ -19,6 +20,7 @@ import { FilePreviewPanel } from "@/components/preview/file-preview-panel";
 import { useWorkspace } from "@/lib/hooks/use-workspaces";
 import { useReport } from "@/lib/hooks/use-report";
 import { useMinimalMode } from "@/lib/hooks/use-minimal-mode";
+import { useAgentSessions } from "@/lib/hooks/use-agent-sessions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Bot, FileText, GraduationCap, Server, Maximize2 } from "lucide-react";
@@ -41,6 +43,14 @@ export default function WorkspacePage({
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const { report, isAvailable: reportAvailable } = useReport(workspaceId);
   const { isMinimal, toggleMinimalMode } = useMinimalMode();
+  const {
+    sessions,
+    activeSessionId,
+    setActiveSessionId,
+    createSession,
+    closeSession,
+    renameSession,
+  } = useAgentSessions(workspaceId);
   const t = useTranslations("report");
   const tc = useTranslations("cluster");
   const tCommon = useTranslations("common");
@@ -170,20 +180,39 @@ export default function WorkspacePage({
                     </div>
                   )}
 
-                  {/* AgentPanel — single instance, never remounted.
+                  {/* AgentPanel — multi-session via tabs, each panel stays mounted.
                       In minimal mode the wrapper becomes a fixed full-screen overlay;
                       in normal mode it sits inside the panel layout as before. */}
                   <div className={
                     isMinimal
                       ? "fixed inset-0 z-40 bg-background"
-                      : (middlePanel === "agent" ? "h-full" : "hidden")
+                      : (middlePanel === "agent" ? "h-full flex flex-col" : "hidden")
                   }>
-                    <div className={isMinimal ? "mx-auto h-screen w-full max-w-4xl" : "h-full"}>
-                      <AgentPanel
-                        workspaceId={workspaceId}
-                        workspaceName={workspace.name}
-                        folderPath={workspace.folderPath}
+                    <div className={isMinimal ? "mx-auto h-screen w-full max-w-4xl flex flex-col" : "h-full flex flex-col"}>
+                      <AgentSessionTabs
+                        sessions={sessions}
+                        activeSessionId={activeSessionId}
+                        onSelect={setActiveSessionId}
+                        onClose={closeSession}
+                        onCreate={createSession}
+                        onRename={renameSession}
                       />
+                      <div className="flex-1 min-h-0 relative">
+                        {sessions.map((session) => (
+                          <div
+                            key={session.id}
+                            className={session.id === activeSessionId ? "h-full" : "hidden"}
+                          >
+                            <AgentPanel
+                              workspaceId={workspaceId}
+                              workspaceName={workspace.name}
+                              folderPath={workspace.folderPath}
+                              sessionId={session.id}
+                              sessionName={session.name}
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <div className={middlePanel === "report" ? "h-full" : "hidden"}>
