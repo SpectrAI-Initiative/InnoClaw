@@ -195,7 +195,13 @@
     "hfTokenClear": "Remove saved token",
     "fetchModels": "Fetch Models",
     "fetchingModels": "Fetching...",
-    "fetchModelsSuccess": "Fetched {count} models from provider"
+    "fetchModelsSuccess": "Fetched {count} models from provider",
+    "styleTheme": "Theme Style",
+    "styleThemeDesc": "Choose a visual style for the interface. Light/dark mode works with all styles.",
+    "styleTheme_default": "Default",
+    "styleTheme_cartoon": "Cartoon",
+    "styleTheme_cyberpunk": "Cyberpunk Pixel",
+    "styleTheme_retro": "Retro Handheld"
   },
   "terminal": {
     "title": "Terminal",

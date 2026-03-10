@@ -1279,7 +1279,7 @@ export function AgentPanel({
             }}
             onKeyDown={(e) => {
               // Enter without Shift sends message, Shift+Enter creates new line
-              if (e.key === "Enter" && !e.shiftKey && !showAutocomplete) {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && !showAutocomplete) {
                 e.preventDefault();
                 handleSend();
               }
