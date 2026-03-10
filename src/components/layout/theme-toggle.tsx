@@ -1,17 +1,28 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useStyleTheme } from "@/lib/hooks/use-style-theme";
+import type { StyleThemeId } from "@/lib/hooks/use-style-theme";
+
+const STYLE_THEMES: { id: StyleThemeId; label: string }[] = [
+  { id: "default", label: "Default" },
+  { id: "cartoon", label: "Cartoon" },
+  { id: "cyberpunk-pixel", label: "Cyberpunk" },
+  { id: "retro-handheld", label: "Retro" },
+];
 
 export function ThemeToggle() {
   const { setTheme } = useTheme();
+  const { styleTheme, setStyleTheme } = useStyleTheme();
 
   return (
     <DropdownMenu>
@@ -32,6 +43,18 @@ export function ThemeToggle() {
         <DropdownMenuItem onClick={() => setTheme("system")}>
           System
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {STYLE_THEMES.map((t) => (
+          <DropdownMenuItem
+            key={t.id}
+            onClick={() => setStyleTheme(t.id)}
+          >
+            <Check
+              className={`mr-2 h-4 w-4 ${styleTheme === t.id ? "opacity-100" : "opacity-0"}`}
+            />
+            {t.label}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

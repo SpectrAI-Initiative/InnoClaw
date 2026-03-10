@@ -19,6 +19,8 @@ A self-hostable AI research assistant inspired by Google NotebookLM. Turn server
 - 🧠 **上下文管理** — MAX 模式自动摘要防止上下文溢出
 - 🔬 **206 个 SCP 科学技能** — 覆盖药物发现、基因组学、蛋白质工程等 8 大领域
 - 🛠️ **Skills 系统** — 通过导入 Skills 快速配置飞书机器人、SCP 科学技能等高级功能
+- 🗂️ **多 Agent 会话** — 标签式多会话管理，支持重命名、独立上下文
+- 📚 **论文研读** — 跨 arXiv / HuggingFace / Semantic Scholar 搜索，AI 智能扩展查询，一键摘要
 
 **适用人群：** 研究人员 · 开发者 · 自托管爱好者 · 学生和教育工作者
 
@@ -265,6 +267,9 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 - **飞书机器人** — WebSocket 长连接，Agent 工具调用，交互卡片
 - **SCP 科学技能** — 206 个技能，覆盖 8 大科学领域
 - **Skills 系统** — 导入/导出/自定义技能，通过 `/skills` 页面管理
+- **多 Agent 会话** — 标签式多会话管理，独立上下文，支持重命名和两步确认关闭
+- **论文研读** — 跨 arXiv / HuggingFace / Semantic Scholar 三源搜索，AI 查询扩展，批量摘要生成
+- **主题风格** — 默认 / 卡通 / 赛博像素 / 复古掌机四种视觉风格
 
 ---
 
@@ -284,6 +289,19 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 
 ### 5. 设置
 访问 `/settings`：切换 AI 提供商和模型、MAX 模式开关、上下文策略、API Key 状态。
+
+### 6. 论文研读 / Paper Study
+访问 `/paper` 页面，搜索 arXiv、HuggingFace Daily Papers 和 Semantic Scholar 的学术论文：
+- **关键词搜索**：添加关键词标签后点击 **"Search"** 进行精确搜索
+- **AI 智能搜索**：在任意输入框输入自然语言描述（如 "diffusion models for video generation"），点击 **"AI Search"** → AI 自动提取优化关键词并跨三源搜索
+- **论文摘要**：勾选论文后点击 **"Summarize"** 生成 AI 结构化摘要
+- **论文讨论**：点击论文预览后可与 AI 讨论论文细节
+
+### 7. 多 Agent 会话 / Multi-Agent Sessions
+在工作空间的 Agent 面板中，点击 **"+"** 按钮创建新会话。每个会话独立维护对话上下文和记忆：
+- 标签栏显示所有活跃会话，点击切换
+- 双击标签或点击铅笔图标重命名
+- 关闭标签需两步确认（防止误操作）
 
 ---
 
@@ -426,18 +444,21 @@ src/
 │       ├── files/                # 文件操作
 │       ├── chat/                 # AI 对话（流式）
 │       ├── agent/                # Agent 面板 API
+│       ├── paper-study/             # 论文研读 API（搜索/摘要/讨论/AI 查询扩展）
 │       ├── skills/               # Skills CRUD + 导入
 │       ├── bot/feishu/           # 飞书 webhook + 推送
 │       ├── generate/             # 笔记生成
 │       └── settings/             # 设置
 ├── components/                   # React 组件
 │   ├── ui/                       # shadcn/ui 基础组件
-│   ├── agent/                    # Agent 面板
+│   ├── agent/                    # Agent 面板（多会话标签）
+│   ├── paper-study/              # 论文研读组件
 │   ├── skills/                   # Skills 管理组件
 │   ├── chat/                     # 对话组件
 │   └── files/                    # 文件浏览器
 ├── lib/                          # 核心逻辑
 │   ├── ai/                       # AI 提供商、Agent 工具、提示词
+│   ├── article-search/           # 论文搜索（arXiv / HuggingFace / Semantic Scholar）
 │   ├── db/                       # Drizzle ORM + SQLite
 │   ├── rag/                      # RAG 管道（分块/嵌入/检索）
 │   ├── bot/feishu/               # 飞书适配器

@@ -55,8 +55,8 @@ export function ArticleCard({
     <div
       role="button"
       tabIndex={0}
-      className={`cursor-pointer rounded-lg border p-3 transition-colors hover:bg-accent/50 ${
-        isSelected ? "border-primary bg-accent/30" : "border-border"
+      className={`cursor-pointer rounded-lg border p-3 transition-colors hover:bg-muted ${
+        isSelected ? "border-primary bg-primary/10" : "border-border"
       }`}
       onClick={() => onSelect(article)}
       onKeyDown={handleKeyDown}
@@ -104,7 +104,11 @@ export function ArticleCard({
           variant="secondary"
           className="text-[10px] px-1.5 py-0"
         >
-          {article.source === "arxiv" ? t("sourceArxiv") : t("sourceHuggingFace")}
+          {article.source === "arxiv"
+            ? t("sourceArxiv")
+            : article.source === "semantic-scholar"
+              ? t("sourceSemanticScholar")
+              : t("sourceHuggingFace")}
         </Badge>
         {date && <span>{date}</span>}
       </div>

@@ -274,7 +274,7 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
             {notes.map((note) => (
               <Card
                 key={note.id}
-                className="cursor-pointer transition-colors hover:bg-accent/50"
+                className="cursor-pointer transition-colors hover:bg-muted"
                 onClick={() => setViewingNote(note)}
               >
                 <CardHeader className="pb-2">

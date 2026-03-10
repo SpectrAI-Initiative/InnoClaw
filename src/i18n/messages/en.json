@@ -66,6 +66,7 @@
     "moved": "Moved successfully",
     "pathCopied": "Path copied to clipboard",
     "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+    "deleteConfirmDir": "Are you sure you want to delete the folder \"{name}\" and all its contents?",
     "fileName": "File name",
     "folderName": "Folder name",
     "emptyFolder": "This folder is empty",
@@ -195,7 +196,20 @@
     "hfTokenClear": "Remove saved token",
     "fetchModels": "Fetch Models",
     "fetchingModels": "Fetching...",
-    "fetchModelsSuccess": "Fetched {count} models from provider"
+    "fetchModelsSuccess": "Fetched {count} models from provider",
+    "styleTheme": "Theme Style",
+    "styleThemeDesc": "Choose a visual style for the interface. Light/dark mode works with all styles.",
+    "styleTheme_default": "Default",
+    "styleTheme_cartoon": "Cartoon",
+    "styleTheme_cyberpunk": "Cyberpunk Pixel",
+    "styleTheme_retro": "Retro Handheld",
+    "fontSize": "Font Size",
+    "fontSizeDesc": "Adjust the base font size for the entire application",
+    "fontSizeReset": "Reset",
+    "fontSizeValue": "{size}px",
+    "fontFamily": "Font",
+    "fontFamilyDesc": "Choose the font family for the application",
+    "fontFamilyReset": "Reset"
   },
   "terminal": {
     "title": "Terminal",
@@ -242,7 +256,11 @@
     "clearAll": "Clear All",
     "roleUser": "User",
     "roleAssistant": "Assistant",
-    "autoContinue": "Continue"
+    "autoContinue": "Continue",
+    "newSession": "New Session",
+    "closeSession": "Close Session",
+    "closeConfirm": "Click again to close",
+    "renameSession": "Rename"
   },
   "report": {
     "tabReport": "Research report",
@@ -276,6 +294,8 @@
     "dateAll": "All dates",
     "sourceArxiv": "arXiv",
     "sourceHuggingFace": "HuggingFace",
+    "sourceSemanticScholar": "Semantic Scholar",
+    "semanticPlaceholder": "Try a natural language question...",
     "results": "{count} papers found",
     "noResults": "No papers found. Try different keywords or date range.",
     "emptyState": "Search for academic papers from arXiv and Hugging Face Daily Papers. Select papers and click Summarize to generate AI summaries.",
@@ -313,7 +333,11 @@
     "discussionRoleAI": "AI",
     "or": "or",
     "selectAll": "Select All",
-    "deselectAll": "Deselect All"
+    "deselectAll": "Deselect All",
+    "selectArticleToPreview": "Select an article to preview",
+    "aiSearch": "AI Search",
+    "aiSearching": "Analyzing...",
+    "aiSearchHint": "Use AI to expand your query into optimized search terms"
   },
   "notes": {
     "title": "Notes",

@@ -63,7 +63,7 @@ function messagesToTranscript(
 
 export async function POST(req: NextRequest) {
   try {
-    const { workspaceId, messages, trigger, preview, locale } = await req.json();
+    const { workspaceId, messages, trigger, preview, locale, sessionName } = await req.json();
 
     if (
       !workspaceId ||
@@ -113,7 +113,10 @@ export async function POST(req: NextRequest) {
 
     const i18n = locale === "en" ? enMessages : zhMessages;
     const titleKey = trigger === "clear" ? "memoryTitleClear" : "memoryTitleOverflow";
-    const title = i18n.notes[titleKey].replace("{date}", dateStr);
+    let title = i18n.notes[titleKey].replace("{date}", dateStr);
+    if (sessionName && typeof sessionName === "string") {
+      title = `${title} (${sessionName})`;
+    }
 
     // Preview mode: return summary without saving to DB
     if (preview) {

@@ -212,6 +212,7 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
+
     return NextResponse.json({ articles });
   } catch (error) {
     console.error("Paper fetch error:", error);

@@ -66,6 +66,7 @@
     "moved": "移动成功",
     "pathCopied": "路径已复制到剪贴板",
     "deleteConfirm": "确定要删除「{name}」吗？",
+    "deleteConfirmDir": "确定要删除文件夹「{name}」及其所有内容吗？",
     "fileName": "文件名",
     "folderName": "文件夹名",
     "emptyFolder": "此文件夹为空",
@@ -198,7 +199,20 @@
     "hfTokenClear": "移除已保存的令牌",
     "fetchModels": "拉取模型列表",
     "fetchingModels": "拉取中...",
-    "fetchModelsSuccess": "已从供应商获取 {count} 个模型"
+    "fetchModelsSuccess": "已从供应商获取 {count} 个模型",
+    "styleTheme": "主题风格",
+    "styleThemeDesc": "选择界面视觉风格，明暗模式在所有风格下均可使用。",
+    "styleTheme_default": "默认",
+    "styleTheme_cartoon": "卡通",
+    "styleTheme_cyberpunk": "赛博像素",
+    "styleTheme_retro": "复古掌机",
+    "fontSize": "字号",
+    "fontSizeDesc": "调整整个应用的基准字号大小",
+    "fontSizeReset": "重置",
+    "fontSizeValue": "{size}px",
+    "fontFamily": "字体",
+    "fontFamilyDesc": "选择应用的显示字体",
+    "fontFamilyReset": "重置"
   },
   "terminal": {
     "title": "终端",
@@ -245,7 +259,11 @@
     "clearAll": "直接清除",
     "roleUser": "用户",
     "roleAssistant": "助手",
-    "autoContinue": "继续"
+    "autoContinue": "继续",
+    "newSession": "新会话",
+    "closeSession": "关闭会话",
+    "closeConfirm": "再次点击关闭",
+    "renameSession": "重命名"
   },
   "report": {
     "tabReport": "研究报告",
@@ -279,6 +297,8 @@
     "dateAll": "不限日期",
     "sourceArxiv": "arXiv",
     "sourceHuggingFace": "HuggingFace",
+    "sourceSemanticScholar": "Semantic Scholar",
+    "semanticPlaceholder": "试试自然语言提问，例如「Transformer 如何处理长序列」...",
     "results": "找到 {count} 篇论文",
     "noResults": "未找到论文。请尝试不同的关键词或日期范围。",
     "emptyState": "搜索 arXiv 和 Hugging Face Daily Papers 上的学术论文。选择论文后点击总结按钮生成 AI 摘要。",
@@ -316,7 +336,11 @@
     "discussionRoleAI": "AI",
     "or": "或",
     "selectAll": "全选",
-    "deselectAll": "取消全选"
+    "deselectAll": "取消全选",
+    "selectArticleToPreview": "选择文章以预览",
+    "aiSearch": "AI 搜索",
+    "aiSearching": "分析中...",
+    "aiSearchHint": "使用 AI 将你的问题扩展为优化的搜索词"
   },
   "skills": {
     "title": "技能",

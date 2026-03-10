@@ -2,10 +2,15 @@
 
 import { useState, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
-import { Search, X, Loader2, FileText, Plus } from "lucide-react";
+import { Search, X, Loader2, FileText, Plus, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ArticleSource } from "@/lib/article-search/types";
 
 const PRESET_KEYWORDS = [
@@ -29,8 +34,10 @@ interface PaperSearchBarProps {
   sources: ArticleSource[];
   onSourcesChange: (sources: ArticleSource[]) => void;
   onSearch: () => void;
+  onAISearch: (question: string) => void;
   onFetchTitle: (title: string) => void;
   isSearching: boolean;
+  isAISearching: boolean;
   isFetching: boolean;
 }
 
@@ -44,8 +51,10 @@ export function PaperSearchBar({
   sources,
   onSourcesChange,
   onSearch,
+  onAISearch,
   onFetchTitle,
   isSearching,
+  isAISearching,
   isFetching,
 }: PaperSearchBarProps) {
   const t = useTranslations("paperStudy");
@@ -189,7 +198,7 @@ export function PaperSearchBar({
           value={keywordInput}
           onChange={(e) => setKeywordInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={t("keywordPlaceholder")}
+          placeholder={sources.includes("semantic-scholar") ? t("semanticPlaceholder") : t("keywordPlaceholder")}
           className="h-7 w-[200px] text-xs"
         />
         <Button
@@ -250,13 +259,50 @@ export function PaperSearchBar({
         >
           {t("sourceHuggingFace")}
         </Button>
+        <Button
+          variant={sources.includes("semantic-scholar") ? "default" : "outline"}
+          size="xs"
+          onClick={() => toggleSource("semantic-scholar")}
+          className="text-xs"
+        >
+          {t("sourceSemanticScholar")}
+        </Button>
 
         <div className="flex-1" />
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const question = titleInput.trim() || keywordInput.trim() || keywords.join(" ");
+                if (question) {
+                  setTitleInput("");
+                  setKeywordInput("");
+                  onAISearch(question);
+                }
+              }}
+              disabled={isAISearching || isSearching || (!titleInput.trim() && !keywordInput.trim() && keywords.length === 0)}
+              className="gap-1"
+            >
+              {isAISearching ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5" />
+              )}
+              {isAISearching ? t("aiSearching") : t("aiSearch")}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs max-w-[200px]">
+            {t("aiSearchHint")}
+          </TooltipContent>
+        </Tooltip>
 
         <Button
           size="sm"
           onClick={onSearch}
-          disabled={isSearching || keywords.length === 0}
+          disabled={isSearching || isAISearching || keywords.length === 0}
           className="gap-1"
         >
           {isSearching ? (

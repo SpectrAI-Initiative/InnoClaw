@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { FolderOpen, GitBranch, Sparkles, Cpu, Zap, Brain, Code2, GraduationCap, Server } from "lucide-react";
 import Link from "next/link";
@@ -18,11 +18,11 @@ export default function HomePage() {
   const t = useTranslations("home");
   const { workspaces, isLoading, mutate } = useWorkspaces();
   const [workspaceRoots, setWorkspaceRoots] = useState<string[]>([]);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    (cb) => { cb(); return () => {}; },
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
     // Fetch workspace roots from settings API
@@ -78,7 +78,7 @@ export default function HomePage() {
             <ParticleEffect isActive={mounted} particleCount={30} />
           </div>
 
-          <div className="container relative px-4 py-12">
+          <div className="relative mx-auto max-w-7xl px-4 py-12">
             {/* Hero Section */}
             <div className="mb-16 text-center">
               {/* Animated badge */}
@@ -90,8 +90,8 @@ export default function HomePage() {
               {/* Main title with glow effect */}
               <h1 className="mb-4 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
                 <span className="inline-block animate-slide-in-up bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
-                  Welcome to{" "}
-                </span>
+                  Welcome to
+                </span>{" "}
                 <span className="relative inline-block animate-slide-in-up [animation-delay:100ms]">
                   <span className="relative z-10 bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-[gradient-rotate_3s_linear_infinite]">
                     InnoClaw

@@ -3,7 +3,7 @@
  */
 
 /** Supported data sources for article search. */
-export type ArticleSource = "arxiv" | "huggingface";
+export type ArticleSource = "arxiv" | "huggingface" | "semantic-scholar";
 
 /** A single article returned from search. */
 export interface Article {
