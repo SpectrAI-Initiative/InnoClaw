@@ -107,6 +107,7 @@ describe("arxiv", () => {
 describe("huggingface", () => {
   beforeEach(() => {
     mockFetch.mockReset();
+    vi.stubGlobal("fetch", mockFetch);
     vi.resetModules();
   });
 
@@ -176,7 +177,8 @@ describe("huggingface", () => {
   it("throws on API error", async () => {
     const { searchHuggingFace } = await import("./huggingface");
 
-    mockFetch.mockResolvedValueOnce({
+    // Mock both initial request and retry (500 triggers a retry)
+    mockFetch.mockResolvedValue({
       ok: false,
       status: 500,
       statusText: "Internal Server Error",
