@@ -156,6 +156,16 @@ class AgentStreamManager {
           // (no direct subscribers). Otherwise the mounted panel handles updates.
           if (entry.subscribers.size === 0) {
             this.notifyUpdate(entry);
+          } else {
+            // When there are subscribers, notify them directly while avoiding
+            // the global cross-tab event.
+            for (const callback of entry.subscribers) {
+              try {
+                callback();
+              } catch {
+                // Swallow subscriber errors to avoid breaking the stream loop.
+              }
+            }
           }
         }
       }
