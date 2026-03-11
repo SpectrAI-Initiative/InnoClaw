@@ -3,7 +3,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { DEFAULT_PROVIDER, DEFAULT_MODEL, PROVIDERS } from "./models";
 import type { ProviderId } from "./models";
 import type { LanguageModel } from "ai";
@@ -106,19 +106,13 @@ export async function getConfiguredModelWithProvider(): Promise<{
   const settings = await db
     .select()
     .from(appSettings)
-    .where(
-      eq(appSettings.key, "llm_provider")
-    )
-    .limit(1);
+    .where(inArray(appSettings.key, ["llm_provider", "llm_model"]));
 
-  const modelSettings = await db
-    .select()
-    .from(appSettings)
-    .where(eq(appSettings.key, "llm_model"))
-    .limit(1);
+  const providerRow = settings.find((s) => s.key === "llm_provider");
+  const modelRow = settings.find((s) => s.key === "llm_model");
 
-  const provider = settings[0]?.value || DEFAULT_PROVIDER;
-  const modelId = modelSettings[0]?.value || DEFAULT_MODEL;
+  const provider = providerRow?.value || DEFAULT_PROVIDER;
+  const modelId = modelRow?.value || DEFAULT_MODEL;
 
   let model: LanguageModel;
   switch (provider) {
