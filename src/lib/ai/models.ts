@@ -82,7 +82,7 @@ export const PROVIDERS = {
       { id: "intern-s1", name: "Intern S1", contextWindow: 200000 },
     ],
     envKey: "SHLAB_API_KEY",
-    supportsTools: false,
+    supportsTools: true,
   },
   qwen: {
     id: "qwen",
@@ -92,7 +92,7 @@ export const PROVIDERS = {
       { id: "qwen3.5-397b", name: "Qwen 3.5 397B", contextWindow: 200000 },
     ],
     envKey: "QWEN_API_KEY",
-    supportsTools: false,
+    supportsTools: true,
   },
   moonshot: {
     id: "moonshot",
@@ -101,7 +101,7 @@ export const PROVIDERS = {
       { id: "kimi-k2.5", name: "Kimi K2.5", contextWindow: 200000 },
     ],
     envKey: "MOONSHOT_API_KEY",
-    supportsTools: false,
+    supportsTools: true,
   },
   deepseek: {
     id: "deepseek",
@@ -110,7 +110,7 @@ export const PROVIDERS = {
       { id: "deepseek-v3.2", name: "DeepSeek V3.2", contextWindow: 200000 },
     ],
     envKey: "DEEPSEEK_API_KEY",
-    supportsTools: false,
+    supportsTools: true,
   },
   minimax: {
     id: "minimax",
@@ -119,7 +119,7 @@ export const PROVIDERS = {
       { id: "minimax2.5", name: "MiniMax 2.5", contextWindow: 200000 },
     ],
     envKey: "MINIMAX_API_KEY",
-    supportsTools: false,
+    supportsTools: true,
   },
   zhipu: {
     id: "zhipu",
@@ -128,7 +128,7 @@ export const PROVIDERS = {
       { id: "glm-5", name: "GLM-5", contextWindow: 200000 },
     ],
     envKey: "ZHIPU_API_KEY",
-    supportsTools: false,
+    supportsTools: true,
   },
 } as const;
 

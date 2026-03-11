@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
+import { agentStreamManager } from "@/lib/agent/agent-stream-manager";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Terminal,
@@ -676,13 +677,57 @@ export function AgentPanel({
     agentBody.cwd = folderPath;
   }, [workspaceId, folderPath, agentBody]);
 
-  // Create transport once with the mutable body reference
+  // Stream key for the background stream manager (use refs so the memoized
+  // transport always reads the latest values).
+  const streamKey = `${workspaceId}:${sessionId}:${mode}`;
+  const streamKeyRef = useRef(streamKey);
+  const storageKeyForManagerRef = useRef(`agent-messages:${workspaceId}:${sessionId}:${mode}`);
+  useEffect(() => {
+    streamKeyRef.current = streamKey;
+    storageKeyForManagerRef.current = `agent-messages:${workspaceId}:${sessionId}:${mode}`;
+  }, [workspaceId, sessionId, mode, streamKey]);
+
+  // Create transport once with the mutable body reference.
+  // Uses a custom fetch that tees the response body so the background manager
+  // can keep reading even after this component unmounts.
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/agent",
         body: agentBody,
+        fetch: async (
+          input: string | URL | Request,
+          init?: RequestInit,
+        ): Promise<Response> => {
+          // Replace the component's abort signal with the manager's
+          const { signal: _componentSignal, ...restInit } = init ?? {};
+          const managerAbort = agentStreamManager.register(
+            streamKeyRef.current,
+            storageKeyForManagerRef.current,
+          );
+
+          const response = await globalThis.fetch(input, {
+            ...restInit,
+            signal: managerAbort.signal,
+          });
+
+          if (!response.ok || !response.body) return response;
+
+          // Tee the response body — component gets one branch, manager gets the other
+          const [managerBranch, componentBranch] = response.body.tee();
+
+          // Manager reads its branch in the background (fire-and-forget)
+          agentStreamManager.consumeInBackground(streamKeyRef.current, managerBranch);
+
+          // Return a Response with the component branch for DefaultChatTransport
+          return new Response(componentBranch, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers,
+          });
+        },
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [agentBody]
   );
 
@@ -762,6 +807,76 @@ export function AgentPanel({
       // storage full or unavailable — silently ignore
     }
   }, [messages, storageKey, status]);
+
+  // Force-save messages to localStorage on unmount, even during streaming.
+  // This ensures the latest state is persisted when navigating away.
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const statusRef = useRef(status);
+  statusRef.current = status;
+  useEffect(() => {
+    return () => {
+      // On unmount, persist the current messages regardless of streaming state.
+      // If the background stream manager is still active, save raw messages
+      // (do NOT scrub tool parts — the agent is still working in the background).
+      const msgs = messagesRef.current;
+      if (msgs.length > 0) {
+        try {
+          const bgActive = agentStreamManager.isActive(streamKeyRef.current);
+          const toSave = bgActive ? msgs : scrubStuckToolParts(msgs);
+          localStorage.setItem(storageKey, JSON.stringify(toSave));
+        } catch { /* ignore */ }
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]);
+
+  // On mount: if the background stream manager is still active, subscribe
+  // to its updates so messages appear in real-time.  When the stream
+  // finishes, do a final read and scrub any stuck tool parts.
+  useEffect(() => {
+    if (!agentStreamManager.isActive(streamKey)) return;
+
+    const readFromStorage = () => {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const parsed = JSON.parse(saved) as UIMessage[];
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            restoreGenRef.current++;
+            setMessages(parsed);
+          }
+        }
+      } catch { /* ignore */ }
+    };
+
+    // Read immediately on mount to pick up what accumulated while away
+    readFromStorage();
+
+    // Subscribe to manager updates (fires whenever the manager persists)
+    const unsub = agentStreamManager.subscribe(
+      streamKey,
+      // onUpdate: read latest messages from localStorage
+      readFromStorage,
+      // onDone: final read + scrub any stuck tool parts
+      () => {
+        try {
+          const saved = localStorage.getItem(storageKey);
+          if (saved) {
+            const parsed = JSON.parse(saved) as UIMessage[];
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              restoreGenRef.current++;
+              setMessages(scrubStuckToolParts(parsed));
+            }
+          }
+        } catch { /* ignore */ }
+        agentStreamManager.cleanup(streamKey);
+      },
+    );
+
+    return unsub;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streamKey, storageKey, setMessages]);
 
   // --- Auto-continue: automatically continue when task is incomplete ---
   const prevStatusRef = useRef(status);
@@ -919,7 +1034,7 @@ export function AgentPanel({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, status, isSummarizing, showMessageSelect, showMemoryPreview]);
 
-  const isLoading = status === "submitted" || status === "streaming";
+  const isLoading = status === "submitted" || status === "streaming" || agentStreamManager.isActive(streamKey);
 
   // Notify parent of loading state changes (use ref to avoid effect re-triggering)
   const onLoadingChangeRef = useRef(onLoadingChange);
@@ -1020,6 +1135,8 @@ export function AgentPanel({
 
   const handleStop = () => {
     stop();
+    // Also stop the background stream manager
+    agentStreamManager.stop(streamKey);
     // Scrub incomplete tool parts so the next sendMessage works cleanly
     // Use setTimeout to let useChat process the abort first
     setTimeout(() => {
@@ -1042,6 +1159,7 @@ export function AgentPanel({
 
   const handleClear = () => {
     if (status === "streaming" || status === "submitted") stop();
+    agentStreamManager.stop(streamKey);
     if (messages.length > 0 && aiEnabled) {
       // Show message selection dialog first
       overflowKeepRef.current = null; // null = manual clear (not overflow)

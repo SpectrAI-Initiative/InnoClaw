@@ -85,8 +85,19 @@ ${combined}`;
  */
 export function buildAgentSystemPrompt(
   cwd: string,
-  skillCatalog?: { slug: string; name: string; description: string | null }[]
+  skillCatalog?: { slug: string; name: string; description: string | null }[],
+  options?: { noTools?: boolean }
 ): string {
+  // When the provider doesn't support tool calling, return a simplified prompt
+  // without tool descriptions so the model doesn't try to "simulate" tool calls.
+  if (options?.noTools) {
+    return `You are a helpful AI assistant. The user's workspace is at: ${cwd}
+
+You are running in a text-only mode without tool access. Answer the user's questions directly using your knowledge. If the user asks you to perform actions that would require executing commands, reading files, or searching, explain that these capabilities require a provider with tool-calling support (e.g. OpenAI, Anthropic, or Gemini). You can still help with analysis, explanations, writing, brainstorming, and other purely conversational tasks.
+
+Respond in the same language as the user's message.`;
+  }
+
   let skillSection = "";
   if (skillCatalog && skillCatalog.length > 0) {
     const skillList = skillCatalog
