@@ -50,7 +50,8 @@ describe("buildSafeExecEnv", () => {
     Object.defineProperty(process, "platform", { value: "linux", configurable: true });
     const buildSafeExecEnv = await loadModule();
     const env = buildSafeExecEnv();
-    expect(env.PATH).toBe("/usr/local/bin:/usr/bin:/bin");
+    // ensureExtraPaths may prepend ~/.local/bin; the base fallback must still be present
+    expect(env.PATH).toContain("/usr/local/bin:/usr/bin:/bin");
   });
 
   it("should provide Windows PATH fallback on win32", async () => {

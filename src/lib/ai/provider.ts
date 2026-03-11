@@ -3,8 +3,9 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { DEFAULT_PROVIDER, DEFAULT_MODEL, PROVIDERS } from "./models";
+import type { ProviderId } from "./models";
 import type { LanguageModel } from "ai";
 
 /**
@@ -47,74 +48,115 @@ const gemini = createOpenAI({
   baseURL: process.env.GEMINI_BASE_URL,
 });
 
-// Cache SH-Lab providers by modelId to avoid re-creating them on every request.
-// Each SH-Lab model uses a distinct base URL, so we key the cache by modelId.
-const shlabProviderCache = new Map<string, ReturnType<typeof createOpenAI>>();
+// Cache per-model OpenAI-compatible providers (shared across all per-model-URL providers).
+const perModelProviderCache = new Map<string, ReturnType<typeof createOpenAI>>();
+
+/**
+ * Create (or return cached) OpenAI-compatible provider for providers that use
+ * per-model base URLs. The env var name is derived from the provider and model:
+ *   e.g. provider="moonshot", model="kimi-k2.5" → MOONSHOT_KIMI_K2_5_BASE_URL
+ */
+function getPerModelProvider(
+  providerId: string,
+  modelId: string
+): LanguageModel {
+  const prefix = providerId.toUpperCase();
+  const providerDef = PROVIDERS[providerId as ProviderId];
+  const model = providerDef?.models.find((m) => m.id === modelId);
+  if (!model) {
+    throw new Error(
+      `Configured ${providerDef?.name ?? providerId} model "${modelId}" is unknown. ` +
+        `Please update your llm_model setting or PROVIDERS configuration.`
+    );
+  }
+
+  const envVarName =
+    prefix +
+    "_" +
+    modelId.toUpperCase().replace(/[^A-Z0-9]/g, "_") +
+    "_BASE_URL";
+  const baseURL = process.env[envVarName];
+  if (!baseURL) {
+    throw new Error(
+      `No base URL configured for ${providerDef?.name ?? providerId} model "${modelId}". ` +
+        `Set the ${envVarName} environment variable.`
+    );
+  }
+
+  const cacheKey = `${providerId}:${modelId}`;
+  let cached = perModelProviderCache.get(cacheKey);
+  if (!cached) {
+    cached = createOpenAI({
+      apiKey: process.env[`${prefix}_API_KEY`] || "",
+      baseURL,
+    });
+    perModelProviderCache.set(cacheKey, cached);
+  }
+  return cached.chat(modelId);
+}
+
+/**
+ * Get the currently configured LLM provider ID and model in a single DB query.
+ * Returns both so callers can avoid duplicate round-trips and stay consistent.
+ */
+export async function getConfiguredModelWithProvider(): Promise<{
+  providerId: string;
+  model: LanguageModel;
+}> {
+  const settings = await db
+    .select()
+    .from(appSettings)
+    .where(inArray(appSettings.key, ["llm_provider", "llm_model"]));
+
+  const providerRow = settings.find((s) => s.key === "llm_provider");
+  const modelRow = settings.find((s) => s.key === "llm_model");
+
+  const provider = providerRow?.value || DEFAULT_PROVIDER;
+  const modelId = modelRow?.value || DEFAULT_MODEL;
+
+  let model: LanguageModel;
+  switch (provider) {
+    case "openai":
+      // Use Chat Completions API (not Responses API) for maximum compatibility
+      // with third-party proxies and OpenAI-compatible services.
+      model = openai.chat(modelId);
+      break;
+    case "gemini":
+      // Gemini models served via a separate OpenAI-compatible proxy
+      model = gemini.chat(modelId);
+      break;
+    case "anthropic":
+      model = anthropic(modelId);
+      break;
+    case "shlab":
+    case "qwen":
+    case "moonshot":
+    case "deepseek":
+    case "minimax":
+    case "zhipu":
+      model = getPerModelProvider(provider, modelId);
+      break;
+    default:
+      // Use the configured modelId even for unknown providers – the user may be
+      // pointing OPENAI_BASE_URL at a third-party OpenAI-compatible service.
+      model = openai.chat(modelId);
+      break;
+  }
+  return { providerId: provider, model };
+}
+
+/**
+ * Get the currently configured LLM provider ID from settings.
+ */
+export async function getConfiguredProviderId(): Promise<string> {
+  const { providerId } = await getConfiguredModelWithProvider();
+  return providerId;
+}
 
 /**
  * Get the currently configured LLM model based on settings
  */
 export async function getConfiguredModel(): Promise<LanguageModel> {
-  const providerSetting = await db
-    .select()
-    .from(appSettings)
-    .where(eq(appSettings.key, "llm_provider"))
-    .limit(1);
-
-  const modelSetting = await db
-    .select()
-    .from(appSettings)
-    .where(eq(appSettings.key, "llm_model"))
-    .limit(1);
-
-  const provider = providerSetting[0]?.value || DEFAULT_PROVIDER;
-  const modelId = modelSetting[0]?.value || DEFAULT_MODEL;
-
-  switch (provider) {
-    case "openai":
-      // Use Chat Completions API (not Responses API) for maximum compatibility
-      // with third-party proxies and OpenAI-compatible services.
-      return openai.chat(modelId);
-    case "gemini":
-      // Gemini models served via a separate OpenAI-compatible proxy
-      return gemini.chat(modelId);
-    case "anthropic":
-      return anthropic(modelId);
-    case "shlab": {
-      // Each SH-Lab model is served from its own endpoint configured via an
-      // environment variable derived from the model ID; use a cached per-model provider.
-      // e.g. intern-s1-pro → SHLAB_INTERN_S1_PRO_BASE_URL
-      const shlabModel = PROVIDERS.shlab.models.find((m) => m.id === modelId);
-      if (!shlabModel) {
-        throw new Error(
-          `Configured SH-Lab model "${modelId}" is unknown. ` +
-            `Please update your llm_model setting or PROVIDERS.shlab.models configuration.`
-        );
-      }
-      const envVarName =
-        "SHLAB_" +
-        modelId.toUpperCase().replace(/[^A-Z0-9]/g, "_") +
-        "_BASE_URL";
-      const baseURL = process.env[envVarName];
-      if (!baseURL) {
-        throw new Error(
-          `No base URL configured for SH-Lab model "${modelId}". ` +
-            `Set the ${envVarName} environment variable.`
-        );
-      }
-      let shlabProvider = shlabProviderCache.get(modelId);
-      if (!shlabProvider) {
-        shlabProvider = createOpenAI({
-          apiKey: process.env.SHLAB_API_KEY || "",
-          baseURL,
-        });
-        shlabProviderCache.set(modelId, shlabProvider);
-      }
-      return shlabProvider.chat(modelId);
-    }
-    default:
-      // Use the configured modelId even for unknown providers – the user may be
-      // pointing OPENAI_BASE_URL at a third-party OpenAI-compatible service.
-      return openai.chat(modelId);
-  }
+  const { model } = await getConfiguredModelWithProvider();
+  return model;
 }

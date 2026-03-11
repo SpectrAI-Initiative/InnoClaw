@@ -277,9 +277,13 @@ export function createAgentTools(
 ) {
   const validatedCwd = validatePath(workspaceCwd);
 
-  const kubeconfigPath =
+  const rawKubeconfigPath =
     process.env.KUBECONFIG_PATH ||
     path.join(process.cwd(), "config", "d_k8s");
+  // Resolve to absolute so kubectl finds it regardless of cwd
+  const kubeconfigPath = path.isAbsolute(rawKubeconfigPath)
+    ? rawKubeconfigPath
+    : path.resolve(process.cwd(), rawKubeconfigPath);
 
   /**
    * Resolves a file path relative to the workspace and validates it against

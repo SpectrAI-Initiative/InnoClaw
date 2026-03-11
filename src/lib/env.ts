@@ -1,4 +1,5 @@
 import os from "os";
+import path from "path";
 
 /**
  * Resolve the user's home directory in a cross-platform way.
@@ -6,6 +7,22 @@ import os from "os";
  */
 export function resolveHome(): string {
   return process.env.HOME || process.env.USERPROFILE || os.homedir();
+}
+
+/**
+ * Ensure common user-local binary directories are included in PATH so that
+ * tools installed outside the system PATH (e.g. kubectl in ~/.local/bin or
+ * the project config/ dir) are discoverable by child processes.
+ */
+function ensureExtraPaths(basePath: string): string {
+  if (process.platform === "win32") return basePath;
+  const home = resolveHome();
+  const extras = [
+    path.join(home, ".local", "bin"),
+  ];
+  const existing = new Set(basePath.split(":"));
+  const missing = extras.filter((p) => !existing.has(p));
+  return missing.length > 0 ? [...missing, basePath].join(":") : basePath;
 }
 
 /**
@@ -17,10 +34,12 @@ export function buildSafeExecEnv(
 ): NodeJS.ProcessEnv {
   const base: NodeJS.ProcessEnv = {
     PATH:
-      process.env.PATH ||
-      (process.platform === "win32"
-        ? "C:\\Windows\\system32;C:\\Windows"
-        : "/usr/local/bin:/usr/bin:/bin"),
+      ensureExtraPaths(
+        process.env.PATH ||
+        (process.platform === "win32"
+          ? "C:\\Windows\\system32;C:\\Windows"
+          : "/usr/local/bin:/usr/bin:/bin")
+      ),
     HOME: resolveHome(),
     NODE_ENV: process.env.NODE_ENV || "production",
     TERM: "dumb",

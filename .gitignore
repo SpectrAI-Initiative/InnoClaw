@@ -51,7 +51,7 @@ next-env.d.ts
 .env.local
 
 # cluster config
-config/d_k8s
+config/
 
 # docs build artifacts
 docs/_build/

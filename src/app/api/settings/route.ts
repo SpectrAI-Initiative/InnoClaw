@@ -4,6 +4,7 @@ import { appSettings } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getWorkspaceRoots } from "@/lib/files/filesystem";
 import { updateEnvLocal } from "@/lib/env-file";
+import { PROVIDERS } from "@/lib/ai/models";
 
 export async function GET() {
   try {
@@ -28,7 +29,7 @@ export async function GET() {
       hasGithubToken: !!process.env.GITHUB_TOKEN,
       hasHfToken,
       hfTokenSource: settingsMap["hf_token"] ? "db" : (process.env.HF_TOKEN ? "env" : null),
-      hasAIKey: !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY || !!process.env.GEMINI_API_KEY,
+      hasAIKey: Object.values(PROVIDERS).some((p) => !!process.env[p.envKey]),
       openaiBaseUrl: process.env.OPENAI_BASE_URL || "",
       anthropicBaseUrl: process.env.ANTHROPIC_BASE_URL || "",
       geminiBaseUrl: process.env.GEMINI_BASE_URL || "",
