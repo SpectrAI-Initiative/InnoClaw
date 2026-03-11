@@ -9,13 +9,10 @@ import type { LanguageModel } from "ai";
 
 /**
  * Check if any AI API key is configured.
+ * Derived from PROVIDERS so new providers are automatically included.
  */
 export function isAIAvailable(): boolean {
-  return (
-    !!process.env.OPENAI_API_KEY ||
-    !!process.env.ANTHROPIC_API_KEY ||
-    !!process.env.GEMINI_API_KEY
-  );
+  return Object.values(PROVIDERS).some((p) => !!process.env[p.envKey]);
 }
 
 /**
