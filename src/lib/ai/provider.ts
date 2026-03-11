@@ -50,6 +50,10 @@ const gemini = createOpenAI({
   baseURL: process.env.GEMINI_BASE_URL,
 });
 
+// Cache SH-Lab providers by modelId to avoid re-creating them on every request.
+// Each SH-Lab model uses a distinct base URL, so we key the cache by modelId.
+const shlabProviderCache = new Map<string, ReturnType<typeof createOpenAI>>();
+
 /**
  * Get the currently configured LLM model based on settings
  */
@@ -80,7 +84,7 @@ export async function getConfiguredModel(): Promise<LanguageModel> {
     case "anthropic":
       return anthropic(modelId);
     case "shlab": {
-      // Each SH-Lab model has its own base URL; create a per-model provider.
+      // Each SH-Lab model has its own base URL; use a cached per-model provider.
       const shlabModel = PROVIDERS.shlab.models.find((m) => m.id === modelId);
       if (!shlabModel || !shlabModel.baseUrl) {
         throw new Error(
@@ -88,10 +92,14 @@ export async function getConfiguredModel(): Promise<LanguageModel> {
             `Please update your llm_model setting or PROVIDERS.shlab.models configuration.`
         );
       }
-      const shlabProvider = createOpenAI({
-        apiKey: process.env.SHLAB_API_KEY || "",
-        baseURL: shlabModel.baseUrl,
-      });
+      let shlabProvider = shlabProviderCache.get(modelId);
+      if (!shlabProvider) {
+        shlabProvider = createOpenAI({
+          apiKey: process.env.SHLAB_API_KEY || "",
+          baseURL: shlabModel.baseUrl,
+        });
+        shlabProviderCache.set(modelId, shlabProvider);
+      }
       return shlabProvider.chat(modelId);
     }
     default:
