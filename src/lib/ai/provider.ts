@@ -47,9 +47,61 @@ const gemini = createOpenAI({
   baseURL: process.env.GEMINI_BASE_URL,
 });
 
-// Cache SH-Lab providers by modelId to avoid re-creating them on every request.
-// Each SH-Lab model uses a distinct base URL, so we key the cache by modelId.
-const shlabProviderCache = new Map<string, ReturnType<typeof createOpenAI>>();
+// Cache per-model OpenAI-compatible providers (shared across all per-model-URL providers).
+const perModelProviderCache = new Map<string, ReturnType<typeof createOpenAI>>();
+
+/** Providers that use a per-model base URL pattern: {PREFIX}_{MODEL_ID}_BASE_URL */
+const PER_MODEL_URL_PROVIDERS = new Set([
+  "shlab",
+  "qwen",
+  "moonshot",
+  "deepseek",
+  "minimax",
+  "zhipu",
+]);
+
+/**
+ * Create (or return cached) OpenAI-compatible provider for providers that use
+ * per-model base URLs. The env var name is derived from the provider and model:
+ *   e.g. provider="moonshot", model="kimi-k2.5" → MOONSHOT_KIMI_K2_5_BASE_URL
+ */
+function getPerModelProvider(
+  providerId: string,
+  modelId: string
+): LanguageModel {
+  const prefix = providerId.toUpperCase();
+  const providerDef = PROVIDERS[providerId as ProviderId];
+  const model = providerDef?.models.find((m) => m.id === modelId);
+  if (!model) {
+    throw new Error(
+      `Configured ${providerDef?.name ?? providerId} model "${modelId}" is unknown. ` +
+        `Please update your llm_model setting or PROVIDERS configuration.`
+    );
+  }
+
+  const envVarName =
+    prefix +
+    "_" +
+    modelId.toUpperCase().replace(/[^A-Z0-9]/g, "_") +
+    "_BASE_URL";
+  const baseURL = process.env[envVarName];
+  if (!baseURL) {
+    throw new Error(
+      `No base URL configured for ${providerDef?.name ?? providerId} model "${modelId}". ` +
+        `Set the ${envVarName} environment variable.`
+    );
+  }
+
+  let cached = perModelProviderCache.get(modelId);
+  if (!cached) {
+    cached = createOpenAI({
+      apiKey: process.env[`${prefix}_API_KEY`] || "",
+      baseURL,
+    });
+    perModelProviderCache.set(modelId, cached);
+  }
+  return cached.chat(modelId);
+}
 
 /**
  * Get the currently configured LLM model based on settings
@@ -80,38 +132,13 @@ export async function getConfiguredModel(): Promise<LanguageModel> {
       return gemini.chat(modelId);
     case "anthropic":
       return anthropic(modelId);
-    case "shlab": {
-      // Each SH-Lab model is served from its own endpoint configured via an
-      // environment variable derived from the model ID; use a cached per-model provider.
-      // e.g. intern-s1-pro → SHLAB_INTERN_S1_PRO_BASE_URL
-      const shlabModel = PROVIDERS.shlab.models.find((m) => m.id === modelId);
-      if (!shlabModel) {
-        throw new Error(
-          `Configured SH-Lab model "${modelId}" is unknown. ` +
-            `Please update your llm_model setting or PROVIDERS.shlab.models configuration.`
-        );
-      }
-      const envVarName =
-        "SHLAB_" +
-        modelId.toUpperCase().replace(/[^A-Z0-9]/g, "_") +
-        "_BASE_URL";
-      const baseURL = process.env[envVarName];
-      if (!baseURL) {
-        throw new Error(
-          `No base URL configured for SH-Lab model "${modelId}". ` +
-            `Set the ${envVarName} environment variable.`
-        );
-      }
-      let shlabProvider = shlabProviderCache.get(modelId);
-      if (!shlabProvider) {
-        shlabProvider = createOpenAI({
-          apiKey: process.env.SHLAB_API_KEY || "",
-          baseURL,
-        });
-        shlabProviderCache.set(modelId, shlabProvider);
-      }
-      return shlabProvider.chat(modelId);
-    }
+    case "shlab":
+    case "qwen":
+    case "moonshot":
+    case "deepseek":
+    case "minimax":
+    case "zhipu":
+      return getPerModelProvider(provider, modelId);
     default:
       // Use the configured modelId even for unknown providers – the user may be
       // pointing OPENAI_BASE_URL at a third-party OpenAI-compatible service.

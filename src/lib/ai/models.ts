@@ -80,13 +80,49 @@ export const PROVIDERS = {
     models: [
       { id: "intern-s1-pro", name: "Intern S1 Pro", contextWindow: 200000 },
       { id: "intern-s1", name: "Intern S1", contextWindow: 200000 },
-      { id: "qwen3.5-397b", name: "Qwen 3.5 397B", contextWindow: 200000 },
-      { id: "kimi-k2.5", name: "Kimi K2.5", contextWindow: 200000 },
-      { id: "deepseek-v3.2", name: "DeepSeek V3.2", contextWindow: 200000 },
-      { id: "minimax2.5", name: "MiniMax 2.5", contextWindow: 200000 },
-      { id: "glm-5", name: "GLM-5", contextWindow: 200000 },
     ],
     envKey: "SHLAB_API_KEY",
+  },
+  qwen: {
+    id: "qwen",
+    name: "Qwen",
+    models: [
+      { id: "qwen3-235b", name: "Qwen3 235B", contextWindow: 200000 },
+      { id: "qwen3.5-397b", name: "Qwen 3.5 397B", contextWindow: 200000 },
+    ],
+    envKey: "QWEN_API_KEY",
+  },
+  moonshot: {
+    id: "moonshot",
+    name: "Moonshot",
+    models: [
+      { id: "kimi-k2.5", name: "Kimi K2.5", contextWindow: 200000 },
+    ],
+    envKey: "MOONSHOT_API_KEY",
+  },
+  deepseek: {
+    id: "deepseek",
+    name: "DeepSeek",
+    models: [
+      { id: "deepseek-v3.2", name: "DeepSeek V3.2", contextWindow: 200000 },
+    ],
+    envKey: "DEEPSEEK_API_KEY",
+  },
+  minimax: {
+    id: "minimax",
+    name: "MiniMax",
+    models: [
+      { id: "minimax2.5", name: "MiniMax 2.5", contextWindow: 200000 },
+    ],
+    envKey: "MINIMAX_API_KEY",
+  },
+  zhipu: {
+    id: "zhipu",
+    name: "Zhipu",
+    models: [
+      { id: "glm-5", name: "GLM-5", contextWindow: 200000 },
+    ],
+    envKey: "ZHIPU_API_KEY",
   },
 } as const;
 
