@@ -339,7 +339,8 @@
     "selectArticleToPreview": "选择文章以预览",
     "aiSearch": "AI 搜索",
     "aiSearching": "分析中...",
-    "aiSearchHint": "使用 AI 将你的问题扩展为优化的搜索词"
+    "aiSearchHint": "使用 AI 将你的问题扩展为优化的搜索词",
+    "discussionTab": "讨论"
   },
   "skills": {
     "title": "技能",
@@ -561,5 +562,29 @@
     "createSuccess": "定时任务已创建",
     "updateSuccess": "定时任务已更新",
     "deleteSuccess": "定时任务已删除"
+  },
+  "paperDiscussion": {
+    "title": "论文讨论",
+    "startDiscussion": "开始讨论",
+    "stopDiscussion": "停止",
+    "modeQuick": "快速",
+    "modeFull": "完整",
+    "running": "讨论进行中...",
+    "phaseA": "开场与议程",
+    "phaseB": "论文总结与证据",
+    "phaseC": "批判性分析",
+    "phaseD": "可复现性检查",
+    "phaseE": "共识与分歧",
+    "phaseF": "最终报告",
+    "roleModerator": "主持人",
+    "roleLibrarian": "文献专家",
+    "roleSkeptic": "质疑者",
+    "roleReproducer": "复现者",
+    "roleScribe": "记录员",
+    "saveToNotes": "保存到笔记",
+    "savedToNotes": "已保存到笔记",
+    "exportMarkdown": "导出 Markdown",
+    "noDiscussion": "启动多智能体讨论，获取对该论文的多角度专家分析。",
+    "completed": "讨论完成"
   }
 }

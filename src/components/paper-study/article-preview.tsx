@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Save,
   Check,
+  Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,10 +24,11 @@ import { DefaultChatTransport } from "ai";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import type { Article } from "@/lib/article-search/types";
+import { PaperDiscussionPanel } from "./paper-discussion-panel";
 
 interface ArticlePreviewProps {
   article: Article;
-  workspaceId: string;
+  workspaceId?: string;
   onClose: () => void;
 }
 
@@ -162,6 +164,10 @@ export function ArticlePreview({ article, workspaceId, onClose }: ArticlePreview
           <TabsTrigger value="chat" className="gap-1 text-xs">
             <MessageSquare className="h-3 w-3" />
             {t("chatTitle")}
+          </TabsTrigger>
+          <TabsTrigger value="discussion" className="gap-1 text-xs">
+            <Users className="h-3 w-3" />
+            {t("discussionTab")}
           </TabsTrigger>
         </TabsList>
 
@@ -337,6 +343,11 @@ export function ArticlePreview({ article, workspaceId, onClose }: ArticlePreview
               )}
             </Button>
           </div>
+        </TabsContent>
+
+        {/* Discussion tab */}
+        <TabsContent value="discussion" className="flex-1 overflow-hidden mt-0">
+          <PaperDiscussionPanel article={article} workspaceId={workspaceId} />
         </TabsContent>
       </Tabs>
     </div>

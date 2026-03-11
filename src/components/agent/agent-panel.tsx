@@ -507,6 +507,7 @@ interface AgentPanelProps {
   folderPath: string;
   sessionId: string;
   sessionName?: string;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 export function AgentPanel({
@@ -515,6 +516,7 @@ export function AgentPanel({
   folderPath,
   sessionId,
   sessionName,
+  onLoadingChange,
 }: AgentPanelProps) {
   const t = useTranslations("agent");
   const tCommon = useTranslations("common");
@@ -918,6 +920,13 @@ export function AgentPanel({
   }, [messages, status, isSummarizing, showMessageSelect, showMemoryPreview]);
 
   const isLoading = status === "submitted" || status === "streaming";
+
+  // Notify parent of loading state changes (use ref to avoid re-triggering on callback identity change)
+  const onLoadingChangeRef = useRef(onLoadingChange);
+  onLoadingChangeRef.current = onLoadingChange;
+  useEffect(() => {
+    onLoadingChangeRef.current?.(isLoading);
+  }, [isLoading]);
 
   // Auto-scroll to bottom when messages update
   useEffect(() => {

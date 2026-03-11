@@ -91,7 +91,7 @@ export const notes = sqliteTable("notes", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   type: text("type", {
-    enum: ["manual", "summary", "faq", "briefing", "timeline", "memory", "daily_report", "weekly_report"],
+    enum: ["manual", "summary", "faq", "briefing", "timeline", "memory", "daily_report", "weekly_report", "paper_discussion"],
   })
     .notNull()
     .default("manual"),

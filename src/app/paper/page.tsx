@@ -32,7 +32,6 @@ export default function PaperPage() {
             {selectedArticle ? (
               <ArticlePreview
                 article={selectedArticle}
-                workspaceId=""
                 onClose={() => setSelectedArticle(null)}
               />
             ) : (

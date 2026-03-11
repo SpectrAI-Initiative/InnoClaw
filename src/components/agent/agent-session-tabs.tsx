@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, X, Pencil } from "lucide-react";
+import { Plus, X, Pencil, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -14,6 +14,7 @@ import type { AgentSession } from "@/lib/hooks/use-agent-sessions";
 interface AgentSessionTabsProps {
   sessions: AgentSession[];
   activeSessionId: string;
+  loadingSessionIds?: Set<string>;
   onSelect: (id: string) => void;
   onClose: (id: string) => void;
   onCreate: () => void;
@@ -23,6 +24,7 @@ interface AgentSessionTabsProps {
 export function AgentSessionTabs({
   sessions,
   activeSessionId,
+  loadingSessionIds,
   onSelect,
   onClose,
   onCreate,
@@ -90,8 +92,12 @@ export function AgentSessionTabs({
 
   // With only one session, show just the "+" button (no tab needed)
   if (sessions.length <= 1) {
+    const singleSessionLoading = sessions.length === 1 && (loadingSessionIds?.has(sessions[0].id) ?? false);
     return (
-      <div className="flex items-center px-1 py-0.5 shrink-0">
+      <div className="flex items-center gap-1 px-1 py-0.5 shrink-0">
+        {singleSessionLoading && (
+          <Loader2 className="h-3 w-3 animate-spin text-primary shrink-0" />
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -117,6 +123,7 @@ export function AgentSessionTabs({
         const isActive = session.id === activeSessionId;
         const isConfirming = confirmingId === session.id;
         const isEditing = editingId === session.id;
+        const isSessionLoading = loadingSessionIds?.has(session.id) ?? false;
 
         return (
           <div
@@ -143,7 +150,12 @@ export function AgentSessionTabs({
                 onClick={(e) => e.stopPropagation()}
               />
             ) : (
-              <span className="max-w-[100px] truncate">{session.name}</span>
+              <>
+                {isSessionLoading && (
+                  <Loader2 className="h-3 w-3 animate-spin text-primary shrink-0" />
+                )}
+                <span className="max-w-[100px] truncate">{session.name}</span>
+              </>
             )}
 
             {!isEditing && (

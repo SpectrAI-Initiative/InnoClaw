@@ -336,7 +336,8 @@
     "selectArticleToPreview": "Select an article to preview",
     "aiSearch": "AI Search",
     "aiSearching": "Analyzing...",
-    "aiSearchHint": "Use AI to expand your query into optimized search terms"
+    "aiSearchHint": "Use AI to expand your query into optimized search terms",
+    "discussionTab": "Discussion"
   },
   "notes": {
     "title": "Notes",
@@ -578,5 +579,29 @@
     "createSuccess": "Scheduled task created",
     "updateSuccess": "Scheduled task updated",
     "deleteSuccess": "Scheduled task deleted"
+  },
+  "paperDiscussion": {
+    "title": "Paper Discussion",
+    "startDiscussion": "Start Discussion",
+    "stopDiscussion": "Stop",
+    "modeQuick": "Quick",
+    "modeFull": "Full",
+    "running": "Discussion in progress...",
+    "phaseA": "Opening & Agenda",
+    "phaseB": "Paper Summary & Evidence",
+    "phaseC": "Critical Analysis",
+    "phaseD": "Reproducibility Check",
+    "phaseE": "Convergence & Disagreements",
+    "phaseF": "Final Report",
+    "roleModerator": "Moderator",
+    "roleLibrarian": "Librarian",
+    "roleSkeptic": "Skeptic",
+    "roleReproducer": "Reproducer",
+    "roleScribe": "Scribe",
+    "saveToNotes": "Save to Notes",
+    "savedToNotes": "Saved to Notes",
+    "exportMarkdown": "Export Markdown",
+    "noDiscussion": "Start a multi-agent discussion to get diverse expert perspectives on this paper.",
+    "completed": "Discussion complete"
   }
 }
