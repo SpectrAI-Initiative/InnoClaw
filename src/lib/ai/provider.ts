@@ -89,7 +89,7 @@ export async function getConfiguredModel(): Promise<LanguageModel> {
         );
       }
       const shlabProvider = createOpenAI({
-        apiKey: process.env.SHLAB_API_KEY || "EMPTY",
+        apiKey: process.env.SHLAB_API_KEY || "",
         baseURL: shlabModel.baseUrl,
       });
       return shlabProvider.chat(modelId);
