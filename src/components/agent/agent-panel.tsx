@@ -57,6 +57,9 @@ import type { Skill } from "@/types";
 
 type AgentMode = "agent" | "plan" | "ask";
 
+/** Pixel threshold for considering the user "at the bottom" of the scroll area */
+const BOTTOM_THRESHOLD_PX = 80;
+
 const MODE_LABEL_KEYS: Record<AgentMode, "modeAgent" | "modePlan" | "modeAsk"> = {
   agent: "modeAgent",
   plan: "modePlan",
@@ -1060,9 +1063,6 @@ export function AgentPanel({
     }
     return viewportRef.current;
   }, []);
-
-  // Pixel threshold for considering the user "at the bottom" of the scroll area
-  const BOTTOM_THRESHOLD_PX = 80;
 
   // Track whether user has scrolled away from the bottom
   useEffect(() => {
