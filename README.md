@@ -22,6 +22,8 @@ A self-hostable AI research assistant inspired by Google NotebookLM. Turn server
 - 🗂️ **多 Agent 会话** — 标签式多会话管理，支持重命名、独立上下文
 - 📚 **论文研读** — 跨 arXiv / HuggingFace / Semantic Scholar 搜索，AI 智能扩展查询，一键摘要
 - 🎓 **论文讨论模式** — 5 角色多智能体结构化讨论（主持人/文献专家/质疑者/复现者/记录员），6 阶段确定性流程
+- 💡 **研究灵感生成** — 多智能体 AI 头脑风暴，基于论文生成跨学科研究方向与创新点
+- 📑 **多标签预览** — 同时打开多篇论文和文件，标签式切换，一键从文件预览转为论文研读模式
 
 **适用人群：** 研究人员 · 开发者 · 自托管爱好者 · 学生和教育工作者
 
@@ -282,6 +284,8 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 - **多 Agent 会话** — 标签式多会话管理，独立上下文，支持重命名和两步确认关闭
 - **论文研读** — 跨 arXiv / HuggingFace / Semantic Scholar 三源搜索，AI 查询扩展，批量摘要生成
 - **论文讨论模式** — 多智能体结构化论文评审：5 个专家角色（Moderator / Librarian / Skeptic / Reproducer / Scribe）经过 6 个阶段（议程→证据→批判→复现→共识→报告）生成结构化评审报告，支持快速/完整两种模式
+- **研究灵感生成** — 多智能体 AI 头脑风暴：基于论文摘要，多个 AI 专家角色从不同视角（方法论创新、跨学科融合、应用拓展等）生成研究方向与创新点，支持交互式深入探讨
+- **多标签预览面板** — 支持同时打开多篇论文和文件，标签式切换管理。文件预览中提供 "Study Paper" 按钮，一键将 PDF/MD/TXT 文件转为论文研读模式（含摘要、讨论、笔记、讨论、灵感生成五个标签页）
 - **论文笔记管理** — 本地笔记目录集成，讨论保存到文件，AI 智能关联笔记
 - **主题风格** — 默认 / 卡通 / 赛博像素 / 复古掌机四种视觉风格
 
@@ -311,7 +315,9 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 - **论文摘要**：勾选论文后点击 **"Summarize"** 生成 AI 结构化摘要
 - **论文讨论**：点击论文预览后可与 AI 讨论论文细节
 - **多智能体论文讨论**：在论文预览的 **"Discussion"** 标签页，启动 5 角色结构化讨论（主持人/文献专家/质疑者/复现者/记录员），经过 6 个阶段自动生成评审报告。支持 Quick（简洁）和 Full（完整）两种模式，可导出 Markdown 或保存到笔记
+- **研究灵感生成**：在论文预览的 **"Ideation"** 标签页，AI 多专家角色从不同视角（方法论创新、跨学科融合、应用拓展等）进行头脑风暴，基于论文生成研究方向与创新点
 - **论文笔记**：在 **"Notes"** 标签页管理本地笔记目录，保存讨论记录，AI 自动发现关联笔记
+- **Study Paper 一键研读**：在文件预览面板中，PDF/MD/TXT 文件会显示 **"Study Paper"** 按钮，点击后自动提取论文元数据并打开研读模式（含摘要、讨论、笔记、Discussion、Ideation 五个标签页），原文件预览保持打开
 
 ### 7. 多 Agent 会话 / Multi-Agent Sessions
 在工作空间的 Agent 面板中，点击 **"+"** 按钮创建新会话。每个会话独立维护对话上下文和记忆：
@@ -460,7 +466,7 @@ src/
 │       ├── files/                # 文件操作
 │       ├── chat/                 # AI 对话（流式）
 │       ├── agent/                # Agent 面板 API
-│       ├── paper-study/             # 论文研读 API（搜索/摘要/讨论/AI 查询扩展）
+│       ├── paper-study/             # 论文研读 API（搜索/摘要/讨论/AI 查询扩展/灵感生成）
 │       ├── skills/               # Skills CRUD + 导入
 │       ├── bot/feishu/           # 飞书 webhook + 推送
 │       ├── generate/             # 笔记生成
@@ -469,6 +475,7 @@ src/
 │   ├── ui/                       # shadcn/ui 基础组件
 │   ├── agent/                    # Agent 面板（多会话标签）
 │   ├── paper-study/              # 论文研读组件
+│   ├── preview/                  # 预览面板（多标签、文件预览）
 │   ├── skills/                   # Skills 管理组件
 │   ├── chat/                     # 对话组件
 │   └── files/                    # 文件浏览器
@@ -476,6 +483,7 @@ src/
 │   ├── ai/                       # AI 提供商、Agent 工具、提示词
 │   ├── article-search/           # 论文搜索（arXiv / HuggingFace / Semantic Scholar）
 │   ├── paper-discussion/         # 多智能体论文讨论（角色/提示词/编排器）
+│   ├── research-ideation/        # 多智能体研究灵感生成（角色/提示词/编排器）
 │   ├── db/                       # Drizzle ORM + SQLite
 │   ├── rag/                      # RAG 管道（分块/嵌入/检索）
 │   ├── bot/feishu/               # 飞书适配器

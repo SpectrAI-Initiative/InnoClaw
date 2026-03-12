@@ -15,6 +15,7 @@ import {
   Users,
   FileText,
   Link2,
+  Lightbulb,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import type { Article } from "@/lib/article-search/types";
 import { PaperDiscussionPanel } from "./paper-discussion-panel";
+import { ResearchIdeationPanel } from "./research-ideation-panel";
 import { PaperNotesPanel } from "./paper-notes-panel";
 
 interface RelatedNote {
@@ -271,6 +273,10 @@ export function ArticlePreview({
             <Users className="h-3 w-3" />
             {t("discussionTab")}
           </TabsTrigger>
+          <TabsTrigger value="ideation" className="gap-1 text-xs" disabled={!article}>
+            <Lightbulb className="h-3 w-3" />
+            {t("ideationTab")}
+          </TabsTrigger>
         </TabsList>
 
         {/* Detail tab */}
@@ -283,7 +289,9 @@ export function ArticlePreview({
                     ? t("sourceArxiv")
                     : article.source === "semantic-scholar"
                       ? t("sourceSemanticScholar")
-                      : t("sourceHuggingFace")}
+                      : article.source === "local"
+                        ? t("sourceLocal")
+                        : t("sourceHuggingFace")}
                 </Badge>
                 {date && (
                   <span className="text-xs text-muted-foreground">
@@ -492,6 +500,11 @@ export function ArticlePreview({
         {/* Discussion tab */}
         <TabsContent value="discussion" className="flex-1 overflow-hidden mt-0">
           {article && <PaperDiscussionPanel article={article} workspaceId={workspaceId} />}
+        </TabsContent>
+
+        {/* Ideation tab */}
+        <TabsContent value="ideation" className="flex-1 overflow-hidden mt-0">
+          {article && <ResearchIdeationPanel article={article} workspaceId={workspaceId} />}
         </TabsContent>
       </Tabs>
     </div>

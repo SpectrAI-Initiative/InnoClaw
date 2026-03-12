@@ -1,13 +1,13 @@
 "use client";
 
-import { use, useState, useCallback } from "react";
+import { use, useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PreviewTabs, type PreviewTab } from "@/components/preview/preview-tabs";
 import { Header } from "@/components/layout/header";
 import { FileBrowser } from "@/components/files/file-browser";
 import { AgentPanel } from "@/components/agent/agent-panel";
@@ -23,11 +23,12 @@ import { useMinimalMode } from "@/lib/hooks/use-minimal-mode";
 import { useAgentSessions } from "@/lib/hooks/use-agent-sessions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Bot, FileText, GraduationCap, Server, Maximize2 } from "lucide-react";
+import { Bot, FileText, GraduationCap, Server, Maximize2, Loader2 } from "lucide-react";
 import { ClusterPanel } from "@/components/cluster/cluster-panel";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LanguageToggle } from "@/components/layout/language-toggle";
 import type { Article } from "@/lib/article-search/types";
+import { getFileName } from "@/lib/utils";
 
 type MiddlePanel = "agent" | "report" | "paperStudy" | "cluster";
 
@@ -38,9 +39,10 @@ export default function WorkspacePage({
 }) {
   const { workspaceId } = use(params);
   const { workspace, isLoading } = useWorkspace(workspaceId);
-  const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [middlePanel, setMiddlePanel] = useState<MiddlePanel>("agent");
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [previewTabs, setPreviewTabs] = useState<PreviewTab[]>([]);
+  const [activeTabId, setActiveTabId] = useState<string>("notes");
+  const tabIdCounter = useRef(0);
   const { report, isAvailable: reportAvailable } = useReport(workspaceId);
   const { isMinimal, toggleMinimalMode } = useMinimalMode();
   const {
@@ -55,10 +57,91 @@ export default function WorkspacePage({
   const tc = useTranslations("cluster");
   const tCommon = useTranslations("common");
   const [loadingSessions, setLoadingSessions] = useState<Record<string, boolean>>({});
+  const [extractingArticle, setExtractingArticle] = useState(false);
 
   const handleSessionLoadingChange = useCallback((sessionId: string, loading: boolean) => {
     setLoadingSessions((prev) => ({ ...prev, [sessionId]: loading }));
   }, []);
+
+  const openFileTab = useCallback((filePath: string | null) => {
+    if (!filePath) return;
+    setPreviewTabs((prev) => {
+      const existing = prev.find((t) => t.type === "file" && t.filePath === filePath);
+      if (existing) {
+        setActiveTabId(existing.id);
+        return prev;
+      }
+      const id = `file-${++tabIdCounter.current}`;
+      const tab: PreviewTab = {
+        id,
+        type: "file",
+        label: getFileName(filePath),
+        filePath,
+      };
+      setActiveTabId(id);
+      return [...prev, tab];
+    });
+  }, []);
+
+  const openArticleTab = useCallback((article: Article) => {
+    setPreviewTabs((prev) => {
+      const existing = prev.find((t) => t.type === "article" && t.article?.id === article.id);
+      if (existing) {
+        setActiveTabId(existing.id);
+        return prev;
+      }
+      const id = `article-${++tabIdCounter.current}`;
+      const tab: PreviewTab = {
+        id,
+        type: "article",
+        label: article.title.slice(0, 40),
+        article,
+      };
+      setActiveTabId(id);
+      return [...prev, tab];
+    });
+  }, []);
+
+  const closeTab = useCallback((id: string) => {
+    setPreviewTabs((prev) => {
+      const idx = prev.findIndex((t) => t.id === id);
+      if (idx === -1) return prev;
+      const next = prev.filter((t) => t.id !== id);
+      // If closing the active tab, select neighbor or notes
+      setActiveTabId((current) => {
+        if (current !== id) return current;
+        if (next.length === 0) return "notes";
+        const newIdx = Math.min(idx, next.length - 1);
+        return next[newIdx].id;
+      });
+      return next;
+    });
+  }, []);
+
+  const handleFileToArticle = useCallback(async (filePath: string) => {
+    setExtractingArticle(true);
+    try {
+      const res = await fetch("/api/files/extract-article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filePath }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Extraction failed");
+      }
+      const article = await res.json();
+      openArticleTab(article);
+    } catch (err) {
+      console.error("Extract article error:", err);
+    } finally {
+      setExtractingArticle(false);
+    }
+  }, [openArticleTab]);
+
+  const handleStudyFile = useCallback(async (filePath: string) => {
+    await handleFileToArticle(filePath);
+  }, [handleFileToArticle]);
 
   if (isLoading) {
     return (
@@ -122,8 +205,10 @@ export default function WorkspacePage({
               workspaceId={workspaceId}
               folderPath={workspace.folderPath}
               isGitRepo={workspace.isGitRepo}
-              onFileSelect={setSelectedFilePath}
-              selectedFilePath={selectedFilePath}
+              onFileSelect={openFileTab}
+              selectedFilePath={null}
+              onDiscussFile={(path) => handleFileToArticle(path)}
+              onIdeateFile={(path) => handleFileToArticle(path)}
             />
           </ResizablePanel>
 
@@ -228,7 +313,7 @@ export default function WorkspacePage({
                   <div className={middlePanel === "paperStudy" ? "h-full" : "hidden"}>
                     <PaperStudyPanel
                       workspaceId={workspaceId}
-                      onArticleSelect={setSelectedArticle}
+                      onArticleSelect={(a) => { if (a) openArticleTab(a); }}
                     />
                   </div>
                   <div className={middlePanel === "cluster" ? "h-full" : "hidden"}>
@@ -240,29 +325,45 @@ export default function WorkspacePage({
               <ResizableHandle withHandle />
 
               <ResizablePanel defaultSize={40} minSize={10} className="overflow-hidden">
-                <Tabs defaultValue="preview" className="flex h-full flex-col">
-                  <TabsList className="mx-2 mt-1 shrink-0">
-                    <TabsTrigger value="preview">Preview</TabsTrigger>
-                    <TabsTrigger value="notes">Notes</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="preview" className="flex-1 overflow-hidden mt-0">
-                    {middlePanel === "paperStudy" && selectedArticle ? (
-                      <ArticlePreview
-                        article={selectedArticle}
-                        workspaceId={workspaceId}
-                        onClose={() => setSelectedArticle(null)}
-                      />
-                    ) : (
-                      <FilePreviewPanel
-                        filePath={selectedFilePath}
-                        onClose={() => setSelectedFilePath(null)}
-                      />
+                <div className="flex h-full flex-col">
+                  <PreviewTabs
+                    tabs={previewTabs}
+                    activeTabId={activeTabId}
+                    onSelect={setActiveTabId}
+                    onClose={closeTab}
+                  />
+                  <div className="flex-1 overflow-hidden relative">
+                    {/* Notes panel — always mounted */}
+                    <div className={activeTabId === "notes" ? "h-full" : "hidden"}>
+                      <NotesPanel workspaceId={workspaceId} />
+                    </div>
+                    {/* Extracting article spinner */}
+                    {extractingArticle && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      </div>
                     )}
-                  </TabsContent>
-                  <TabsContent value="notes" className="flex-1 overflow-hidden mt-0">
-                    <NotesPanel workspaceId={workspaceId} />
-                  </TabsContent>
-                </Tabs>
+                    {/* Dynamic tabs — each stays mounted */}
+                    {previewTabs.map((tab) => (
+                      <div key={tab.id} className={tab.id === activeTabId ? "h-full" : "hidden"}>
+                        {tab.type === "file" && tab.filePath && (
+                          <FilePreviewPanel
+                            filePath={tab.filePath}
+                            onClose={() => closeTab(tab.id)}
+                            onStudyPaper={handleStudyFile}
+                          />
+                        )}
+                        {tab.type === "article" && tab.article && (
+                          <ArticlePreview
+                            article={tab.article}
+                            workspaceId={workspaceId}
+                            onClose={() => closeTab(tab.id)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>

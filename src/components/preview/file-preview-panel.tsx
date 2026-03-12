@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, X, Save, FileDown, AlertCircle, Loader2 } from "lucide-react";
+import { Eye, X, Save, FileDown, AlertCircle, Loader2, GraduationCap } from "lucide-react";
 import { getFileName } from "@/lib/utils";
 import { PdfViewer } from "@/components/files/pdf-viewer";
 import { MolViewer } from "@/components/files/mol-viewer";
@@ -44,6 +44,7 @@ const MarkdownPreview = dynamic(
 interface FilePreviewPanelProps {
   filePath: string | null;
   onClose: () => void;
+  onStudyPaper?: (filePath: string) => void;
 }
 
 const EDITABLE_EXTS = [
@@ -158,7 +159,14 @@ function UnsupportedPreview({ filePath }: { filePath: string }) {
   );
 }
 
-export function FilePreviewPanel({ filePath, onClose }: FilePreviewPanelProps) {
+const PAPER_EXTS = ["pdf", "md", "markdown", "txt"];
+
+function isPaperEligible(filePath: string): boolean {
+  const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
+  return PAPER_EXTS.includes(ext);
+}
+
+export function FilePreviewPanel({ filePath, onClose, onStudyPaper }: FilePreviewPanelProps) {
   const t = useTranslations("preview");
   const fileName = filePath ? getFileName(filePath) : "";
   const fileType = filePath ? getFileType(filePath) : null;
@@ -174,14 +182,27 @@ export function FilePreviewPanel({ filePath, onClose }: FilePreviewPanelProps) {
             <span className="text-xs text-muted-foreground truncate ml-1">
               — {fileName}
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="ml-auto h-6 w-6 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="ml-auto flex items-center gap-1">
+              {onStudyPaper && isPaperEligible(filePath) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-6 gap-1 text-xs"
+                  onClick={() => onStudyPaper(filePath)}
+                >
+                  <GraduationCap className="h-3.5 w-3.5" />
+                  {t("studyPaper")}
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="h-6 w-6 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </>
         )}
       </div>

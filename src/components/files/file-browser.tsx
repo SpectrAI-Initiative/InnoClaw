@@ -30,6 +30,8 @@ interface FileBrowserProps {
   isGitRepo: boolean;
   onFileSelect: (path: string | null) => void;
   selectedFilePath: string | null;
+  onDiscussFile?: (path: string) => void;
+  onIdeateFile?: (path: string) => void;
 }
 
 export function FileBrowser({
@@ -38,6 +40,8 @@ export function FileBrowser({
   isGitRepo,
   onFileSelect,
   selectedFilePath,
+  onDiscussFile,
+  onIdeateFile,
 }: FileBrowserProps) {
   const t = useTranslations("files");
   const tWorkspace = useTranslations("workspace");
@@ -238,6 +242,8 @@ export function FileBrowser({
             onRefresh={refresh}
             selectedPath={selectedFilePath}
             refreshKey={refreshKey}
+            onDiscussFile={onDiscussFile}
+            onIdeateFile={onIdeateFile}
           />
         </ScrollArea>
       </div>

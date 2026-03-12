@@ -60,6 +60,8 @@
     "cutItem": "Cut",
     "paste": "Paste",
     "copyPath": "Copy Path",
+    "discussPaper": "Discuss Paper",
+    "ideatePaper": "Ideate on Paper",
     "copied": "\"{name}\" copied",
     "cut": "\"{name}\" cut",
     "pasted": "Pasted successfully",
@@ -192,7 +194,9 @@
     "emptyState": "Select a file to preview",
     "unsupported": "Preview not available for this file type",
     "editMode": "Edit",
-    "previewMode": "Preview"
+    "previewMode": "Preview",
+    "notes": "Notes",
+    "studyPaper": "Study Paper"
   },
   "agent": {
     "title": "Agent",
@@ -266,6 +270,7 @@
     "sourceArxiv": "arXiv",
     "sourceHuggingFace": "HuggingFace",
     "sourceSemanticScholar": "Semantic Scholar",
+    "sourceLocal": "Local File",
     "semanticPlaceholder": "Try a natural language question...",
     "results": "{count} papers found",
     "noResults": "No papers found. Try different keywords or date range.",
@@ -320,6 +325,7 @@
     "aiSearching": "Analyzing...",
     "aiSearchHint": "Use AI to expand your query into optimized search terms",
     "discussionTab": "Discussion",
+    "ideationTab": "Ideation",
     "notesTab": "Notes",
     "setDirectory": "Set Directory",
     "setDirectoryPlaceholder": "Enter notes directory path...",
@@ -644,5 +650,30 @@
     "exportMarkdown": "Export Markdown",
     "noDiscussion": "Start a multi-agent discussion to get diverse expert perspectives on this paper.",
     "completed": "Discussion complete"
+  },
+  "researchIdeation": {
+    "title": "Research Ideation",
+    "startIdeation": "Start Ideation",
+    "stopIdeation": "Stop",
+    "modeQuick": "Quick",
+    "modeFull": "Full",
+    "running": "Ideation in progress...",
+    "stageHypothesisGeneration": "Hypothesis Generation",
+    "stageFeasibilityReview": "Feasibility Review",
+    "stageExperimentDesign": "Experiment Design",
+    "stageReview": "Review & Critique",
+    "stageFinalReport": "Final Report",
+    "roleIdeator": "Ideator",
+    "roleFeasibilityChecker": "Feasibility Checker",
+    "roleExperimentalist": "Experimentalist",
+    "roleReviewer": "Reviewer",
+    "roleScribe": "Scribe",
+    "saveToNotes": "Save to Notes",
+    "savedToNotes": "Saved to Notes",
+    "exportMarkdown": "Export Markdown",
+    "noIdeation": "Start a multi-agent ideation session to generate actionable research directions from this paper.",
+    "completed": "Ideation complete",
+    "userSeedPlaceholder": "Optional: describe your research angle or seed idea...",
+    "ideationNoteTitle": "Research Ideation"
   }
 }

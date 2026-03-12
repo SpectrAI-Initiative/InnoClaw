@@ -60,6 +60,8 @@
     "cutItem": "剪切",
     "paste": "粘贴",
     "copyPath": "复制路径",
+    "discussPaper": "讨论论文",
+    "ideatePaper": "研究构思",
     "copied": "已复制「{name}」",
     "cut": "已剪切「{name}」",
     "pasted": "粘贴成功",
@@ -225,7 +227,9 @@
     "emptyState": "选择一个文件以预览",
     "unsupported": "此文件类型不支持预览",
     "editMode": "编辑",
-    "previewMode": "预览"
+    "previewMode": "预览",
+    "notes": "笔记",
+    "studyPaper": "研究论文"
   },
   "agent": {
     "title": "Agent",
@@ -299,6 +303,7 @@
     "sourceArxiv": "arXiv",
     "sourceHuggingFace": "HuggingFace",
     "sourceSemanticScholar": "Semantic Scholar",
+    "sourceLocal": "本地文件",
     "semanticPlaceholder": "试试自然语言提问，例如「Transformer 如何处理长序列」...",
     "results": "找到 {count} 篇论文",
     "noResults": "未找到论文。请尝试不同的关键词或日期范围。",
@@ -353,6 +358,7 @@
     "aiSearching": "分析中...",
     "aiSearchHint": "使用 AI 将你的问题扩展为优化的搜索词",
     "discussionTab": "讨论",
+    "ideationTab": "研究构思",
     "notesTab": "笔记",
     "setDirectory": "设置目录",
     "setDirectoryPlaceholder": "输入笔记目录路径...",
@@ -644,5 +650,30 @@
     "exportMarkdown": "导出 Markdown",
     "noDiscussion": "启动多智能体讨论，获取对该论文的多角度专家分析。",
     "completed": "讨论完成"
+  },
+  "researchIdeation": {
+    "title": "研究构思",
+    "startIdeation": "开始构思",
+    "stopIdeation": "停止",
+    "modeQuick": "快速",
+    "modeFull": "完整",
+    "running": "构思进行中...",
+    "stageHypothesisGeneration": "假设生成",
+    "stageFeasibilityReview": "可行性评审",
+    "stageExperimentDesign": "实验设计",
+    "stageReview": "审查与批评",
+    "stageFinalReport": "最终报告",
+    "roleIdeator": "构思者",
+    "roleFeasibilityChecker": "可行性评估者",
+    "roleExperimentalist": "实验设计者",
+    "roleReviewer": "审查者",
+    "roleScribe": "记录员",
+    "saveToNotes": "保存到笔记",
+    "savedToNotes": "已保存到笔记",
+    "exportMarkdown": "导出 Markdown",
+    "noIdeation": "启动多智能体构思会话，从该论文生成可操作的研究方向。",
+    "completed": "构思完成",
+    "userSeedPlaceholder": "可选：描述你的研究角度或种子想法...",
+    "ideationNoteTitle": "研究构思"
   }
 }

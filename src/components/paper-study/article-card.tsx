@@ -108,7 +108,9 @@ export function ArticleCard({
             ? t("sourceArxiv")
             : article.source === "semantic-scholar"
               ? t("sourceSemanticScholar")
-              : t("sourceHuggingFace")}
+              : article.source === "local"
+                ? t("sourceLocal")
+                : t("sourceHuggingFace")}
         </Badge>
         {date && <span>{date}</span>}
       </div>
