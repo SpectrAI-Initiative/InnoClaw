@@ -97,6 +97,8 @@ export function AgentPanel({
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
+  const MODEL_SELECTION_STORAGE_KEY = "innoclaw-agent-model-selection";
+
   // Draggable input area height
   const [inputHeight, setInputHeight] = useState(80);
   const dragRef = useRef<{ startY: number; startH: number } | null>(null);
@@ -241,7 +243,7 @@ export function AgentPanel({
     let storedSelection: { provider: string; model: string } | null = null;
     try {
       if (typeof window !== "undefined" && window.localStorage) {
-        const stored = window.localStorage.getItem("agent-model-selection");
+        const stored = window.localStorage.getItem(MODEL_SELECTION_STORAGE_KEY);
         if (stored) {
           try {
             storedSelection = JSON.parse(stored);
@@ -275,7 +277,7 @@ export function AgentPanel({
       // Clear invalid stored value
       try {
         if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.removeItem("agent-model-selection");
+          window.localStorage.removeItem(MODEL_SELECTION_STORAGE_KEY);
         }
       } catch {
         // Ignore storage access errors
@@ -301,7 +303,7 @@ export function AgentPanel({
     try {
       if (typeof window !== "undefined" && window.localStorage) {
         window.localStorage.setItem(
-          "agent-model-selection",
+          MODEL_SELECTION_STORAGE_KEY,
           JSON.stringify({ provider: providerId, model: modelId })
         );
       }
@@ -1108,7 +1110,7 @@ export function AgentPanel({
                   <DropdownMenuLabel className="text-xs text-muted-foreground">{provider.name}</DropdownMenuLabel>
                   <DropdownMenuRadioGroup
                     key={provider.id}
-                    value={selectedProvider === provider.id ? selectedModel : ""}
+                    value={selectedProvider === provider.id ? (selectedModel ?? "") : ""}
                     onValueChange={(modelId) => handleModelChange(provider.id, modelId)}
                   >
                     {provider.models.map((model: { id: string; name: string }) => (

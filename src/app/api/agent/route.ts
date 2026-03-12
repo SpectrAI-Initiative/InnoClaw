@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       const knownProviderIds = Object.keys(PROVIDERS) as ProviderId[];
       const matchedProvider = knownProviderIds.find((id) => id === llmProvider);
       if (matchedProvider) {
-        const knownModels = PROVIDERS[matchedProvider].models.map((m) => m.id);
+        const knownModels: string[] = PROVIDERS[matchedProvider].models.map((m) => m.id);
         if (!knownModels.includes(llmModel)) {
           return new Response(
             `Invalid llmModel "${llmModel}" for provider "${llmProvider}". ` +
