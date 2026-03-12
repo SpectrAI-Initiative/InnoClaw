@@ -114,7 +114,7 @@ export function markdownToSkillData(content: string): {
 } | null {
   const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!fmMatch) {
-    // No frontmatter — treat entire content as system prompt
+    // No frontmatter — return null (no skill metadata detected)
     return null;
   }
 
