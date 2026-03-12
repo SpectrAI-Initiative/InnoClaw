@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import {
   Dialog,
@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Eye, Code2, AlertCircle } from "lucide-react";
+import { Eye, Code2, AlertCircle, AlertTriangle } from "lucide-react";
 import type { Skill, SkillStep, SkillParameter } from "@/types";
 import { skillToMarkdown, markdownToSkillData, getDefaultSkillTemplate } from "@/lib/utils/skill-md";
 
@@ -50,6 +50,9 @@ export function SkillMdFormDialog({
   const [showPreview, setShowPreview] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
 
+  // Memoize parsed result to avoid re-parsing during render
+  const parsed = useMemo(() => markdownToSkillData(markdown), [markdown]);
+
   // Initialize markdown content
   useEffect(() => {
     if (skill) {
@@ -64,22 +67,29 @@ export function SkillMdFormDialog({
   // Validate on change
   const handleChange = useCallback((value: string) => {
     setMarkdown(value);
-    const parsed = markdownToSkillData(value);
-    if (!parsed) {
+    const result = markdownToSkillData(value);
+    if (!result) {
       setParseError(t("mdParseError"));
-    } else if (!parsed.name) {
+    } else if (!result.name) {
       setParseError(t("mdMissingName"));
-    } else if (!parsed.systemPrompt) {
+    } else if (!result.systemPrompt) {
       setParseError(t("mdMissingPrompt"));
+    } else if (!workspaceId && !result.isGlobal) {
+      setParseError(t("mdScopeError"));
     } else {
       setParseError(null);
     }
-  }, [t]);
+  }, [t, workspaceId]);
 
   const handleSubmit = async () => {
-    const parsed = markdownToSkillData(markdown);
     if (!parsed || !parsed.name || !parsed.systemPrompt) {
       toast.error(parseError || t("mdParseError"));
+      return;
+    }
+
+    // Disallow workspace scope without workspaceId
+    if (!parsed.isGlobal && !workspaceId) {
+      toast.error(t("mdScopeError"));
       return;
     }
 
@@ -106,9 +116,6 @@ export function SkillMdFormDialog({
       setSaving(false);
     }
   };
-
-  // Preview parsed data
-  const parsed = markdownToSkillData(markdown);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -268,6 +275,16 @@ export function SkillMdFormDialog({
                 <div className="flex items-center gap-1.5 text-destructive text-xs">
                   <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                   {parseError}
+                </div>
+              )}
+              {!parseError && parsed?.warnings && parsed.warnings.length > 0 && (
+                <div className="space-y-1">
+                  {parsed.warnings.map((w, i) => (
+                    <div key={i} className="flex items-center gap-1.5 text-yellow-600 dark:text-yellow-500 text-xs">
+                      <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                      {w}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

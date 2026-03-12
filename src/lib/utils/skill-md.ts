@@ -1,5 +1,6 @@
 import type { Skill, SkillStep, SkillParameter } from "@/types";
 import { slugify } from "./slugify";
+import { EVERY_TOOL } from "@/lib/ai/tool-names";
 
 /**
  * Convert a Skill object to SKILL.md markdown format.
@@ -102,6 +103,9 @@ scope: global
 /**
  * Parse a SKILL.md markdown string back into skill data.
  */
+/** Canonical set of known tool names for validation. */
+const KNOWN_TOOLS = new Set<string>(EVERY_TOOL);
+
 export function markdownToSkillData(content: string): {
   name: string;
   slug: string;
@@ -111,6 +115,7 @@ export function markdownToSkillData(content: string): {
   steps: SkillStep[] | null;
   allowedTools: string[] | null;
   parameters: SkillParameter[] | null;
+  warnings: string[];
 } | null {
   const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!fmMatch) {
@@ -127,13 +132,15 @@ export function markdownToSkillData(content: string): {
     return m?.[1]?.trim();
   };
 
+  const warnings: string[] = [];
+
   const name = getValue("name") || "";
   const slug = getValue("slug") || slugify(name);
   const description = getValue("description") || "";
   const scope = getValue("scope") || "global";
   const isGlobal = scope !== "workspace";
 
-  // Parse allowed-tools
+  // Parse allowed-tools and validate against canonical tool names
   let allowedTools: string[] | null = null;
   const allowedToolsRaw = getValue("allowed-tools");
   if (allowedToolsRaw) {
@@ -141,7 +148,16 @@ export function markdownToSkillData(content: string): {
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    if (allowedTools.length === 0) allowedTools = null;
+    if (allowedTools.length === 0) {
+      allowedTools = null;
+    } else {
+      const unknown = allowedTools.filter((t) => !KNOWN_TOOLS.has(t));
+      if (unknown.length > 0) {
+        warnings.push(
+          `Unknown tool(s): ${unknown.join(", ")}. Valid tools: ${EVERY_TOOL.join(", ")}`
+        );
+      }
+    }
   }
 
   // Parse parameters (multi-line YAML list)
@@ -159,6 +175,7 @@ export function markdownToSkillData(content: string): {
     steps,
     allowedTools,
     parameters,
+    warnings,
   };
 }
 

@@ -465,7 +465,8 @@
     "mdMissingName": "Missing name field. Please add it in the frontmatter.",
     "mdMissingPrompt": "Missing system prompt. Please add content below the frontmatter.",
     "mdNoName": "Unnamed",
-    "mdNoPrompt": "No prompt content"
+    "mdNoPrompt": "No prompt content",
+    "mdScopeError": "Workspace scope requires a workspace context. Use 'scope: global' or edit this skill from within a workspace."
   },
   "cluster": {
     "clusterToggle": "Cluster",

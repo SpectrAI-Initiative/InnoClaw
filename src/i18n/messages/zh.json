@@ -465,7 +465,8 @@
     "mdMissingName": "缺少 name 字段，请在 frontmatter 中添加。",
     "mdMissingPrompt": "缺少系统提示词，请在 frontmatter 下方添加内容。",
     "mdNoName": "未命名",
-    "mdNoPrompt": "无提示词内容"
+    "mdNoPrompt": "无提示词内容",
+    "mdScopeError": "工作区作用域需要工作区上下文。请使用 'scope: global' 或在工作区内编辑此技能。"
   },
   "cluster": {
     "clusterToggle": "集群",
