@@ -1050,31 +1050,43 @@ export function AgentPanel({
     onLoadingChangeRef.current?.(isLoading);
   }, [isLoading]);
 
+  // Cached viewport element to avoid repeated DOM queries
+  const viewportRef = useRef<Element | null>(null);
+  const getViewport = () => {
+    if (!viewportRef.current) {
+      viewportRef.current = scrollRef.current?.querySelector(
+        '[data-slot="scroll-area-viewport"]'
+      ) ?? null;
+    }
+    return viewportRef.current;
+  };
+
   // Track whether user has scrolled away from the bottom
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const viewport = el.querySelector('[data-slot="scroll-area-viewport"]');
+    const viewport = getViewport();
     if (!viewport) return;
+    let rafId = 0;
     const handleScroll = () => {
-      const threshold = 80;
-      const atBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < threshold;
-      userScrolledUp.current = !atBottom;
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        const atBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 80;
+        userScrolledUp.current = !atBottom;
+      });
     };
     viewport.addEventListener("scroll", handleScroll, { passive: true });
-    return () => viewport.removeEventListener("scroll", handleScroll);
+    return () => {
+      viewport.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Auto-scroll to bottom when messages update (skip if user scrolled up)
   useEffect(() => {
     if (userScrolledUp.current) return;
-    if (scrollRef.current) {
-      const viewport = scrollRef.current.querySelector(
-        '[data-slot="scroll-area-viewport"]'
-      );
-      if (viewport) {
-        viewport.scrollTop = viewport.scrollHeight;
-      }
+    const viewport = getViewport();
+    if (viewport) {
+      viewport.scrollTop = viewport.scrollHeight;
     }
   }, [messages, status]);
 
