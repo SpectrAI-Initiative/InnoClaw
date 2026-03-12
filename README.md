@@ -569,3 +569,9 @@ npm run lint             # 代码检查
 npx drizzle-kit generate # 生成迁移（修改 schema 后）
 mkdir -p ./data && npx drizzle-kit migrate  # 执行迁移
 ```
+
+---
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=zjowowen/InnoClaw&type=Date)](https://star-history.com/#zjowowen/InnoClaw&Date)
