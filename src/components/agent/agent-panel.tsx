@@ -57,6 +57,9 @@ import type { Skill } from "@/types";
 
 type AgentMode = "agent" | "plan" | "ask";
 
+/** Pixel threshold for considering the user "at the bottom" of the scroll area */
+const BOTTOM_THRESHOLD_PX = 80;
+
 const MODE_LABEL_KEYS: Record<AgentMode, "modeAgent" | "modePlan" | "modeAsk"> = {
   agent: "modeAgent",
   plan: "modePlan",
@@ -523,6 +526,7 @@ export function AgentPanel({
   const tCommon = useTranslations("common");
   const locale = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const userScrolledUp = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<AgentMode>("agent");
@@ -1049,17 +1053,45 @@ export function AgentPanel({
     onLoadingChangeRef.current?.(isLoading);
   }, [isLoading]);
 
-  // Auto-scroll to bottom when messages update
-  useEffect(() => {
-    if (scrollRef.current) {
-      const viewport = scrollRef.current.querySelector(
+  // Cached viewport element to avoid repeated DOM queries
+  const viewportRef = useRef<Element | null>(null);
+  const getViewport = useCallback(() => {
+    if (!viewportRef.current) {
+      viewportRef.current = scrollRef.current?.querySelector(
         '[data-slot="scroll-area-viewport"]'
-      );
-      if (viewport) {
-        viewport.scrollTop = viewport.scrollHeight;
-      }
+      ) ?? null;
     }
-  }, [messages, status]);
+    return viewportRef.current;
+  }, []);
+
+  // Track whether user has scrolled away from the bottom
+  useEffect(() => {
+    const viewport = getViewport();
+    if (!viewport) return;
+    let rafId = 0;
+    const handleScroll = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        const atBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < BOTTOM_THRESHOLD_PX;
+        userScrolledUp.current = !atBottom;
+      });
+    };
+    viewport.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      viewport.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, [getViewport]);
+
+  // Auto-scroll to bottom when messages update (skip if user scrolled up)
+  useEffect(() => {
+    if (userScrolledUp.current) return;
+    const viewport = getViewport();
+    if (viewport) {
+      viewport.scrollTop = viewport.scrollHeight;
+    }
+  }, [messages, status, getViewport]);
 
   // Slash command detection
   const handleInputChange = (value: string) => {
@@ -1112,6 +1144,7 @@ export function AgentPanel({
   const handleSend = async () => {
     const text = input.trim();
     if (!text || isLoading || !aiEnabled || isSummarizing) return;
+    userScrolledUp.current = false;
 
     // Check if input matches a skill slug
     if (text.startsWith("/")) {
