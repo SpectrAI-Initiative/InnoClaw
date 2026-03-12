@@ -93,7 +93,7 @@ export function AgentSessionTabs({
   if (sessions.length <= 1) {
     const singleSessionLoading = sessions.length === 1 && !!loadingSessions[sessions[0].id];
     return (
-      <div className="flex items-center gap-1.5 px-2 py-1 shrink-0 flex-1 min-w-0">
+      <div className="flex items-center gap-1.5 px-2 py-1 flex-1 min-w-0">
         <Bot className={`h-3.5 w-3.5 text-agent-accent ${singleSessionLoading ? "animate-pulse" : ""}`} />
         {singleSessionLoading && (
           <span className="text-xs text-agent-accent animate-title-breathe font-medium">
