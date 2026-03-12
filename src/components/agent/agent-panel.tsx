@@ -57,6 +57,9 @@ import type { Skill } from "@/types";
 
 type AgentMode = "agent" | "plan" | "ask";
 
+/** Pixel threshold for considering the user "at the bottom" of the scroll area */
+const BOTTOM_THRESHOLD_PX = 80;
+
 const MODE_LABEL_KEYS: Record<AgentMode, "modeAgent" | "modePlan" | "modeAsk"> = {
   agent: "modeAgent",
   plan: "modePlan",
@@ -1052,14 +1055,14 @@ export function AgentPanel({
 
   // Cached viewport element to avoid repeated DOM queries
   const viewportRef = useRef<Element | null>(null);
-  const getViewport = () => {
+  const getViewport = useCallback(() => {
     if (!viewportRef.current) {
       viewportRef.current = scrollRef.current?.querySelector(
         '[data-slot="scroll-area-viewport"]'
       ) ?? null;
     }
     return viewportRef.current;
-  };
+  }, []);
 
   // Track whether user has scrolled away from the bottom
   useEffect(() => {
@@ -1070,7 +1073,7 @@ export function AgentPanel({
       if (rafId) return;
       rafId = requestAnimationFrame(() => {
         rafId = 0;
-        const atBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 80;
+        const atBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < BOTTOM_THRESHOLD_PX;
         userScrolledUp.current = !atBottom;
       });
     };
@@ -1079,7 +1082,7 @@ export function AgentPanel({
       viewport.removeEventListener("scroll", handleScroll);
       cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [getViewport]);
 
   // Auto-scroll to bottom when messages update (skip if user scrolled up)
   useEffect(() => {
@@ -1088,7 +1091,7 @@ export function AgentPanel({
     if (viewport) {
       viewport.scrollTop = viewport.scrollHeight;
     }
-  }, [messages, status]);
+  }, [messages, status, getViewport]);
 
   // Slash command detection
   const handleInputChange = (value: string) => {
