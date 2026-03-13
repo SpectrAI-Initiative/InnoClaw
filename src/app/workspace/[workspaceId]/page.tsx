@@ -1,13 +1,13 @@
 "use client";
 
-import { use, useState, useCallback, useRef } from "react";
+import { use, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { PreviewTabs, type PreviewTab } from "@/components/preview/preview-tabs";
+import { PreviewTabs } from "@/components/preview/preview-tabs";
 import { Header } from "@/components/layout/header";
 import { FileBrowser } from "@/components/files/file-browser";
 import { AgentPanel } from "@/components/agent/agent-panel";
@@ -21,16 +21,17 @@ import { useWorkspace } from "@/lib/hooks/use-workspaces";
 import { useReport } from "@/lib/hooks/use-report";
 import { useMinimalMode } from "@/lib/hooks/use-minimal-mode";
 import { useAgentSessions } from "@/lib/hooks/use-agent-sessions";
+import { usePreviewTabs } from "@/lib/hooks/use-preview-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Bot, FileText, GraduationCap, Server, Maximize2, Loader2 } from "lucide-react";
+import { Bot, FileText, GraduationCap, Server, FlaskConical, Maximize2, Loader2 } from "lucide-react";
 import { ClusterPanel } from "@/components/cluster/cluster-panel";
+import { ResearchExecPanel } from "@/components/research-exec/research-exec-panel";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LanguageToggle } from "@/components/layout/language-toggle";
 import type { Article } from "@/lib/article-search/types";
-import { getFileName } from "@/lib/utils";
 
-type MiddlePanel = "agent" | "report" | "paperStudy" | "cluster";
+type MiddlePanel = "agent" | "report" | "paperStudy" | "cluster" | "research";
 
 export default function WorkspacePage({
   params,
@@ -40,9 +41,14 @@ export default function WorkspacePage({
   const { workspaceId } = use(params);
   const { workspace, isLoading } = useWorkspace(workspaceId);
   const [middlePanel, setMiddlePanel] = useState<MiddlePanel>("agent");
-  const [previewTabs, setPreviewTabs] = useState<PreviewTab[]>([]);
-  const [activeTabId, setActiveTabId] = useState<string>("notes");
-  const tabIdCounter = useRef(0);
+  const {
+    previewTabs,
+    activeTabId,
+    setActiveTabId,
+    openFileTab,
+    openArticleTab,
+    closeTab,
+  } = usePreviewTabs(workspaceId);
   const { report, isAvailable: reportAvailable } = useReport(workspaceId);
   const { isMinimal, toggleMinimalMode } = useMinimalMode();
   const {
@@ -55,67 +61,13 @@ export default function WorkspacePage({
   } = useAgentSessions(workspaceId);
   const t = useTranslations("report");
   const tc = useTranslations("cluster");
+  const tRex = useTranslations("researchExec");
   const tCommon = useTranslations("common");
   const [loadingSessions, setLoadingSessions] = useState<Record<string, boolean>>({});
   const [extractingArticle, setExtractingArticle] = useState(false);
 
   const handleSessionLoadingChange = useCallback((sessionId: string, loading: boolean) => {
     setLoadingSessions((prev) => ({ ...prev, [sessionId]: loading }));
-  }, []);
-
-  const openFileTab = useCallback((filePath: string | null) => {
-    if (!filePath) return;
-    setPreviewTabs((prev) => {
-      const existing = prev.find((t) => t.type === "file" && t.filePath === filePath);
-      if (existing) {
-        setActiveTabId(existing.id);
-        return prev;
-      }
-      const id = `file-${++tabIdCounter.current}`;
-      const tab: PreviewTab = {
-        id,
-        type: "file",
-        label: getFileName(filePath),
-        filePath,
-      };
-      setActiveTabId(id);
-      return [...prev, tab];
-    });
-  }, []);
-
-  const openArticleTab = useCallback((article: Article) => {
-    setPreviewTabs((prev) => {
-      const existing = prev.find((t) => t.type === "article" && t.article?.id === article.id);
-      if (existing) {
-        setActiveTabId(existing.id);
-        return prev;
-      }
-      const id = `article-${++tabIdCounter.current}`;
-      const tab: PreviewTab = {
-        id,
-        type: "article",
-        label: article.title.slice(0, 40),
-        article,
-      };
-      setActiveTabId(id);
-      return [...prev, tab];
-    });
-  }, []);
-
-  const closeTab = useCallback((id: string) => {
-    setPreviewTabs((prev) => {
-      const idx = prev.findIndex((t) => t.id === id);
-      if (idx === -1) return prev;
-      const next = prev.filter((t) => t.id !== id);
-      // If closing the active tab, select neighbor or notes
-      setActiveTabId((current) => {
-        if (current !== id) return current;
-        if (next.length === 0) return "notes";
-        const newIdx = Math.min(idx, next.length - 1);
-        return next[newIdx].id;
-      });
-      return next;
-    });
   }, []);
 
   const handleFileToArticle = useCallback(async (filePath: string) => {
@@ -283,6 +235,17 @@ export default function WorkspacePage({
                           <Server className="h-3.5 w-3.5" />
                           <span className="text-xs hidden lg:inline">Cluster</span>
                         </Button>
+                        <Button
+                          variant={middlePanel === "research" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setMiddlePanel("research")}
+                          title={tRex("panelToggle")}
+                          aria-label={tRex("panelToggle")}
+                          className="h-7 px-2 gap-1"
+                        >
+                          <FlaskConical className="h-3.5 w-3.5" />
+                          <span className="text-xs hidden lg:inline">Research</span>
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -341,6 +304,9 @@ export default function WorkspacePage({
                   </div>
                   <div className={middlePanel === "cluster" ? "flex-1 min-h-0" : "hidden"}>
                     <ClusterPanel workspaceId={workspaceId} />
+                  </div>
+                  <div className={middlePanel === "research" ? "flex-1 min-h-0" : "hidden"}>
+                    <ResearchExecPanel workspaceId={workspaceId} />
                   </div>
                 </div>
               </ResizablePanel>

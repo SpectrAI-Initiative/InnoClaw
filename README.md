@@ -24,6 +24,7 @@ A self-hostable AI research assistant inspired by Google NotebookLM. Turn server
 - 🎓 **论文讨论模式** — 5 角色多智能体结构化讨论（主持人/文献专家/质疑者/复现者/记录员），6 阶段确定性流程
 - 💡 **研究灵感生成** — 多智能体 AI 头脑风暴，基于论文生成跨学科研究方向与创新点
 - 📑 **多标签预览** — 同时打开多篇论文和文件，标签式切换，一键从文件预览转为论文研读模式
+- 🧪 **研究执行工作区** — 13 阶段自动化实验工作流：代码审查 → 补丁提议 → 远程同步 → 任务提交 → 智能监控 → 结果收集 → 分析推荐。支持 Shell / Slurm / rjob 三种调度后端，5 个 AI Agent 角色协作，权限细粒度管控
 
 **适用人群：** 研究人员 · 开发者 · 自托管爱好者 · 学生和教育工作者
 
@@ -288,6 +289,14 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 - **多标签预览面板** — 支持同时打开多篇论文和文件，标签式切换管理。文件预览中提供 "Study Paper" 按钮，一键将 PDF/MD/TXT 文件转为论文研读模式（含摘要、讨论、笔记、讨论、灵感生成五个标签页）
 - **论文笔记管理** — 本地笔记目录集成，讨论保存到文件，AI 智能关联笔记
 - **主题风格** — 默认 / 卡通 / 赛博像素 / 复古掌机四种视觉风格
+- **研究执行工作区 (Research Execution Workspace)** — 端到端自动化实验管理：
+  - **13 阶段工作流**：代码审查 → 补丁提议 → 审批 → 应用 → 同步预览 → 同步执行 → 任务准备 → 提交 → 监控 → 审批收集 → 收集结果 → 分析 → 推荐下一步
+  - **5 个 AI Agent 角色**：Repo Agent（代码分析）、Patch Agent（补丁生成）、Remote Agent（远程操作）、Result Analyst（结果分析）、Research Planner（策略规划）
+  - **3 种调度后端**：Shell (nohup)、Slurm (sbatch)、rjob（容器化任务，支持 GPU/内存/镜像/挂载配置）
+  - **智能任务监控**：SSH 单命令批量检查（调度器状态 + 标志文件 + 心跳 + 日志），自动状态推断与冲突检测
+  - **SSH 快速配置**：粘贴 SSH 命令自动解析主机、用户名、端口、密钥
+  - **8 项权限管控**：读代码 / 写代码 / 本地终端 / SSH / 远程同步 / 任务提交 / 收集结果 / 自动应用
+  - **人工审批门控**：补丁审批、同步执行、任务提交、结果收集四个关键节点需人工确认
 
 ---
 
@@ -324,6 +333,24 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 - 标签栏显示所有活跃会话，点击切换
 - 双击标签或点击铅笔图标重命名
 - 关闭标签需两步确认（防止误操作）
+
+### 8. 研究执行工作区 / Research Execution Workspace
+在工作空间侧边栏打开 **Research Execution** 面板，管理远程实验全流程：
+
+**配置远程目标：**
+1. 在 **"Remotes"** 标签页添加远程执行配置（或粘贴 SSH 命令自动解析）
+2. 选择调度类型：Shell (nohup) / Slurm (sbatch) / rjob (容器)
+3. 在 **"Capabilities"** 标签页启用所需权限
+
+**运行实验：**
+1. Agent 自动分析代码库结构（Repo Agent）
+2. 提议并审批实验代码变更（Patch Agent）
+3. 同步代码到远程目标并提交任务（Remote Agent）
+4. 智能监控任务状态：通过 SSH 批量检查调度器状态、标志文件、心跳、日志
+5. 人工审批后收集结果，AI 分析并推荐下一步实验方向
+
+**rjob 容器任务示例：**
+rjob 后端支持指定容器镜像、GPU 数量、内存、挂载路径等参数，适合需要容器化环境的深度学习实验。
 
 ---
 
@@ -467,6 +494,7 @@ src/
 │       ├── chat/                 # AI 对话（流式）
 │       ├── agent/                # Agent 面板 API
 │       ├── paper-study/             # 论文研读 API（搜索/摘要/讨论/AI 查询扩展/灵感生成）
+│       ├── research-exec/           # 研究执行 API（配置/运行/监控）
 │       ├── skills/               # Skills CRUD + 导入
 │       ├── bot/feishu/           # 飞书 webhook + 推送
 │       ├── generate/             # 笔记生成
@@ -476,6 +504,7 @@ src/
 │   ├── agent/                    # Agent 面板（多会话标签）
 │   ├── paper-study/              # 论文研读组件
 │   ├── preview/                  # 预览面板（多标签、文件预览）
+│   ├── research-exec/            # 研究执行组件（工作流/配置/监控/历史）
 │   ├── skills/                   # Skills 管理组件
 │   ├── chat/                     # 对话组件
 │   └── files/                    # 文件浏览器
@@ -484,6 +513,7 @@ src/
 │   ├── article-search/           # 论文搜索（arXiv / HuggingFace / Semantic Scholar）
 │   ├── paper-discussion/         # 多智能体论文讨论（角色/提示词/编排器）
 │   ├── research-ideation/        # 多智能体研究灵感生成（角色/提示词/编排器）
+│   ├── research-exec/            # 研究执行引擎（类型/编排器/监控/角色/权限/提示词）
 │   ├── db/                       # Drizzle ORM + SQLite
 │   ├── rag/                      # RAG 管道（分块/嵌入/检索）
 │   ├── bot/feishu/               # 飞书适配器
