@@ -102,6 +102,37 @@ describe("buildSafeExecEnv", () => {
     expect(env.SYSTEMROOT).toBe("C:\\Windows");
     expect(env.COMSPEC).toBe("C:\\Windows\\system32\\cmd.exe");
   });
+
+  it("should NOT include SCP_HUB_API_KEY even when set in process.env", async () => {
+    process.env.SCP_HUB_API_KEY = "secret-key-123";
+    const buildSafeExecEnv = await loadModule();
+    const env = buildSafeExecEnv();
+    expect(env.SCP_HUB_API_KEY).toBeUndefined();
+  });
+
+  it("should allow SCP_HUB_API_KEY to be passed via extra parameter", async () => {
+    const buildSafeExecEnv = await loadModule();
+    const env = buildSafeExecEnv({ SCP_HUB_API_KEY: "explicit-key" });
+    expect(env.SCP_HUB_API_KEY).toBe("explicit-key");
+  });
+
+  it("should include macOS Python/Homebrew paths only on darwin", async () => {
+    delete process.env.PATH;
+    Object.defineProperty(process, "platform", { value: "darwin", configurable: true });
+    const buildSafeExecEnv = await loadModule();
+    const env = buildSafeExecEnv();
+    expect(env.PATH).toContain("/Library/Frameworks/Python.framework/Versions/Current/bin");
+    expect(env.PATH).toContain("/opt/homebrew/bin");
+  });
+
+  it("should NOT include macOS Python/Homebrew paths on Linux", async () => {
+    delete process.env.PATH;
+    Object.defineProperty(process, "platform", { value: "linux", configurable: true });
+    const buildSafeExecEnv = await loadModule();
+    const env = buildSafeExecEnv();
+    expect(env.PATH).not.toContain("/Library/Frameworks/Python.framework/Versions/Current/bin");
+    expect(env.PATH).not.toContain("/opt/homebrew/bin");
+  });
 });
 
 describe("resolveHome", () => {
