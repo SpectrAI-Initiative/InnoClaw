@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { runFullIdeation } from "@/lib/research-ideation/orchestrator";
+import { textError } from "@/lib/api-errors";
 import type { IdeationSharedContext, IdeationTurn } from "@/lib/research-ideation/types";
 
 export async function POST(req: NextRequest) {
@@ -8,17 +9,17 @@ export async function POST(req: NextRequest) {
     const { article, mode = "quick", locale = "en", userSeed } = await req.json();
 
     if (!article || !article.title) {
-      return new Response("Missing article data", { status: 400 });
+      return textError("Missing article data", 400);
     }
 
     if (mode !== "quick" && mode !== "full") {
-      return new Response("Invalid mode, must be 'quick' or 'full'", { status: 400 });
+      return textError("Invalid mode, must be 'quick' or 'full'", 400);
     }
 
     if (!isAIAvailable()) {
-      return new Response(
+      return textError(
         "AI is not configured. Please set one of OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or SHLAB_API_KEY in .env.local.",
-        { status: 503 },
+        503,
       );
     }
 
@@ -72,9 +73,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Research ideation error:", error);
-    return new Response(
+    return textError(
       error instanceof Error ? error.message : "Ideation failed",
-      { status: 500 },
+      500,
     );
   }
 }

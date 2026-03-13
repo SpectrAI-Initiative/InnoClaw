@@ -51,8 +51,20 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
   const [saved, setSaved] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<Element | null>(null);
 
   const isComplete = turns.length === IDEATION_STAGES.length && !isRunning;
+
+  /** Format turns into a markdown transcript (shared by save & export). */
+  function buildTranscript(items: IdeationTurn[]) {
+    return items
+      .map((turn) => {
+        const role = IDEATION_ROLES[turn.roleId];
+        const roleName = t(role.nameKey.split(".")[1] as Parameters<typeof t>[0]);
+        return `### ${roleName} — ${turn.stageId}\n\n${turn.content}`;
+      })
+      .join("\n\n---\n\n");
+  }
 
   const startIdeation = useCallback(async () => {
     setTurns([]);
@@ -110,11 +122,13 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
           }
         }
 
-        // Auto-scroll
+        // Auto-scroll (cache viewport ref to avoid querySelector per chunk)
         if (scrollRef.current) {
-          const viewport = scrollRef.current.querySelector('[data-slot="scroll-area-viewport"]');
-          if (viewport) {
-            viewport.scrollTop = viewport.scrollHeight;
+          if (!viewportRef.current) {
+            viewportRef.current = scrollRef.current.querySelector('[data-slot="scroll-area-viewport"]');
+          }
+          if (viewportRef.current) {
+            viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
           }
         }
       }
@@ -136,14 +150,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
   const handleSaveToNotes = useCallback(async () => {
     if (!workspaceId || turns.length === 0) return;
 
-    const transcript = turns
-      .map((turn) => {
-        const role = IDEATION_ROLES[turn.roleId];
-        const roleName = t(role.nameKey.split(".")[1] as Parameters<typeof t>[0]);
-        return `### ${roleName} — ${turn.stageId}\n\n${turn.content}`;
-      })
-      .join("\n\n---\n\n");
-
+    const transcript = buildTranscript(turns);
     const title = `${t("ideationNoteTitle")}: ${article.title.slice(0, 60)}`;
     const content = `# ${t("title")}: ${article.title}\n\n${transcript}`;
 
@@ -160,21 +167,8 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
       });
 
       if (!res.ok) {
-        let errorMessage: string | undefined;
-        try {
-          const data = await res.json();
-          errorMessage =
-            (typeof data === "string" ? data : data?.error || data?.message) || undefined;
-        } catch {
-          try {
-            const text = await res.text();
-            errorMessage = text || undefined;
-          } catch {
-            // Ignore parsing errors
-          }
-        }
-
-        throw new Error(errorMessage || "Failed to save");
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || body.message || "Failed to save");
       }
 
       setSaved(true);
@@ -191,14 +185,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
   const handleExportMarkdown = useCallback(() => {
     if (turns.length === 0) return;
 
-    const transcript = turns
-      .map((turn) => {
-        const role = IDEATION_ROLES[turn.roleId];
-        const roleName = t(role.nameKey.split(".")[1] as Parameters<typeof t>[0]);
-        return `### ${roleName} — ${turn.stageId}\n\n${turn.content}`;
-      })
-      .join("\n\n---\n\n");
-
+    const transcript = buildTranscript(turns);
     const md = `# Research Ideation: ${article.title}\n\n**Authors:** ${article.authors.join(", ")}\n**Mode:** ${mode}\n**Date:** ${new Date().toISOString().slice(0, 10)}${userSeed ? `\n**Seed Idea:** ${userSeed}` : ""}\n\n---\n\n${transcript}`;
 
     const blob = new Blob([md], { type: "text/markdown" });

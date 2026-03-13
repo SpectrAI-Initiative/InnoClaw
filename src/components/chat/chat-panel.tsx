@@ -28,8 +28,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { swrFetcher as fetcher } from "@/lib/fetcher";
 
 // --- Selectable options support ---
 

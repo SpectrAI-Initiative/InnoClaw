@@ -42,6 +42,9 @@ yarn-error.log*
 !.claude/commands/
 !.claude/commands/**
 
+# research history
+history/
+
 # data
 /data/
 

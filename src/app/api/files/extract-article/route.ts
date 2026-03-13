@@ -5,6 +5,9 @@ import { generateText } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { extractText, isSupportedFile } from "@/lib/files/text-extractor";
 import { validatePath } from "@/lib/files/filesystem";
+import { jsonError } from "@/lib/api-errors";
+import { logAndIgnore } from "@/lib/utils/log";
+import { PAPER } from "@/lib/constants";
 import type { Article } from "@/lib/article-search/types";
 
 export async function POST(req: NextRequest) {
@@ -12,29 +15,29 @@ export async function POST(req: NextRequest) {
     const { filePath } = await req.json();
 
     if (!filePath || typeof filePath !== "string") {
-      return NextResponse.json({ error: "Missing filePath" }, { status: 400 });
+      return jsonError("Missing filePath", 400);
     }
 
     // Security: validate path is within workspace roots
     const validated = validatePath(filePath);
 
     if (!isSupportedFile(validated)) {
-      return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
+      return jsonError("Unsupported file type", 400);
     }
 
     // Extract text from the file
     const rawText = await extractText(validated);
     if (!rawText.trim()) {
-      return NextResponse.json({ error: "Could not extract text from file" }, { status: 400 });
+      return jsonError("Could not extract text from file", 400);
     }
 
-    // Truncate for AI extraction (first ~4000 chars is enough for metadata)
-    const truncated = rawText.slice(0, 4000);
+    // Truncate for AI extraction
+    const truncated = rawText.slice(0, PAPER.MAX_EXTRACT_CONTEXT);
     const fileName = path.basename(validated, path.extname(validated));
 
     let title = fileName;
     let authors: string[] = [];
-    let abstract = rawText.slice(0, 500);
+    let abstract = rawText.slice(0, PAPER.MAX_ABSTRACT_LENGTH);
     let publishedDate = "";
 
     // Use AI to extract metadata if available
@@ -63,8 +66,8 @@ If a field cannot be determined, use sensible defaults: title from filename, emp
           if (parsed.abstract) abstract = parsed.abstract;
           if (parsed.publishedDate) publishedDate = parsed.publishedDate;
         }
-      } catch {
-        // AI extraction failed — use fallbacks (already set above)
+      } catch (err) {
+        logAndIgnore("extract-article:ai")(err);
       }
     }
 
@@ -81,9 +84,8 @@ If a field cannot be determined, use sensible defaults: title from filename, emp
     return NextResponse.json(article);
   } catch (error) {
     console.error("Extract article error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Extraction failed" },
-      { status: 500 },
-    );
+    const message =
+      error instanceof Error ? error.message : "Extraction failed";
+    return jsonError(message, 500);
   }
 }

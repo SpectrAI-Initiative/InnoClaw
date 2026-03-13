@@ -218,55 +218,72 @@ export default function WorkspacePage({
           <ResizablePanel defaultSize={75} minSize={30} className="overflow-hidden">
             <ResizablePanelGroup orientation="horizontal">
               <ResizablePanel defaultSize={60} minSize={10} className="overflow-hidden">
-                <div className="relative h-full">
-                  {/* Panel toggle buttons — hidden in minimal mode */}
+                <div className="relative h-full flex flex-col">
+                  {/* Top bar: agent tabs (when active) + panel toggle buttons */}
                   {!isMinimal && (
-                    <div className="absolute top-1 right-3 z-50 flex gap-1 bg-background/90 backdrop-blur-md rounded-lg p-1 border border-border/50 shadow-lg">
-                      <Button
-                        variant={middlePanel === "agent" ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setMiddlePanel("agent")}
-                        title={t("agentToggle")}
-                        aria-label={t("agentToggle")}
-                        className="h-7 px-2 gap-1"
-                      >
-                        <Bot className="h-3.5 w-3.5" />
-                        <span className="text-xs hidden lg:inline">Agent</span>
-                      </Button>
-                      <Button
-                        variant={middlePanel === "report" ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setMiddlePanel("report")}
-                        disabled={!reportAvailable}
-                        title={t("reportToggle")}
-                        aria-label={t("reportToggle")}
-                        className="h-7 px-2 gap-1"
-                      >
-                        <FileText className="h-3.5 w-3.5" />
-                        <span className="text-xs hidden lg:inline">Report</span>
-                      </Button>
-                      <Button
-                        variant={middlePanel === "paperStudy" ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setMiddlePanel("paperStudy")}
-                        title={t("paperStudyToggle")}
-                        aria-label={t("paperStudyToggle")}
-                        className="h-7 px-2 gap-1"
-                      >
-                        <GraduationCap className="h-3.5 w-3.5" />
-                        <span className="text-xs hidden lg:inline">Paper</span>
-                      </Button>
-                      <Button
-                        variant={middlePanel === "cluster" ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setMiddlePanel("cluster")}
-                        title={tc("clusterToggle")}
-                        aria-label={tc("clusterToggle")}
-                        className="h-7 px-2 gap-1"
-                      >
-                        <Server className="h-3.5 w-3.5" />
-                        <span className="text-xs hidden lg:inline">Cluster</span>
-                      </Button>
+                    <div className="flex items-center border-b border-border/50 bg-muted/30 shrink-0">
+                      {/* Agent session tabs — only shown when agent panel is active */}
+                      {middlePanel === "agent" && (
+                        <AgentSessionTabs
+                          sessions={sessions}
+                          activeSessionId={activeSessionId}
+                          loadingSessions={loadingSessions}
+                          onSelect={setActiveSessionId}
+                          onClose={closeSession}
+                          onCreate={createSession}
+                          onRename={renameSession}
+                        />
+                      )}
+                      {/* Spacer when agent tabs are not shown */}
+                      {middlePanel !== "agent" && <div className="flex-1" />}
+                      {/* Panel toggle buttons */}
+                      <div className="shrink-0 flex gap-1 bg-background/90 backdrop-blur-md rounded-lg p-1 border border-border/50 shadow-lg m-0.5 mr-1">
+                        <Button
+                          variant={middlePanel === "agent" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setMiddlePanel("agent")}
+                          title={t("agentToggle")}
+                          aria-label={t("agentToggle")}
+                          className="h-7 px-2 gap-1"
+                        >
+                          <Bot className="h-3.5 w-3.5" />
+                          <span className="text-xs hidden lg:inline">Agent</span>
+                        </Button>
+                        <Button
+                          variant={middlePanel === "report" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setMiddlePanel("report")}
+                          disabled={!reportAvailable}
+                          title={t("reportToggle")}
+                          aria-label={t("reportToggle")}
+                          className="h-7 px-2 gap-1"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          <span className="text-xs hidden lg:inline">Report</span>
+                        </Button>
+                        <Button
+                          variant={middlePanel === "paperStudy" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setMiddlePanel("paperStudy")}
+                          title={t("paperStudyToggle")}
+                          aria-label={t("paperStudyToggle")}
+                          className="h-7 px-2 gap-1"
+                        >
+                          <GraduationCap className="h-3.5 w-3.5" />
+                          <span className="text-xs hidden lg:inline">Paper</span>
+                        </Button>
+                        <Button
+                          variant={middlePanel === "cluster" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setMiddlePanel("cluster")}
+                          title={tc("clusterToggle")}
+                          aria-label={tc("clusterToggle")}
+                          className="h-7 px-2 gap-1"
+                        >
+                          <Server className="h-3.5 w-3.5" />
+                          <span className="text-xs hidden lg:inline">Cluster</span>
+                        </Button>
+                      </div>
                     </div>
                   )}
 
@@ -276,18 +293,23 @@ export default function WorkspacePage({
                   <div className={
                     isMinimal
                       ? "fixed inset-0 z-40 bg-background"
-                      : (middlePanel === "agent" ? "h-full flex flex-col" : "hidden")
+                      : (middlePanel === "agent" ? "flex-1 min-h-0 flex flex-col" : "hidden")
                   }>
                     <div className={isMinimal ? "mx-auto h-screen w-full max-w-4xl flex flex-col" : "h-full flex flex-col"}>
-                      <AgentSessionTabs
-                        sessions={sessions}
-                        activeSessionId={activeSessionId}
-                        loadingSessions={loadingSessions}
-                        onSelect={setActiveSessionId}
-                        onClose={closeSession}
-                        onCreate={createSession}
-                        onRename={renameSession}
-                      />
+                      {/* In minimal mode, show tabs inside the overlay */}
+                      {isMinimal && (
+                        <div className="border-b border-border/50 bg-muted/30 shrink-0">
+                          <AgentSessionTabs
+                            sessions={sessions}
+                            activeSessionId={activeSessionId}
+                            loadingSessions={loadingSessions}
+                            onSelect={setActiveSessionId}
+                            onClose={closeSession}
+                            onCreate={createSession}
+                            onRename={renameSession}
+                          />
+                        </div>
+                      )}
                       <div className="flex-1 min-h-0 relative">
                         {sessions.map((session) => (
                           <div
@@ -300,6 +322,7 @@ export default function WorkspacePage({
                               folderPath={workspace.folderPath}
                               sessionId={session.id}
                               sessionName={session.name}
+                              sessionCreatedAt={session.createdAt}
                               onLoadingChange={(loading) => handleSessionLoadingChange(session.id, loading)}
                             />
                           </div>
@@ -307,16 +330,16 @@ export default function WorkspacePage({
                       </div>
                     </div>
                   </div>
-                  <div className={middlePanel === "report" ? "h-full" : "hidden"}>
+                  <div className={middlePanel === "report" ? "flex-1 min-h-0" : "hidden"}>
                     <ReportPanel report={report} />
                   </div>
-                  <div className={middlePanel === "paperStudy" ? "h-full" : "hidden"}>
+                  <div className={middlePanel === "paperStudy" ? "flex-1 min-h-0" : "hidden"}>
                     <PaperStudyPanel
                       workspaceId={workspaceId}
                       onArticleSelect={(a) => { if (a) openArticleTab(a); }}
                     />
                   </div>
-                  <div className={middlePanel === "cluster" ? "h-full" : "hidden"}>
+                  <div className={middlePanel === "cluster" ? "flex-1 min-h-0" : "hidden"}>
                     <ClusterPanel workspaceId={workspaceId} />
                   </div>
                 </div>

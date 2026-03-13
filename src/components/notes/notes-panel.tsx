@@ -31,8 +31,7 @@ import { useNotes } from "@/lib/hooks/use-notes";
 import { toast } from "sonner";
 import type { Note } from "@/types";
 import useSWR from "swr";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { swrFetcher as fetcher } from "@/lib/fetcher";
 
 interface NotesPanelProps {
   workspaceId: string;

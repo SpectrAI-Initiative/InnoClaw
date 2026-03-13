@@ -96,6 +96,35 @@ function getPerModelProvider(
 }
 
 /**
+ * Build a LanguageModel instance from an arbitrary provider/model pair.
+ * Shared by both DB-based and per-request model resolution.
+ */
+function buildLanguageModel(provider: string, modelId: string): LanguageModel {
+  switch (provider) {
+    case "openai":
+      // Use Chat Completions API (not Responses API) for maximum compatibility
+      // with third-party proxies and OpenAI-compatible services.
+      return openai.chat(modelId);
+    case "gemini":
+      // Gemini models served via a separate OpenAI-compatible proxy
+      return gemini.chat(modelId);
+    case "anthropic":
+      return anthropic(modelId);
+    case "shlab":
+    case "qwen":
+    case "moonshot":
+    case "deepseek":
+    case "minimax":
+    case "zhipu":
+      return getPerModelProvider(provider, modelId);
+    default:
+      // Use the configured modelId even for unknown providers – the user may be
+      // pointing OPENAI_BASE_URL at a third-party OpenAI-compatible service.
+      return openai.chat(modelId);
+  }
+}
+
+/**
  * Get the currently configured LLM provider ID and model in a single DB query.
  * Returns both so callers can avoid duplicate round-trips and stay consistent.
  */
@@ -114,35 +143,18 @@ export async function getConfiguredModelWithProvider(): Promise<{
   const provider = providerRow?.value || DEFAULT_PROVIDER;
   const modelId = modelRow?.value || DEFAULT_MODEL;
 
-  let model: LanguageModel;
-  switch (provider) {
-    case "openai":
-      // Use Chat Completions API (not Responses API) for maximum compatibility
-      // with third-party proxies and OpenAI-compatible services.
-      model = openai.chat(modelId);
-      break;
-    case "gemini":
-      // Gemini models served via a separate OpenAI-compatible proxy
-      model = gemini.chat(modelId);
-      break;
-    case "anthropic":
-      model = anthropic(modelId);
-      break;
-    case "shlab":
-    case "qwen":
-    case "moonshot":
-    case "deepseek":
-    case "minimax":
-    case "zhipu":
-      model = getPerModelProvider(provider, modelId);
-      break;
-    default:
-      // Use the configured modelId even for unknown providers – the user may be
-      // pointing OPENAI_BASE_URL at a third-party OpenAI-compatible service.
-      model = openai.chat(modelId);
-      break;
-  }
-  return { providerId: provider, model };
+  return { providerId: provider, model: buildLanguageModel(provider, modelId) };
+}
+
+/**
+ * Build a model from an explicit provider/model pair without querying the DB.
+ * Used for per-request model overrides from the agent panel.
+ */
+export function getModelFromOverride(
+  provider: string,
+  modelId: string
+): { providerId: string; model: LanguageModel } {
+  return { providerId: provider, model: buildLanguageModel(provider, modelId) };
 }
 
 /**

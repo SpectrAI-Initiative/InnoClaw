@@ -6,3 +6,6 @@ export async function fetcher<T>(url: string): Promise<T> {
   }
   return res.json();
 }
+
+/** Simple JSON fetcher for useSWR — no error body extraction. */
+export const swrFetcher = (url: string) => fetch(url).then((r) => r.json());

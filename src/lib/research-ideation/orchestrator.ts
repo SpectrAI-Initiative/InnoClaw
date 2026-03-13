@@ -7,13 +7,14 @@ import type {
 } from "./types";
 import { IDEATION_STAGES, IDEATION_AGENTS } from "./roles";
 import { buildIdeationPrompt } from "./prompts";
+import { IDEATION } from "@/lib/constants";
 
 // =============================================================
 // TOKEN LIMITS per stage by mode
 // =============================================================
 const MAX_TOKENS: Record<"quick" | "full", number> = {
-  quick: 600,
-  full: 1500,
+  quick: IDEATION.TOKENS_QUICK,
+  full: IDEATION.TOKENS_FULL,
 };
 
 // =============================================================

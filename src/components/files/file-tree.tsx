@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { PAPER_ELIGIBLE_EXTENSIONS } from "@/lib/constants";
 import {
   ChevronRight,
   ChevronDown,
@@ -469,7 +470,7 @@ function TreeNode({
               {tCommon("open")}
             </ContextMenuItem>
           )}
-          {!isDirectory && /\.(pdf|md|txt)$/i.test(entry.name) && (onDiscussFile || onIdeateFile) && (
+          {!isDirectory && PAPER_ELIGIBLE_EXTENSIONS.some((ext) => entry.name.toLowerCase().endsWith(`.${ext}`)) && (onDiscussFile || onIdeateFile) && (
             <>
               <ContextMenuSeparator />
               {onDiscussFile && (

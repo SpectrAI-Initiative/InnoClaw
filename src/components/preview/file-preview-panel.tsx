@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, X, Save, FileDown, AlertCircle, Loader2, GraduationCap } from "lucide-react";
+import { PAPER_ELIGIBLE_EXTENSIONS } from "@/lib/constants";
 import { getFileName } from "@/lib/utils";
 import { PdfViewer } from "@/components/files/pdf-viewer";
 import { MolViewer } from "@/components/files/mol-viewer";
@@ -159,11 +160,9 @@ function UnsupportedPreview({ filePath }: { filePath: string }) {
   );
 }
 
-const PAPER_EXTS = ["pdf", "md", "markdown", "txt"];
-
 function isPaperEligible(filePath: string): boolean {
   const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
-  return PAPER_EXTS.includes(ext);
+  return (PAPER_ELIGIBLE_EXTENSIONS as readonly string[]).includes(ext);
 }
 
 export function FilePreviewPanel({ filePath, onClose, onStudyPaper }: FilePreviewPanelProps) {

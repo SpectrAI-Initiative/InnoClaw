@@ -242,6 +242,7 @@
     "clearContext": "清空上下文",
     "back": "返回",
     "modeLabel": "选择模式",
+    "modelLabel": "选择模型",
     "modeAgent": "智能体",
     "modeAgentDesc": "读写文件、执行代码",
     "modePlan": "规划",

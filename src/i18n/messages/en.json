@@ -209,6 +209,7 @@
     "clearContext": "Clear context",
     "back": "Back",
     "modeLabel": "Select Mode",
+    "modelLabel": "Select Model",
     "modeAgent": "Agent",
     "modeAgentDesc": "Read, write, and execute code",
     "modePlan": "Plan",

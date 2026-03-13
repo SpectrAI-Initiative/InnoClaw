@@ -30,6 +30,9 @@ export async function GET() {
       hasHfToken,
       hfTokenSource: settingsMap["hf_token"] ? "db" : (process.env.HF_TOKEN ? "env" : null),
       hasAIKey: Object.values(PROVIDERS).some((p) => !!process.env[p.envKey]),
+      configuredProviders: Object.values(PROVIDERS)
+        .filter((p) => !!process.env[p.envKey])
+        .map((p) => p.id),
       openaiBaseUrl: process.env.OPENAI_BASE_URL || "",
       anthropicBaseUrl: process.env.ANTHROPIC_BASE_URL || "",
       geminiBaseUrl: process.env.GEMINI_BASE_URL || "",

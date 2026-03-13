@@ -1,7 +1,6 @@
 import useSWR from "swr";
 import type { HfDataset, HfDownloadProgress } from "@/types";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { swrFetcher as fetcher } from "@/lib/fetcher";
 
 export function useDatasets() {
   const { data, error, isLoading, mutate } = useSWR<HfDataset[]>(
