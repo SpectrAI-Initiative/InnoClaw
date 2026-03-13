@@ -91,7 +91,7 @@ export const notes = sqliteTable("notes", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   type: text("type", {
-    enum: ["manual", "summary", "faq", "briefing", "timeline", "memory", "daily_report", "weekly_report", "paper_discussion", "research_ideation"],
+    enum: ["manual", "summary", "faq", "briefing", "timeline", "memory", "daily_report", "weekly_report", "paper_discussion", "research_ideation", "experiment_analysis"],
   })
     .notNull()
     .default("manual"),
@@ -251,4 +251,71 @@ export const datasetWorkspaceLinks = sqliteTable("dataset_workspace_links", {
     .default(sql`(datetime('now'))`),
 }, (table) => [
   uniqueIndex("dataset_workspace_unique_idx").on(table.datasetId, table.workspaceId),
+]);
+
+// ============================================================
+// REMOTE EXECUTION PROFILES (SSH targets for research exec)
+// ============================================================
+export const remoteProfiles = sqliteTable("remote_profiles", {
+  id: text("id").primaryKey(),
+  workspaceId: text("workspace_id")
+    .notNull()
+    .references(() => workspaces.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  host: text("host").notNull(),
+  port: integer("port").notNull().default(22),
+  username: text("username").notNull(),
+  remotePath: text("remote_path").notNull(),
+  schedulerType: text("scheduler_type", {
+    enum: ["shell", "slurm"],
+  })
+    .notNull()
+    .default("shell"),
+  sshKeyRef: text("ssh_key_ref"), // path to SSH key file, never raw key
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+}, (table) => [
+  index("remote_profiles_ws_idx").on(table.workspaceId),
+]);
+
+// ============================================================
+// EXPERIMENT RUNS (research execution workflow runs)
+// ============================================================
+export const experimentRuns = sqliteTable("experiment_runs", {
+  id: text("id").primaryKey(),
+  workspaceId: text("workspace_id")
+    .notNull()
+    .references(() => workspaces.id, { onDelete: "cascade" }),
+  remoteProfileId: text("remote_profile_id").references(
+    () => remoteProfiles.id,
+    { onDelete: "set null" },
+  ),
+  status: text("status", {
+    enum: [
+      "planning", "patching", "syncing", "submitted",
+      "running", "collecting", "analyzing", "completed",
+      "failed", "cancelled",
+    ],
+  })
+    .notNull()
+    .default("planning"),
+  manifestJson: text("manifest_json"), // JSON: ExperimentManifest
+  patchSummary: text("patch_summary"),
+  syncSummary: text("sync_summary"),
+  jobId: text("job_id"),
+  resultSummaryJson: text("result_summary_json"), // JSON: ExperimentResultSummary
+  recommendationJson: text("recommendation_json"), // JSON: AnalysisRecommendation
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+}, (table) => [
+  index("experiment_runs_ws_idx").on(table.workspaceId),
+  index("experiment_runs_status_idx").on(table.status),
 ]);

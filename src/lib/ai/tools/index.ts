@@ -7,6 +7,7 @@ import { createK8sTools } from "./k8s-tools";
 import { createSearchTools } from "./search-tools";
 import { createSkillTools } from "./skill-tools";
 import { createMcpTools } from "./mcp-tools";
+import { createResearchExecTools } from "./research-exec-tools";
 import { formatTimestampForDir } from "./research-history";
 import type { ToolContext } from "./types";
 
@@ -59,6 +60,7 @@ export function createAgentTools(
     ...createSearchTools(),
     ...createSkillTools(workspaceId),
     ...createMcpTools(ctx),
+    ...createResearchExecTools(ctx),
   };
 
   // Filter tools if allowedTools is specified
