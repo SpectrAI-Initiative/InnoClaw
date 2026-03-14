@@ -97,50 +97,60 @@ jobs:
       - name: Send to Feishu
         if: steps.check.outputs.commit_count != '0'
         env:
-          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          FEISHU_WEBHOOK_URLS: ${{ secrets.FEISHU_WEBHOOK_URL }}
         run: |
           TODAY=$(date +%Y-%m-%d)
           COMMITS="${{ steps.check.outputs.commit_count }}"
           SUMMARY=$(cat /tmp/summary.md)
           REPO_URL="https://github.com/${{ github.repository }}"
 
-          curl -s -X POST "$FEISHU_WEBHOOK_URL" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n \
-              --arg title "📋 InnoClaw 每日变更总结 - ${TODAY}" \
-              --arg commits "${COMMITS} 个 commit" \
-              --arg summary "$SUMMARY" \
-              --arg repo_url "$REPO_URL" \
-              '{
-                "msg_type": "interactive",
-                "card": {
-                  "header": {
-                    "title": { "tag": "plain_text", "content": $title },
-                    "template": "blue"
+          PAYLOAD=$(jq -n \
+            --arg title "📋 InnoClaw 每日变更总结 - ${TODAY}" \
+            --arg commits "${COMMITS} 个 commit" \
+            --arg summary "$SUMMARY" \
+            --arg repo_url "$REPO_URL" \
+            '{
+              "msg_type": "interactive",
+              "card": {
+                "header": {
+                  "title": { "tag": "plain_text", "content": $title },
+                  "template": "blue"
+                },
+                "elements": [
+                  {
+                    "tag": "div",
+                    "text": { "tag": "lark_md", "content": $commits }
                   },
-                  "elements": [
-                    {
-                      "tag": "div",
-                      "text": { "tag": "lark_md", "content": $commits }
-                    },
-                    { "tag": "hr" },
-                    {
-                      "tag": "div",
-                      "text": { "tag": "lark_md", "content": $summary }
-                    },
-                    { "tag": "hr" },
-                    {
-                      "tag": "action",
-                      "actions": [
-                        {
-                          "tag": "button",
-                          "text": { "tag": "plain_text", "content": "查看仓库" },
-                          "url": $repo_url,
-                          "type": "primary"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }'
-            )"
+                  { "tag": "hr" },
+                  {
+                    "tag": "div",
+                    "text": { "tag": "lark_md", "content": $summary }
+                  },
+                  { "tag": "hr" },
+                  {
+                    "tag": "action",
+                    "actions": [
+                      {
+                        "tag": "button",
+                        "text": { "tag": "plain_text", "content": "查看仓库" },
+                        "url": $repo_url,
+                        "type": "primary"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }')
+
+          # Support multiple webhook URLs separated by commas
+          IFS=',' read -ra URLS <<< "$FEISHU_WEBHOOK_URLS"
+          for URL in "${URLS[@]}"; do
+            URL=$(echo "$URL" | xargs)  # trim whitespace
+            if [ -n "$URL" ]; then
+              echo "Sending to webhook: ${URL:0:60}..."
+              curl -s -X POST "$URL" \
+                -H "Content-Type: application/json" \
+                -d "$PAYLOAD"
+              echo ""
+            fi
+          done
