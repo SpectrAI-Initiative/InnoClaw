@@ -1,8 +1,8 @@
 # InnoClaw
 
-一个可自托管的 AI 研究助手，灵感来自 Google NotebookLM。将服务器文件夹作为工作空间，基于 RAG 与 AI 对话，内置 206 个科学技能。
+一个可自托管的 AI 研究助手。将服务器文件夹作为工作空间，基于 RAG 与 AI 对话，内置 206 个科学技能。
 
-A self-hostable AI research assistant inspired by Google NotebookLM. Turn server-side folders into workspaces, chat with AI grounded in your documents via RAG, and leverage 206 built-in scientific skills.
+A self-hostable AI research assistant. Turn server-side folders into workspaces, chat with AI grounded in your documents via RAG, and leverage 206 built-in scientific skills.
 
 📖 **[完整文档 / Full Documentation](https://zjowowen.github.io/InnoClaw/)** (English & 简体中文)
 
