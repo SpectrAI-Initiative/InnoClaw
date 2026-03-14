@@ -273,7 +273,13 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 
 <!-- whats-new-start -->
 
+#### 2026-03-14
+- **Research Execution Engine / 研究执行引擎**: New AI-driven research orchestration system with remote profiles, capability toggles, run history, and agent tools
+- **Auto-updating README "What's New" / 自动更新 README 新功能板块**: GitHub Actions workflow that automatically generates and commits a bilingual What's New section daily
+
 *暂无条目。当 CI 检测到重大新功能时会自动更新此栏目。*
+
+
 
 <!-- whats-new-end -->
 
