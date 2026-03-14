@@ -269,6 +269,16 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 
 ---
 
+## 新增特性 / What's New
+
+<!-- whats-new-start -->
+
+*暂无条目。当 CI 检测到重大新功能时会自动更新此栏目。*
+
+<!-- whats-new-end -->
+
+---
+
 ## 功能 / Features
 
 - **工作空间管理** — 映射服务器文件夹，持久化存储
