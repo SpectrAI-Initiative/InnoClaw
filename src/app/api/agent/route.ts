@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     const { providerId, model } = llmProvider && llmModel
       ? getModelFromOverride(llmProvider, llmModel)
       : await getConfiguredModelWithProvider();
-    console.log(`[agent] provider=${providerId} model=${model.modelId} override=${!!(llmProvider && llmModel)}`);
+    console.log(`[agent] provider=${providerId} model=${typeof model === 'string' ? model : model.modelId} override=${!!(llmProvider && llmModel)}`);
     const useTools = providerSupportsTools(providerId);
     let systemPrompt: string;
     let tools;
