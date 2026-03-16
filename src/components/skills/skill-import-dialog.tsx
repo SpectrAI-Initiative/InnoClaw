@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Globe, FileUp, ClipboardPaste, CheckCircle2 } from "lucide-react";
+import { Globe, FileUp, CheckCircle2 } from "lucide-react";
+import { markdownToSkillData } from "@/lib/utils/skill-md";
 
 interface SkillImportDialogProps {
   open: boolean;
@@ -39,7 +39,6 @@ export function SkillImportDialog({
 
   const [tab, setTab] = useState("url");
   const [url, setUrl] = useState("");
-  const [jsonText, setJsonText] = useState("");
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [batchResult, setBatchResult] = useState<BatchResult | null>(null);
@@ -47,7 +46,6 @@ export function SkillImportDialog({
 
   const resetState = () => {
     setUrl("");
-    setJsonText("");
     setError(null);
     setImporting(false);
     setBatchResult(null);
@@ -101,26 +99,30 @@ export function SkillImportDialog({
     await doImport({ url: url.trim() });
   };
 
-  const handleImportJson = async () => {
-    if (!jsonText.trim()) return;
-    try {
-      const parsed = JSON.parse(jsonText.trim());
-      await doImport({ skill: parsed });
-    } catch {
-      setError(t("invalidJson"));
-    }
-  };
-
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
       const text = await file.text();
-      const parsed = JSON.parse(text);
-      await doImport({ skill: parsed });
+      const parsed = markdownToSkillData(text);
+      if (!parsed || !parsed.name || !parsed.systemPrompt) {
+        setError(t("invalidMarkdown"));
+        return;
+      }
+      await doImport({
+        skill: {
+          name: parsed.name,
+          slug: parsed.slug,
+          description: parsed.description || null,
+          systemPrompt: parsed.systemPrompt,
+          steps: parsed.steps,
+          allowedTools: parsed.allowedTools,
+          parameters: parsed.parameters,
+        },
+      });
     } catch {
-      setError(t("invalidJson"));
+      setError(t("invalidMarkdown"));
     }
 
     // Reset file input
@@ -143,7 +145,7 @@ export function SkillImportDialog({
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={(v) => { setTab(v); setBatchResult(null); setError(null); }}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="url" className="gap-1.5">
               <Globe className="h-3.5 w-3.5" />
               URL
@@ -151,10 +153,6 @@ export function SkillImportDialog({
             <TabsTrigger value="file" className="gap-1.5">
               <FileUp className="h-3.5 w-3.5" />
               {t("importFromFile")}
-            </TabsTrigger>
-            <TabsTrigger value="json" className="gap-1.5">
-              <ClipboardPaste className="h-3.5 w-3.5" />
-              JSON
             </TabsTrigger>
           </TabsList>
 
@@ -183,7 +181,7 @@ export function SkillImportDialog({
             <input
               ref={fileInputRef}
               type="file"
-              accept=".json"
+              accept=".md"
               onChange={handleFileSelect}
               className="hidden"
             />
@@ -195,21 +193,6 @@ export function SkillImportDialog({
               <FileUp className="h-4 w-4 mr-2" />
               {t("selectFile")}
             </Button>
-          </TabsContent>
-
-          <TabsContent value="json" className="space-y-3 mt-4">
-            <p className="text-xs text-muted-foreground">
-              {t("importJsonDesc")}
-            </p>
-            <Textarea
-              value={jsonText}
-              onChange={(e) => {
-                setJsonText(e.target.value);
-                setError(null);
-              }}
-              placeholder={t("importJsonPlaceholder")}
-              className="min-h-[200px] font-mono text-xs"
-            />
           </TabsContent>
         </Tabs>
 
@@ -241,13 +224,10 @@ export function SkillImportDialog({
           >
             {batchResult ? tc("close") : tc("cancel")}
           </Button>
-          {tab !== "file" && !batchResult && (
+          {tab === "url" && !batchResult && (
             <Button
-              onClick={tab === "url" ? handleImportUrl : handleImportJson}
-              disabled={
-                importing ||
-                (tab === "url" ? !url.trim() : !jsonText.trim())
-              }
+              onClick={handleImportUrl}
+              disabled={importing || !url.trim()}
             >
               {importing ? t("importing") : t("import")}
             </Button>

@@ -122,7 +122,7 @@ export default function SkillsPage() {
     <div className="flex h-screen flex-col bg-background">
       <Header />
       <ScrollArea className="flex-1">
-        <main className="mx-auto max-w-4xl px-4 py-8">
+        <main className="mx-auto max-w-6xl px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">{t("title")}</h1>
           <div className="flex items-center gap-2">
