@@ -555,7 +555,7 @@ export function AgentPanel({
   const prevStatusRef = useRef(status);
   const autoContinueCountRef = useRef(0);
   const autoContinueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const MAX_AUTO_CONTINUES = mode === "long-agent" ? 100 : 20; // long-agent supports extended interactions
+  const maxAutoContinues = mode === "long-agent" ? 100 : 20; // long-agent supports extended interactions
 
   useEffect(() => {
     const wasStreaming = prevStatusRef.current === "streaming" || prevStatusRef.current === "submitted";
@@ -572,7 +572,7 @@ export function AgentPanel({
     }
 
     // Check if we've hit the auto-continue limit
-    if (autoContinueCountRef.current >= MAX_AUTO_CONTINUES) {
+    if (autoContinueCountRef.current >= maxAutoContinues) {
       return;
     }
 
@@ -606,7 +606,7 @@ export function AgentPanel({
         autoContinueTimerRef.current = null;
       }
     };
-  }, [status, messages, sendMessage, t, mode]);
+  }, [status, messages, sendMessage, t, maxAutoContinues]);
   const overflowThreshold = getOverflowThresholdChars(
     selectedProvider ?? settings?.llmProvider ?? "openai",
     selectedModel ?? settings?.llmModel ?? "gpt-4o-mini",
