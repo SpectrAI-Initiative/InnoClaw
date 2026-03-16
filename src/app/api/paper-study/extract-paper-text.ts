@@ -1,6 +1,6 @@
-import { extractText, isSupportedFile } from "@/lib/files/text-extractor";
-import { normalizeText } from "@/lib/files/text-extractor";
+import { extractText, isSupportedFile, normalizeText } from "@/lib/files/text-extractor";
 import { validatePath } from "@/lib/files/filesystem";
+
 
 /**
  * Extract full paper text for local files to feed into discussion/ideation agents.
