@@ -57,7 +57,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
   const isComplete = turns.length === IDEATION_STAGES.length && !isRunning;
 
   /** Format turns into a markdown transcript (shared by save & export). */
-  function buildTranscript(items: IdeationTurn[]) {
+  const buildTranscript = useCallback((items: IdeationTurn[]) => {
     return items
       .map((turn) => {
         const role = IDEATION_ROLES[turn.roleId];
@@ -65,7 +65,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
         return `### ${roleName} — ${turn.stageId}\n\n${turn.content}`;
       })
       .join("\n\n---\n\n");
-  }
+  }, [t]);
 
   const startIdeation = useCallback(async () => {
     setTurns([]);
@@ -181,7 +181,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
           : "Failed to save";
       toast.error(message);
     }
-  }, [workspaceId, turns, article, t]);
+  }, [workspaceId, turns, article, t, buildTranscript]);
 
   const handleExportMarkdown = useCallback(() => {
     if (turns.length === 0) return;
@@ -196,7 +196,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
     a.download = `research-ideation-${article.id}.md`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [turns, article, mode, userSeed, t]);
+  }, [turns, article, mode, userSeed, buildTranscript]);
 
   function getRoleIcon(roleId: IdeationRoleId) {
     const role = IDEATION_ROLES[roleId];

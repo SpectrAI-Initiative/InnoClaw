@@ -14,8 +14,6 @@ import {
   Loader2,
   Square,
   Brain,
-  ClipboardList,
-  MessageCircleQuestion,
 } from "lucide-react";
 import useSWR from "swr";
 import {
@@ -99,7 +97,6 @@ interface AgentPanelProps {
 
 export function AgentPanel({
   workspaceId,
-  workspaceName,
   folderPath,
   sessionId,
   sessionName,
@@ -418,7 +415,6 @@ export function AgentPanel({
           });
         },
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [agentBody]
   );
 
@@ -517,7 +513,6 @@ export function AgentPanel({
         } catch { /* ignore */ }
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
   // On mount: if the background stream manager is still active, subscribe
@@ -564,7 +559,6 @@ export function AgentPanel({
     );
 
     return unsub;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamKey, storageKey, setMessages]);
 
   // --- Auto-continue: automatically continue when task is incomplete ---
