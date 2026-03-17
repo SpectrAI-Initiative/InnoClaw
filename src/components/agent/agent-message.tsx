@@ -7,6 +7,11 @@ import type { UIMessage } from "ai";
 import { ToolCallBlock } from "./tool-call-block";
 import type { ToolInvocationPart } from "./tool-call-block";
 import { BreathingBorder, ThinkingParticles } from "@/components/ui/particle-effect";
+import {
+  remarkPlugins,
+  rehypePlugins,
+  markdownComponents,
+} from "@/lib/markdown/shared-components";
 
 /** XML tag used to identify compacted context summary messages. */
 const CONTEXT_SUMMARY_TAG_PREFIX = "<context_summary>";
@@ -51,8 +56,12 @@ function ContextSummaryBlock({ text }: { text: string }) {
         </button>
         {expanded && (
           <div className="px-3 pb-3 border-t border-purple-500/20">
-            <div className="mt-2 prose prose-sm max-w-none text-agent-foreground/80 [&_p]:my-1 [&_h3]:text-purple-300 [&_h3]:text-xs [&_h3]:mt-2 [&_h3]:mb-1 [&_ul]:my-1 [&_li]:my-0 [&_li]:text-xs [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_pre]:rounded-lg [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:text-agent-code [&_code]:break-all dark:prose-invert text-xs leading-relaxed">
-              <ReactMarkdown>{summary}</ReactMarkdown>
+            <div className="mt-2 chat-prose max-w-none text-agent-foreground/80 [&_p]:my-1 [&_h3]:text-purple-300 [&_h3]:text-xs [&_h3]:mt-2 [&_h3]:mb-1 [&_ul]:my-1 [&_li]:my-0 [&_li]:text-xs [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_pre]:rounded-lg [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:text-agent-code [&_code]:break-all dark:prose-invert text-xs leading-relaxed">
+              <ReactMarkdown
+                remarkPlugins={remarkPlugins}
+                rehypePlugins={rehypePlugins}
+                components={markdownComponents}
+              >{summary}</ReactMarkdown>
             </div>
           </div>
         )}
@@ -106,9 +115,13 @@ export function AgentMessage({ message }: { message: UIMessage }) {
           return (
             <div
               key={i}
-              className="prose prose-sm max-w-none text-agent-foreground [&_p]:my-1.5 [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_pre]:rounded-lg [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:text-agent-code [&_code]:break-all [&_h1]:text-agent-foreground [&_h2]:text-agent-foreground [&_h3]:text-agent-foreground [&_a]:text-agent-accent [&_strong]:text-agent-foreground [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-0.5 dark:prose-invert"
+              className="chat-prose text-sm max-w-none text-agent-foreground [&_p]:my-1.5 [&_pre]:bg-agent-card-bg [&_pre]:border [&_pre]:border-agent-border [&_pre]:rounded-lg [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:text-agent-code [&_code]:break-all [&_h1]:text-agent-foreground [&_h2]:text-agent-foreground [&_h3]:text-agent-foreground [&_a]:text-agent-accent [&_strong]:text-agent-foreground [&_ul]:my-2 [&_ol]:my-2 [&_li]:my-0.5 dark:prose-invert"
             >
-              <ReactMarkdown>{text}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={remarkPlugins}
+                rehypePlugins={rehypePlugins}
+                components={markdownComponents}
+              >{text}</ReactMarkdown>
             </div>
           );
         }
