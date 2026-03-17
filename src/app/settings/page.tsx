@@ -38,15 +38,11 @@ interface Settings {
   contextMode: string;
   maxMode: boolean;
   workspaceRoots: string[];
-  hasOpenAIKey: boolean;
-  hasAnthropicKey: boolean;
-  hasGeminiKey: boolean;
   hasGithubToken: boolean;
   hasHfToken: boolean;
   hfTokenSource: "db" | "env" | null;
-  openaiBaseUrl: string;
-  anthropicBaseUrl: string;
-  geminiBaseUrl: string;
+  providerKeys: Record<string, boolean>;
+  providerBaseUrls: Record<string, string>;
   feishuBotEnabled: boolean;
   wechatBotEnabled: boolean;
 }
@@ -66,6 +62,10 @@ export default function SettingsPage() {
   const [fetchingModels, setFetchingModels] = useState(false);
   const [contextMode, setContextMode] = useState("normal");
   const [maxMode, setMaxMode] = useState(true);
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
+  const [baseUrls, setBaseUrls] = useState<Record<string, string>>({});
+  const [githubToken, setGithubToken] = useState("");
+  const [apiKeySaving, setApiKeySaving] = useState(false);
   const { styleTheme, setStyleTheme } = useStyleTheme();
   const { fontSize, increase, decrease, reset, min, max } = useFontSize();
   const { fontFamily, setFontFamily: setFont, reset: resetFont } = useFontFamily();
@@ -113,6 +113,9 @@ export default function SettingsPage() {
         }
         setContextMode(data.contextMode || "normal");
         setMaxMode(data.maxMode ?? true);
+        if (data.providerBaseUrls) {
+          setBaseUrls(data.providerBaseUrls);
+        }
       });
   }, []);
 
@@ -179,6 +182,50 @@ export default function SettingsPage() {
       toast.error(tCommon("error"));
     } finally {
       setHfTokenSaving(false);
+    }
+  };
+
+  const handleApiKeysSave = async () => {
+    setApiKeySaving(true);
+    try {
+      const payload: Record<string, string> = {};
+      // Collect non-empty API keys
+      for (const [providerId, key] of Object.entries(apiKeys)) {
+        if (key.trim()) {
+          payload[`${providerId}_api_key`] = key.trim();
+        }
+      }
+      // Only send base URLs that actually changed
+      for (const [providerId, url] of Object.entries(baseUrls)) {
+        if (url !== (settings?.providerBaseUrls?.[providerId] ?? "")) {
+          payload[`${providerId}_base_url`] = url;
+        }
+      }
+      // GitHub token
+      if (githubToken.trim()) {
+        payload.github_token = githubToken.trim();
+      }
+      if (Object.keys(payload).length === 0) {
+        return;
+      }
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      // Re-fetch to update status
+      const res = await fetch("/api/settings");
+      const data = await res.json();
+      setSettings(data);
+      if (data.providerBaseUrls) setBaseUrls(data.providerBaseUrls);
+      // Clear entered keys (they are now persisted)
+      setApiKeys({});
+      setGithubToken("");
+      toast.success(tCommon("success"));
+    } catch {
+      toast.error(tCommon("error"));
+    } finally {
+      setApiKeySaving(false);
     }
   };
 
@@ -426,77 +473,80 @@ export default function SettingsPage() {
                   {t("apiKeysDesc")}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">OpenAI API Key</span>
-                  <Badge
-                    variant={settings?.hasOpenAIKey ? "default" : "secondary"}
-                  >
-                    {settings?.hasOpenAIKey
-                      ? t("configured")
-                      : t("notConfigured")}
-                  </Badge>
-                </div>
-                {settings?.openaiBaseUrl && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">OpenAI Base URL</span>
-                    <span className="max-w-[60%] truncate rounded bg-muted px-2 py-1 font-mono text-xs">
-                      {settings.openaiBaseUrl}
-                    </span>
+              <CardContent className="space-y-5">
+                {Object.entries(PROVIDERS).map(([id, p]) => (
+                  <div key={id} className="space-y-2 rounded-lg border p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{p.name}</span>
+                      <Badge
+                        variant={settings?.providerKeys?.[id] ? "default" : "secondary"}
+                      >
+                        {settings?.providerKeys?.[id]
+                          ? t("configured")
+                          : t("notConfigured")}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">{t("apiKeyLabel")}</Label>
+                      <Input
+                        type="password"
+                        placeholder={
+                          settings?.providerKeys?.[id]
+                            ? t("apiKeyConfiguredPlaceholder")
+                            : p.envKey
+                        }
+                        value={apiKeys[id] || ""}
+                        onChange={(e) =>
+                          setApiKeys((prev) => ({ ...prev, [id]: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">{t("baseUrlLabel")}</Label>
+                      <Input
+                        type="text"
+                        placeholder={t("baseUrlPlaceholder")}
+                        value={baseUrls[id] || ""}
+                        onChange={(e) =>
+                          setBaseUrls((prev) => ({ ...prev, [id]: e.target.value }))
+                        }
+                      />
+                    </div>
                   </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Anthropic API Key</span>
-                  <Badge
-                    variant={
-                      settings?.hasAnthropicKey ? "default" : "secondary"
-                    }
-                  >
-                    {settings?.hasAnthropicKey
-                      ? t("configured")
-                      : t("notConfigured")}
-                  </Badge>
-                </div>
-                {settings?.anthropicBaseUrl && (
+                ))}
+                {/* GitHub Token */}
+                <div className="space-y-2 rounded-lg border p-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Anthropic Base URL</span>
-                    <span className="max-w-[60%] truncate rounded bg-muted px-2 py-1 font-mono text-xs">
-                      {settings.anthropicBaseUrl}
-                    </span>
+                    <span className="text-sm font-medium">{t("githubToken")}</span>
+                    <Badge
+                      variant={settings?.hasGithubToken ? "default" : "secondary"}
+                    >
+                      {settings?.hasGithubToken
+                        ? t("configured")
+                        : t("notConfigured")}
+                    </Badge>
                   </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Gemini API Key</span>
-                  <Badge
-                    variant={
-                      settings?.hasGeminiKey ? "default" : "secondary"
-                    }
-                  >
-                    {settings?.hasGeminiKey
-                      ? t("configured")
-                      : t("notConfigured")}
-                  </Badge>
-                </div>
-                {settings?.geminiBaseUrl && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Gemini Base URL</span>
-                    <span className="max-w-[60%] truncate rounded bg-muted px-2 py-1 font-mono text-xs">
-                      {settings.geminiBaseUrl}
-                    </span>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("apiKeyLabel")}</Label>
+                    <Input
+                      type="password"
+                      placeholder={
+                        settings?.hasGithubToken
+                          ? t("apiKeyConfiguredPlaceholder")
+                          : "GITHUB_TOKEN"
+                      }
+                      value={githubToken}
+                      onChange={(e) => setGithubToken(e.target.value)}
+                    />
                   </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">{t("githubToken")}</span>
-                  <Badge
-                    variant={
-                      settings?.hasGithubToken ? "default" : "secondary"
-                    }
-                  >
-                    {settings?.hasGithubToken
-                      ? t("configured")
-                      : t("notConfigured")}
-                  </Badge>
                 </div>
+                <Button
+                  onClick={handleApiKeysSave}
+                  disabled={apiKeySaving}
+                  className="w-full"
+                >
+                  {tCommon("save")}
+                </Button>
               </CardContent>
             </Card>
 
