@@ -70,7 +70,9 @@ export function usePreviewTabs(workspaceId: string) {
       label: getFileName(filePath),
       filePath,
     };
-    setPreviewTabs([...current, tab]);
+    const next = [...current, tab];
+    tabsRef.current = next;
+    setPreviewTabs(next);
     setActiveTabId(id);
   }, []);
 
@@ -88,7 +90,9 @@ export function usePreviewTabs(workspaceId: string) {
       label: article.title.slice(0, 40),
       article,
     };
-    setPreviewTabs([...current, tab]);
+    const next = [...current, tab];
+    tabsRef.current = next;
+    setPreviewTabs(next);
     setActiveTabId(id);
   }, []);
 
