@@ -14,8 +14,6 @@ import {
   Loader2,
   Square,
   Brain,
-  ClipboardList,
-  MessageCircleQuestion,
 } from "lucide-react";
 import useSWR from "swr";
 import {
@@ -99,7 +97,6 @@ interface AgentPanelProps {
 
 export function AgentPanel({
   workspaceId,
-  workspaceName,
   folderPath,
   sessionId,
   sessionName,
@@ -418,7 +415,6 @@ export function AgentPanel({
           });
         },
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [agentBody]
   );
 
@@ -451,7 +447,7 @@ export function AgentPanel({
   const { messages, sendMessage, setMessages, stop, status, error: chatError } = useChat({ transport });
 
   // --- Message persistence via localStorage ---
-  const storageKey = `agent-messages:${workspaceId}:${sessionId}:${mode}`;
+  const storageKey = `agent-messages:${workspaceId}:${sessionId}`;
   // Counter-based gate: incremented on restore, decremented in the save effect
   // that sees the restored messages. Avoids save-during-restore race.
   const restoreGenRef = useRef(0);
@@ -517,7 +513,6 @@ export function AgentPanel({
         } catch { /* ignore */ }
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
   // On mount: if the background stream manager is still active, subscribe
@@ -564,7 +559,6 @@ export function AgentPanel({
     );
 
     return unsub;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamKey, storageKey, setMessages]);
 
   // --- Auto-continue: automatically continue when task is incomplete ---
@@ -1034,7 +1028,7 @@ export function AgentPanel({
     }
   };
 
-  // Switch mode: update body synchronously and clear stale conversation
+  // Switch mode: update body synchronously, keep conversation context
   const handleModeChange = (newMode: AgentMode) => {
     setMode(newMode);
     agentBody.mode = newMode; // synchronous — guarantees next request uses correct mode

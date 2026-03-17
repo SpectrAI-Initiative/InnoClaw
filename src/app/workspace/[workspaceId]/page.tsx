@@ -29,7 +29,6 @@ import { ClusterPanel } from "@/components/cluster/cluster-panel";
 import { ResearchExecPanel } from "@/components/research-exec/research-exec-panel";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LanguageToggle } from "@/components/layout/language-toggle";
-import type { Article } from "@/lib/article-search/types";
 
 type MiddlePanel = "agent" | "report" | "paperStudy" | "cluster" | "research";
 

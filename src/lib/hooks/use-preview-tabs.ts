@@ -40,10 +40,6 @@ export function usePreviewTabs(workspaceId: string) {
   });
   const tabIdCounter = useRef<number>(loadState(workspaceId)?.tabIdCounter ?? 0);
 
-  // Keep a ref to the latest tabs so callbacks always see current state
-  const tabsRef = useRef(previewTabs);
-  tabsRef.current = previewTabs;
-
   // Persist to sessionStorage whenever tabs or activeTabId change
   useEffect(() => {
     saveState(workspaceId, {
@@ -55,52 +51,55 @@ export function usePreviewTabs(workspaceId: string) {
 
   const openFileTab = useCallback((filePath: string | null) => {
     if (!filePath) return;
-    const current = tabsRef.current;
-    const existing = current.find((t) => t.type === "file" && t.filePath === filePath);
-    if (existing) {
-      setActiveTabId(existing.id);
-      return;
-    }
-    const id = `file-${++tabIdCounter.current}`;
-    const tab: PreviewTab = {
-      id,
-      type: "file",
-      label: getFileName(filePath),
-      filePath,
-    };
-    setPreviewTabs([...current, tab]);
-    setActiveTabId(id);
+    setPreviewTabs((prev) => {
+      const existing = prev.find((t) => t.type === "file" && t.filePath === filePath);
+      if (existing) {
+        setActiveTabId(existing.id);
+        return prev;
+      }
+      const id = `file-${++tabIdCounter.current}`;
+      const tab: PreviewTab = {
+        id,
+        type: "file",
+        label: getFileName(filePath),
+        filePath,
+      };
+      setActiveTabId(id);
+      return [...prev, tab];
+    });
   }, []);
 
   const openArticleTab = useCallback((article: Article) => {
-    const current = tabsRef.current;
-    const existing = current.find((t) => t.type === "article" && t.article?.id === article.id);
-    if (existing) {
-      setActiveTabId(existing.id);
-      return;
-    }
-    const id = `article-${++tabIdCounter.current}`;
-    const tab: PreviewTab = {
-      id,
-      type: "article",
-      label: article.title.slice(0, 40),
-      article,
-    };
-    setPreviewTabs([...current, tab]);
-    setActiveTabId(id);
+    setPreviewTabs((prev) => {
+      const existing = prev.find((t) => t.type === "article" && t.article?.id === article.id);
+      if (existing) {
+        setActiveTabId(existing.id);
+        return prev;
+      }
+      const id = `article-${++tabIdCounter.current}`;
+      const tab: PreviewTab = {
+        id,
+        type: "article",
+        label: article.title.slice(0, 40),
+        article,
+      };
+      setActiveTabId(id);
+      return [...prev, tab];
+    });
   }, []);
 
   const closeTab = useCallback((id: string) => {
-    const current = tabsRef.current;
-    const idx = current.findIndex((t) => t.id === id);
-    if (idx === -1) return;
-    const next = current.filter((t) => t.id !== id);
-    setPreviewTabs(next);
-    setActiveTabId((currentActiveId) => {
-      if (currentActiveId !== id) return currentActiveId;
-      if (next.length === 0) return "notes";
-      const newIdx = Math.min(idx, next.length - 1);
-      return next[newIdx].id;
+    setPreviewTabs((prev) => {
+      const idx = prev.findIndex((t) => t.id === id);
+      if (idx === -1) return prev;
+      const next = prev.filter((t) => t.id !== id);
+      setActiveTabId((currentActiveId) => {
+        if (currentActiveId !== id) return currentActiveId;
+        if (next.length === 0) return "notes";
+        const newIdx = Math.min(idx, next.length - 1);
+        return next[newIdx].id;
+      });
+      return next;
     });
   }, []);
 
