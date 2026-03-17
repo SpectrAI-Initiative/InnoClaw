@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { runFullIdeation } from "@/lib/research-ideation/orchestrator";
+import { extractPaperFullText } from "../extract-paper-text";
 import { textError } from "@/lib/api-errors";
 import type { IdeationSharedContext, IdeationTurn } from "@/lib/research-ideation/types";
 
@@ -38,6 +39,12 @@ export async function POST(req: NextRequest) {
       locale,
       mode,
     };
+
+    // Extract full paper text for deeper analysis (local files only)
+    const paperText = await extractPaperFullText(article, 30_000);
+    if (paperText) {
+      context.retrievedEvidence = paperText;
+    }
 
     // Stream each completed turn as a JSON line
     const encoder = new TextEncoder();

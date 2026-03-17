@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 
+const MAX_PARTICLES = 40;
+
 interface Particle {
   x: number;
   y: number;
@@ -25,7 +27,7 @@ interface ParticleEffectProps {
 export function ParticleEffect({
   isActive,
   className = "",
-  particleCount = 50,
+  particleCount = MAX_PARTICLES,
   colors = ["#8b5cf6", "#6366f1", "#3b82f6", "#06b6d4", "#a855f7"],
   density = 0.00015, // particles per square pixel
 }: ParticleEffectProps) {
@@ -41,7 +43,7 @@ export function ParticleEffect({
     const area = width * height;
     // Use density-based count, with min/max bounds
     const dynamicCount = Math.floor(area * density);
-    return Math.max(particleCount, Math.min(dynamicCount, 200));
+    return Math.min(Math.max(particleCount, dynamicCount), MAX_PARTICLES);
   }, [particleCount, density]);
 
   // Create particle function
@@ -121,7 +123,17 @@ export function ParticleEffect({
     const targetCount = getParticleCount();
     particlesRef.current = Array.from({ length: targetCount }, createParticle);
 
+    let lastFrameTime = 0;
+
     const animate = () => {
+      // Throttle to ~30fps to reduce main-thread pressure
+      const now = performance.now();
+      if (now - lastFrameTime < 33) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTime = now;
+
       const { width, height } = dimensionsRef.current;
       ctx.clearRect(0, 0, width, height);
 
@@ -164,29 +176,27 @@ export function ParticleEffect({
           return;
         }
 
-        ctx.save();
         ctx.globalAlpha = particle.opacity * fadeOpacity;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = particle.color;
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
         ctx.fillStyle = particle.color;
         ctx.fill();
-        ctx.restore();
       });
 
-      // Draw connecting lines
+      // Draw connecting lines (use distance-squared to avoid sqrt for distant pairs)
       ctx.save();
       ctx.strokeStyle = "rgba(139, 92, 246, 0.1)";
       ctx.lineWidth = 0.5;
 
+      const maxDistSq = 10000; // 100^2
       for (let i = 0; i < particlesRef.current.length; i++) {
         for (let j = i + 1; j < particlesRef.current.length; j++) {
           const dx = particlesRef.current[i].x - particlesRef.current[j].x;
           const dy = particlesRef.current[i].y - particlesRef.current[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+          const distSq = dx * dx + dy * dy;
 
-          if (distance < 100) {
+          if (distSq < maxDistSq) {
+            const distance = Math.sqrt(distSq);
             ctx.globalAlpha = (1 - distance / 100) * 0.3;
             ctx.beginPath();
             ctx.moveTo(particlesRef.current[i].x, particlesRef.current[i].y);
@@ -261,171 +271,36 @@ export function FloatingOrbs({ isActive }: { isActive: boolean }) {
   );
 }
 
-// Neural network style thinking particles for reasoning sections
-interface NeuralParticle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-  pulsePhase: number;
-  pulseSpeed: number;
-}
-
+// Lightweight CSS-only thinking particles for reasoning sections
+// (Replaces the previous canvas-based O(n²) animation to prevent main-thread blocking)
 interface ThinkingParticlesProps {
   isActive: boolean;
   className?: string;
 }
 
 export function ThinkingParticles({ isActive, className = "" }: ThinkingParticlesProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particlesRef = useRef<NeuralParticle[]>([]);
-  const animationRef = useRef<number>(0);
-  const timeRef = useRef(0);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !isActive) {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = 0;
-      }
-      return;
-    }
-
-    const parent = canvas.parentElement;
-    if (!parent) return;
-
-    const updateSize = () => {
-      const rect = parent.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-    };
-    updateSize();
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Initialize particles - sparse neural nodes
-    const nodeCount = Math.max(6, Math.floor((canvas.width * canvas.height) / 8000));
-    particlesRef.current = Array.from({ length: nodeCount }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: (Math.random() - 0.5) * 0.6,
-      radius: 2 + Math.random() * 2,
-      pulsePhase: Math.random() * Math.PI * 2,
-      pulseSpeed: 0.02 + Math.random() * 0.02,
-    }));
-
-    const animate = () => {
-      timeRef.current += 0.016;
-      const { width, height } = canvas;
-
-      // Clear with slight trail effect
-      ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
-      ctx.fillRect(0, 0, width, height);
-
-      const particles = particlesRef.current;
-
-      // Update and draw connections first (behind nodes)
-      ctx.lineWidth = 1;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[j].x - particles[i].x;
-          const dy = particles[j].y - particles[i].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const maxDist = 120;
-
-          if (dist < maxDist) {
-            const alpha = (1 - dist / maxDist) * 0.4;
-            // Animated gradient along connection
-            const pulseAlpha = 0.3 + 0.2 * Math.sin(timeRef.current * 3 + i + j);
-
-            const gradient = ctx.createLinearGradient(
-              particles[i].x, particles[i].y,
-              particles[j].x, particles[j].y
-            );
-            gradient.addColorStop(0, `rgba(139, 92, 246, ${alpha * pulseAlpha})`);
-            gradient.addColorStop(0.5, `rgba(99, 102, 241, ${alpha * pulseAlpha * 1.5})`);
-            gradient.addColorStop(1, `rgba(59, 130, 246, ${alpha * pulseAlpha})`);
-
-            ctx.strokeStyle = gradient;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-
-            // Draw traveling pulse along connection
-            const pulsePos = (Math.sin(timeRef.current * 2 + i * 0.5) + 1) / 2;
-            const pulseX = particles[i].x + dx * pulsePos;
-            const pulseY = particles[i].y + dy * pulsePos;
-
-            ctx.beginPath();
-            ctx.arc(pulseX, pulseY, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(168, 85, 247, ${alpha * 0.8})`;
-            ctx.fill();
-          }
-        }
-      }
-
-      // Update and draw particles
-      particles.forEach((p) => {
-        // Update position
-        p.x += p.vx;
-        p.y += p.vy;
-        p.pulsePhase += p.pulseSpeed;
-
-        // Bounce off edges
-        if (p.x < 0 || p.x > width) p.vx *= -1;
-        if (p.y < 0 || p.y > height) p.vy *= -1;
-        p.x = Math.max(0, Math.min(width, p.x));
-        p.y = Math.max(0, Math.min(height, p.y));
-
-        // Draw glow
-        const pulseScale = 1 + 0.3 * Math.sin(p.pulsePhase);
-        const glowRadius = p.radius * 3 * pulseScale;
-        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowRadius);
-        gradient.addColorStop(0, "rgba(139, 92, 246, 0.6)");
-        gradient.addColorStop(0.5, "rgba(99, 102, 241, 0.2)");
-        gradient.addColorStop(1, "rgba(59, 130, 246, 0)");
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-
-        // Draw core
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius * pulseScale, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${0.7 + 0.3 * Math.sin(p.pulsePhase)})`;
-        ctx.fill();
-      });
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    const resizeObserver = new ResizeObserver(updateSize);
-    resizeObserver.observe(parent);
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-      resizeObserver.disconnect();
-    };
-  }, [isActive]);
-
   if (!isActive) return null;
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`pointer-events-none absolute inset-0 z-0 rounded-lg ${className}`}
-      style={{ background: "transparent" }}
-    />
+    <div className={`pointer-events-none absolute inset-0 z-0 rounded-lg overflow-hidden ${className}`}>
+      {/* Shimmer sweep */}
+      <div
+        className="absolute inset-0 animate-thinking-shimmer opacity-30"
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.1), transparent)",
+          backgroundSize: "200% 100%",
+        }}
+      />
+      {/* Slow-moving gradient orbs to simulate particle feel */}
+      <div
+        className="absolute -left-1/4 -top-1/4 h-3/4 w-3/4 rounded-full opacity-20 animate-float"
+        style={{ background: "radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent 70%)" }}
+      />
+      <div
+        className="absolute -right-1/4 -bottom-1/4 h-3/4 w-3/4 rounded-full opacity-15 animate-float-delayed"
+        style={{ background: "radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 70%)" }}
+      />
+    </div>
   );
 }
 

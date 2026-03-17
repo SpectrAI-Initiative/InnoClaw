@@ -3,9 +3,12 @@ import { TRUNCATE, BUFFER } from "@/lib/constants";
 import type {
   RunMonitorStatus,
   RunStatusSnapshot,
+  RunCompletionState,
+  MonitorJobDecision,
   JobMonitoringConfig,
   RemoteExecutionProfile,
   ExperimentRun,
+  ExperimentRunStatus,
 } from "./types";
 
 // =============================================================
@@ -148,85 +151,138 @@ function parseCheckOutput(stdout: string): ParsedCheckOutput {
 function resolveStatus(
   profile: RemoteExecutionProfile,
   parsed: ParsedCheckOutput,
-): { schedulerStatus: RunMonitorStatus; resolvedStatus: RunMonitorStatus } {
-  let schedulerStatus: RunMonitorStatus = "unknown";
+): { schedulerState: string; resolvedStatus: RunMonitorStatus; exitCode?: number | null } {
+  let schedulerState = "unknown";
+  let exitCode: number | null | undefined = undefined;
 
   if (profile.schedulerType === "slurm") {
-    // Prefer squeue (active jobs), fall back to sacct (terminal jobs)
     if (parsed.squeue) {
-      schedulerStatus = parseSlurmState(parsed.squeue);
+      schedulerState = parsed.squeue.trim();
     } else if (parsed.sacct) {
-      // sacct format: State|ExitCode  e.g. "COMPLETED|0:0" or "FAILED|1:0"
-      const sacctState = parsed.sacct.split("|")[0] ?? "";
-      schedulerStatus = parseSlurmState(sacctState);
+      const parts = parsed.sacct.split("|");
+      schedulerState = (parts[0] ?? "").trim();
+      const exitStr = (parts[1] ?? "").split(":")[0];
+      if (exitStr) {
+        const parsedExit = parseInt(exitStr, 10);
+        exitCode = Number.isNaN(parsedExit) ? null : parsedExit;
+      }
     }
   } else if (profile.schedulerType === "rjob") {
     if (parsed.rjobStatus) {
-      schedulerStatus = parseRjobState(parsed.rjobStatus);
+      schedulerState = parsed.rjobStatus.trim();
     }
   } else {
-    // Shell mode — PID check
-    if (parsed.pidStatus === "RUNNING") {
-      schedulerStatus = "running";
-    } else if (parsed.pidStatus === "STOPPED") {
-      schedulerStatus = "stopped";
-    }
+    // Shell mode
+    schedulerState = parsed.pidStatus || "unknown";
+  }
+
+  // Map to RunMonitorStatus
+  let schedulerStatus: RunMonitorStatus;
+  if (profile.schedulerType === "slurm") {
+    schedulerStatus = parseSlurmState(schedulerState);
+  } else if (profile.schedulerType === "rjob") {
+    schedulerStatus = parseRjobState(schedulerState);
+  } else {
+    if (parsed.pidStatus === "RUNNING") schedulerStatus = "running";
+    else if (parsed.pidStatus === "STOPPED") schedulerStatus = "stopped";
+    else schedulerStatus = "unknown";
   }
 
   // Resolve: scheduler is authoritative when terminal
   const isTerminal = ["completed", "failed", "cancelled", "timed_out"].includes(schedulerStatus);
   if (isTerminal) {
-    return { schedulerStatus, resolvedStatus: schedulerStatus };
+    return { schedulerState, resolvedStatus: schedulerStatus, exitCode };
   }
 
   // Scheduler says running/queued → trust it
   if (schedulerStatus === "running" || schedulerStatus === "queued" || schedulerStatus === "completing") {
     // But check for conflicting markers
-    if (parsed.doneMarker) {
-      return { schedulerStatus, resolvedStatus: "needs_attention" };
+    if (parsed.doneMarker || parsed.failedMarker) {
+      return { schedulerState, resolvedStatus: "needs_attention", exitCode };
     }
-    if (parsed.failedMarker) {
-      return { schedulerStatus, resolvedStatus: "needs_attention" };
-    }
-    return { schedulerStatus, resolvedStatus: schedulerStatus };
+    return { schedulerState, resolvedStatus: schedulerStatus, exitCode };
   }
 
   // Scheduler unknown/stopped — use markers as strong evidence
   if (parsed.doneMarker) {
-    return { schedulerStatus, resolvedStatus: "completed" };
+    return { schedulerState, resolvedStatus: "completed", exitCode };
   }
   if (parsed.failedMarker) {
-    return { schedulerStatus, resolvedStatus: "failed" };
+    return { schedulerState, resolvedStatus: "failed", exitCode };
   }
 
   // Stopped process with no markers → needs attention
   if (schedulerStatus === "stopped") {
-    return { schedulerStatus, resolvedStatus: "needs_attention" };
+    return { schedulerState, resolvedStatus: "needs_attention", exitCode };
   }
 
-  return { schedulerStatus, resolvedStatus: "unknown" };
+  return { schedulerState, resolvedStatus: "unknown", exitCode };
 }
 
 // =============================================================
-// Map resolvedStatus to a decision
+// Map RunMonitorStatus → ExperimentRunStatus + RunCompletionState
 // =============================================================
 
-function toDecision(
-  resolvedStatus: RunMonitorStatus,
-): "still_running" | "completed" | "failed" | "needs_attention" {
-  switch (resolvedStatus) {
-    case "completed":
-      return "completed";
-    case "failed":
-    case "cancelled":
-    case "timed_out":
-      return "failed";
+function toExperimentStatus(monitorStatus: RunMonitorStatus): ExperimentRunStatus {
+  switch (monitorStatus) {
+    case "queued": return "queued";
+    case "running": return "running";
+    case "completing": return "running";
+    case "completed": return "completed";
+    case "failed": return "failed";
+    case "cancelled": return "cancelled";
+    case "timed_out": return "timed_out";
+    case "stopped": return "failed";
+    case "needs_attention": return "needs_attention";
+    default: return "unknown";
+  }
+}
+
+function toCompletionState(monitorStatus: RunMonitorStatus): RunCompletionState {
+  switch (monitorStatus) {
     case "queued":
     case "running":
     case "completing":
-      return "still_running";
+      return "in_progress";
+    case "completed":
+      return "terminal_success";
+    case "failed":
+    case "timed_out":
+    case "stopped":
+      return "terminal_failure";
+    case "cancelled":
+      return "terminal_cancelled";
     default:
-      return "needs_attention";
+      return "undetermined";
+  }
+}
+
+// =============================================================
+// Build MonitorJobDecision from resolved status
+// =============================================================
+
+function buildDecision(
+  snapshot: RunStatusSnapshot,
+  resolvedStatus: RunMonitorStatus,
+  pollInterval: number,
+): MonitorJobDecision {
+  switch (resolvedStatus) {
+    case "completed":
+      return { kind: "completed", snapshot };
+    case "failed":
+    case "timed_out":
+    case "stopped":
+      return { kind: "failed", snapshot };
+    case "cancelled":
+      return { kind: "cancelled", snapshot };
+    case "queued":
+    case "running":
+    case "completing":
+      return { kind: "still_running", snapshot, retryAfterSeconds: pollInterval };
+    case "needs_attention":
+      return { kind: "unknown", snapshot, retryAfterSeconds: pollInterval };
+    default:
+      return { kind: "unknown", snapshot, retryAfterSeconds: pollInterval };
   }
 }
 
@@ -239,7 +295,7 @@ export async function checkJobStatus(
   run: ExperimentRun,
   cwd: string,
   overrides?: JobMonitoringConfig,
-): Promise<RunStatusSnapshot> {
+): Promise<MonitorJobDecision> {
   const sshPrefix = buildSshPrefix(profile);
   const remotePath = profile.remotePath;
   const jobId = run.jobId ?? "";
@@ -313,37 +369,36 @@ export async function checkJobStatus(
   const parsed = parseCheckOutput(rawOutput);
 
   // Resolve status
-  const { schedulerStatus, resolvedStatus } = resolveStatus(profile, parsed);
+  const { schedulerState, resolvedStatus, exitCode } = resolveStatus(profile, parsed);
 
-  // Heartbeat age
-  let heartbeat: RunStatusSnapshot["heartbeat"] = null;
-  if (parsed.heartbeatMtime !== null) {
-    const nowEpoch = Math.floor(Date.now() / 1000);
-    heartbeat = { found: true, ageSeconds: nowEpoch - parsed.heartbeatMtime };
-  } else {
-    heartbeat = { found: false };
-  }
+  // Heartbeat
+  const heartbeatSeenAt = parsed.heartbeatMtime !== null
+    ? new Date(parsed.heartbeatMtime * 1000).toISOString()
+    : undefined;
 
-  // Marker evidence
-  const markerEvidence: RunStatusSnapshot["markerEvidence"] = parsed.doneMarker
-    ? "done"
-    : parsed.failedMarker
-      ? "failed"
-      : "none";
+  // Log tail preview
+  const logTailContent = parsed.logTail || parsed.rjobLog || "";
+  const logTailPreview = logTailContent
+    ? logTailContent.split("\n").filter(Boolean).slice(-5)
+    : undefined;
 
-  const decision = toDecision(resolvedStatus);
-  const pollInterval = overrides?.pollIntervalSeconds ?? profile.pollIntervalSeconds ?? 60;
-
-  return {
-    schedulerStatus,
-    markerEvidence,
-    heartbeat,
-    logTail: parsed.logTail || parsed.rjobLog || null,
-    logGrowing: null, // would need previous snapshot to compute — omit for v1
-    resolvedStatus,
-    decision,
-    retryAfterSeconds: decision === "still_running" ? pollInterval : null,
-    timestamp: new Date().toISOString(),
-    rawOutput: result.exitCode !== 0 ? `exit=${result.exitCode} stderr=${result.stderr.slice(0, 500)}` : undefined,
+  // Build observation-only snapshot
+  const snapshot: RunStatusSnapshot = {
+    observedAt: new Date().toISOString(),
+    status: toExperimentStatus(resolvedStatus),
+    completionState: toCompletionState(resolvedStatus),
+    schedulerState,
+    exitCode: exitCode ?? undefined,
+    processAlive: parsed.pidStatus === "RUNNING" ? true : parsed.pidStatus === "STOPPED" ? false : undefined,
+    heartbeatSeenAt,
+    stdoutLogExists: parsed.logTail.length > 0 || undefined,
+    stderrLogExists: undefined,
+    logTailPreview,
+    message: result.exitCode !== 0
+      ? `SSH exit=${result.exitCode} stderr=${result.stderr.slice(0, 500)}`
+      : undefined,
   };
+
+  const pollInterval = overrides?.pollIntervalSeconds ?? profile.pollIntervalSeconds ?? 60;
+  return buildDecision(snapshot, resolvedStatus, pollInterval);
 }

@@ -47,6 +47,7 @@ export interface IdeationTurn {
   roleId: IdeationRoleId;
   content: string;
   timestamp: string;
+  error?: boolean;
 }
 
 // =============================================================

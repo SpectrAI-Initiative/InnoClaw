@@ -297,15 +297,19 @@ export function createResearchExecTools(ctx: ToolContext) {
               type: "rjob",
               jobName: name,
               rjobSpec: {
-                image: "pytorch/pytorch:latest",
-                gpuCount: 1,
-                entrypoint: command,
                 jobName: name,
+                memoryMb: 16384,
+                cpu: 4,
+                gpu: 1,
+                mounts: [],
+                image: "pytorch/pytorch:latest",
+                command: command,
+                commandArgs: [],
               },
-              command: `rjob submit --name ${name} --gpu 1 --image pytorch/pytorch:latest -- ${command}`,
+              command: `rjob submit --name ${name} --gpu 1 --cpu 4 --memory 16384 --image pytorch/pytorch:latest -- ${command}`,
               profile: { name: profile.name, host: profile.host },
             },
-            instruction: "Review this rjob manifest. Adjust image, GPU count, memory, and mounts as needed, then call submitRemoteJob with confirmSubmit=true.",
+            instruction: "Review this rjob manifest. Adjust image, GPU count, CPU, memory, mounts, and other options as needed, then call submitRemoteJob with confirmSubmit=true.",
           };
         }
 
@@ -455,7 +459,7 @@ export function createResearchExecTools(ctx: ToolContext) {
           recommendation: run.recommendationJson ? JSON.parse(run.recommendationJson) : null,
         };
 
-        const snapshot = await checkJobStatus(
+        const decision = await checkJobStatus(
           typedProfile,
           typedRun,
           ctx.validatedCwd,
@@ -466,13 +470,13 @@ export function createResearchExecTools(ctx: ToolContext) {
         await db
           .update(experimentRuns)
           .set({
-            statusSnapshotJson: JSON.stringify(snapshot),
-            lastPolledAt: snapshot.timestamp,
+            statusSnapshotJson: JSON.stringify(decision.snapshot),
+            lastPolledAt: decision.snapshot.observedAt,
             updatedAt: new Date().toISOString(),
           })
           .where(eq(experimentRuns.id, runId));
 
-        return snapshot;
+        return decision;
       },
     }),
 
@@ -516,16 +520,19 @@ export function createResearchExecTools(ctx: ToolContext) {
             const snapshot = run.statusSnapshotJson
               ? JSON.parse(run.statusSnapshotJson)
               : null;
-            if (snapshot?.decision === "still_running") {
+            const completionState = snapshot?.completionState;
+            if (completionState === "in_progress" || completionState === "not_started") {
               return {
-                decision: "still_running" as const,
+                kind: "still_running" as const,
+                ...(snapshot ? { snapshot } : {}),
+                retryAfterSeconds: 60,
                 message: "Job is still running. Use monitorJob to check status.",
-                retryAfterSeconds: snapshot.retryAfterSeconds ?? 60,
               };
             }
             if (!run.collectApprovedAt) {
               return {
-                decision: "awaiting_manual_approval" as const,
+                kind: "awaiting_manual_approval" as const,
+                ...(snapshot ? { snapshot } : {}),
                 message: "Result collection requires manual approval. Set collectApprovedAt on the run to proceed.",
               };
             }

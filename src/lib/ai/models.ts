@@ -163,6 +163,13 @@ export const CONTEXT_MODES = {
 export type ContextModeId = keyof typeof CONTEXT_MODES;
 export const DEFAULT_CONTEXT_MODE: ContextModeId = "normal";
 
+/** Resolve the context window (in tokens) for a provider/model pair. */
+function resolveContextWindow(providerId: string, modelId: string): number {
+  const provider = PROVIDERS[providerId as ProviderId];
+  const model = provider?.models.find((m) => m.id === modelId);
+  return model?.contextWindow ?? 200_000;
+}
+
 /**
  * Compute the overflow threshold (in characters) for a given provider/model/mode.
  * Uses ~4 chars per token and the mode's ratio of the model's context window.
@@ -172,9 +179,7 @@ export function getOverflowThresholdChars(
   modelId: string,
   contextMode: string = "normal"
 ): number {
-  const provider = PROVIDERS[providerId as ProviderId];
-  const model = provider?.models.find((m) => m.id === modelId);
-  const contextWindow = model?.contextWindow ?? 200_000;
+  const contextWindow = resolveContextWindow(providerId, modelId);
   const ratio = CONTEXT_MODES[contextMode as ContextModeId]?.ratio ?? 0.8;
   return Math.floor(contextWindow * 4 * ratio);
 }
@@ -188,10 +193,18 @@ export function getSummarizationLimitChars(
   providerId: string,
   modelId: string
 ): number {
-  const provider = PROVIDERS[providerId as ProviderId];
-  const model = provider?.models.find((m) => m.id === modelId);
-  const contextWindow = model?.contextWindow ?? 200_000;
-  return Math.floor(contextWindow * 3);
+  return Math.floor(resolveContextWindow(providerId, modelId) * 3);
+}
+
+/**
+ * Return the full context window size in characters (~4 chars per token)
+ * for percentage display purposes. Does NOT apply mode ratio.
+ */
+export function getContextWindowChars(
+  providerId: string,
+  modelId: string
+): number {
+  return resolveContextWindow(providerId, modelId) * 4;
 }
 
 /**

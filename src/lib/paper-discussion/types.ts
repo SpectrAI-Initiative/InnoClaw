@@ -48,6 +48,7 @@ export interface DiscussionTurn {
   roleId: DiscussionRoleId;
   content: string;
   timestamp: string;
+  error?: boolean;
 }
 
 // =============================================================

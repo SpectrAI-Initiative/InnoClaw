@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import type { SkillExportData } from "@/types";
+import { skillToMarkdown } from "@/lib/utils/skill-md";
 
 export async function GET(
   _request: NextRequest,
@@ -26,11 +26,12 @@ export async function GET(
 
     const row = skill[0];
 
-    const exportData: SkillExportData = {
+    const skillData = {
       name: row.name,
       slug: row.slug,
       description: row.description,
       systemPrompt: row.systemPrompt,
+      workspaceId: row.workspaceId,
       steps: typeof row.steps === "string" ? JSON.parse(row.steps) : null,
       allowedTools:
         typeof row.allowedTools === "string"
@@ -40,10 +41,17 @@ export async function GET(
         typeof row.parameters === "string"
           ? JSON.parse(row.parameters)
           : null,
-      version: "1.0",
     };
 
-    return NextResponse.json(exportData);
+    const markdown = skillToMarkdown(skillData);
+
+    return new NextResponse(markdown, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${row.slug || "SKILL"}.md"`,
+      },
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to export skill";

@@ -17,9 +17,21 @@ A complete reference of all environment variables used by InnoClaw.
 | `OPENAI_API_KEY` | `string` | No | — | OpenAI API key for chat and embedding. |
 | `ANTHROPIC_API_KEY` | `string` | No | — | Anthropic API key for Claude models. |
 | `GEMINI_API_KEY` | `string` | No | — | Google Gemini API key for Gemini models. |
+| `SHLAB_API_KEY` | `string` | No | — | SH-Lab API key for Intern models. |
+| `QWEN_API_KEY` | `string` | No | — | Qwen API key. |
+| `MOONSHOT_API_KEY` | `string` | No | — | Moonshot API key for Kimi models. |
+| `DEEPSEEK_API_KEY` | `string` | No | — | DeepSeek API key. |
+| `MINIMAX_API_KEY` | `string` | No | — | MiniMax API key. |
+| `ZHIPU_API_KEY` | `string` | No | — | Zhipu API key for GLM models. |
 | `OPENAI_BASE_URL` | `string` | No | `https://api.openai.com/v1` | Custom OpenAI-compatible API endpoint (for proxies or third-party providers). |
 | `ANTHROPIC_BASE_URL` | `string` | No | `https://api.anthropic.com` | Custom Anthropic API endpoint. |
 | `GEMINI_BASE_URL` | `string` | No | — | Custom Gemini-compatible API endpoint (OpenAI-compatible proxy). |
+| `SHLAB_BASE_URL` | `string` | No | — | Vendor-level base URL for all SH-Lab models. Per-model URLs (e.g. `SHLAB_INTERN_S1_PRO_BASE_URL`) take priority. |
+| `QWEN_BASE_URL` | `string` | No | — | Vendor-level base URL for all Qwen models. Per-model URLs (e.g. `QWEN_QWEN3_235B_BASE_URL`) take priority. |
+| `MOONSHOT_BASE_URL` | `string` | No | — | Vendor-level base URL for all Moonshot models. Per-model URLs (e.g. `MOONSHOT_KIMI_K2_5_BASE_URL`) take priority. |
+| `DEEPSEEK_BASE_URL` | `string` | No | — | Vendor-level base URL for all DeepSeek models. Per-model URLs (e.g. `DEEPSEEK_DEEPSEEK_V3_2_BASE_URL`) take priority. |
+| `MINIMAX_BASE_URL` | `string` | No | — | Vendor-level base URL for all MiniMax models. Per-model URLs (e.g. `MINIMAX_MINIMAX2_5_BASE_URL`) take priority. |
+| `ZHIPU_BASE_URL` | `string` | No | — | Vendor-level base URL for all Zhipu models. Per-model URLs (e.g. `ZHIPU_GLM_5_BASE_URL`) take priority. |
 | `LLM_PROVIDER` | `string` | No | `openai` | Default LLM provider: `openai`, `anthropic`, or `gemini`. Overridable in Settings UI. |
 | `LLM_MODEL` | `string` | No | `gpt-4o-mini` | Default model ID. Overridable in Settings UI. |
 

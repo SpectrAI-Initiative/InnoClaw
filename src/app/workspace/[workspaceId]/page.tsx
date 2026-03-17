@@ -30,7 +30,6 @@ import { ResearchExecPanel } from "@/components/research-exec/research-exec-pane
 import { DeepResearchPanel } from "@/components/deep-research/deep-research-panel";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LanguageToggle } from "@/components/layout/language-toggle";
-import type { Article } from "@/lib/article-search/types";
 
 type MiddlePanel = "agent" | "report" | "paperStudy" | "cluster" | "research" | "deepResearch";
 

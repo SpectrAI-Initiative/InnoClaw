@@ -19,13 +19,18 @@ function activeKey(workspaceId: string) {
   return `agent-active-session:${workspaceId}`;
 }
 
-function messageKey(workspaceId: string, sessionId: string, mode: string) {
-  return `agent-messages:${workspaceId}:${sessionId}:${mode}`;
+function messageKey(workspaceId: string, sessionId: string) {
+  return `agent-messages:${workspaceId}:${sessionId}`;
 }
 
-/** Old-format key (pre-session) */
+/** Old-format key (pre-session, with mode) */
 function legacyMessageKey(workspaceId: string, mode: string) {
   return `agent-messages:${workspaceId}:${mode}`;
+}
+
+/** Old-format key (with session and mode) */
+function legacySessionModeKey(workspaceId: string, sessionId: string, mode: string) {
+  return `agent-messages:${workspaceId}:${sessionId}:${mode}`;
 }
 
 function readSessions(workspaceId: string): AgentSession[] {
@@ -78,7 +83,27 @@ function nextName(sessions: AgentSession[]): string {
  */
 function migrateIfNeeded(workspaceId: string): AgentSession[] | null {
   const existing = readSessions(workspaceId);
-  if (existing.length > 0) return null; // already migrated
+  if (existing.length > 0) {
+    // Migrate existing sessions from mode-specific keys to unified key
+    for (const session of existing) {
+      const unifiedKey = messageKey(workspaceId, session.id);
+      if (localStorage.getItem(unifiedKey)) continue; // already migrated
+      // Pick the first mode that has data (prefer "agent")
+      for (const mode of MODES) {
+        const oldKey = legacySessionModeKey(workspaceId, session.id, mode);
+        const data = localStorage.getItem(oldKey);
+        if (data) {
+          localStorage.setItem(unifiedKey, data);
+          break;
+        }
+      }
+      // Clean up all old mode-specific keys
+      for (const mode of MODES) {
+        try { localStorage.removeItem(legacySessionModeKey(workspaceId, session.id, mode)); } catch { /* ignore */ }
+      }
+    }
+    return null;
+  }
 
   let hasLegacy = false;
   for (const mode of MODES) {
@@ -86,9 +111,11 @@ function migrateIfNeeded(workspaceId: string): AgentSession[] | null {
     const data = localStorage.getItem(oldKey);
     if (data) {
       hasLegacy = true;
-      // Copy to new key format
-      const newKey = messageKey(workspaceId, "default", mode);
-      localStorage.setItem(newKey, data);
+      // Copy to new key format (unified, no mode)
+      const newKey = messageKey(workspaceId, "default");
+      if (!localStorage.getItem(newKey)) {
+        localStorage.setItem(newKey, data);
+      }
       localStorage.removeItem(oldKey);
     }
   }
@@ -172,9 +199,15 @@ export function useAgentSessions(workspaceId: string) {
       if (current.length <= 1) return; // don't close the last session
 
       // Clear localStorage for this session's messages
+      try {
+        localStorage.removeItem(messageKey(workspaceId, id));
+      } catch {
+        // ignore
+      }
+      // Also clean up any leftover legacy mode-specific keys
       for (const mode of MODES) {
         try {
-          localStorage.removeItem(messageKey(workspaceId, id, mode));
+          localStorage.removeItem(legacySessionModeKey(workspaceId, id, mode));
         } catch {
           // ignore
         }

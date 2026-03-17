@@ -93,8 +93,8 @@ export function usePreviewTabs(workspaceId: string) {
       const idx = prev.findIndex((t) => t.id === id);
       if (idx === -1) return prev;
       const next = prev.filter((t) => t.id !== id);
-      setActiveTabId((current) => {
-        if (current !== id) return current;
+      setActiveTabId((currentActiveId) => {
+        if (currentActiveId !== id) return currentActiveId;
         if (next.length === 0) return "notes";
         const newIdx = Math.min(idx, next.length - 1);
         return next[newIdx].id;

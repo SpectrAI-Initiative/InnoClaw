@@ -13,7 +13,7 @@ function getStorageKey(workspaceId: string): string {
   try {
     const activeSession = localStorage.getItem(`agent-active-session:${workspaceId}`);
     if (activeSession) {
-      return `agent-messages:${workspaceId}:${activeSession}:agent`;
+      return `agent-messages:${workspaceId}:${activeSession}`;
     }
   } catch {
     // ignore

@@ -134,7 +134,7 @@ class AgentStreamManager {
       const messageStream = readUIMessageStream({ stream: chunkStream });
 
       let lastSaveTime = 0;
-      const SAVE_INTERVAL = 2000; // save at most every 2s to reduce main-thread churn
+      const SAVE_INTERVAL = 5000; // save at most every 5s to reduce main-thread churn
 
       // Step 3: Iterate over the message stream – each yield is the latest
       // snapshot of the assistant message being built.
@@ -147,25 +147,35 @@ class AgentStreamManager {
           entry.messages.push(message);
         }
 
-        // Periodically persist to localStorage
+        // Periodically persist to localStorage (time-based; content may change without part-count changes)
         const now = Date.now();
         if (now - lastSaveTime > SAVE_INTERVAL) {
           lastSaveTime = now;
-          this.saveToLocalStorage(entry);
-          // Only dispatch the cross-tab event when the panel is unmounted
-          // (no direct subscribers). Otherwise the mounted panel handles updates.
-          if (entry.subscribers.size === 0) {
-            this.notifyUpdate(entry);
-          } else {
-            // When there are subscribers, notify them directly while avoiding
-            // the global cross-tab event.
-            for (const callback of entry.subscribers) {
-              try {
-                callback();
-              } catch {
-                // Swallow subscriber errors to avoid breaking the stream loop.
+          // Defer non-critical saves to idle time to avoid blocking the main thread,
+          // and only notify listeners after the save has completed so they see
+          // the latest persisted state in localStorage.
+          const runSaveAndNotify = () => {
+            this.saveToLocalStorage(entry);
+            // Only dispatch the cross-tab event when the panel is unmounted
+            // (no direct subscribers). Otherwise the mounted panel handles updates.
+            if (entry.subscribers.size === 0) {
+              this.notifyUpdate(entry);
+            } else {
+              // When there are subscribers, notify them directly while avoiding
+              // the global cross-tab event.
+              for (const callback of entry.subscribers) {
+                try {
+                  callback();
+                } catch {
+                  // Swallow subscriber errors to avoid breaking the stream loop.
+                }
               }
             }
+          };
+          if (typeof requestIdleCallback !== "undefined") {
+            requestIdleCallback(() => runSaveAndNotify(), { timeout: 3000 });
+          } else {
+            setTimeout(() => runSaveAndNotify(), 0);
           }
         }
       }

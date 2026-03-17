@@ -6,6 +6,28 @@ import { getWorkspaceRoots } from "@/lib/files/filesystem";
 import { updateEnvLocal } from "@/lib/env-file";
 import { PROVIDERS } from "@/lib/ai/models";
 
+/**
+ * Derive the base-URL env var name for a provider (e.g. "openai" → "OPENAI_BASE_URL").
+ */
+function baseUrlEnvKey(providerId: string): string {
+  return `${providerId.toUpperCase()}_BASE_URL`;
+}
+
+/**
+ * Build a dynamic provider status map:
+ *   providerKeys: { [providerId]: boolean }   — whether the API key env var is set
+ *   providerBaseUrls: { [providerId]: string } — the base URL env var value (or "")
+ */
+function getProviderEnvInfo() {
+  const providerKeys: Record<string, boolean> = {};
+  const providerBaseUrls: Record<string, string> = {};
+  for (const p of Object.values(PROVIDERS)) {
+    providerKeys[p.id] = !!process.env[p.envKey];
+    providerBaseUrls[p.id] = process.env[baseUrlEnvKey(p.id)] || "";
+  }
+  return { providerKeys, providerBaseUrls };
+}
+
 export async function GET() {
   try {
     const settings = await db.select().from(appSettings);
@@ -16,6 +38,7 @@ export async function GET() {
     }
 
     const hasHfToken = !!settingsMap["hf_token"] || !!process.env.HF_TOKEN;
+    const { providerKeys, providerBaseUrls } = getProviderEnvInfo();
 
     return NextResponse.json({
       llmProvider: settingsMap["llm_provider"] || "openai",
@@ -23,19 +46,18 @@ export async function GET() {
       contextMode: settingsMap["context_mode"] || "normal",
       maxMode: settingsMap["max_mode"] !== "false",
       workspaceRoots: getWorkspaceRoots(),
-      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
-      hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
-      hasGeminiKey: !!process.env.GEMINI_API_KEY,
+      hasOpenAIKey: providerKeys["openai"] ?? false,
+      hasAnthropicKey: providerKeys["anthropic"] ?? false,
+      hasGeminiKey: providerKeys["gemini"] ?? false,
       hasGithubToken: !!process.env.GITHUB_TOKEN,
       hasHfToken,
       hfTokenSource: settingsMap["hf_token"] ? "db" : (process.env.HF_TOKEN ? "env" : null),
-      hasAIKey: Object.values(PROVIDERS).some((p) => !!process.env[p.envKey]),
-      configuredProviders: Object.values(PROVIDERS)
-        .filter((p) => !!process.env[p.envKey])
-        .map((p) => p.id),
-      openaiBaseUrl: process.env.OPENAI_BASE_URL || "",
-      anthropicBaseUrl: process.env.ANTHROPIC_BASE_URL || "",
-      geminiBaseUrl: process.env.GEMINI_BASE_URL || "",
+      hasAIKey: Object.values(providerKeys).some(Boolean),
+      configuredProviders: Object.entries(providerKeys)
+        .filter(([, has]) => has)
+        .map(([id]) => id),
+      providerKeys,
+      providerBaseUrls,
       feishuBotEnabled:
         process.env.FEISHU_BOT_ENABLED === "true" &&
         !!process.env.FEISHU_APP_ID &&
@@ -86,8 +108,29 @@ export async function PATCH(request: NextRequest) {
       envUpdates.LLM_PROVIDER = body.llm_provider;
     if (typeof body.llm_model === "string")
       envUpdates.LLM_MODEL = body.llm_model;
+
+    // Persist provider API keys and base URLs to .env.local
+    for (const p of Object.values(PROVIDERS)) {
+      const apiKeyField = `${p.id}_api_key`;
+      if (typeof body[apiKeyField] === "string" && body[apiKeyField]) {
+        envUpdates[p.envKey] = body[apiKeyField];
+      }
+      const baseUrlField = `${p.id}_base_url`;
+      if (typeof body[baseUrlField] === "string") {
+        envUpdates[baseUrlEnvKey(p.id)] = body[baseUrlField];
+      }
+    }
+    // GitHub token
+    if (typeof body.github_token === "string" && body.github_token) {
+      envUpdates.GITHUB_TOKEN = body.github_token;
+    }
+
     if (Object.keys(envUpdates).length > 0) {
       updateEnvLocal(envUpdates);
+      // Update process.env in-memory so changes take effect immediately
+      for (const [k, v] of Object.entries(envUpdates)) {
+        process.env[k] = v;
+      }
     }
 
     return NextResponse.json({ success: true });

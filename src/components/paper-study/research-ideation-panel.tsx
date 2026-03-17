@@ -14,6 +14,7 @@ import {
   Check,
   Download,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -56,7 +57,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
   const isComplete = turns.length === IDEATION_STAGES.length && !isRunning;
 
   /** Format turns into a markdown transcript (shared by save & export). */
-  function buildTranscript(items: IdeationTurn[]) {
+  const buildTranscript = useCallback((items: IdeationTurn[]) => {
     return items
       .map((turn) => {
         const role = IDEATION_ROLES[turn.roleId];
@@ -64,7 +65,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
         return `### ${roleName} — ${turn.stageId}\n\n${turn.content}`;
       })
       .join("\n\n---\n\n");
-  }
+  }, [t]);
 
   const startIdeation = useCallback(async () => {
     setTurns([]);
@@ -180,7 +181,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
           : "Failed to save";
       toast.error(message);
     }
-  }, [workspaceId, turns, article, t]);
+  }, [workspaceId, turns, article, t, buildTranscript]);
 
   const handleExportMarkdown = useCallback(() => {
     if (turns.length === 0) return;
@@ -195,7 +196,7 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
     a.download = `research-ideation-${article.id}.md`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [turns, article, mode, userSeed, t]);
+  }, [turns, article, mode, userSeed, buildTranscript]);
 
   function getRoleIcon(roleId: IdeationRoleId) {
     const role = IDEATION_ROLES[roleId];
@@ -249,7 +250,9 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
       {/* Progress stepper */}
       <div className="flex items-center gap-1 px-3 py-2 border-b border-border/50 bg-muted/20 shrink-0 overflow-x-auto">
         {IDEATION_STAGES.map((stage, i) => {
-          const isDone = turns.some((turn) => turn.stageId === stage.id);
+          const doneTurn = turns.find((turn) => turn.stageId === stage.id);
+          const isDone = !!doneTurn;
+          const isError = doneTurn?.error === true;
           const isCurrent = currentStage === stage.id;
 
           return (
@@ -259,13 +262,16 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
                 className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors whitespace-nowrap ${
                   isCurrent
                     ? "bg-primary/10 text-primary font-medium"
-                    : isDone
-                      ? "text-foreground"
-                      : "text-muted-foreground/50"
+                    : isError
+                      ? "text-destructive"
+                      : isDone
+                        ? "text-foreground"
+                        : "text-muted-foreground/50"
                 }`}
               >
                 {isCurrent && <Loader2 className="h-3 w-3 animate-spin shrink-0" />}
-                {isDone && <Check className="h-3 w-3 text-green-600 shrink-0" />}
+                {isDone && !isError && <Check className="h-3 w-3 text-green-600 shrink-0" />}
+                {isError && <AlertCircle className="h-3 w-3 text-destructive shrink-0" />}
                 {getRoleIcon(stage.roleId)}
                 <span className="hidden lg:inline">
                   {t(stage.labelKey.split(".")[1] as Parameters<typeof t>[0])}
@@ -291,26 +297,29 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
           {turns.map((turn, i) => {
             const role = IDEATION_ROLES[turn.roleId];
             const isReport = turn.stageId === "final_report";
+            const isError = turn.error === true;
 
             return (
               <div
                 key={`${turn.stageId}-${i}`}
                 className={`rounded-lg border p-3 ${
-                  isReport
-                    ? "border-primary/30 bg-primary/5"
-                    : "border-border/50 bg-background"
+                  isError
+                    ? "border-destructive/50 bg-destructive/5"
+                    : isReport
+                      ? "border-primary/30 bg-primary/5"
+                      : "border-border/50 bg-background"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  {getRoleIcon(turn.roleId)}
-                  <Badge variant="outline" className={`text-xs ${role.color}`}>
+                  {isError ? <AlertCircle className="h-4 w-4 text-destructive" /> : getRoleIcon(turn.roleId)}
+                  <Badge variant="outline" className={`text-xs ${isError ? "text-destructive border-destructive/50" : role.color}`}>
                     {t(role.nameKey.split(".")[1] as Parameters<typeof t>[0])}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {t(IDEATION_STAGES.find((s) => s.id === turn.stageId)?.labelKey.split(".")[1] as Parameters<typeof t>[0])}
                   </span>
                 </div>
-                <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
+                <div className={`prose prose-sm dark:prose-invert max-w-none text-sm ${isError ? "text-destructive" : ""}`}>
                   <ReactMarkdown>{turn.content}</ReactMarkdown>
                 </div>
               </div>

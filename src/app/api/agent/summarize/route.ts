@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
-import { buildMemorySummarizationPrompt } from "@/lib/ai/prompts";
+import { buildMemorySummarizationPrompt, buildCompactSummaryPrompt } from "@/lib/ai/prompts";
 import { getSummarizationLimitChars } from "@/lib/ai/models";
 import { db } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
@@ -63,7 +63,7 @@ function messagesToTranscript(
 
 export async function POST(req: NextRequest) {
   try {
-    const { workspaceId, messages, trigger, preview, locale, sessionName } = await req.json();
+    const { workspaceId, messages, trigger, preview, compact, locale, sessionName } = await req.json();
 
     if (
       !workspaceId ||
@@ -96,9 +96,9 @@ export async function POST(req: NextRequest) {
     const truncatedTranscript = transcript.slice(0, transcriptLimit);
 
     const model = await getConfiguredModel();
-    const systemPrompt = buildMemorySummarizationPrompt(
-      trigger === "clear" ? "clear" : "overflow"
-    );
+    const systemPrompt = compact
+      ? buildCompactSummaryPrompt()
+      : buildMemorySummarizationPrompt(trigger === "clear" ? "clear" : "overflow");
 
     const { text } = await generateText({
       model,

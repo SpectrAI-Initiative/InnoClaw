@@ -53,8 +53,10 @@ const perModelProviderCache = new Map<string, ReturnType<typeof createOpenAI>>()
 
 /**
  * Create (or return cached) OpenAI-compatible provider for providers that use
- * per-model base URLs. The env var name is derived from the provider and model:
- *   e.g. provider="moonshot", model="kimi-k2.5" → MOONSHOT_KIMI_K2_5_BASE_URL
+ * per-model base URLs. Resolution order:
+ *   1. Per-model env var:  e.g. MOONSHOT_KIMI_K2_5_BASE_URL
+ *   2. Vendor-level env var: e.g. MOONSHOT_BASE_URL
+ *   3. Error if neither is set.
  */
 function getPerModelProvider(
   providerId: string,
@@ -70,16 +72,17 @@ function getPerModelProvider(
     );
   }
 
-  const envVarName =
+  const perModelEnvVar =
     prefix +
     "_" +
     modelId.toUpperCase().replace(/[^A-Z0-9]/g, "_") +
     "_BASE_URL";
-  const baseURL = process.env[envVarName];
+  const vendorEnvVar = prefix + "_BASE_URL";
+  const baseURL = process.env[perModelEnvVar] || process.env[vendorEnvVar];
   if (!baseURL) {
     throw new Error(
       `No base URL configured for ${providerDef?.name ?? providerId} model "${modelId}". ` +
-        `Set the ${envVarName} environment variable.`
+        `Set ${perModelEnvVar} or ${vendorEnvVar}.`
     );
   }
 

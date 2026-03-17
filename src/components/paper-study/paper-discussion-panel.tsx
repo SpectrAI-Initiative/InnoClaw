@@ -14,6 +14,7 @@ import {
   Check,
   Download,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -252,7 +253,9 @@ export function PaperDiscussionPanel({ article, workspaceId }: PaperDiscussionPa
       {/* Progress stepper */}
       <div className="flex items-center gap-1 px-3 py-2 border-b border-border/50 bg-muted/20 shrink-0 overflow-x-auto">
         {DISCUSSION_STAGES.map((stage, i) => {
-          const isDone = turns.some((turn) => turn.stageId === stage.id);
+          const doneTurn = turns.find((turn) => turn.stageId === stage.id);
+          const isDone = !!doneTurn;
+          const isError = doneTurn?.error === true;
           const isCurrent = currentStage === stage.id;
 
           return (
@@ -262,13 +265,16 @@ export function PaperDiscussionPanel({ article, workspaceId }: PaperDiscussionPa
                 className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors whitespace-nowrap ${
                   isCurrent
                     ? "bg-primary/10 text-primary font-medium"
-                    : isDone
-                      ? "text-foreground"
-                      : "text-muted-foreground/50"
+                    : isError
+                      ? "text-destructive"
+                      : isDone
+                        ? "text-foreground"
+                        : "text-muted-foreground/50"
                 }`}
               >
                 {isCurrent && <Loader2 className="h-3 w-3 animate-spin shrink-0" />}
-                {isDone && <Check className="h-3 w-3 text-green-600 shrink-0" />}
+                {isDone && !isError && <Check className="h-3 w-3 text-green-600 shrink-0" />}
+                {isError && <AlertCircle className="h-3 w-3 text-destructive shrink-0" />}
                 {getRoleIcon(stage.roleId)}
                 <span className="hidden lg:inline">
                   {t(stage.labelKey.split(".")[1] as Parameters<typeof t>[0])}
@@ -294,26 +300,29 @@ export function PaperDiscussionPanel({ article, workspaceId }: PaperDiscussionPa
           {turns.map((turn, i) => {
             const role = DISCUSSION_ROLES[turn.roleId];
             const isReport = turn.stageId === "final_report";
+            const isError = turn.error === true;
 
             return (
               <div
                 key={`${turn.stageId}-${i}`}
                 className={`rounded-lg border p-3 ${
-                  isReport
-                    ? "border-primary/30 bg-primary/5"
-                    : "border-border/50 bg-background"
+                  isError
+                    ? "border-destructive/50 bg-destructive/5"
+                    : isReport
+                      ? "border-primary/30 bg-primary/5"
+                      : "border-border/50 bg-background"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  {getRoleIcon(turn.roleId)}
-                  <Badge variant="outline" className={`text-xs ${role.color}`}>
+                  {isError ? <AlertCircle className="h-4 w-4 text-destructive" /> : getRoleIcon(turn.roleId)}
+                  <Badge variant="outline" className={`text-xs ${isError ? "text-destructive border-destructive/50" : role.color}`}>
                     {t(role.nameKey.split(".")[1] as Parameters<typeof t>[0])}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {t(DISCUSSION_STAGES.find((s) => s.id === turn.stageId)?.labelKey.split(".")[1] as Parameters<typeof t>[0])}
                   </span>
                 </div>
-                <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
+                <div className={`prose prose-sm dark:prose-invert max-w-none text-sm ${isError ? "text-destructive" : ""}`}>
                   <ReactMarkdown>{turn.content}</ReactMarkdown>
                 </div>
               </div>

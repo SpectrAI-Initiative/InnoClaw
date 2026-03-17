@@ -1,0 +1,226 @@
+name: Update README What's New
+
+on:
+  workflow_run:
+    workflows: ["Daily Change Summary"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-readme:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for commits
+        id: check
+        run: |
+          git checkout main
+          git log --oneline -1
+
+          SINCE=$(date -u -d "24 hours ago" +%Y-%m-%dT%H:%M:%S)
+          echo "SINCE=$SINCE"
+          COUNT=$(git log --since="$SINCE" --oneline --no-merges | wc -l)
+          echo "commit_count=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "since=$SINCE" >> "$GITHUB_OUTPUT"
+          if [ "$COUNT" -eq "0" ]; then
+            echo "No commits in the last 24 hours, skipping."
+          else
+            echo "Found $COUNT commits since $SINCE"
+          fi
+
+      - name: Setup Node.js
+        if: steps.check.outputs.commit_count != '0'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Copilot CLI
+        if: steps.check.outputs.commit_count != '0'
+        run: npm install -g @github/copilot
+
+      - name: Detect significant features
+        if: steps.check.outputs.commit_count != '0'
+        id: detect
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
+        run: |
+          SINCE="${{ steps.check.outputs.since }}"
+          GIT_LOG=$(git log main --since="$SINCE" --pretty=format:"%h %s (%an)" --no-merges)
+          OLDEST=$(git log main --since="$SINCE" --format="%H" --no-merges | tail -1)
+          DIFF_STAT=$(git diff --stat "${OLDEST}^..main" 2>/dev/null || echo "N/A")
+          DIFF_NAMES=$(git diff --name-only "${OLDEST}^..main" 2>/dev/null || echo "N/A")
+
+          PROMPT=$(cat <<'PROMPT_EOF'
+          You are a release-notes analyst for a Next.js + TypeScript AI research assistant project.
+
+          Analyze the following git commits and file changes. Determine if there are any SIGNIFICANT NEW FEATURES worth highlighting in a "What's New" section of the README.
+
+          CLASSIFICATION RULES:
+          - SIGNIFICANT = new user-facing capability, new major integration, new UI panel/page, new API endpoint category, new workflow/system
+          - NOT SIGNIFICANT = bug fixes, refactoring, dependency updates, CI/workflow changes, documentation-only changes, minor UI tweaks, code style changes, test additions
+
+          OUTPUT FORMAT:
+          If there ARE significant features, output EXACTLY in this format (no extra text before or after):
+          ---BEGIN_FEATURES---
+          - **Feature Name / 功能名称**: One-line English description / 一行中文描述
+          ---END_FEATURES---
+
+          If there are NO significant features, output EXACTLY:
+          ---NO_FEATURES---
+
+          IMPORTANT:
+          - Each bullet must be bilingual (English / Chinese) to match README style
+          - Keep descriptions concise (under 120 chars per language)
+          - Group related commits into a single feature bullet
+          - Maximum 3 feature bullets per day
+          PROMPT_EOF
+          )
+
+          RESULT=$(copilot -p "${PROMPT}
+
+          ## Git Commits:
+          ${GIT_LOG}
+
+          ## Changed Files:
+          ${DIFF_NAMES}
+
+          ## File Change Stats:
+          ${DIFF_STAT}")
+
+          echo "$RESULT"
+          echo "$RESULT" > /tmp/feature_detection.txt
+
+          if echo "$RESULT" | grep -q "BEGIN_FEATURES"; then
+            echo "has_features=true" >> "$GITHUB_OUTPUT"
+            sed -n '/---BEGIN_FEATURES---/,/---END_FEATURES---/p' \
+              /tmp/feature_detection.txt \
+              | grep -vF -- '---' > /tmp/new_features.txt
+            echo "Detected features:"
+            cat /tmp/new_features.txt
+          else
+            echo "has_features=false" >> "$GITHUB_OUTPUT"
+            echo "No significant features detected."
+          fi
+
+      - name: Update README
+        if: steps.detect.outputs.has_features == 'true'
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          NEW_FEATURES=$(cat /tmp/new_features.txt)
+          MARKER_START="<!-- whats-new-start -->"
+
+          # Build the new entry
+          ENTRY=$(printf '#### %s\n%s\n' "$TODAY" "$NEW_FEATURES")
+
+          # Insert new entry after the start marker
+          awk -v marker="$MARKER_START" -v entry="$ENTRY" '
+            { print }
+            index($0, marker) { printf "\n%s\n", entry }
+          ' README.md > /tmp/README_updated.md
+          mv /tmp/README_updated.md README.md
+
+          echo "README updated with new entry for $TODAY"
+
+      - name: Trim old entries
+        if: steps.detect.outputs.has_features == 'true'
+        run: |
+          python3 <<'PYEOF'
+          import re
+
+          with open("README.md", "r", encoding="utf-8") as f:
+              content = f.read()
+
+          start_marker = "<!-- whats-new-start -->"
+          end_marker = "<!-- whats-new-end -->"
+
+          start_idx = content.find(start_marker)
+          end_idx = content.find(end_marker)
+
+          if start_idx == -1 or end_idx == -1:
+              print("Markers not found, skipping trim.")
+              exit(0)
+
+          before = content[:start_idx + len(start_marker)]
+          section = content[start_idx + len(start_marker):end_idx]
+          after = content[end_idx:]
+
+          # Split into date-headed entries
+          entries = re.split(r'(?=\n#### \d{4}-\d{2}-\d{2})', section)
+          entries = [e for e in entries if e.strip() and '####' in e]
+
+          MAX_ENTRIES = 10
+          if len(entries) > MAX_ENTRIES:
+              entries = entries[:MAX_ENTRIES]
+              print(f"Trimmed to {MAX_ENTRIES} entries.")
+          else:
+              print(f"Have {len(entries)} entries (max {MAX_ENTRIES}), no trimming needed.")
+
+          trimmed = "\n".join(entries) + "\n\n"
+          new_content = before + "\n" + trimmed + after
+
+          with open("README.md", "w", encoding="utf-8") as f:
+              f.write(new_content)
+          PYEOF
+
+      - name: Create branch and PR
+        if: steps.detect.outputs.has_features == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          BRANCH="auto/whats-new-${TODAY}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Create or reset branch from current state (README already modified)
+          git checkout -B "${BRANCH}"
+
+          git add README.md
+          git commit -m "docs: update What's New section (${TODAY})" || {
+            echo "No changes to commit."
+            exit 0
+          }
+
+          git push origin "${BRANCH}" --force-with-lease
+
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list --head "${BRANCH}" --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            echo "PR #${EXISTING_PR} already exists. Branch updated."
+          else
+            NEW_FEATURES=$(cat /tmp/new_features.txt)
+            gh pr create \
+              --title "docs: What's New - ${TODAY}" \
+              --body "$(cat <<PR_EOF
+          ## Summary
+
+          Auto-detected significant new features from today's commits and updated the README **What's New** section.
+
+          ### New entries added:
+
+          ${NEW_FEATURES}
+
+          ---
+          *Auto-generated by the \`readme-whats-new\` workflow. Please review for accuracy before merging.*
+          PR_EOF
+              )" \
+              --label "documentation" \
+              --base main \
+              --head "${BRANCH}"
+          fi

@@ -32,7 +32,7 @@ export const PAPER = {
   /** Max abstract length per article when sent to the LLM for summarization. */
   MAX_ABSTRACT_CHARS: 1_500,
   /** Max chars of raw text sent to AI for metadata extraction. */
-  MAX_EXTRACT_CONTEXT: 4_000,
+  MAX_EXTRACT_CONTEXT: 10_000,
 } as const;
 
 /** Buffer size constants for exec calls. */
@@ -43,14 +43,6 @@ export const BUFFER = {
   DEFAULT: 1024 * 1024,
   /** 2 MB — large log collection */
   LARGE: 2 * 1024 * 1024,
-} as const;
-
-/** Research ideation constants. */
-export const IDEATION = {
-  /** Max output tokens per stage in quick mode. */
-  TOKENS_QUICK: 600,
-  /** Max output tokens per stage in full mode. */
-  TOKENS_FULL: 1_500,
 } as const;
 
 /** File extensions eligible for paper study (discuss / ideate). */

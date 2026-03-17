@@ -62,21 +62,39 @@ export type ExperimentRunStatus =
   | "syncing"
   | "submitted"
   | "monitoring"
+  | "queued"
   | "running"
   | "collecting"
   | "analyzing"
   | "completed"
   | "failed"
-  | "cancelled";
+  | "cancelled"
+  | "timed_out"
+  | "needs_attention"
+  | "unknown";
 
+/** Structured mount for rjob containers. */
+export interface RJobMount {
+  source: string;
+  target: string;
+}
+
+/** Structured representation of an `rjob submit` request. */
 export interface RJobSubmissionSpec {
+  jobName: string;
+  memoryMb: number;
+  cpu: number;
+  gpu: number;
+  chargedGroup?: string;
+  privateMachine?: string;
+  mounts: RJobMount[];
   image: string;
-  gpuCount?: number;
-  memory?: string;
-  mounts?: string[];
-  entrypoint: string;
-  jobName?: string;
-  extraArgs?: string[];
+  priority?: number;
+  hostNetwork?: boolean;
+  autoRestart?: boolean;
+  env?: Record<string, string>;
+  command: string;
+  commandArgs: string[];
 }
 
 export interface ExperimentManifest {
@@ -126,18 +144,55 @@ export type RunMonitorStatus =
   | "needs_attention"
   | "unknown";
 
+/** Semantic completion state — whether a run has reached a terminal state. */
+export type RunCompletionState =
+  | "not_started"
+  | "in_progress"
+  | "terminal_success"
+  | "terminal_failure"
+  | "terminal_cancelled"
+  | "undetermined";
+
+/** Point-in-time observation of a remote run's status. Pure observation — no decision logic. */
 export interface RunStatusSnapshot {
-  schedulerStatus: RunMonitorStatus;
-  markerEvidence: "done" | "failed" | "none";
-  heartbeat: { found: boolean; ageSeconds?: number } | null;
-  logTail: string | null;
-  logGrowing: boolean | null;
-  resolvedStatus: RunMonitorStatus;
-  decision: "still_running" | "completed" | "failed" | "needs_attention";
-  retryAfterSeconds: number | null;
-  timestamp: string;
-  rawOutput?: string;
+  observedAt: string;
+  status: ExperimentRunStatus;
+  completionState: RunCompletionState;
+  schedulerState?: string;
+  schedulerReason?: string;
+  exitCode?: number | null;
+  signalCode?: number | null;
+  processAlive?: boolean;
+  heartbeatSeenAt?: string;
+  stdoutLogExists?: boolean;
+  stderrLogExists?: boolean;
+  logTailPreview?: string[];
+  message?: string;
 }
+
+/** Discriminated union: output of monitorJob(). */
+export type MonitorJobDecision =
+  | { kind: "still_running"; snapshot: RunStatusSnapshot; retryAfterSeconds: number }
+  | { kind: "completed"; snapshot: RunStatusSnapshot }
+  | { kind: "failed"; snapshot: RunStatusSnapshot }
+  | { kind: "cancelled"; snapshot: RunStatusSnapshot }
+  | { kind: "unknown"; snapshot: RunStatusSnapshot; retryAfterSeconds?: number };
+
+/** Lightweight reference to collected experiment results. */
+export interface ExperimentResultSummaryRef {
+  collectedAt: string;
+  status: ExperimentRunStatus;
+  completionState: RunCompletionState;
+  metrics?: Record<string, number | string | boolean | null>;
+  notes?: string;
+}
+
+/** Discriminated union: output of collectResults(). */
+export type CollectResultsDecision =
+  | { kind: "still_running"; snapshot: RunStatusSnapshot; retryAfterSeconds: number }
+  | { kind: "awaiting_manual_approval"; snapshot: RunStatusSnapshot }
+  | { kind: "collected"; snapshot: RunStatusSnapshot; result: ExperimentResultSummaryRef }
+  | { kind: "not_ready"; snapshot: RunStatusSnapshot; reason: string };
 
 export interface JobMonitoringConfig {
   pollIntervalSeconds?: number;

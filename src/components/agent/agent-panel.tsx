@@ -14,8 +14,6 @@ import {
   Loader2,
   Square,
   Brain,
-  ClipboardList,
-  MessageCircleQuestion,
 } from "lucide-react";
 import useSWR from "swr";
 import {
@@ -28,7 +26,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useSkills } from "@/lib/hooks/use-skills";
-import { getOverflowThresholdChars, getMessageTextLength, PROVIDERS } from "@/lib/ai/models";
+import { getOverflowThresholdChars, getMessageTextLength, getContextWindowChars, PROVIDERS, DEFAULT_PROVIDER, DEFAULT_MODEL, DEFAULT_CONTEXT_MODE } from "@/lib/ai/models";
 import type { ProviderId } from "@/lib/ai/models";
 import { SkillAutocomplete } from "@/components/skills/skill-autocomplete";
 import { SkillParameterDialog } from "@/components/skills/skill-parameter-dialog";
@@ -50,18 +48,36 @@ import type { Skill } from "@/types";
 import { swrFetcher as fetcher } from "@/lib/fetcher";
 import { AgentMessage } from "./agent-message";
 
-type AgentMode = "agent" | "plan" | "ask";
+type AgentMode = "long-agent" | "agent" | "plan" | "ask";
 
 /** Pixel threshold for considering the user "at the bottom" of the scroll area */
 const BOTTOM_THRESHOLD_PX = 80;
 
-const MODE_LABEL_KEYS: Record<AgentMode, "modeAgent" | "modePlan" | "modeAsk"> = {
+/** XML tag used to wrap compacted context summaries in messages. */
+const CONTEXT_SUMMARY_OPEN = "<context_summary>";
+const CONTEXT_SUMMARY_CLOSE = "</context_summary>";
+
+/** Build a UIMessage containing a compacted context summary. */
+function makeContextSummaryMessage(content: string, notice: string): UIMessage {
+  return {
+    id: `memory-${Date.now()}`,
+    role: "user",
+    parts: [{
+      type: "text",
+      text: `${CONTEXT_SUMMARY_OPEN}\n${content}\n${CONTEXT_SUMMARY_CLOSE}\n${notice}`,
+    }],
+  } as UIMessage;
+}
+
+const MODE_LABEL_KEYS: Record<AgentMode, "modeLongAgent" | "modeAgent" | "modePlan" | "modeAsk"> = {
+  "long-agent": "modeLongAgent",
   agent: "modeAgent",
   plan: "modePlan",
   ask: "modeAsk",
 };
 
-const MODE_PLACEHOLDER_KEYS: Record<AgentMode, "placeholder" | "placeholderPlan" | "placeholderAsk"> = {
+const MODE_PLACEHOLDER_KEYS: Record<AgentMode, "placeholder" | "placeholderLongAgent" | "placeholderPlan" | "placeholderAsk"> = {
+  "long-agent": "placeholderLongAgent",
   agent: "placeholder",
   plan: "placeholderPlan",
   ask: "placeholderAsk",
@@ -81,7 +97,6 @@ interface AgentPanelProps {
 
 export function AgentPanel({
   workspaceId,
-  workspaceName,
   folderPath,
   sessionId,
   sessionName,
@@ -400,7 +415,6 @@ export function AgentPanel({
           });
         },
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [agentBody]
   );
 
@@ -433,7 +447,7 @@ export function AgentPanel({
   const { messages, sendMessage, setMessages, stop, status, error: chatError } = useChat({ transport });
 
   // --- Message persistence via localStorage ---
-  const storageKey = `agent-messages:${workspaceId}:${sessionId}:${mode}`;
+  const storageKey = `agent-messages:${workspaceId}:${sessionId}`;
   // Counter-based gate: incremented on restore, decremented in the save effect
   // that sees the restored messages. Avoids save-during-restore race.
   const restoreGenRef = useRef(0);
@@ -499,7 +513,6 @@ export function AgentPanel({
         } catch { /* ignore */ }
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
   // On mount: if the background stream manager is still active, subscribe
@@ -546,14 +559,13 @@ export function AgentPanel({
     );
 
     return unsub;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamKey, storageKey, setMessages]);
 
   // --- Auto-continue: automatically continue when task is incomplete ---
   const prevStatusRef = useRef(status);
   const autoContinueCountRef = useRef(0);
   const autoContinueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const MAX_AUTO_CONTINUES = 20; // Prevent infinite loops
+  const maxAutoContinues = mode === "long-agent" ? 100 : 20; // long-agent supports extended interactions
 
   useEffect(() => {
     const wasStreaming = prevStatusRef.current === "streaming" || prevStatusRef.current === "submitted";
@@ -570,7 +582,7 @@ export function AgentPanel({
     }
 
     // Check if we've hit the auto-continue limit
-    if (autoContinueCountRef.current >= MAX_AUTO_CONTINUES) {
+    if (autoContinueCountRef.current >= maxAutoContinues) {
       return;
     }
 
@@ -604,11 +616,30 @@ export function AgentPanel({
         autoContinueTimerRef.current = null;
       }
     };
-  }, [status, messages, sendMessage, t]);
+  }, [status, messages, sendMessage, t, maxAutoContinues]);
+
+  // Resolved provider/model (avoids repeating fallback chain)
+  const resolvedProvider = selectedProvider ?? settings?.llmProvider ?? DEFAULT_PROVIDER;
+  const resolvedModel = selectedModel ?? settings?.llmModel ?? DEFAULT_MODEL;
+
   const overflowThreshold = getOverflowThresholdChars(
-    selectedProvider ?? settings?.llmProvider ?? "openai",
-    selectedModel ?? settings?.llmModel ?? "gpt-4o-mini",
-    settings?.contextMode ?? "normal"
+    resolvedProvider,
+    resolvedModel,
+    settings?.contextMode ?? DEFAULT_CONTEXT_MODE
+  );
+
+  // Compute context usage percentage for display
+  const contextWindowChars = useMemo(
+    () => getContextWindowChars(resolvedProvider, resolvedModel),
+    [resolvedProvider, resolvedModel]
+  );
+  const totalMessageChars = useMemo(
+    () => messages.reduce((sum, m) => sum + getMessageTextLength(m), 0),
+    [messages]
+  );
+  const contextPercent = useMemo(
+    () => Math.min(Math.round((totalMessageChars / contextWindowChars) * 100), 100),
+    [totalMessageChars, contextWindowChars]
   );
 
   const summarizeAndEvict = async (
@@ -623,6 +654,7 @@ export function AgentPanel({
     setSummaryError(null);
 
     try {
+      // Step 1: Generate compact summary (preview mode — don't save yet)
       const res = await fetch("/api/agent/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -630,6 +662,8 @@ export function AgentPanel({
           workspaceId,
           messages: messagesToSummarize,
           trigger,
+          preview: true,
+          compact: true,
           locale,
           sessionName,
         }),
@@ -640,16 +674,30 @@ export function AgentPanel({
         throw new Error(errData.error || "Summarization failed");
       }
 
+      const { title, content } = await res.json();
+
+      // Step 2: Save to DB as memory note (best-effort — don't block context compaction on save failure)
+      const saveRes = await fetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspaceId,
+          title,
+          content,
+          type: "memory",
+        }),
+      });
+      if (!saveRes.ok) {
+        console.warn("Failed to save memory note to DB:", await saveRes.text().catch(() => ""));
+      }
+
+      // Step 3: Inject compact summary or clear
       if (trigger === "clear") {
         setMessages([]);
       } else {
-        // Inject a marker message indicating memory was saved
-        const memoryMarker = {
-          id: `memory-${Date.now()}`,
-          role: "assistant" as const,
-          parts: [{ type: "text" as const, text: t("memorySaved") }],
-        } as UIMessage;
-        setMessages([memoryMarker, ...messagesToKeep]);
+        // Inject the compact summary as a user-role context message
+        const contextSummary = makeContextSummaryMessage(content, t("contextCompactedNotice"));
+        setMessages([contextSummary, ...messagesToKeep]);
       }
     } catch (err) {
       setSummaryError(err instanceof Error ? err.message : "Summarization failed");
@@ -672,15 +720,16 @@ export function AgentPanel({
     if (messages.length < 4) return;
     if (messages.length === failedAtCountRef.current) return;
 
-    // Pre-compute per-message sizes once to avoid repeated serialization
+    // Reuse pre-computed totalMessageChars for the early-exit check
+    if (totalMessageChars <= overflowThreshold) return;
+
+    // Need per-message sizes only for split-point calculation
     const messageSizes = messages.map((m) => getMessageTextLength(m));
-    const totalChars = messageSizes.reduce((sum, s) => sum + s, 0);
-    if (totalChars <= overflowThreshold) return;
 
     // Find split point: keep newest ~20% by character count
     let keepFromIndex = messages.length;
     let accumulatedChars = 0;
-    const targetKeepChars = totalChars * 0.2;
+    const targetKeepChars = totalMessageChars * 0.2;
 
     for (let i = messages.length - 1; i >= 0; i--) {
       accumulatedChars += messageSizes[i];
@@ -892,8 +941,9 @@ export function AgentPanel({
         body: JSON.stringify({
           workspaceId,
           messages: selected,
-          trigger: "clear",
+          trigger: overflowKeepRef.current ? "overflow" : "clear",
           preview: true,
+          compact: true,
           locale,
           sessionName,
         }),
@@ -948,13 +998,9 @@ export function AgentPanel({
         throw new Error(errorMessage);
       }
       if (overflowKeepRef.current) {
-        // Overflow: keep recent messages, inject memory marker
-        const memoryMarker = {
-          id: `memory-${Date.now()}`,
-          role: "assistant" as const,
-          parts: [{ type: "text" as const, text: t("memorySaved") }],
-        } as UIMessage;
-        setMessages([memoryMarker, ...scrubStuckToolParts(overflowKeepRef.current)]);
+        // Overflow: keep recent messages, inject compact summary as context
+        const contextSummary = makeContextSummaryMessage(memoryPreviewContent, t("contextCompactedNotice"));
+        setMessages([contextSummary, ...scrubStuckToolParts(overflowKeepRef.current)]);
         overflowKeepRef.current = null;
       } else {
         // Manual clear: empty all messages
@@ -982,7 +1028,7 @@ export function AgentPanel({
     }
   };
 
-  // Switch mode: update body synchronously and clear stale conversation
+  // Switch mode: update body synchronously, keep conversation context
   const handleModeChange = (newMode: AgentMode) => {
     setMode(newMode);
     agentBody.mode = newMode; // synchronous — guarantees next request uses correct mode
@@ -1140,6 +1186,12 @@ export function AgentPanel({
               <DropdownMenuLabel className="text-xs">{t("modeLabel")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup value={mode} onValueChange={(v) => handleModeChange(v as AgentMode)}>
+                <DropdownMenuRadioItem value="long-agent">
+                  <div className="flex flex-col">
+                    <span>{t("modeLongAgent")}</span>
+                    <span className="text-xs text-muted-foreground">{t("modeLongAgentDesc")}</span>
+                  </div>
+                </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="agent">
                   <div className="flex flex-col">
                     <span>{t("modeAgent")}</span>
@@ -1184,6 +1236,21 @@ export function AgentPanel({
             autoFocus
           />
           <div className="flex items-center gap-1 shrink-0 mt-1">
+            {/* Context usage percentage */}
+            {messages.length > 0 && (
+              <span
+                title={t("contextUsage")}
+                className={`text-[10px] font-mono tabular-nums px-1 py-0.5 rounded select-none transition-colors ${
+                  contextPercent >= 80
+                    ? "text-[#f7768e]"
+                    : contextPercent >= 50
+                    ? "text-[#e0af68]"
+                    : "text-agent-muted"
+                }`}
+              >
+                {contextPercent}%
+              </span>
+            )}
             {isLoading && (
             <button
               onClick={handleStop}
@@ -1409,7 +1476,7 @@ export function AgentPanel({
       {/* Particle effects overlay - renders on top of content but allows click-through */}
       <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
         <FloatingOrbs isActive={isLoading} />
-        <ParticleEffect isActive={isLoading} particleCount={80} density={0.0003} colors={["#8b5cf6", "#6366f1", "#3b82f6", "#06b6d4", "#a855f7", "#ec4899"]} />
+        <ParticleEffect isActive={isLoading} particleCount={25} density={0.0001} colors={["#8b5cf6", "#6366f1", "#3b82f6", "#06b6d4", "#a855f7", "#ec4899"]} />
       </div>
     </div>
   );

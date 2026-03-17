@@ -298,8 +298,8 @@ export const experimentRuns = sqliteTable("experiment_runs", {
   status: text("status", {
     enum: [
       "planning", "patching", "syncing", "submitted",
-      "monitoring", "running", "collecting", "analyzing", "completed",
-      "failed", "cancelled",
+      "monitoring", "queued", "running", "collecting", "analyzing", "completed",
+      "failed", "cancelled", "timed_out", "needs_attention", "unknown",
     ],
   })
     .notNull()

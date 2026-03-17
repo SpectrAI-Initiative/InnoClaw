@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { runFullPaperDiscussion } from "@/lib/paper-discussion/orchestrator";
+import { extractPaperFullText } from "../extract-paper-text";
 import type { PaperDiscussionSharedContext, DiscussionTurn } from "@/lib/paper-discussion/types";
 
 export async function POST(req: NextRequest) {
@@ -36,6 +37,12 @@ export async function POST(req: NextRequest) {
       locale,
       mode,
     };
+
+    // Extract full paper text for deeper analysis (local files only)
+    const paperText = await extractPaperFullText(article, 30_000);
+    if (paperText) {
+      context.retrievedEvidence = paperText;
+    }
 
     // Stream each completed turn as a JSON line
     const encoder = new TextEncoder();

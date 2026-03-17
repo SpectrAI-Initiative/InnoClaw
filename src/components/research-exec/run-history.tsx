@@ -24,13 +24,16 @@ function statusIcon(status: ExperimentRunStatus) {
       return <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
     case "failed":
     case "cancelled":
+    case "timed_out":
       return <XCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
     case "monitoring":
+    case "needs_attention":
       return <Activity className="h-3.5 w-3.5 animate-pulse text-blue-600 dark:text-blue-400" />;
     case "planning":
     case "patching":
     case "syncing":
     case "submitted":
+    case "queued":
     case "running":
     case "collecting":
     case "analyzing":
@@ -46,8 +49,10 @@ function statusColor(status: ExperimentRunStatus) {
       return "border-green-500/20 bg-green-500/15 text-green-700 dark:text-green-400";
     case "failed":
     case "cancelled":
+    case "timed_out":
       return "border-red-500/20 bg-red-500/15 text-red-700 dark:text-red-400";
     case "monitoring":
+    case "needs_attention":
       return "border-blue-500/20 bg-blue-500/15 text-blue-700 dark:text-blue-400";
     default:
       return "border-yellow-500/20 bg-yellow-500/15 text-yellow-700 dark:text-yellow-400";
