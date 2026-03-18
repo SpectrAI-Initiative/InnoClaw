@@ -487,7 +487,20 @@
     "mdMissingPrompt": "缺少系统提示词，请在 frontmatter 下方添加内容。",
     "mdNoName": "未命名",
     "mdNoPrompt": "无提示词内容",
-    "mdScopeError": "工作区作用域需要工作区上下文。请使用 'scope: global' 或在工作区内编辑此技能。"
+    "mdScopeError": "工作区作用域需要工作区上下文。请使用 'scope: global' 或在工作区内编辑此技能。",
+    "importFromFolder": "从文件夹导入",
+    "importFolderDesc": "选择本地文件夹，自动发现并导入 SKILL.md、commands/*.md 和 agents/*.md 文件",
+    "selectFolder": "选择文件夹",
+    "folderScanning": "正在扫描文件夹...",
+    "folderNoSkills": "所选文件夹中未找到可导入的技能文件",
+    "folderProgress": "已处理 {current} / {total} 个文件",
+    "importFromClaudeCode": "从 Claude Code 导入",
+    "claudeCodeDesc": "自动从本地 Claude Code 配置目录（~/.claude）导入技能",
+    "claudeCodePath": "Claude Code 路径",
+    "claudeCodePathPlaceholder": "~/.claude（默认）",
+    "claudeCodeScan": "从 Claude Code 导入",
+    "claudeCodeScanning": "扫描中...",
+    "claudeCodeNoSkills": "未在 Claude Code 目录中找到技能：{path}"
   },
   "cluster": {
     "clusterToggle": "集群",
