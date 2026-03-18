@@ -487,7 +487,20 @@
     "mdMissingPrompt": "Missing system prompt. Please add content below the frontmatter.",
     "mdNoName": "Unnamed",
     "mdNoPrompt": "No prompt content",
-    "mdScopeError": "Workspace scope requires a workspace context. Use 'scope: global' or edit this skill from within a workspace."
+    "mdScopeError": "Workspace scope requires a workspace context. Use 'scope: global' or edit this skill from within a workspace.",
+    "importFromFolder": "Import from Folder",
+    "importFolderDesc": "Select a local folder to automatically discover and import SKILL.md, commands/*.md, and agents/*.md files",
+    "selectFolder": "Select Folder",
+    "folderScanning": "Scanning folder...",
+    "folderNoSkills": "No importable skill files found in the selected folder",
+    "folderProgress": "{current} / {total} files processed",
+    "importFromClaudeCode": "Import from Claude Code",
+    "claudeCodeDesc": "Automatically import skills from your local Claude Code configuration (~/.claude)",
+    "claudeCodePath": "Claude Code path",
+    "claudeCodePathPlaceholder": "~/.claude (default)",
+    "claudeCodeScan": "Import from Claude Code",
+    "claudeCodeScanning": "Scanning...",
+    "claudeCodeNoSkills": "No skills found in Claude Code directory: {path}"
   },
   "cluster": {
     "clusterToggle": "Cluster",
