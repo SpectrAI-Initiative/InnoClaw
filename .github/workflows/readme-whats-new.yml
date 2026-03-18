@@ -127,31 +127,129 @@ jobs:
             echo "No significant features detected."
           fi
 
+      - name: Translate features for JA/FR/DE
+        if: steps.detect.outputs.has_features == 'true'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_PAT }}
+        run: |
+          NEW_FEATURES_EN=$(cat /tmp/new_features_en.txt)
+          NEW_FEATURES_ZH=$(cat /tmp/new_features_zh.txt)
+
+          PROMPT=$(cat <<'PROMPT_EOF'
+          You translate concise README "What's New" bullets for a software project.
+
+          Convert the provided feature bullets into THREE aligned output blocks in this exact format:
+
+          ---BEGIN_FEATURES_JA---
+          - **Feature Name**: Japanese description
+          ---END_FEATURES_JA---
+          ---BEGIN_FEATURES_FR---
+          - **Nom de fonctionnalite**: Description francaise en ASCII uniquement
+          ---END_FEATURES_FR---
+          ---BEGIN_FEATURES_DE---
+          - **Funktionsname**: Deutsche Beschreibung in ASCII nur
+          ---END_FEATURES_DE---
+
+          RULES:
+          - Keep bullet count and order exactly aligned with the English source.
+          - Preserve the markdown bullet and bold feature-name structure.
+          - Keep each line concise and skimmable.
+          - Japanese may use natural Japanese.
+          - French must use ASCII only, with no accented characters.
+          - German must use ASCII only; use ae, oe, ue, and ss when needed.
+          - Do not add commentary before or after the blocks.
+          PROMPT_EOF
+          )
+
+          RESULT=$(copilot -p "${PROMPT}
+
+          ## English features:
+          ${NEW_FEATURES_EN}
+
+          ## Chinese features:
+          ${NEW_FEATURES_ZH}")
+
+          echo "$RESULT"
+          echo "$RESULT" > /tmp/feature_translations.txt
+
+          if echo "$RESULT" | grep -q "BEGIN_FEATURES_JA"; then
+            sed -n '/---BEGIN_FEATURES_JA---/,/---END_FEATURES_JA---/p' \
+              /tmp/feature_translations.txt \
+              | grep -vF -- '---' > /tmp/new_features_ja.txt
+            sed -n '/---BEGIN_FEATURES_FR---/,/---END_FEATURES_FR---/p' \
+              /tmp/feature_translations.txt \
+              | grep -vF -- '---' > /tmp/new_features_fr.txt
+            sed -n '/---BEGIN_FEATURES_DE---/,/---END_FEATURES_DE---/p' \
+              /tmp/feature_translations.txt \
+              | grep -vF -- '---' > /tmp/new_features_de.txt
+            echo "Detected Japanese features:"
+            cat /tmp/new_features_ja.txt
+            echo "Detected French features:"
+            cat /tmp/new_features_fr.txt
+            echo "Detected German features:"
+            cat /tmp/new_features_de.txt
+          else
+            echo "Translation blocks not detected. Falling back to English bullets for JA/FR/DE."
+            cp /tmp/new_features_en.txt /tmp/new_features_ja.txt
+            cp /tmp/new_features_en.txt /tmp/new_features_fr.txt
+            cp /tmp/new_features_en.txt /tmp/new_features_de.txt
+          fi
+
       - name: Update READMEs
         if: steps.detect.outputs.has_features == 'true'
         run: |
           TODAY=$(date +%Y-%m-%d)
           MARKER_START="<!-- whats-new-start -->"
 
-          # Update README.md (Chinese)
-          NEW_FEATURES_ZH=$(cat /tmp/new_features_zh.txt)
-          ENTRY_ZH=$(printf '#### %s\n%s\n' "$TODAY" "$NEW_FEATURES_ZH")
-          awk -v marker="$MARKER_START" -v entry="$ENTRY_ZH" '
-            { print }
-            index($0, marker) { printf "\n%s\n", entry }
-          ' README.md > /tmp/README_updated.md
-          mv /tmp/README_updated.md README.md
-          echo "README.md (ZH) updated with new entry for $TODAY"
-
-          # Update README_en.md (English)
+          # Update README.md (English homepage)
           NEW_FEATURES_EN=$(cat /tmp/new_features_en.txt)
           ENTRY_EN=$(printf '#### %s\n%s\n' "$TODAY" "$NEW_FEATURES_EN")
           awk -v marker="$MARKER_START" -v entry="$ENTRY_EN" '
             { print }
             index($0, marker) { printf "\n%s\n", entry }
-          ' README_en.md > /tmp/README_en_updated.md
-          mv /tmp/README_en_updated.md README_en.md
-          echo "README_en.md (EN) updated with new entry for $TODAY"
+          ' README.md > /tmp/README_updated.md
+          mv /tmp/README_updated.md README.md
+          echo "README.md (EN) updated with new entry for $TODAY"
+
+          # Update docs/README_CN.md (Chinese translation)
+          NEW_FEATURES_ZH=$(cat /tmp/new_features_zh.txt)
+          ENTRY_ZH=$(printf '#### %s\n%s\n' "$TODAY" "$NEW_FEATURES_ZH")
+          awk -v marker="$MARKER_START" -v entry="$ENTRY_ZH" '
+            { print }
+            index($0, marker) { printf "\n%s\n", entry }
+          ' docs/README_CN.md > /tmp/README_CN_updated.md
+          mv /tmp/README_CN_updated.md docs/README_CN.md
+          echo "docs/README_CN.md (ZH) updated with new entry for $TODAY"
+
+          # Update docs/README_JA.md (Japanese translation)
+          NEW_FEATURES_JA=$(cat /tmp/new_features_ja.txt)
+          ENTRY_JA=$(printf '#### %s\n%s\n' "$TODAY" "$NEW_FEATURES_JA")
+          awk -v marker="$MARKER_START" -v entry="$ENTRY_JA" '
+            { print }
+            index($0, marker) { printf "\n%s\n", entry }
+          ' docs/README_JA.md > /tmp/README_JA_updated.md
+          mv /tmp/README_JA_updated.md docs/README_JA.md
+          echo "docs/README_JA.md (JA) updated with new entry for $TODAY"
+
+          # Update docs/README_FR.md (French translation)
+          NEW_FEATURES_FR=$(cat /tmp/new_features_fr.txt)
+          ENTRY_FR=$(printf '#### %s\n%s\n' "$TODAY" "$NEW_FEATURES_FR")
+          awk -v marker="$MARKER_START" -v entry="$ENTRY_FR" '
+            { print }
+            index($0, marker) { printf "\n%s\n", entry }
+          ' docs/README_FR.md > /tmp/README_FR_updated.md
+          mv /tmp/README_FR_updated.md docs/README_FR.md
+          echo "docs/README_FR.md (FR) updated with new entry for $TODAY"
+
+          # Update docs/README_DE.md (German translation)
+          NEW_FEATURES_DE=$(cat /tmp/new_features_de.txt)
+          ENTRY_DE=$(printf '#### %s\n%s\n' "$TODAY" "$NEW_FEATURES_DE")
+          awk -v marker="$MARKER_START" -v entry="$ENTRY_DE" '
+            { print }
+            index($0, marker) { printf "\n%s\n", entry }
+          ' docs/README_DE.md > /tmp/README_DE_updated.md
+          mv /tmp/README_DE_updated.md docs/README_DE.md
+          echo "docs/README_DE.md (DE) updated with new entry for $TODAY"
 
       - name: Trim old entries
         if: steps.detect.outputs.has_features == 'true'
@@ -161,7 +259,13 @@ jobs:
 
           MAX_ENTRIES = 10
 
-          for readme_file in ["README.md", "README_en.md"]:
+          for readme_file in [
+              "README.md",
+              "docs/README_CN.md",
+              "docs/README_JA.md",
+              "docs/README_FR.md",
+              "docs/README_DE.md",
+          ]:
               with open(readme_file, "r", encoding="utf-8") as f:
                   content = f.read()
 
@@ -210,7 +314,7 @@ jobs:
           # Create or reset branch from current state (READMEs already modified)
           git checkout -B "${BRANCH}"
 
-          git add README.md README_en.md
+          git add README.md docs/README_CN.md docs/README_JA.md docs/README_FR.md docs/README_DE.md
           git commit -m "docs: update What's New section (${TODAY})" || {
             echo "No changes to commit."
             exit 0
@@ -231,7 +335,7 @@ jobs:
               --body "$(cat <<PR_EOF
           ## Summary
 
-          Auto-detected significant new features from today's commits and updated the **What's New** section in both README.md (Chinese) and README_en.md (English).
+          Auto-detected significant new features from today's commits and updated the **What's New** section in `README.md` (English homepage), `docs/README_CN.md` (Chinese translation), and lightweight localized summaries in `docs/README_JA.md`, `docs/README_FR.md`, and `docs/README_DE.md`.
 
           ### New entries (English):
 
