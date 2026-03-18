@@ -173,7 +173,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       claudeDir,
-      files: skillFiles.map((f) => ({ slug: f.slug, path: f.filePath })),
+      files: skillFiles.map((f) => ({
+        slug: f.slug,
+        path: path.relative(claudeDir, f.filePath),
+      })),
       count: skillFiles.length,
     });
   } catch (error) {
