@@ -47,3 +47,13 @@ development/documentation
 
 troubleshooting/faq
 ```
+
+```{toctree}
+:hidden:
+
+README_CN
+README_JA
+README_FR
+README_DE
+development/readme-homepage-redesign
+```

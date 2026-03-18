@@ -35,19 +35,13 @@ InnoClaw verwandelt serverseitige Ordner in KI-native Workspaces fuer dokumenten
 
 Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als nur eine generische Chat-Oberflaeche wollen: zitierte Antworten auf echten Dateien, wiederverwendbare Skills und einen klaren Weg vom Lesen zur Ausfuehrung.
 
-```mermaid
-flowchart LR
-    A[Workspace oeffnen] --> B[Dateien in RAG synchronisieren]
-    B --> C[Mit Quellen fragen]
-    C --> D[Paper studieren]
-    D --> E[Multi-Agent-Diskussion starten]
-    E --> F[Notizen und Ideen generieren]
-    F --> G[Remote-Forschungstasks ausfuehren]
-```
+> Workflow: Workspace oeffnen -> Dateien in RAG synchronisieren -> Mit Quellen fragen -> Paper studieren -> Multi-Agent-Diskussion starten -> Notizen und Ideen generieren -> Remote-Forschungstasks ausfuehren
 
 ---
 
 ## 🔥 Neuigkeiten
+
+### Letzte Updates
 
 *Dieser Bereich wird als leichtgewichtige Uebersetzungszusammenfassung automatisch synchronisiert. Fuer die schnellsten Updates sehen Sie bitte in `../README.md` und `README_CN.md` nach.*
 

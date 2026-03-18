@@ -35,19 +35,13 @@ InnoClaw transforme les dossiers cote serveur en espaces de travail IA natifs po
 
 Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosting qui veulent plus qu'une simple interface de chat : des reponses citees sur de vrais fichiers, des competences reutilisables, et un chemin clair de la lecture a l'execution.
 
-```mermaid
-flowchart LR
-    A[Ouvrir un workspace] --> B[Synchroniser les fichiers dans le RAG]
-    B --> C[Poser des questions avec sources]
-    C --> D[Etudier des articles]
-    D --> E[Lancer une discussion multi-agent]
-    E --> F[Generer des notes et des idees]
-    F --> G[Executer des taches de recherche a distance]
-```
+> Workflow : Ouvrir un workspace -> Synchroniser les fichiers dans le RAG -> Poser des questions avec sources -> Etudier des articles -> Lancer une discussion multi-agent -> Generer des notes et des idees -> Executer des taches de recherche a distance
 
 ---
 
 ## 🔥 Nouveautes
+
+### Dernieres mises a jour
 
 *Cette section est synchronisee automatiquement sous forme de resume traduit leger. Pour les mises a jour les plus rapides, consultez `../README.md` et `README_CN.md`.*
 

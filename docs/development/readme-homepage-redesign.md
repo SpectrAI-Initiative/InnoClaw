@@ -327,15 +327,15 @@ Short description.
 
 ## Documentation
 
-- [Overview](docs/getting-started/overview.md)
-- [Installation](docs/getting-started/installation.md)
-- [Deployment](docs/getting-started/deployment.md)
-- [Environment Variables](docs/getting-started/environment-variables.md)
-- [Features](docs/usage/features.md)
-- [Configuration](docs/usage/configuration.md)
-- [API Reference](docs/usage/api-reference.md)
-- [Troubleshooting](docs/troubleshooting/faq.md)
-- [Development Guide](docs/development/contributing.md)
+- [Overview](../getting-started/overview.md)
+- [Installation](../getting-started/installation.md)
+- [Deployment](../getting-started/deployment.md)
+- [Environment Variables](../getting-started/environment-variables.md)
+- [Features](../usage/features.md)
+- [Configuration](../usage/configuration.md)
+- [API Reference](../usage/api-reference.md)
+- [Troubleshooting](../troubleshooting/faq.md)
+- [Development Guide](../development/contributing.md)
 
 ## Community
 
