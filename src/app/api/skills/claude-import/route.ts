@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
 
     const claudeDir = resolveClaudeDir(claudePath);
 
-    // Security: prevent path traversal by ensuring the resolved path stays
-    // within reasonable bounds (must be an absolute path)
-    if (!path.isAbsolute(claudeDir)) {
+    // Security: reject paths that aren't absolute (shouldn't happen after resolve,
+    // but ensures no null bytes or other injection)
+    if (!path.isAbsolute(claudeDir) || claudeDir.includes("\0")) {
       return NextResponse.json(
         { error: "Invalid Claude Code path" },
         { status: 400 }
@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
     const claudePath = searchParams.get("path") || undefined;
     const claudeDir = resolveClaudeDir(claudePath);
 
-    if (!path.isAbsolute(claudeDir)) {
+    if (!path.isAbsolute(claudeDir) || claudeDir.includes("\0")) {
       return NextResponse.json(
         { error: "Invalid Claude Code path" },
         { status: 400 }

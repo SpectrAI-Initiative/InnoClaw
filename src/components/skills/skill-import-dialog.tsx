@@ -51,6 +51,37 @@ function getImportableSlug(relativePath: string): string | null {
   return null;
 }
 
+/** Helper to parse file content and fall back gracefully when no valid frontmatter exists */
+function parseFileContent(
+  content: string,
+  fallbackSlug: string
+): { name: string; slug: string; systemPrompt: string; description: string | null; steps: null; allowedTools: null; parameters: null } | null {
+  const parsed = markdownToSkillData(content);
+  if (parsed?.name && parsed.systemPrompt) {
+    return {
+      name: parsed.name,
+      slug: parsed.slug || fallbackSlug,
+      systemPrompt: parsed.systemPrompt,
+      description: parsed.description || null,
+      steps: parsed.steps ?? null,
+      allowedTools: parsed.allowedTools ?? null,
+      parameters: parsed.parameters ?? null,
+    };
+  }
+  const systemPrompt = content.trim();
+  if (!systemPrompt) return null;
+  return {
+    name: fallbackSlug,
+    slug: fallbackSlug,
+    systemPrompt,
+    description: null,
+    steps: null,
+    allowedTools: null,
+    parameters: null,
+  };
+}
+
+
 export function SkillImportDialog({
   open,
   onOpenChange,
@@ -200,8 +231,8 @@ export function SkillImportDialog({
 
       try {
         const text = await file.text();
-        const parsed = markdownToSkillData(text) ?? { name: slug, slug, systemPrompt: text.trim(), description: null, steps: null, allowedTools: null, parameters: null };
-        if (!parsed.name || !parsed.systemPrompt) {
+        const parsed = parseFileContent(text, slug);
+        if (!parsed) {
           failed++;
           continue;
         }
@@ -212,8 +243,8 @@ export function SkillImportDialog({
           body: JSON.stringify({
             skill: {
               name: parsed.name,
-              slug: parsed.slug || slug,
-              description: parsed.description || null,
+              slug: parsed.slug,
+              description: parsed.description,
               systemPrompt: parsed.systemPrompt,
               steps: parsed.steps,
               allowedTools: parsed.allowedTools,
@@ -351,7 +382,9 @@ export function SkillImportDialog({
             <input
               ref={folderInputRef}
               type="file"
-              // @ts-expect-error webkitdirectory is not in the standard typings
+              // webkitdirectory is a widely-supported non-standard attribute for folder selection;
+              // it is not included in React's InputHTMLAttributes typings
+              // @ts-expect-error TS2322: webkitdirectory is valid HTML but not typed in React
               webkitdirectory=""
               multiple
               onChange={handleFolderSelect}
