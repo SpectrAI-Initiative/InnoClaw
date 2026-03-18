@@ -534,20 +534,30 @@ Agent 面板支持向 Kubernetes 集群提交 GPU 计算任务。
 - **Provider Vision Capability Detection / 供应商视觉能力检测**: Added `supportsVision` flag to all provider configs and a `providerSupportsVision()` helper, allowing routes to dynamically choose multimodal vs text-only content based on the active provider.
 
 #### 2026-03-17
+- **Remote Job Profile Management & SSH Hardening / 远程作业配置管理与 SSH 安全加固**: Secure remote profile creation, editing, and SSH-hardened job submission for research execution / 支持安全的远程配置文件创建、编辑及 SSH 加固的研究作业提交
+- **Rich Markdown Rendering in Agent Panel / 智能体面板富文本渲染**: Agent messages now render tables, LaTeX math, and syntax-highlighted code blocks / 智能体消息支持表格、LaTeX 数学公式及代码高亮渲染
+- **API Provider Settings UI / API 提供商设置界面**: Configure AI provider API keys and endpoints directly from the Settings page / 可在设置页面直接配置 AI 提供商的 API 密钥与端点
+
+
+#### 2026-03-17
 - **rjob Profile Config & Submission Hardening / rjob 配置与提交加固**: Remote profiles now store full rjob defaults (image, GPU, CPU, memory, mounts, charged-group, private-machine, env vars, host-network, example commands). `submitRemoteJob` builds the rjob command internally from stored config — the agent can no longer modify flags like `--charged-group` or `--image`. SSH transport fixed with `-o StrictHostKeyChecking=no -tt`, init script sourcing, and double-quote wrapping for correct quoting.
 - **Profile Editing / 远程配置编辑**: Edit button (pencil icon) on remote profiles in the Remotes tab. Click to load profile into the form for updating, including all rjob config fields.
 - **Direct Job Submission Shortcut / 直接任务提交捷径**: Agent-Long mode can skip inspect/patch/sync stages for simple job submissions: `listRemoteProfiles → prepareJobSubmission → approval → submitRemoteJob`.
+
 
 #### 2026-03-16
 - **Paper Discussion & Ideation Robustness / 论文讨论与灵感生成稳定性提升**: Per-role token budgets (2–2.5x increase), automatic retry on empty/short responses, and error visibility in the UI. Fixes agents returning empty or truncated output with reasoning-capable models (SH-Lab, Qwen, etc.)
 - **Full Paper Context / 全文送入讨论智能体**: Discussion and ideation agents now receive up to 30k chars of the full paper text (local files) instead of just the abstract, enabling deeper analysis of methodology, experiments, and results
 - **Abstract Extraction Fix / 摘要提取修复**: Heuristic regex-based abstract extraction with improved AI prompt to prevent extracting author names instead of the actual abstract
 
+
 #### 2026-03-14
 - **Research Execution Engine / 研究执行引擎**: New AI-driven research orchestration system with remote profiles, capability toggles, run history, and agent tools
 - **Auto-updating README "What's New" / 自动更新 README 新功能板块**: GitHub Actions workflow that automatically generates and commits a bilingual What's New section daily
 
 *暂无条目。当 CI 检测到重大新功能时会自动更新此栏目。*
+
+
 
 
 
