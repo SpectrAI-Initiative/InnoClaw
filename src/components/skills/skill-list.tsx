@@ -54,11 +54,11 @@ export function SkillList({
       return;
     }
 
-    const descriptionsToTranslate = skills
+    const toTranslate = skills
       .filter((s) => s.description)
-      .map((s) => s.description!);
+      .map((s) => ({ id: s.id, text: s.description! }));
 
-    if (descriptionsToTranslate.length === 0) return;
+    if (toTranslate.length === 0) return;
 
     setTranslating(true);
     try {
@@ -67,7 +67,7 @@ export function SkillList({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          texts: descriptionsToTranslate,
+          texts: toTranslate.map((t) => t.text),
           targetLanguage: targetLang,
         }),
       });
@@ -79,13 +79,9 @@ export function SkillList({
 
       const { translations: results } = await res.json();
       const map: Record<string, string> = {};
-      let idx = 0;
-      for (const skill of skills) {
-        if (skill.description) {
-          map[skill.id] = results[idx] || skill.description;
-          idx++;
-        }
-      }
+      toTranslate.forEach((item, idx) => {
+        map[item.id] = results[idx] || item.text;
+      });
       setTranslations(map);
       setTranslated(true);
     } catch (err) {

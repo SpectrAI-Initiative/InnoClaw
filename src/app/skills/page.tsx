@@ -1,18 +1,25 @@
 "use client";
 
-import React, { useState, useMemo, useSyncExternalStore } from "react";
+import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { PageBackground } from "@/components/ui/page-background";
 import { Plus, Download, Sparkles, Zap, Brain, Code2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSkills } from "@/lib/hooks/use-skills";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import { SkillList } from "@/components/skills/skill-list";
 import { SkillMdFormDialog } from "@/components/skills/skill-md-form-dialog";
 import { SkillImportDialog } from "@/components/skills/skill-import-dialog";
-import { ParticleEffect, FloatingOrbs } from "@/components/ui/particle-effect";
 import type { Skill, SkillStep, SkillParameter } from "@/types";
+
+const FEATURES = [
+  { icon: Zap, label: "Automation", color: "from-amber-500 to-orange-500" },
+  { icon: Code2, label: "Custom Workflows", color: "from-blue-500 to-cyan-500" },
+  { icon: Brain, label: "AI-Powered", color: "from-violet-500 to-purple-500" },
+] as const;
 
 export default function SkillsPage() {
   const t = useTranslations("skills");
@@ -20,18 +27,7 @@ export default function SkillsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
-
-  const mounted = useSyncExternalStore(
-    (cb) => { cb(); return () => {}; },
-    () => true,
-    () => false,
-  );
-
-  const features = useMemo(() => [
-    { icon: Zap, label: "Automation", color: "from-amber-500 to-orange-500" },
-    { icon: Code2, label: "Custom Workflows", color: "from-blue-500 to-cyan-500" },
-    { icon: Brain, label: "AI-Powered", color: "from-violet-500 to-purple-500" },
-  ], []);
+  const mounted = useMounted();
 
   const handleCreate = () => {
     setEditingSkill(null);
@@ -136,24 +132,7 @@ export default function SkillsPage() {
       <Header />
       <ScrollArea className="flex-1">
         <main className="relative min-h-full overflow-hidden">
-          {/* Background effects */}
-          <div className="pointer-events-none absolute inset-0">
-            {/* Grid pattern */}
-            <div
-              className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]"
-              style={{
-                backgroundImage: `linear-gradient(rgba(139, 92, 246, 0.3) 1px, transparent 1px),
-                                  linear-gradient(90deg, rgba(139, 92, 246, 0.3) 1px, transparent 1px)`,
-                backgroundSize: '60px 60px',
-              }}
-            />
-            {/* Radial gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
-            {/* Floating orbs */}
-            <FloatingOrbs isActive={mounted} />
-            {/* Particle effect */}
-            <ParticleEffect isActive={mounted} particleCount={30} />
-          </div>
+          <PageBackground isActive={mounted} />
 
           <div className="relative mx-auto max-w-7xl px-4 py-12">
             {/* Hero Section */}
@@ -177,7 +156,7 @@ export default function SkillsPage() {
 
               {/* Feature pills */}
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3 animate-slide-in-up [animation-delay:300ms]">
-                {features.map((feature, i) => (
+                {FEATURES.map((feature, i) => (
                   <div
                     key={feature.label}
                     className="group flex items-center gap-2 rounded-full border border-border/50 bg-card/50 px-4 py-2 text-sm backdrop-blur-sm transition-all hover:border-primary/50 hover:bg-primary/5"
@@ -283,7 +262,7 @@ export default function SkillsPage() {
       <SkillImportDialog
         open={importOpen}
         onOpenChange={setImportOpen}
-        onImported={() => mutate()}
+        onImported={mutate}
       />
     </div>
   );

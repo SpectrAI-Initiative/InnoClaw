@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { FolderOpen, GitBranch, Sparkles, Cpu, Zap, Brain, Code2, GraduationCap, Server } from "lucide-react";
 import Link from "next/link";
@@ -10,19 +10,16 @@ import { OpenWorkspaceDialog } from "@/components/workspaces/open-workspace-dial
 import { CloneRepoDialog } from "@/components/git/clone-repo-dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { PageBackground } from "@/components/ui/page-background";
 import { useWorkspaces } from "@/lib/hooks/use-workspaces";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import { toast } from "sonner";
-import { ParticleEffect, FloatingOrbs } from "@/components/ui/particle-effect";
 
 export default function HomePage() {
   const t = useTranslations("home");
   const { workspaces, isLoading, mutate } = useWorkspaces();
   const [workspaceRoots, setWorkspaceRoots] = useState<string[]>([]);
-  const mounted = useSyncExternalStore(
-    (cb) => { cb(); return () => {}; },
-    () => true,
-    () => false,
-  );
+  const mounted = useMounted();
 
   useEffect(() => {
     // Fetch workspace roots from settings API
@@ -60,23 +57,7 @@ export default function HomePage() {
       <ScrollArea className="flex-1">
         <main className="relative min-h-full overflow-hidden">
           {/* Background effects */}
-          <div className="pointer-events-none absolute inset-0">
-            {/* Grid pattern */}
-            <div
-              className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]"
-              style={{
-                backgroundImage: `linear-gradient(rgba(139, 92, 246, 0.3) 1px, transparent 1px),
-                                  linear-gradient(90deg, rgba(139, 92, 246, 0.3) 1px, transparent 1px)`,
-                backgroundSize: '60px 60px',
-              }}
-            />
-            {/* Radial gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
-            {/* Floating orbs */}
-            <FloatingOrbs isActive={mounted} />
-            {/* Particle effect */}
-            <ParticleEffect isActive={mounted} particleCount={30} />
-          </div>
+          <PageBackground isActive={mounted} />
 
           <div className="relative mx-auto max-w-7xl px-4 py-12">
             {/* Hero Section */}
