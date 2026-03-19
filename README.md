@@ -50,14 +50,21 @@ flowchart LR
 <!-- whats-new-start -->
 
 #### 2026-03-18
+- **Multimodal Vision for Paper Analysis**: PDF images are now extracted and analyzed visually during paper discussion and research ideation sessions
+- **Claude Code Skills Integration**: Import skills directly from local folders or Claude Code projects via a new dedicated import workflow
+
+
+#### 2026-03-18
 - **Multimodal Vision for Paper Discussion & Ideation**: Vision-capable providers can now receive extracted PDF page images alongside text so discussion and ideation agents can analyze figures, tables, and diagrams.
 - **Paper Pages Gallery UI**: Discussion and ideation panels now show a collapsible thumbnail gallery for extracted paper pages with full-size preview dialogs.
 - **Provider Vision Capability Detection**: Provider configs now expose vision support so routes can switch between multimodal and text-only paper context automatically.
+
 
 #### 2026-03-17
 - **Remote Job Profile Management & SSH Hardening**: Secure remote profile creation, editing, and SSH-hardened job submission for research execution
 - **Rich Markdown Rendering in Agent Panel**: Agent messages now render tables, LaTeX math, and syntax-highlighted code blocks
 - **API Provider Settings UI**: Configure AI provider API keys and endpoints directly from the Settings page
+
 
 
 #### 2026-03-17
@@ -66,10 +73,12 @@ flowchart LR
 - **Direct Job Submission Shortcut**: Agent-Long mode can skip inspect/patch/sync stages for simple job submissions: `listRemoteProfiles -> prepareJobSubmission -> approval -> submitRemoteJob`.
 
 
+
 #### 2026-03-16
 - **Paper Discussion & Ideation Robustness**: Per-role token budgets (2-2.5x increase), automatic retry on empty/short responses, and error visibility in the UI. Fixes agents returning empty or truncated output with reasoning-capable models (SH-Lab, Qwen, etc.)
 - **Full Paper Context**: Discussion and ideation agents now receive up to 30k chars of the full paper text (local files) instead of just the abstract, enabling deeper analysis of methodology, experiments, and results
 - **Abstract Extraction Fix**: Heuristic regex-based abstract extraction with improved AI prompt to prevent extracting author names instead of the actual abstract
+
 
 
 #### 2026-03-14
@@ -77,6 +86,8 @@ flowchart LR
 - **Auto-updating README "What's New"**: GitHub Actions workflow that automatically generates and commits a What's New section daily
 
 *No entries yet. This section is auto-updated when significant new features are detected by CI.*
+
+
 
 <!-- whats-new-end -->
 

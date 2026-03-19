@@ -48,28 +48,39 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 <!-- whats-new-start -->
 
 #### 2026-03-18
+- **Multimodale Bildanalyse fuer Papierauswertung**: PDF-Bilder werden jetzt waehrend Diskussions- und Forschungsideensitzungen visuell extrahiert und analysiert
+- **Claude Code Skills-Integration**: Importieren Sie Skills direkt aus lokalen Ordnern oder Claude Code-Projekten ueber einen neuen dedizierten Import-Workflow
+
+
+#### 2026-03-18
 - **Multimodale Vision fuer Paper-Diskussion und Ideation**: Vision-faehige Anbieter erhalten jetzt extrahierte PDF-Seitenbilder zusammen mit Text, damit Agents Abbildungen, Tabellen und Diagramme direkt analysieren koennen.
 - **Paper-Seitengalerie-UI**: Die Discussion- und Ideation-Panels zeigen jetzt eine einklappbare Miniaturgalerie der extrahierten Paper-Seiten mit Grossansicht im Dialog.
 - **Erkennung der Vision-Faehigkeit von Anbietern**: Provider-Konfigurationen enthalten jetzt Vision-Support, sodass Routen automatisch zwischen multimodalem und rein textbasiertem Kontext wechseln koennen.
+
 
 #### 2026-03-17
 - **Remote-Job-Profilverwaltung und SSH-Haertung**: sichere Erstellung, Bearbeitung und SSH-gehaertete Einreichung von Forschungsjobs auf Remote-Systemen
 - **Rich Markdown Rendering im Agent Panel**: Agent-Nachrichten rendern jetzt Tabellen, LaTeX-Mathematik und syntaxhervorgehobene Codebloecke
 - **API-Provider-Settings-UI**: API-Keys und Endpunkte fuer KI-Provider direkt auf der Settings-Seite konfigurieren
 
+
 #### 2026-03-17
 - **rjob-Profilkonfiguration und sichere Einreichung**: Remote-Profile speichern vollstaendige rjob-Defaults wie image, GPU, CPU, memory, mounts, charged-group, private-machine, env vars, host-network und example commands. `submitRemoteJob` baut den rjob-Befehl intern aus der gespeicherten Konfiguration auf, sodass der Agent kritische Flags wie `--charged-group` oder `--image` nicht veraendern kann. Auch der SSH-Transport wurde mit `-o StrictHostKeyChecking=no -tt`, dem Laden des Init-Skripts und korrektem Quoting verhaertet.
 - **Profilbearbeitung**: Der Edit-Button im Remotes-Tab laedt vorhandene Profile inklusive aller rjob-Felder zur Aktualisierung in das Formular.
 - **Direkter Job-Submission-Shortcut**: Im Agent-Long-Modus koennen einfache Job-Einreichungen inspect/patch/sync ueberspringen und dem Ablauf `listRemoteProfiles -> prepareJobSubmission -> approval -> submitRemoteJob` folgen.
+
 
 #### 2026-03-16
 - **Robustheit fuer Paper-Diskussion und Ideation**: 2-2.5x hoeheres Token-Budget pro Rolle, automatische Wiederholung bei leeren oder zu kurzen Antworten und sichtbare Fehler in der UI
 - **Vollstaendiger Paper-Kontext**: Discussion- und Ideation-Agents erhalten bis zu 30k Zeichen des lokalen Volltexts statt nur des Abstracts
 - **Abstract-Extraktion korrigiert**: heuristische Regex-Extraktion und verbesserter KI-Prompt verhindern, dass Autorennamen als Abstract erkannt werden
 
+
 #### 2026-03-14
 - **Research Execution Engine**: neues KI-gesteuertes Forschungsorchestrierungssystem mit Remote-Profilen, Capability-Toggles, Laufhistorie und Agent-Tools
 - **Automatisch aktualisierter README-Bereich "What's New"**: GitHub-Actions-Workflow, der wichtige neue Features taeglich erkennt und in die README eintraegt
+
+
 
 <!-- whats-new-end -->
 
