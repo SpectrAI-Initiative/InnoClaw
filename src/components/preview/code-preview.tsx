@@ -10,32 +10,11 @@ import { keymap } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 import { Button } from "@/components/ui/button";
 import { Copy, CheckCheck } from "lucide-react";
+import { EXT_TO_DISPLAY } from "@/lib/constants";
 import { useFileContent } from "@/lib/hooks/use-file-content";
 import { useClipboard } from "@/lib/hooks/use-clipboard";
 import { SaveStatus } from "@/components/preview/save-status";
 import { getFileName } from "@/lib/utils";
-
-/** Map file extension overrides to display name (extensions not listed fall back to the raw ext) */
-const EXT_TO_DISPLAY: Record<string, string> = {
-  js: "javascript",
-  jsx: "javascript",
-  ts: "typescript",
-  tsx: "typescript",
-  py: "python",
-  sass: "scss",
-  yml: "yaml",
-  sh: "bash",
-  bat: "bash",
-  rs: "rust",
-  rb: "ruby",
-  h: "c",
-  hpp: "cpp",
-  kt: "kotlin",
-  pl: "perl",
-  pm: "perl",
-  cmake: "makefile",
-  proto: "protobuf",
-};
 
 function getDisplayLanguage(filePath: string): string {
   const filename = getFileName(filePath).toLowerCase();

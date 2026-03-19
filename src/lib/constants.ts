@@ -78,8 +78,30 @@ export const CODE_EXTS = [
   "py", "yaml", "yml", "xml", "toml", "sh", "bat",
   "c", "cpp", "h", "hpp", "java", "go", "rs", "rb", "php",
   "sql", "r", "scala", "kt", "swift", "dart", "lua", "pl", "pm", "groovy",
-  "scss", "sass", "less", "graphql", "proto",
+  "scss", "sass", "less", "graphql", "proto", "cmake",
 ] as const;
+
+/** Map short file extensions to human-readable language display names. */
+export const EXT_TO_DISPLAY: Record<string, string> = {
+  js: "javascript",
+  jsx: "javascript",
+  ts: "typescript",
+  tsx: "typescript",
+  py: "python",
+  sass: "scss",
+  yml: "yaml",
+  sh: "bash",
+  bat: "bash",
+  rs: "rust",
+  rb: "ruby",
+  h: "c",
+  hpp: "cpp",
+  kt: "kotlin",
+  pl: "perl",
+  pm: "perl",
+  cmake: "makefile",
+  proto: "protobuf",
+};
 
 /** Molecular / chemical file formats. */
 export const MOL_EXTS = ["pdb", "mol", "mol2", "sdf", "sd", "xyz", "cif"] as const;

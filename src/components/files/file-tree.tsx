@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { PAPER_ELIGIBLE_EXTENSIONS } from "@/lib/constants";
+import { PAPER_ELIGIBLE_EXTENSIONS, CODE_EXTS, IMAGE_EXTS } from "@/lib/constants";
 import { useClipboard as useSystemClipboard } from "@/lib/hooks/use-clipboard";
 import {
   ChevronRight,
@@ -85,32 +85,12 @@ interface FileTreeProps {
 
 function getFileIcon(name: string, type: string) {
   if (type === "directory") return Folder;
-  const ext = name.split(".").pop()?.toLowerCase();
-  switch (ext) {
-    case "md":
-    case "txt":
-    case "csv":
-      return FileText;
-    case "json":
-      return FileJson;
-    case "ts":
-    case "tsx":
-    case "js":
-    case "jsx":
-    case "py":
-    case "html":
-    case "css":
-      return FileCode;
-    case "png":
-    case "jpg":
-    case "jpeg":
-    case "gif":
-    case "svg":
-    case "webp":
-      return FileImage;
-    default:
-      return File;
-  }
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  if (ext === "md" || ext === "txt" || ext === "csv") return FileText;
+  if (ext === "json") return FileJson;
+  if ((CODE_EXTS as readonly string[]).includes(ext)) return FileCode;
+  if ((IMAGE_EXTS as readonly string[]).includes(ext)) return FileImage;
+  return File;
 }
 
 function getParentPath(filePath: string): string {
