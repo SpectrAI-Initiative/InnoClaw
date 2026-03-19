@@ -990,28 +990,9 @@
   letter-spacing: 0.05em;
 }
 
-/* Code preview panel */
-.code-preview-container {
-  padding: 0.75rem;
-  font-size: 0.8125rem;
-  line-height: 1.25rem;
-}
-
-.code-preview-container pre {
-  margin: 0;
-  background: transparent !important;
-}
-
-.code-preview-container code {
-  font-size: inherit;
-  line-height: inherit;
-  background: transparent !important;
-}
-
-.code-line-numbers {
-  min-width: 2.5rem;
-  line-height: 1.25rem;
-  font-size: 0.8125rem;
+/* CodeMirror editor — fill parent height */
+.cm-editor {
+  height: 100%;
 }
 
 /* ---- Report prose (article-style) ---- */

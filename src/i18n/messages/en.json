@@ -200,7 +200,9 @@
     "editMode": "Edit",
     "previewMode": "Preview",
     "notes": "Notes",
-    "studyPaper": "Study Paper"
+    "studyPaper": "Study Paper",
+    "autoSaved": "Saved",
+    "autoSaving": "Saving..."
   },
   "agent": {
     "title": "Agent",

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React from "react";
 import { Components } from "react-markdown";
 import type { PluggableList } from "unified";
 import remarkGfm from "remark-gfm";
@@ -8,6 +8,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
 import { FileText, Copy, CheckCheck } from "lucide-react";
+import { useClipboard } from "@/lib/hooks/use-clipboard";
 
 function unescapeCitationFilename(raw: string): string {
   return raw.replace(/\\(["\\])/g, "$1");
@@ -56,40 +57,16 @@ export function CitationText({ text }: { text: string }) {
 }
 
 export function CodeBlock({ children, className, ...rest }: React.HTMLAttributes<HTMLElement>) {
-  const [copied, setCopied] = useState(false);
-  const codeRef = useRef<HTMLElement>(null);
-  const timeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+  const { copied, copy } = useClipboard();
+  const codeRef = React.useRef<HTMLElement>(null);
 
   const langMatch = className?.match(/language-(\w+)/);
   const lang = langMatch?.[1];
 
-  const handleCopy = useCallback(async () => {
+  const handleCopy = () => {
     const text = codeRef.current?.textContent ?? "";
-    if (!text) return;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      timeoutRef.current = window.setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch {
-      // Clipboard write failed
-    }
-  }, []);
+    if (text) copy(text);
+  };
 
   return (
     <div className="code-block-wrapper">

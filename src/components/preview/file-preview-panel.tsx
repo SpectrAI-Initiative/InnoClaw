@@ -4,13 +4,12 @@ import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, X, Save, FileDown, AlertCircle, Loader2, GraduationCap } from "lucide-react";
+import { Eye, X, FileDown, AlertCircle, Loader2, GraduationCap } from "lucide-react";
 import { PAPER_ELIGIBLE_EXTENSIONS } from "@/lib/constants";
 import { getFileName } from "@/lib/utils";
 import { PdfViewer } from "@/components/files/pdf-viewer";
 import { MolViewer } from "@/components/files/mol-viewer";
 import { useFileContent } from "@/lib/hooks/use-file-content";
-import { toast } from "sonner";
 
 // Lazy-load CadViewer so Three.js is only fetched when a CAD file is opened
 const CadViewer = dynamic(
@@ -25,24 +24,7 @@ const CadViewer = dynamic(
   },
 );
 
-// Lazy-load MarkdownPreview so react-markdown / remark / rehype / katex
-// are only fetched when a .md file is opened
-const MarkdownPreview = dynamic(
-  () =>
-    import("@/components/preview/markdown-preview").then(
-      (mod) => mod.MarkdownPreview,
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    ),
-  },
-);
-
-// Lazy-load CodePreview so highlight.js is only fetched when a code file is opened
+// Lazy-load CodePreview so CodeMirror is only fetched when a code file is opened
 const CodePreview = dynamic(
   () =>
     import("@/components/preview/code-preview").then(
@@ -82,7 +64,7 @@ function getFileType(filePath: string) {
   // Special filenames without extensions
   if (filename === "dockerfile" || filename === "makefile") return "code" as const;
   if (ext === "pdf") return "pdf" as const;
-  if (ext === "md" || ext === "markdown") return "markdown" as const;
+  if (ext === "md" || ext === "markdown") return "text" as const;
   if (MOL_EXTS.includes(ext)) return "mol" as const;
   if (CAD_EXTS.includes(ext)) return "cad" as const;
   if (IMAGE_EXTS.includes(ext)) return "image" as const;
@@ -119,15 +101,10 @@ function ImagePreview({ filePath }: { filePath: string }) {
 }
 
 function TextPreview({ filePath }: { filePath: string }) {
-  const t = useTranslations("files");
   const tCommon = useTranslations("common");
+  const tPreview = useTranslations("preview");
   const { content, loading, saving, modified, handleSave, updateContent } =
     useFileContent({ filePath });
-
-  const onSave = async () => {
-    const ok = await handleSave();
-    if (ok) toast.success(t("saved"));
-  };
 
   if (loading) {
     return (
@@ -138,24 +115,24 @@ function TextPreview({ filePath }: { filePath: string }) {
   }
 
   return (
-    <div className="flex h-full flex-col gap-2 p-3">
-      <div className="flex items-center justify-end gap-2">
-        {modified && (
-          <span className="text-xs text-muted-foreground">{tCommon("modified")}</span>
-        )}
-        <Button size="sm" onClick={onSave} disabled={saving || !modified}>
-          <Save className="mr-2 h-4 w-4" />
-          {saving ? t("saving") : tCommon("save")}
-        </Button>
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-end gap-2 border-b px-3 py-1.5">
+        <span className="text-xs text-muted-foreground">
+          {saving
+            ? tPreview("autoSaving")
+            : modified
+              ? tCommon("modified")
+              : ""}
+        </span>
       </div>
       <Textarea
-        className="flex-1 resize-none font-mono text-sm"
+        className="flex-1 resize-none rounded-none border-0 font-mono text-sm focus-visible:ring-0"
         value={content}
         onChange={(e) => updateContent(e.target.value)}
         onKeyDown={(e) => {
           if ((e.ctrlKey || e.metaKey) && e.key === "s") {
             e.preventDefault();
-            onSave();
+            handleSave();
           }
         }}
       />
@@ -237,8 +214,6 @@ export function FilePreviewPanel({ filePath, onClose, onStudyPaper }: FilePrevie
           </div>
         ) : fileType === "pdf" ? (
           <PdfViewer filePath={filePath} />
-        ) : fileType === "markdown" ? (
-          <MarkdownPreview filePath={filePath} />
         ) : fileType === "mol" ? (
           <MolViewer filePath={filePath} />
         ) : fileType === "cad" ? (

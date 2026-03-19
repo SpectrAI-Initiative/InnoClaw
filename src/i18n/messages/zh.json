@@ -233,7 +233,9 @@
     "editMode": "编辑",
     "previewMode": "预览",
     "notes": "笔记",
-    "studyPaper": "研究论文"
+    "studyPaper": "研究论文",
+    "autoSaved": "已保存",
+    "autoSaving": "保存中..."
   },
   "agent": {
     "title": "Agent",
