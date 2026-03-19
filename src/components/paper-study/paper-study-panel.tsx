@@ -63,7 +63,6 @@ export function PaperStudyPanel({
   const roastAbortRef = useRef<AbortController | null>(null);
 
   // Notify parent of state changes for cache persistence
-  const stateRef = useRef<PaperStudyCacheData | null>(null);
   useEffect(() => {
     const snapshot: PaperStudyCacheData = {
       keywords,
@@ -77,7 +76,6 @@ export function PaperStudyPanel({
       roast,
       hasSearched,
     };
-    stateRef.current = snapshot;
     onStateChange?.(snapshot);
   }, [keywords, dateFrom, dateTo, sources, articles, selectedArticle, checkedIds, summary, roast, hasSearched, onStateChange]);
 
