@@ -44,12 +44,12 @@ function readCache(): PaperStudyCacheData | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!isValidCacheEnvelope(parsed)) {
-      localStorage.removeItem(STORAGE_KEY);
+      try { localStorage.removeItem(STORAGE_KEY); } catch { /* storage may be blocked */ }
       return null;
     }
     const envelope = parsed;
     if (Date.now() - envelope.savedAt > TTL_MS) {
-      localStorage.removeItem(STORAGE_KEY);
+      try { localStorage.removeItem(STORAGE_KEY); } catch { /* storage may be blocked */ }
       return null;
     }
     return envelope.data;
