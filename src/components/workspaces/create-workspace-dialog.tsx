@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { useControlledOpen } from "@/lib/hooks/use-controlled-open";
 import { useDirectoryBrowser } from "@/lib/hooks/use-directory-browser";
 
-interface OpenWorkspaceDialogProps {
+interface CreateWorkspaceDialogProps {
   trigger?: React.ReactNode;
   workspaceRoots: string[];
   defaultBrowsePath?: string;
@@ -26,14 +26,15 @@ interface OpenWorkspaceDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function OpenWorkspaceDialog({
+export function CreateWorkspaceDialog({
   trigger,
   workspaceRoots,
   defaultBrowsePath,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
-}: OpenWorkspaceDialogProps) {
-  const t = useTranslations("files");
+}: CreateWorkspaceDialogProps) {
+  const t = useTranslations("home");
+  const tFiles = useTranslations("files");
   const tCommon = useTranslations("common");
   const router = useRouter();
   const { open, setOpen } = useControlledOpen(controlledOpen, controlledOnOpenChange);
@@ -41,28 +42,31 @@ export function OpenWorkspaceDialog({
     useDirectoryBrowser(defaultBrowsePath);
   const [workspaceName, setWorkspaceName] = useState("");
 
-  // Auto-fill workspace name from selected folder
-  useEffect(() => {
-    if (currentPath) {
-      const name = currentPath.split("/").pop() || currentPath.split("\\").pop();
-      if (name) setWorkspaceName(name);
-    }
-  }, [currentPath]);
-
-  const handleOpen = async () => {
+  const handleCreate = async () => {
     if (!currentPath || !workspaceName) return;
+    const newFolderPath = `${currentPath}/${workspaceName}`;
     try {
+      const mkdirRes = await fetch("/api/files/mkdir", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: newFolderPath }),
+      });
+      if (!mkdirRes.ok) {
+        const err = await mkdirRes.json();
+        throw new Error(err.error || "Failed to create directory");
+      }
+
       const res = await fetch("/api/workspaces", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: workspaceName, folderPath: currentPath }),
+        body: JSON.stringify({ name: workspaceName, folderPath: newFolderPath }),
       });
       if (!res.ok) throw new Error("Failed to create workspace");
       const workspace = await res.json();
       setOpen(false);
       router.push(`/workspace/${workspace.id}`);
-    } catch {
-      toast.error("Failed to open workspace");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create workspace");
     }
   };
 
@@ -79,28 +83,28 @@ export function OpenWorkspaceDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("selectFolder")}</DialogTitle>
+          <DialogTitle>{t("newWorkspace")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {/* Initial view: manual path input + root shortcuts */}
+          {/* Step 1: Select parent path via input or root shortcuts */}
           {!currentPath && (
             <>
               <div className="space-y-2">
-                <Label>{t("enterPath")}</Label>
+                <Label>{t("newWorkspaceLocation")}</Label>
                 <div className="flex gap-2">
                   <Input
                     value={manualPath}
                     onChange={(e) => setManualPath(e.target.value)}
-                    placeholder={t("enterPathPlaceholder")}
+                    placeholder={tFiles("enterPathPlaceholder")}
                     onKeyDown={(e) => { if (e.key === "Enter") browse(); }}
                   />
-                  <Button onClick={browse}>{t("browse")}</Button>
+                  <Button onClick={browse}>{tFiles("browse")}</Button>
                 </div>
               </div>
 
               {workspaceRoots.length > 0 && (
                 <div className="space-y-2">
-                  <Label>{t("rootPaths")}</Label>
+                  <Label>{tFiles("rootPaths")}</Label>
                   <div className="space-y-1">
                     {workspaceRoots.map((root) => (
                       <button
@@ -119,22 +123,22 @@ export function OpenWorkspaceDialog({
             </>
           )}
 
-          {/* Directory browser */}
+          {/* Step 2: Browse subdirectories, name and create */}
           {currentPath && (
             <>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <button className="hover:underline" onClick={goBack}>
-                  {t("rootPaths")}
+                  {tFiles("rootPaths")}
                 </button>
                 <ChevronRight className="h-3 w-3" />
                 <span className="truncate">{currentPath}</span>
               </div>
 
-              <div className="max-h-60 space-y-1 overflow-y-auto rounded-md border p-2">
+              <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border p-2">
                 {loading ? (
                   <p className="py-4 text-center text-sm text-muted-foreground">{tCommon("loading")}</p>
                 ) : entries.length === 0 ? (
-                  <p className="py-4 text-center text-sm text-muted-foreground">{t("emptyFolder")}</p>
+                  <p className="py-4 text-center text-sm text-muted-foreground">{tFiles("emptyFolder")}</p>
                 ) : (
                   entries.map((entry) => (
                     <button
@@ -151,17 +155,20 @@ export function OpenWorkspaceDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>{t("folderName")}</Label>
+                <Label>{t("newWorkspaceName")}</Label>
                 <Input
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
-                  placeholder="Workspace name"
+                  placeholder={t("newWorkspaceName")}
                 />
+                {workspaceName && (
+                  <p className="text-xs text-muted-foreground">{currentPath}/{workspaceName}</p>
+                )}
               </div>
 
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={goBack}>{tCommon("back")}</Button>
-                <Button onClick={handleOpen} disabled={!workspaceName}>{tCommon("open")}</Button>
+                <Button onClick={handleCreate} disabled={!workspaceName}>{tCommon("create")}</Button>
               </div>
             </>
           )}

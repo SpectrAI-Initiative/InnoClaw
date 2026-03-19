@@ -2,13 +2,20 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { FolderOpen, GitBranch, Sparkles, Cpu, Zap, Brain, Code2, GraduationCap, Server } from "lucide-react";
+import { FolderOpen, FolderPlus, GitBranch, Sparkles, Cpu, Zap, Brain, Code2, GraduationCap, Server, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { WorkspaceList } from "@/components/workspaces/workspace-list";
 import { OpenWorkspaceDialog } from "@/components/workspaces/open-workspace-dialog";
+import { CreateWorkspaceDialog } from "@/components/workspaces/create-workspace-dialog";
 import { CloneRepoDialog } from "@/components/git/clone-repo-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageBackground } from "@/components/ui/page-background";
 import { useWorkspaces } from "@/lib/hooks/use-workspaces";
@@ -19,6 +26,9 @@ export default function HomePage() {
   const t = useTranslations("home");
   const { workspaces, isLoading, mutate } = useWorkspaces();
   const [workspaceRoots, setWorkspaceRoots] = useState<string[]>([]);
+  const [defaultBrowsePath, setDefaultBrowsePath] = useState("");
+  const [openDialogOpen, setOpenDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const mounted = useMounted();
 
   useEffect(() => {
@@ -28,6 +38,9 @@ export default function HomePage() {
       .then((data) => {
         if (data.workspaceRoots) {
           setWorkspaceRoots(data.workspaceRoots);
+        }
+        if (data.defaultBrowsePath) {
+          setDefaultBrowsePath(data.defaultBrowsePath);
         }
       })
       .catch(() => {});
@@ -115,14 +128,36 @@ export default function HomePage() {
                   </Button>
                 }
               />
-              <OpenWorkspaceDialog
-                workspaceRoots={workspaceRoots}
-                trigger={
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button size="lg" className="gap-2 group cyber-btn text-white">
                     <FolderOpen className="h-4 w-4 transition-transform group-hover:scale-110" />
                     {t("openWorkspace")}
+                    <ChevronDown className="h-3 w-3 opacity-70" />
                   </Button>
-                }
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center">
+                  <DropdownMenuItem onClick={() => setOpenDialogOpen(true)}>
+                    <FolderOpen className="mr-2 h-4 w-4" />
+                    {t("openWorkspace")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setCreateDialogOpen(true)}>
+                    <FolderPlus className="mr-2 h-4 w-4" />
+                    {t("newWorkspace")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <OpenWorkspaceDialog
+                workspaceRoots={workspaceRoots}
+                defaultBrowsePath={defaultBrowsePath}
+                open={openDialogOpen}
+                onOpenChange={setOpenDialogOpen}
+              />
+              <CreateWorkspaceDialog
+                workspaceRoots={workspaceRoots}
+                defaultBrowsePath={defaultBrowsePath}
+                open={createDialogOpen}
+                onOpenChange={setCreateDialogOpen}
               />
               <Link href="/paper">
                 <Button variant="outline" size="lg" className="gap-2 group border-border/50 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all">
@@ -176,15 +211,16 @@ export default function HomePage() {
                 <p className="mb-8 max-w-md text-muted-foreground">
                   {t("noWorkspacesDesc") || "Create or open a workspace to get started with InnoClaw"}
                 </p>
-                <OpenWorkspaceDialog
-                  workspaceRoots={workspaceRoots}
-                  trigger={
-                    <Button size="lg" className="gap-2 cyber-btn text-white">
-                      <FolderOpen className="mr-1 h-4 w-4" />
-                      {t("openWorkspace")}
-                    </Button>
-                  }
-                />
+                <div className="flex gap-3">
+                  <Button size="lg" className="gap-2 cyber-btn text-white" onClick={() => setOpenDialogOpen(true)}>
+                    <FolderOpen className="mr-1 h-4 w-4" />
+                    {t("openWorkspace")}
+                  </Button>
+                  <Button size="lg" variant="outline" className="gap-2" onClick={() => setCreateDialogOpen(true)}>
+                    <FolderPlus className="mr-1 h-4 w-4" />
+                    {t("newWorkspace")}
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="animate-slide-in-up [animation-delay:700ms]">

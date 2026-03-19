@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import os from "os";
+import path from "path";
 import { getWorkspaceRoots } from "@/lib/files/filesystem";
 import { updateEnvLocal } from "@/lib/env-file";
 import { PROVIDERS } from "@/lib/ai/models";
@@ -46,6 +48,7 @@ export async function GET() {
       contextMode: settingsMap["context_mode"] || "normal",
       maxMode: settingsMap["max_mode"] !== "false",
       workspaceRoots: getWorkspaceRoots(),
+      defaultBrowsePath: path.join(os.homedir(), "Desktop"),
       hasOpenAIKey: providerKeys["openai"] ?? false,
       hasAnthropicKey: providerKeys["anthropic"] ?? false,
       hasGeminiKey: providerKeys["gemini"] ?? false,

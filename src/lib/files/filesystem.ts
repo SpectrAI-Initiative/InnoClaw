@@ -1,6 +1,17 @@
 import fsp from "fs/promises";
 import path from "path";
 import type { FileEntry } from "@/types";
+import { updateEnvLocal } from "@/lib/env-file";
+
+function normalizePath(p: string): string {
+  return p.replace(/\\/g, "/").toLowerCase();
+}
+
+function isPathUnderRoot(resolved: string, root: string): boolean {
+  const n = normalizePath(resolved);
+  const r = normalizePath(root);
+  return n === r || n.startsWith(r + "/");
+}
 
 /**
  * Parse workspace roots from environment variable
@@ -27,15 +38,13 @@ export function validatePath(targetPath: string): string {
     throw new Error("Invalid path: contains null bytes");
   }
 
+  // When no roots are configured, allow any valid path
+  if (roots.length === 0) {
+    return resolved;
+  }
+
   // Check the path is under one of the allowed roots
-  const isAllowed = roots.some((root) => {
-    const normalizedResolved = resolved.replace(/\\/g, "/").toLowerCase();
-    const normalizedRoot = root.replace(/\\/g, "/").toLowerCase();
-    return (
-      normalizedResolved === normalizedRoot ||
-      normalizedResolved.startsWith(normalizedRoot + "/")
-    );
-  });
+  const isAllowed = roots.some((root) => isPathUnderRoot(resolved, root));
 
   if (!isAllowed) {
     throw new Error(
@@ -47,21 +56,32 @@ export function validatePath(targetPath: string): string {
 }
 
 /**
+ * Add a path as a workspace root if it's not already covered by existing roots.
+ * Persists to .env.local and updates process.env in-memory.
+ */
+export function addWorkspaceRoot(targetPath: string): void {
+  const resolved = path.resolve(targetPath);
+  const roots = getWorkspaceRoots();
+
+  // Check if path is already under an existing root
+  const alreadyCovered = roots.some((root) => isPathUnderRoot(resolved, root));
+
+  if (alreadyCovered) return;
+
+  // Keep at most 3 roots (FIFO — drop the oldest when over limit)
+  const newRoots = [...roots, resolved].slice(-3).join(",");
+  updateEnvLocal({ WORKSPACE_ROOTS: newRoots });
+  process.env.WORKSPACE_ROOTS = newRoots;
+}
+
+/**
  * Check if a path is within a specific workspace folder
  */
 export function isWithinWorkspace(
   filePath: string,
   workspacePath: string
 ): boolean {
-  const resolvedFile = path.resolve(filePath).replace(/\\/g, "/").toLowerCase();
-  const resolvedWorkspace = path
-    .resolve(workspacePath)
-    .replace(/\\/g, "/")
-    .toLowerCase();
-  return (
-    resolvedFile === resolvedWorkspace ||
-    resolvedFile.startsWith(resolvedWorkspace + "/")
-  );
+  return isPathUnderRoot(path.resolve(filePath), path.resolve(workspacePath));
 }
 
 /**

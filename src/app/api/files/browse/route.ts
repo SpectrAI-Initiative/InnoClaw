@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listDirectory } from "@/lib/files/filesystem";
+import { listDirectory, addWorkspaceRoot } from "@/lib/files/filesystem";
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +12,9 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Auto-register as workspace root if not already covered
+    addWorkspaceRoot(dirPath);
 
     const entries = await listDirectory(dirPath);
     return NextResponse.json(entries);

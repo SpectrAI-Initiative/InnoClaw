@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createDirectory } from "@/lib/files/filesystem";
+import { createDirectory, addWorkspaceRoot } from "@/lib/files/filesystem";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +11,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Auto-register parent as workspace root if not already covered
+    addWorkspaceRoot(dirPath);
 
     await createDirectory(dirPath);
     return NextResponse.json({ success: true });

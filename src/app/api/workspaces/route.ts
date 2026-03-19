@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { workspaces } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { validatePath, pathExists, isDirectory } from "@/lib/files/filesystem";
+import { pathExists, isDirectory, addWorkspaceRoot } from "@/lib/files/filesystem";
 
 export async function GET() {
   try {
@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate path is within allowed roots
-    validatePath(folderPath);
+    // Register as workspace root so subsequent file-system calls are allowed
+    addWorkspaceRoot(folderPath);
 
     // Check that the folder exists
     if (!(await pathExists(folderPath)) || !(await isDirectory(folderPath))) {
