@@ -125,6 +125,9 @@ function filterByDate(
   });
 }
 
+/** Request timeout in milliseconds. arXiv is slow through corporate proxies. */
+const TIMEOUT_MS = 30_000;
+
 /**
  * Search arXiv for papers matching the given parameters.
  */
@@ -144,7 +147,23 @@ export async function searchArxiv(params: SearchParams): Promise<Article[]> {
 
   const url = `${ARXIV_API_URL}?search_query=${query}&start=0&max_results=${fetchCount}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
 
-  const response = await fetch(url);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(url, { signal: controller.signal });
+  } catch (err) {
+    clearTimeout(timer);
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("arXiv API request timed out");
+    }
+    throw new Error(
+      `arXiv API network error: ${err instanceof Error ? err.message : String(err)}`
+    );
+  } finally {
+    clearTimeout(timer);
+  }
   if (!response.ok) {
     throw new Error(`arXiv API error: ${response.status} ${response.statusText}`);
   }

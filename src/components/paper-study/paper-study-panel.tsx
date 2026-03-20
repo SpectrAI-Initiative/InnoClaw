@@ -36,7 +36,7 @@ export function PaperStudyPanel({
   const [keywords, setKeywords] = useState<string[]>(initialCache?.keywords ?? []);
   const [dateFrom, setDateFrom] = useState(initialCache?.dateFrom ?? "");
   const [dateTo, setDateTo] = useState(initialCache?.dateTo ?? "");
-  const [sources, setSources] = useState<ArticleSource[]>(initialCache?.sources ?? ["arxiv", "huggingface"]);
+  const [sources, setSources] = useState<ArticleSource[]>(initialCache?.sources ?? ["arxiv", "huggingface", "semantic-scholar"]);
 
   // Results
   const [articles, setArticles] = useState<Article[]>(initialCache?.articles ?? []);

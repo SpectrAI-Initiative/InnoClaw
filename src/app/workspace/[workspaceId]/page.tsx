@@ -22,13 +22,14 @@ import { useAgentSessions } from "@/lib/hooks/use-agent-sessions";
 import { usePreviewTabs } from "@/lib/hooks/use-preview-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Bot, GraduationCap, Server, FlaskConical, Maximize2, Loader2 } from "lucide-react";
+import { Bot, FileText, GraduationCap, Server, FlaskConical, Microscope, Maximize2, Loader2 } from "lucide-react";
 import { ClusterPanel } from "@/components/cluster/cluster-panel";
 import { ResearchExecPanel } from "@/components/research-exec/research-exec-panel";
+import { DeepResearchPanel } from "@/components/deep-research/deep-research-panel";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LanguageToggle } from "@/components/layout/language-toggle";
 
-type MiddlePanel = "agent" | "paperStudy" | "cluster" | "research";
+type MiddlePanel = "agent" | "report" | "paperStudy" | "cluster" | "research" | "deepResearch";
 
 export default function WorkspacePage({
   params,
@@ -226,6 +227,17 @@ export default function WorkspacePage({
                           <FlaskConical className="h-3.5 w-3.5" />
                           <span className="text-xs hidden lg:inline">Research</span>
                         </Button>
+                        <Button
+                          variant={middlePanel === "deepResearch" ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setMiddlePanel("deepResearch")}
+                          title="Deep Research"
+                          aria-label="Deep Research"
+                          className="h-7 px-2 gap-1"
+                        >
+                          <Microscope className="h-3.5 w-3.5" />
+                          <span className="text-xs hidden lg:inline">Deep Research</span>
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -284,6 +296,9 @@ export default function WorkspacePage({
                   </div>
                   <div className={middlePanel === "research" ? "flex-1 min-h-0" : "hidden"}>
                     <ResearchExecPanel workspaceId={workspaceId} />
+                  </div>
+                  <div className={middlePanel === "deepResearch" ? "flex-1 min-h-0" : "hidden"}>
+                    <DeepResearchPanel workspaceId={workspaceId} />
                   </div>
                 </div>
               </ResizablePanel>

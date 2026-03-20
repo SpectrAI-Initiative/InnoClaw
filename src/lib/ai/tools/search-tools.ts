@@ -25,7 +25,7 @@ export function createSearchTools() {
   return {
     searchArticles: tool({
       description:
-        "Search for academic articles from arXiv and Hugging Face Daily Papers. " +
+        "Search for academic articles from arXiv, Semantic Scholar, and Hugging Face Daily Papers. " +
         "Returns matching articles with title, authors, abstract, link, and date. " +
         "Supports keyword search with optional date filtering. " +
         "After displaying results, users can ask for a detailed summary of specific articles and related article recommendations.",
@@ -57,16 +57,16 @@ export function createSearchTools() {
               "Only return articles published before this date (ISO 8601, e.g. '2025-12-31')"
             ),
           sources: z
-            .array(z.enum(["arxiv", "huggingface"]))
+            .array(z.enum(["arxiv", "huggingface", "semantic-scholar"]))
             .optional()
             .describe(
-              "Data sources to search (default: both 'arxiv' and 'huggingface')"
+              "Data sources to search (default: all three — 'arxiv', 'huggingface', and 'semantic-scholar')"
             ),
           findRelatedTo: z
             .object({
               id: z.string(),
               title: z.string(),
-              source: z.enum(["arxiv", "huggingface"]),
+              source: z.enum(["arxiv", "huggingface", "semantic-scholar"]),
             })
             .optional()
             .describe(
@@ -91,6 +91,8 @@ export function createSearchTools() {
         sources,
         findRelatedTo,
       }) => {
+        console.log(`[searchArticles] keywords=${JSON.stringify(keywords)} sources=${JSON.stringify(sources)} findRelatedTo=${!!findRelatedTo}`);
+
         if (findRelatedTo) {
           const related = await findRelatedArticles(
             {
@@ -104,6 +106,7 @@ export function createSearchTools() {
             },
             3
           );
+          console.log(`[searchArticles] findRelated returned ${related.length} articles`);
           return {
             relatedTo: findRelatedTo.title,
             articles: related.map(formatArticle),
@@ -118,6 +121,8 @@ export function createSearchTools() {
           dateTo,
           sources,
         });
+
+        console.log(`[searchArticles] search returned ${result.totalCount} articles, errors=${JSON.stringify(result.errors)}`);
 
         return {
           articles: result.articles.map(formatArticle),
