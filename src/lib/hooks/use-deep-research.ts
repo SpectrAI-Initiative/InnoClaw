@@ -33,8 +33,8 @@ export function useDeepResearchSession(sessionId: string | undefined) {
   const { data, error, isLoading, mutate } = useSWR<DeepResearchSession>(url, fetcher, {
     refreshInterval: (latestData) => {
       if (!latestData) return 5000;
-      const active = ["running", "intake", "planning", "awaiting_user_confirmation"].includes(latestData.status);
-      return active ? 5000 : 30000;
+      const terminal = ["completed", "stopped_by_user", "failed", "cancelled"].includes(latestData.status);
+      return terminal ? 30000 : 5000;
     },
   });
 

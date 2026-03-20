@@ -35,6 +35,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# ── Validate CONCURRENCY ──────────────────────────────────────────────────────
+if ! [[ "$CONCURRENCY" =~ ^[0-9]+$ ]] || [[ "$CONCURRENCY" -le 0 ]]; then
+  echo "Error: --concurrency must be a positive integer (got '${CONCURRENCY}')"
+  exit 1
+fi
+
 API="${BASE_URL}/api"
 
 # ── Test Cases ────────────────────────────────────────────────────────────────
@@ -275,9 +281,9 @@ echo "  Logs:       ${LOG_DIR}/"
 echo ""
 
 # Count results
-completed=$(grep -l "Final status: completed" "${LOG_DIR}"/*.log 2>/dev/null | wc -l | tr -d ' ')
-failed=$(grep -l "Final status: failed" "${LOG_DIR}"/*.log 2>/dev/null | wc -l | tr -d ' ')
-timeout=$(grep -l "Final status: timeout" "${LOG_DIR}"/*.log 2>/dev/null | wc -l | tr -d ' ')
+completed=$( { grep -l "Final status: completed" "${LOG_DIR}"/*.log 2>/dev/null || true; } | wc -l | tr -d ' ')
+failed=$( { grep -l "Final status: failed" "${LOG_DIR}"/*.log 2>/dev/null || true; } | wc -l | tr -d ' ')
+timeout=$( { grep -l "Final status: timeout" "${LOG_DIR}"/*.log 2>/dev/null || true; } | wc -l | tr -d ' ')
 
 echo -e "  ${GREEN}Completed: ${completed}${NC}"
 echo -e "  ${RED}Failed:    ${failed}${NC}"
