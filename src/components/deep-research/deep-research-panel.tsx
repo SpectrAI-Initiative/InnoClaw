@@ -36,7 +36,7 @@ import { DeleteSessionDialog } from "./delete-session-dialog";
 import { RequirementPanel } from "./requirement-panel";
 import { ReviewerBattlePanel } from "./reviewer-battle-panel";
 import { ExecutionStatusPanel } from "./execution-status-panel";
-import type { ConfirmationOutcome, ReviewerBattleResultExtended, RequirementState } from "@/lib/deep-research/types";
+import type { ConfirmationOutcome, ReviewerBattleResultExtended, RequirementState, Phase } from "@/lib/deep-research/types";
 
 type PanelView = "list" | "intake" | "session";
 type TabView = "chat" | "requirements" | "reviewers" | "execution";
@@ -220,10 +220,65 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
     }
   }, [activeSessionId, mutateSession]);
 
+  const handleRunPhase = useCallback(async (phase: Phase) => {
+    if (!activeSessionId) return;
+    try {
+      const res = await fetch(`/api/deep-research/sessions/${activeSessionId}/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetPhase: phase, action: "run" }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to run phase");
+      }
+      mutateSession();
+      toast.success(`Running phase: ${phase}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to run phase");
+    }
+  }, [activeSessionId, mutateSession]);
+
+  const handleSkipPhase = useCallback(async (phase: Phase) => {
+    if (!activeSessionId) return;
+    try {
+      const res = await fetch(`/api/deep-research/sessions/${activeSessionId}/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetPhase: phase, action: "skip" }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to skip phase");
+      }
+      mutateSession();
+      toast.success(`Skipped phase: ${phase}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to skip phase");
+    }
+  }, [activeSessionId, mutateSession]);
+
   const handleNodeSelect = useCallback((nodeId: string) => {
     setSelectedNodeId(nodeId);
     setDrawerOpen(true);
   }, []);
+
+  const handleBindProfile = useCallback(
+    async (profileId: string | null) => {
+      if (!activeSessionId) return;
+      try {
+        await fetch(`/api/deep-research/sessions/${activeSessionId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ remoteProfileId: profileId }),
+        });
+        mutateSession();
+      } catch {
+        toast.error("Failed to bind remote profile");
+      }
+    },
+    [activeSessionId, mutateSession],
+  );
 
   // --- Render views ---
 
@@ -256,6 +311,9 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
   const isLiteratureBlocked = session.status === "literature_blocked";
   const isStopped = session.status === "stopped_by_user";
   const canStart = ["intake", "paused", "awaiting_approval", "failed"].includes(session.status);
+  const completedPhases = new Set(
+    nodes.filter(n => n.status === "completed").map(n => n.phase)
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -362,6 +420,10 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
                     sessionStatus={session.status}
                     budget={session.budget}
                     budgetLimits={session.config.budget}
+                    completedPhases={completedPhases}
+                    onRunPhase={handleRunPhase}
+                    onSkipPhase={handleSkipPhase}
+                    isRunning={isRunning}
                   />
                   {/* Tab bar */}
                   <div className="flex gap-0.5 px-2 py-1 border-b border-border/50 bg-muted/20 shrink-0">
@@ -399,7 +461,13 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
                       <ReviewerBattlePanel battleResult={battleResult} />
                     )}
                     {activeTab === "execution" && (
-                      <ExecutionStatusPanel executions={executions} />
+                      <ExecutionStatusPanel
+                        executions={executions}
+                        workspaceId={workspaceId}
+                        sessionId={activeSessionId!}
+                        remoteProfileId={session.remoteProfileId}
+                        onBindProfile={handleBindProfile}
+                      />
                     )}
                   </div>
                 </>

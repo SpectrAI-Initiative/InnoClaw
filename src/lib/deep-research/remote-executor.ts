@@ -466,6 +466,63 @@ function extractFlatMetrics(obj: unknown, prefix = ""): Record<string, number> {
 
 import type { SubmissionAdapter } from "./exec-job-submitter";
 
+// -------------------------------------------------------------------
+// Profile → Config loader
+// -------------------------------------------------------------------
+
+/**
+ * Load a remote profile by ID from the database and construct a
+ * RemoteExecutionConfig suitable for creating a RemoteExecutor.
+ * Returns null if no profile is found.
+ */
+export async function loadRemoteConfigFromProfile(
+  profileId: string,
+): Promise<RemoteExecutionConfig | null> {
+  const { db } = await import("@/lib/db");
+  const { remoteProfiles } = await import("@/lib/db/schema");
+  const { eq } = await import("drizzle-orm");
+
+  const [row] = await db
+    .select()
+    .from(remoteProfiles)
+    .where(eq(remoteProfiles.id, profileId));
+
+  if (!row) return null;
+
+  return {
+    host: row.host,
+    port: row.port,
+    username: row.username,
+    keyPath: row.sshKeyRef ?? "agent",
+    remoteWorkDir: row.remotePath,
+    remoteSetupCommands: [],
+    availableLaunchers: row.schedulerType === "rjob"
+      ? ["rjob"]
+      : row.schedulerType === "slurm"
+        ? ["slurm"]
+        : ["rjob", "rlaunch"],
+    connectTimeoutMs: DEFAULT_REMOTE_EXECUTION_CONFIG.connectTimeoutMs,
+    commandTimeoutMs: DEFAULT_REMOTE_EXECUTION_CONFIG.commandTimeoutMs,
+  };
+}
+
+/**
+ * Build a RemoteExecutor from a deep-research session's bound profile.
+ * Returns null if the session has no bound profile or the profile doesn't exist.
+ */
+export async function buildExecutorForSession(
+  sessionId: string,
+): Promise<RemoteExecutor | null> {
+  const { getSession } = await import("./event-store");
+  const session = await getSession(sessionId);
+  if (!session?.remoteProfileId) return null;
+
+  const config = await loadRemoteConfigFromProfile(session.remoteProfileId);
+  if (!config) return null;
+
+  return new RemoteExecutor(config);
+}
+
 export class SSHSubmissionAdapter implements SubmissionAdapter {
   readonly name = "ssh";
   readonly launcherType: LauncherType = "ssh";

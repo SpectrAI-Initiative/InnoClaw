@@ -171,7 +171,9 @@ export type EventType =
   | "synthesis_completed"
   | "scientific_review_completed"
   | "execution_plan_created"
-  | "data_download_completed";
+  | "data_download_completed"
+  | "phase_jumped"
+  | "phase_skipped";
 
 export type MessageRole = "user" | "main_brain" | "system";
 
@@ -202,6 +204,8 @@ export interface DeepResearchSession {
   /** Current execution loop number (0 = not started). */
   executionLoop: number;
   error: string | null;
+  /** ID of the bound remote execution profile (from research-exec module). */
+  remoteProfileId: string | null;
   createdAt: string;
   updatedAt: string;
 }

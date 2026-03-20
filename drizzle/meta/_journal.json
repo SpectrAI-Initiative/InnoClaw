@@ -99,6 +99,13 @@
       "when": 1773548805418,
       "tag": "0012_deep_research_v2",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1774000000000,
+      "tag": "0015_remote_profile_binding",
+      "breakpoints": true
     }
   ]
 }

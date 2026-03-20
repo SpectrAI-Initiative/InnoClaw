@@ -69,6 +69,7 @@ function parseSession(row: typeof deepResearchSessions.$inferSelect): DeepResear
     reviewerRound: (row as Record<string, unknown>).reviewerRound as number ?? 0,
     executionLoop: (row as Record<string, unknown>).executionLoop as number ?? 0,
     error: row.error,
+    remoteProfileId: (row as Record<string, unknown>).remoteProfileId as string | null ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -225,6 +226,7 @@ export async function updateSession(
     executionLoop: number;
     error: string | null;
     title: string;
+    remoteProfileId: string | null;
   }>
 ): Promise<void> {
   const dbUpdates: Record<string, unknown> = {
@@ -240,6 +242,7 @@ export async function updateSession(
   if (updates.executionLoop !== undefined) dbUpdates.executionLoop = updates.executionLoop;
   if (updates.error !== undefined) dbUpdates.error = updates.error;
   if (updates.title !== undefined) dbUpdates.title = updates.title;
+  if (updates.remoteProfileId !== undefined) dbUpdates.remoteProfileId = updates.remoteProfileId;
 
   await db
     .update(deepResearchSessions)

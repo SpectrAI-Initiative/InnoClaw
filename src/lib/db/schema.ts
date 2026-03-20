@@ -344,6 +344,7 @@ export const deepResearchSessions = sqliteTable("deep_research_sessions", {
   reviewerRound: integer("reviewer_round").notNull().default(0),
   executionLoop: integer("execution_loop").notNull().default(0),
   error: text("error"),
+  remoteProfileId: text("remote_profile_id").references(() => remoteProfiles.id, { onDelete: "set null" }),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),

@@ -2,8 +2,14 @@
 
 import { PHASE_ORDER, PHASE_STAGE_NUMBER, type Phase, type BudgetUsage, type BudgetLimits, type SessionStatus } from "@/lib/deep-research/types";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, Loader2, PauseCircle, AlertTriangle, StopCircle, BookX } from "lucide-react";
+import { CheckCircle2, Circle, Loader2, PauseCircle, AlertTriangle, StopCircle, BookX, SkipForward } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const PHASE_LABELS: Record<Phase, string> = {
   intake: "Intake",
@@ -34,9 +40,22 @@ interface PhaseProgressProps {
   sessionStatus: SessionStatus;
   budget: BudgetUsage;
   budgetLimits: BudgetLimits;
+  completedPhases?: Set<string>;
+  onRunPhase?: (phase: Phase) => void;
+  onSkipPhase?: (phase: Phase) => void;
+  isRunning?: boolean;
 }
 
-export function PhaseProgress({ currentPhase, sessionStatus, budget, budgetLimits }: PhaseProgressProps) {
+export function PhaseProgress({
+  currentPhase,
+  sessionStatus,
+  budget,
+  budgetLimits,
+  completedPhases,
+  onRunPhase,
+  onSkipPhase,
+  isRunning,
+}: PhaseProgressProps) {
   const currentIndex = PHASE_ORDER.indexOf(currentPhase);
   const currentStage = PHASE_STAGE_NUMBER[currentPhase] ?? 0;
   const budgetPercent = Math.min(
@@ -45,6 +64,7 @@ export function PhaseProgress({ currentPhase, sessionStatus, budget, budgetLimit
   );
   const isBlocked = sessionStatus === "awaiting_user_confirmation" || sessionStatus === "literature_blocked" || sessionStatus === "execution_prepared";
   const statusMsg = STATUS_MESSAGES[sessionStatus];
+  const hasActions = onRunPhase && onSkipPhase && !isRunning;
 
   return (
     <div className="space-y-2 px-3 py-2 border-b border-border/50">
@@ -67,8 +87,33 @@ export function PhaseProgress({ currentPhase, sessionStatus, budget, budgetLimit
       {/* Phase steps */}
       <div className="flex items-center gap-0.5 overflow-x-auto">
         {PHASE_ORDER.map((phase, i) => {
-          const isCompleted = i < currentIndex;
+          const isCompleted = completedPhases ? completedPhases.has(phase) : i < currentIndex;
           const isCurrent = i === currentIndex;
+          const isFuture = !isCompleted && !isCurrent;
+
+          const pill = (
+            <div
+              className={cn(
+                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium",
+                hasActions && "cursor-pointer hover:ring-1 hover:ring-border",
+                isCompleted && "text-green-600 dark:text-green-400",
+                isCurrent && !isBlocked && "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950",
+                isCurrent && isBlocked && "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950",
+                !isCompleted && !isCurrent && "text-muted-foreground"
+              )}
+            >
+              {isCompleted ? (
+                <CheckCircle2 className="h-3 w-3" />
+              ) : isCurrent && isBlocked ? (
+                <PauseCircle className="h-3 w-3" />
+              ) : isCurrent ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Circle className="h-3 w-3" />
+              )}
+              <span className="hidden xl:inline">{PHASE_LABELS[phase]}</span>
+            </div>
+          );
 
           return (
             <div
@@ -78,26 +123,38 @@ export function PhaseProgress({ currentPhase, sessionStatus, budget, budgetLimit
                 i < PHASE_ORDER.length - 1 && "after:content-[''] after:w-2 after:h-px after:bg-border"
               )}
             >
-              <div
-                className={cn(
-                  "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium",
-                  isCompleted && "text-green-600 dark:text-green-400",
-                  isCurrent && !isBlocked && "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950",
-                  isCurrent && isBlocked && "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950",
-                  !isCompleted && !isCurrent && "text-muted-foreground"
-                )}
-              >
-                {isCompleted ? (
-                  <CheckCircle2 className="h-3 w-3" />
-                ) : isCurrent && isBlocked ? (
-                  <PauseCircle className="h-3 w-3" />
-                ) : isCurrent ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Circle className="h-3 w-3" />
-                )}
-                <span className="hidden xl:inline">{PHASE_LABELS[phase]}</span>
-              </div>
+              {hasActions ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    {pill}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="min-w-[120px]">
+                    {isCompleted && (
+                      <DropdownMenuItem onClick={() => onRunPhase(phase)}>
+                        Re-run
+                      </DropdownMenuItem>
+                    )}
+                    {isCurrent && isBlocked && (
+                      <>
+                        <DropdownMenuItem onClick={() => onRunPhase(phase)}>
+                          Run
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onSkipPhase(phase)}>
+                          <SkipForward className="h-3 w-3 mr-1.5" />
+                          Skip
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {isFuture && (
+                      <DropdownMenuItem onClick={() => onRunPhase(phase)}>
+                        Jump to
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                pill
+              )}
             </div>
           );
         })}

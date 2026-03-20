@@ -48,10 +48,14 @@ const DEFAULT_ROUTES: Record<ModelRole, ModelRoute[]> = {
   ],
 };
 
+/** Sentinel values that mean "not really configured". */
+const PLACEHOLDER_KEYS = new Set(["none", "null", "undefined", "placeholder", "xxx", "your-api-key-here", ""]);
+
 function isProviderAvailable(provider: string): boolean {
   const p = PROVIDERS[provider as ProviderId];
   if (!p) return false;
-  return !!process.env[p.envKey];
+  const key = (process.env[p.envKey] ?? "").trim();
+  return key.length > 0 && !PLACEHOLDER_KEYS.has(key.toLowerCase());
 }
 
 /**
@@ -81,6 +85,38 @@ export function getModelForRole(
   throw new Error(
     `No available model for role "${role}". Configure at least one API key for: ${chain.map((r) => r.provider).join(", ")}`
   );
+}
+
+/**
+ * Get all available models for a role in fallback order.
+ * Used by executeWithFallback to retry with the next model on failure.
+ */
+export function getModelChainForRole(
+  role: ModelRole,
+  config?: DeepResearchConfig
+): Array<{ model: LanguageModel; provider: string; modelId: string }> {
+  const results: Array<{ model: LanguageModel; provider: string; modelId: string }> = [];
+
+  // Config override first
+  const override = config?.modelOverrides?.[role];
+  if (override && isProviderAvailable(override.provider)) {
+    const { model } = getModelFromOverride(override.provider, override.modelId);
+    results.push({ model, provider: override.provider, modelId: override.modelId });
+  }
+
+  // Then walk fallback chain
+  const chain = DEFAULT_ROUTES[role];
+  for (const route of chain) {
+    if (isProviderAvailable(route.provider)) {
+      // Avoid duplicates with the override
+      if (!results.some(r => r.provider === route.provider && r.modelId === route.modelId)) {
+        const { model } = getModelFromOverride(route.provider, route.modelId);
+        results.push({ model, provider: route.provider, modelId: route.modelId });
+      }
+    }
+  }
+
+  return results;
 }
 
 // --- Budget tracking ---

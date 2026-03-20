@@ -3,7 +3,7 @@
 // =============================================================
 
 import { generateText } from "ai";
-import { getModelForRole, checkBudget, trackUsage } from "../model-router";
+import { getModelChainForRole, checkBudget, trackUsage } from "../model-router";
 import * as store from "../event-store";
 import { executeNode } from "../node-executor";
 import {
@@ -45,7 +45,7 @@ export async function callMainBrain(
   const nodes = await store.getNodes(session.id);
   const artifacts = await store.getArtifacts(session.id);
 
-  const { model } = getModelForRole("main_brain", session.config);
+  const modelChain = getModelChainForRole("main_brain", session.config);
   let systemPrompt = buildMainBrainSystemPrompt(session, messages, nodes, artifacts, session.phase, requirementState);
 
   // Add language instruction if user writes in non-English
@@ -67,21 +67,33 @@ export async function callMainBrain(
     ? "Continue orchestrating the research based on current state and any new user messages."
     : "Begin processing the user's research request.";
 
-  const result = await generateText({
-    model,
-    system: systemPrompt,
-    messages: [{ role: "user", content: userMsg }],
-    abortSignal,
-  });
+  // Try each model in the chain with fallback
+  let lastError: Error | null = null;
+  for (const { model, provider, modelId } of modelChain) {
+    try {
+      const result = await generateText({
+        model,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userMsg }],
+        abortSignal,
+      });
 
-  const budget = trackUsage(session.budget, "main_brain", `brain_${session.phase}`, result.usage?.totalTokens ?? 0);
-  await store.updateSession(session.id, { budget });
+      const budget = trackUsage(session.budget, "main_brain", `brain_${session.phase}`, result.usage?.totalTokens ?? 0);
+      await store.updateSession(session.id, { budget });
 
-  try {
-    return extractJsonFromLLMResponse<BrainDecision>(result.text);
-  } catch {
-    return { action: "respond_to_user", messageToUser: result.text };
+      try {
+        return extractJsonFromLLMResponse<BrainDecision>(result.text);
+      } catch {
+        return { action: "respond_to_user", messageToUser: result.text };
+      }
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.warn(`[callMainBrain] ${provider}/${modelId} failed: ${lastError.message}. Trying next model...`);
+    }
   }
+
+  // All models failed
+  throw lastError ?? new Error("No available model for main_brain");
 }
 
 export async function createNodesFromSpecs(
