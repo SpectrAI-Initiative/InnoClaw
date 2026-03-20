@@ -1,0 +1,20 @@
+=== Test Case #7: Curriculum Learning for Neural Machine Translation ===
+Started: Fri Mar 20 15:36:37 UTC 2026
+
+Session created: sess-008
+Run started: {"success":true}
+[10s] status=running
+[20s] Auto-confirming checkpoint ckpt-sess-008-1...
+  confirm: {"success":true}
+[20s] status=awaiting_user_confirmation
+[30s] status=running
+[40s] Awaiting approval — auto-approving...
+  approve node node-1: {"success":true}
+[40s] status=awaiting_approval
+[50s] status=running
+[60s] Terminal status: completed
+Export: {"success":true,"filePath":"/tmp/report.md","filename":"report.md"}
+
+Finished: Fri Mar 20 15:37:37 UTC 2026
+Final status: completed
+Session ID: sess-008
