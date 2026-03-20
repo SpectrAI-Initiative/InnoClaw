@@ -72,7 +72,7 @@ function getSystemPrompt(mode: AgentMode, cwd: string): string {
   }
 }
 
-function getTools(mode: AgentMode, cwd: string) {
+async function getTools(mode: AgentMode, cwd: string) {
   if (mode === "plan" || mode === "ask") {
     return createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
   }
@@ -113,7 +113,7 @@ export async function processAgentMessage(
 
   const model = await getConfiguredModel();
   const systemPrompt = getSystemPrompt(mode, workspacePath);
-  const tools = getTools(mode, workspacePath);
+  const tools = await getTools(mode, workspacePath);
 
   // Build messages with conversation history
   const userMsg: UIMessage = {

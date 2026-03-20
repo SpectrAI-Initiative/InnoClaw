@@ -225,7 +225,21 @@
     "fontSizeValue": "{size}px",
     "fontFamily": "字体",
     "fontFamilyDesc": "选择应用的显示字体",
-    "fontFamilyReset": "重置"
+    "fontFamilyReset": "重置",
+    "k8sCluster": "Kubernetes 集群",
+    "k8sClusterDesc": "配置 Kubernetes 集群连接和任务提交设置。更改保存到 .env.local 并立即生效。",
+    "k8sCommon": "通用设置",
+    "k8sA3": "A3 集群 (昇腾 910B)",
+    "k8sMuxi": "沐曦集群 (MetaX GPU)",
+    "k8sKubeconfigPath": "KubeConfig 路径",
+    "k8sSubmitter": "提交者 (AD 账户)",
+    "k8sImagePullSecret": "镜像拉取密钥",
+    "k8sMountUser": "挂载用户",
+    "k8sContextName": "上下文名称",
+    "k8sDefaultImage": "默认镜像",
+    "k8sPvcAi4s": "PVC AI4S",
+    "k8sPvcUser": "PVC 用户",
+    "k8sPvcAi4sA2": "PVC AI4S-A2"
   },
   "terminal": {
     "title": "终端",

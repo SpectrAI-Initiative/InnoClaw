@@ -7,6 +7,7 @@ import path from "path";
 import { getWorkspaceRoots } from "@/lib/files/filesystem";
 import { updateEnvLocal } from "@/lib/env-file";
 import { PROVIDERS } from "@/lib/ai/models";
+import { getK8sConfig, SETTINGS_TO_ENV, invalidateK8sConfigCache } from "@/lib/cluster/config";
 
 /**
  * Derive the base-URL env var name for a provider (e.g. "openai" → "OPENAI_BASE_URL").
@@ -74,6 +75,7 @@ export async function GET() {
         !!process.env.WECHAT_ENCODING_AES_KEY &&
         !!process.env.WECHAT_AGENT_ID,
       styleTheme: settingsMap["style_theme"] || "default",
+      k8sConfig: await getK8sConfig(),
     });
   } catch (error) {
     const message =
@@ -128,12 +130,21 @@ export async function PATCH(request: NextRequest) {
       envUpdates.GITHUB_TOKEN = body.github_token;
     }
 
+    // K8s cluster settings → .env.local mapping (uses shared SETTINGS_TO_ENV)
+    for (const [settingsKey, envKey] of Object.entries(SETTINGS_TO_ENV)) {
+      if (typeof body[settingsKey] === "string") {
+        envUpdates[envKey] = body[settingsKey];
+      }
+    }
+
     if (Object.keys(envUpdates).length > 0) {
       updateEnvLocal(envUpdates);
       // Update process.env in-memory so changes take effect immediately
       for (const [k, v] of Object.entries(envUpdates)) {
         process.env[k] = v;
       }
+      // Bust K8s config cache so next read picks up the new values
+      invalidateK8sConfigCache();
     }
 
     return NextResponse.json({ success: true });

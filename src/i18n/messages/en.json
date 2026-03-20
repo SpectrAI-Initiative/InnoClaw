@@ -192,7 +192,21 @@
     "fontSizeValue": "{size}px",
     "fontFamily": "Font",
     "fontFamilyDesc": "Choose the font family for the application",
-    "fontFamilyReset": "Reset"
+    "fontFamilyReset": "Reset",
+    "k8sCluster": "Kubernetes Cluster",
+    "k8sClusterDesc": "Configure Kubernetes cluster connection and job submission settings. Changes are saved to .env.local and take effect immediately.",
+    "k8sCommon": "Common Settings",
+    "k8sA3": "A3 Cluster (Ascend 910B)",
+    "k8sMuxi": "Muxi Cluster (MetaX GPU)",
+    "k8sKubeconfigPath": "KubeConfig Path",
+    "k8sSubmitter": "Submitter (AD Account)",
+    "k8sImagePullSecret": "Image Pull Secret",
+    "k8sMountUser": "Mount User",
+    "k8sContextName": "Context Name",
+    "k8sDefaultImage": "Default Image",
+    "k8sPvcAi4s": "PVC AI4S",
+    "k8sPvcUser": "PVC User",
+    "k8sPvcAi4sA2": "PVC AI4S-A2"
   },
   "terminal": {
     "title": "Terminal",

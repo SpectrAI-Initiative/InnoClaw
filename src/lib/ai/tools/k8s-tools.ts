@@ -12,8 +12,11 @@ import { isValidDnsLabel, isValidImageRef } from "@/lib/utils/validators";
 import { logAndIgnore } from "@/lib/utils/log";
 import type { ToolContext } from "./types";
 
-const DEFAULT_CONTAINER_IMAGE =
-  "registry2.d.pjlab.org.cn/ccr-hw/910c:82rc2ipc";
+import type { K8sConfig } from "@/lib/cluster/config";
+
+/** Cluster short-name enum used by all K8s tools. */
+const CLUSTER_ENUM = ["a3", "muxi"] as const;
+type ClusterName = (typeof CLUSTER_ENUM)[number];
 
 /** Read-only kubectl subcommands that don't require confirmDangerous. */
 const READ_ONLY_PATTERNS = [
@@ -42,19 +45,27 @@ const FORBIDDEN_PATTERNS = [
   /^delete\s+node\b/,
 ];
 
-/** Flags that could bypass the fixed KUBECONFIG. */
+/** Flags that could bypass the fixed KUBECONFIG (user-supplied subcommand). */
 const FORBIDDEN_FLAGS = [
   "--kubeconfig", "--context", "--cluster", "--server",
   "--token", "--as", "--as-group", "--certificate-authority",
   "--client-certificate", "--client-key", "--insecure-skip-tls-verify",
 ];
 
+/** Resolve a cluster short-name to its kubeconfig --context value. */
+function resolveContext(ctx: ToolContext, cluster: ClusterName): string {
+  return ctx.k8sConfig.clusterContextMap[cluster] || ctx.k8sConfig.clusterContextMap.a3 || "vc-a3-ai4s";
+}
+
+/** Return the default container image for the given cluster. */
+function defaultImageForCluster(k8s: K8sConfig, cluster: ClusterName): string {
+  return cluster === "muxi" ? k8s.muxi.defaultImage : k8s.a3.defaultImage;
+}
+
 /**
- * Generate a clean Volcano Job YAML from template parameters.
- * Based on config/d_k8s_job.yaml structure, stripped of runtime fields.
- * Submitter, PVC, and imagePullSecrets are parameterized via env vars with defaults.
+ * Generate a Volcano Job YAML for the A3 cluster (Ascend 910B NPUs).
  */
-function generateVolcanoJobYaml(params: {
+function generateA3VolcanoJobYaml(k8s: K8sConfig, params: {
   jobName: string;
   command: string;
   image: string;
@@ -68,13 +79,12 @@ function generateVolcanoJobYaml(params: {
   const safeNamespace = yamlEscape(namespace);
   const safeJobName = yamlEscape(jobName);
 
-  const rawSubmitter = process.env.K8S_SUBMITTER || "tangshixiang";
-  const submitter = yamlEscape(rawSubmitter);
-  const imagePullSecret = yamlEscape(process.env.K8S_IMAGE_PULL_SECRET || rawSubmitter);
-  const pvcAi4s = yamlEscape(process.env.K8S_PVC_AI4S || "pvc-mdjl8");
-  const pvcUser = yamlEscape(process.env.K8S_PVC_USER || "pvc-tzsf9");
-  const pvcAi4sA2 = yamlEscape(process.env.K8S_PVC_AI4S_A2 || "pvc-r4sjn");
-  const mountUser = yamlEscape(process.env.K8S_MOUNT_USER || rawSubmitter);
+  const submitter = yamlEscape(k8s.submitter);
+  const imagePullSecret = yamlEscape(k8s.imagePullSecret);
+  const pvcAi4s = yamlEscape(k8s.a3.pvcAi4s);
+  const pvcUser = yamlEscape(k8s.a3.pvcUser);
+  const pvcAi4sA2 = yamlEscape(k8s.a3.pvcAi4sA2);
+  const mountUser = yamlEscape(k8s.mountUser);
 
   return `apiVersion: batch.volcano.sh/v1alpha1
 kind: Job
@@ -174,16 +184,155 @@ spec:
   priorityClassName: 'normal'`;
 }
 
+/**
+ * Generate a Volcano Job YAML for the Muxi cluster (MetaX GPUs).
+ */
+function generateMuxiVolcanoJobYaml(k8s: K8sConfig, params: {
+  jobName: string;
+  command: string;
+  image: string;
+  gpuCount: number;
+  namespace: string;
+}): string {
+  const { jobName, command, image, gpuCount, namespace } = params;
+
+  const safeCommand = yamlEscape(command);
+  const safeImage = yamlEscape(image);
+  const safeNamespace = yamlEscape(namespace);
+  const safeJobName = yamlEscape(jobName);
+
+  const submitter = yamlEscape(k8s.submitter);
+  const imagePullSecret = yamlEscape(k8s.imagePullSecret);
+  const pvcAi4s = yamlEscape(k8s.muxi.pvcAi4s);
+  const pvcUser = yamlEscape(k8s.muxi.pvcUser);
+  const pvcAi4sA2 = yamlEscape(k8s.muxi.pvcAi4sA2);
+  const mountUser = yamlEscape(k8s.mountUser);
+
+  return `apiVersion: batch.volcano.sh/v1alpha1
+kind: Job
+metadata:
+  name: '${safeJobName}'
+  namespace: '${safeNamespace}'
+  labels:
+    lepton.sensetime.com/framework-type: 'PyTorch'
+    lepton.sensetime.com/submitter: '${submitter}'
+    ring-controller.atlas: 'ascend-910b'
+  annotations:
+    sp-block: '${gpuCount}'
+spec:
+  schedulerName: 'volcano'
+  minAvailable: 1
+  tasks:
+    - name: 'worker'
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            lepton.sensetime.com/submitter: '${submitter}'
+            ring-controller.atlas: 'ascend-910b'
+        spec:
+          volumes:
+            - name: 'vol-ai4s'
+              persistentVolumeClaim:
+                claimName: '${pvcAi4s}'
+            - name: 'vol-user'
+              persistentVolumeClaim:
+                claimName: '${pvcUser}'
+            - name: 'vol-ai4s-a2'
+              persistentVolumeClaim:
+                claimName: '${pvcAi4sA2}'
+            - name: 'shm-data'
+              emptyDir:
+                medium: 'Memory'
+                sizeLimit: '64Gi'
+          containers:
+            - name: 'worker'
+              image: '${safeImage}'
+              command:
+                - 'bash'
+                - '-c'
+              args:
+                - '${safeCommand}'
+              resources:
+                limits:
+                  cpu: '224'
+                  metax-tech.com/gpu: '${gpuCount}'
+                  memory: '1440Gi'
+                requests:
+                  cpu: '224'
+                  metax-tech.com/gpu: '${gpuCount}'
+                  memory: '1440Gi'
+              volumeMounts:
+                - name: 'vol-ai4s'
+                  mountPath: '/mnt/ai4s'
+                - name: 'vol-user'
+                  mountPath: '/mnt/${mountUser}'
+                - name: 'vol-ai4s-a2'
+                  mountPath: '/mnt/ai4s-a2'
+                - name: 'shm-data'
+                  mountPath: '/dev/shm'
+              imagePullPolicy: 'IfNotPresent'
+          restartPolicy: 'Never'
+          imagePullSecrets:
+            - name: '${imagePullSecret}'
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: 'resource.compute.sensecore.cn/machine-type'
+                        operator: 'In'
+                        values:
+                          - 'x2ls.ri.i80'
+      policies:
+        - action: 'RestartJob'
+          event: 'PodEvicted'
+      maxRetry: 3
+  policies:
+    - action: 'RestartJob'
+      event: 'PodEvicted'
+  plugins:
+    pytorch:
+      - '--master=master'
+      - '--worker=worker'
+      - '--port=23456'
+    svc: []
+  queue: 'default'
+  maxRetry: 1
+  priorityClassName: 'normal'`;
+}
+
+/** Select the correct YAML generator based on cluster. */
+function generateVolcanoJobYaml(
+  k8s: K8sConfig,
+  cluster: ClusterName,
+  params: { jobName: string; command: string; image: string; gpuCount: number; namespace: string },
+): string {
+  return cluster === "muxi"
+    ? generateMuxiVolcanoJobYaml(k8s, params)
+    : generateA3VolcanoJobYaml(k8s, params);
+}
+
 export function createK8sTools(ctx: ToolContext) {
+  const k8s = ctx.k8sConfig;
+  const DEFAULT_A3_IMAGE = k8s.a3.defaultImage;
+  const DEFAULT_MUXI_IMAGE = k8s.muxi.defaultImage;
+
   return {
     kubectl: tool({
       description:
-        "Execute kubectl or vcctl commands against the configured Kubernetes cluster (Volcano scheduler, Ascend910 NPUs). Use for monitoring pods, jobs, deployments, nodes, logs, and cluster status. Set useVcctl=true to use the vcctl CLI for Volcano job management (job get/run/delete/clone/suspend/resume, pod get/logs/exec). Mutating operations require confirmDangerous=true.",
+        "Execute kubectl or vcctl commands against a Kubernetes cluster. Supports two clusters: 'a3' (Ascend 910B NPUs, default) and 'muxi' (MetaX GPUs). Use for monitoring pods, jobs, deployments, nodes, logs, and cluster status. Set useVcctl=true to use the vcctl CLI for Volcano job management. Mutating operations require confirmDangerous=true.",
       inputSchema: z.object({
         subcommand: z
           .string()
           .describe(
             "The subcommand and arguments, e.g. 'get pods -n default', 'get vcjob', 'describe node host-10-12-104-1', 'logs my-pod --tail=100'. Do NOT include the 'kubectl' or 'vcctl' prefix."
+          ),
+        cluster: z
+          .enum(CLUSTER_ENUM)
+          .optional()
+          .describe(
+            "Target cluster: 'a3' (A3 cluster, Ascend 910B NPUs, default) or 'muxi' (沐曦 cluster, MetaX GPUs)."
           ),
         namespace: z
           .string()
@@ -204,7 +353,10 @@ export function createK8sTools(ctx: ToolContext) {
             "Must be set to true to execute non-read-only operations (anything not in the allowlist: get, describe, logs, top, etc.). Default is false."
           ),
       }),
-      execute: async ({ subcommand, namespace, useVcctl, confirmDangerous }) => {
+      execute: async ({ subcommand, cluster, namespace, useVcctl, confirmDangerous }) => {
+        const resolvedCluster: ClusterName = cluster || "a3";
+        const contextName = resolveContext(ctx, resolvedCluster);
+
         const isReadOnly = READ_ONLY_PATTERNS.some((p) =>
           p.test(subcommand.trim())
         );
@@ -217,8 +369,8 @@ export function createK8sTools(ctx: ToolContext) {
             subcommand,
             namespace,
             status: "blocked",
-            summary: `Blocked: ${blockedBin} ${subcommand.slice(0, 80)}`,
-            input: { subcommand, namespace, useVcctl },
+            summary: `Blocked: ${blockedBin} ${subcommand.slice(0, 80)} [${resolvedCluster}]`,
+            input: { subcommand, namespace, useVcctl, cluster: resolvedCluster },
           }).catch(logAndIgnore("recordClusterOp"));
 
           return {
@@ -237,8 +389,8 @@ export function createK8sTools(ctx: ToolContext) {
             subcommand,
             namespace,
             status: "blocked",
-            summary: `Forbidden: ${forbiddenBin} ${subcommand.slice(0, 80)}`,
-            input: { subcommand, namespace, useVcctl },
+            summary: `Forbidden: ${forbiddenBin} ${subcommand.slice(0, 80)} [${resolvedCluster}]`,
+            input: { subcommand, namespace, useVcctl, cluster: resolvedCluster },
           }).catch(logAndIgnore("recordClusterOp"));
 
           return {
@@ -265,6 +417,7 @@ export function createK8sTools(ctx: ToolContext) {
         }
 
         args.push("--kubeconfig", ctx.kubeconfigPath);
+        args.push("--context", contextName);
 
         if (
           !useVcctl &&
@@ -312,8 +465,8 @@ export function createK8sTools(ctx: ToolContext) {
                 namespace,
                 status: result.exitCode === 0 ? "success" : "error",
                 exitCode: result.exitCode,
-                summary: `${bin} ${subcommand.slice(0, 80)}`,
-                input: { subcommand, namespace, useVcctl },
+                summary: `${bin} ${subcommand.slice(0, 80)} [${resolvedCluster}]`,
+                input: { subcommand, namespace, useVcctl, cluster: resolvedCluster },
                 output: { exitCode: result.exitCode, stdoutLen: result.stdout.length },
               }).catch(logAndIgnore("recordClusterOp"));
 
@@ -326,7 +479,7 @@ export function createK8sTools(ctx: ToolContext) {
 
     submitK8sJob: tool({
       description:
-        `Submit a Volcano K8s job to the D cluster (Ascend 910B NPUs). Generates a job YAML from the standard template and submits it via kubectl. IMPORTANT: Before using this tool, always confirm with the user: (1) the container image to use (default: ${DEFAULT_CONTAINER_IMAGE}), (2) the GPU count (default: 4), and (3) the exact command to run. Set confirmSubmit=true only after the user has explicitly confirmed.`,
+        `Submit a Volcano K8s job to a cluster. Supports two clusters: 'a3' (A3 cluster, Ascend 910B NPUs, default image: ${DEFAULT_A3_IMAGE}) and 'muxi' (沐曦 cluster, MetaX GPUs, default image: ${DEFAULT_MUXI_IMAGE}). Generates a cluster-specific job YAML and submits via kubectl. IMPORTANT: Before using this tool, always confirm with the user: (1) the target cluster, (2) the container image, (3) the GPU count (default: 4), and (4) the exact command to run. Set confirmSubmit=true only after the user has explicitly confirmed.`,
       inputSchema: z.object({
         jobName: z
           .string()
@@ -338,17 +491,23 @@ export function createK8sTools(ctx: ToolContext) {
           .describe(
             "The bash command to run inside the container. For scripts, use the full path, e.g. 'bash /mnt/tangshixiang/research_folder/research/hello_word.sh'."
           ),
+        cluster: z
+          .enum(CLUSTER_ENUM)
+          .optional()
+          .describe(
+            "Target cluster: 'a3' (A3 cluster, Ascend 910B NPUs, default) or 'muxi' (沐曦 cluster, MetaX GPUs)."
+          ),
         image: z
           .string()
           .optional()
           .describe(
-            `Container image. Default: '${DEFAULT_CONTAINER_IMAGE}'`
+            `Container image. Default depends on cluster: A3='${DEFAULT_A3_IMAGE}', Muxi='${DEFAULT_MUXI_IMAGE}'`
           ),
         gpuCount: z
           .number()
           .optional()
           .describe(
-            "Number of Ascend 910B NPUs to request. Default: 4. Common values: 1, 2, 4, 8."
+            "Number of GPUs to request. Default: 4. For A3: Ascend 910B NPUs; for Muxi: MetaX GPUs. Common values: 1, 2, 4, 8."
           ),
         namespace: z
           .string()
@@ -360,22 +519,25 @@ export function createK8sTools(ctx: ToolContext) {
           .boolean()
           .optional()
           .describe(
-            "Set this to true only after you have explicitly confirmed with the user the container image, GPU count, and exact command. If false or omitted, the job will NOT be submitted."
+            "Set this to true only after you have explicitly confirmed with the user the target cluster, container image, GPU count, and exact command. If false or omitted, the job will NOT be submitted."
           ),
       }),
-      execute: async ({ jobName, command, image, gpuCount, namespace, confirmSubmit = false }) => {
+      execute: async ({ jobName, command, cluster, image, gpuCount, namespace, confirmSubmit = false }) => {
+        const resolvedCluster: ClusterName = cluster || "a3";
+        const contextName = resolveContext(ctx, resolvedCluster);
+
         if (!confirmSubmit) {
           return {
             success: false,
             error:
-              "Job submission blocked: confirmSubmit must be true to submit a K8s job. First confirm with the user the container image, GPU count, and exact command, then call this tool again with confirmSubmit set to true.",
+              "Job submission blocked: confirmSubmit must be true to submit a K8s job. First confirm with the user the target cluster, container image, GPU count, and exact command, then call this tool again with confirmSubmit set to true.",
             stdout: "",
             stderr: "",
             exitCode: 1,
           };
         }
 
-        const resolvedImage = image || DEFAULT_CONTAINER_IMAGE;
+        const resolvedImage = image || defaultImageForCluster(k8s, resolvedCluster);
         const resolvedGpuCount = gpuCount ?? 4;
         const resolvedNamespace = namespace || "default";
 
@@ -422,7 +584,7 @@ export function createK8sTools(ctx: ToolContext) {
           };
         }
 
-        const yaml = generateVolcanoJobYaml({
+        const yaml = generateVolcanoJobYaml(k8s, resolvedCluster, {
           jobName,
           command,
           image: resolvedImage,
@@ -445,7 +607,7 @@ export function createK8sTools(ctx: ToolContext) {
           }>((resolve) => {
             execFile(
               "kubectl",
-              ["create", "-f", tmpFile],
+              ["create", "-f", tmpFile, "--kubeconfig", ctx.kubeconfigPath, "--context", contextName],
               {
                 cwd: ctx.validatedCwd,
                 timeout: 30_000,
@@ -476,13 +638,14 @@ export function createK8sTools(ctx: ToolContext) {
             namespace: resolvedNamespace,
             status: result.exitCode === 0 ? "success" : "error",
             exitCode: result.exitCode,
-            summary: `Submit ${jobName} (${resolvedGpuCount} GPUs)`,
-            input: { jobName, command, image: resolvedImage, gpuCount: resolvedGpuCount },
+            summary: `Submit ${jobName} (${resolvedGpuCount} GPUs) [${resolvedCluster}]`,
+            input: { jobName, command, image: resolvedImage, gpuCount: resolvedGpuCount, cluster: resolvedCluster },
             output: { exitCode: result.exitCode, success: result.exitCode === 0 },
           }).catch(logAndIgnore("recordClusterOp"));
 
           return {
             success: result.exitCode === 0,
+            cluster: resolvedCluster,
             jobName,
             namespace: resolvedNamespace,
             image: resolvedImage,
@@ -502,12 +665,18 @@ export function createK8sTools(ctx: ToolContext) {
     collectJobResults: tool({
       description:
         "Collect and summarize the results (logs, status, exit code) of a completed K8s job. " +
-        "Useful for automated result collection after job submission. " +
+        "Supports two clusters: 'a3' (default) and 'muxi'. " +
         "Returns the job status and the last N lines of logs from the job's pods.",
       inputSchema: z.object({
         jobName: z
           .string()
           .describe("Name of the K8s job to collect results from"),
+        cluster: z
+          .enum(CLUSTER_ENUM)
+          .optional()
+          .describe(
+            "Target cluster: 'a3' (A3 cluster, default) or 'muxi' (沐曦 cluster)."
+          ),
         namespace: z
           .string()
           .optional()
@@ -517,7 +686,9 @@ export function createK8sTools(ctx: ToolContext) {
           .optional()
           .describe("Number of log lines to fetch (default: 200, max: 2000)"),
       }),
-      execute: async ({ jobName, namespace, tailLines }) => {
+      execute: async ({ jobName, cluster, namespace, tailLines }) => {
+        const resolvedCluster: ClusterName = cluster || "a3";
+        const contextName = resolveContext(ctx, resolvedCluster);
         const resolvedNamespace = namespace || "default";
         const resolvedTailLines = Math.max(1, Math.min(tailLines ?? 200, 2000));
 
@@ -549,6 +720,7 @@ export function createK8sTools(ctx: ToolContext) {
                 "-n", resolvedNamespace,
                 "-o", "json",
                 "--kubeconfig", ctx.kubeconfigPath,
+                "--context", contextName,
               ],
               {
                 cwd: ctx.validatedCwd,
@@ -578,6 +750,7 @@ export function createK8sTools(ctx: ToolContext) {
                 "-n", resolvedNamespace,
                 `--tail=${resolvedTailLines}`,
                 "--kubeconfig", ctx.kubeconfigPath,
+                "--context", contextName,
               ],
               {
                 cwd: ctx.validatedCwd,
@@ -620,6 +793,7 @@ export function createK8sTools(ctx: ToolContext) {
 
         const result = {
           success: statusResult.exitCode === 0,
+          cluster: resolvedCluster,
           jobName,
           namespace: resolvedNamespace,
           jobStatus,
@@ -634,8 +808,8 @@ export function createK8sTools(ctx: ToolContext) {
           namespace: resolvedNamespace,
           status: statusResult.exitCode === 0 ? "success" : "error",
           exitCode: statusResult.exitCode,
-          summary: `Collect results for ${jobName}`,
-          input: { jobName, namespace: resolvedNamespace, tailLines: resolvedTailLines },
+          summary: `Collect results for ${jobName} [${resolvedCluster}]`,
+          input: { jobName, namespace: resolvedNamespace, tailLines: resolvedTailLines, cluster: resolvedCluster },
           output: { jobStatus, logsLength: logsResult.stdout.length },
         }).catch(logAndIgnore("recordClusterOp"));
 

@@ -1,3 +1,5 @@
+import type { K8sConfig } from "@/lib/cluster/config";
+
 /** Shared context passed to each tool factory. */
 export interface ToolContext {
   /** Validated absolute path to the workspace root. */
@@ -6,6 +8,8 @@ export interface ToolContext {
   resolvePath: (filePath: string) => string;
   /** Absolute path to the kubeconfig file. */
   kubeconfigPath: string;
+  /** Full K8s cluster configuration loaded from DB (primary) with env fallback. */
+  k8sConfig: K8sConfig;
   /** Base environment variables for exec calls. */
   baseExecEnv: NodeJS.ProcessEnv;
   /** Optional workspace ID for recording cluster operations. */

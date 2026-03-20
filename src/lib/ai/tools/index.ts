@@ -1,6 +1,7 @@
 import path from "path";
 import { validatePath } from "@/lib/files/filesystem";
 import { baseExecEnv } from "@/lib/utils/shell";
+import { getK8sConfig } from "@/lib/cluster/config";
 import { createFileTools } from "./file-tools";
 import { createShellTools } from "./shell-tools";
 import { createK8sTools } from "./k8s-tools";
@@ -13,7 +14,7 @@ import type { ToolContext } from "./types";
 
 export type { ToolContext } from "./types";
 
-export function createAgentTools(
+export async function createAgentTools(
   workspaceCwd: string,
   allowedTools?: string[] | null,
   workspaceId?: string | null,
@@ -22,8 +23,11 @@ export function createAgentTools(
 ) {
   const validatedCwd = validatePath(workspaceCwd);
 
+  // Load K8s config from DB (primary) with env fallback
+  const k8sConfig = await getK8sConfig();
+
   const rawKubeconfigPath =
-    process.env.KUBECONFIG_PATH ||
+    k8sConfig.kubeconfigPath ||
     path.join(process.cwd(), "config", "d_k8s");
   const kubeconfigPath = path.isAbsolute(rawKubeconfigPath)
     ? rawKubeconfigPath
@@ -49,6 +53,7 @@ export function createAgentTools(
     validatedCwd,
     resolvePath,
     kubeconfigPath,
+    k8sConfig,
     baseExecEnv,
     workspaceId,
     researchHistoryDir,

@@ -29,19 +29,25 @@
   <a href="https://SpectrAI-Initiative.github.io/InnoClaw/">Documentation</a> · <a href="#quick-start">Quick Start</a> · <a href="#community-support">Community</a>
 </p>
 
+<p align="center">
+  <a href="#community-support">
+    <img src="site/social/飞书体验群.png" alt="Join Feishu Community" width="200" />
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="#community-support">
+    <img src="site/social/微信体验群.jpg" alt="Join WeChat Community" width="200" />
+  </a>
+  <br/>
+  <sub>Scan to join our community · 扫码加入飞书/微信体验群</sub>
+</p>
+
 InnoClaw turns server-side folders into AI-native workspaces for grounded chat, paper study, scientific workflows, and research execution.
 
 It is built for researchers, developers, labs, and self-hosters who want more than a generic chat UI: cited answers over real files, reusable skills, and a path from reading to execution.
 
-```mermaid
-flowchart LR
-    A[Open a workspace] --> B[Sync files into RAG]
-    B --> C[Ask grounded questions]
-    C --> D[Study papers]
-    D --> E[Run multi-agent discussion]
-    E --> F[Generate notes and ideas]
-    F --> G[Execute remote research tasks]
-```
+<p align="center">
+  <img src="public/innoclaw-flow.png" alt="InnoClaw Workflow" width="800" />
+</p>
 
 ---
 

@@ -31,6 +31,7 @@ import { useStyleTheme } from "@/lib/hooks/use-style-theme";
 import { useFontSize } from "@/lib/hooks/use-font-size";
 import { useFontFamily, FONT_OPTIONS } from "@/lib/hooks/use-font-family";
 import { Minus, Plus, RotateCcw } from "lucide-react";
+import type { K8sConfig } from "@/lib/cluster/config";
 
 interface Settings {
   llmProvider: string;
@@ -45,6 +46,7 @@ interface Settings {
   providerBaseUrls: Record<string, string>;
   feishuBotEnabled: boolean;
   wechatBotEnabled: boolean;
+  k8sConfig: K8sConfig;
 }
 
 export default function SettingsPage() {
@@ -69,6 +71,13 @@ export default function SettingsPage() {
   const { styleTheme, setStyleTheme } = useStyleTheme();
   const { fontSize, increase, decrease, reset, min, max } = useFontSize();
   const { fontFamily, setFontFamily: setFont, reset: resetFont } = useFontFamily();
+  const [k8sConfig, setK8sConfig] = useState<K8sConfig>({
+    kubeconfigPath: "", submitter: "", imagePullSecret: "", mountUser: "",
+    clusterContextMap: { a3: "", muxi: "" },
+    a3: { defaultImage: "", pvcAi4s: "", pvcUser: "", pvcAi4sA2: "" },
+    muxi: { defaultImage: "", pvcAi4s: "", pvcUser: "", pvcAi4sA2: "" },
+  });
+  const [k8sSaving, setK8sSaving] = useState(false);
 
   const fetchRemoteModels = useCallback(
     async (prov: string) => {
@@ -115,6 +124,9 @@ export default function SettingsPage() {
         setMaxMode(data.maxMode ?? true);
         if (data.providerBaseUrls) {
           setBaseUrls(data.providerBaseUrls);
+        }
+        if (data.k8sConfig) {
+          setK8sConfig(data.k8sConfig);
         }
       });
   }, []);
@@ -226,6 +238,36 @@ export default function SettingsPage() {
       toast.error(tCommon("error"));
     } finally {
       setApiKeySaving(false);
+    }
+  };
+
+  const handleK8sSave = async () => {
+    setK8sSaving(true);
+    try {
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kubeconfig_path: k8sConfig.kubeconfigPath,
+          k8s_submitter: k8sConfig.submitter,
+          k8s_image_pull_secret: k8sConfig.imagePullSecret,
+          k8s_mount_user: k8sConfig.mountUser,
+          kubeconfig_context_a3: k8sConfig.clusterContextMap.a3,
+          k8s_pvc_ai4s: k8sConfig.a3.pvcAi4s,
+          k8s_pvc_user: k8sConfig.a3.pvcUser,
+          k8s_pvc_ai4s_a2: k8sConfig.a3.pvcAi4sA2,
+          kubeconfig_context_muxi: k8sConfig.clusterContextMap.muxi,
+          k8s_muxi_default_image: k8sConfig.muxi.defaultImage,
+          k8s_muxi_pvc_ai4s: k8sConfig.muxi.pvcAi4s,
+          k8s_muxi_pvc_user: k8sConfig.muxi.pvcUser,
+          k8s_muxi_pvc_ai4s_a2: k8sConfig.muxi.pvcAi4sA2,
+        }),
+      });
+      toast.success(tCommon("success"));
+    } catch {
+      toast.error(tCommon("error"));
+    } finally {
+      setK8sSaving(false);
     }
   };
 
@@ -656,6 +698,142 @@ export default function SettingsPage() {
                       : t("notConfigured")}
                   </Badge>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* K8s Cluster Configuration */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("k8sCluster")}</CardTitle>
+                <CardDescription>{t("k8sClusterDesc")}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                {/* Common Settings */}
+                <div className="space-y-3 rounded-lg border p-3">
+                  <span className="text-sm font-medium">{t("k8sCommon")}</span>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sKubeconfigPath")}</Label>
+                    <Input
+                      placeholder="config/d_k8s"
+                      value={k8sConfig.kubeconfigPath}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, kubeconfigPath: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sSubmitter")}</Label>
+                    <Input
+                      placeholder="your-ad-account"
+                      value={k8sConfig.submitter}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, submitter: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sImagePullSecret")}</Label>
+                    <Input
+                      placeholder={t("k8sSubmitter")}
+                      value={k8sConfig.imagePullSecret}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, imagePullSecret: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sMountUser")}</Label>
+                    <Input
+                      placeholder={t("k8sSubmitter")}
+                      value={k8sConfig.mountUser}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, mountUser: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                {/* A3 Cluster */}
+                <div className="space-y-3 rounded-lg border p-3">
+                  <span className="text-sm font-medium">{t("k8sA3")}</span>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sContextName")}</Label>
+                    <Input
+                      placeholder="vc-a3-ai4s"
+                      value={k8sConfig.clusterContextMap.a3 ?? ""}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, clusterContextMap: { ...prev.clusterContextMap, a3: e.target.value } }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sPvcAi4s")}</Label>
+                    <Input
+                      placeholder="pvc-xxxxx"
+                      value={k8sConfig.a3.pvcAi4s}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, a3: { ...prev.a3, pvcAi4s: e.target.value } }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sPvcUser")}</Label>
+                    <Input
+                      placeholder="pvc-xxxxx"
+                      value={k8sConfig.a3.pvcUser}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, a3: { ...prev.a3, pvcUser: e.target.value } }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sPvcAi4sA2")}</Label>
+                    <Input
+                      placeholder="pvc-xxxxx"
+                      value={k8sConfig.a3.pvcAi4sA2}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, a3: { ...prev.a3, pvcAi4sA2: e.target.value } }))}
+                    />
+                  </div>
+                </div>
+
+                {/* Muxi Cluster */}
+                <div className="space-y-3 rounded-lg border p-3">
+                  <span className="text-sm font-medium">{t("k8sMuxi")}</span>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sContextName")}</Label>
+                    <Input
+                      placeholder="vc-c550-jiaofu-test"
+                      value={k8sConfig.clusterContextMap.muxi ?? ""}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, clusterContextMap: { ...prev.clusterContextMap, muxi: e.target.value } }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sDefaultImage")}</Label>
+                    <Input
+                      placeholder="registry2.d.pjlab.org.cn/..."
+                      value={k8sConfig.muxi.defaultImage}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, muxi: { ...prev.muxi, defaultImage: e.target.value } }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sPvcAi4s")}</Label>
+                    <Input
+                      placeholder="pvc-xxxxx"
+                      value={k8sConfig.muxi.pvcAi4s}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, muxi: { ...prev.muxi, pvcAi4s: e.target.value } }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sPvcUser")}</Label>
+                    <Input
+                      placeholder="pvc-xxxxx"
+                      value={k8sConfig.muxi.pvcUser}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, muxi: { ...prev.muxi, pvcUser: e.target.value } }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t("k8sPvcAi4sA2")}</Label>
+                    <Input
+                      placeholder="pvc-xxxxx"
+                      value={k8sConfig.muxi.pvcAi4sA2}
+                      onChange={(e) => setK8sConfig((prev) => ({ ...prev, muxi: { ...prev.muxi, pvcAi4sA2: e.target.value } }))}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleK8sSave}
+                  disabled={k8sSaving}
+                  className="w-full"
+                >
+                  {tCommon("save")}
+                </Button>
               </CardContent>
             </Card>
 

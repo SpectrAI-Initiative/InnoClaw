@@ -94,15 +94,15 @@ export async function POST(req: NextRequest) {
       }
 
       systemPrompt = buildSkillSystemPrompt(skill, cwd, paramValues || {});
-      tools = createAgentTools(cwd, skill.allowedTools, workspaceId, sessionCreatedAt);
+      tools = await createAgentTools(cwd, skill.allowedTools, workspaceId, sessionCreatedAt);
     } else if (mode === "plan") {
       // Plan mode: read-only tools, focus on analysis and planning
       systemPrompt = buildPlanSystemPrompt(cwd);
-      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"], workspaceId, sessionCreatedAt);
+      tools = await createAgentTools(cwd, ["readFile", "listDirectory", "grep"], workspaceId, sessionCreatedAt);
     } else if (mode === "ask") {
       // Ask mode: read-only tools, can read files but never write or execute
       systemPrompt = buildAskSystemPrompt(cwd);
-      tools = createAgentTools(cwd, ["readFile", "listDirectory", "grep"], workspaceId, sessionCreatedAt);
+      tools = await createAgentTools(cwd, ["readFile", "listDirectory", "grep"], workspaceId, sessionCreatedAt);
     } else {
       // Agent modes ("agent" (default), "long-agent", or legacy "agent"): load skill catalog
       let skillCatalog: { slug: string; name: string; description: string | null }[] | undefined;
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
         // Agent (default): standard agent mode
         systemPrompt = buildAgentSystemPrompt(cwd, skillCatalog, { noTools: !useTools });
       }
-      tools = createAgentTools(cwd, undefined, workspaceId, sessionCreatedAt, mode === "long-agent");
+      tools = await createAgentTools(cwd, undefined, workspaceId, sessionCreatedAt, mode === "long-agent");
     }
 
     // Sanitize UI messages: remove tool invocation parts with missing input
