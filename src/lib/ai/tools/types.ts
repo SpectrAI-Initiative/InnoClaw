@@ -6,6 +6,8 @@ export interface ToolContext {
   resolvePath: (filePath: string) => string;
   /** Absolute path to the kubeconfig file. */
   kubeconfigPath: string;
+  /** Map of cluster short names to kubeconfig context names. e.g. { a3: "vc-a3-ai4s", muxi: "vc-c550-jiaofu-test" } */
+  clusterContextMap: Record<string, string>;
   /** Base environment variables for exec calls. */
   baseExecEnv: NodeJS.ProcessEnv;
   /** Optional workspace ID for recording cluster operations. */

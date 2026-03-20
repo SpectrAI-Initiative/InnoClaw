@@ -29,6 +29,11 @@ export function createAgentTools(
     ? rawKubeconfigPath
     : path.resolve(process.cwd(), rawKubeconfigPath);
 
+  const clusterContextMap: Record<string, string> = {
+    a3: process.env.KUBECONFIG_CONTEXT_A3 || "vc-a3-ai4s",
+    muxi: process.env.KUBECONFIG_CONTEXT_MUXI || "vc-c550-jiaofu-test",
+  };
+
   /**
    * Resolves a file path relative to the workspace and validates it against
    * allowed workspace roots.
@@ -49,6 +54,7 @@ export function createAgentTools(
     validatedCwd,
     resolvePath,
     kubeconfigPath,
+    clusterContextMap,
     baseExecEnv,
     workspaceId,
     researchHistoryDir,

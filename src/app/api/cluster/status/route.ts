@@ -1,17 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { execFile } from "child_process";
 import { buildSafeExecEnv } from "@/lib/env";
 
 const baseExecEnv = buildSafeExecEnv();
 const kubeconfigPath = process.env.KUBECONFIG_PATH || process.env.KUBECONFIG || "";
 
+/** Map of cluster short-names to kubeconfig context names. */
+const CLUSTER_CONTEXTS: Record<string, string> = {
+  a3: process.env.KUBECONFIG_CONTEXT_A3 || "vc-a3-ai4s",
+  muxi: process.env.KUBECONFIG_CONTEXT_MUXI || "vc-c550-jiaofu-test",
+};
+
 /**
- * GET /api/cluster/status
+ * GET /api/cluster/status?cluster=a3|muxi
  *
  * Returns a JSON overview of the K8s cluster (nodes, jobs, pods).
  * This endpoint runs read-only kubectl commands only.
+ * The optional `cluster` query parameter selects the target cluster (default: a3).
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!kubeconfigPath) {
     return NextResponse.json(
       { configured: false, error: "KUBECONFIG_PATH not set" },
@@ -19,11 +26,14 @@ export async function GET() {
     );
   }
 
+  const clusterParam = request.nextUrl.searchParams.get("cluster") || "a3";
+  const contextName = CLUSTER_CONTEXTS[clusterParam] || CLUSTER_CONTEXTS.a3;
+
   const run = (args: string[]): Promise<{ stdout: string; stderr: string; exitCode: number }> =>
     new Promise((resolve) => {
       execFile(
         "kubectl",
-        [...args, "--kubeconfig", kubeconfigPath],
+        [...args, "--kubeconfig", kubeconfigPath, "--context", contextName],
         {
           timeout: 15_000,
           maxBuffer: 1024 * 1024,
@@ -50,6 +60,7 @@ export async function GET() {
     if (nodesResult.exitCode !== 0) {
       return NextResponse.json({
         configured: true,
+        cluster: clusterParam,
         error: nodesResult.stderr || "Failed to connect to cluster",
         nodes: [],
         jobs: [],
@@ -82,7 +93,7 @@ export async function GET() {
             .map((l) => l.replace("node-role.kubernetes.io/", "")),
           cpu: allocatable.cpu ?? "?",
           memory: allocatable.memory ?? "?",
-          gpu: allocatable["huawei.com/Ascend910"] ?? allocatable["nvidia.com/gpu"] ?? "0",
+          gpu: allocatable["huawei.com/Ascend910"] ?? allocatable["metax-tech.com/gpu"] ?? allocatable["nvidia.com/gpu"] ?? "0",
         };
       }
     );
@@ -117,6 +128,7 @@ export async function GET() {
 
     return NextResponse.json({
       configured: true,
+      cluster: clusterParam,
       nodes,
       jobs: jobs.slice(0, 100),
       pods: pods.slice(0, 200),
@@ -124,6 +136,6 @@ export async function GET() {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ configured: true, error: msg }, { status: 500 });
+    return NextResponse.json({ configured: true, cluster: clusterParam, error: msg }, { status: 500 });
   }
 }

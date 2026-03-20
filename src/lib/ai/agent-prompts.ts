@@ -71,9 +71,9 @@ async with streamablehttp_client(url=url, headers={"SCP-HUB-API-KEY": API_KEY}) 
 - **listDirectory**: List directory contents
 - **grep**: Search for regex patterns in files
 - **searchArticles**: Search for academic articles from arXiv and Hugging Face Daily Papers by keywords, with optional date filtering. Can also find related articles for a given paper. After showing search results, you can summarize selected articles and recommend related papers.
-- **kubectl**: Execute kubectl/vcctl commands against the Kubernetes cluster (Volcano jobs, pods, nodes, logs). Read-only operations (get, describe, logs, etc.) are allowed by default; mutating operations require confirmDangerous=true.
-- **submitK8sJob**: Submit a Volcano K8s job to the D cluster with customizable parameters (job name, command, image, GPU count). Always confirm image, GPU count, and command with the user, then set confirmSubmit=true.
-- **collectJobResults**: Collect and summarize results (logs, status, exit code) of a completed K8s job. Use after job submission to automate result collection. Returns job status and pod logs.
+- **kubectl**: Execute kubectl/vcctl commands against Kubernetes clusters. Supports two clusters via the 'cluster' parameter: 'a3' (A3 cluster, Ascend 910B NPUs, default) and 'muxi' (沐曦 cluster, MetaX GPUs). Read-only operations are allowed by default; mutating operations require confirmDangerous=true.
+- **submitK8sJob**: Submit a Volcano K8s job to the A3 cluster (Ascend 910B) or Muxi cluster (MetaX GPUs). Set 'cluster' to 'a3' or 'muxi'. Each cluster has different default images, GPU types, and resource limits. Always confirm target cluster, image, GPU count, and command with the user, then set confirmSubmit=true.
+- **collectJobResults**: Collect and summarize results (logs, status, exit code) of a completed K8s job. Supports 'cluster' parameter ('a3' or 'muxi'). Use after job submission to automate result collection.
 - **getSkillInstructions**: Load detailed workflow instructions for a scientific skill by its slug. Use when the user's request matches a skill from the catalog.
 - **listMcpTools**: List all available tools on an MCP server by URL. **You MUST call this tool before calling any MCP tool via bash** to discover the correct tool names and parameter schemas. Never guess or assume MCP tool names.
 - **listRemoteProfiles**: List all configured remote execution profiles for the current workspace. **Always call this first** before using any remote execution tool to discover the correct profileId. Never guess profile IDs.
@@ -100,7 +100,7 @@ ${CONTEXT_COMPACTION_SECTION}
 7. Keep file writes minimal — don't rewrite entire files when a small change suffices.
 8. If a command fails, analyze the error and try an alternative approach.
 9. File paths are relative to the workspace root unless specified as absolute.
-10. When submitting K8s jobs, always confirm with the user: the container image, GPU count, and the exact command before calling submitK8sJob with confirmSubmit=true. After submission, use kubectl to check job status or use collectJobResults to automatically collect the results.
+10. When submitting K8s jobs, always confirm with the user: the target cluster ('a3' for Ascend 910B or 'muxi' for MetaX GPUs), the container image, GPU count, and the exact command before calling submitK8sJob with confirmSubmit=true. After submission, use kubectl (with the same cluster parameter) to check job status or use collectJobResults to automatically collect the results.
 11. When the user asks to search for academic articles or papers, use the searchArticles tool. Present results as a numbered list with title, authors, date, and a brief excerpt. After presenting results, offer to summarize selected articles and find related papers.
 12. After submitting a K8s job, proactively offer to collect results using collectJobResults when the job is likely to complete. Record all cluster operations for visibility in the cluster dashboard.
 13. **When the user's request involves scientific computing** (drug discovery, protein analysis, genomics, chemistry, physics, etc.), check the skill catalog and use the matching skill via getSkillInstructions. Always prefer using a skill over manual ad-hoc solutions.
