@@ -83,7 +83,7 @@ mkdir -p "${LOG_DIR}"
 log "Creating workspace: ${WORKSPACE_NAME}"
 log "Folder: ${WORKSPACE_FOLDER}"
 
-WS_RESP=$(curl -sf -X POST "${API}/workspaces" \
+WS_RESP=$(curl -s -X POST "${API}/workspaces" \
   -H "Content-Type: application/json" \
   -d "$(jq -n --arg name "$WORKSPACE_NAME" --arg fp "$WORKSPACE_FOLDER" \
     '{name: $name, folderPath: $fp}')")
@@ -110,7 +110,7 @@ run_session() {
 
     # 1) Create session
     local sess_resp
-    sess_resp=$(curl -sf -X POST "${API}/deep-research/sessions" \
+    sess_resp=$(curl -s -X POST "${API}/deep-research/sessions" \
       -H "Content-Type: application/json" \
       -d "$(jq -n \
         --arg ws "$WORKSPACE_ID" \
@@ -128,13 +128,22 @@ run_session() {
 
     # 2) Start orchestrator run
     local run_resp
-    run_resp=$(curl -sf -X POST "${API}/deep-research/sessions/${session_id}/run")
+    run_resp=$(curl -s -X POST "${API}/deep-research/sessions/${session_id}/run")
     echo "Run started: ${run_resp}"
+
+    # Check if run start failed
+    local run_error
+    run_error=$(echo "$run_resp" | jq -r '.error // empty')
+    if [[ -n "$run_error" ]]; then
+      echo "FAIL: Could not start run: ${run_error}"
+      return 1
+    fi
 
     # 3) Poll until terminal state, auto-confirming checkpoints
     local elapsed=0
     local status=""
     local final_status=""
+    local last_confirmed_id=""
 
     while [[ $elapsed -lt $MAX_POLL_TIME ]]; do
       sleep "$POLL_INTERVAL"
@@ -151,29 +160,30 @@ run_session() {
         break
       fi
 
-      # Only fetch nodes when the session actually needs user interaction
-      if [[ "$status" == "awaiting_user_confirmation" || "$status" == "awaiting_approval" ]]; then
+      # Auto-confirm checkpoints — use pendingCheckpointId from session data
+      if [[ "$status" == "awaiting_user_confirmation" ]]; then
+        local checkpoint_id
+        checkpoint_id=$(echo "$sess_data" | jq -r '.pendingCheckpointId // empty')
+        if [[ -n "$checkpoint_id" && "$checkpoint_id" != "${last_confirmed_id:-}" ]]; then
+          echo "[${elapsed}s] Auto-confirming checkpoint ${checkpoint_id}..."
+          local confirm_resp
+          confirm_resp=$(curl -sf -X POST "${API}/deep-research/sessions/${session_id}/confirm" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg nid "$checkpoint_id" '{nodeId: $nid, outcome: "confirmed"}')" \
+            2>/dev/null || echo '{"error":"confirm failed"}')
+          echo "  confirm: ${confirm_resp}"
+          last_confirmed_id="$checkpoint_id"
+        fi
+      fi
+
+      # Auto-approve execution steps — find from nodes list
+      if [[ "$status" == "awaiting_approval" ]]; then
+        echo "[${elapsed}s] Awaiting approval — auto-approving..."
         local nodes
         nodes=$(curl -sf "${API}/deep-research/sessions/${session_id}/nodes" 2>/dev/null || echo '[]')
-
-        # Auto-confirm checkpoints
-        if [[ "$status" == "awaiting_user_confirmation" ]]; then
-          echo "[${elapsed}s] Awaiting confirmation — auto-confirming..."
-          if ! api_auto_action "$API" "$session_id" "$nodes" \
-              '[.[] | select(.status == "awaiting_user_confirmation" or .status == "checkpoint" or .nodeType == "checkpoint")] | last | .id // empty' \
-              "confirm" '{"outcome":"confirmed"}'; then
-            echo "  No checkpoint node found, restarting run..."
-            curl -sf -X POST "${API}/deep-research/sessions/${session_id}/run" >/dev/null 2>&1 || true
-          fi
-        fi
-
-        # Auto-approve execution steps
-        if [[ "$status" == "awaiting_approval" ]]; then
-          echo "[${elapsed}s] Awaiting approval — auto-approving..."
-          api_auto_action "$API" "$session_id" "$nodes" \
-            '[.[] | select(.status == "awaiting_approval")] | first | .id // empty' \
-            "approve" '{"approved":true}' || true
-        fi
+        api_auto_action "$API" "$session_id" "$nodes" \
+          '[.[] | select(.status == "awaiting_approval")] | first | .id // empty' \
+          "approve" '{"approved":true}' || true
       fi
 
       echo "[${elapsed}s] status=${status}"
@@ -220,15 +230,15 @@ echo ""
 # Reap finished children and compact the active_pids array.
 reap_children() {
   local new_pids=()
-  for pid in "${active_pids[@]}"; do
+  local pid
+  for pid in "${active_pids[@]+"${active_pids[@]}"}"; do
     if kill -0 "$pid" 2>/dev/null; then
       new_pids+=("$pid")
     else
-      # Reap immediately to prevent PID reuse confusion
       wait "$pid" 2>/dev/null || true
     fi
   done
-  active_pids=("${new_pids[@]}")
+  active_pids=("${new_pids[@]+"${new_pids[@]}"}")
 }
 
 active_pids=()

@@ -31,7 +31,7 @@ api_auto_action() {
     local payload
     payload=$(echo "$extra_json" | jq --arg nid "$node_id" '. + {nodeId: $nid}')
     local resp
-    resp=$(curl -sf -X POST "${api}/deep-research/sessions/${sid}/${endpoint}" \
+    resp=$(curl -s -X POST "${api}/deep-research/sessions/${sid}/${endpoint}" \
       -H "Content-Type: application/json" \
       -d "$payload" 2>/dev/null || echo '{"error":"'"$endpoint"' failed"}')
     echo "  ${endpoint} node ${node_id}: ${resp}"
