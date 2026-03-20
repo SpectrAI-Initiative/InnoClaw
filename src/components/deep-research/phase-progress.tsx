@@ -1,21 +1,32 @@
 "use client";
 
-import { PHASE_ORDER, type Phase, type BudgetUsage, type BudgetLimits, type SessionStatus } from "@/lib/deep-research/types";
+import { PHASE_ORDER, PHASE_STAGE_NUMBER, type Phase, type BudgetUsage, type BudgetLimits, type SessionStatus } from "@/lib/deep-research/types";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, Loader2, PauseCircle } from "lucide-react";
+import { CheckCircle2, Circle, Loader2, PauseCircle, AlertTriangle, StopCircle, BookX } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 const PHASE_LABELS: Record<Phase, string> = {
   intake: "Intake",
   planning: "Planning",
   evidence_collection: "Evidence",
-  structured_understanding: "Understand",
+  literature_synthesis: "Synthesis",
   reviewer_deliberation: "Review",
   decision: "Decision",
-  execution_planning: "Exec Plan",
-  execution: "Execution",
-  review_correction: "Correction",
+  additional_literature: "More Lit.",
+  validation_planning: "Val. Plan",
+  resource_acquisition: "Resources",
+  experiment_execution: "Experiment",
+  validation_review: "Val. Review",
   final_report: "Report",
+};
+
+const STATUS_MESSAGES: Partial<Record<SessionStatus, { text: string; color: string; icon: "pause" | "alert" | "stop" | "blocked" }>> = {
+  awaiting_user_confirmation: { text: "Halted — waiting for your confirmation", color: "text-amber-600 dark:text-amber-400", icon: "pause" },
+  stopped_by_user: { text: "Stopped by user", color: "text-red-600 dark:text-red-400", icon: "stop" },
+  literature_blocked: { text: "Literature blocked — no evidence retrieved", color: "text-orange-600 dark:text-orange-400", icon: "blocked" },
+  awaiting_additional_literature: { text: "Awaiting additional literature approval", color: "text-amber-600 dark:text-amber-400", icon: "pause" },
+  reviewer_battle_in_progress: { text: "Reviewer deliberation in progress", color: "text-blue-600 dark:text-blue-400", icon: "alert" },
+  execution_prepared: { text: "Execution prepared — awaiting approval", color: "text-amber-600 dark:text-amber-400", icon: "pause" },
 };
 
 interface PhaseProgressProps {
@@ -27,21 +38,31 @@ interface PhaseProgressProps {
 
 export function PhaseProgress({ currentPhase, sessionStatus, budget, budgetLimits }: PhaseProgressProps) {
   const currentIndex = PHASE_ORDER.indexOf(currentPhase);
+  const currentStage = PHASE_STAGE_NUMBER[currentPhase] ?? 0;
   const budgetPercent = Math.min(
     100,
     Math.round((budget.totalTokens / budgetLimits.maxTotalTokens) * 100)
   );
-  const isBlocked = sessionStatus === "awaiting_user_confirmation";
+  const isBlocked = sessionStatus === "awaiting_user_confirmation" || sessionStatus === "literature_blocked" || sessionStatus === "execution_prepared";
+  const statusMsg = STATUS_MESSAGES[sessionStatus];
 
   return (
     <div className="space-y-2 px-3 py-2 border-b border-border/50">
-      {/* Blocked indicator */}
-      {isBlocked && (
-        <div className="flex items-center gap-1.5 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
-          <PauseCircle className="h-3 w-3" />
-          Halted — waiting for your confirmation
+      {/* Status indicator */}
+      {statusMsg && (
+        <div className={cn("flex items-center gap-1.5 text-[10px] font-medium", statusMsg.color)}>
+          {statusMsg.icon === "pause" ? <PauseCircle className="h-3 w-3" /> :
+           statusMsg.icon === "stop" ? <StopCircle className="h-3 w-3" /> :
+           statusMsg.icon === "blocked" ? <BookX className="h-3 w-3" /> :
+           <AlertTriangle className="h-3 w-3" />}
+          {statusMsg.text}
         </div>
       )}
+
+      {/* Stage counter */}
+      <div className="text-[10px] text-muted-foreground">
+        Stage {currentStage}/11 — {PHASE_LABELS[currentPhase]}
+      </div>
 
       {/* Phase steps */}
       <div className="flex items-center gap-0.5 overflow-x-auto">

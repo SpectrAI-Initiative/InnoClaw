@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Play, Brain, Trash2 } from "lucide-react";
+import { Play, Brain, Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
   useDeepResearchSessions,
@@ -23,6 +23,7 @@ import {
   useDeepResearchNodes,
   useDeepResearchArtifacts,
   useDeepResearchEvents,
+  useDeepResearchExecutions,
 } from "@/lib/hooks/use-deep-research";
 import { SessionList } from "./session-list";
 import { IntakeScreen } from "./intake-screen";
@@ -32,9 +33,13 @@ import { PhaseProgress } from "./phase-progress";
 import { WorkflowGraph } from "./workflow-graph";
 import { NodeDetailDrawer } from "./node-detail-drawer";
 import { DeleteSessionDialog } from "./delete-session-dialog";
-import type { ConfirmationOutcome } from "@/lib/deep-research/types";
+import { RequirementPanel } from "./requirement-panel";
+import { ReviewerBattlePanel } from "./reviewer-battle-panel";
+import { ExecutionStatusPanel } from "./execution-status-panel";
+import type { ConfirmationOutcome, ReviewerBattleResultExtended, RequirementState } from "@/lib/deep-research/types";
 
 type PanelView = "list" | "intake" | "session";
+type TabView = "chat" | "requirements" | "reviewers" | "execution";
 
 interface DeepResearchPanelProps {
   workspaceId: string;
@@ -46,6 +51,7 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabView>("chat");
 
   const { sessions, mutate: mutateSessions } = useDeepResearchSessions(workspaceId);
   const { session, mutate: mutateSession } = useDeepResearchSession(activeSessionId ?? undefined);
@@ -53,8 +59,24 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
   const { nodes } = useDeepResearchNodes(activeSessionId ?? undefined);
   const { artifacts } = useDeepResearchArtifacts(activeSessionId ?? undefined);
   const { events } = useDeepResearchEvents(activeSessionId ?? undefined);
+  const { executions } = useDeepResearchExecutions(activeSessionId ?? undefined);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) ?? null;
+
+  // Extract requirement state and battle result from artifacts for panels
+  const requirementStateArtifact = artifacts.find(a => a.artifactType === "checkpoint" && (a.content as Record<string, unknown>).requirementState);
+  const latestBattleArtifact = [...artifacts].reverse().find(a => a.artifactType === "reviewer_battle_result");
+  const battleResult = latestBattleArtifact?.content as unknown as ReviewerBattleResultExtended | null ?? null;
+
+  // Auto-switch tab based on phase
+  const autoTabForPhase = useCallback((phase: string) => {
+    if (phase === "reviewer_deliberation" || phase === "validation_review") return "reviewers";
+    if (phase === "experiment_execution" || phase === "resource_acquisition") return "execution";
+    return null;
+  }, []);
+
+  // Requirement state from SWR - placeholder (would need its own API endpoint or derive from artifacts)
+  const requirementState: RequirementState | null = null;
 
   // --- Navigation ---
 
@@ -227,11 +249,13 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
   }
 
   // Active session view
-  const isRunning = session.status === "running";
-  const isAwaitingConfirmation = session.status === "awaiting_user_confirmation";
-  const isCompleted = session.status === "completed";
+  const isRunning = session.status === "running" || session.status === "reviewing" || session.status === "awaiting_resource" || session.status === "literature_in_progress" || session.status === "planning_in_progress" || session.status === "reviewer_battle_in_progress" || session.status === "execution_in_progress" || session.status === "validation_planning_in_progress";
+  const isAwaitingConfirmation = session.status === "awaiting_user_confirmation" || session.status === "execution_prepared" || session.status === "awaiting_additional_literature";
+  const isCompleted = session.status === "completed" || session.status === "final_report_generated";
   const isFailed = session.status === "failed";
-  const canStart = ["intake", "paused", "awaiting_approval"].includes(session.status);
+  const isLiteratureBlocked = session.status === "literature_blocked";
+  const isStopped = session.status === "stopped_by_user";
+  const canStart = ["intake", "paused", "awaiting_approval", "failed"].includes(session.status);
 
   return (
     <div className="flex flex-col h-full">
@@ -255,7 +279,7 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
 
         <div className="flex-1" />
 
-        {canStart && (
+        {canStart && !isFailed && (
           <Button size="sm" className="h-7 px-2 gap-1" onClick={handleStartRun}>
             <Play className="h-3 w-3" />
             <span className="text-xs">{session.status === "intake" ? "Start" : "Resume"}</span>
@@ -277,9 +301,29 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
         )}
 
         {isFailed && (
-          <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
-            <div className="h-2 w-2 rounded-full bg-red-500" />
-            Failed
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
+              <div className="h-2 w-2 rounded-full bg-red-500" />
+              Failed
+            </div>
+            <Button size="sm" variant="outline" className="h-7 px-2 gap-1" onClick={handleStartRun}>
+              <RotateCcw className="h-3 w-3" />
+              <span className="text-xs">Retry</span>
+            </Button>
+          </div>
+        )}
+
+        {isStopped && (
+          <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+            <div className="h-2 w-2 rounded-full bg-gray-500" />
+            Stopped by user
+          </div>
+        )}
+
+        {isLiteratureBlocked && (
+          <div className="flex items-center gap-1.5 text-xs text-orange-600 dark:text-orange-400">
+            <div className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+            Literature blocked — no evidence
           </div>
         )}
 
@@ -306,14 +350,12 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
       {/* Main content */}
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup orientation="horizontal">
-          {/* Left: Chat + Phase */}
+          {/* Left: Tabs + Content */}
           <ResizablePanel defaultSize={45} minSize={25}>
             <div className="flex flex-col h-full">
               {isCompleted ? (
-                /* Completed: show full report view */
                 <FinalReportView session={session} artifacts={artifacts} />
               ) : (
-                /* In progress: show phase progress + chat */
                 <>
                   <PhaseProgress
                     currentPhase={session.phase}
@@ -321,16 +363,44 @@ export function DeepResearchPanel({ workspaceId }: DeepResearchPanelProps) {
                     budget={session.budget}
                     budgetLimits={session.config.budget}
                   />
+                  {/* Tab bar */}
+                  <div className="flex gap-0.5 px-2 py-1 border-b border-border/50 bg-muted/20 shrink-0">
+                    {(["chat", "requirements", "reviewers", "execution"] as TabView[]).map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`px-2 py-1 text-[11px] rounded transition-colors ${
+                          activeTab === tab
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {tab === "chat" ? "Chat" : tab === "requirements" ? "Requirements" : tab === "reviewers" ? "Reviewers" : "Execution"}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Tab content */}
                   <div className="flex-1 min-h-0">
-                    <ResearchChat
-                      session={session}
-                      messages={messages}
-                      nodes={nodes}
-                      artifacts={artifacts}
-                      onSendMessage={handleSendMessage}
-                      onApprove={handleApprove}
-                      onConfirm={handleConfirm}
-                    />
+                    {activeTab === "chat" && (
+                      <ResearchChat
+                        session={session}
+                        messages={messages}
+                        nodes={nodes}
+                        artifacts={artifacts}
+                        onSendMessage={handleSendMessage}
+                        onApprove={handleApprove}
+                        onConfirm={handleConfirm}
+                      />
+                    )}
+                    {activeTab === "requirements" && (
+                      <RequirementPanel requirementState={requirementState} />
+                    )}
+                    {activeTab === "reviewers" && (
+                      <ReviewerBattlePanel battleResult={battleResult} />
+                    )}
+                    {activeTab === "execution" && (
+                      <ExecutionStatusPanel executions={executions} />
+                    )}
                   </div>
                 </>
               )}

@@ -5,10 +5,16 @@ import {
   deepResearchNodes,
   deepResearchArtifacts,
   deepResearchEvents,
+  deepResearchRequirements,
+  deepResearchExecutionRecords,
 } from "@/lib/db/schema";
 import { eq, and, desc, gt } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { DEFAULT_CONFIG, createEmptyUsage } from "./model-router";
+import {
+  DEFAULT_CONFIG,
+  createEmptyUsage,
+  PHASE_STAGE_NUMBER,
+} from "./types";
 import type {
   DeepResearchSession,
   DeepResearchMessage,
@@ -27,6 +33,10 @@ import type {
   NodeStatus,
   ConfirmationOutcome,
   CheckpointPackage,
+  RequirementState,
+  PersistedExecutionRecord,
+  ExecutionRecordType,
+  ExecutionRecordStatus,
 } from "./types";
 
 // --- Helpers ---
@@ -55,6 +65,9 @@ function parseSession(row: typeof deepResearchSessions.$inferSelect): DeepResear
     config: parseJson<DeepResearchConfig>(row.configJson, DEFAULT_CONFIG),
     budget: parseJson<BudgetUsage>(row.budgetJson, createEmptyUsage()),
     pendingCheckpointId: row.pendingCheckpointId ?? null,
+    literatureRound: (row as Record<string, unknown>).literatureRound as number ?? 0,
+    reviewerRound: (row as Record<string, unknown>).reviewerRound as number ?? 0,
+    executionLoop: (row as Record<string, unknown>).executionLoop as number ?? 0,
     error: row.error,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -68,6 +81,8 @@ function parseMessage(row: typeof deepResearchMessages.$inferSelect): DeepResear
     role: row.role as MessageRole,
     content: row.content,
     metadata: parseJson<Record<string, unknown> | null>(row.metadataJson, null),
+    relatedNodeId: (row as Record<string, unknown>).relatedNodeId as string | null ?? null,
+    relatedArtifactIds: parseJson<string[]>((row as Record<string, unknown>).relatedArtifactIdsJson as string | null, []),
     createdAt: row.createdAt,
   };
 }
@@ -91,6 +106,7 @@ function parseNode(row: typeof deepResearchNodes.$inferSelect): DeepResearchNode
     branchKey: row.branchKey,
     retryOfId: row.retryOfId,
     retryCount: row.retryCount,
+    phase: ((row as Record<string, unknown>).phase as Phase) ?? "intake",
     requiresConfirmation: row.requiresConfirmation,
     confirmedAt: row.confirmedAt,
     confirmedBy: row.confirmedBy,
@@ -99,6 +115,7 @@ function parseNode(row: typeof deepResearchNodes.$inferSelect): DeepResearchNode
     positionY: row.positionY,
     startedAt: row.startedAt,
     completedAt: row.completedAt,
+    stageNumber: ((row as Record<string, unknown>).stageNumber as number) ?? PHASE_STAGE_NUMBER[((row as Record<string, unknown>).phase as Phase) ?? "intake"] ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -141,7 +158,13 @@ export async function createSession(
 ): Promise<DeepResearchSession> {
   const id = nanoid();
   const now = new Date().toISOString();
-  const fullConfig = { ...DEFAULT_CONFIG, ...config };
+  const fullConfig: DeepResearchConfig = {
+    ...DEFAULT_CONFIG,
+    ...config,
+    budget: { ...DEFAULT_CONFIG.budget, ...config?.budget },
+    literature: { ...DEFAULT_CONFIG.literature, ...config?.literature },
+    execution: { ...DEFAULT_CONFIG.execution, ...config?.execution },
+  };
   const usage = createEmptyUsage();
 
   await db.insert(deepResearchSessions).values({
@@ -184,7 +207,6 @@ export async function listSessions(workspaceId: string): Promise<DeepResearchSes
 }
 
 export async function deleteSession(sessionId: string): Promise<void> {
-  // CASCADE deletes handle messages, nodes, artifacts, and events automatically
   await db
     .delete(deepResearchSessions)
     .where(eq(deepResearchSessions.id, sessionId));
@@ -198,6 +220,9 @@ export async function updateSession(
     config: DeepResearchConfig;
     budget: BudgetUsage;
     pendingCheckpointId: string | null;
+    literatureRound: number;
+    reviewerRound: number;
+    executionLoop: number;
     error: string | null;
     title: string;
   }>
@@ -210,6 +235,9 @@ export async function updateSession(
   if (updates.config !== undefined) dbUpdates.configJson = toJson(updates.config);
   if (updates.budget !== undefined) dbUpdates.budgetJson = toJson(updates.budget);
   if (updates.pendingCheckpointId !== undefined) dbUpdates.pendingCheckpointId = updates.pendingCheckpointId;
+  if (updates.literatureRound !== undefined) dbUpdates.literatureRound = updates.literatureRound;
+  if (updates.reviewerRound !== undefined) dbUpdates.reviewerRound = updates.reviewerRound;
+  if (updates.executionLoop !== undefined) dbUpdates.executionLoop = updates.executionLoop;
   if (updates.error !== undefined) dbUpdates.error = updates.error;
   if (updates.title !== undefined) dbUpdates.title = updates.title;
 
@@ -231,7 +259,9 @@ export async function addMessage(
   sessionId: string,
   role: MessageRole,
   content: string,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  relatedNodeId?: string,
+  relatedArtifactIds?: string[]
 ): Promise<DeepResearchMessage> {
   const id = nanoid();
   const now = new Date().toISOString();
@@ -242,11 +272,14 @@ export async function addMessage(
     role,
     content,
     metadataJson: toJson(metadata ?? null),
+    relatedNodeId: relatedNodeId ?? null,
+    relatedArtifactIdsJson: toJson(relatedArtifactIds ?? []),
     createdAt: now,
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
 
   const eventType: EventType = role === "user" ? "user_message" : "brain_response";
-  await appendEvent(sessionId, eventType, undefined, role, undefined, undefined, {
+  await appendEvent(sessionId, eventType, relatedNodeId, role, undefined, undefined, {
     messageId: id,
   });
 
@@ -286,16 +319,19 @@ export async function createNode(
     inputJson: toJson(spec.input ?? null),
     dependsOnJson: toJson(spec.dependsOn ?? []),
     branchKey: spec.branchKey ?? null,
+    phase: spec.phase ?? null,
     retryCount: 0,
     requiresConfirmation: true,
     createdAt: now,
     updatedAt: now,
-  });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
 
   await appendEvent(sessionId, "node_created", id, "system", undefined, undefined, {
     nodeType: spec.nodeType,
     label: spec.label,
     role: spec.assignedRole,
+    phase: spec.phase,
   });
 
   const [row] = await db
@@ -424,9 +460,6 @@ export async function createArtifact(
   return parseArtifact(row);
 }
 
-/**
- * Create a checkpoint artifact and link it to the session.
- */
 export async function createCheckpoint(
   sessionId: string,
   nodeId: string,
@@ -452,12 +485,11 @@ export async function getArtifacts(
   sessionId: string,
   filters?: { nodeId?: string; type?: ArtifactType }
 ): Promise<DeepResearchArtifact[]> {
-  const query = db
+  const rows = await db
     .select()
     .from(deepResearchArtifacts)
-    .where(eq(deepResearchArtifacts.sessionId, sessionId));
-
-  const rows = await query.orderBy(deepResearchArtifacts.createdAt);
+    .where(eq(deepResearchArtifacts.sessionId, sessionId))
+    .orderBy(deepResearchArtifacts.createdAt);
 
   let result = rows.map(parseArtifact);
   if (filters?.nodeId) {
@@ -477,9 +509,6 @@ export async function getArtifact(artifactId: string): Promise<DeepResearchArtif
   return row ? parseArtifact(row) : null;
 }
 
-/**
- * Get the latest checkpoint artifact for a session.
- */
 export async function getLatestCheckpoint(sessionId: string): Promise<DeepResearchArtifact | null> {
   const checkpoints = await getArtifacts(sessionId, { type: "checkpoint" });
   return checkpoints.length > 0 ? checkpoints[checkpoints.length - 1] : null;
@@ -536,4 +565,142 @@ export async function getEvents(
     .where(eq(deepResearchEvents.sessionId, sessionId))
     .orderBy(deepResearchEvents.createdAt);
   return rows.map(parseEvent);
+}
+
+// --- Requirements (Phase 1) ---
+
+export async function saveRequirementState(
+  sessionId: string,
+  state: RequirementState
+): Promise<void> {
+  const id = nanoid();
+  const now = new Date().toISOString();
+
+  await db.insert(deepResearchRequirements).values({
+    id,
+    sessionId,
+    version: state.version,
+    stateJson: JSON.stringify(state),
+    createdAt: now,
+  });
+
+  await appendEvent(sessionId, "requirement_changed", undefined, state.lastModifiedBy, undefined, undefined, {
+    version: state.version,
+    requirementCount: state.requirements.length,
+    constraintCount: state.constraints.length,
+  });
+}
+
+export async function getLatestRequirementState(
+  sessionId: string
+): Promise<RequirementState | null> {
+  const rows = await db
+    .select()
+    .from(deepResearchRequirements)
+    .where(eq(deepResearchRequirements.sessionId, sessionId))
+    .orderBy(desc(deepResearchRequirements.version))
+    .limit(1);
+
+  if (rows.length === 0) return null;
+  return parseJson<RequirementState>(rows[0].stateJson, null as unknown as RequirementState);
+}
+
+// --- Execution Records (Phase 5) ---
+
+export async function createExecutionRecord(
+  sessionId: string,
+  nodeId: string,
+  recordType: ExecutionRecordType,
+  command: string,
+  configJson: Record<string, unknown> = {}
+): Promise<PersistedExecutionRecord> {
+  const id = nanoid();
+  const now = new Date().toISOString();
+
+  await db.insert(deepResearchExecutionRecords).values({
+    id,
+    sessionId,
+    nodeId,
+    recordType,
+    status: "pending",
+    command,
+    configJson: JSON.stringify(configJson),
+    createdAt: now,
+  });
+
+  const [row] = await db
+    .select()
+    .from(deepResearchExecutionRecords)
+    .where(eq(deepResearchExecutionRecords.id, id));
+
+  return parseExecutionRecord(row);
+}
+
+export async function updateExecutionRecord(
+  recordId: string,
+  updates: Partial<{
+    status: ExecutionRecordStatus;
+    remoteJobId: string;
+    remoteHost: string;
+    resultJson: Record<string, unknown>;
+    submittedAt: string;
+    startedAt: string;
+    completedAt: string;
+  }>
+): Promise<void> {
+  const dbUpdates: Record<string, unknown> = {};
+  if (updates.status !== undefined) dbUpdates.status = updates.status;
+  if (updates.remoteJobId !== undefined) dbUpdates.remoteJobId = updates.remoteJobId;
+  if (updates.remoteHost !== undefined) dbUpdates.remoteHost = updates.remoteHost;
+  if (updates.resultJson !== undefined) dbUpdates.resultJson = JSON.stringify(updates.resultJson);
+  if (updates.submittedAt !== undefined) dbUpdates.submittedAt = updates.submittedAt;
+  if (updates.startedAt !== undefined) dbUpdates.startedAt = updates.startedAt;
+  if (updates.completedAt !== undefined) dbUpdates.completedAt = updates.completedAt;
+
+  await db
+    .update(deepResearchExecutionRecords)
+    .set(dbUpdates)
+    .where(eq(deepResearchExecutionRecords.id, recordId));
+}
+
+export async function getExecutionRecords(
+  sessionId: string
+): Promise<PersistedExecutionRecord[]> {
+  const rows = await db
+    .select()
+    .from(deepResearchExecutionRecords)
+    .where(eq(deepResearchExecutionRecords.sessionId, sessionId))
+    .orderBy(deepResearchExecutionRecords.createdAt);
+  return rows.map(parseExecutionRecord);
+}
+
+export async function getExecutionRecord(
+  recordId: string
+): Promise<PersistedExecutionRecord | null> {
+  const [row] = await db
+    .select()
+    .from(deepResearchExecutionRecords)
+    .where(eq(deepResearchExecutionRecords.id, recordId));
+  return row ? parseExecutionRecord(row) : null;
+}
+
+function parseExecutionRecord(
+  row: typeof deepResearchExecutionRecords.$inferSelect
+): PersistedExecutionRecord {
+  return {
+    id: row.id,
+    sessionId: row.sessionId,
+    nodeId: row.nodeId,
+    recordType: row.recordType as ExecutionRecordType,
+    status: row.status as ExecutionRecordStatus,
+    remoteJobId: row.remoteJobId,
+    remoteHost: row.remoteHost,
+    command: row.command,
+    configJson: parseJson<Record<string, unknown>>(row.configJson, {}),
+    resultJson: parseJson<Record<string, unknown> | null>(row.resultJson, null),
+    submittedAt: row.submittedAt,
+    startedAt: row.startedAt,
+    completedAt: row.completedAt,
+    createdAt: row.createdAt,
+  };
 }

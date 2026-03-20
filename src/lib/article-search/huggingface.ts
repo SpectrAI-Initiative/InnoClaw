@@ -22,8 +22,8 @@ function getHfApiUrl(): string {
   return HF_DEFAULT_URL;
 }
 
-/** Request timeout in milliseconds. */
-const TIMEOUT_MS = 15_000;
+/** Request timeout in milliseconds. Allow extra time for proxied environments. */
+const TIMEOUT_MS = 25_000;
 
 /** Maximum number of retry attempts for transient network errors. */
 const MAX_RETRIES = 1;

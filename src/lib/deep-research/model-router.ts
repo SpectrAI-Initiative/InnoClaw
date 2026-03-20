@@ -10,6 +10,7 @@ import type {
 } from "./types";
 
 // --- Default route chains per role ---
+// Enforces hierarchy: Main Brain = Opus, Reviewers = Sonnet, Workers = Kimi/Sonnet
 
 interface ModelRoute {
   provider: string;
@@ -17,22 +18,33 @@ interface ModelRoute {
 }
 
 const DEFAULT_ROUTES: Record<ModelRole, ModelRoute[]> = {
-  // TODO: restore proper model assignments after flow validation
+  // Main Brain: Kimi first for testing, then Opus/Sonnet fallback
   main_brain: [
     { provider: "moonshot", modelId: "kimi-k2.5" },
+    { provider: "anthropic", modelId: "claude-opus-4-20250514" },
     { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
   ],
+  // Reviewer A: Kimi first for testing
   reviewer_a: [
     { provider: "moonshot", modelId: "kimi-k2.5" },
     { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
   ],
+  // Reviewer B: Kimi first for testing
   reviewer_b: [
     { provider: "moonshot", modelId: "kimi-k2.5" },
     { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
   ],
+  // Workers: Kimi first for testing
   worker: [
     { provider: "moonshot", modelId: "kimi-k2.5" },
     { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
+    { provider: "openai", modelId: "gpt-4o" },
+  ],
+  // Synthesizer: same as main_brain (synthesis needs strong reasoning)
+  synthesizer: [
+    { provider: "moonshot", modelId: "kimi-k2.5" },
+    { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
+    { provider: "openai", modelId: "gpt-4o" },
   ],
 };
 
@@ -73,19 +85,6 @@ export function getModelForRole(
 
 // --- Budget tracking ---
 
-const DEFAULT_BUDGET: BudgetLimits = {
-  maxTotalTokens: 2_000_000,
-  maxOpusTokens: 500_000,
-};
-
-export function getDefaultBudget(): BudgetLimits {
-  return { ...DEFAULT_BUDGET };
-}
-
-export function createEmptyUsage(): BudgetUsage {
-  return { totalTokens: 0, opusTokens: 0, byRole: {}, byNode: {} };
-}
-
 export function checkBudget(
   role: ModelRole,
   usage: BudgetUsage,
@@ -116,13 +115,3 @@ export function trackUsage(
   updated.byNode = { ...updated.byNode, [nodeId]: (updated.byNode[nodeId] || 0) + tokens };
   return updated;
 }
-
-// --- Default config ---
-
-export const DEFAULT_CONFIG: DeepResearchConfig = {
-  budget: getDefaultBudget(),
-  maxWorkerFanOut: 8,
-  maxReviewerRounds: 2,
-  maxExecutionLoops: 3,
-  maxWorkerConcurrency: 4,
-};

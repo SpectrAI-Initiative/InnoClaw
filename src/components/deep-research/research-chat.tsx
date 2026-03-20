@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Send, Brain, User, CheckCircle, XCircle, Loader2, FileText } from "lucide-react";
+import { Send, Brain, User, CheckCircle, XCircle, Loader2, FileText, Tag, PlayCircle, Square, RotateCcw } from "lucide-react";
 import { CheckpointReview } from "./checkpoint-review";
 import { ArtifactViewer } from "./artifact-viewer";
 import type {
@@ -15,6 +15,7 @@ import type {
   DeepResearchArtifact,
   ConfirmationOutcome,
 } from "@/lib/deep-research/types";
+import { PHASE_STAGE_NUMBER, type Phase } from "@/lib/deep-research/types";
 
 interface ResearchChatProps {
   session: DeepResearchSession;
@@ -42,10 +43,11 @@ export function ResearchChat({
   const awaitingApprovalNodes = nodes.filter((n) => n.status === "awaiting_approval");
   const isRunning = session.status === "running";
   const isAwaitingConfirmation = session.status === "awaiting_user_confirmation";
-  const isCompleted = session.status === "completed";
+  const isCompleted = session.status === "completed" || session.status === "final_report_generated";
   const isFailed = session.status === "failed";
   const isCancelled = session.status === "cancelled";
-  const isTerminal = isCompleted || isFailed || isCancelled;
+  const isStopped = session.status === "stopped_by_user";
+  const isTerminal = isCompleted || isFailed || isCancelled || isStopped;
 
   // Get the pending checkpoint data
   const pendingCheckpoint = isAwaitingConfirmation && session.pendingCheckpointId
@@ -91,6 +93,16 @@ export function ResearchChat({
     await onConfirm(targetNodeId, outcome, feedback);
   };
 
+  // Fallback resume handler — for awaiting_user_confirmation with no checkpoint
+  const handleFallbackResume = async (outcome: ConfirmationOutcome, feedback?: string) => {
+    // Find ANY node we can use as target — prefer awaiting_user_confirmation, then last completed
+    const awaitingNodes = nodes.filter((n) => n.status === "awaiting_user_confirmation");
+    const lastCompleted = [...nodes].reverse().find((n) => n.status === "completed");
+    const targetNodeId = awaitingNodes[0]?.id || lastCompleted?.id;
+    if (!targetNodeId) return;
+    await onConfirm(targetNodeId, outcome, feedback);
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -110,39 +122,71 @@ export function ResearchChat({
           {session.status.replace(/_/g, " ")}
         </Badge>
         <Badge variant="outline" className="text-[10px]">
-          {session.phase}
+          S{PHASE_STAGE_NUMBER[session.phase as Phase] ?? "?"} — {session.phase}
         </Badge>
       </div>
 
       {/* Messages */}
       <ScrollArea className="flex-1 min-h-0" ref={scrollRef}>
         <div className="p-3 space-y-3">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              {msg.role !== "user" && (
-                <div className="shrink-0 h-6 w-6 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                  <Brain className="h-3.5 w-3.5 text-purple-600 dark:text-purple-300" />
-                </div>
-              )}
+          {messages.map((msg) => {
+            const relatedNode = msg.relatedNodeId
+              ? nodes.find(n => n.id === msg.relatedNodeId) ?? null
+              : null;
+            const relatedArts = msg.relatedArtifactIds.length > 0
+              ? artifacts.filter(a => msg.relatedArtifactIds.includes(a.id))
+              : [];
+
+            return (
               <div
-                className={`max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
-                  msg.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}
+                key={msg.id}
+                className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                {msg.content}
-              </div>
-              {msg.role === "user" && (
-                <div className="shrink-0 h-6 w-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                  <User className="h-3.5 w-3.5 text-blue-600 dark:text-blue-300" />
+                {msg.role !== "user" && (
+                  <div className="shrink-0 h-6 w-6 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                    <Brain className="h-3.5 w-3.5 text-purple-600 dark:text-purple-300" />
+                  </div>
+                )}
+                <div className="max-w-[85%] space-y-1">
+                  <div
+                    className={`rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
+                      msg.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                  {/* Phase badge + related node/artifact chips */}
+                  {msg.role !== "user" && (relatedNode || relatedArts.length > 0) && (
+                    <div className="flex flex-wrap gap-1 px-1">
+                      {relatedNode && (
+                        <Badge variant="secondary" className="text-[9px] gap-0.5">
+                          <Tag className="h-2.5 w-2.5" />
+                          S{PHASE_STAGE_NUMBER[relatedNode.phase as Phase] ?? "?"} {relatedNode.phase}
+                        </Badge>
+                      )}
+                      {relatedNode && (
+                        <Badge variant="outline" className="text-[9px]">
+                          {relatedNode.label.slice(0, 30)}{relatedNode.label.length > 30 ? "..." : ""}
+                        </Badge>
+                      )}
+                      {relatedArts.map(a => (
+                        <Badge key={a.id} variant="outline" className="text-[9px]">
+                          {a.artifactType}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+                {msg.role === "user" && (
+                  <div className="shrink-0 h-6 w-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                    <User className="h-3.5 w-3.5 text-blue-600 dark:text-blue-300" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
           {/* Running indicator */}
           {isRunning && (
@@ -161,14 +205,74 @@ export function ResearchChat({
                 currentFindings: string;
                 openQuestions: string[];
                 recommendedNextAction: string;
+                continueWillDo?: string;
                 alternativeNextActions: string[];
                 artifactsToReview: string[];
                 phase: string;
                 stepType: string;
+                mainBrainAudit?: {
+                  whatWasCompleted: string;
+                  resultAssessment: "good" | "acceptable" | "concerning" | "problematic";
+                  issuesAndRisks: string[];
+                  recommendedNextAction: string;
+                  continueWillDo: string;
+                  alternativeActions: Array<{ label: string; description: string; actionType: string }>;
+                  canProceed: boolean;
+                };
+                literatureRoundInfo?: { roundNumber: number; papersCollected: number; coverageSummary: string };
+                reviewerBattleInfo?: { combinedVerdict: string; combinedConfidence: number; agreements: string[]; disagreements: string[]; needsMoreLiterature: boolean; needsExperimentalValidation: boolean };
+                executionInfo?: { stepsCompleted: number; stepsTotal: number; currentStatus: string };
+                transitionAction?: { nextPhase: string; description: string };
               }}
               artifacts={artifacts}
               onConfirm={handleCheckpointConfirm}
             />
+          )}
+
+          {/* Fallback confirmation panel — awaiting but no checkpoint artifact */}
+          {isAwaitingConfirmation && !pendingCheckpoint && (
+            <div className="border border-amber-300 dark:border-amber-700 rounded-lg bg-amber-50/50 dark:bg-amber-950/30 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                  Awaiting your decision
+                </span>
+                <Badge variant="outline" className="text-[10px]">
+                  S{PHASE_STAGE_NUMBER[session.phase as Phase] ?? "?"} — {session.phase.replace(/_/g, " ")}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                The session is paused and waiting for your input. You can continue to the next phase, or stop the research.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  className="h-7 px-3 text-xs gap-1.5"
+                  onClick={() => handleFallbackResume("confirmed")}
+                >
+                  <PlayCircle className="h-3.5 w-3.5" />
+                  Continue
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 px-3 text-xs gap-1.5"
+                  onClick={() => handleFallbackResume("revision_requested")}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Revise
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 px-3 text-xs gap-1.5 text-red-600"
+                  onClick={() => handleFallbackResume("stopped")}
+                >
+                  <Square className="h-3.5 w-3.5" />
+                  Stop
+                </Button>
+              </div>
+            </div>
           )}
 
           {/* Completed state — show final report */}
@@ -218,7 +322,17 @@ export function ResearchChat({
             <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
               <XCircle className="h-4 w-4 text-gray-500 shrink-0" />
               <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Research was stopped
+                Research was cancelled
+              </span>
+            </div>
+          )}
+
+          {/* Stopped by user */}
+          {isStopped && (
+            <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
+              <XCircle className="h-4 w-4 text-gray-500 shrink-0" />
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Research was stopped by user
               </span>
             </div>
           )}

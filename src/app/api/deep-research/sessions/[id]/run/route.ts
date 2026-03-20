@@ -26,9 +26,9 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ started: false, running: true });
     }
 
-    // If awaiting approval, paused, or stuck in "running" without an active run, resume
-    if (["awaiting_approval", "paused", "running"].includes(session.status)) {
-      await updateSession(sessionId, { status: "running" });
+    // If awaiting approval, paused, failed, or stuck in "running" without an active run, resume
+    if (["awaiting_approval", "paused", "running", "failed"].includes(session.status)) {
+      await updateSession(sessionId, { status: "running", error: null });
     }
 
     const started = runManager.startRun(sessionId);

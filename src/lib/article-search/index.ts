@@ -24,7 +24,7 @@ const cache = new SearchCache<Article[]>(15);
 export async function searchArticles(
   params: SearchParams
 ): Promise<SearchResult> {
-  const sources = params.sources ?? ["arxiv", "huggingface"];
+  const sources = params.sources ?? ["arxiv", "huggingface", "semantic-scholar"];
   const allArticles: Article[] = [];
   const errors: Record<string, string> = {};
 

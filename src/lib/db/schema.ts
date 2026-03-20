@@ -339,6 +339,9 @@ export const deepResearchSessions = sqliteTable("deep_research_sessions", {
   configJson: text("config_json"), // JSON: DeepResearchConfig
   budgetJson: text("budget_json"), // JSON: BudgetUsage
   pendingCheckpointId: text("pending_checkpoint_id"),
+  literatureRound: integer("literature_round").notNull().default(0),
+  reviewerRound: integer("reviewer_round").notNull().default(0),
+  executionLoop: integer("execution_loop").notNull().default(0),
   error: text("error"),
   createdAt: text("created_at")
     .notNull()
@@ -362,6 +365,8 @@ export const deepResearchMessages = sqliteTable("deep_research_messages", {
   role: text("role").notNull(), // user | main_brain | system
   content: text("content").notNull(),
   metadataJson: text("metadata_json"), // JSON: Record<string, unknown>
+  relatedNodeId: text("related_node_id"),
+  relatedArtifactIdsJson: text("related_artifact_ids_json"), // JSON: string[]
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -386,12 +391,14 @@ export const deepResearchNodes = sqliteTable("deep_research_nodes", {
   inputJson: text("input_json"), // JSON: Record<string, unknown>
   outputJson: text("output_json"), // JSON: Record<string, unknown>
   error: text("error"),
+  phase: text("phase"), // which phase spawned this node
   dependsOnJson: text("depends_on_json"), // JSON: string[]
   supersedesId: text("supersedes_id"),
   supersededById: text("superseded_by_id"),
   branchKey: text("branch_key"),
   retryOfId: text("retry_of_id"),
   retryCount: integer("retry_count").notNull().default(0),
+  requirementVersion: integer("requirement_version").notNull().default(0),
   requiresConfirmation: integer("requires_confirmation", { mode: "boolean" })
     .notNull()
     .default(true),
@@ -456,4 +463,50 @@ export const deepResearchEvents = sqliteTable("deep_research_events", {
     .default(sql`(datetime('now'))`),
 }, (table) => [
   index("dr_events_session_created_idx").on(table.sessionId, table.createdAt),
+]);
+
+// ============================================================
+// DEEP RESEARCH REQUIREMENTS (Phase 1)
+// ============================================================
+export const deepResearchRequirements = sqliteTable("deep_research_requirements", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => deepResearchSessions.id, { onDelete: "cascade" }),
+  version: integer("version").notNull().default(1),
+  stateJson: text("state_json").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+}, (table) => [
+  index("dr_requirements_session_idx").on(table.sessionId),
+  index("dr_requirements_version_idx").on(table.sessionId, table.version),
+]);
+
+// ============================================================
+// DEEP RESEARCH EXECUTION RECORDS (Phase 5)
+// ============================================================
+export const deepResearchExecutionRecords = sqliteTable("deep_research_execution_records", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => deepResearchSessions.id, { onDelete: "cascade" }),
+  nodeId: text("node_id").notNull(),
+  recordType: text("record_type").notNull().default("local"),
+  status: text("status").notNull().default("pending"),
+  remoteJobId: text("remote_job_id"),
+  remoteHost: text("remote_host"),
+  command: text("command").notNull().default(""),
+  configJson: text("config_json"),
+  resultJson: text("result_json"),
+  submittedAt: text("submitted_at"),
+  startedAt: text("started_at"),
+  completedAt: text("completed_at"),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+}, (table) => [
+  index("dr_exec_records_session_idx").on(table.sessionId),
+  index("dr_exec_records_status_idx").on(table.status),
+  index("dr_exec_records_node_idx").on(table.nodeId),
 ]);

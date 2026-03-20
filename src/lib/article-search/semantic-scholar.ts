@@ -13,8 +13,8 @@ import type { Article, SearchParams } from "./types";
 
 const S2_API_URL = "https://api.semanticscholar.org/graph/v1/paper/search";
 
-/** Request timeout in milliseconds. */
-const TIMEOUT_MS = 15_000;
+/** Request timeout in milliseconds. Allow extra time for proxied environments. */
+const TIMEOUT_MS = 30_000;
 
 /** Max retries on transient errors (429, 5xx, network). */
 const MAX_RETRIES = 3;

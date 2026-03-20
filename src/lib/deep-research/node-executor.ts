@@ -13,11 +13,8 @@ import type {
   DeepResearchArtifact,
   DeepResearchSession,
   DeepResearchMessage,
-  DeepResearchConfig,
-  BudgetUsage,
   ArtifactType,
   ArtifactProvenance,
-  ReviewerPacket,
 } from "./types";
 
 interface ExecutionContext {
@@ -104,6 +101,8 @@ export async function executeNode(
   }
 }
 
+// --- Node type dispatch ---
+
 async function executeByNodeType(
   node: DeepResearchNode,
   ctx: ExecutionContext,
@@ -124,38 +123,71 @@ async function executeByNodeType(
   );
 
   switch (node.nodeType) {
+    // Main brain nodes
     case "intake":
     case "plan":
     case "synthesize":
-    case "final_report": {
+    case "final_report":
       return executeBrainNode(node, ctx, model, abortSignal);
-    }
-    case "evidence_gather": {
+
+    // Worker evidence nodes
+    case "evidence_gather":
       return executeEvidenceGather(node, parentArtifacts, model, abortSignal);
-    }
-    case "summarize": {
+
+    case "evidence_extract":
+      return executeWorkerTask(node, parentArtifacts, model, abortSignal, "evidence_card");
+
+    // Worker summary/synthesis
+    case "summarize":
       return executeSummarize(node, parentArtifacts, model, abortSignal);
-    }
+
+    // Reviewer nodes
     case "review":
-    case "deliberate": {
+    case "deliberate":
       return executeReview(node, ctx.allArtifacts, model, abortSignal);
-    }
-    case "execute": {
-      return executeWorkerTask(node, parentArtifacts, model, abortSignal);
-    }
-    case "approve": {
-      // Approval nodes are handled by the orchestrator, not executed directly
+
+    // Main brain audit
+    case "audit":
+      return executeBrainNode(node, ctx, model, abortSignal);
+
+    // Validation planning (main brain)
+    case "validation_plan":
+      return executeBrainNode(node, ctx, model, abortSignal);
+
+    // Resource request (worker)
+    case "resource_request":
+      return executeWorkerTask(node, parentArtifacts, model, abortSignal, "execution_manifest");
+
+    // Execution (worker)
+    case "execute":
+      return executeWorkerTask(node, parentArtifacts, model, abortSignal, "step_result");
+
+    // Monitoring (worker)
+    case "monitor":
+      return executeWorkerTask(node, parentArtifacts, model, abortSignal, "step_result");
+
+    // Result collection (worker)
+    case "result_collect":
+      return executeWorkerTask(node, parentArtifacts, model, abortSignal, "experiment_result");
+
+    // Result comparison (main brain)
+    case "result_compare":
+      return executeBrainNode(node, ctx, model, abortSignal);
+
+    // Approval nodes — handled by orchestrator
+    case "approve":
       return {
         output: { status: "awaiting_approval" },
         artifacts: [],
         tokensUsed: 0,
       };
-    }
-    default: {
+
+    default:
       return executeGeneric(node, parentArtifacts, model, abortSignal);
-    }
   }
 }
+
+// --- Executor implementations ---
 
 async function executeBrainNode(
   node: DeepResearchNode,
@@ -185,9 +217,7 @@ async function executeBrainNode(
   const output = safeParseJson(result.text);
   const artifactType = getArtifactTypeForNode(node.nodeType);
 
-  // For final_report nodes, extract the actual report text from the BrainDecision
-  // The LLM returns { action, messageToUser, reasoning, ... } where messageToUser
-  // contains the full markdown report. Store it in a `report` field for clean access.
+  // For final_report nodes, extract the actual report text
   let artifactContent = output;
   if (node.nodeType === "final_report") {
     const reportText = (output.messageToUser as string)
@@ -224,15 +254,16 @@ async function executeEvidenceGather(
   model: ReturnType<typeof getModelForRole>["model"],
   abortSignal?: AbortSignal
 ) {
-  const query = (node.input as Record<string, unknown>)?.query as string
-    || (node.input as Record<string, unknown>)?.researchQuestion as string
+  const input = (node.input as Record<string, unknown>) ?? {};
+  const query = (input.query as string)
+    || (input.researchQuestion as string)
     || node.label;
-  const constraints = (node.input as Record<string, unknown>)?.constraints as Record<string, unknown> | undefined;
+  const maxSources = (input.maxPapers as number) || (input.maxSources as number) || 10;
+  const focusAreas = input.focusAreas as string[] | undefined;
 
   const systemPrompt = buildWorkerSystemPrompt(node, parentArtifacts, "evidence_gather");
-  const userPrompt = buildEvidenceGatherPrompt(query, constraints as { maxSources?: number; focusAreas?: string[] });
+  const userPrompt = buildEvidenceGatherPrompt(query, { maxSources, focusAreas });
 
-  // Provide real search tools so the model can find actual papers
   const searchTools = createSearchTools();
 
   const result = await generateText({
@@ -240,11 +271,45 @@ async function executeEvidenceGather(
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
     tools: searchTools,
-    stopWhen: stepCountIs(5), // Allow multiple tool calls for thorough search
+    stopWhen: stepCountIs(15),
     abortSignal,
   });
 
-  const output = safeParseJson(result.text);
+  // Log tool call statistics for debugging
+  const toolCalls = result.steps?.flatMap(s => s.toolCalls ?? []) ?? [];
+  const toolResults = result.steps?.flatMap(s => s.toolResults ?? []) ?? [];
+  console.log(
+    `[evidence-gather] node=${node.id} toolCalls=${toolCalls.length} toolResults=${toolResults.length} steps=${result.steps?.length ?? 0}`
+  );
+
+  // Extract articles from tool results as fallback if LLM text parsing fails
+  let output = safeParseJson(result.text);
+  if (!output || (typeof output === "object" && Object.keys(output).length === 0)) {
+    // Try to build output from tool results directly
+    const allArticles: unknown[] = [];
+    for (const tr of toolResults) {
+      const res = (tr as { output?: unknown }).output as { articles?: unknown[]; totalCount?: number } | undefined;
+      if (res?.articles && Array.isArray(res.articles)) {
+        allArticles.push(...res.articles);
+      }
+    }
+    if (allArticles.length > 0) {
+      output = {
+        sources: allArticles,
+        totalFound: allArticles.length,
+        query,
+        note: "Extracted directly from search tool results",
+      };
+    } else {
+      output = {
+        sources: [],
+        totalFound: 0,
+        query,
+        rawText: result.text?.slice(0, 2000) || "No response text",
+        note: "No articles found via search tools",
+      };
+    }
+  }
 
   return {
     output,
@@ -306,12 +371,12 @@ async function executeReview(
 ) {
   const role = node.assignedRole as "reviewer_a" | "reviewer_b";
 
-  // Target artifacts: summaries, evidence cards, execution results
+  // Target: summaries, evidence cards, execution results, provisional conclusions
   const targetArtifacts = allArtifacts.filter((a) =>
-    ["structured_summary", "evidence_card", "step_result", "provisional_conclusion"].includes(a.artifactType)
+    ["structured_summary", "evidence_card", "step_result", "provisional_conclusion", "experiment_result"].includes(a.artifactType)
   );
 
-  // Previous reviewer packets
+  // Previous reviewer packets for multi-round reviews
   const previousPackets = allArtifacts.filter((a) => a.artifactType === "reviewer_packet");
 
   const systemPrompt = buildReviewerSystemPrompt(role, targetArtifacts, previousPackets);
@@ -319,7 +384,7 @@ async function executeReview(
   const result = await generateText({
     model,
     system: systemPrompt,
-    messages: [{ role: "user", content: `Please review the provided artifacts and produce your assessment.` }],
+    messages: [{ role: "user", content: "Please review the provided artifacts and produce your assessment." }],
     abortSignal,
   });
 
@@ -342,13 +407,17 @@ async function executeReview(
   };
 }
 
+/**
+ * Generic worker task executor with configurable artifact type.
+ */
 async function executeWorkerTask(
   node: DeepResearchNode,
   parentArtifacts: DeepResearchArtifact[],
   model: ReturnType<typeof getModelForRole>["model"],
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
+  artifactType: ArtifactType = "step_result"
 ) {
-  const systemPrompt = buildWorkerSystemPrompt(node, parentArtifacts, "execute");
+  const systemPrompt = buildWorkerSystemPrompt(node, parentArtifacts, node.nodeType);
   const taskPrompt = node.input
     ? JSON.stringify(node.input)
     : `Execute the task: ${node.label}`;
@@ -365,7 +434,7 @@ async function executeWorkerTask(
   return {
     output,
     artifacts: [{
-      artifactType: "step_result" as ArtifactType,
+      artifactType,
       title: `Result: ${node.label}`,
       content: output,
       provenance: {
@@ -404,11 +473,15 @@ async function executeGeneric(
   };
 }
 
+// --- Helpers ---
+
 function getArtifactTypeForNode(nodeType: string): ArtifactType | null {
   const map: Record<string, ArtifactType> = {
     intake: "research_brief",
     plan: "task_graph",
     synthesize: "provisional_conclusion",
+    validation_plan: "validation_plan",
+    result_compare: "validation_report",
     final_report: "final_report",
   };
   return map[nodeType] ?? null;
@@ -416,7 +489,6 @@ function getArtifactTypeForNode(nodeType: string): ArtifactType | null {
 
 function safeParseJson(text: string): Record<string, unknown> {
   try {
-    // Try to extract JSON from markdown code blocks
     const jsonMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
     const jsonStr = jsonMatch ? jsonMatch[1].trim() : text.trim();
     return JSON.parse(jsonStr);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, getLatestCheckpoint } from "@/lib/deep-research/event-store";
+import { getSession } from "@/lib/deep-research/event-store";
 import { runManager } from "@/lib/deep-research/run-manager";
 import type { ConfirmationOutcome } from "@/lib/deep-research/types";
 

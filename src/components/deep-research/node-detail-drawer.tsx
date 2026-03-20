@@ -65,6 +65,12 @@ export function NodeDetailDrawer({
             <span>{node.nodeType}</span>
             <span>&middot;</span>
             <span>{node.assignedRole}</span>
+            {node.phase && (
+              <>
+                <span>&middot;</span>
+                <Badge variant="outline" className="text-[9px]">{node.phase}</Badge>
+              </>
+            )}
             {node.assignedModel && (
               <>
                 <span>&middot;</span>

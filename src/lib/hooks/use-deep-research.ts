@@ -6,6 +6,8 @@ import type {
   DeepResearchNode,
   DeepResearchArtifact,
   DeepResearchEvent,
+  PersistedExecutionRecord,
+  RequirementState,
 } from "@/lib/deep-research/types";
 
 export function useDeepResearchSessions(workspaceId: string | undefined) {
@@ -111,6 +113,27 @@ export function useDeepResearchEvents(sessionId: string | undefined, since?: str
 
   return {
     events: Array.isArray(data) ? data : [],
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+export function useDeepResearchExecutions(sessionId: string | undefined) {
+  const url = sessionId ? `/api/deep-research/sessions/${sessionId}/executions` : null;
+
+  const { data, error, isLoading, mutate } = useSWR<PersistedExecutionRecord[]>(url, fetcher, {
+    refreshInterval: (latestData) => {
+      if (!latestData) return 5000;
+      const hasActive = latestData.some((r) =>
+        ["pending", "submitted", "running"].includes(r.status)
+      );
+      return hasActive ? 3000 : 10000;
+    },
+  });
+
+  return {
+    executions: Array.isArray(data) ? data : [],
     isLoading,
     error,
     mutate,

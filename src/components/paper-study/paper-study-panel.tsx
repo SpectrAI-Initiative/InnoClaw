@@ -31,7 +31,7 @@ export function PaperStudyPanel({
   const [keywords, setKeywords] = useState<string[]>([]);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [sources, setSources] = useState<ArticleSource[]>(["arxiv", "huggingface"]);
+  const [sources, setSources] = useState<ArticleSource[]>(["arxiv", "huggingface", "semantic-scholar"]);
 
   // Results
   const [articles, setArticles] = useState<Article[]>([]);
