@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { FolderOpen, FolderPlus, GitBranch, Sparkles, Cpu, Zap, Brain, Code2, GraduationCap, Server, ChevronDown } from "lucide-react";
+import { FolderOpen, FolderPlus, GitBranch, Sparkles, Cpu, Zap, Brain, Code2, GraduationCap, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { WorkspaceList } from "@/components/workspaces/workspace-list";
@@ -165,12 +165,7 @@ export default function HomePage() {
                   <span>Paper Study</span>
                 </Button>
               </Link>
-              <Link href="/cluster">
-                <Button variant="outline" size="lg" className="gap-2 group border-border/50 hover:border-green-500/50 hover:bg-green-500/5 transition-all">
-                  <Server className="h-4 w-4 transition-transform group-hover:scale-110 text-green-500" />
-                  <span>Cluster</span>
-                </Button>
-              </Link>
+
             </div>
 
             {/* Workspace Section */}
