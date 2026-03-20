@@ -1,5 +1,5 @@
 import { generateText, stepCountIs } from "ai";
-import { getModelForRole, checkBudget, trackUsage } from "./model-router";
+import { getModelForRole, getModelChainForRole, checkBudget, trackUsage } from "./model-router";
 import * as eventStore from "./event-store";
 import {
   buildWorkerSystemPrompt,
@@ -47,58 +47,82 @@ export async function executeNode(
     throw new Error(`Budget exceeded: ${budgetCheck.reason}`);
   }
 
-  // Resolve model
-  const { model, provider, modelId } = getModelForRole(node.assignedRole, config);
-
-  // Mark node as running
-  await eventStore.updateNode(node.id, {
-    status: "running",
-    assignedModel: `${provider}/${modelId}`,
-    startedAt: new Date().toISOString(),
-  });
-
-  try {
-    const result = await executeByNodeType(node, ctx, model, abortSignal);
-
-    // Mark node as completed
-    await eventStore.updateNode(node.id, {
-      status: "completed",
-      output: result.output,
-      completedAt: new Date().toISOString(),
-    });
-
-    // Create artifacts
-    const createdArtifacts: DeepResearchArtifact[] = [];
-    for (const art of result.artifacts) {
-      const created = await eventStore.createArtifact(
-        ctx.session.id,
-        node.id,
-        art.artifactType,
-        art.title,
-        art.content,
-        art.provenance ?? undefined
-      );
-      createdArtifacts.push(created);
-    }
-
-    // Track token usage
-    const updatedBudget = trackUsage(budget, node.assignedRole, node.id, result.tokensUsed);
-    await eventStore.updateSession(ctx.session.id, { budget: updatedBudget });
-
-    return {
-      output: result.output,
-      artifacts: createdArtifacts,
-      tokensUsed: result.tokensUsed,
-    };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown execution error";
-    await eventStore.updateNode(node.id, {
-      status: "failed",
-      error: message,
-      completedAt: new Date().toISOString(),
-    });
-    throw error;
+  // Resolve model chain for runtime fallback
+  const modelChain = getModelChainForRole(node.assignedRole, config);
+  if (modelChain.length === 0) {
+    // Fallback to single model (will throw if none available)
+    const single = getModelForRole(node.assignedRole, config);
+    modelChain.push(single);
   }
+
+  // Try each model in the chain until one succeeds
+  let lastError: Error | null = null;
+  for (let i = 0; i < modelChain.length; i++) {
+    const { model, provider, modelId } = modelChain[i];
+
+    // Mark node as running with current model
+    await eventStore.updateNode(node.id, {
+      status: "running",
+      assignedModel: `${provider}/${modelId}`,
+      startedAt: new Date().toISOString(),
+    });
+
+    try {
+      const result = await executeByNodeType(node, ctx, model, abortSignal);
+
+      // Mark node as completed
+      await eventStore.updateNode(node.id, {
+        status: "completed",
+        output: result.output,
+        completedAt: new Date().toISOString(),
+      });
+
+      // Create artifacts
+      const createdArtifacts: DeepResearchArtifact[] = [];
+      for (const art of result.artifacts) {
+        const created = await eventStore.createArtifact(
+          ctx.session.id,
+          node.id,
+          art.artifactType,
+          art.title,
+          art.content,
+          art.provenance ?? undefined
+        );
+        createdArtifacts.push(created);
+      }
+
+      // Track token usage
+      const updatedBudget = trackUsage(budget, node.assignedRole, node.id, result.tokensUsed);
+      await eventStore.updateSession(ctx.session.id, { budget: updatedBudget });
+
+      return {
+        output: result.output,
+        artifacts: createdArtifacts,
+        tokensUsed: result.tokensUsed,
+      };
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      const isLast = i === modelChain.length - 1;
+      if (!isLast) {
+        const next = modelChain[i + 1];
+        console.warn(
+          `[node-executor] ${provider}/${modelId} failed for node ${node.id}: ${lastError.message}. ` +
+          `Falling back to ${next.provider}/${next.modelId}...`
+        );
+        // Reset node status for retry with next model
+        await eventStore.updateNode(node.id, { status: "pending" });
+      }
+    }
+  }
+
+  // All models failed
+  const message = lastError?.message ?? "Unknown execution error";
+  await eventStore.updateNode(node.id, {
+    status: "failed",
+    error: `All models failed. Last error: ${message}`,
+    completedAt: new Date().toISOString(),
+  });
+  throw lastError ?? new Error(message);
 }
 
 // --- Node type dispatch ---
