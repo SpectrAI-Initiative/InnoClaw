@@ -55,15 +55,22 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 
 <!-- whats-new-start -->
 
+#### 2026-03-20
+- **Deep Research Module**: Full AI-driven scientific research pipeline with multi-phase orchestration, reviewer deliberation, execution planning, and workflow graph UI
+- **Execution Pipeline**: Automated experiment execution system with Slurm job submission, dataset management, preprocessing, and remote executor support
+
+
 #### 2026-03-19
 - **ClawHub Skill Import**: New integration to import skills directly from ClawHub via a dedicated API endpoint and import dialog
 - **Code Preview Panel**: New in-editor code preview component supporting syntax highlighting and save-status tracking
 - **Paper Study Cache**: Persistent caching layer for paper study sessions, improving reload performance and state continuity
 
 
+
 #### 2026-03-18
 - **Multimodal Vision for Paper Analysis**: PDF images are now extracted and analyzed visually during paper discussion and research ideation sessions
 - **Claude Code Skills Integration**: Import skills directly from local folders or Claude Code projects via a new dedicated import workflow
+
 
 
 
@@ -74,10 +81,12 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 
 
 
+
 #### 2026-03-17
 - **Remote Job Profile Management & SSH Hardening**: Secure remote profile creation, editing, and SSH-hardened job submission for research execution
 - **Rich Markdown Rendering in Agent Panel**: Agent messages now render tables, LaTeX math, and syntax-highlighted code blocks
 - **API Provider Settings UI**: Configure AI provider API keys and endpoints directly from the Settings page
+
 
 
 
@@ -90,10 +99,12 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 
 
 
+
 #### 2026-03-16
 - **Paper Discussion & Ideation Robustness**: Per-role token budgets (2-2.5x increase), automatic retry on empty/short responses, and error visibility in the UI. Fixes agents returning empty or truncated output with reasoning-capable models (SH-Lab, Qwen, etc.)
 - **Full Paper Context**: Discussion and ideation agents now receive up to 30k chars of the full paper text (local files) instead of just the abstract, enabling deeper analysis of methodology, experiments, and results
 - **Abstract Extraction Fix**: Heuristic regex-based abstract extraction with improved AI prompt to prevent extracting author names instead of the actual abstract
+
 
 
 
@@ -103,6 +114,8 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 - **Auto-updating README "What's New"**: GitHub Actions workflow that automatically generates and commits a What's New section daily
 
 *No entries yet. This section is auto-updated when significant new features are detected by CI.*
+
+
 
 
 
