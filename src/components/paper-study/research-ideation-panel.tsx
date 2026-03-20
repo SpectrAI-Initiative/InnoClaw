@@ -41,9 +41,11 @@ const ROLE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 interface ResearchIdeationPanelProps {
   article: Article;
   workspaceId?: string;
+  llmProvider?: string | null;
+  llmModel?: string | null;
 }
 
-export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeationPanelProps) {
+export function ResearchIdeationPanel({ article, workspaceId, llmProvider, llmModel }: ResearchIdeationPanelProps) {
   const t = useTranslations("researchIdeation");
   const locale = useLocale();
 
@@ -91,7 +93,13 @@ export function ResearchIdeationPanel({ article, workspaceId }: ResearchIdeation
       const res = await fetch("/api/paper-study/ideate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ article, mode, locale, userSeed: userSeed.trim() || undefined }),
+        body: JSON.stringify({
+          article,
+          mode,
+          locale,
+          userSeed: userSeed.trim() || undefined,
+          ...(llmProvider && llmModel ? { llmProvider, llmModel } : {}),
+        }),
         signal: controller.signal,
       });
 

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
-import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
+import { getConfiguredModel, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { buildQueryExpansionPrompt } from "@/lib/ai/prompts";
 
 export async function POST(req: NextRequest) {
   try {
-    const { question } = await req.json();
+    const { question, llmProvider, llmModel } = await req.json();
 
     if (!question || typeof question !== "string" || !question.trim()) {
       return NextResponse.json(
@@ -21,7 +21,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const model = await getConfiguredModel();
+    const { model } = llmProvider && llmModel
+      ? getModelFromOverride(llmProvider, llmModel)
+      : { model: await getConfiguredModel() };
     const systemPrompt = buildQueryExpansionPrompt();
 
     const { text } = await generateText({

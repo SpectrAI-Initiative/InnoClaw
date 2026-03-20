@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
-import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
+import { getConfiguredModel, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { buildNotesOrganizePrompt } from "@/lib/ai/prompts";
 import {
   listDirectory,
@@ -12,7 +12,7 @@ import path from "path";
 
 export async function POST(req: NextRequest) {
   try {
-    const { notesDir, dryRun } = await req.json();
+    const { notesDir, dryRun, llmProvider, llmModel } = await req.json();
 
     if (!notesDir || typeof notesDir !== "string") {
       return NextResponse.json(
@@ -54,7 +54,9 @@ export async function POST(req: NextRequest) {
     );
 
     // Ask LLM to classify
-    const model = await getConfiguredModel();
+    const { model } = llmProvider && llmModel
+      ? getModelFromOverride(llmProvider, llmModel)
+      : { model: await getConfiguredModel() };
     const prompt = buildNotesOrganizePrompt(fileData);
 
     const { text } = await generateText({

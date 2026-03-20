@@ -35,6 +35,7 @@ ${articlesText}`;
 
 /**
  * Build a system prompt for generating sharp/roast-style reviews of papers (今日锐评).
+ * Enhanced with scoring info and constraint rules from dailypaper-skills.
  */
 export function buildPaperRoastPrompt(
   articles: Array<{
@@ -43,12 +44,19 @@ export function buildPaperRoastPrompt(
     publishedDate: string;
     source: string;
     abstract: string;
+    score?: number;
+    upvotes?: number;
   }>
 ): string {
   const articlesText = articles
     .map(
-      (a, i) =>
-        `## Paper ${i + 1}: ${a.title}\n\n**Authors:** ${a.authors.join(", ")}\n**Date:** ${a.publishedDate}\n**Source:** ${a.source}\n\n### Abstract\n${a.abstract}`
+      (a, i) => {
+        const meta: string[] = [];
+        if (a.score !== undefined) meta.push(`**Relevance Score:** ${a.score}`);
+        if (a.upvotes !== undefined) meta.push(`**Upvotes:** ${a.upvotes}`);
+        const metaLine = meta.length > 0 ? `${meta.join(" | ")}\n` : "";
+        return `## Paper ${i + 1}: ${a.title}\n\n**Authors:** ${a.authors.join(", ")}\n**Date:** ${a.publishedDate}\n**Source:** ${a.source}\n${metaLine}\n### Abstract\n${a.abstract}`;
+      }
     )
     .join("\n\n---\n\n");
 
@@ -63,6 +71,14 @@ export function buildPaperRoastPrompt(
 - 质疑标题是否夸大、contribution 是否 incremental
 - 指出与已有工作的真实关系
 - 即使论文结果好，也要指出其评估局限
+
+## 硬性约束（不可违反）
+
+- 如果论文的摘要没有明确提到"仿真"或"simulation-only"，你不能声称论文"只有仿真验证"
+- 如果没有方法级别的具体证据，不能称论文为"模仿品"或"照搬某某工作"
+- 当你对某个事实不确定时，必须标注"摘要未提及"而非编造结论
+- 如果论文有 Relevance Score，高分论文应给予更认真的审视（但不代表免评）
+- 如果论文 Upvotes 很高（≥10），说明社区认可度高，但不影响你的独立判断
 
 ## 语气要求
 
@@ -158,6 +174,13 @@ ${article.abstract}
 5. 将论文与相关研究进行比较
 6. 解释论文中涉及的专业术语和概念
 
+## 可用工具
+你有以下工具可以使用来获取论文更详细的信息：
+- **fetchPaperFullText**: 获取论文全文。当用户询问摘要中没有涉及的具体章节、方法细节、实验结果、公式推导或具体数据时，主动使用此工具。
+- **extractPaperFigures**: 提取论文中的图表信息（图片URL和图说）。当用户询问论文的图表、架构图、实验结果可视化或任何视觉内容时使用。
+
+在需要更多上下文时主动使用这些工具，不需要等待用户明确要求。但如果问题可以仅通过摘要回答，则不需要使用工具。
+
 请始终用中文回答，即使论文本身是英文的。回答要准确、专业且有深度。`;
 }
 
@@ -203,8 +226,17 @@ ${fileList}
  */
 export function buildNoteChatPrompt(
   noteTitle: string,
-  noteContent: string
+  noteContent: string,
+  relatedNotes?: Array<{ name: string; content: string }>
 ): string {
+  let relatedSection = "";
+  if (relatedNotes && relatedNotes.length > 0) {
+    const notesText = relatedNotes
+      .map((n) => `### ${n.name}\n${n.content}`)
+      .join("\n\n");
+    relatedSection = `\n\n## 关联笔记\n以下是用户选择的关联笔记，请结合这些笔记内容进行讨论：\n\n${notesText}`;
+  }
+
   return `你是一个学术论文讨论助手。用户正在查看一篇论文笔记，你需要基于笔记内容与用户深入讨论。
 
 ## 笔记信息
@@ -213,16 +245,16 @@ export function buildNoteChatPrompt(
 ${noteTitle}
 
 ### 内容
-${noteContent}
+${noteContent}${relatedSection}
 
 ## 你的任务
-基于上述笔记内容，回答用户的问题。你可以：
+基于上述笔记内容${relatedNotes && relatedNotes.length > 0 ? "以及关联笔记" : ""}，回答用户的问题。你可以：
 1. 深入分析笔记中提到的研究方法和技术细节
 2. 补充相关背景知识和最新进展
 3. 讨论研究的潜在影响和应用场景
 4. 指出值得进一步探索的方向
 5. 比较不同方法的优劣
-6. 帮助用户梳理和总结关键要点
+6. 帮助用户梳理和总结关键要点${relatedNotes && relatedNotes.length > 0 ? "\n7. 对比和关联不同笔记中的研究方法和发现" : ""}
 
 请始终用中文回答，回答要准确、专业且有深度。`;
 }
@@ -311,5 +343,233 @@ ${notesContext}
 5. 深入解释论文的研究动机和技术细节
 6. 讨论论文的局限性和未来方向
 
+## 可用工具
+你有以下工具可以使用来获取论文更详细的信息：
+- **fetchPaperFullText**: 获取论文全文。当用户询问摘要中没有涉及的具体章节、方法细节、实验结果、公式推导或具体数据时，主动使用此工具。
+- **extractPaperFigures**: 提取论文中的图表信息（图片URL和图说）。当用户询问论文的图表、架构图、实验结果可视化或任何视觉内容时使用。
+
+在需要更多上下文时主动使用这些工具，不需要等待用户明确要求。但如果问题可以仅通过摘要回答，则不需要使用工具。
+
 请始终用中文回答，回答要准确、专业且有深度。主动引用相关笔记中的内容进行对比讨论。`;
+}
+
+/**
+ * Build a system prompt for one-click paper quick summary.
+ * Reads full text + figures and produces a structured deep summary.
+ */
+export function buildPaperQuickSummaryPrompt(
+  article: {
+    title: string;
+    authors: string[];
+    publishedDate: string;
+    source: string;
+    abstract: string;
+  },
+  fullText: string,
+  figures: Array<{ url: string; caption: string; figureId?: string }> = []
+): string {
+  const figuresInfo =
+    figures.length > 0
+      ? `\n\n## 论文图表\n论文中包含以下图表：\n${figures
+          .map(
+            (f, i) =>
+              `- 图${i + 1}${f.figureId ? ` (${f.figureId})` : ""}: ${f.caption || "(无图说)"}`
+          )
+          .join("\n")}\n\n在总结方法细节时，请引用相关的图表编号（如"如图1所示"）。注意：图片已由系统单独展示，请勿在输出中使用 Markdown 图片语法 \`![](url)\`，只需用文字引用图表编号即可。`
+      : "";
+
+  return `你是一名资深学术论文分析专家。请基于以下论文的完整内容，提供一份深入且结构化的总结。
+
+## 论文信息
+- **标题**: ${article.title}
+- **作者**: ${article.authors.join(", ")}
+- **发表日期**: ${article.publishedDate}
+- **来源**: ${article.source}
+
+### 摘要
+${article.abstract}
+${figuresInfo}
+
+## 论文全文
+${fullText}
+
+## 输出要求
+
+请按照以下结构输出总结，每个部分都要有深度和细节：
+
+### 1. 研究动机 (Motivation)
+- 该研究试图解决什么核心问题？
+- 现有方法存在哪些不足？
+- 为什么需要新的解决方案？
+
+### 2. 方法细节 (Method Details)
+- 详细描述提出的方法/框架
+- 关键的技术创新点是什么？
+- 方法的核心组件和工作流程
+- 涉及的关键公式或算法思路
+${figures.length > 0 ? '- 请引用相关的方法架构图编号（如"如图1所示"），图片由系统单独展示' : ""}
+
+### 3. 实验结果 (Results)
+- 主要实验设置（数据集、基线方法、评估指标）
+- 关键实验结果和性能对比
+- 消融实验的主要发现（如有）
+
+### 4. 潜在问题 (Potential Issues)
+- 方法的假设是否过强或适用范围是否有限？
+- 实验设计是否有遗漏（缺少的基线、数据集偏差等）？
+- 可扩展性或计算成本方面的潜在问题
+- 论文中未充分讨论的局限性
+- 结论是否有过度声明的嫌疑？
+
+请务必使用中文回答。内容要具体、有深度，避免泛泛而谈。`;
+}
+
+/**
+ * Build a system prompt for generating a structured Obsidian note (dailypaper-skills style).
+ *
+ * Generates a comprehensive, structured paper note that integrates into an Obsidian vault
+ * with wikilinks, figures, formulas, and a standardized template.
+ */
+export function buildStructuredNotePrompt(
+  article: {
+    title: string;
+    authors: string[];
+    publishedDate: string;
+    source: string;
+    abstract: string;
+  },
+  fullText: string,
+  figures: Array<{ url: string; caption: string; figureId?: string; localRef?: string }> = []
+): string {
+  const figuresInfo =
+    figures.length > 0
+      ? `\n\n## 论文图表\n论文中包含以下图表，请在笔记中引用它们：\n${figures
+          .map((f, i) => {
+            const ref = f.localRef || `图${i + 1}`;
+            return `- ${ref}${f.figureId ? ` (${f.figureId})` : ""}: ${f.caption || "(无图说)"}`;
+          })
+          .join("\n")}`
+      : "";
+
+  const figureEmbedInstructions = figures.length > 0
+    ? `
+### 图表嵌入规则
+- 对于每个图表，使用以下格式嵌入：
+${figures.map((f, i) => {
+  if (f.localRef) {
+    return `  - 图${i + 1}: \`${f.localRef}\``;
+  }
+  return `  - 图${i + 1}: \`![${f.caption || `Figure ${i + 1}`}](${f.url})\``;
+}).join("\n")}
+- 必须在 ## 关键图表 部分嵌入所有图表
+- 在方法详解中引用相关图表时，用文字引用（如"如图1所示"）`
+    : "";
+
+  return `你是一名学术论文笔记专家。请基于以下论文的完整内容，生成一份结构化的 Obsidian 笔记。
+
+## 论文信息
+- **标题**: ${article.title}
+- **作者**: ${article.authors.join(", ")}
+- **发表日期**: ${article.publishedDate}
+- **来源**: ${article.source}
+
+### 摘要
+${article.abstract}
+${figuresInfo}
+
+## 论文全文
+${fullText}
+
+## 输出模板
+
+请严格按照以下模板格式输出笔记内容（不包含 frontmatter，系统会自动添加）：
+
+\`\`\`
+# 一句话总结
+
+用一句话概括这篇论文的核心贡献和方法。
+
+## 核心贡献
+
+- 贡献点1
+- 贡献点2
+- 贡献点3
+
+## 问题背景与动机
+
+详细描述研究的背景、现有方法的局限性、以及为什么需要新的解决方案。
+在适当的地方使用 [[概念名]] 的 wikilink 语法链接到相关概念。
+
+## 方法详解
+
+详细描述论文提出的方法，包括：
+- 整体架构设计
+- 核心模块和组件
+- 关键的设计思路和创新点
+
+对涉及的技术概念使用 [[概念名]] wikilink 语法。例如：
+- 本文基于 [[Transformer]] 架构...
+- 采用了 [[Diffusion Model]] 作为生成器...
+
+## 关键公式
+
+列出论文中的所有关键公式，使用 LaTeX 格式：
+
+$$
+公式1
+$$
+
+说明每个公式的含义和各符号的定义。
+
+## 关键图表
+
+嵌入论文中的所有关键图表（零遗漏），并为每张图表添加解读说明。
+${figureEmbedInstructions}
+
+## 实验结果
+
+- **数据集**: 使用了哪些数据集
+- **基线方法**: 对比了哪些方法
+- **评估指标**: 使用了哪些指标
+- **主要结果**: 关键的性能数据和对比
+- **消融实验**: 消融研究的主要发现（如有）
+
+## 批判性思考
+
+### 优点
+- 列出论文的主要优点
+
+### 局限性
+- 列出论文的局限性和不足
+
+### 改进方向
+- 提出可能的改进方向
+
+## 关联笔记
+
+使用 [[wikilink]] 语法链接相关的论文和概念：
+- [[相关论文1]] — 关联原因
+- [[相关概念1]] — 关联原因
+
+## 速查卡片
+
+| 项目 | 内容 |
+|------|------|
+| 方法名 | ... |
+| 核心思路 | 一句话 |
+| 任务类型 | ... |
+| 关键指标 | ... |
+| 代码/数据 | 链接（如有） |
+\`\`\`
+
+## 质量要求
+
+1. 笔记内容必须 ≥120 行
+2. 必须包含 ≥2 个 LaTeX 公式
+3. 必须嵌入论文中的所有关键图表
+4. 技术术语必须使用 [[概念名]] wikilink 语法内联链接
+5. 所有 Figure/Table 都必须在关键图表部分出现（零遗漏）
+6. 内容必须准确、有深度，避免空洞的套话
+
+请务必使用中文回答。直接输出笔记内容，不要输出 frontmatter。`;
 }

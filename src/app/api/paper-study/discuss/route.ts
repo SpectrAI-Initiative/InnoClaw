@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getConfiguredModelWithProvider, isAIAvailable } from "@/lib/ai/provider";
+import { getConfiguredModelWithProvider, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { providerSupportsVision } from "@/lib/ai/models";
 import { runFullPaperDiscussion } from "@/lib/paper-discussion/orchestrator";
 import { extractPaperContent, extractPaperFullText } from "../extract-paper-content";
@@ -7,7 +7,7 @@ import type { PaperDiscussionSharedContext, DiscussionTurn } from "@/lib/paper-d
 
 export async function POST(req: NextRequest) {
   try {
-    const { article, mode = "quick", locale = "en" } = await req.json();
+    const { article, mode = "quick", locale = "en", llmProvider, llmModel } = await req.json();
 
     if (!article || !article.title) {
       return new Response("Missing article data", { status: 400 });
@@ -24,7 +24,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { providerId, model } = await getConfiguredModelWithProvider();
+    let providerId: string;
+    let model;
+    if (llmProvider && llmModel) {
+      const override = getModelFromOverride(llmProvider, llmModel);
+      model = override.model;
+      providerId = llmProvider;
+    } else {
+      const configured = await getConfiguredModelWithProvider();
+      model = configured.model;
+      providerId = configured.providerId;
+    }
     const visionCapable = providerSupportsVision(providerId);
 
     const context: PaperDiscussionSharedContext = {

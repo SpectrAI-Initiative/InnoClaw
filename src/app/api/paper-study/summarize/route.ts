@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
-import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
+import { getConfiguredModel, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { buildPaperSummarizationPrompt } from "@/lib/ai/prompts";
 import { trimArticlesForLLM } from "@/lib/ai/paper-utils";
 import { jsonError } from "@/lib/api-errors";
 
 export async function POST(req: NextRequest) {
   try {
-    const { articles } = await req.json();
+    const { articles, llmProvider, llmModel } = await req.json();
 
     if (!articles || !Array.isArray(articles) || articles.length === 0) {
       return jsonError("At least one article is required", 400);
@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
       return jsonError("AI is not configured. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env.local.", 503);
     }
 
-    const model = await getConfiguredModel();
+    const { model } = llmProvider && llmModel
+      ? getModelFromOverride(llmProvider, llmModel)
+      : { model: await getConfiguredModel() };
 
     const trimmedArticles = trimArticlesForLLM(articles);
 
@@ -27,6 +29,7 @@ export async function POST(req: NextRequest) {
       model,
       system: systemPrompt,
       prompt: "Please analyze and summarize all the papers listed above.",
+      maxOutputTokens: 8192,
       abortSignal: req.signal,
     });
 

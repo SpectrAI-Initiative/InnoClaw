@@ -113,6 +113,16 @@ export function ArticleCard({
                 : t("sourceHuggingFace")}
         </Badge>
         {date && <span>{date}</span>}
+        {article.score !== undefined && article.score > 0 && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/50 text-amber-600 dark:text-amber-400">
+            {t("scoreLabel")}: {article.score}
+          </Badge>
+        )}
+        {article.upvotes !== undefined && article.upvotes > 0 && (
+          <span title={t("upvotesLabel")}>
+            &uarr;{article.upvotes}
+          </span>
+        )}
       </div>
 
       {truncatedAuthors && (

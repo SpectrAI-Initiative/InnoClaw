@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
 import { streamText, convertToModelMessages, UIMessage } from "ai";
-import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
+import { getConfiguredModel, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { buildNoteChatPrompt } from "@/lib/ai/prompts";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages: uiMessages, noteTitle, noteContent } = await req.json();
+    const { messages: uiMessages, noteTitle, noteContent, relatedNotes, llmProvider, llmModel } = await req.json();
 
     if (!noteTitle || !noteContent) {
       return new Response("Missing note data", { status: 400 });
@@ -18,8 +18,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const model = await getConfiguredModel();
-    const systemPrompt = buildNoteChatPrompt(noteTitle, noteContent);
+    const { model } = llmProvider && llmModel
+      ? getModelFromOverride(llmProvider, llmModel)
+      : { model: await getConfiguredModel() };
+    const systemPrompt = buildNoteChatPrompt(noteTitle, noteContent, relatedNotes);
 
     const modelMessages = await convertToModelMessages(
       uiMessages as UIMessage[]

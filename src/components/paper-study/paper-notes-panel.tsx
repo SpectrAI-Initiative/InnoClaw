@@ -16,6 +16,7 @@ import {
   Trash2,
   Save,
   X,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { DirectoryPickerDialog } from "./directory-picker-dialog";
-import { NoteDiscussionDialog } from "./note-discussion-dialog";
+import { buildObsidianUri } from "@/lib/utils/obsidian";
 
 interface FileEntry {
   name: string;
@@ -35,9 +36,12 @@ interface FileEntry {
 interface PaperNotesPanelProps {
   notesDir: string;
   onSetNotesDir: (dir: string) => void;
+  onDiscussNote?: (note: { path: string; name: string; content: string }) => void;
+  llmProvider?: string | null;
+  llmModel?: string | null;
 }
 
-export function PaperNotesPanel({ notesDir, onSetNotesDir }: PaperNotesPanelProps) {
+export function PaperNotesPanel({ notesDir, onSetNotesDir, onDiscussNote, llmProvider, llmModel }: PaperNotesPanelProps) {
   const t = useTranslations("paperStudy");
   const tCommon = useTranslations("common");
 
@@ -53,13 +57,6 @@ export function PaperNotesPanel({ notesDir, onSetNotesDir }: PaperNotesPanelProp
   const [editingFile, setEditingFile] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-
-  // Discuss state
-  const [discussFile, setDiscussFile] = useState<{
-    path: string;
-    name: string;
-    content: string;
-  } | null>(null);
 
   // Fetch file list
   const fetchFiles = useCallback(async (dir: string) => {
@@ -186,7 +183,9 @@ export function PaperNotesPanel({ notesDir, onSetNotesDir }: PaperNotesPanelProp
     const filePath = `${currentPath}/${fileName}`;
     try {
       const content = await readFileContent(filePath);
-      setDiscussFile({ path: filePath, name: fileName, content });
+      if (onDiscussNote) {
+        onDiscussNote({ path: filePath, name: fileName, content });
+      }
     } catch {
       toast.error(tCommon("error"));
     }
@@ -396,6 +395,19 @@ export function PaperNotesPanel({ notesDir, onSetNotesDir }: PaperNotesPanelProp
                       <Button
                         variant="ghost"
                         size="icon-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const filePath = `${currentPath}/${file.name}`;
+                          const uri = buildObsidianUri(notesDir, filePath);
+                          window.open(uri);
+                        }}
+                        title={t("openInObsidian")}
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
                         onClick={(e) => handleDeleteFile(file.name, e)}
                         title={t("deleteNote")}
                         className="hover:text-destructive"
@@ -460,16 +472,6 @@ export function PaperNotesPanel({ notesDir, onSetNotesDir }: PaperNotesPanelProp
         onSelect={handleDirectorySelected}
       />
 
-      {/* Note discussion dialog */}
-      {discussFile && (
-        <NoteDiscussionDialog
-          open={!!discussFile}
-          onClose={() => setDiscussFile(null)}
-          noteTitle={discussFile.name}
-          noteContent={discussFile.content}
-          noteFilePath={discussFile.path}
-        />
-      )}
     </div>
   );
 }

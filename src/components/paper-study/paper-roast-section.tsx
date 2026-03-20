@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, Save, Check, Square, MessageSquare, FileText } from "lucide-react";
+import { Loader2, Save, Check, Square, MessageSquare, FileText, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from "react-markdown";
@@ -10,6 +10,12 @@ import { toast } from "sonner";
 import type { Article } from "@/lib/article-search/types";
 import type { Components } from "react-markdown";
 import { NoteDiscussionDialog } from "./note-discussion-dialog";
+import {
+  wrapWithFrontmatter,
+  buildObsidianUri,
+  buildRelatedNotesSection,
+  type NoteFrontmatter,
+} from "@/lib/utils/obsidian";
 
 /** Sanitize a string for use as a filename. */
 function sanitizeFileName(name: string): string {
@@ -25,6 +31,8 @@ interface PaperRoastSectionProps {
   workspaceId: string;
   notesDir?: string;
   articles?: Article[];
+  llmProvider?: string | null;
+  llmModel?: string | null;
   onArticleSelect?: (article: Article) => void;
   onSaved?: () => void;
   onStop?: () => void;
@@ -36,6 +44,8 @@ export function PaperRoastSection({
   workspaceId,
   notesDir,
   articles = [],
+  llmProvider,
+  llmModel,
   onArticleSelect,
   onSaved,
   onStop,
@@ -90,8 +100,11 @@ export function PaperRoastSection({
 
   if (!isRoasting && !roast) return null;
 
-  const now = new Date();
-  const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  /** Get today's date string (YYYY-MM-DD). Called inside handlers to avoid hydration mismatch. */
+  const getDateStr = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -101,7 +114,7 @@ export function PaperRoastSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId,
-          title: `🔪 今日锐评 - ${dateStr}`,
+          title: `🔪 今日锐评 - ${getDateStr()}`,
           content: roast,
           type: "summary",
         }),
@@ -120,16 +133,39 @@ export function PaperRoastSection({
     if (!notesDir) return;
     setSavingFile(true);
     try {
+      const dateStr = getDateStr();
       const fileName = `锐评-${dateStr}.md`;
       const filePath = `${notesDir}/${fileName}`;
+      const title = `🔪 今日锐评 - ${dateStr}`;
+
+      // Build Obsidian-compatible frontmatter
+      const uniqueSources = [...new Set(articles.map((a) => a.source))];
+      const allAuthors = [...new Set(articles.flatMap((a) => a.authors))];
+      const paperUrls = articles.map((a) => a.url).filter(Boolean);
+      const meta: NoteFrontmatter = {
+        title,
+        date: dateStr,
+        type: "roast",
+        tags: ["paper-study", "roast"],
+        aliases: [title],
+        source: uniqueSources,
+        authors: allAuthors.slice(0, 20),
+        paper_url: paperUrls,
+      };
+
+      const content = wrapWithFrontmatter(`# ${title}\n\n${roast}`, meta);
+
       const res = await fetch("/api/files/write", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: filePath, content: `# 🔪 今日锐评 - ${dateStr}\n\n${roast}` }),
+        body: JSON.stringify({ path: filePath, content }),
       });
       if (!res.ok) throw new Error("Write failed");
       setSavedFilePath(filePath);
       toast.success(t("savedToFile"));
+
+      // Append related notes (best effort)
+      appendRelatedNotes(filePath, content);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : tCommon("error"));
     } finally {
@@ -157,7 +193,7 @@ export function PaperRoastSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId,
-          title: `🔪 锐评: ${article.title} - ${dateStr}`,
+          title: `🔪 锐评: ${article.title} - ${getDateStr()}`,
           content: sectionContent,
           type: "summary",
         }),
@@ -177,26 +213,79 @@ export function PaperRoastSection({
     }
   };
 
-  /** Save a single paper's roast section as a file. */
+  /** Save a single paper's roast section as a file with Obsidian frontmatter. */
   const handleSaveFileForPaper = async (article: Article, sectionContent: string) => {
     if (!notesDir) return;
     const key = `${article.source}-${article.id}`;
     setSavingFileFor(key);
     try {
+      const dateStr = getDateStr();
+      const title = `🔪 锐评: ${article.title}`;
       const fileName = `锐评-${sanitizeFileName(article.title)}-${dateStr}.md`;
       const filePath = `${notesDir}/${fileName}`;
+
+      const meta: NoteFrontmatter = {
+        title,
+        date: dateStr,
+        type: "roast",
+        tags: ["paper-study", "roast"],
+        aliases: [title],
+        source: [article.source],
+        authors: article.authors.slice(0, 20),
+        paper_url: article.url ? [article.url] : [],
+      };
+
+      const content = wrapWithFrontmatter(`# ${title}\n\n${sectionContent}`, meta);
+
       const res = await fetch("/api/files/write", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: filePath, content: `# 🔪 锐评: ${article.title}\n\n${sectionContent}` }),
+        body: JSON.stringify({ path: filePath, content }),
       });
       if (!res.ok) throw new Error("Write failed");
       setSavedFileFor((prev) => new Map(prev).set(key, filePath));
       toast.success(t("savedToFile"));
+
+      // Append related notes (best effort)
+      appendRelatedNotes(filePath, content, article);
     } catch {
       toast.error(tCommon("error"));
     } finally {
       setSavingFileFor(null);
+    }
+  };
+
+  /** Find and append related notes using [[wikilink]] syntax. */
+  const appendRelatedNotes = async (filePath: string, currentContent: string, article?: Article) => {
+    if (!notesDir) return;
+    const targetArticle = article || articles[0];
+    if (!targetArticle) return;
+    try {
+      const res = await fetch("/api/paper-study/find-related-notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          notesDir,
+          article: targetArticle,
+          ...(llmProvider && llmModel ? { llmProvider, llmModel } : {}),
+        }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const related: { name: string; reason?: string }[] = data.related || [];
+      const baseName = filePath.split("/").pop() || "";
+      const filtered = related.filter((n) => n.name !== baseName);
+      if (filtered.length === 0) return;
+
+      const section = buildRelatedNotesSection(filtered);
+      await fetch("/api/files/write", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: filePath, content: currentContent + section }),
+      });
+      toast.success(t("relatedNotesAppended"));
+    } catch {
+      // Silently ignore
     }
   };
 
@@ -218,6 +307,13 @@ export function PaperRoastSection({
       }
     }
     return "";
+  };
+
+  /** Open a saved file in Obsidian. */
+  const handleOpenInObsidian = (filePath: string) => {
+    if (!notesDir) return;
+    const uri = buildObsidianUri(notesDir, filePath);
+    window.open(uri);
   };
 
   /** Custom h3 renderer that adds action buttons for paper review sections. */
@@ -298,18 +394,32 @@ export function PaperRoastSection({
                   </Button>
                 )}
                 {savedFileFor.has(`${article.source}-${article.id}`) && (
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    className="gap-1 text-xs h-6"
-                    onClick={() => {
-                      const section = getSectionForArticle(article);
-                      if (section) openDiscussForPaper(article, section);
-                    }}
-                  >
-                    <MessageSquare className="h-3 w-3" />
-                    {t("expandDiscuss")}
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      className="gap-1 text-xs h-6"
+                      onClick={() => {
+                        const path = savedFileFor.get(`${article.source}-${article.id}`);
+                        if (path) handleOpenInObsidian(path);
+                      }}
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      {t("openInObsidian")}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      className="gap-1 text-xs h-6"
+                      onClick={() => {
+                        const section = getSectionForArticle(article);
+                        if (section) openDiscussForPaper(article, section);
+                      }}
+                    >
+                      <MessageSquare className="h-3 w-3" />
+                      {t("expandDiscuss")}
+                    </Button>
+                  </>
                 )}
               </div>
             )}
@@ -375,20 +485,31 @@ export function PaperRoastSection({
                 </Button>
               )}
               {savedFilePath && (
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  onClick={() => {
-                    setDiscussTitle(`今日锐评 - ${dateStr}`);
-                    setDiscussContent(roast);
-                    setDiscussFilePath(savedFilePath);
-                    setDiscussOpen(true);
-                  }}
-                  className="gap-1 text-xs"
-                >
-                  <MessageSquare className="h-3 w-3" />
-                  {t("expandDiscuss")}
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => handleOpenInObsidian(savedFilePath)}
+                    className="gap-1 text-xs"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    {t("openInObsidian")}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => {
+                      setDiscussTitle(`今日锐评 - ${getDateStr()}`);
+                      setDiscussContent(roast);
+                      setDiscussFilePath(savedFilePath);
+                      setDiscussOpen(true);
+                    }}
+                    className="gap-1 text-xs"
+                  >
+                    <MessageSquare className="h-3 w-3" />
+                    {t("expandDiscuss")}
+                  </Button>
+                </>
               )}
             </>
           )}
@@ -416,6 +537,9 @@ export function PaperRoastSection({
         noteTitle={discussTitle}
         noteContent={discussContent}
         noteFilePath={discussFilePath}
+        notesDir={notesDir}
+        llmProvider={llmProvider}
+        llmModel={llmModel}
       />
     </div>
   );

@@ -91,6 +91,14 @@ function formatRetrievedEvidence(evidence?: string): string {
   return `## Retrieved Evidence / Citations Context\n${evidence}`;
 }
 
+function formatFigures(figures?: Array<{ url: string; caption: string; figureId?: string }>): string {
+  if (!figures || figures.length === 0) return "";
+  const items = figures
+    .map((f, i) => `- **${f.figureId || `Figure ${i + 1}`}**: ${f.caption}${f.url ? ` [Image](${f.url})` : ""}`)
+    .join("\n");
+  return `## Paper Figures\n${items}`;
+}
+
 function brevityInstruction(mode: "quick" | "full"): string {
   if (mode === "quick") {
     return "\n\nIMPORTANT: Keep your response concise — focus on the most critical points only. Be brief but substantive.";
@@ -141,6 +149,13 @@ export function buildIdeationPrompt(
     "",
     formatArticleContext(context),
   ];
+
+  // Add figures metadata to system prompt (always available, text-only)
+  const figuresBlock = formatFigures(context.figures);
+  if (figuresBlock) {
+    systemParts.push("", figuresBlock);
+  }
+
 
   const transcriptBlock = formatTranscript(transcript);
   if (transcriptBlock) {

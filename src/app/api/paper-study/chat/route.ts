@@ -1,11 +1,13 @@
 import { NextRequest } from "next/server";
-import { streamText, convertToModelMessages, UIMessage } from "ai";
-import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
+import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
+import { getConfiguredModel, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
+import { providerSupportsTools } from "@/lib/ai/models";
 import { buildPaperChatPrompt, buildPaperChatWithNotesPrompt } from "@/lib/ai/prompts";
+import { createPaperChatTools } from "@/lib/ai/tools/paper-chat-tools";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages: uiMessages, article, relatedNotes } = await req.json();
+    const { messages: uiMessages, article, relatedNotes, llmProvider, llmModel } = await req.json();
 
     if (!article || !article.title) {
       return new Response("Missing article data", { status: 400 });
@@ -18,7 +20,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const model = await getConfiguredModel();
+    const { model } = llmProvider && llmModel
+      ? getModelFromOverride(llmProvider, llmModel)
+      : { model: await getConfiguredModel() };
     const articleData = {
       title: article.title,
       authors: Array.isArray(article.authors) ? article.authors : [],
@@ -37,10 +41,21 @@ export async function POST(req: NextRequest) {
       uiMessages as UIMessage[]
     );
 
+    // Create paper tools for fetching full text and figures
+    const paperTools = createPaperChatTools({
+      id: article.id || "",
+      url: article.url || "",
+      pdfUrl: article.pdfUrl,
+      source: article.source || "",
+    });
+
+    const useTools = providerSupportsTools(llmProvider || "openai");
+
     const result = streamText({
       model,
       system: systemPrompt,
       messages: modelMessages,
+      ...(useTools ? { tools: paperTools, maxSteps: 5 } : {}),
       abortSignal: req.signal,
       onError({ error }) {
         console.error("Paper chat stream error:", error);

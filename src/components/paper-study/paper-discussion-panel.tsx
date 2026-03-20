@@ -41,9 +41,11 @@ const ROLE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 interface PaperDiscussionPanelProps {
   article: Article;
   workspaceId?: string;
+  llmProvider?: string | null;
+  llmModel?: string | null;
 }
 
-export function PaperDiscussionPanel({ article, workspaceId }: PaperDiscussionPanelProps) {
+export function PaperDiscussionPanel({ article, workspaceId, llmProvider, llmModel }: PaperDiscussionPanelProps) {
   const t = useTranslations("paperDiscussion");
   const tPaper = useTranslations("paperStudy");
   const locale = useLocale();
@@ -79,7 +81,12 @@ export function PaperDiscussionPanel({ article, workspaceId }: PaperDiscussionPa
       const res = await fetch("/api/paper-study/discuss", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ article, mode, locale }),
+        body: JSON.stringify({
+          article,
+          mode,
+          locale,
+          ...(llmProvider && llmModel ? { llmProvider, llmModel } : {}),
+        }),
         signal: controller.signal,
       });
 

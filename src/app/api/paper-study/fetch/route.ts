@@ -3,12 +3,11 @@ import type { Article } from "@/lib/article-search/types";
 
 const ARXIV_API_URL = "https://export.arxiv.org/api/query";
 const SEMANTIC_SCHOLAR_API = "https://api.semanticscholar.org/graph/v1/paper/search";
-
 /** Request timeout in milliseconds. */
 const TIMEOUT_MS = 15_000;
 
 // ──────────────────────────────────────────────
-// arXiv helpers (for direct URL / ID lookup)
+// arXiv helpers
 // ──────────────────────────────────────────────
 
 function parseArxivEntries(xml: string): Article[] {
@@ -78,6 +77,48 @@ async function fetchArxivById(arxivId: string): Promise<Article | null> {
   return articles[0] || null;
 }
 
+/**
+ * Search arXiv by paper title using the ti: (title) field.
+ * This is much more reliable than Semantic Scholar for finding arxiv papers.
+ */
+async function searchArxivByTitle(title: string): Promise<Article[]> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    // Use ti: field for title-specific search. Wrap in quotes for phrase match.
+    const query = `ti:"${title}"`;
+    const params = new URLSearchParams({
+      search_query: query,
+      start: "0",
+      max_results: "10",
+      sortBy: "relevance",
+      sortOrder: "descending",
+    });
+
+    const res = await fetch(`${ARXIV_API_URL}?${params}`, {
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      console.error(`arXiv search API error: ${res.status}`);
+      return [];
+    }
+
+    const xml = await res.text();
+    return parseArxivEntries(xml);
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      console.error("arXiv title search timed out");
+    } else {
+      console.error("arXiv title search error:", err);
+    }
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // ──────────────────────────────────────────────
 // Semantic Scholar search (for title-based lookup)
 // ──────────────────────────────────────────────
@@ -94,10 +135,6 @@ interface S2Paper {
   openAccessPdf: { url: string } | null;
 }
 
-/**
- * Search for papers using the Semantic Scholar Academic Graph API.
- * Free, no API key required. Covers arXiv, ACL, IEEE, PubMed, etc.
- */
 async function searchByTitle(title: string): Promise<Article[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -145,7 +182,7 @@ async function searchByTitle(title: string): Promise<Article[]> {
           url: articleUrl,
           pdfUrl,
           publishedDate: p.publicationDate || (p.year ? `${p.year}` : ""),
-          source: "arxiv" as const, // display as arxiv if has arxiv id
+          source: "arxiv" as const,
         };
       });
   } catch (err) {
@@ -158,6 +195,215 @@ async function searchByTitle(title: string): Promise<Article[]> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+// ──────────────────────────────────────────────
+// Google search — direct HTML scraping (no API key needed)
+// ──────────────────────────────────────────────
+
+/**
+ * Extract URLs from Google search result HTML.
+ * Google embeds result links in <a> tags with href="/url?q=<actual-url>&...".
+ */
+function extractGoogleResultUrls(html: string): string[] {
+  const urls: string[] = [];
+  // Match Google's redirect links: /url?q=<encoded-url>&sa=...
+  const regex = /\/url\?q=(https?:\/\/[^&"]+)/g;
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    const decoded = decodeURIComponent(match[1]);
+    // Skip Google's own pages and tracking URLs
+    if (
+      decoded.includes("google.com") ||
+      decoded.includes("googleapis.com") ||
+      decoded.includes("accounts.google") ||
+      decoded.includes("support.google")
+    ) {
+      continue;
+    }
+    urls.push(decoded);
+  }
+  return urls;
+}
+
+/**
+ * Extract a simple text snippet from Google result HTML for a given URL.
+ */
+function extractSnippet(html: string, url: string): string {
+  // Find the region around the URL and look for nearby text
+  const idx = html.indexOf(url);
+  if (idx === -1) return "";
+  // Take a chunk after the URL reference and try to extract visible text
+  const chunk = html.slice(idx, idx + 2000);
+  // Remove HTML tags and get the first meaningful text
+  const text = chunk
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z]+;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  // Return first ~300 chars
+  return text.slice(0, 300);
+}
+
+/**
+ * Search Google directly by fetching the HTML results page.
+ * No API key required. Prefers arxiv.org results.
+ *
+ * Falls back gracefully if Google blocks the request (returns []).
+ */
+async function searchViaGoogle(title: string): Promise<Article[]> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    // First try with site restriction to prefer academic sources
+    const query = encodeURIComponent(
+      `"${title}" site:arxiv.org OR site:semanticscholar.org OR site:openreview.net`
+    );
+    const googleUrl = `https://www.google.com/search?q=${query}&num=10&hl=en`;
+
+    const res = await fetch(googleUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      console.error(`Google search returned ${res.status}`);
+      // If site-restricted search fails, try broader search
+      return searchViaGoogleBroad(title, controller.signal);
+    }
+
+    const html = await res.text();
+    const urls = extractGoogleResultUrls(html);
+
+    // If no results with site restriction, try broader search
+    if (urls.length === 0) {
+      return searchViaGoogleBroad(title, controller.signal);
+    }
+
+    return resolveUrlsToArticles(urls, html);
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      console.error("Google search timed out");
+    } else {
+      console.error("Google search error:", err);
+    }
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Broader Google search without site restriction.
+ */
+async function searchViaGoogleBroad(
+  title: string,
+  signal: AbortSignal
+): Promise<Article[]> {
+  try {
+    const query = encodeURIComponent(`"${title}" paper arxiv`);
+    const googleUrl = `https://www.google.com/search?q=${query}&num=10&hl=en`;
+
+    const res = await fetch(googleUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      signal,
+    });
+
+    if (!res.ok) {
+      console.error(`Google broad search returned ${res.status}`);
+      return [];
+    }
+
+    const html = await res.text();
+    const urls = extractGoogleResultUrls(html);
+    return resolveUrlsToArticles(urls, html);
+  } catch (err) {
+    console.error("Google broad search error:", err);
+    return [];
+  }
+}
+
+/**
+ * Given a list of URLs from Google results, sort by priority (arxiv first),
+ * extract arXiv IDs, and fetch full metadata from arXiv API.
+ * For non-arxiv URLs, create a basic article entry from the search snippet.
+ */
+async function resolveUrlsToArticles(
+  urls: string[],
+  html: string
+): Promise<Article[]> {
+  // Sort: arxiv > semanticscholar > openreview > others
+  const sorted = [...urls].sort((a, b) => {
+    const score = (u: string) =>
+      u.includes("arxiv.org")
+        ? 0
+        : u.includes("semanticscholar.org")
+          ? 1
+          : u.includes("openreview.net")
+            ? 2
+            : 3;
+    return score(a) - score(b);
+  });
+
+  const articles: Article[] = [];
+  const seenIds = new Set<string>();
+
+  for (const url of sorted) {
+    if (articles.length >= 5) break;
+
+    // Try to extract arXiv ID
+    const arxivIdMatch = url.match(
+      /arxiv\.org\/(?:abs|pdf|html)\/([0-9]+\.[0-9]+(?:v\d+)?)/i
+    );
+
+    if (arxivIdMatch) {
+      const arxivId = arxivIdMatch[1];
+      if (seenIds.has(arxivId)) continue;
+      seenIds.add(arxivId);
+
+      const article = await fetchArxivById(arxivId);
+      if (article) {
+        articles.push(article);
+        continue;
+      }
+    }
+
+    // For non-arxiv results, create a basic article from the search info
+    if (seenIds.has(url)) continue;
+    seenIds.add(url);
+
+    const snippet = extractSnippet(html, url);
+    // Extract a cleaner title from the URL path or snippet
+    const pathTitle = url
+      .split("/")
+      .pop()
+      ?.replace(/[-_]/g, " ")
+      ?.replace(/\.\w+$/, "") || "";
+
+    articles.push({
+      id: url,
+      title: pathTitle || url,
+      authors: [],
+      abstract: snippet,
+      url,
+      pdfUrl: undefined,
+      publishedDate: "",
+      source: "arxiv",
+    });
+  }
+
+  return articles;
 }
 
 // ──────────────────────────────────────────────
@@ -204,16 +450,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Treat as paper title → Semantic Scholar search
-    const articles = await searchByTitle(input);
-    if (articles.length === 0) {
-      return NextResponse.json(
-        { error: "NOT_FOUND" },
-        { status: 404 }
-      );
+    // 3. Multi-strategy title search:
+    //    a) arXiv title search (most reliable for arxiv papers)
+    //    b) Semantic Scholar (broader coverage)
+    //    c) Google search via Serper API (final fallback)
+
+    // Strategy A: arXiv title search
+    console.log(`[fetch] Searching arXiv by title: "${input}"`);
+    const arxivResults = await searchArxivByTitle(input);
+    if (arxivResults.length > 0) {
+      return NextResponse.json({ articles: arxivResults });
     }
 
-    return NextResponse.json({ articles });
+    // Strategy B: Semantic Scholar
+    console.log(`[fetch] arXiv title search returned 0 results, trying Semantic Scholar...`);
+    const s2Results = await searchByTitle(input);
+    if (s2Results.length > 0) {
+      return NextResponse.json({ articles: s2Results });
+    }
+
+    // Strategy C: Google search via Serper API
+    console.log(`[fetch] Semantic Scholar returned 0 results, trying Google search...`);
+    const googleResults = await searchViaGoogle(input);
+    if (googleResults.length > 0) {
+      return NextResponse.json({ articles: googleResults });
+    }
+
+    return NextResponse.json(
+      { error: "NOT_FOUND" },
+      { status: 404 }
+    );
   } catch (error) {
     console.error("Paper fetch error:", error);
     return NextResponse.json({ error: "INTERNAL_ERROR" }, { status: 500 });

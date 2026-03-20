@@ -6,6 +6,8 @@ export interface TrimmedArticle {
   publishedDate: string;
   source: string;
   abstract: string;
+  score?: number;
+  upvotes?: number;
 }
 
 /** Trim and sanitize article data for LLM consumption. */
@@ -18,5 +20,7 @@ export function trimArticlesForLLM(
     publishedDate: String(a.publishedDate || ""),
     source: String(a.source || ""),
     abstract: String(a.abstract || "").slice(0, PAPER.MAX_ABSTRACT_CHARS),
+    score: typeof a.score === "number" ? a.score : undefined,
+    upvotes: typeof a.upvotes === "number" ? a.upvotes : undefined,
   }));
 }

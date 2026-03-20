@@ -23,6 +23,10 @@ export interface Article {
   publishedDate: string;
   /** Data source. */
   source: ArticleSource;
+  /** Upvote count (from HuggingFace). */
+  upvotes?: number;
+  /** Relevance score from scoring system. */
+  score?: number;
 }
 
 /** Parameters for searching articles. */

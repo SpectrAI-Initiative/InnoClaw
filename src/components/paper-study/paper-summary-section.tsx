@@ -2,12 +2,19 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, Save, Check, Square, FileText, MessageSquare } from "lucide-react";
+import { Loader2, Save, Check, Square, FileText, MessageSquare, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { NoteDiscussionDialog } from "./note-discussion-dialog";
+import type { Article } from "@/lib/article-search/types";
+import {
+  wrapWithFrontmatter,
+  buildObsidianUri,
+  buildRelatedNotesSection,
+  type NoteFrontmatter,
+} from "@/lib/utils/obsidian";
 
 /** Sanitize a string for use as a filename. */
 function sanitizeFileName(name: string): string {
@@ -22,6 +29,9 @@ interface PaperSummarySectionProps {
   isSummarizing: boolean;
   workspaceId: string;
   notesDir?: string;
+  articles?: Article[];
+  llmProvider?: string | null;
+  llmModel?: string | null;
   onSaved?: () => void;
   onStop?: () => void;
 }
@@ -31,6 +41,9 @@ export function PaperSummarySection({
   isSummarizing,
   workspaceId,
   notesDir,
+  articles = [],
+  llmProvider,
+  llmModel,
   onSaved,
   onStop,
 }: PaperSummarySectionProps) {
@@ -81,19 +94,80 @@ export function PaperSummarySection({
     try {
       const fileName = `${sanitizeFileName(t("summaryNoteTitle"))}-${dateStr}.md`;
       const filePath = `${notesDir}/${fileName}`;
+
+      // Build Obsidian-compatible frontmatter
+      const uniqueSources = [...new Set(articles.map((a) => a.source))];
+      const allAuthors = [...new Set(articles.flatMap((a) => a.authors))];
+      const paperUrls = articles.map((a) => a.url).filter(Boolean);
+      const meta: NoteFrontmatter = {
+        title: noteTitle,
+        date: dateStr,
+        type: "summary",
+        tags: ["paper-study", "summary"],
+        aliases: [noteTitle],
+        source: uniqueSources,
+        authors: allAuthors.slice(0, 20),
+        paper_url: paperUrls,
+      };
+
+      const content = wrapWithFrontmatter(`# ${noteTitle}\n\n${summary}`, meta);
+
       const res = await fetch("/api/files/write", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: filePath, content: `# ${noteTitle}\n\n${summary}` }),
+        body: JSON.stringify({ path: filePath, content }),
       });
       if (!res.ok) throw new Error("Write failed");
       setSavedFilePath(filePath);
       toast.success(t("savedToFile"));
+
+      // Append related notes as wikilinks (best effort, non-blocking)
+      appendRelatedNotes(filePath, content);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : tCommon("error"));
     } finally {
       setSavingFile(false);
     }
+  };
+
+  /** Find and append related notes using [[wikilink]] syntax. */
+  const appendRelatedNotes = async (filePath: string, currentContent: string) => {
+    if (!notesDir || articles.length === 0) return;
+    try {
+      const article = articles[0];
+      const res = await fetch("/api/paper-study/find-related-notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          notesDir,
+          article,
+          ...(llmProvider && llmModel ? { llmProvider, llmModel } : {}),
+        }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const related: { name: string; reason?: string }[] = data.related || [];
+      // Filter out self
+      const baseName = filePath.split("/").pop() || "";
+      const filtered = related.filter((n) => n.name !== baseName);
+      if (filtered.length === 0) return;
+
+      const section = buildRelatedNotesSection(filtered);
+      await fetch("/api/files/write", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: filePath, content: currentContent + section }),
+      });
+      toast.success(t("relatedNotesAppended"));
+    } catch {
+      // Silently ignore - related notes are best effort
+    }
+  };
+
+  const handleOpenInObsidian = () => {
+    if (!savedFilePath || !notesDir) return;
+    const uri = buildObsidianUri(notesDir, savedFilePath);
+    window.open(uri);
   };
 
   return (
@@ -152,15 +226,26 @@ export function PaperSummarySection({
                 </Button>
               )}
               {savedFilePath && (
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  onClick={() => setDiscussOpen(true)}
-                  className="gap-1 text-xs"
-                >
-                  <MessageSquare className="h-3 w-3" />
-                  {t("expandDiscuss")}
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={handleOpenInObsidian}
+                    className="gap-1 text-xs"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    {t("openInObsidian")}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => setDiscussOpen(true)}
+                    className="gap-1 text-xs"
+                  >
+                    <MessageSquare className="h-3 w-3" />
+                    {t("expandDiscuss")}
+                  </Button>
+                </>
               )}
             </>
           )}
@@ -188,6 +273,9 @@ export function PaperSummarySection({
         noteTitle={noteTitle}
         noteContent={summary}
         noteFilePath={savedFilePath || undefined}
+        notesDir={notesDir}
+        llmProvider={llmProvider}
+        llmModel={llmModel}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getConfiguredModelWithProvider, isAIAvailable } from "@/lib/ai/provider";
+import { getConfiguredModelWithProvider, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { providerSupportsVision } from "@/lib/ai/models";
 import { runFullIdeation } from "@/lib/research-ideation/orchestrator";
 import { extractPaperContent, extractPaperFullText } from "../extract-paper-content";
@@ -8,7 +8,7 @@ import type { IdeationSharedContext, IdeationTurn } from "@/lib/research-ideatio
 
 export async function POST(req: NextRequest) {
   try {
-    const { article, mode = "quick", locale = "en", userSeed } = await req.json();
+    const { article, mode = "quick", locale = "en", userSeed, llmProvider, llmModel } = await req.json();
 
     if (!article || !article.title) {
       return textError("Missing article data", 400);
@@ -25,7 +25,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { providerId, model } = await getConfiguredModelWithProvider();
+    let providerId: string;
+    let model;
+    if (llmProvider && llmModel) {
+      const override = getModelFromOverride(llmProvider, llmModel);
+      model = override.model;
+      providerId = llmProvider;
+    } else {
+      const configured = await getConfiguredModelWithProvider();
+      model = configured.model;
+      providerId = configured.providerId;
+    }
     const visionCapable = providerSupportsVision(providerId);
 
     const context: IdeationSharedContext = {

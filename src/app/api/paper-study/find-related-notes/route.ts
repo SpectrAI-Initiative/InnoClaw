@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
-import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
+import { getConfiguredModel, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { buildFindRelatedNotesPrompt } from "@/lib/ai/prompts";
 import { listDirectory, readFile } from "@/lib/files/filesystem";
 import path from "path";
 
 export async function POST(req: NextRequest) {
   try {
-    const { notesDir, article } = await req.json();
+    const { notesDir, article, llmProvider, llmModel } = await req.json();
 
     if (!notesDir || typeof notesDir !== "string") {
       return NextResponse.json(
@@ -59,7 +59,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Ask LLM to find related notes
-    const model = await getConfiguredModel();
+    const { model } = llmProvider && llmModel
+      ? getModelFromOverride(llmProvider, llmModel)
+      : { model: await getConfiguredModel() };
     const prompt = buildFindRelatedNotesPrompt(
       { title: article.title, abstract: article.abstract || "" },
       validFiles.map((f) => ({ name: f.name, excerpt: f.excerpt }))

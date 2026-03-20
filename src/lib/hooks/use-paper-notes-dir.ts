@@ -1,16 +1,35 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 const STORAGE_KEY = "paperStudy.notesDir";
 
-function getStoredNotesDir(): string {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem(STORAGE_KEY) || "";
-}
-
 export function usePaperNotesDir() {
-  const [notesDir, setNotesDirState] = useState(getStoredNotesDir);
+  const [notesDir, setNotesDirState] = useState("");
+
+  // Read from localStorage first, then fall back to backend config
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY) || "";
+    if (stored) {
+      setNotesDirState(stored);
+      return;
+    }
+
+    // Fallback: try loading from backend config
+    fetch("/api/paper-study/config")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((config) => {
+        if (config?.paths?.obsidian_vault) {
+          const vault = config.paths.obsidian_vault;
+          const subfolder = config.paths.paper_notes_folder || "";
+          const dir = subfolder ? `${vault}/${subfolder}` : vault;
+          setNotesDirState(dir);
+        }
+      })
+      .catch(() => {
+        // Config endpoint not available — ignore
+      });
+  }, []);
 
   const setNotesDir = useCallback((dir: string) => {
     const trimmed = dir.trim();

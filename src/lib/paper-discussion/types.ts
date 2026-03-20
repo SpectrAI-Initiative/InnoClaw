@@ -70,6 +70,8 @@ export interface PaperDiscussionSharedContext {
   paperContent?: PaperContentPart[];
   /** Whether the current model supports vision/image inputs */
   supportsVision?: boolean;
+  /** Extracted figure metadata (URLs, captions) */
+  figures?: Array<{ url: string; caption: string; figureId?: string }>;
   locale: string;
   mode: "quick" | "full";
 }

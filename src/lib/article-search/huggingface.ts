@@ -36,11 +36,6 @@ export async function searchHuggingFace(
 ): Promise<Article[]> {
   const { keywords, maxResults = 10, dateFrom, dateTo } = params;
 
-  // No keywords means no search — return empty results
-  if (keywords.length === 0) {
-    return [];
-  }
-
   const apiUrl = getHfApiUrl();
   let lastError: Error | undefined;
 
@@ -104,15 +99,21 @@ function filterAndMap(
   dateTo?: string,
 ): Article[] {
 
-  // Filter by keywords (case-insensitive, match title or abstract)
-  const lowerKeywords = keywords.map((k) => k.toLowerCase());
-  let filtered = data.filter((paper) => {
-    const title = (paper.title || "").toLowerCase();
-    const abstract = (paper.paper?.summary || "").toLowerCase();
-    return lowerKeywords.some(
-      (kw) => title.includes(kw) || abstract.includes(kw)
-    );
-  });
+  // Filter by keywords (case-insensitive, match title or abstract).
+  // When no keywords are provided, return all papers (used by 今日锐评).
+  let filtered: HFPaper[];
+  if (keywords.length > 0) {
+    const lowerKeywords = keywords.map((k) => k.toLowerCase());
+    filtered = data.filter((paper) => {
+      const title = (paper.title || "").toLowerCase();
+      const abstract = (paper.paper?.summary || "").toLowerCase();
+      return lowerKeywords.some(
+        (kw) => title.includes(kw) || abstract.includes(kw)
+      );
+    });
+  } else {
+    filtered = [...data];
+  }
 
   // Filter by date
   if (dateFrom || dateTo) {
@@ -139,11 +140,13 @@ interface HFPaper {
     summary?: string;
     authors?: { name?: string; user?: { fullname?: string } }[];
     publishedAt?: string;
+    upvotes?: number;
   };
   publishedAt?: string;
+  numComments?: number;
 }
 
-/** Convert a HF paper to our Article type. */
+/** Convert a HF paper to our Article type (with upvotes). */
 function toArticle(paper: HFPaper): Article {
   const p = paper.paper;
   const id = p?.id || "";
@@ -159,5 +162,6 @@ function toArticle(paper: HFPaper): Article {
     pdfUrl: undefined,
     publishedDate: paper.publishedAt || p?.publishedAt || "",
     source: "huggingface",
+    upvotes: p?.upvotes ?? 0,
   };
 }
