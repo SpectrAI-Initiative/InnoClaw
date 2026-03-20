@@ -33,15 +33,9 @@ InnoClaw turns server-side folders into AI-native workspaces for grounded chat, 
 
 It is built for researchers, developers, labs, and self-hosters who want more than a generic chat UI: cited answers over real files, reusable skills, and a path from reading to execution.
 
-```mermaid
-flowchart LR
-    A[Open a workspace] --> B[Sync files into RAG]
-    B --> C[Ask grounded questions]
-    C --> D[Study papers]
-    D --> E[Run multi-agent discussion]
-    E --> F[Generate notes and ideas]
-    F --> G[Execute remote research tasks]
-```
+<p align="center">
+  <img src="public/innoclaw-flow.png" alt="InnoClaw Workflow" width="800" />
+</p>
 
 ---
 
