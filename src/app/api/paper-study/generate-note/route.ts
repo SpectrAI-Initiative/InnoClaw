@@ -26,6 +26,19 @@ export async function POST(req: NextRequest) {
       return new Response("Missing notesDir", { status: 400 });
     }
 
+    // Basic path traversal / sandboxing guard for notesDir
+    if (typeof notesDir !== "string") {
+      return new Response("Invalid notesDir", { status: 400 });
+    }
+    // Reject absolute paths to avoid writing outside the intended workspace
+    if (path.isAbsolute(notesDir)) {
+      return new Response("Invalid notesDir", { status: 400 });
+    }
+    // Reject any usage of parent directory segments (e.g., "../")
+    const unsafeSegments = notesDir.split(/[/\\]+/).some(segment => segment === "..");
+    if (unsafeSegments) {
+      return new Response("Invalid notesDir", { status: 400 });
+    }
     if (!isAIAvailable()) {
       return new Response(
         "AI is not configured. Please set one of OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or SHLAB_API_KEY in .env.local.",
