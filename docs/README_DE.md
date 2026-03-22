@@ -53,11 +53,16 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 - **Entfernte Profil-Bindung**: Tiefe Recherche-Sitzungen koennen an vorkonfigurierte SSH/Remote-Rechenprofile gebunden werden, was reproduzierbare verteilte Forschungs-Workflows ermoeglicht
 
 
+
 #### 2026-03-20
 - **Tiefenforschungsmodul**: Vollstaendige KI-gesteuerte wissenschaftliche Forschungs-Pipeline mit Mehrphasen-Orchestrierung, Gutachter-Diskussion, Ausfuehrungsplanung und Workflow-Grafik-Oberflaeche
 - **Ausfuehrungs-Pipeline**: Automatisiertes System zur Experimentausfuehrung mit Slurm-Job-Uebermittlung, Datensatzverwaltung, Vorverarbeitung und Unterstuetzung fuer entfernte Ausfuehrer
 
 
+
+
+<details>
+<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-03-19
 - **ClawHub-Skill-Import**: Neue Integration zum direkten Importieren von Skills aus ClawHub ueber einen dedizierten API-Endpunkt und einen Import-Dialog
@@ -67,9 +72,11 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-18
 - **Multimodale Bildanalyse fuer Papierauswertung**: PDF-Bilder werden jetzt waehrend Diskussions- und Forschungsideensitzungen visuell extrahiert und analysiert
 - **Claude Code Skills-Integration**: Importieren Sie Skills direkt aus lokalen Ordnern oder Claude Code-Projekten ueber einen neuen dedizierten Import-Workflow
+
 
 
 
@@ -84,10 +91,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-17
 - **Remote-Job-Profilverwaltung und SSH-Haertung**: sichere Erstellung, Bearbeitung und SSH-gehaertete Einreichung von Forschungsjobs auf Remote-Systemen
 - **Rich Markdown Rendering im Agent Panel**: Agent-Nachrichten rendern jetzt Tabellen, LaTeX-Mathematik und syntaxhervorgehobene Codebloecke
 - **API-Provider-Settings-UI**: API-Keys und Endpunkte fuer KI-Provider direkt auf der Settings-Seite konfigurieren
+
 
 
 
@@ -102,10 +111,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-16
 - **Robustheit fuer Paper-Diskussion und Ideation**: 2-2.5x hoeheres Token-Budget pro Rolle, automatische Wiederholung bei leeren oder zu kurzen Antworten und sichtbare Fehler in der UI
 - **Vollstaendiger Paper-Kontext**: Discussion- und Ideation-Agents erhalten bis zu 30k Zeichen des lokalen Volltexts statt nur des Abstracts
 - **Abstract-Extraktion korrigiert**: heuristische Regex-Extraktion und verbesserter KI-Prompt verhindern, dass Autorennamen als Abstract erkannt werden
+
 
 
 
@@ -121,6 +132,11 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
+
+
+
+</details>
 
 
 <!-- whats-new-end -->

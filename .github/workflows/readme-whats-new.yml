@@ -251,13 +251,22 @@ jobs:
           mv /tmp/README_DE_updated.md docs/README_DE.md
           echo "docs/README_DE.md (DE) updated with new entry for $TODAY"
 
-      - name: Trim old entries
+      - name: Trim old entries and collapse
         if: steps.detect.outputs.has_features == 'true'
         run: |
           python3 <<'PYEOF'
           import re
 
           MAX_ENTRIES = 10
+          VISIBLE_DATES = 2  # Number of most-recent unique dates shown expanded
+
+          LANG_LABELS = {
+              "README.md": "Show earlier updates",
+              "docs/README_CN.md": "显示更早的更新",
+              "docs/README_JA.md": "以前の更新を表示",
+              "docs/README_FR.md": "Afficher les mises a jour precedentes",
+              "docs/README_DE.md": "Aeltere Updates anzeigen",
+          }
 
           for readme_file in [
               "README.md",
@@ -283,6 +292,14 @@ jobs:
               section = content[start_idx + len(start_marker):end_idx]
               after = content[end_idx:]
 
+              # Strip any existing <details> wrapper from previous runs
+              section = re.sub(
+                  r'<details>\s*<summary>.*?</summary>\s*(.*?)\s*</details>',
+                  r'\1',
+                  section,
+                  flags=re.DOTALL,
+              )
+
               # Split into date-headed entries
               entries = re.split(r'(?=\n#### \d{4}-\d{2}-\d{2})', section)
               entries = [e for e in entries if e.strip() and '####' in e]
@@ -293,11 +310,33 @@ jobs:
               else:
                   print(f"{readme_file}: Have {len(entries)} entries (max {MAX_ENTRIES}), no trimming needed.")
 
-              trimmed = "\n".join(entries) + "\n\n"
-              new_content = before + "\n" + trimmed + after
+              # Determine split point: first VISIBLE_DATES unique dates stay expanded
+              seen_dates = []
+              split_idx = len(entries)
+              for i, entry in enumerate(entries):
+                  m = re.search(r'#### (\d{4}-\d{2}-\d{2})', entry)
+                  if m and m.group(1) not in seen_dates:
+                      seen_dates.append(m.group(1))
+                  if len(seen_dates) > VISIBLE_DATES:
+                      split_idx = i
+                      break
+
+              visible = entries[:split_idx]
+              collapsed = entries[split_idx:]
+
+              result = "\n".join(visible)
+              if collapsed:
+                  label = LANG_LABELS.get(readme_file, "Show earlier updates")
+                  result += "\n\n<details>\n<summary>" + label + "</summary>\n"
+                  result += "\n".join(collapsed)
+                  result += "\n\n</details>\n"
+              result += "\n\n"
+
+              new_content = before + "\n" + result + after
 
               with open(readme_file, "w", encoding="utf-8") as f:
                   f.write(new_content)
+              print(f"{readme_file}: {len(visible)} entries visible, {len(collapsed)} collapsed.")
           PYEOF
 
       - name: Create branch, PR and merge

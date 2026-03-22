@@ -53,11 +53,16 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 - **Liaison de profil distant**: Les sessions de recherche approfondie peuvent etre liees a des profils SSH/calcul distant preconfigures, permettant des workflows de recherche distribues et reproductibles
 
 
+
 #### 2026-03-20
 - **Module de recherche approfondie**: Pipeline de recherche scientifique entierement pilote par IA avec orchestration multi-phases, deliberation des evaluateurs, planification d'execution et interface graphique de flux de travail
 - **Pipeline d'execution**: Systeme d'execution d'experiences automatise avec soumission de jobs Slurm, gestion de jeux de donnees, preprocessement et support d'executeurs distants
 
 
+
+
+<details>
+<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-03-19
 - **Importation de competences ClawHub**: Nouvelle integration pour importer des competences directement depuis ClawHub via un point d'API dedie et une boite de dialogue d'importation
@@ -67,9 +72,11 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-18
 - **Vision Multimodale pour l'Analyse d'Articles**: Les images PDF sont desormais extraites et analysees visuellement lors des sessions de discussion et d'ideation de recherche
 - **Integration des Competences Claude Code**: Importez des competences directement depuis des dossiers locaux ou des projets Claude Code via un nouveau flux d'importation dedie
+
 
 
 
@@ -84,10 +91,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-17
 - **Gestion des profils de jobs distants et durcissement SSH** : prise en charge de la creation, de l'edition et de l'envoi securise de jobs de recherche via SSH
 - **Rendu Markdown riche dans le panneau Agent** : les messages Agent affichent maintenant tableaux, formules LaTeX et blocs de code avec coloration syntaxique
 - **UI de configuration des fournisseurs API** : configuration directe des cles API et endpoints des fournisseurs IA depuis la page Settings
+
 
 
 
@@ -102,10 +111,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-16
 - **Robustesse des discussions d'articles et de l'ideation** : budget de tokens par role augmente de 2 a 2.5x, reessai automatique sur reponses vides ou trop courtes, et erreurs visibles dans l'UI
 - **Contexte article complet** : les agents de discussion et d'ideation recoivent jusqu'a 30k caracteres du texte complet local de l'article, et pas seulement le resume
 - **Correction de l'extraction d'abstract** : extraction heuristique via regex et meilleur prompt IA pour eviter de prendre les noms d'auteurs pour le resume
+
 
 
 
@@ -121,6 +132,11 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
+
+
+
+</details>
 
 
 <!-- whats-new-end -->
