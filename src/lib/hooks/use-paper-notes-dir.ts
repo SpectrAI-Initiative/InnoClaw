@@ -5,17 +5,18 @@ import { useState, useCallback, useEffect } from "react";
 const STORAGE_KEY = "paperStudy.notesDir";
 
 export function usePaperNotesDir() {
-  const [notesDir, setNotesDirState] = useState("");
-
-  // Read from localStorage first, then fall back to backend config
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) || "";
-    if (stored) {
-      setNotesDirState(stored);
-      return;
+  const [notesDir, setNotesDirState] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY) || "";
+    } catch {
+      return "";
     }
+  });
 
-    // Fallback: try loading from backend config
+  // Fallback: if nothing in localStorage, try loading from backend config
+  useEffect(() => {
+    if (notesDir) return;
+
     fetch("/api/paper-study/config")
       .then((res) => (res.ok ? res.json() : null))
       .then((config) => {
@@ -29,7 +30,7 @@ export function usePaperNotesDir() {
       .catch(() => {
         // Config endpoint not available — ignore
       });
-  }, []);
+  }, [notesDir]);
 
   const setNotesDir = useCallback((dir: string) => {
     const trimmed = dir.trim();

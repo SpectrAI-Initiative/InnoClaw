@@ -4,7 +4,7 @@
 
 export type { PhaseContext, PhaseResult } from "../types";
 
-import type { DeepResearchNode, DeepResearchArtifact, Phase } from "../types";
+import type { DeepResearchNode, Phase } from "../types";
 
 /**
  * Utility type for phase handler function signature.

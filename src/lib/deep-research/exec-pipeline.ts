@@ -13,37 +13,26 @@ import type {
   PreprocessingRunResult,
   JobSubmissionResult,
   DryRunResult,
-  SubmissionMode,
   ValidationPlan,
   DeepResearchSession,
-  DeepResearchArtifact,
   ExperimentGroup,
   WorkerFanoutPlan,
-  ExecutionRound,
-  ExecutionLineage,
   ExecutionValidationResult,
   ExperimentAnalysisResult,
   AggregatedResult,
 } from "./types";
-import { DEFAULT_EXECUTION_PIPELINE_CONFIG } from "./types";
 import { resolveConfig, resolveResources, resolveEnvironment, experimentOutputPath, preprocessingOutputPath, datasetCachePath } from "./exec-config";
-import { MockSubmissionAdapter, RJobSubmissionAdapter, getSubmissionAdapter, renderJobSpec } from "./exec-job-submitter";
+import { MockSubmissionAdapter, getSubmissionAdapter, renderJobSpec } from "./exec-job-submitter";
 import type { SubmissionAdapter } from "./exec-job-submitter";
-import { buildDatasetAcquisitionPlan, executeDatasetAcquisition, createDatasetManifest } from "./exec-dataset-manager";
-import { executePreprocessingPipeline, generatePreprocessingManifest } from "./exec-preprocess-runner";
-import { createExperimentManifest, updateManifestWithDatasets, updateManifestWithPreprocessing, updateManifestWithSubmission, finalizeManifest, renderManifestSummary } from "./exec-manifest";
+import { buildDatasetAcquisitionPlan, executeDatasetAcquisition } from "./exec-dataset-manager";
+import { executePreprocessingPipeline } from "./exec-preprocess-runner";
+import { createExperimentManifest, updateManifestWithDatasets, updateManifestWithPreprocessing, updateManifestWithSubmission, finalizeManifest } from "./exec-manifest";
 import { checkExecutionReadiness, generateDryRun } from "./exec-readiness";
 import {
   buildExperimentGroup,
   submitGroupWorkers,
   pollWorkerStatuses,
   collectWorkerResults,
-  createExecutionRound,
-  validateAndAnalyzeRound,
-  createExecutionLineage,
-  addRoundToLineage,
-  checkStopConditions,
-  buildSimpleFanoutPlan,
 } from "./execution-round-manager";
 import { aggregateWorkerResults, computeGroupStatus } from "./worker-aggregator";
 import { validateExperimentResults } from "./execution-validator";

@@ -34,7 +34,6 @@ import type {
   MainBrainAudit,
   ReviewerBattleResult,
   LanguageState,
-  PHASE_STAGE_NUMBER as _PSN,
 } from "./types";
 import { PHASE_ORDER, PHASE_STAGE_NUMBER } from "./types";
 
@@ -95,7 +94,7 @@ function resolveLanguageState(messages: { role: string; content: string }[]): La
 // =============================================================
 
 /** Invariant A: Check if final_report can proceed. */
-function canGenerateFinalReport(nodes: DeepResearchNode[], session: DeepResearchSession): { allowed: boolean; reason?: string } {
+function canGenerateFinalReport(nodes: DeepResearchNode[], _session: DeepResearchSession): { allowed: boolean; reason?: string } {
   // Check active-branch pending required nodes
   const activePending = nodes.filter(n =>
     n.status !== "superseded" &&
@@ -119,7 +118,7 @@ function canGenerateFinalReport(nodes: DeepResearchNode[], session: DeepResearch
 }
 
 /** Invariant B: Check if session can be marked completed. */
-function canCompleteSession(nodes: DeepResearchNode[], session: DeepResearchSession): { allowed: boolean; reason?: string } {
+function canCompleteSession(nodes: DeepResearchNode[], _session: DeepResearchSession): { allowed: boolean; reason?: string } {
   // Check for any non-terminal nodes that are NOT superseded
   const activeNodes = nodes.filter(n =>
     n.status !== "superseded" &&
@@ -891,12 +890,6 @@ async function createNodesFromSpecs(
     created.push(node);
   }
   return created;
-}
-
-function getNextPhase(current: Phase): Phase | null {
-  const idx = PHASE_ORDER.indexOf(current);
-  if (idx < 0 || idx >= PHASE_ORDER.length - 1) return null;
-  return PHASE_ORDER[idx + 1];
 }
 
 function validatePhase(phase: string | undefined, fallback: Phase): Phase {

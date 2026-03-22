@@ -7,7 +7,6 @@
 import type {
   DataSourceSpec,
   DatasetAcquisitionResult,
-  DatasetAcquisitionStatus,
   ExecutionPipelineConfig,
   ExperimentSpec,
 } from "./types";

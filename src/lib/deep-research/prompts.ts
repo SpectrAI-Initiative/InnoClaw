@@ -400,7 +400,7 @@ export function buildConfirmationInterpretationPrompt(
   outcome: ConfirmationOutcome,
   userFeedback: string | undefined,
   nodes: DeepResearchNode[],
-  artifacts: DeepResearchArtifact[]
+  _artifacts: DeepResearchArtifact[]
 ): string {
   const nodesSummary = nodes.map((n) =>
     `  - [${n.id.slice(0, 8)}] ${n.label} (${n.nodeType}, ${n.status})`

@@ -7,7 +7,6 @@ import type {
   DeepResearchArtifact,
   DeepResearchEvent,
   PersistedExecutionRecord,
-  RequirementState,
 } from "@/lib/deep-research/types";
 
 export function useDeepResearchSessions(workspaceId: string | undefined) {

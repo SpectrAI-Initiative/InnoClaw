@@ -22,7 +22,7 @@ import { useAgentSessions } from "@/lib/hooks/use-agent-sessions";
 import { usePreviewTabs } from "@/lib/hooks/use-preview-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Bot, FileText, GraduationCap, Server, FlaskConical, Microscope, Maximize2, Loader2 } from "lucide-react";
+import { Bot, GraduationCap, Server, FlaskConical, Microscope, Maximize2, Loader2 } from "lucide-react";
 import { ClusterPanel } from "@/components/cluster/cluster-panel";
 import { ResearchExecPanel } from "@/components/research-exec/research-exec-panel";
 import { DeepResearchPanel } from "@/components/deep-research/deep-research-panel";

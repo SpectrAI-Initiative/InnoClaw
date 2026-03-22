@@ -11,7 +11,6 @@ import { generateText } from "ai";
 import { getModelForRole, checkBudget, trackUsage } from "../model-router";
 import type {
   PhaseContext,
-  DeepResearchNode,
   BrainDecision,
   NodeCreationSpec,
   SkillRoutingDecision,
@@ -140,8 +139,8 @@ async function planWithSkillRouting(ctx: PhaseContext): Promise<{
 
   const { model } = getModelForRole("main_brain", session.config);
   const messages = await store.getMessages(session.id);
-  const nodes = await store.getNodes(session.id);
-  const artifacts = await store.getArtifacts(session.id);
+  const _nodes = await store.getNodes(session.id);
+  const _artifacts = await store.getArtifacts(session.id);
 
   // Build skill catalog for the prompt
   const skillCatalog = defaultSkillRegistry.describeForLLM();

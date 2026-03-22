@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -22,60 +22,52 @@ interface ModelSelectorProps {
   onModelChange?: (provider: string | null, model: string | null) => void;
 }
 
+function readStoredSelection(storageKey: string): { provider: string; model: string } | null {
+  try {
+    const stored = localStorage.getItem(storageKey);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed?.provider && parsed?.model) {
+        const providerDef = PROVIDERS[parsed.provider as ProviderId];
+        if (providerDef && providerDef.models.some((m: { id: string }) => m.id === parsed.model)) {
+          return parsed;
+        }
+      }
+      // Invalid stored selection — clean up
+      localStorage.removeItem(storageKey);
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 export function useModelSelection(storageKey: string) {
-  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  // Tracks explicit user selection; null means "use default from settings"
+  const [userSelection, setUserSelection] = useState<{ provider: string; model: string } | null>(
+    () => readStoredSelection(storageKey)
+  );
 
   const { data: settings } = useSWR("/api/settings", swrFetcher);
 
-  // Initialize from localStorage, then fall back to global settings
-  useEffect(() => {
-    if (selectedProvider !== null) return;
-
-    let storedSelection: { provider: string; model: string } | null = null;
-    try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored) {
-        try {
-          storedSelection = JSON.parse(stored);
-        } catch {
-          // ignore
-        }
-      }
-    } catch {
-      // ignore
+  // Derive effective provider/model: user selection > settings fallback
+  const settingsFallback = useMemo(() => {
+    if (!settings?.llmProvider || !settings?.llmModel) return null;
+    const configuredProviders = settings.configuredProviders as string[] | undefined;
+    const provider = settings.llmProvider as string;
+    const model = settings.llmModel as string;
+    const providerDef = PROVIDERS[provider as ProviderId];
+    if (providerDef && (!configuredProviders || configuredProviders.includes(provider)) && providerDef.models.some((m) => m.id === model)) {
+      return { provider, model };
     }
+    return null;
+  }, [settings]);
 
-    const configuredProviders = settings?.configuredProviders as string[] | undefined;
-
-    const isValid = (sel: { provider: string; model: string } | null) => {
-      if (!sel || !sel.provider || !sel.model) return false;
-      const providerDef = PROVIDERS[sel.provider as ProviderId];
-      if (!providerDef) return false;
-      if (configuredProviders && !configuredProviders.includes(sel.provider)) return false;
-      return providerDef.models.some((m) => m.id === sel.model);
-    };
-
-    if (isValid(storedSelection)) {
-      setSelectedProvider(storedSelection!.provider);
-      setSelectedModel(storedSelection!.model);
-      return;
-    } else if (storedSelection) {
-      try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
-    }
-
-    if (settings?.llmProvider && settings?.llmModel) {
-      const fallback = { provider: settings.llmProvider as string, model: settings.llmModel as string };
-      if (isValid(fallback)) {
-        setSelectedProvider(fallback.provider);
-        setSelectedModel(fallback.model);
-      }
-    }
-  }, [settings?.llmProvider, settings?.llmModel, settings?.configuredProviders, selectedProvider, storageKey]);
+  const selectedProvider = userSelection?.provider ?? settingsFallback?.provider ?? null;
+  const selectedModel = userSelection?.model ?? settingsFallback?.model ?? null;
 
   const handleModelChange = useCallback((providerId: string, modelId: string) => {
-    setSelectedProvider(providerId);
-    setSelectedModel(modelId);
+    setUserSelection({ provider: providerId, model: modelId });
     try {
       localStorage.setItem(storageKey, JSON.stringify({ provider: providerId, model: modelId }));
     } catch {

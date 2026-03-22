@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, getArtifacts, getNodes, getMessages } from "@/lib/deep-research/event-store";
+import { getSession, getArtifacts } from "@/lib/deep-research/event-store";
 import { db } from "@/lib/db";
 import { workspaces } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";

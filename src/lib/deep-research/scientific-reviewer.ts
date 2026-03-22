@@ -26,7 +26,6 @@ import type {
   ReviewDimension,
   ScientificVerdict,
   ReviewIssue,
-  ReviewIssueStatus,
   AntiPatternFlag,
   AntiPatternType,
   ReviewRevisionRequest,

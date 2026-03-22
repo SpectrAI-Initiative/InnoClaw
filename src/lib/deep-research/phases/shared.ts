@@ -16,7 +16,6 @@ import type {
   Phase,
   NodeCreationSpec,
   RequirementState,
-  PhaseContext,
 } from "../types";
 
 export async function buildNodeContext(sessionId: string) {

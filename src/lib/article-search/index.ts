@@ -32,7 +32,6 @@ export async function searchArticles(
   const tasks = sources.map(async (source) => {
     // Build cache key per-source; exclude the original `sources` array to
     // avoid redundant entries when sources are specified in different orders.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { sources: _ignored, ...restParams } = params;
     const cacheKey = SearchCache.buildKey({ source, ...restParams });
     const cached = cache.get(cacheKey);

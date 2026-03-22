@@ -141,7 +141,7 @@ export function buildStepCommand(
   }
 }
 
-function buildFilterCommand(step: PreprocessingStepSpec, inputPath: string, outputPath: string, format: string): string {
+function buildFilterCommand(step: PreprocessingStepSpec, inputPath: string, outputPath: string, _format: string): string {
   const field = (step.config.field as string) ?? "text";
   const minLen = (step.config.minLength as number) ?? 0;
   const maxLen = (step.config.maxLength as number) ?? 1_000_000;
@@ -162,7 +162,7 @@ print(f'Filter: kept={kept}, dropped={dropped}')
 "`;
 }
 
-function buildTransformCommand(step: PreprocessingStepSpec, inputPath: string, outputPath: string, format: string): string {
+function buildTransformCommand(step: PreprocessingStepSpec, inputPath: string, outputPath: string, _format: string): string {
   const operations = (step.config.operations as string[]) ?? [];
   const opStr = operations.map(op => {
     if (op === "lowercase") return "rec['text'] = rec.get('text', '').lower()";

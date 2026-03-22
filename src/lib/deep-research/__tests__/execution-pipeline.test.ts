@@ -17,7 +17,6 @@ import type {
   ExecutionPipelineConfig,
   JobSubmissionResult,
 } from "../types";
-import { DEFAULT_EXECUTION_PIPELINE_CONFIG } from "../types";
 
 // --- Config ---
 import { resolveConfig, resolveResources, resolveEnvironment, datasetCachePath, experimentOutputPath } from "../exec-config";
@@ -47,7 +46,6 @@ import {
 // --- Preprocessing ---
 import {
   hashStepConfig,
-  hashPipelineConfig,
   buildStepCommand,
   executePreprocessingPipeline,
   generatePreprocessingManifest,

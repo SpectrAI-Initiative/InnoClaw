@@ -15,8 +15,6 @@ import { executeNode } from "../node-executor";
 import type {
   PhaseContext,
   EvidenceCard,
-  EvidenceCardCollection,
-  DeepResearchArtifact,
 } from "../types";
 import type { PhaseHandlerResult } from "./types";
 import { buildNodeContext } from "./shared";

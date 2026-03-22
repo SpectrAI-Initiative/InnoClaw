@@ -12,7 +12,6 @@
 import * as store from "./event-store";
 import { assessEvidenceHonesty } from "./evidence-cards";
 import type {
-  DeepResearchSession,
   DeepResearchNode,
   DeepResearchArtifact,
   Phase,

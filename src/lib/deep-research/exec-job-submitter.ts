@@ -6,7 +6,6 @@
 
 import type {
   ExperimentSpec,
-  ExperimentResources,
   MountSpec,
   EnvironmentSetup,
   JobSubmissionResult,
@@ -20,10 +19,9 @@ import type {
   RLaunchManifest,
   SlurmManifest,
   ExecutionManifest,
-  RetryPolicy,
 } from "./types";
 import { rjobToCommand, rlaunchToCommand } from "./execution-adapters";
-import { slurmToScript, slurmToCommand } from "./slurm-launcher";
+import { slurmToScript } from "./slurm-launcher";
 
 // -------------------------------------------------------------------
 // Adapter interface

@@ -165,7 +165,7 @@ export function ResearchIdeationPanel({ article, workspaceId, llmProvider, llmMo
       setCurrentStage(null);
       abortRef.current = null;
     }
-  }, [article, mode, locale, userSeed]);
+  }, [article, mode, locale, userSeed, llmProvider, llmModel]);
 
   const stopIdeation = useCallback(() => {
     abortRef.current?.abort();

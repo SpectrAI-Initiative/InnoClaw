@@ -10,8 +10,6 @@ import type {
   AggregatedResult,
   ExecutionValidationResult,
   ExperimentAnalysisResult,
-  ExperimentFailureCategory,
-  ExperimentAnalysisRecommendation,
 } from "./types";
 
 // -------------------------------------------------------------------
@@ -170,7 +168,7 @@ export function analyzeExperimentFailure(
   // --- Pattern 6: High variance across seeds ---
   if (aggregated) {
     const highVarianceMetrics = Object.entries(aggregated.metrics).filter(
-      ([_, m]) => m.coefficientOfVariation > 0.3 && m.values.length >= 2
+      ([_key, m]) => m.coefficientOfVariation > 0.3 && m.values.length >= 2
     );
     if (highVarianceMetrics.length > 0) {
       rootCauses.push({

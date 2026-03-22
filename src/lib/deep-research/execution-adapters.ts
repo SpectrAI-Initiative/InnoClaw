@@ -9,7 +9,6 @@ import type {
   RLaunchManifest,
   RJobManifest,
   MountSpec,
-  ResourceProfile,
   LauncherType,
   ExecutionConfig,
   ValidationStep,

@@ -150,7 +150,7 @@ export function PaperDiscussionPanel({ article, workspaceId, llmProvider, llmMod
       setCurrentStage(null);
       abortRef.current = null;
     }
-  }, [article, mode, locale]);
+  }, [article, mode, locale, llmProvider, llmModel]);
 
   const stopDiscussion = useCallback(() => {
     abortRef.current?.abort();

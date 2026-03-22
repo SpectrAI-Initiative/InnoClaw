@@ -10,15 +10,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import type {
   ScientificReviewPacket,
   ScientificBlocker,
-  RepairPath,
-  DimensionScore,
-  ReviewDimension,
-  ScientificVerdict,
   ReviewIssue,
   AntiPatternFlag,
-  AntiPatternType,
-  ReviewRevisionRequest,
-  ClaimMap,
 } from "../types";
 
 import {

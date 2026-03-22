@@ -106,7 +106,7 @@ export async function handleReviewerDeliberation(ctx: PhaseContext): Promise<Pha
         // Run synthesizer revision
         try {
           const existingClaimMap = latestClaimMap.content as unknown as ClaimMap;
-          const { artifacts: newArtifacts } = await synthesizer.executeRevisionSynthesis(
+          const { artifacts: _newArtifacts } = await synthesizer.executeRevisionSynthesis(
             session,
             existingClaimMap,
             revisionRequest,

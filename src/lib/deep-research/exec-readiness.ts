@@ -6,11 +6,9 @@
 
 import type {
   ExperimentSpec,
-  DataSourceSpec,
   ExperimentResources,
   ExecutionPipelineConfig,
   DryRunResult,
-  PreprocessingStepSpec,
 } from "./types";
 import { renderJobSpec } from "./exec-job-submitter";
 
@@ -49,7 +47,7 @@ export interface ReadinessBlocker {
  */
 export function checkExecutionReadiness(
   spec: ExperimentSpec,
-  config: ExecutionPipelineConfig,
+  _config: ExecutionPipelineConfig,
 ): ReadinessReport {
   const blockers: ReadinessBlocker[] = [];
   const warnings: string[] = [];

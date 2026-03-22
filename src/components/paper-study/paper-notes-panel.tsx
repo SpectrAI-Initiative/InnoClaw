@@ -41,7 +41,7 @@ interface PaperNotesPanelProps {
   llmModel?: string | null;
 }
 
-export function PaperNotesPanel({ notesDir, onSetNotesDir, onDiscussNote, llmProvider, llmModel }: PaperNotesPanelProps) {
+export function PaperNotesPanel({ notesDir, onSetNotesDir, onDiscussNote }: PaperNotesPanelProps) {
   const t = useTranslations("paperStudy");
   const tCommon = useTranslations("common");
 

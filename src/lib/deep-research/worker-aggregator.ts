@@ -6,7 +6,6 @@
 
 import type {
   ExperimentGroup,
-  WorkerRun,
   AggregatedResult,
   AggregatedMetric,
   AggregationRules,

@@ -38,10 +38,6 @@ import { slurmToScript, slurmToCommand } from "../slurm-launcher";
 
 import type {
   ExperimentSpec,
-  RJobManifest,
-  RLaunchManifest,
-  SlurmManifest,
-  RemoteExecutionConfig,
 } from "../types";
 
 // -------------------------------------------------------------------
@@ -1076,9 +1072,9 @@ describe("SSHSubmissionAdapter", () => {
   // --- Full lifecycle test ---
 
   it("full lifecycle: submit → status → logs → outputs → cancel", async () => {
-    let callIndex = 0;
+    let _callIndex = 0;
     setSSHRunner(async (_config, cmd) => {
-      callIndex++;
+      _callIndex++;
       // 1: submit
       if (cmd.includes("rjob submit")) {
         return { stdout: "Job ID: 42000", stderr: "", exitCode: 0 };

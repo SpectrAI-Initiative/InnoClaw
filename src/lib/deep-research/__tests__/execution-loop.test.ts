@@ -12,18 +12,9 @@ import type {
   ExperimentGroup,
   WorkerRun,
   WorkerFanoutPlan,
-  ValidationCriteria,
-  AggregationRules,
-  AggregatedResult,
   ExecutionValidationResult,
-  ExperimentAnalysisResult,
   ExecutionRound,
-  ExecutionLineage,
-  RemoteExecutionConfig,
   ValidationPlan,
-  JobLogResult,
-  JobOutputResult,
-  WorkerRunStatus,
 } from "../types";
 
 // --- Remote executor ---
@@ -35,7 +26,6 @@ import {
   setSCPTransfer,
   resetSCPTransfer,
 } from "../remote-executor";
-import type { SSHCommandResult } from "../remote-executor";
 
 // --- Worker aggregator ---
 import {
@@ -98,9 +88,6 @@ import {
 } from "../exec-dataset-manager";
 
 import {
-  setFileChecker,
-  setCommandRunner,
-  setHashReader,
   resetRunnerOverrides,
 } from "../exec-preprocess-runner";
 
@@ -577,7 +564,7 @@ describe("execution-round-manager", () => {
   });
 
   it("collects worker results via fetcher", async () => {
-    setResultsFetcher(async (worker) => ({
+    setResultsFetcher(async (_worker) => ({
       metrics: { accuracy: 0.85, loss: 0.05 },
       artifactPaths: ["/out/model.pt"],
       logTail: "Done",
@@ -926,7 +913,7 @@ describe("grouped-pipeline", () => {
     setCommandExecutor(async () => ({ stdout: "OK", exitCode: 0 }));
 
     // Set up results fetcher to return mock metrics
-    setResultsFetcher(async (worker) => ({
+    setResultsFetcher(async (_worker) => ({
       metrics: { accuracy: 0.85 + Math.random() * 0.05, loss: 0.05 },
       artifactPaths: ["/out/metrics.json"],
       logTail: "Training completed",

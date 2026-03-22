@@ -2,9 +2,9 @@
 
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle, MessageSquare, Scale } from "lucide-react";
+import { CheckCircle, MessageSquare } from "lucide-react";
 import { useState } from "react";
-import type { ReviewerBattleResultExtended, ReviewerRound } from "@/lib/deep-research/types";
+import type { ReviewerBattleResultExtended } from "@/lib/deep-research/types";
 
 interface ReviewerBattlePanelProps {
   battleResult: ReviewerBattleResultExtended | null;

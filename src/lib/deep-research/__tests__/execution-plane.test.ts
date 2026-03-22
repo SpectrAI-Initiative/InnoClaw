@@ -13,7 +13,7 @@ import {
   dataManifestToArtifact,
 } from "../data-acquisition";
 import type { ExecutionPlanFull, DeepResearchSession } from "../types";
-import { DEFAULT_CONFIG, createEmptyUsage } from "../types";
+import { DEFAULT_CONFIG } from "../types";
 
 // -------------------------------------------------------------------
 // Slurm Launcher Tests

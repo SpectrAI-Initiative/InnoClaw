@@ -7,7 +7,6 @@ import { getModelForRole, checkBudget, trackUsage } from "./model-router";
 import * as store from "./event-store";
 import { executeNode } from "./node-executor";
 import {
-  buildReviewerSystemPrompt,
   buildReviewerBattleSynthesisPrompt,
 } from "./prompts";
 import type {
@@ -51,7 +50,7 @@ export async function runReviewerBattle(
   for (let roundNum = 1; roundNum <= config.maxRounds; roundNum++) {
     if (abortSignal?.aborted) throw new Error("Aborted");
 
-    const previousPacketArtifacts = roundNum > 1
+    const _previousPacketArtifacts = roundNum > 1
       ? await store.getArtifacts(sessionId, { type: "reviewer_packet" })
       : [];
 

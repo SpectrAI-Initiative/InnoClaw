@@ -16,7 +16,6 @@ import type {
   ValidationCriteria,
   ExecutionValidationResult,
   ValidationVerdict,
-  AggregatedMetric,
 } from "./types";
 
 // -------------------------------------------------------------------

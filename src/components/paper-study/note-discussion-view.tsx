@@ -519,10 +519,11 @@ export function NoteDiscussionView({
                   remarkPlugins={[remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                   components={{
-                    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
                     img: (props) => (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         {...props}
+                        alt=""
                         style={{ maxWidth: "100%", height: "auto" }}
                         loading="lazy"
                       />
