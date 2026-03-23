@@ -17,7 +17,9 @@ CREATE TABLE IF NOT EXISTS deep_research_execution_records (
   completed_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS dr_exec_records_session_idx ON deep_research_execution_records(session_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS dr_exec_records_status_idx ON deep_research_execution_records(status);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS dr_exec_records_node_idx ON deep_research_execution_records(node_id);
