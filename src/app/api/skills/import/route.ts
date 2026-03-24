@@ -5,10 +5,20 @@ import { eq } from "drizzle-orm";
 import type { SkillExportData } from "@/types";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 import { insertSkill, parseSkillMd } from "@/lib/db/skills-insert";
+import {
+  isGitHubUrl,
+  parseGitHubUrl,
+  getGitHubFallbackSlug,
+} from "@/lib/skills/github-import";
+import {
+  resolveGitHubRepo,
+  fetchRaw,
+  batchProcess,
+  MAX_FETCH_BYTES,
+} from "@/lib/skills/github-fetch";
 
 /** Check if a hostname/IP is private, loopback, or internal */
 function isPrivateOrInternalHost(hostname: string): boolean {
-  // IPv4 loopback and private ranges
   if (
     hostname === "localhost" ||
     hostname === "127.0.0.1" ||
@@ -20,37 +30,33 @@ function isPrivateOrInternalHost(hostname: string): boolean {
     return true;
   }
 
-  // IPv4 172.16.0.0/12
   const m172 = hostname.match(/^172\.(\d+)\./);
   if (m172) {
     const octet = parseInt(m172[1], 10);
     if (octet >= 16 && octet <= 31) return true;
   }
 
-  // IPv6 loopback and private ranges
   const lower = hostname.toLowerCase().replace(/^\[|\]$/g, "");
   if (
     lower === "::1" ||
     lower === "::" ||
-    lower.startsWith("fc") || // fc00::/7 (ULA)
-    lower.startsWith("fd") || // fc00::/7 (ULA)
-    /^fe[89ab]/i.test(lower) || // fe80::/10 (link-local)
-    lower.startsWith("::ffff:127.") || // IPv4-mapped loopback
-    lower.startsWith("::ffff:10.") || // IPv4-mapped private
-    lower.startsWith("::ffff:192.168.") || // IPv4-mapped private
-    lower.startsWith("::ffff:169.254.") // IPv4-mapped link-local
+    lower.startsWith("fc") ||
+    lower.startsWith("fd") ||
+    /^fe[89ab]/i.test(lower) ||
+    lower.startsWith("::ffff:127.") ||
+    lower.startsWith("::ffff:10.") ||
+    lower.startsWith("::ffff:192.168.") ||
+    lower.startsWith("::ffff:169.254.")
   ) {
     return true;
   }
 
-  // IPv4-mapped 172.16.0.0/12
   const m172mapped = lower.match(/^::ffff:172\.(\d+)\./);
   if (m172mapped) {
     const octet = parseInt(m172mapped[1], 10);
     if (octet >= 16 && octet <= 31) return true;
   }
 
-  // Common internal hostnames
   if (hostname.endsWith(".local") || hostname.endsWith(".internal")) {
     return true;
   }
@@ -71,186 +77,20 @@ function validateSkillData(data: unknown): data is SkillExportData {
   );
 }
 
-// --------------- GitHub helpers ---------------
-
-interface GitHubUrlParts {
-  owner: string;
-  repo: string;
-  branch: string;
-  path: string; // empty string means repo root
-}
-
-function parseGitHubUrl(url: string): GitHubUrlParts | null {
-  // Matches:
-  //   https://github.com/owner/repo
-  //   https://github.com/owner/repo/tree/branch
-  //   https://github.com/owner/repo/tree/branch/path/to/dir
-  const m = url.match(
-    /github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:\/tree\/([^/]+)(?:\/(.+?))?)?(?:\/)?$/
-  );
-  if (!m) return null;
-  return {
-    owner: m[1],
-    repo: m[2],
-    branch: m[3] || "main",
-    path: m[4] || "",
-  };
-}
-
-function isGitHubUrl(url: string): boolean {
-  return /^https?:\/\/(www\.)?github\.com\/[^/]+\/[^/]+/.test(url);
-}
-
-const MAX_FETCH_BYTES = 1_000_000; // 1 MB safety limit for external fetches
-
-async function fetchRaw(
-  owner: string,
-  repo: string,
-  branch: string,
-  filePath: string
-): Promise<string | null> {
-  const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
-
-  // Retry up to 2 times with increasing timeout
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const timeout = 15_000 + attempt * 10_000; // 15s, 25s, 35s
-      const res = await fetch(rawUrl, { signal: AbortSignal.timeout(timeout) });
-      if (!res.ok) {
-        // 404 is not retryable
-        if (res.status === 404) return null;
-        console.error(
-          "Failed to fetch GitHub raw file: non-OK response",
-          { url: rawUrl, status: res.status, attempt }
-        );
-        continue; // retry on server errors
-      }
-
-      const contentLengthHeader = res.headers.get("content-length");
-      if (contentLengthHeader) {
-        const contentLength = Number.parseInt(contentLengthHeader, 10);
-        if (!Number.isNaN(contentLength) && contentLength > MAX_FETCH_BYTES) {
-          return null;
-        }
-      }
-
-      const text = await res.text();
-      if (text.length > MAX_FETCH_BYTES) return null;
-      return text;
-    } catch (error) {
-      if (attempt < 2) {
-        // Wait before retry: 1s, 2s
-        await new Promise((r) => setTimeout(r, (attempt + 1) * 1000));
-        continue;
-      }
-      console.error("Failed to fetch GitHub raw file after retries", { url: rawUrl, error });
-      return null;
-    }
-  }
-  return null;
-}
-
-interface PluginContentFile {
-  path: string;
-  fallbackSlug: string;
-}
-
-/** Discover importable content (skills, commands, agents) from a GitHub repo */
-async function discoverPluginContent(
-  owner: string,
-  repo: string,
-  branch: string,
-  basePath: string
-): Promise<PluginContentFile[]> {
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github.v3+json",
-  };
-  const githubToken = process.env.GITHUB_TOKEN;
-  if (githubToken) {
-    headers.Authorization = `Bearer ${githubToken}`;
-  }
-
-  // Use the recursive tree API to get all files in one call
-  const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
-  try {
-    const res = await fetch(treeUrl, {
-      headers,
-      signal: AbortSignal.timeout(20_000),
-    });
-    if (!res.ok) return [];
-
-    const data: { tree?: Array<{ path: string; type: string }>; truncated?: boolean } =
-      await res.json();
-    if (!data.tree) return [];
-
-    const results: PluginContentFile[] = [];
-
-    for (const item of data.tree) {
-      if (item.type !== "blob") continue;
-      const p = item.path;
-
-      // Filter by basePath if specified
-      if (basePath && !p.startsWith(basePath)) continue;
-
-      // Match: */skills/*/SKILL.md or skills/*/SKILL.md (top-level skill definitions)
-      const skillMatch = p.match(/(?:^|\/)skills\/([^/]+)\/SKILL\.md$/);
-      if (skillMatch) {
-        // Skip sub-agents inside skills (e.g., skill-creator/skills/skill-creator/agents/*.md)
-        results.push({ path: p, fallbackSlug: skillMatch[1] });
-        continue;
-      }
-
-      // Match: */commands/*.md or commands/*.md (slash commands)
-      const cmdMatch = p.match(/(?:^|\/)commands\/([^/]+)\.md$/);
-      if (cmdMatch) {
-        results.push({ path: p, fallbackSlug: cmdMatch[1] });
-        continue;
-      }
-
-      // Match: */agents/*.md but NOT inside skills/*/agents/ (those are skill sub-agents)
-      if (/(?:^|\/)agents\/[^/]+\.md$/.test(p) && !/(?:^|\/)skills\/[^/]+\/agents\//.test(p)) {
-        const agentSlug = p.match(/(?:^|\/)agents\/([^/]+)\.md$/)?.[1];
-        if (agentSlug) {
-          results.push({ path: p, fallbackSlug: agentSlug });
-        }
-      }
-    }
-
-    return results;
-  } catch (error) {
-    console.error("[skills/import] GitHub tree API failed:", error);
-    return [];
-  }
-}
-
-/** Batch helper: process items with a concurrency limit */
-async function batchProcess<T, R>(
-  items: T[],
-  concurrency: number,
-  fn: (item: T) => Promise<R>
-): Promise<R[]> {
-  const results: R[] = [];
-  for (let i = 0; i < items.length; i += concurrency) {
-    const batch = items.slice(i, i + concurrency);
-    const batchResults = await Promise.all(batch.map(fn));
-    results.push(...batchResults);
-  }
-  return results;
-}
-
 // --------------- Main handler ---------------
 
 // POST /api/skills/import
 // Body: { skill: SkillExportData, workspaceId?: string }
 // Or:   { url: string, workspaceId?: string }
+// Or:   { url: string, paths: string[], branch: string, workspaceId?: string }  (selective import)
 //   - url can be a direct JSON endpoint, or a GitHub repo/directory URL
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { url, skill: skillData, workspaceId } = body;
+    const { url, skill: skillData, workspaceId, paths, branch } = body;
 
-    // ─── Path A: GitHub repo/directory URL ───
-    if (url && isGitHubUrl(url)) {
+    // ─── Path A: Selective GitHub import (from preview) ───
+    if (url && isGitHubUrl(url) && Array.isArray(paths) && branch) {
       const gh = parseGitHubUrl(url);
       if (!gh) {
         return NextResponse.json(
@@ -259,53 +99,52 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Check if URL points to a single skill directory (has SKILL.md)
-      const singlePath = gh.path
-        ? `${gh.path}/SKILL.md`
-        : null;
+      let imported = 0;
+      let failed = 0;
+      const importedNames: string[] = [];
 
-      if (singlePath) {
-        const content = await fetchRaw(
-          gh.owner,
-          gh.repo,
-          gh.branch,
-          singlePath
-        );
-        if (content) {
-          const dirName = gh.path.split("/").pop() || gh.path;
-          const parsed = parseSkillMd(content, dirName);
-          if (parsed) {
-            const id = await insertSkill(parsed, workspaceId || null);
-            if (id) {
-              const skill = await db
-                .select()
-                .from(skills)
-                .where(eq(skills.id, id))
-                .limit(1);
-              return NextResponse.json(
-                {
-                  batch: true,
-                  imported: 1,
-                  failed: 0,
-                  skills: [parseSkillRow(skill[0])],
-                },
-                { status: 201 }
-              );
-            }
+      await batchProcess(paths as string[], 3, async (filePath: string) => {
+        try {
+          const content = await fetchRaw(
+            gh.owner,
+            gh.repo,
+            branch as string,
+            filePath
+          );
+          if (!content) {
+            failed++;
+            return;
           }
+
+          const fallbackSlug = getGitHubFallbackSlug(filePath, gh.repo);
+          const parsed = parseSkillMd(content, fallbackSlug);
+          if (!parsed) {
+            failed++;
+            return;
+          }
+
+          const id = await insertSkill(parsed, workspaceId || null);
+          if (id) {
+            imported++;
+            importedNames.push(parsed.name);
+          } else {
+            failed++;
+          }
+        } catch {
+          failed++;
         }
-        // If SKILL.md not found at this path, fall through to discovery
-      }
+      });
 
-      // Discover all skills/commands/agents in the repo
-      const contentFiles = await discoverPluginContent(
-        gh.owner,
-        gh.repo,
-        gh.branch,
-        gh.path
+      return NextResponse.json(
+        { batch: true, imported, failed, skills: importedNames },
+        { status: 201 }
       );
+    }
 
-      if (contentFiles.length === 0) {
+    // ─── Path B: GitHub repo/directory URL (full discovery import) ───
+    if (url && isGitHubUrl(url)) {
+      const resolved = await resolveGitHubRepo(url);
+      if (!resolved) {
         return NextResponse.json(
           {
             error:
@@ -315,16 +154,54 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Single file
+      if (resolved.singleFile) {
+        const parsed = parseSkillMd(
+          resolved.singleFile.content,
+          resolved.singleFile.fallbackSlug
+        );
+        if (!parsed) {
+          return NextResponse.json(
+            { error: "Failed to parse skill file" },
+            { status: 400 }
+          );
+        }
+
+        const id = await insertSkill(parsed, workspaceId || null);
+        if (!id) {
+          return NextResponse.json(
+            { error: "Failed to create skill" },
+            { status: 500 }
+          );
+        }
+
+        const skill = await db
+          .select()
+          .from(skills)
+          .where(eq(skills.id, id))
+          .limit(1);
+        return NextResponse.json(
+          {
+            batch: true,
+            imported: 1,
+            failed: 0,
+            skills: [parseSkillRow(skill[0])],
+          },
+          { status: 201 }
+        );
+      }
+
+      // Multiple files
       let imported = 0;
       let failed = 0;
       const importedNames: string[] = [];
 
-      await batchProcess(contentFiles, 3, async (file) => {
+      await batchProcess(resolved.contentFiles, 3, async (file) => {
         try {
           const content = await fetchRaw(
-            gh.owner,
-            gh.repo,
-            gh.branch,
+            resolved.owner,
+            resolved.repo,
+            resolved.branch,
             file.path
           );
           if (!content) {
@@ -356,11 +233,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ─── Path B: Direct JSON URL ───
+    // ─── Path C: Direct JSON URL ───
     let importData: unknown;
 
     if (url) {
-      // SSRF protection: only allow https URLs
       try {
         const parsed = new URL(url);
         if (parsed.protocol !== "https:") {
@@ -369,29 +245,26 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        // Block private/loopback IP ranges
         const hostname = parsed.hostname;
         if (isPrivateOrInternalHost(hostname)) {
           return NextResponse.json(
-            { error: "URLs pointing to private or internal addresses are not allowed" },
+            {
+              error:
+                "URLs pointing to private or internal addresses are not allowed",
+            },
             { status: 400 }
           );
         }
       } catch {
-        return NextResponse.json(
-          { error: "Invalid URL" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
       }
 
-      // Disable automatic redirects so we can validate each hop
       const res = await fetch(url, {
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(10_000),
         redirect: "manual",
       });
 
-      // Reject redirects to prevent SSRF via open redirects
       if (res.status >= 300 && res.status < 400) {
         return NextResponse.json(
           { error: "URL redirects are not allowed for security reasons" },
@@ -440,7 +313,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate the imported data
     if (!validateSkillData(importData)) {
       return NextResponse.json(
         {

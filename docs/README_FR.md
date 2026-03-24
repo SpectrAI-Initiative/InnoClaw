@@ -47,12 +47,22 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 <!-- whats-new-start -->
 
+#### 2026-03-22
+- **Export de notes Obsidian**: Generez des notes structurees compatibles Obsidian avec frontmatter YAML enrichi, figures et wikilinks directement depuis le panneau d'etude de l'article
+- **Selecteur de modele par tache**: Un nouveau composant UI de selection de modele permet aux utilisateurs de remplacer le modele AI par defaut pour chaque tache d'etude (resume, critique, notes, etc.)
+- **Vue de discussion des notes**: Nouvelle vue de discussion pleine page pour les notes d'articles, permettant des conversations assistees par IA autour du contenu des notes generees
+
+
 #### 2026-03-21
 - **Execution HPC/SLURM distante**: Les sessions de recherche approfondie peuvent desormais s'executer sur des clusters distants via SSH, avec prise en charge de rjob, rlaunch et SLURM, ainsi que la gestion du cycle de vie des taches
 - **Interface de configuration Kubernetes**: Nouveau panneau de parametres pour configurer a chaud les contextes K8s, les liaisons PVC et les images de conteneurs sur des deployments multi-clusters sans redemarrage
 - **Liaison de profil distant**: Les sessions de recherche approfondie peuvent etre liees a des profils SSH/calcul distant preconfigures, permettant des workflows de recherche distribues et reproductibles
 
 
+
+
+<details>
+<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-03-20
 - **Module de recherche approfondie**: Pipeline de recherche scientifique entierement pilote par IA avec orchestration multi-phases, deliberation des evaluateurs, planification d'execution et interface graphique de flux de travail
@@ -61,8 +71,6 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
-<details>
-<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-03-19
 - **Importation de competences ClawHub**: Nouvelle integration pour importer des competences directement depuis ClawHub via un point d'API dedie et une boite de dialogue d'importation
@@ -73,9 +81,11 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-18
 - **Vision Multimodale pour l'Analyse d'Articles**: Les images PDF sont desormais extraites et analysees visuellement lors des sessions de discussion et d'ideation de recherche
 - **Integration des Competences Claude Code**: Importez des competences directement depuis des dossiers locaux ou des projets Claude Code via un nouveau flux d'importation dedie
+
 
 
 
@@ -92,10 +102,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-17
 - **Gestion des profils de jobs distants et durcissement SSH** : prise en charge de la creation, de l'edition et de l'envoi securise de jobs de recherche via SSH
 - **Rendu Markdown riche dans le panneau Agent** : les messages Agent affichent maintenant tableaux, formules LaTeX et blocs de code avec coloration syntaxique
 - **UI de configuration des fournisseurs API** : configuration directe des cles API et endpoints des fournisseurs IA depuis la page Settings
+
 
 
 
@@ -112,6 +124,7 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-16
 - **Robustesse des discussions d'articles et de l'ideation** : budget de tokens par role augmente de 2 a 2.5x, reessai automatique sur reponses vides ou trop courtes, et erreurs visibles dans l'UI
 - **Contexte article complet** : les agents de discussion et d'ideation recoivent jusqu'a 30k caracteres du texte complet local de l'article, et pas seulement le resume
@@ -122,16 +135,10 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-14
 - **Research Execution Engine** : nouveau systeme d'orchestration de recherche pilote par IA avec profils distants, toggles de capacites, historique d'execution et outils Agent
 - **Section README "What's New" mise a jour automatiquement** : workflow GitHub Actions qui genere et met a jour chaque jour les nouvelles fonctionnalites importantes
-
-
-
-
-
-
-
 
 
 
