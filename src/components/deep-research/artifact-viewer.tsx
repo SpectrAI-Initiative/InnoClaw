@@ -96,7 +96,7 @@ function renderContent(type: string, content: Record<string, unknown>) {
       } />;
 
     case "task_graph":
-      return <pre className="text-xs bg-muted p-3 rounded overflow-auto">{JSON.stringify(content, null, 2)}</pre>;
+      return <TaskGraphDisplay data={content} />;
 
     case "checkpoint":
       return <CheckpointDisplay data={content} />;
@@ -337,6 +337,84 @@ function ProtocolGraphDisplay({ data }: { data: Record<string, unknown> }) {
   );
 }
 
+function ArtifactSection({
+  title,
+  children,
+  className = "space-y-2",
+}: {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</div>
+      {children}
+    </div>
+  );
+}
+
+function ArtifactCard({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return <div className={`rounded border p-3 ${className}`.trim()}>{children}</div>;
+}
+
+function ArtifactNotice({
+  title,
+  children,
+  tone = "muted",
+}: {
+  title?: string;
+  children: React.ReactNode;
+  tone?: "muted" | "blue" | "green" | "yellow" | "emerald" | "slate";
+}) {
+  const toneStyles: Record<typeof tone, { container: string; title: string; body: string }> = {
+    muted: {
+      container: "bg-muted",
+      title: "text-muted-foreground",
+      body: "text-foreground",
+    },
+    blue: {
+      container: "bg-blue-50 dark:bg-blue-950/50",
+      title: "text-blue-800 dark:text-blue-200",
+      body: "text-blue-700 dark:text-blue-300",
+    },
+    green: {
+      container: "bg-green-50 dark:bg-green-950/50",
+      title: "text-green-800 dark:text-green-200",
+      body: "text-green-700 dark:text-green-300",
+    },
+    yellow: {
+      container: "bg-yellow-50 dark:bg-yellow-950",
+      title: "text-yellow-800 dark:text-yellow-200",
+      body: "text-yellow-700 dark:text-yellow-300",
+    },
+    emerald: {
+      container: "bg-emerald-50 dark:bg-emerald-950/40",
+      title: "text-emerald-800 dark:text-emerald-200",
+      body: "text-emerald-700 dark:text-emerald-300",
+    },
+    slate: {
+      container: "bg-slate-50 dark:bg-slate-900/50",
+      title: "text-slate-800 dark:text-slate-200",
+      body: "text-slate-700 dark:text-slate-300",
+    },
+  };
+  const styles = toneStyles[tone];
+
+  return (
+    <div className={`rounded p-2 text-xs ${styles.container}`}>
+      {title ? <div className={`mb-1 font-medium ${styles.title}`}>{title}</div> : null}
+      <div className={styles.body}>{children}</div>
+    </div>
+  );
+}
+
 function SectionList({ title, items, compact = false }: { title: string; items: string[]; compact?: boolean }) {
   if (items.length === 0) {
     return null;
@@ -376,7 +454,7 @@ function EvidenceCardDisplay({ data }: { data: Record<string, unknown> }) {
   return (
     <div className="space-y-3">
       {claims.map((claim: Record<string, unknown>, i: number) => (
-        <div key={i} className="p-2 border rounded text-sm space-y-1">
+        <ArtifactCard key={i} className="space-y-1 p-2 text-sm">
           <div className="font-medium">{claim.claim as string}</div>
           <div className="text-xs text-muted-foreground">{claim.evidence as string}</div>
           <div className="flex items-center gap-2">
@@ -385,17 +463,16 @@ function EvidenceCardDisplay({ data }: { data: Record<string, unknown> }) {
             </Badge>
             <ConfidenceBadge confidence={claim.confidence as string} />
           </div>
-        </div>
+        </ArtifactCard>
       ))}
       {gaps.length > 0 && (
-        <div className="p-2 bg-yellow-50 dark:bg-yellow-950 rounded text-sm">
-          <div className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">Gaps</div>
+        <ArtifactNotice title="Gaps" tone="yellow">
           <ul className="list-disc list-inside text-xs space-y-0.5">
             {gaps.map((gap: string, i: number) => (
               <li key={i}>{gap}</li>
             ))}
           </ul>
-        </div>
+        </ArtifactNotice>
       )}
     </div>
   );
@@ -534,15 +611,14 @@ function ReviewAssessmentDisplay({ data }: { data: Record<string, unknown> }) {
       </div>
 
       {reviewerSummary && (
-        <div className="p-2 bg-blue-50 dark:bg-blue-950/50 rounded text-xs">
-          <div className="font-medium text-blue-800 dark:text-blue-200 mb-1">Results and Evidence Analyst</div>
-          <div className="text-blue-700 dark:text-blue-300">{reviewerSummary}</div>
-        </div>
+        <ArtifactNotice title="Results and Evidence Analyst" tone="blue">
+          {reviewerSummary}
+        </ArtifactNotice>
       )}
 
       {reviewHighlights.length > 0 && (
-        <div>
-          <div className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Review Highlights</div>
+        <div className="text-xs">
+          <div className="mb-1 font-medium text-green-700 dark:text-green-300">Review Highlights</div>
           <ul className="list-disc list-inside text-xs space-y-0.5">
             {reviewHighlights.map((item, i) => <li key={i}>{item}</li>)}
           </ul>
@@ -596,19 +672,18 @@ function MainBrainAuditDisplay({ data }: { data: Record<string, unknown> }) {
       <div className="text-sm">{data.whatWasCompleted as string}</div>
 
       {Array.isArray(data.issuesAndRisks) && data.issuesAndRisks.length > 0 && (
-        <div className="p-2 bg-yellow-50 dark:bg-yellow-950 rounded text-xs">
-          <div className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">Issues & Risks</div>
+        <ArtifactNotice title="Issues & Risks" tone="yellow">
           <ul className="list-disc list-inside space-y-0.5">
             {(data.issuesAndRisks as string[]).map((r, i) => <li key={i}>{r}</li>)}
           </ul>
-        </div>
+        </ArtifactNotice>
       )}
 
       {typeof data.continueWillDo === "string" && data.continueWillDo && (
-        <div className="p-2 bg-green-50 dark:bg-green-950/50 rounded text-xs">
-          <span className="font-medium text-green-800 dark:text-green-200">Continue will: </span>
-          <span className="text-green-700 dark:text-green-300">{data.continueWillDo}</span>
-        </div>
+        <ArtifactNotice tone="green">
+          <span className="font-medium">Continue will: </span>
+          <span>{data.continueWillDo}</span>
+        </ArtifactNotice>
       )}
 
       {Array.isArray(data.alternativeActions) && data.alternativeActions.length > 0 && (
@@ -636,19 +711,18 @@ function ValidationPlanDisplay({ data }: { data: Record<string, unknown> }) {
         <div className="text-sm"><span className="font-medium">Hypothesis:</span> {data.hypothesis}</div>
       )}
       {steps.length > 0 && (
-        <div className="space-y-2">
-          <div className="text-xs font-medium text-muted-foreground">Steps</div>
+        <ArtifactSection title="Steps">
           {steps.map((step: Record<string, unknown>, i: number) => (
-            <div key={i} className="flex items-start gap-2 text-xs p-2 border rounded">
+            <ArtifactCard key={i} className="flex items-start gap-2 p-2 text-xs">
               <span className="font-mono bg-muted px-1.5 py-0.5 rounded shrink-0">{Number(step.stepNumber) || i + 1}</span>
               <div className="flex-1">
                 <div className="font-medium">{String(step.description || "")}</div>
                 {typeof step.command === "string" && step.command && <code className="text-[10px] text-muted-foreground">{step.command}</code>}
                 {Boolean(step.requiresApproval) && <Badge variant="outline" className="text-[10px] mt-1">Needs Approval</Badge>}
               </div>
-            </div>
+            </ArtifactCard>
           ))}
-        </div>
+        </ArtifactSection>
       )}
       {Array.isArray(data.successCriteria) && data.successCriteria.length > 0 && (
         <div className="text-xs">
@@ -705,15 +779,14 @@ function CheckpointDisplay({ data }: { data: Record<string, unknown> }) {
       {humanSummary && <div className="text-sm leading-relaxed">{humanSummary}</div>}
 
       {currentFindings && (
-        <div className="text-xs p-2 bg-muted rounded">
-          <div className="font-medium text-muted-foreground mb-1">Findings</div>
+        <ArtifactNotice title="Findings">
           {currentFindings}
-        </div>
+        </ArtifactNotice>
       )}
 
       {openQuestions.length > 0 && (
-        <div>
-          <div className="text-xs font-medium text-muted-foreground mb-1">Open Questions</div>
+        <div className="text-xs">
+          <div className="mb-1 font-medium text-muted-foreground">Open Questions</div>
           <ul className="list-disc list-inside text-xs space-y-0.5">
             {openQuestions.map((q, i) => <li key={i}>{q}</li>)}
           </ul>
@@ -721,35 +794,96 @@ function CheckpointDisplay({ data }: { data: Record<string, unknown> }) {
       )}
 
       {recommended && (
-        <div className="text-xs p-2 bg-green-50 dark:bg-green-950/50 rounded">
-          <span className="font-medium text-green-800 dark:text-green-200">Recommended: </span>
-          <span className="text-green-700 dark:text-green-300">{recommended}</span>
-        </div>
+        <ArtifactNotice tone="green">
+          <span className="font-medium">Next step: </span>
+          <span>{recommended}</span>
+        </ArtifactNotice>
       )}
 
       {recommendedWorker && (
-        <div className="text-xs p-2 bg-emerald-50 dark:bg-emerald-950/40 rounded">
-          <span className="font-medium text-emerald-800 dark:text-emerald-200">Next worker: </span>
-          <span className="text-emerald-700 dark:text-emerald-300">
+        <ArtifactNotice tone="emerald">
+          <span className="font-medium">Next task owner: </span>
+          <span>
             {String(recommendedWorker.roleName ?? "")} ({String(recommendedWorker.nodeType ?? "")}) - {String(recommendedWorker.label ?? "")}
           </span>
-        </div>
+        </ArtifactNotice>
       )}
 
       {promptUsed && (
-        <div className="text-xs p-2 bg-slate-50 dark:bg-slate-900/50 rounded">
-          <span className="font-medium text-slate-800 dark:text-slate-200">Prompt used: </span>
-          <span className="text-slate-700 dark:text-slate-300">{String(promptUsed.title ?? "")}</span>
+        <ArtifactNotice tone="slate">
+          <span className="font-medium">Prompt used: </span>
+          <span>{String(promptUsed.title ?? "")}</span>
           <div className="mt-1 text-muted-foreground">
             {String(promptUsed.kind ?? "")} - {String(promptUsed.objective ?? "")}
           </div>
-        </div>
+        </ArtifactNotice>
       )}
 
       {alternatives.length > 0 && (
         <div className="text-xs text-muted-foreground">
           <span className="font-medium">Alternatives: </span>
           {alternatives.join(" · ")}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TaskGraphDisplay({ data }: { data: Record<string, unknown> }) {
+  const nextTask = (
+    (data.nextTask as Record<string, unknown> | undefined)
+    ?? (Array.isArray(data.proposedNodeSpecs) ? data.proposedNodeSpecs[0] as Record<string, unknown> : undefined)
+  );
+  const nextTaskCount = typeof data.nextTaskCount === "number"
+    ? data.nextTaskCount
+    : typeof data.totalNodes === "number"
+      ? data.totalNodes
+      : (nextTask ? 1 : 0);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Badge variant="outline" className="text-[10px]">
+          Next Task
+        </Badge>
+        <span className="text-xs text-muted-foreground">
+          {nextTaskCount > 0 ? "Single-task dispatch is enabled." : "No task queued."}
+        </span>
+      </div>
+
+      {nextTask ? (
+        <ArtifactCard className="space-y-2">
+          <div className="text-sm font-medium">{String(nextTask.label ?? "Untitled task")}</div>
+          <div className="flex flex-wrap gap-1.5">
+            {typeof nextTask.nodeType === "string" && (
+              <Badge variant="secondary" className="text-[10px]">
+                {String(nextTask.nodeType)}
+              </Badge>
+            )}
+            {typeof nextTask.assignedRole === "string" && (
+              <Badge variant="outline" className="text-[10px]">
+                {String(nextTask.assignedRole)}
+              </Badge>
+            )}
+            {typeof nextTask.contextTag === "string" && (
+              <Badge variant="outline" className="text-[10px]">
+                {String(nextTask.contextTag)}
+              </Badge>
+            )}
+          </div>
+          {Boolean(nextTask.input) && typeof nextTask.input === "object" && (
+            <pre className="overflow-auto rounded bg-muted p-2 text-xs">
+              {JSON.stringify(nextTask.input, null, 2)}
+            </pre>
+          )}
+        </ArtifactCard>
+      ) : (
+        <div className="text-xs text-muted-foreground">No next task captured in this artifact.</div>
+      )}
+
+      {typeof data.suggestedNextContextTag === "string" && data.suggestedNextContextTag && (
+        <div className="text-xs text-muted-foreground">
+          Context after this task: {data.suggestedNextContextTag}
         </div>
       )}
     </div>

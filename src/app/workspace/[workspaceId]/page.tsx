@@ -298,13 +298,7 @@ export default function WorkspacePage({
                     <ResearchExecPanel workspaceId={workspaceId} />
                   </div>
                   <div className={middlePanel === "deepResearch" ? "flex-1 min-h-0" : "hidden"}>
-                    <DeepResearchPanel
-                      workspaceId={workspaceId}
-                      onOpenAgent={() => setMiddlePanel("agent")}
-                      onOpenPaperStudy={() => setMiddlePanel("paperStudy")}
-                      onOpenCluster={() => setMiddlePanel("cluster")}
-                      onOpenResearchExec={() => setMiddlePanel("research")}
-                    />
+                    <DeepResearchPanel workspaceId={workspaceId} />
                   </div>
                 </div>
               </ResizablePanel>

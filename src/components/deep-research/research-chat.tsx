@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Send, Brain, User, CheckCircle, XCircle, Loader2, FileText, PlayCircle, Square, RotateCcw } from "lucide-react";
-import { CheckpointReview } from "./checkpoint-review";
+import { CheckpointReview, type CheckpointData } from "./checkpoint-review";
 import { ArtifactViewer } from "./artifact-viewer";
 import { isNodeDetailOnlyMessage } from "@/lib/deep-research/node-transcript";
 import {
@@ -61,6 +61,7 @@ export function ResearchChat({
   const pendingCheckpoint = isAwaitingConfirmation && session.pendingCheckpointId
     ? artifacts.find((a) => a.id === session.pendingCheckpointId)
     : null;
+  const pendingCheckpointData = pendingCheckpoint?.content as CheckpointData | undefined;
 
   // Get the final report artifact (for completed sessions)
   const finalReportArtifact = artifacts.find((a) => a.artifactType === "final_report");
@@ -94,9 +95,7 @@ export function ResearchChat({
   const handleCheckpointConfirm = async (outcome: ConfirmationOutcome, feedback?: string) => {
     // Use the checkpoint's nodeId directly, fall back to first awaiting node
     const awaitingConfirmationNodes = nodes.filter((n) => n.status === "awaiting_user_confirmation");
-    const checkpointNodeId = pendingCheckpoint
-      ? (pendingCheckpoint.content as unknown as { nodeId?: string })?.nodeId
-      : undefined;
+    const checkpointNodeId = pendingCheckpointData?.nodeId;
     const targetNodeId = checkpointNodeId || awaitingConfirmationNodes[0]?.id;
     if (!targetNodeId) return;
     await onConfirm(targetNodeId, outcome, feedback);
@@ -199,42 +198,7 @@ export function ResearchChat({
           {/* Checkpoint review panel */}
           {isAwaitingConfirmation && pendingCheckpoint && (
             <CheckpointReview
-              checkpoint={pendingCheckpoint.content as unknown as {
-                title: string;
-                humanSummary: string;
-                currentFindings: string;
-                openQuestions: string[];
-                recommendedNextAction: string;
-                recommendedWorker?: { roleId: string; roleName: string; nodeType: string; label: string };
-                promptUsed?: { title: string; kind: string; objective: string };
-                continueWillDo?: string;
-                alternativeNextActions: string[];
-                artifactsToReview: string[];
-                contextTag: string;
-                stepType: string;
-                mainBrainAudit?: {
-                  whatWasCompleted: string;
-                  resultAssessment: "good" | "acceptable" | "concerning" | "problematic";
-                  issuesAndRisks: string[];
-                  recommendedNextAction: string;
-                  continueWillDo: string;
-                  alternativeActions: Array<{ label: string; description: string; actionType: string }>;
-                  canProceed: boolean;
-                };
-                literatureRoundInfo?: {
-                  roundNumber: number;
-                  papersCollected: number;
-                  retrievalTaskCount: number;
-                  successfulTaskCount: number;
-                  failedTaskCount: number;
-                  emptyTaskCount: number;
-                  coverageSummary: string;
-                };
-                reviewInfo?: { combinedVerdict: string; combinedConfidence: number; needsMoreLiterature: boolean; needsExperimentalValidation: boolean };
-                executionInfo?: { stepsCompleted: number; stepsTotal: number; currentStatus: string };
-                transitionAction?: { nextContextTag: string; description: string };
-                interactionMode?: "confirmation" | "answer_required";
-              }}
+              checkpoint={pendingCheckpointData!}
               artifacts={artifacts}
               onConfirm={handleCheckpointConfirm}
             />
@@ -304,7 +268,7 @@ export function ResearchChat({
                     <span className="font-medium">No final report artifact found.</span>
                   </div>
                   <p>
-                    You can view all research artifacts by clicking on nodes in the workflow graph on the right.
+                    You can view all research artifacts by opening nodes from the Roadmap tab.
                     Look for nodes of type &quot;final_report&quot; or &quot;synthesize&quot; to find the research conclusions.
                   </p>
                 </div>

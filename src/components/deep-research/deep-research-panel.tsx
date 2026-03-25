@@ -1,11 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -32,21 +27,17 @@ import { FinalReportView } from "./final-report-view";
 import { WorkflowGraph } from "./workflow-graph";
 import { NodeDetailDrawer } from "./node-detail-drawer";
 import { DeleteSessionDialog } from "./delete-session-dialog";
-import { RequirementPanel } from "./requirement-panel";
-import { ReviewPanel } from "./review-panel";
 import { ExecutionStatusPanel } from "./execution-status-panel";
-import { WorkbenchPanel } from "./workbench-panel";
 import { RoleStudioPanel } from "./role-studio-panel";
-import type { ConfirmationOutcome, ReviewAssessmentExtended, RequirementState } from "@/lib/deep-research/types";
+import type { ConfirmationOutcome } from "@/lib/deep-research/types";
 import {
   canStartSession,
-  isActiveSessionStatus,
   isAwaitingConfirmationSessionStatus,
   isCompletedSessionStatus,
 } from "@/lib/deep-research/session-status";
 
 type PanelView = "list" | "intake" | "session";
-type TabView = "chat" | "roles" | "requirements" | "reviewers" | "execution" | "workbench";
+type TabView = "chat" | "roadmap" | "roles" | "execution";
 type SessionMessageOptions = {
   relatedNodeId?: string;
   metadata?: Record<string, unknown>;
@@ -55,20 +46,16 @@ type SessionMessageOptions = {
 
 interface DeepResearchPanelProps {
   workspaceId: string;
-  onOpenAgent?: () => void;
-  onOpenPaperStudy?: () => void;
-  onOpenCluster?: () => void;
-  onOpenResearchExec?: () => void;
 }
 
 const TAB_LABELS: Record<TabView, string> = {
   chat: "Chat",
+  roadmap: "Roadmap",
   roles: "Roles",
-  requirements: "Requirements",
-  reviewers: "Reviewers",
   execution: "Execution",
-  workbench: "Workbench",
 };
+
+const TAB_ORDER = Object.keys(TAB_LABELS) as TabView[];
 
 async function readErrorMessage(response: Response, fallback: string): Promise<string> {
   const data = await response.json().catch(() => null);
@@ -77,10 +64,6 @@ async function readErrorMessage(response: Response, fallback: string): Promise<s
 
 export function DeepResearchPanel({
   workspaceId,
-  onOpenAgent,
-  onOpenPaperStudy,
-  onOpenCluster,
-  onOpenResearchExec,
 }: DeepResearchPanelProps) {
   const [view, setView] = useState<PanelView>("list");
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -100,24 +83,15 @@ export function DeepResearchPanel({
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) ?? null;
   const isInterfaceOnly = session?.config.interfaceOnly === true;
-
-  const requirementState = useMemo(() => {
-    const artifact = artifacts.find((candidate) => {
-      if (candidate.artifactType !== "checkpoint") {
-        return false;
-      }
-      const content = candidate.content as Record<string, unknown>;
-      return Boolean(content.requirementState);
-    });
-    return (artifact?.content as { requirementState?: RequirementState } | undefined)?.requirementState ?? null;
-  }, [artifacts]);
-
-  const reviewResult = useMemo(() => {
-    const latestReviewArtifact = [...artifacts]
-      .reverse()
-      .find((artifact) => artifact.artifactType === "review_assessment");
-    return latestReviewArtifact?.content as ReviewAssessmentExtended | null | undefined ?? null;
-  }, [artifacts]);
+  const resetSessionChrome = useCallback(() => {
+    setSelectedNodeId(null);
+    setDrawerOpen(false);
+  }, []);
+  const resetToSessionList = useCallback(() => {
+    setActiveSessionId(null);
+    setView("list");
+    resetSessionChrome();
+  }, [resetSessionChrome]);
 
   const runSessionRequest = useCallback(
     async <T,>(
@@ -148,16 +122,12 @@ export function DeepResearchPanel({
   const handleOpenSession = useCallback((sessionId: string) => {
     setActiveSessionId(sessionId);
     setView("session");
-    setSelectedNodeId(null);
-    setDrawerOpen(false);
-  }, []);
+    resetSessionChrome();
+  }, [resetSessionChrome]);
 
   const handleBackToList = useCallback(() => {
-    setActiveSessionId(null);
-    setView("list");
-    setSelectedNodeId(null);
-    setDrawerOpen(false);
-  }, []);
+    resetToSessionList();
+  }, [resetToSessionList]);
 
   // --- Intake ---
 
@@ -183,13 +153,11 @@ export function DeepResearchPanel({
   const handleSessionDeleted = useCallback(
     (deletedId: string) => {
       mutateSessions();
-      // If the currently active session was deleted, go back to list
       if (activeSessionId === deletedId) {
-        setActiveSessionId(null);
-        setView("list");
+        resetToSessionList();
       }
     },
-    [activeSessionId, mutateSessions]
+    [activeSessionId, mutateSessions, resetToSessionList]
   );
 
   const handleDeleteActiveSession = useCallback(() => {
@@ -198,10 +166,9 @@ export function DeepResearchPanel({
 
   const handleActiveSessionDeleted = useCallback(() => {
     mutateSessions();
-    setActiveSessionId(null);
-    setView("list");
+    resetToSessionList();
     setDeleteDialogOpen(false);
-  }, [mutateSessions]);
+  }, [mutateSessions, resetToSessionList]);
 
   // --- Session actions ---
 
@@ -321,22 +288,6 @@ export function DeepResearchPanel({
     [mutateSession, runSessionRequest],
   );
 
-  const sessionFlags = useMemo(() => {
-    if (!session) {
-      return null;
-    }
-
-    return {
-      isRunning: isActiveSessionStatus(session.status),
-      isAwaitingConfirmation: isAwaitingConfirmationSessionStatus(session.status),
-      isCompleted: isCompletedSessionStatus(session.status),
-      isFailed: session.status === "failed",
-      isLiteratureBlocked: session.status === "literature_blocked",
-      isStopped: session.status === "stopped_by_user",
-      canStart: canStartSession(session.status),
-    };
-  }, [session]);
-
   if (view === "intake") {
     return (
       <IntakeScreen
@@ -347,7 +298,7 @@ export function DeepResearchPanel({
     );
   }
 
-  if (view === "list" || !activeSessionId || !session || !sessionFlags) {
+  if (view === "list" || !activeSessionId || !session) {
     return (
       <SessionList
         sessions={sessions}
@@ -358,14 +309,12 @@ export function DeepResearchPanel({
     );
   }
 
-  const {
-    isAwaitingConfirmation,
-    isCompleted,
-    isFailed,
-    isLiteratureBlocked,
-    isStopped,
-    canStart,
-  } = sessionFlags;
+  const isAwaitingConfirmation = isAwaitingConfirmationSessionStatus(session.status);
+  const isCompleted = isCompletedSessionStatus(session.status);
+  const isFailed = session.status === "failed";
+  const isLiteratureBlocked = session.status === "literature_blocked";
+  const isStopped = session.status === "stopped_by_user";
+  const canStart = canStartSession(session.status);
 
   return (
     <div className="flex flex-col h-full">
@@ -466,89 +415,63 @@ export function DeepResearchPanel({
 
       {/* Main content */}
       <div className="flex-1 min-h-0">
-        <ResizablePanelGroup orientation="vertical">
-          {/* Top: Tabs + Content */}
-          <ResizablePanel defaultSize={58} minSize={30}>
-            <div className="flex flex-col h-full">
-              {isCompleted ? (
-                <FinalReportView session={session} artifacts={artifacts} />
-              ) : (
-                <>
-                  {/* Tab bar */}
-                  <div className="flex gap-0.5 px-2 py-1 border-b border-border/50 bg-muted/20 shrink-0">
-                    {(Object.keys(TAB_LABELS) as TabView[]).map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-2 py-1 text-[11px] rounded transition-colors ${
-                          activeTab === tab
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                        }`}
-                      >
-                        {TAB_LABELS[tab]}
-                      </button>
-                    ))}
-                  </div>
-                  {/* Tab content */}
-                  <div className="flex-1 min-h-0">
-                    {activeTab === "chat" && (
-                      <ResearchChat
-                        session={session}
-                        messages={messages}
-                        nodes={nodes}
-                        artifacts={artifacts}
-                        onSendMessage={handleSendMessage}
-                        onApprove={handleApprove}
-                        onConfirm={handleConfirm}
-                      />
-                    )}
-                    {activeTab === "roles" && (
-                      <RoleStudioPanel
-                        nodes={nodes}
-                        artifacts={artifacts}
-                        selectedNode={selectedNode}
-                        resolvedModel={session.config.resolvedModel ?? null}
-                        onSelectRoleNode={handleRoleNodeSelect}
-                        onSendMessage={handleSendMessage}
-                      />
-                    )}
-                    {activeTab === "requirements" && (
-                      <RequirementPanel requirementState={requirementState} />
-                    )}
-                    {activeTab === "reviewers" && (
-                      <ReviewPanel reviewResult={reviewResult} />
-                    )}
-                    {activeTab === "execution" && (
-                      <ExecutionStatusPanel
-                        executions={executions}
-                        workspaceId={workspaceId}
-                        remoteProfileId={session.remoteProfileId}
-                        onBindProfile={handleBindProfile}
-                      />
-                    )}
-                    {activeTab === "workbench" && (
-                      <WorkbenchPanel
-                        selectedNode={selectedNode}
-                        onOpenAgent={onOpenAgent}
-                        onOpenPaperStudy={onOpenPaperStudy}
-                        onOpenCluster={onOpenCluster}
-                        onOpenResearchExec={onOpenResearchExec}
-                      />
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          </ResizablePanel>
-
-          <ResizableHandle withHandle />
-
-          {/* Bottom: Workflow graph */}
-          <ResizablePanel defaultSize={42} minSize={20}>
-            <WorkflowGraph nodes={nodes} onNodeSelect={handleNodeSelect} />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+        <div className="flex h-full flex-col">
+          {isCompleted ? (
+            <FinalReportView session={session} artifacts={artifacts} />
+          ) : (
+            <>
+              <div className="flex gap-0.5 px-2 py-1 border-b border-border/50 bg-muted/20 shrink-0">
+                {TAB_ORDER.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-2 py-1 text-[11px] rounded transition-colors ${
+                      activeTab === tab
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {TAB_LABELS[tab]}
+                  </button>
+                ))}
+              </div>
+              <div className="flex-1 min-h-0">
+                {activeTab === "chat" && (
+                  <ResearchChat
+                    session={session}
+                    messages={messages}
+                    nodes={nodes}
+                    artifacts={artifacts}
+                    onSendMessage={handleSendMessage}
+                    onApprove={handleApprove}
+                    onConfirm={handleConfirm}
+                  />
+                )}
+                {activeTab === "roadmap" && (
+                  <WorkflowGraph nodes={nodes} onNodeSelect={handleNodeSelect} />
+                )}
+                {activeTab === "roles" && (
+                  <RoleStudioPanel
+                    nodes={nodes}
+                    artifacts={artifacts}
+                    selectedNode={selectedNode}
+                    resolvedModel={session.config.resolvedModel ?? null}
+                    onSelectRoleNode={handleRoleNodeSelect}
+                    onSendMessage={handleSendMessage}
+                  />
+                )}
+                {activeTab === "execution" && (
+                  <ExecutionStatusPanel
+                    executions={executions}
+                    workspaceId={workspaceId}
+                    remoteProfileId={session.remoteProfileId}
+                    onBindProfile={handleBindProfile}
+                  />
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Node detail drawer */}

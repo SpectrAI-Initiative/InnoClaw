@@ -72,7 +72,7 @@ ${constraintLines}
   }
 
   const workstationSection = workstationContext
-    ? `\n## Workstation Search Findings\n${workstationContext}\n`
+    ? `\n## Additional Coordination Context\n${workstationContext}\n`
     : "";
 
   return `You are GPT-5.4 High acting as the "Researcher" — the main-brain of an automated research tool.
@@ -101,6 +101,7 @@ Lead the entire automated research workflow, make data-driven decisions, and kee
 ## Delegation Policy
 When creating specialist nodes, decompose work into small, concrete, role-scoped units:
 - One clear task per node.
+- Return at most ONE NodeCreationSpec in "nodesToCreate" for each decision.
 - Explicit inputs, outputs, stop conditions, and dependencies.
 - Assign exactly one responsible role per node.
 - Keep assignments non-overlapping and milestone-aware.
@@ -198,7 +199,7 @@ The verification statement must explicitly cover alignment, feasibility, rigor, 
 
 ## Cost Awareness
 - Use specialist roles for bulk work and keep your own reasoning focused on strategic decisions.
-- Max specialist fan-out: ${session.config.maxWorkerFanOut}
+- Max specialist fan-out: 1
 - Specialist execution is serial. Only one specialist task runs at a time.
 - Literature bounds: max ${session.config.literature.maxPapersPerRound} papers/round, max ${session.config.literature.maxLiteratureRounds} rounds`;
 }
@@ -362,10 +363,10 @@ export function buildConfirmationInterpretationPrompt(
   const proposedPlanSummary = latestTaskGraph
     ? JSON.stringify({
         title: latestTaskGraph.title,
-        totalNodes: latestTaskGraph.content.totalNodes,
+        nextTaskCount: latestTaskGraph.content.nextTaskCount ?? latestTaskGraph.content.totalNodes,
         skillsUsed: latestTaskGraph.content.skillsUsed,
         suggestedNextContextTag: latestTaskGraph.content.suggestedNextContextTag,
-        proposedNodeSpecs: latestTaskGraph.content.proposedNodeSpecs,
+        nextTask: latestTaskGraph.content.nextTask ?? latestTaskGraph.content.proposedNodeSpecs,
       }, null, 2)
     : "(no task_graph artifact available)";
 
@@ -385,27 +386,27 @@ ${userFeedback ? `- Feedback: "${userFeedback}"` : "- (no additional feedback)"}
 ## Current Task Graph
 ${nodesSummary}
 
-## Latest Proposed Research Plan
+## Latest Next-Task Plan
 ${proposedPlanSummary}
 
 ## CRITICAL SEMANTIC RULE
 "Continue" means: proceed according to YOUR recommended next action.
 It does NOT mean "blindly run the old pipeline." It means the user accepts YOUR recommendation.
 
-## Task-Graph Confirmation Rule
+## Next-Task Confirmation Rule
 If the checkpoint included a task_graph artifact and the user confirmed it:
-- treat the approved task graph as authorized for dispatch;
-- return the approved worker tasks in "nodesToCreate";
+- treat the approved next-task artifact as authorized for dispatch;
+- return only the NEXT approved worker task in "nodesToCreate";
 - set "nextContextTag" to "planning" unless the approved work is a final report.
 
 ## Literature-Dispatch Rule
 If the user confirmed a checkpoint that recommends literature work:
-- return explicit evidence_gather tasks in "nodesToCreate" when new literature work is required;
+- return at most one explicit evidence_gather task in "nodesToCreate" when new literature work is required;
 - assign those tasks to "literature_intelligence_analyst";
 - do not rely on any hidden runtime handler to fabricate fallback searches.
 
 ## Re-Planning Rule
-If the checkpoint proposed a task graph and the user feedback changes core objectives, task division, time nodes, or resources:
+If the checkpoint proposed a next task and the user feedback changes core objectives, task division, time nodes, or resources:
 - do NOT dispatch workers;
 - return "action": "revise" or "branch" and keep the workflow in planning.
 

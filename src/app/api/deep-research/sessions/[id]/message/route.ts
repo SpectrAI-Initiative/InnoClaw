@@ -26,7 +26,7 @@ import {
   requireSession,
   type DeepResearchRouteParams,
 } from "@/lib/deep-research/api-helpers";
-import type { CheckpointPackage, ModelRole } from "@/lib/deep-research/types";
+import type { CheckpointPackage, ConfirmationOutcome, ModelRole } from "@/lib/deep-research/types";
 
 type NodeMessageRequest = {
   content: string;
@@ -99,18 +99,56 @@ async function createStructuredArtifacts(
   return [artifact.id];
 }
 
-async function shouldResumeAfterUserReply(session: Awaited<ReturnType<typeof requireSession>>): Promise<boolean> {
+type UserReplyAutoAction =
+  | { mode: "none" }
+  | { mode: "resume_after_reply" }
+  | { mode: "resume_after_feedback"; nodeId: string; outcome: ConfirmationOutcome };
+
+async function resolveUserReplyAutoAction(
+  session: Awaited<ReturnType<typeof requireSession>>,
+  content: string,
+): Promise<UserReplyAutoAction> {
   if (session.status !== "awaiting_user_confirmation" || !session.pendingCheckpointId) {
-    return false;
+    return { mode: "none" };
   }
 
   const checkpointArtifact = await getArtifact(session.pendingCheckpointId);
   if (!checkpointArtifact || checkpointArtifact.artifactType !== "checkpoint") {
-    return false;
+    return { mode: "none" };
   }
 
   const checkpoint = checkpointArtifact.content as Partial<CheckpointPackage>;
-  return checkpoint.interactionMode === "answer_required";
+  if (checkpoint.interactionMode === "answer_required") {
+    return { mode: "resume_after_reply" };
+  }
+
+  if (
+    checkpoint.interactionMode === "confirmation" &&
+    looksLikeActionableConfirmationFeedback(content) &&
+    typeof checkpoint.nodeId === "string" &&
+    checkpoint.nodeId.trim().length > 0
+  ) {
+    return {
+      mode: "resume_after_feedback",
+      nodeId: checkpoint.nodeId,
+      outcome: "revision_requested",
+    };
+  }
+
+  return { mode: "none" };
+}
+
+function looksLikeActionableConfirmationFeedback(content: string): boolean {
+  const normalized = content.trim();
+  if (normalized.length < 8) return false;
+  if (/(do not continue|don't continue|不要继续|先别继续|暂不继续|不要开始)/i.test(normalized)) {
+    return false;
+  }
+
+  return [
+    /清理|重试|开始|执行|补做|撰写|修复|验证|核实|去重|清除|取消/,
+    /\bretry\b|\bclean(?:\s+up)?\b|\bcancel\b|\bstart\b|\bwrite\b|\bverify\b|\bdedupe\b|\bremove\b|\bresume\b|\bproceed\b/i,
+  ].some((pattern) => pattern.test(normalized));
 }
 
 export async function POST(req: NextRequest, { params }: DeepResearchRouteParams) {
@@ -119,7 +157,7 @@ export async function POST(req: NextRequest, { params }: DeepResearchRouteParams
     const session = await requireSession(sessionId);
     const { content, relatedNodeId, metadata, relatedArtifactIds } = await parseNodeMessageRequest(req);
     if (!isInterfaceOnlySession(session)) {
-      const resumeAfterReply = await shouldResumeAfterUserReply(session);
+      const autoAction = await resolveUserReplyAutoAction(session, content);
       const message = await addMessage(
         sessionId,
         "user",
@@ -130,18 +168,27 @@ export async function POST(req: NextRequest, { params }: DeepResearchRouteParams
       );
 
       let started = false;
-      if (resumeAfterReply) {
+      if (autoAction.mode === "resume_after_reply") {
         await updateSession(sessionId, {
           status: "running",
           pendingCheckpointId: null,
         });
         started = runManager.isRunning(sessionId) ? false : runManager.startRun(sessionId);
+      } else if (autoAction.mode === "resume_after_feedback") {
+        started = runManager.isRunning(sessionId)
+          ? false
+          : runManager.resumeAfterConfirmation(
+              sessionId,
+              autoAction.nodeId,
+              autoAction.outcome,
+              content,
+            );
       }
 
       return NextResponse.json({
         message,
         autoAction: {
-          mode: resumeAfterReply ? "resume_after_reply" : "none",
+          mode: autoAction.mode,
           started,
         },
       }, { status: 201 });

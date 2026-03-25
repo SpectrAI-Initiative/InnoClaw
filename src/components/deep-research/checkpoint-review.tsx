@@ -66,7 +66,8 @@ interface PromptUsedInfo {
   objective: string;
 }
 
-interface CheckpointData {
+export interface CheckpointData {
+  nodeId?: string;
   title: string;
   humanSummary: string;
   currentFindings: string;
@@ -94,6 +95,76 @@ interface CheckpointReviewProps {
   checkpoint: CheckpointData;
   artifacts: DeepResearchArtifact[];
   onConfirm: (outcome: ConfirmationOutcome, feedback?: string) => Promise<void>;
+}
+
+const ASSESSMENT_BADGE_CLASS: Record<MainBrainAuditData["resultAssessment"], string> = {
+  good: "border-green-300 text-green-600",
+  acceptable: "border-blue-300 text-blue-600",
+  concerning: "border-yellow-300 text-yellow-600",
+  problematic: "border-red-300 text-red-600",
+};
+
+const ACTION_BUTTONS: Array<{
+  outcome: ConfirmationOutcome;
+  label: string;
+  icon: typeof CheckCircle;
+  variant?: "default" | "outline";
+  className?: string;
+}> = [
+  { outcome: "confirmed", label: "Continue", icon: CheckCircle },
+  { outcome: "revision_requested", label: "Revise", icon: RotateCcw, variant: "outline" },
+  { outcome: "branch_requested", label: "Branch", icon: GitBranch, variant: "outline" },
+  { outcome: "rejected", label: "Reject", icon: XCircle, variant: "outline", className: "text-red-600" },
+  { outcome: "stopped", label: "Stop", icon: Square, variant: "outline", className: "text-red-600" },
+];
+
+function CheckpointCallout({
+  icon: Icon,
+  label,
+  children,
+  tone,
+}: {
+  icon: typeof ArrowRight;
+  label: string;
+  children: React.ReactNode;
+  tone: "blue" | "green" | "emerald" | "slate";
+}) {
+  const styles = {
+    blue: {
+      container: "bg-blue-50 dark:bg-blue-950/50",
+      icon: "text-blue-600 dark:text-blue-400",
+      label: "text-blue-800 dark:text-blue-200",
+      body: "text-blue-700 dark:text-blue-300",
+    },
+    green: {
+      container: "bg-green-50 dark:bg-green-950/50",
+      icon: "text-green-600 dark:text-green-400",
+      label: "text-green-800 dark:text-green-200",
+      body: "text-green-700 dark:text-green-300",
+    },
+    emerald: {
+      container: "bg-emerald-50 dark:bg-emerald-950/40",
+      icon: "text-emerald-600 dark:text-emerald-400",
+      label: "text-emerald-800 dark:text-emerald-200",
+      body: "text-emerald-700 dark:text-emerald-300",
+    },
+    slate: {
+      container: "bg-slate-50 dark:bg-slate-900/50",
+      icon: "text-slate-600 dark:text-slate-400",
+      label: "text-slate-800 dark:text-slate-200",
+      body: "text-slate-700 dark:text-slate-300",
+    },
+  }[tone];
+
+  return (
+    <div className={`flex items-start gap-2 rounded p-2 text-xs ${styles.container}`}>
+      <Icon className={`mt-0.5 h-3 w-3 shrink-0 ${styles.icon}`} />
+      <div>
+        <span className={`font-medium ${styles.label}`}>{label}</span>
+        <span className={styles.body}>{children}</span>
+      </div>
+    </div>
+  );
 }
 
 export function CheckpointReview({ checkpoint, artifacts, onConfirm }: CheckpointReviewProps) {
@@ -182,12 +253,7 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
                 <span className="font-semibold">Researcher Assessment:</span>
                 <Badge
                   variant="outline"
-                  className={`text-[10px] ${
-                    checkpoint.mainBrainAudit.resultAssessment === "good" ? "text-green-600 border-green-300" :
-                    checkpoint.mainBrainAudit.resultAssessment === "acceptable" ? "text-blue-600 border-blue-300" :
-                    checkpoint.mainBrainAudit.resultAssessment === "concerning" ? "text-yellow-600 border-yellow-300" :
-                    "text-red-600 border-red-300"
-                  }`}
+                  className={`text-[10px] ${ASSESSMENT_BADGE_CLASS[checkpoint.mainBrainAudit.resultAssessment]}`}
                 >
                   {checkpoint.mainBrainAudit.resultAssessment}
                 </Badge>
@@ -271,51 +337,35 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
 
           {/* "Continue will do" — mandatory per spec */}
           {(checkpoint.transitionAction?.description || checkpoint.continueWillDo || checkpoint.mainBrainAudit?.continueWillDo) && (
-            <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-950/50 rounded text-xs">
-              <ArrowRight className="h-3 w-3 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
-              <div>
-                <span className="font-medium text-blue-800 dark:text-blue-200">
-                  {isAnswerRequired ? "Next step after your reply: " : "Continue will: "}
-                </span>
-                <span className="text-blue-700 dark:text-blue-300">
-                  {checkpoint.transitionAction?.description || checkpoint.continueWillDo || checkpoint.mainBrainAudit?.continueWillDo}
-                </span>
-              </div>
-            </div>
+            <CheckpointCallout
+              icon={ArrowRight}
+              label={isAnswerRequired ? "Next step after your reply: " : "Continue will: "}
+              tone="blue"
+            >
+              {checkpoint.transitionAction?.description || checkpoint.continueWillDo || checkpoint.mainBrainAudit?.continueWillDo}
+            </CheckpointCallout>
           )}
 
           {/* Recommended action */}
-          <div className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950/50 rounded text-xs">
-            <ArrowRight className="h-3 w-3 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
-            <div>
-              <span className="font-medium text-green-800 dark:text-green-200">Recommended: </span>
-              <span className="text-green-700 dark:text-green-300">{checkpoint.recommendedNextAction}</span>
-            </div>
-          </div>
+          <CheckpointCallout icon={ArrowRight} label="Next step: " tone="green">
+            {checkpoint.recommendedNextAction}
+          </CheckpointCallout>
 
           {checkpoint.recommendedWorker && (
-            <div className="flex items-start gap-2 p-2 bg-emerald-50 dark:bg-emerald-950/40 rounded text-xs">
-              <ArrowRight className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
-              <div>
-                <span className="font-medium text-emerald-800 dark:text-emerald-200">Next worker: </span>
-                <span className="text-emerald-700 dark:text-emerald-300">
-                  {checkpoint.recommendedWorker.roleName} ({checkpoint.recommendedWorker.nodeType}) - {checkpoint.recommendedWorker.label}
-                </span>
-              </div>
-            </div>
+            <CheckpointCallout icon={ArrowRight} label="Next task owner: " tone="emerald">
+              {checkpoint.recommendedWorker.roleName} ({checkpoint.recommendedWorker.nodeType}) - {checkpoint.recommendedWorker.label}
+            </CheckpointCallout>
           )}
 
           {checkpoint.promptUsed && (
-            <div className="flex items-start gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded text-xs">
-              <FileText className="h-3 w-3 text-slate-600 dark:text-slate-400 mt-0.5 shrink-0" />
-              <div>
-                <span className="font-medium text-slate-800 dark:text-slate-200">Prompt used: </span>
-                <span className="text-slate-700 dark:text-slate-300">{checkpoint.promptUsed.title}</span>
+            <CheckpointCallout icon={FileText} label="Prompt used: " tone="slate">
+              <>
+                {checkpoint.promptUsed.title}
                 <div className="mt-1 text-muted-foreground">
                   {checkpoint.promptUsed.kind} - {checkpoint.promptUsed.objective}
                 </div>
-              </div>
-            </div>
+              </>
+            </CheckpointCallout>
           )}
 
           {/* Alternative actions */}
@@ -352,55 +402,19 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
               />
 
               <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  className="h-7 px-3 text-xs gap-1.5"
-                  onClick={() => handleAction("confirmed")}
-                  disabled={submitting}
-                >
-                  <CheckCircle className="h-3.5 w-3.5" />
-                  Continue
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 px-3 text-xs gap-1.5"
-                  onClick={() => handleAction("revision_requested")}
-                  disabled={submitting}
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  Revise
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 px-3 text-xs gap-1.5"
-                  onClick={() => handleAction("branch_requested")}
-                  disabled={submitting}
-                >
-                  <GitBranch className="h-3.5 w-3.5" />
-                  Branch
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 px-3 text-xs gap-1.5 text-red-600"
-                  onClick={() => handleAction("rejected")}
-                  disabled={submitting}
-                >
-                  <XCircle className="h-3.5 w-3.5" />
-                  Reject
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 px-3 text-xs gap-1.5 text-red-600"
-                  onClick={() => handleAction("stopped")}
-                  disabled={submitting}
-                >
-                  <Square className="h-3.5 w-3.5" />
-                  Stop
-                </Button>
+                {ACTION_BUTTONS.map(({ outcome, label, icon: Icon, variant, className }) => (
+                  <Button
+                    key={outcome}
+                    size="sm"
+                    variant={variant}
+                    className={`h-7 gap-1.5 px-3 text-xs ${className ?? ""}`.trim()}
+                    onClick={() => handleAction(outcome)}
+                    disabled={submitting}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </Button>
+                ))}
               </div>
             </>
           )}

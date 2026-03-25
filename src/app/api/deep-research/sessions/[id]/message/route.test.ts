@@ -9,6 +9,7 @@ const mockEnsureInterfaceShell = vi.fn();
 const mockIsInterfaceOnlySession = vi.fn();
 const mockStartRun = vi.fn();
 const mockIsRunning = vi.fn();
+const mockResumeAfterConfirmation = vi.fn();
 const mockRequireSession = vi.fn();
 
 vi.mock("@/lib/deep-research/event-store", () => ({
@@ -28,6 +29,7 @@ vi.mock("@/lib/deep-research/run-manager", () => ({
   runManager: {
     startRun: (...args: unknown[]) => mockStartRun(...args),
     isRunning: (...args: unknown[]) => mockIsRunning(...args),
+    resumeAfterConfirmation: (...args: unknown[]) => mockResumeAfterConfirmation(...args),
   },
 }));
 
@@ -116,6 +118,7 @@ describe("/api/deep-research/sessions/[id]/message", () => {
     });
     mockIsRunning.mockReturnValue(false);
     mockStartRun.mockReturnValue(true);
+    mockResumeAfterConfirmation.mockReturnValue(true);
   });
 
   it("auto-resumes when the pending checkpoint requires a clarification answer", async () => {
@@ -182,6 +185,36 @@ describe("/api/deep-research/sessions/[id]/message", () => {
     expect(body.autoAction).toEqual({
       mode: "none",
       started: false,
+    });
+  });
+
+  it("auto-resumes as revision feedback when the user sends actionable instructions at a confirmation gate", async () => {
+    mockGetArtifact.mockResolvedValue({
+      id: "checkpoint-1",
+      artifactType: "checkpoint",
+      content: {
+        interactionMode: "confirmation",
+        nodeId: "node-7",
+      },
+    });
+
+    const { POST } = await import("@/app/api/deep-research/sessions/[id]/message/route");
+    const response = await POST(
+      new FakeNextRequest({ content: "清理所有的进程，开始撰写阶段性综述报告，并验证异常年份。" }) as never,
+      { params: Promise.resolve({ id: "session-1" }) },
+    );
+    const body = await response.json();
+
+    expect(mockResumeAfterConfirmation).toHaveBeenCalledWith(
+      "session-1",
+      "node-7",
+      "revision_requested",
+      "清理所有的进程，开始撰写阶段性综述报告，并验证异常年份。",
+    );
+    expect(mockUpdateSession).not.toHaveBeenCalled();
+    expect(body.autoAction).toEqual({
+      mode: "resume_after_feedback",
+      started: true,
     });
   });
 });

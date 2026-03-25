@@ -744,7 +744,7 @@ export const DEFAULT_CONFIG: DeepResearchConfig = {
     maxTotalTokens: 2_000_000,
     maxOpusTokens: 500_000,
   },
-  maxWorkerFanOut: 8,
+  maxWorkerFanOut: 1,
   maxReviewerRounds: 2,
   maxExecutionLoops: 3,
   maxWorkerConcurrency: 1,

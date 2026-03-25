@@ -169,31 +169,35 @@ function extractAbstract(entry: string): string {
 
 function parsePubMedXml(xml: string, source: PubMedBackedSource): Article[] {
   const entries = xml.match(/<PubmedArticle\b[\s\S]*?<\/PubmedArticle>/gi) ?? [];
+  const articles: Article[] = [];
 
-  return entries
-    .map((entry) => {
-      const pmid = extractFirst(entry, /<PMID\b[^>]*>([\s\S]*?)<\/PMID>/i);
-      const title = extractFirst(entry, /<ArticleTitle>([\s\S]*?)<\/ArticleTitle>/i);
+  for (const entry of entries) {
+    const pmid = extractFirst(entry, /<PMID\b[^>]*>([\s\S]*?)<\/PMID>/i);
+    const title = extractFirst(entry, /<ArticleTitle>([\s\S]*?)<\/ArticleTitle>/i);
 
-      if (!pmid || !title) {
-        return null;
-      }
+    if (!pmid || !title) {
+      continue;
+    }
 
-      const pmcid = extractArticleId(entry, "pmc");
-      const pdfUrl = pmcid ? `https://pmc.ncbi.nlm.nih.gov/articles/${pmcid}/pdf` : undefined;
+    const pmcid = extractArticleId(entry, "pmc");
+    const article: Article = {
+      id: pmid,
+      title,
+      authors: extractAuthors(entry),
+      abstract: extractAbstract(entry),
+      url: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
+      publishedDate: extractPublishedDate(entry),
+      source,
+    };
 
-      return {
-        id: pmid,
-        title,
-        authors: extractAuthors(entry),
-        abstract: extractAbstract(entry),
-        url: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
-        pdfUrl,
-        publishedDate: extractPublishedDate(entry),
-        source,
-      } satisfies Article;
-    })
-    .filter((article): article is Article => article !== null);
+    if (pmcid) {
+      article.pdfUrl = `https://pmc.ncbi.nlm.nih.gov/articles/${pmcid}/pdf`;
+    }
+
+    articles.push(article);
+  }
+
+  return articles;
 }
 
 function filterArticlesByDate(

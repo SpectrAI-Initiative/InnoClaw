@@ -145,6 +145,31 @@ function buildTranscriptEntries(
   return entries.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 }
 
+function DrawerSection({
+  title,
+  children,
+  titleClassName = "text-xs font-semibold uppercase text-muted-foreground",
+}: {
+  title: string;
+  children: React.ReactNode;
+  titleClassName?: string;
+}) {
+  return (
+    <div className="space-y-1">
+      <h4 className={titleClassName}>{title}</h4>
+      {children}
+    </div>
+  );
+}
+
+function DrawerEmptyState({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="py-8 text-center text-xs text-muted-foreground">
+      {children}
+    </div>
+  );
+}
+
 function TranscriptBubble({
   entry,
   artifactLabels,
@@ -241,6 +266,10 @@ export function NodeDetailDrawer({
   const transcriptEntries = useMemo(
     () => (node ? buildTranscriptEntries(node, nodeMessages) : []),
     [node, nodeMessages],
+  );
+  const artifactTypeById = useMemo(
+    () => new Map(nodeArtifacts.map((artifact) => [artifact.id, artifact.artifactType])),
+    [nodeArtifacts],
   );
 
   useEffect(() => {
@@ -355,8 +384,8 @@ export function NodeDetailDrawer({
                 ) : (
                   transcriptEntries.map((entry) => {
                     const artifactLabels = entry.relatedArtifactIds.flatMap((artifactId) => {
-                      const artifact = nodeArtifacts.find((candidate) => candidate.id === artifactId);
-                      return artifact ? [artifact.artifactType] : [];
+                      const artifactType = artifactTypeById.get(artifactId);
+                      return artifactType ? [artifactType] : [];
                     });
 
                     return (
@@ -380,8 +409,7 @@ export function NodeDetailDrawer({
 
             <TabsContent value="details" className="px-4 py-3 space-y-4 mt-0">
               {/* Timing */}
-              <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase">Timing</h4>
+              <DrawerSection title="Timing" titleClassName="text-xs font-semibold uppercase text-muted-foreground">
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3 text-muted-foreground" />
@@ -403,12 +431,11 @@ export function NodeDetailDrawer({
                     </div>
                   )}
                 </div>
-              </div>
+              </DrawerSection>
 
               {/* Dependencies */}
               {node.dependsOn.length > 0 && (
-                <div className="space-y-1">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase">Depends On</h4>
+                <DrawerSection title="Depends On">
                   <div className="flex flex-wrap gap-1">
                     {node.dependsOn.map((id) => (
                       <Badge key={id} variant="outline" className="text-[10px] font-mono">
@@ -416,33 +443,29 @@ export function NodeDetailDrawer({
                       </Badge>
                     ))}
                   </div>
-                </div>
+                </DrawerSection>
               )}
 
               {/* Retry info */}
               {node.retryCount > 0 && (
-                <div className="space-y-1">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase">Retry Info</h4>
+                <DrawerSection title="Retry Info">
                   <div className="text-xs">Attempt #{node.retryCount + 1}</div>
-                </div>
+                </DrawerSection>
               )}
 
               {/* Error */}
               {node.error && (
-                <div className="space-y-1">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase text-red-600">Error</h4>
+                <DrawerSection title="Error" titleClassName="text-xs font-semibold uppercase text-red-600">
                   <pre className="text-xs bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-200 p-2 rounded">
                     {node.error}
                   </pre>
-                </div>
+                </DrawerSection>
               )}
             </TabsContent>
 
             <TabsContent value="artifacts" className="px-4 py-3 space-y-4 mt-0">
               {nodeArtifacts.length === 0 ? (
-                <div className="text-xs text-muted-foreground text-center py-8">
-                  No artifacts for this node
-                </div>
+                <DrawerEmptyState>No artifacts for this node</DrawerEmptyState>
               ) : (
                 nodeArtifacts.map((artifact) => (
                   <div key={artifact.id} className="border rounded-lg p-3">
@@ -454,9 +477,7 @@ export function NodeDetailDrawer({
 
             <TabsContent value="events" className="px-4 py-3 mt-0">
               {nodeEvents.length === 0 ? (
-                <div className="text-xs text-muted-foreground text-center py-8">
-                  No events for this node
-                </div>
+                <DrawerEmptyState>No events for this node</DrawerEmptyState>
               ) : (
                 <div className="space-y-2">
                   {nodeEvents.map((event) => (

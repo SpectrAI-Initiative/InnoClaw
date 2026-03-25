@@ -27,6 +27,12 @@ import { executeNode } from "./node-executor";
 import { buildWorkstationPlanningContext } from "./workstation-context";
 import { buildNodeContext, callMainBrain } from "./researcher-runtime";
 import { getStructuredPromptForNode, getStructuredRoleDisplayName } from "./role-registry";
+import {
+  buildSessionHygienePromptBlock,
+  cleanupFailedNodesFromFeedback,
+  reconcileSessionState,
+  type SessionHygieneSummary,
+} from "./session-hygiene";
 import type {
   DeepResearchSession,
   DeepResearchNode,
@@ -284,6 +290,29 @@ async function _resumeAfterConfirmationInner(
     { outcome, feedback, explicitUserAction: true }
   );
 
+  const cleanupResult = await cleanupFailedNodesFromFeedback(sessionId, feedback);
+  if (
+    cleanupResult.cleanedFailedNodeIds.length > 0 ||
+    cleanupResult.cleanedBlockedNodeIds.length > 0 ||
+    cleanupResult.cancelledExecutionRecordIds.length > 0
+  ) {
+    await store.addMessage(
+      sessionId,
+      "system",
+      [
+        cleanupResult.cleanedFailedNodeIds.length > 0
+          ? `Cleaned failed nodes: ${cleanupResult.cleanedFailedNodeIds.join(", ")}.`
+          : null,
+        cleanupResult.cleanedBlockedNodeIds.length > 0
+          ? `Cleaned blocked downstream nodes: ${cleanupResult.cleanedBlockedNodeIds.join(", ")}.`
+          : null,
+        cleanupResult.cancelledExecutionRecordIds.length > 0
+          ? `Cancelled execution records: ${cleanupResult.cancelledExecutionRecordIds.join(", ")}.`
+          : null,
+      ].filter((line): line is string => Boolean(line)).join(" "),
+    );
+  }
+
   if (outcome === "stopped") {
     await store.updateSession(sessionId, { status: "stopped_by_user" });
     await store.addMessage(sessionId, "system", "Research stopped by user.");
@@ -349,9 +378,14 @@ async function _resumeAfterConfirmationInner(
       `${normalizedDecisionSpecs.droppedSpecs.length} malformed confirmation task(s) were ignored before dispatch.`,
     );
   }
+  const limitedConfirmationSpecs = await enforceSingleWorkerDispatch(
+    sessionId,
+    normalizedDecisionSpecs.validSpecs,
+    "confirmation dispatch",
+  );
   decision = {
     ...decision,
-    nodesToCreate: normalizedDecisionSpecs.validSpecs,
+    nodesToCreate: limitedConfirmationSpecs,
   };
 
   await store.updateSession(sessionId, { pendingCheckpointId: null });
@@ -447,6 +481,8 @@ async function routeNextAction(session: DeepResearchSession, abortSignal?: Abort
   const fresh = await store.getSession(session.id);
   if (!fresh) return;
 
+  const hygieneSummary = await reconcileSessionState(fresh.id);
+
   // Load requirement state
   const requirementState = await store.getLatestRequirementState(fresh.id);
 
@@ -488,6 +524,7 @@ async function routeNextAction(session: DeepResearchSession, abortSignal?: Abort
     nodes,
     requirementState,
     languageState,
+    hygieneSummary,
     abortSignal,
   );
 
@@ -601,6 +638,7 @@ async function createResearcherDispatchStep(
   nodes: DeepResearchNode[],
   requirementState: RequirementState | null,
   languageState: LanguageState,
+  hygieneSummary: SessionHygieneSummary,
   abortSignal?: AbortSignal,
 ): Promise<{
   completedNode: DeepResearchNode;
@@ -609,19 +647,28 @@ async function createResearcherDispatchStep(
   interactionMode: CheckpointInteractionMode;
 }> {
   const workstationContext = await buildWorkstationPlanningContext(session, messages);
+  const sessionHygienePromptBlock = buildSessionHygienePromptBlock(hygieneSummary);
+  const coordinationContext = [sessionHygienePromptBlock, workstationContext.promptBlock]
+    .filter((block): block is string => Boolean(block))
+    .join("\n\n");
   const decision = await callMainBrain(
     session,
     abortSignal,
     requirementState,
     languageState.preferredOutputLanguage,
-    workstationContext.promptBlock,
+    coordinationContext,
   );
 
   const { validSpecs: plannedNodesToCreate, droppedSpecs } = normalizeNodeCreationSpecs(
     decision.nodesToCreate ?? [],
     session.contextTag,
   );
-  const interactionMode = resolveCheckpointInteractionMode(decision, plannedNodesToCreate);
+  const limitedPlannedNodesToCreate = await enforceSingleWorkerDispatch(
+    session.id,
+    plannedNodesToCreate,
+    "researcher planning",
+  );
+  const interactionMode = resolveCheckpointInteractionMode(decision, limitedPlannedNodesToCreate);
 
   if (droppedSpecs.length > 0) {
     await store.addMessage(
@@ -635,7 +682,7 @@ async function createResearcherDispatchStep(
     await store.addMessage(session.id, "main_brain", decision.messageToUser);
   }
 
-  if (decision.action === "complete" && plannedNodesToCreate.length === 0) {
+  if (decision.action === "complete" && limitedPlannedNodesToCreate.length === 0) {
     const finalReportCheck = canGenerateFinalReport(nodes);
     if (!finalReportCheck.allowed) {
       const blockedNode = await createCompletedResearcherNode(
@@ -664,6 +711,7 @@ async function createResearcherDispatchStep(
       input: {
         decision,
         workstationContext,
+        hygieneSummary,
       },
       contextTag: "final_report",
     });
@@ -683,22 +731,23 @@ async function createResearcherDispatchStep(
   }
 
   const suggestedNextContextTag = resolveContextTagFromSpecs(
-    plannedNodesToCreate,
+    limitedPlannedNodesToCreate,
     resolveLegacyContextFromNodes(nodes, session.contextTag),
   );
 
   const completedNode = await createCompletedResearcherNode(
     session.id,
     "audit",
-    plannedNodesToCreate.length > 0
-      ? "Researcher coordination proposal"
+    limitedPlannedNodesToCreate.length > 0
+      ? "Researcher next-task recommendation"
       : interactionMode === "answer_required"
         ? "Researcher clarification request"
         : "Researcher coordination audit",
     {
       decision,
       workstationContext,
-      proposedNodeSpecs: plannedNodesToCreate,
+      hygieneSummary,
+      proposedNodeSpecs: limitedPlannedNodesToCreate,
       suggestedNextContextTag,
       requiresUserConfirmation: true,
       interactionMode,
@@ -706,17 +755,19 @@ async function createResearcherDispatchStep(
     suggestedNextContextTag,
   );
 
-  if (plannedNodesToCreate.length > 0) {
+  if (limitedPlannedNodesToCreate.length > 0) {
     await store.createArtifact(
       session.id,
       completedNode.id,
       "task_graph",
-      `Researcher Task Proposal (${plannedNodesToCreate.length} tasks)`,
+      "Researcher Next Task",
       {
-        totalNodes: plannedNodesToCreate.length,
-        nodesByType: countNodesByType(plannedNodesToCreate),
+        nextTaskCount: limitedPlannedNodesToCreate.length,
+        nextTask: limitedPlannedNodesToCreate[0] ?? null,
+        nextTaskByType: countNodesByType(limitedPlannedNodesToCreate),
         workstationContext,
-        proposedNodeSpecs: plannedNodesToCreate,
+        hygieneSummary,
+        proposedNodeSpecs: limitedPlannedNodesToCreate,
         suggestedNextContextTag,
         requiresUserConfirmation: true,
         interactionMode,
@@ -808,7 +859,12 @@ async function runPostStepChecks(
     }
   }
 
-  return { freshNodes, freshArtifacts };
+  await reconcileSessionState(session.id);
+
+  return {
+    freshNodes: await store.getNodes(session.id),
+    freshArtifacts: await store.getArtifacts(session.id),
+  };
 }
 
 function resolveLegacyContextFromNodes(nodes: DeepResearchNode[], fallback: ContextTag): ContextTag {
@@ -905,8 +961,10 @@ async function generateCheckpointAndHalt(
   const plannedSpecs = planArtifact && Array.isArray(planArtifact.content.proposedNodeSpecs)
     ? normalizeNodeCreationSpecs(planArtifact.content.proposedNodeSpecs as unknown[], checkpointContextTag).validSpecs
     : [];
-  const plannedNodeCount = typeof planArtifact?.content.totalNodes === "number"
-    ? planArtifact.content.totalNodes
+  const plannedNodeCount = typeof planArtifact?.content.nextTaskCount === "number"
+    ? planArtifact.content.nextTaskCount
+    : typeof planArtifact?.content.totalNodes === "number"
+      ? planArtifact.content.totalNodes
     : 0;
   const recommendedDispatch = getRecommendedDispatch(freshNodes, plannedSpecs);
 
@@ -917,7 +975,7 @@ async function generateCheckpointAndHalt(
     description: interactionMode === "answer_required"
       ? "Wait for the user to answer the Researcher's clarification questions in chat before any further work."
       : plannedNodeCount > 0
-        ? `If you confirm this Researcher proposal, ${plannedNodeCount} task(s) will be authorized and the Researcher will continue coordination from ${suggestedNextContextTag}.`
+        ? `If you confirm this next task, the Researcher will authorize it and continue coordination from ${suggestedNextContextTag}.`
         : `Resume the session and let the Researcher choose the next work dynamically. Current recommendation: ${suggestedNextContextTag}.`,
   };
 
@@ -1169,6 +1227,11 @@ async function createNodesFromSpecs(
   const created: DeepResearchNode[] = [];
   const createdNodeIdsByLabel = new Map<string, string>();
   const { validSpecs: normalizedSpecs, droppedSpecs } = normalizeNodeCreationSpecs(specs, defaultContextTag);
+  const limitedSpecs = await enforceSingleWorkerDispatch(
+    sessionId,
+    normalizedSpecs,
+    "node creation",
+  );
 
   if (droppedSpecs.length > 0) {
     await store.addMessage(
@@ -1178,7 +1241,7 @@ async function createNodesFromSpecs(
     );
   }
 
-  for (const normalizedSpec of normalizedSpecs) {
+  for (const normalizedSpec of limitedSpecs) {
     const node = await store.createNode(sessionId, {
       ...normalizedSpec,
       dependsOn: resolveNodeDependencies(
@@ -1194,7 +1257,7 @@ async function createNodesFromSpecs(
   }
 
   for (let i = 0; i < created.length; i++) {
-    const normalizedSpec = normalizedSpecs[i];
+    const normalizedSpec = limitedSpecs[i];
     const resolvedDependsOn = resolveNodeDependencies(
       normalizedSpec.dependsOn ?? [],
       existingNodeIds,
@@ -1352,7 +1415,26 @@ function extractPlannedNodeSpecsFromCheckpoint(
     return [];
   }
 
-  return normalizeNodeCreationSpecs(candidate, checkpoint.contextTag).validSpecs;
+  const normalized = normalizeNodeCreationSpecs(candidate, checkpoint.contextTag).validSpecs;
+  return normalized.slice(0, 1);
+}
+
+async function enforceSingleWorkerDispatch(
+  sessionId: string,
+  specs: NodeCreationSpec[],
+  source: string,
+): Promise<NodeCreationSpec[]> {
+  if (specs.length <= 1) {
+    return specs;
+  }
+
+  await store.addMessage(
+    sessionId,
+    "system",
+    `${specs.length - 1} extra task(s) from ${source} were dropped. Deep Research now dispatches at most one worker task at a time.`,
+  );
+
+  return specs.slice(0, 1);
 }
 
 function resolveContextTagFromSpecs(specs: NodeCreationSpec[], fallback: ContextTag): ContextTag {
