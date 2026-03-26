@@ -47,22 +47,31 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 <!-- whats-new-start -->
 
+#### 2026-03-26
+- **Decouverte dynamique des modeles**: Le panneau agent recupere automatiquement les modeles disponibles de chaque fournisseur IA configure et les fusionne avec la liste integree
+- **Routage Base URL par modele**: Les fournisseurs IA chinois (shlab, qwen, moonshot, deepseek, minimax, zhipu) supportent des variables d'environnement `<PROVIDER>_<MODEL>_BASE_URL` par modele pour un routage flexible
+- **Activation des outils a la volee**: Le support des outils peut etre active ou desactive par fournisseur via `<PROVIDER>_TOOLS_ENABLED=true/false` sans modification du code
+
+
 #### 2026-03-24
 - **Support LLM multimodal**: Les flux de recherche de documents et d'agents prennent desormais en charge les LLM standard et multimodaux (mLLM), selectionnables par contexte dans les parametres et le selecteur de modele.
-
-
-#### 2026-03-23
-- **Apercu d'importation de competences GitHub**: Nouveau flux de previsualisation avant importation permettant de parcourir, examiner et importer selectivement des competences depuis des depots GitHub
 
 
 
 <details>
 <summary>Afficher les mises a jour precedentes</summary>
 
+#### 2026-03-23
+- **Apercu d'importation de competences GitHub**: Nouveau flux de previsualisation avant importation permettant de parcourir, examiner et importer selectivement des competences depuis des depots GitHub
+
+
+
+
 #### 2026-03-22
 - **Export de notes Obsidian**: Generez des notes structurees compatibles Obsidian avec frontmatter YAML enrichi, figures et wikilinks directement depuis le panneau d'etude de l'article
 - **Selecteur de modele par tache**: Un nouveau composant UI de selection de modele permet aux utilisateurs de remplacer le modele AI par defaut pour chaque tache d'etude (resume, critique, notes, etc.)
 - **Vue de discussion des notes**: Nouvelle vue de discussion pleine page pour les notes d'articles, permettant des conversations assistees par IA autour du contenu des notes generees
+
 
 
 
@@ -77,9 +86,11 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-20
 - **Module de recherche approfondie**: Pipeline de recherche scientifique entierement pilote par IA avec orchestration multi-phases, deliberation des evaluateurs, planification d'execution et interface graphique de flux de travail
 - **Pipeline d'execution**: Systeme d'execution d'experiences automatise avec soumission de jobs Slurm, gestion de jeux de donnees, preprocessement et support d'executeurs distants
+
 
 
 
@@ -99,9 +110,11 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-18
 - **Vision Multimodale pour l'Analyse d'Articles**: Les images PDF sont desormais extraites et analysees visuellement lors des sessions de discussion et d'ideation de recherche
 - **Integration des Competences Claude Code**: Importez des competences directement depuis des dossiers locaux ou des projets Claude Code via un nouveau flux d'importation dedie
+
 
 
 
@@ -124,23 +137,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-17
 - **Gestion des profils de jobs distants et durcissement SSH** : prise en charge de la creation, de l'edition et de l'envoi securise de jobs de recherche via SSH
 - **Rendu Markdown riche dans le panneau Agent** : les messages Agent affichent maintenant tableaux, formules LaTeX et blocs de code avec coloration syntaxique
 - **UI de configuration des fournisseurs API** : configuration directe des cles API et endpoints des fournisseurs IA depuis la page Settings
 
-
-
-
-
-
-
-
-
-#### 2026-03-17
-- **Durcissement de la configuration et de la soumission rjob** : les profils distants peuvent stocker les valeurs par defaut rjob completes (image, GPU, CPU, memory, mounts, charged-group, private-machine, env vars, host-network, example commands). `submitRemoteJob` construit la commande rjob a partir de la configuration stockee, ce qui empeche l'Agent de modifier des drapeaux critiques comme `--charged-group` ou `--image`. Le transport SSH a aussi ete fiabilise avec `-o StrictHostKeyChecking=no -tt`, le chargement du script d'init et le bon quoting.
-- **Edition des profils** : le bouton d'edition dans l'onglet Remotes recharge le profil existant dans le formulaire, y compris tous les champs rjob.
-- **Raccourci de soumission directe** : en mode Agent-Long, les soumissions simples peuvent sauter inspect/patch/sync et suivre `listRemoteProfiles -> prepareJobSubmission -> approval -> submitRemoteJob`.
 
 
 
