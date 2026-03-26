@@ -5,6 +5,10 @@ import { workspaces } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { writeFile } from "@/lib/files/filesystem";
 import path from "path";
+import {
+  extractFinalReportText,
+  getLatestFinalReportArtifact,
+} from "@/lib/deep-research/final-report";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -37,25 +41,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     // Find the final report artifact
     const artifacts = await getArtifacts(sessionId);
-    const finalReport = artifacts.find((a) => a.artifactType === "final_report");
+    const finalReport = getLatestFinalReportArtifact(artifacts);
 
     if (!finalReport) {
       return NextResponse.json({ error: "No final report found for this session" }, { status: 404 });
     }
 
     // Extract report text from artifact content
-    const content = finalReport.content;
-    let reportText =
-      (content.report as string) ||
-      (content.messageToUser as string) ||
-      (content.text as string) ||
-      (content.content as string) ||
-      "";
-
-    if (!reportText) {
-      // Fallback: stringify the whole content as formatted JSON
-      reportText = JSON.stringify(content, null, 2);
-    }
+    const reportText = extractFinalReportText(finalReport);
 
     // Build the full markdown document with metadata header
     const now = new Date();

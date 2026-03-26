@@ -16,21 +16,14 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { DeepResearchSession, DeepResearchArtifact } from "@/lib/deep-research/types";
+import {
+  extractFinalReportText,
+  getLatestFinalReportArtifact,
+} from "@/lib/deep-research/final-report";
 
 interface FinalReportViewProps {
   session: DeepResearchSession;
   artifacts: DeepResearchArtifact[];
-}
-
-function extractReportText(artifact: DeepResearchArtifact): string {
-  const c = artifact.content;
-  return (
-    (c.report as string) ||
-    (c.messageToUser as string) ||
-    (c.text as string) ||
-    (c.content as string) ||
-    ""
-  );
 }
 
 export function FinalReportView({ session, artifacts }: FinalReportViewProps) {
@@ -38,8 +31,8 @@ export function FinalReportView({ session, artifacts }: FinalReportViewProps) {
   const [savedPath, setSavedPath] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const finalReport = artifacts.find((a) => a.artifactType === "final_report");
-  const reportText = finalReport ? extractReportText(finalReport) : "";
+  const finalReport = getLatestFinalReportArtifact(artifacts);
+  const reportText = finalReport ? extractFinalReportText(finalReport) : "";
 
   const handleSaveToWorkspace = async () => {
     setSaving(true);

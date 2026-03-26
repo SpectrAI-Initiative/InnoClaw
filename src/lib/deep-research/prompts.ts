@@ -10,6 +10,10 @@ import type {
   ReviewAssessment,
   RequirementState,
 } from "./types";
+import {
+  buildRuntimeRoleContract,
+  listMetaWorkerRoleDefinitions,
+} from "./role-registry";
 
 // =============================================================
 // RESEARCHER SYSTEM PROMPT
@@ -27,16 +31,27 @@ export function buildMainBrainSystemPrompt(
   contextTag: ContextTag,
   requirementState?: RequirementState | null,
   workstationContext?: string | null,
+  memoryContext?: string | null,
+  doctrineContext?: string | null,
 ): string {
+  const specialistRoleNames = listMetaWorkerRoleDefinitions().map((role) => role.roleName).join(", ");
+  const researcherContract = buildRuntimeRoleContract("researcher", "plan", {
+    includeResponsibilities: true,
+    includeCollaboration: true,
+    includePerformance: true,
+    maxItemsPerSection: 3,
+  });
   const nodeStatusSummary = nodes.map((n) =>
     `  - [${n.id.slice(0, 8)}] ${n.label} (${n.nodeType}, ${n.status}, role=${n.assignedRole}, context=${n.contextTag})`
   ).join("\n");
 
-  const artifactSummary = artifacts.map((a) => {
+  const artifactSummary = artifacts
+    .filter((a) => !a.artifactType.startsWith("memory_"))
+    .map((a) => {
     const contentStr = JSON.stringify(a.content);
     const preview = contentStr.length > 500 ? contentStr.slice(0, 500) + "..." : contentStr;
     return `  - [${a.id.slice(0, 8)}] ${a.title} (${a.artifactType}): ${preview}`;
-  }).join("\n");
+    }).join("\n");
 
   const recentMessages = messages.slice(-10).map((m) =>
     `  [${m.role}]: ${m.content.slice(0, 300)}${m.content.length > 300 ? "..." : ""}`
@@ -75,55 +90,42 @@ ${constraintLines}
     ? `\n## Additional Coordination Context\n${workstationContext}\n`
     : "";
 
+  const memorySection = memoryContext
+    ? `\n${memoryContext}\n`
+    : "";
+  const doctrineSection = doctrineContext
+    ? `\n${doctrineContext}\n`
+    : "";
+
   return `You are GPT-5.4 High acting as the "Researcher" — the main-brain of an automated research tool.
 
 ## Core Mission
 Lead the entire automated research workflow, make data-driven decisions, and keep the research process logical, rigorous, traceable, and aligned with the user's goals.
 
-## Hard Hierarchy
-- Researcher (you): top-level coordinator and decision-maker.
-- Results and Evidence Analyst reviews: advisory only. They cannot redefine the workflow.
-- Six specialist roles: literature assistance, experiment architecture design, research code implementation, experiment execution, result analysis, and achievement reuse.
+## Structured Role Contract
+${researcherContract || "  (no structured role contract available)"}
 
-## Default Operating Preference
-- Start from context and history review.
-- If the problem is ambiguous, high-risk, broad in scope, or requires multiple dependent tasks, prefer to first produce a clear plan for the user before dispatching workers.
-- If the next step is already clear, low-risk, and fully consistent with confirmed user intent, you may proceed directly with tightly scoped worker dispatch.
-- Return to planning whenever new evidence, user feedback, or execution failures create uncertainty about the next best step.
+## Specialist Topology
+- Researcher (you) is the top-level coordinator and decision-maker.
+- Results and Evidence Analyst reviews are advisory only. They cannot redefine the workflow.
+- Specialist roles available for dispatch: ${specialistRoleNames}.
 
-## Non-Negotiable Rules
-- Prioritize context and history. Never ignore existing workstation materials, historical messages, prior nodes, artifacts, requirement state, or earlier user feedback.
-- No assumption for ambiguity. If requirements, metrics, scope, methods, resources, or success criteria are unclear, ask targeted clarification questions before finalizing the plan.
-- Verify every plan in four dimensions before user submission: alignment, feasibility, rigor, completeness.
-- User confirmation first. Do not dispatch worker roles or materially change core objectives, scope, time nodes, or resources without explicit user confirmation.
-- Maintain a professional, academic, technical tone.
-
-## Delegation Policy
-When creating specialist nodes, decompose work into small, concrete, role-scoped units:
-- One clear task per node.
+## Runtime Dispatch Rules
 - Return at most ONE NodeCreationSpec in "nodesToCreate" for each decision.
-- Explicit inputs, outputs, stop conditions, and dependencies.
-- Assign exactly one responsible role per node.
-- Keep assignments non-overlapping and milestone-aware.
+- One clear task per node, with explicit inputs, outputs, stop conditions, and dependencies.
+- Assign exactly one responsible role per node and keep assignments non-overlapping.
 - Runtime dispatch is node-driven, not stage-driven. Decide the next worker from the confirmed plan, current evidence, and dependency state.
 - Do not rely on hidden workflow stages. If a worker should act next, express that directly in "nodesToCreate".
 
-When ambiguity or complexity is high:
-- Use "messageToUser" to present a plan or clarification request before dispatching workers.
+## Ambiguity And Planning Gates
+- On the first planning pass, you MUST use "messageToUser" to present a complete plan grounded in the workstation search before any worker dispatch can begin.
+- The first plan must explain: objectives, task split, phases to execute, phases to skip, expected outputs, risks, and why the chosen workflow fits the user's question.
 - Treat "nodesToCreate" as a proposed assignment set until the user confirms.
 - If ambiguity remains, return action "respond_to_user" and ask targeted questions with no worker dispatch.
-
-When the next step is already clear and within confirmed scope:
-- You may move directly into execution supervision and dispatch role-scoped tasks.
-
-## If You Choose To Plan
-Any plan you present should explicitly cover:
-- Core research objectives.
-- Task division and responsible roles.
-- Time nodes and milestones.
-- Resource requirements.
-- Risk prevention and mitigation.
-- Verification logic showing alignment, feasibility, rigor, and completeness.
+- When the next step is already clear and within confirmed scope, you may move directly into execution supervision and dispatch role-scoped tasks.
+- Do NOT schedule experiment design or execution just because those roles exist. Use them only when the user explicitly asks for empirical validation, implementation, reproduction, benchmarking, or when the confirmed plan truly requires it.
+- For survey, mechanism, taxonomy, comparison, conceptual-analysis, and desk-research requests, default to literature/synthesis/reporting workflows and explicitly skip unnecessary experimental phases.
+- Any plan you present should explicitly cover objectives, task division, time nodes, resource requirements, risk prevention, and the four verification checks.
 
 ## Current State
 - Session: "${session.title}" (id: ${session.id})
@@ -151,6 +153,8 @@ ${reviewAssessments || "  (none yet)"}
 ${recentMessages || "  (no messages yet)"}
 ${requirementSection}
 ${workstationSection}
+${doctrineSection}
+${memorySection}
 ## Output Format
 You MUST respond with valid JSON matching the BrainDecision schema:
 {
@@ -219,6 +223,7 @@ export function buildCheckpointPrompt(
   nodes: DeepResearchNode[],
   contextTag: ContextTag
 ): string {
+  const isFinalReportingStep = completedNode.nodeType === "final_report" || contextTag === "final_report";
   const relevantNodeIds = isEvidenceAggregationPhase(contextTag, completedNode, nodes)
     ? new Set(
         nodes
@@ -259,9 +264,21 @@ export function buildCheckpointPrompt(
   ).join("\n");
 
   // Include analytical deliberation results if this context includes critique
-  const reviewAssessments = artifacts.filter(a => a.artifactType === "review_assessment");
+  const reviewAssessments = isFinalReportingStep
+    ? artifacts.filter((artifact) => artifact.artifactType === "review_assessment").slice(-1)
+    : artifacts.filter((artifact) => artifact.artifactType === "review_assessment");
   const reviewSection = reviewAssessments.length > 0
     ? `\n## Review Assessments\n${reviewAssessments.map(review => JSON.stringify(review.content, null, 2)).join("\n")}`
+    : "";
+  const finalReportingRule = isFinalReportingStep
+    ? `
+
+## Final Report Phase Rule
+- You are already in the report-writing/final-report phase.
+- Do NOT recommend restarting broad literature discovery, restarting literature round counting, or returning to an earlier "round 1/N" style search loop.
+- The default next action here is to let the user review/accept the final report or request targeted revisions.
+- Only recommend additional literature work if there is a clearly blocking evidence gap that prevents the report from standing as a final deliverable, and frame it as a targeted revision request rather than a restart of the workflow.
+`
     : "";
 
   return `You have just completed a step in a step-gated deep research workflow.
@@ -280,6 +297,7 @@ ${artifactPreviews || "  (none)"}
 ## Current Task Graph
 ${allNodesSummary || "  (none)"}
 ${reviewSection}
+${finalReportingRule}
 
 ## Session
 - Title: "${session.title}"
@@ -369,6 +387,16 @@ export function buildConfirmationInterpretationPrompt(
         nextTask: latestTaskGraph.content.nextTask ?? latestTaskGraph.content.proposedNodeSpecs,
       }, null, 2)
     : "(no task_graph artifact available)";
+  const isFinalReportingCheckpoint = checkpoint.isFinalStep || checkpoint.contextTag === "final_report";
+  const finalReportRule = isFinalReportingCheckpoint
+    ? `
+
+## Final-Report Confirmation Rule
+This checkpoint is already in the final report phase.
+- If the user confirms, treat that as accepting the final report path rather than reopening broad literature discovery.
+- Do NOT dispatch new evidence-gather work unless the user explicitly asks to reopen literature review or requests targeted evidence additions.
+- If the user wants changes, prefer targeted revisions to the report or its supporting claims instead of restarting from an earlier literature round.`
+    : "";
 
   return `The user has responded to a checkpoint in the step-gated deep research workflow.
 
@@ -388,6 +416,7 @@ ${nodesSummary}
 
 ## Latest Next-Task Plan
 ${proposedPlanSummary}
+${finalReportRule}
 
 ## CRITICAL SEMANTIC RULE
 "Continue" means: proceed according to YOUR recommended next action.
@@ -430,6 +459,12 @@ export function buildWorkerSystemPrompt(
   parentArtifacts: DeepResearchArtifact[],
   taskType: NodeType
 ): string {
+  const roleContract = buildRuntimeRoleContract(node.assignedRole, taskType, {
+    includeResponsibilities: true,
+    includeCollaboration: true,
+    includePerformance: true,
+    maxItemsPerSection: 2,
+  });
   const contextSection = parentArtifacts.length > 0
     ? "## Context Artifacts\n" + parentArtifacts.map((a) =>
         `### ${a.title} (${a.artifactType})\n${JSON.stringify(a.content, null, 2)}`
@@ -447,6 +482,9 @@ export function buildWorkerSystemPrompt(
 - Do NOT self-assign additional tasks or redefine the plan.
 - Do NOT dispatch other roles or make final conclusions.
 - Be thorough but concise. Quality over quantity.
+
+## Structured Role Contract
+${roleContract || "  (no structured role contract available)"}
 
 ## Your Task
 ${node.label}

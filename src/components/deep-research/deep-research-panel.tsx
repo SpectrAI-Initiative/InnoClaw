@@ -18,7 +18,6 @@ import {
   useDeepResearchNodes,
   useDeepResearchArtifacts,
   useDeepResearchEvents,
-  useDeepResearchExecutions,
 } from "@/lib/hooks/use-deep-research";
 import { SessionList } from "./session-list";
 import { IntakeScreen } from "./intake-screen";
@@ -27,7 +26,6 @@ import { FinalReportView } from "./final-report-view";
 import { WorkflowGraph } from "./workflow-graph";
 import { NodeDetailDrawer } from "./node-detail-drawer";
 import { DeleteSessionDialog } from "./delete-session-dialog";
-import { ExecutionStatusPanel } from "./execution-status-panel";
 import { RoleStudioPanel } from "./role-studio-panel";
 import type { ConfirmationOutcome } from "@/lib/deep-research/types";
 import {
@@ -37,7 +35,7 @@ import {
 } from "@/lib/deep-research/session-status";
 
 type PanelView = "list" | "intake" | "session";
-type TabView = "chat" | "roadmap" | "roles" | "execution";
+type TabView = "chat" | "roadmap" | "roles";
 type SessionMessageOptions = {
   relatedNodeId?: string;
   metadata?: Record<string, unknown>;
@@ -52,7 +50,6 @@ const TAB_LABELS: Record<TabView, string> = {
   chat: "Chat",
   roadmap: "Roadmap",
   roles: "Roles",
-  execution: "Execution",
 };
 
 const TAB_ORDER = Object.keys(TAB_LABELS) as TabView[];
@@ -78,7 +75,6 @@ export function DeepResearchPanel({
   const { nodes } = useDeepResearchNodes(activeSessionId ?? undefined);
   const { artifacts } = useDeepResearchArtifacts(activeSessionId ?? undefined);
   const { events } = useDeepResearchEvents(activeSessionId ?? undefined);
-  const { executions } = useDeepResearchExecutions(activeSessionId ?? undefined);
   const activeSessionPath = activeSessionId ? `/api/deep-research/sessions/${activeSessionId}` : null;
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) ?? null;
@@ -270,24 +266,6 @@ export function DeepResearchPanel({
     setSelectedNodeId(nodeId);
   }, []);
 
-  const handleBindProfile = useCallback(
-    async (profileId: string | null) => {
-      const response = await runSessionRequest(
-        "",
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ remoteProfileId: profileId }),
-        },
-        "Failed to bind remote profile",
-      );
-      if (response) {
-        await mutateSession();
-      }
-    },
-    [mutateSession, runSessionRequest],
-  );
-
   if (view === "intake") {
     return (
       <IntakeScreen
@@ -458,14 +436,6 @@ export function DeepResearchPanel({
                     resolvedModel={session.config.resolvedModel ?? null}
                     onSelectRoleNode={handleRoleNodeSelect}
                     onSendMessage={handleSendMessage}
-                  />
-                )}
-                {activeTab === "execution" && (
-                  <ExecutionStatusPanel
-                    executions={executions}
-                    workspaceId={workspaceId}
-                    remoteProfileId={session.remoteProfileId}
-                    onBindProfile={handleBindProfile}
                   />
                 )}
               </div>

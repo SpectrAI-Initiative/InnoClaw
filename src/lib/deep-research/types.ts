@@ -214,6 +214,9 @@ export type ArtifactType =
   | "checkpoint"
   | "evidence_card_collection"
   | "claim_map"
+  | "memory_profile"
+  | "memory_snapshot"
+  | "memory_index"
   | "data_manifest";
 
 export type EventType =
@@ -1050,6 +1053,113 @@ export interface ClaimMap {
   contradictions: Contradiction[];
   gaps: GapAnalysis[];
   confidenceDistribution: Record<ClaimStrength, number>;
+}
+
+// =============================================================
+// Memory Fabric — Long-running research memory
+// =============================================================
+
+export type ResearchMemoryKind = "semantic" | "episodic" | "procedural";
+
+export type ResearchMemoryStatus = "active" | "superseded" | "archived";
+
+export type ResearchMemoryCategory =
+  | "user_goal"
+  | "constraint"
+  | "evidence"
+  | "claim"
+  | "gap"
+  | "decision"
+  | "execution"
+  | "workflow";
+
+export interface ResearchMemoryAnchor {
+  artifactId?: string;
+  artifactType?: ArtifactType;
+  nodeId?: string;
+  messageId?: string;
+  sourceIndex?: number;
+  excerptIndex?: number;
+  claimId?: string;
+  gapIndex?: number;
+  field?: string;
+  note?: string;
+}
+
+export interface ResearchMemoryItem {
+  id: string;
+  kind: ResearchMemoryKind;
+  category: ResearchMemoryCategory;
+  title: string;
+  summary: string;
+  details?: string;
+  tags: string[];
+  keywords: string[];
+  importance: number;
+  confidence: number;
+  status: ResearchMemoryStatus;
+  createdAt: string;
+  updatedAt: string;
+  provenance: {
+    sourceType: "artifact" | "message" | "event" | "derived";
+    artifactId?: string;
+    nodeId?: string;
+    eventId?: string;
+    messageId?: string;
+  };
+  /** Exact back-pointers into the source-of-truth records for research traceability. */
+  anchors?: ResearchMemoryAnchor[];
+  relatedMemoryIds?: string[];
+}
+
+export interface ResearchMemoryProfile {
+  sessionId: string;
+  generatedAt: string;
+  objective: string;
+  currentPhase: ContextTag;
+  latestCheckpointTitle?: string;
+  latestRecommendedNextAction?: string;
+  activeRequirements: string[];
+  activeConstraints: string[];
+  openQuestions: string[];
+  activeHypotheses: string[];
+  latestPlanSummary?: string;
+  keyDecisions: string[];
+}
+
+export interface ResearchMemorySnapshot {
+  sessionId: string;
+  generatedAt: string;
+  title: string;
+  summary: string;
+  acceptedFacts: string[];
+  contestedFacts: string[];
+  unresolvedGaps: string[];
+  nextStep: string;
+  focusAreas: string[];
+  relatedArtifactIds: string[];
+}
+
+export interface ResearchMemoryIndex {
+  sessionId: string;
+  generatedAt: string;
+  itemCount: number;
+  /** Derived retrieval cache built from artifacts/messages, not the source of truth itself. */
+  sourceOfTruth: "artifacts_and_messages";
+  items: ResearchMemoryItem[];
+  stats: {
+    semanticCount: number;
+    episodicCount: number;
+    proceduralCount: number;
+    activeCount: number;
+  };
+}
+
+export interface ResearchMemoryRetrievalResult {
+  profile: ResearchMemoryProfile;
+  snapshot: ResearchMemorySnapshot | null;
+  items: Array<ResearchMemoryItem & { retrievalScore: number }>;
+  query: string;
 }
 
 // =============================================================

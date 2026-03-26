@@ -1,7 +1,10 @@
 import { generateText } from "ai";
 import { getModelChainForRole, checkBudget, trackUsage } from "./model-router";
 import * as store from "./event-store";
+import { extractJsonFromLLMResponse } from "./json-response";
 import { buildMainBrainSystemPrompt } from "./prompts";
+import { buildResearchMemoryPromptBlock } from "./memory-fabric";
+import { buildResearcherDoctrinePromptBlock } from "./researcher-doctrine";
 import type {
   DeepResearchSession,
   BrainDecision,
@@ -34,6 +37,19 @@ export async function callMainBrain(
   const messages = await store.getMessages(session.id);
   const nodes = await store.getNodes(session.id);
   const artifacts = await store.getArtifacts(session.id);
+  const recentUserMessages = messages.filter((message) => message.role === "user");
+  const latestUserMessage = recentUserMessages[recentUserMessages.length - 1]?.content ?? "";
+  const memoryContext = buildResearchMemoryPromptBlock({
+    session,
+    messages,
+    artifacts,
+    requirementState,
+    query: `${session.contextTag} ${session.title} ${latestUserMessage}`.trim(),
+  });
+  const doctrineContext = await buildResearcherDoctrinePromptBlock({
+    contextTag: session.contextTag,
+    query: `${session.contextTag} ${session.title} ${latestUserMessage}`.trim(),
+  });
 
   const modelChain = getModelChainForRole("main_brain", session.config);
   let systemPrompt = buildMainBrainSystemPrompt(
@@ -44,6 +60,8 @@ export async function callMainBrain(
     session.contextTag,
     requirementState,
     workstationContext,
+    memoryContext,
+    doctrineContext,
   );
 
   if (!languageHint) {
@@ -89,34 +107,4 @@ export async function callMainBrain(
   }
 
   throw lastError ?? new Error("No available model for main_brain");
-}
-
-function extractJsonFromLLMResponse<T>(text: string): T {
-  const fenceMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
-  if (fenceMatch) {
-    return JSON.parse(fenceMatch[1].trim()) as T;
-  }
-
-  const firstBrace = text.indexOf("{");
-  if (firstBrace >= 0) {
-    let depth = 0;
-    let inString = false;
-    let escape = false;
-    for (let i = firstBrace; i < text.length; i++) {
-      const ch = text[i];
-      if (escape) { escape = false; continue; }
-      if (ch === "\\") { escape = true; continue; }
-      if (ch === "\"") { inString = !inString; continue; }
-      if (inString) continue;
-      if (ch === "{") depth++;
-      if (ch === "}") {
-        depth--;
-        if (depth === 0) {
-          return JSON.parse(text.slice(firstBrace, i + 1)) as T;
-        }
-      }
-    }
-  }
-
-  return JSON.parse(text.trim()) as T;
 }

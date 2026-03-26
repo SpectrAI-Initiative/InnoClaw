@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { ArtifactViewer } from "./artifact-viewer";
 import {
   CheckCircle,
   XCircle,
@@ -16,88 +17,20 @@ import {
   HelpCircle,
   ArrowRight,
 } from "lucide-react";
-import type { DeepResearchArtifact } from "@/lib/deep-research/types";
-import type { ConfirmationOutcome } from "@/lib/deep-research/types";
-
-interface MainBrainAuditData {
-  whatWasCompleted: string;
-  resultAssessment: "good" | "acceptable" | "concerning" | "problematic";
-  issuesAndRisks: string[];
-  recommendedNextAction: string;
-  continueWillDo: string;
-  alternativeActions: Array<{ label: string; description: string; actionType: string }>;
-  canProceed: boolean;
-}
-
-interface LiteratureRoundInfo {
-  roundNumber: number;
-  papersCollected: number;
-  retrievalTaskCount: number;
-  successfulTaskCount: number;
-  failedTaskCount: number;
-  emptyTaskCount: number;
-  coverageSummary: string;
-}
-
-interface ReviewInfo {
-  combinedVerdict: string;
-  combinedConfidence: number;
-  reviewerSummary?: string;
-  needsMoreLiterature: boolean;
-  needsExperimentalValidation: boolean;
-}
-
-interface ExecutionInfo {
-  stepsCompleted: number;
-  stepsTotal: number;
-  currentStatus: string;
-}
-
-interface RecommendedWorkerInfo {
-  roleId: string;
-  roleName: string;
-  nodeType: string;
-  label: string;
-}
-
-interface PromptUsedInfo {
-  title: string;
-  kind: string;
-  objective: string;
-}
-
-export interface CheckpointData {
-  nodeId?: string;
-  title: string;
-  humanSummary: string;
-  currentFindings: string;
-  openQuestions: string[];
-  recommendedNextAction: string;
-  recommendedWorker?: RecommendedWorkerInfo;
-  promptUsed?: PromptUsedInfo;
-  continueWillDo?: string;
-  alternativeNextActions: string[];
-  artifactsToReview: string[];
-  contextTag: string;
-  stepType: string;
-  mainBrainAudit?: MainBrainAuditData;
-  literatureRoundInfo?: LiteratureRoundInfo;
-  reviewInfo?: ReviewInfo;
-  executionInfo?: ExecutionInfo;
-  transitionAction?: { nextContextTag: string; description: string };
-  evidenceStatusNote?: string;
-  emptyStreams?: string[];
-  successStreams?: string[];
-  interactionMode?: "confirmation" | "answer_required";
-}
+import type {
+  CheckpointPackage,
+  ConfirmationOutcome,
+  DeepResearchArtifact,
+  MainBrainAudit,
+} from "@/lib/deep-research/types";
 
 interface CheckpointReviewProps {
-  checkpoint: CheckpointData;
+  checkpoint: CheckpointPackage;
   artifacts: DeepResearchArtifact[];
   onConfirm: (outcome: ConfirmationOutcome, feedback?: string) => Promise<void>;
 }
 
-const ASSESSMENT_BADGE_CLASS: Record<MainBrainAuditData["resultAssessment"], string> = {
+const ASSESSMENT_BADGE_CLASS: Record<MainBrainAudit["resultAssessment"], string> = {
   good: "border-green-300 text-green-600",
   acceptable: "border-blue-300 text-blue-600",
   concerning: "border-yellow-300 text-yellow-600",
@@ -177,6 +110,9 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
   const relatedArtifacts = artifacts.filter((a) =>
     checkpoint.artifactsToReview.includes(a.id)
   );
+  const taskGraphArtifacts = relatedArtifacts.filter((artifact) => artifact.artifactType === "task_graph");
+  const evidenceArtifacts = relatedArtifacts.filter((artifact) => artifact.artifactType === "evidence_card");
+  const otherArtifacts = relatedArtifacts.filter((artifact) => !["evidence_card", "task_graph"].includes(artifact.artifactType));
 
   const handleAction = async (outcome: ConfirmationOutcome) => {
     setSubmitting(true);
@@ -319,22 +255,6 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
             </div>
           )}
 
-          {/* Evidence stream health */}
-          {(checkpoint.emptyStreams?.length || checkpoint.successStreams?.length) && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              {checkpoint.successStreams && checkpoint.successStreams.length > 0 && (
-                <Badge variant="secondary" className="text-[10px] text-green-600 border-green-300">
-                  {checkpoint.successStreams.length} stream(s) with evidence
-                </Badge>
-              )}
-              {checkpoint.emptyStreams && checkpoint.emptyStreams.length > 0 && (
-                <Badge variant="outline" className="text-[10px] text-orange-600 border-orange-300">
-                  {checkpoint.emptyStreams.length} empty stream(s)
-                </Badge>
-              )}
-            </div>
-          )}
-
           {/* "Continue will do" — mandatory per spec */}
           {(checkpoint.transitionAction?.description || checkpoint.continueWillDo || checkpoint.mainBrainAudit?.continueWillDo) && (
             <CheckpointCallout
@@ -376,10 +296,44 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
             </div>
           )}
 
+          {evidenceArtifacts.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Evidence Cards
+              </div>
+              <div className="space-y-3">
+                {evidenceArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="rounded-lg border bg-background p-3">
+                    <ArtifactViewer
+                      artifact={artifact}
+                      disableScroll
+                      evidenceExcerptLimit={Number.POSITIVE_INFINITY}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {taskGraphArtifacts.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Planned Worker Payload
+              </div>
+              <div className="space-y-3">
+                {taskGraphArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="rounded-lg border bg-background p-3">
+                    <ArtifactViewer artifact={artifact} disableScroll />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Related artifacts */}
-          {relatedArtifacts.length > 0 && (
+          {otherArtifacts.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {relatedArtifacts.map((a) => (
+              {otherArtifacts.map((a) => (
                 <Badge key={a.id} variant="secondary" className="text-[10px]">
                   {a.artifactType}: {a.title}
                 </Badge>

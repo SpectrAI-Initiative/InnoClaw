@@ -26,6 +26,15 @@ import { normalizeNodeCreationSpecs } from "./node-spec-normalizer";
 import { executeNode } from "./node-executor";
 import { buildWorkstationPlanningContext } from "./workstation-context";
 import { buildNodeContext, callMainBrain } from "./researcher-runtime";
+import { extractJsonFromLLMResponse, safeParseJson } from "./json-response";
+import { consolidateResearchMemory } from "./memory-fabric";
+import { buildResearcherDoctrinePromptBlock } from "./researcher-doctrine";
+import { buildNodeCreationSpecDispatchPreviews } from "./node-spec-templates";
+import {
+  deriveWorkflowPolicy,
+  filterNodeSpecsForWorkflowPolicy,
+  type WorkflowPolicy,
+} from "./workflow-policy";
 import { getStructuredPromptForNode, getStructuredRoleDisplayName } from "./role-registry";
 import {
   buildSessionHygienePromptBlock,
@@ -50,6 +59,13 @@ import type {
   CheckpointInteractionMode,
 } from "./types";
 import { VALID_CONTEXT_TAGS } from "./types";
+
+type WorkflowRuntimeState = {
+  messages: Awaited<ReturnType<typeof store.getMessages>>;
+  artifacts: Awaited<ReturnType<typeof store.getArtifacts>>;
+  workstationContext: Awaited<ReturnType<typeof buildWorkstationPlanningContext>>;
+  workflowPolicy: WorkflowPolicy;
+};
 
 // =============================================================
 // LANGUAGE DETECTION
@@ -370,17 +386,12 @@ async function _resumeAfterConfirmationInner(
         : { action: "revise", reasoning: `User requested ${outcome}.` };
   }
 
-  const normalizedDecisionSpecs = normalizeNodeCreationSpecs(decision.nodesToCreate ?? [], session.contextTag);
-  if (normalizedDecisionSpecs.droppedSpecs.length > 0) {
-    await store.addMessage(
-      sessionId,
-      "system",
-      `${normalizedDecisionSpecs.droppedSpecs.length} malformed confirmation task(s) were ignored before dispatch.`,
-    );
-  }
-  const limitedConfirmationSpecs = await enforceSingleWorkerDispatch(
+  const confirmationWorkflowState = await loadWorkflowRuntimeState(session);
+  const limitedConfirmationSpecs = await normalizeAndLimitNodeSpecs(
     sessionId,
-    normalizedDecisionSpecs.validSpecs,
+    decision.nodesToCreate ?? [],
+    session.contextTag,
+    confirmationWorkflowState.workflowPolicy,
     "confirmation dispatch",
   );
   decision = {
@@ -417,12 +428,9 @@ async function _resumeAfterConfirmationInner(
 
   switch (decision.action) {
     case "continue": {
-      const fallbackPlanSpecs = outcome === "confirmed"
-        ? extractPlannedNodeSpecsFromCheckpoint(await store.getArtifacts(sessionId), checkpoint)
-        : [];
       const nodesToCreate = decision.nodesToCreate?.length
         ? decision.nodesToCreate
-        : fallbackPlanSpecs;
+        : transitionAction.nodesToCreate;
       const targetContextTag = decision.nextContextTag
         ? validateContextTag(decision.nextContextTag, resolveContextTagFromSpecs(nodesToCreate, transitionAction.nextContextTag))
         : resolveContextTagFromSpecs(nodesToCreate, transitionAction.nextContextTag);
@@ -488,13 +496,12 @@ async function routeNextAction(session: DeepResearchSession, abortSignal?: Abort
 
   // Build context
   const nodes = await store.getNodes(fresh.id);
-  const artifacts = await store.getArtifacts(fresh.id);
-  const messages = await store.getMessages(fresh.id);
+  const workflowState = await loadWorkflowRuntimeState(fresh);
+  const { artifacts, messages, workflowPolicy } = workflowState;
 
   // Resolve language state from user messages
   const languageState = resolveLanguageState(messages);
-  const nextReadyNode = (await store.getReadyNodes(fresh.id))
-    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
+  const nextReadyNode = await selectNextReadyNodeForWorkflow(fresh.id, workflowPolicy);
 
   if (nextReadyNode) {
     const executed = await executeApprovedNode(
@@ -520,11 +527,11 @@ async function routeNextAction(session: DeepResearchSession, abortSignal?: Abort
 
   const researcherStep = await createResearcherDispatchStep(
     fresh,
-    messages,
     nodes,
     requirementState,
     languageState,
     hygieneSummary,
+    workflowState,
     abortSignal,
   );
 
@@ -634,11 +641,11 @@ async function executeApprovedNode(
 
 async function createResearcherDispatchStep(
   session: DeepResearchSession,
-  messages: Awaited<ReturnType<typeof store.getMessages>>,
   nodes: DeepResearchNode[],
   requirementState: RequirementState | null,
   languageState: LanguageState,
   hygieneSummary: SessionHygieneSummary,
+  workflowState: WorkflowRuntimeState,
   abortSignal?: AbortSignal,
 ): Promise<{
   completedNode: DeepResearchNode;
@@ -646,9 +653,9 @@ async function createResearcherDispatchStep(
   isFinalStep: boolean;
   interactionMode: CheckpointInteractionMode;
 }> {
-  const workstationContext = await buildWorkstationPlanningContext(session, messages);
+  const { workstationContext, workflowPolicy } = workflowState;
   const sessionHygienePromptBlock = buildSessionHygienePromptBlock(hygieneSummary);
-  const coordinationContext = [sessionHygienePromptBlock, workstationContext.promptBlock]
+  const coordinationContext = [sessionHygienePromptBlock, workstationContext.promptBlock, workflowPolicy.promptBlock]
     .filter((block): block is string => Boolean(block))
     .join("\n\n");
   const decision = await callMainBrain(
@@ -659,30 +666,24 @@ async function createResearcherDispatchStep(
     coordinationContext,
   );
 
-  const { validSpecs: plannedNodesToCreate, droppedSpecs } = normalizeNodeCreationSpecs(
+  const limitedPlannedNodesToCreate = await normalizeAndLimitNodeSpecs(
+    session.id,
     decision.nodesToCreate ?? [],
     session.contextTag,
-  );
-  const limitedPlannedNodesToCreate = await enforceSingleWorkerDispatch(
-    session.id,
-    plannedNodesToCreate,
+    workflowPolicy,
     "researcher planning",
   );
   const interactionMode = resolveCheckpointInteractionMode(decision, limitedPlannedNodesToCreate);
-
-  if (droppedSpecs.length > 0) {
-    await store.addMessage(
-      session.id,
-      "system",
-      `${droppedSpecs.length} malformed Researcher task(s) were ignored before dispatch planning.`,
-    );
-  }
 
   if (decision.messageToUser) {
     await store.addMessage(session.id, "main_brain", decision.messageToUser);
   }
 
-  if (decision.action === "complete" && limitedPlannedNodesToCreate.length === 0) {
+  if (
+    decision.action === "complete"
+    && limitedPlannedNodesToCreate.length === 0
+    && !workflowPolicy.requiresInitialPlanConfirmation
+  ) {
     const finalReportCheck = canGenerateFinalReport(nodes);
     if (!finalReportCheck.allowed) {
       const blockedNode = await createCompletedResearcherNode(
@@ -738,7 +739,9 @@ async function createResearcherDispatchStep(
   const completedNode = await createCompletedResearcherNode(
     session.id,
     "audit",
-    limitedPlannedNodesToCreate.length > 0
+    workflowPolicy.requiresInitialPlanConfirmation
+      ? "Researcher initial research plan"
+      : limitedPlannedNodesToCreate.length > 0
       ? "Researcher next-task recommendation"
       : interactionMode === "answer_required"
         ? "Researcher clarification request"
@@ -746,6 +749,12 @@ async function createResearcherDispatchStep(
     {
       decision,
       workstationContext,
+      workflowPolicy: {
+        mode: workflowPolicy.mode,
+        reasoning: workflowPolicy.reasoning,
+        blockedNodeTypes: Array.from(workflowPolicy.blockedNodeTypes),
+        requiresInitialPlanConfirmation: workflowPolicy.requiresInitialPlanConfirmation,
+      },
       hygieneSummary,
       proposedNodeSpecs: limitedPlannedNodesToCreate,
       suggestedNextContextTag,
@@ -755,19 +764,27 @@ async function createResearcherDispatchStep(
     suggestedNextContextTag,
   );
 
-  if (limitedPlannedNodesToCreate.length > 0) {
+  if (workflowPolicy.requiresInitialPlanConfirmation || limitedPlannedNodesToCreate.length > 0) {
+    const dispatchPreviews = buildNodeCreationSpecDispatchPreviews(limitedPlannedNodesToCreate);
     await store.createArtifact(
       session.id,
       completedNode.id,
       "task_graph",
-      "Researcher Next Task",
+      workflowPolicy.requiresInitialPlanConfirmation ? "Researcher Initial Plan" : "Researcher Next Task",
       {
         nextTaskCount: limitedPlannedNodesToCreate.length,
         nextTask: limitedPlannedNodesToCreate[0] ?? null,
         nextTaskByType: countNodesByType(limitedPlannedNodesToCreate),
         workstationContext,
+        workflowPolicy: {
+          mode: workflowPolicy.mode,
+          reasoning: workflowPolicy.reasoning,
+          blockedNodeTypes: Array.from(workflowPolicy.blockedNodeTypes),
+          requiresInitialPlanConfirmation: workflowPolicy.requiresInitialPlanConfirmation,
+        },
         hygieneSummary,
         proposedNodeSpecs: limitedPlannedNodesToCreate,
+        dispatchPreviews,
         suggestedNextContextTag,
         requiresUserConfirmation: true,
         interactionMode,
@@ -953,6 +970,10 @@ async function generateCheckpointAndHalt(
   const freshNode = freshNodes.find(n => n.id === completedNode.id) ?? completedNode;
   const checkpointContextTag = freshNode.contextTag ?? session.contextTag;
   const artifacts = await store.getArtifacts(session.id);
+  const isFinalReportingCheckpoint = isFinalStep || freshNode.nodeType === "final_report" || checkpointContextTag === "final_report";
+  const finalReportCheckpointCopy = isFinalReportingCheckpoint
+    ? getFinalReportCheckpointCopy(languageState.preferredOutputLanguage)
+    : null;
   const checkpointReviewArtifacts = getCheckpointReviewArtifacts(checkpointContextTag, freshNode, freshNodes, artifacts);
   const literatureSummary = getEvidencePhaseSummary(checkpointContextTag, freshNodes, checkpointReviewArtifacts);
   const planArtifact = artifacts.find((artifact) =>
@@ -970,9 +991,11 @@ async function generateCheckpointAndHalt(
 
   const transitionAction = {
     nextContextTag: suggestedNextContextTag,
-    nodesToCreate: [],
+    nodesToCreate: plannedSpecs,
     nodesToSupersede: [],
-    description: interactionMode === "answer_required"
+    description: isFinalReportingCheckpoint && finalReportCheckpointCopy
+      ? finalReportCheckpointCopy.continueWillDo
+      : interactionMode === "answer_required"
       ? "Wait for the user to answer the Researcher's clarification questions in chat before any further work."
       : plannedNodeCount > 0
         ? `If you confirm this next task, the Researcher will authorize it and continue coordination from ${suggestedNextContextTag}.`
@@ -996,6 +1019,9 @@ async function generateCheckpointAndHalt(
   const checkpointContent = await generateCheckpointContent(
     session, freshNode, artifacts, freshNodes, suggestedNextContextTag, langInstruction, abortSignal
   );
+  const guardedCheckpointContent = isFinalReportingCheckpoint
+    ? applyFinalReportCheckpointGuard(checkpointContent, languageState.preferredOutputLanguage)
+    : checkpointContent;
 
   const checkpointPkg: CheckpointPackage = {
     checkpointId: nanoid(),
@@ -1003,14 +1029,16 @@ async function generateCheckpointAndHalt(
     nodeId: freshNode.id,
     stepType: freshNode.nodeType,
     contextTag: checkpointContextTag,
-    title: checkpointContent.title || `${freshNode.label} completed`,
-    humanSummary: checkpointContent.humanSummary || `Completed: ${freshNode.label}`,
-    machineSummary: checkpointContent.machineSummary || "",
-    mainBrainAudit: checkpointContent.mainBrainAudit || {
+    title: guardedCheckpointContent.title || `${freshNode.label} completed`,
+    humanSummary: guardedCheckpointContent.humanSummary || `Completed: ${freshNode.label}`,
+    machineSummary: guardedCheckpointContent.machineSummary || "",
+    mainBrainAudit: guardedCheckpointContent.mainBrainAudit || {
       whatWasCompleted: freshNode.label,
       resultAssessment: "acceptable",
       issuesAndRisks: [],
-      recommendedNextAction: recommendedDispatch
+      recommendedNextAction: isFinalReportingCheckpoint && finalReportCheckpointCopy
+        ? finalReportCheckpointCopy.recommendedNextAction
+        : recommendedDispatch
         ? `Proceed to ${recommendedDispatch.roleName}: ${recommendedDispatch.label}`
         : `Proceed to ${suggestedNextContextTag}`,
       continueWillDo: transitionAction.description,
@@ -1021,10 +1049,12 @@ async function generateCheckpointAndHalt(
       canProceed: true,
     },
     artifactsToReview: checkpointReviewArtifacts.map(artifact => artifact.id),
-    currentFindings: checkpointContent.currentFindings || "",
-    openQuestions: checkpointContent.openQuestions || [],
-    recommendedNextAction: checkpointContent.recommendedNextAction || (
-      recommendedDispatch
+    currentFindings: guardedCheckpointContent.currentFindings || "",
+    openQuestions: guardedCheckpointContent.openQuestions || [],
+    recommendedNextAction: guardedCheckpointContent.recommendedNextAction || (
+      isFinalReportingCheckpoint && finalReportCheckpointCopy
+        ? finalReportCheckpointCopy.recommendedNextAction
+        : recommendedDispatch
         ? `Proceed to ${recommendedDispatch.roleName}: ${recommendedDispatch.label}`
         : `Proceed to ${suggestedNextContextTag}`
     ),
@@ -1038,25 +1068,26 @@ async function generateCheckpointAndHalt(
       : undefined,
     promptUsed: recommendedDispatch?.promptUsed,
     continueWillDo: transitionAction.description,
-    alternativeNextActions: checkpointContent.alternativeNextActions || [],
+    alternativeNextActions: guardedCheckpointContent.alternativeNextActions || [],
     requiresUserConfirmation: true,
     interactionMode,
     isFinalStep,
     transitionAction,
-    literatureRoundInfo: session.literatureRound > 0 && literatureSummary ? {
+    literatureRoundInfo: !isFinalReportingCheckpoint && session.literatureRound > 0 && literatureSummary ? {
       roundNumber: session.literatureRound,
       papersCollected: literatureSummary.papersCollected,
       retrievalTaskCount: literatureSummary.retrievalTaskCount,
       successfulTaskCount: literatureSummary.successfulTaskCount,
       failedTaskCount: literatureSummary.failedTaskCount,
       emptyTaskCount: literatureSummary.emptyTaskCount,
-      coverageSummary: checkpointContent.currentFindings || "",
+      coverageSummary: guardedCheckpointContent.currentFindings || "",
     } : undefined,
-    reviewInfo: await getLatestReviewAssessment(session.id),
+    reviewInfo: isFinalReportingCheckpoint ? undefined : await getLatestReviewAssessment(session.id),
     createdAt: new Date().toISOString(),
   };
 
   const checkpointArtifact = await store.createCheckpoint(session.id, freshNode.id, checkpointPkg);
+  await consolidateResearchMemory(session.id, { triggerNodeId: freshNode.id });
 
   // ALWAYS halt at awaiting_user_confirmation — no auto-continue
   await store.updateSession(session.id, {
@@ -1130,9 +1161,13 @@ async function generateCheckpointContent(
 
   try {
     const prompt = buildCheckpointPrompt(session, completedNode, artifacts, nodes, contextTag);
+    const doctrineContext = await buildResearcherDoctrinePromptBlock({
+      contextTag,
+      query: `${completedNode.nodeType} ${completedNode.label}`.trim(),
+    });
     const result = await generateText({
       model,
-      system: `You are the Researcher. Produce a checkpoint summary with your audit/opinion as JSON.${langInstruction}`,
+      system: `You are the Researcher. Produce a checkpoint summary with your audit/opinion as JSON.${langInstruction}${doctrineContext ? `\n\n${doctrineContext}` : ""}`,
       messages: [{ role: "user", content: prompt }],
       abortSignal,
     });
@@ -1148,6 +1183,75 @@ async function generateCheckpointContent(
       humanSummary: `Step completed in context ${contextTag}.`,
     };
   }
+}
+
+function applyFinalReportCheckpointGuard(
+  checkpointContent: {
+    title?: string;
+    humanSummary?: string;
+    machineSummary?: string;
+    mainBrainAudit?: MainBrainAudit;
+    currentFindings?: string;
+    openQuestions?: string[];
+    recommendedNextAction?: string;
+    continueWillDo?: string;
+    alternativeNextActions?: string[];
+  },
+  preferredOutputLanguage: string,
+): {
+  title?: string;
+  humanSummary?: string;
+  machineSummary?: string;
+  mainBrainAudit?: MainBrainAudit;
+  currentFindings?: string;
+  openQuestions?: string[];
+  recommendedNextAction?: string;
+  continueWillDo?: string;
+  alternativeNextActions?: string[];
+} {
+  const copy = getFinalReportCheckpointCopy(preferredOutputLanguage);
+  return {
+    ...checkpointContent,
+    recommendedNextAction: copy.recommendedNextAction,
+    continueWillDo: copy.continueWillDo,
+    alternativeNextActions: copy.alternativeNextActions,
+    mainBrainAudit: checkpointContent.mainBrainAudit
+      ? {
+          ...checkpointContent.mainBrainAudit,
+          recommendedNextAction: copy.recommendedNextAction,
+          continueWillDo: copy.continueWillDo,
+          alternativeActions: checkpointContent.mainBrainAudit.alternativeActions.filter(
+            (action) => action.actionType !== "more_literature"
+          ),
+        }
+      : undefined,
+  };
+}
+
+function getFinalReportCheckpointCopy(preferredOutputLanguage: string): {
+  recommendedNextAction: string;
+  continueWillDo: string;
+  alternativeNextActions: string[];
+} {
+  if (preferredOutputLanguage.startsWith("zh")) {
+    return {
+      recommendedNextAction: "请审阅最终报告，并选择接受为本次研究结论，或提出定向修改意见；不要回退到早期的大范围文献检索轮次。",
+      continueWillDo: "继续将把这份最终报告作为当前研究交付物并结束本次会话；如果你希望补充内容，请选择修订并指出需要补充的具体证据或段落。",
+      alternativeNextActions: [
+        "接受最终报告并结束本次研究",
+        "要求定向修订最终报告中的具体段落、论证或证据",
+      ],
+    };
+  }
+
+  return {
+    recommendedNextAction: "Review the final report and either accept it as the session outcome or request targeted revisions; do not restart broad literature rounds from earlier phases.",
+    continueWillDo: "Continue will finalize this report as the current research deliverable and close the session unless you request targeted revisions.",
+    alternativeNextActions: [
+      "Accept the final report and close the session",
+      "Request targeted revisions to specific sections, claims, or supporting evidence",
+    ],
+  };
 }
 
 // =============================================================
@@ -1180,10 +1284,14 @@ async function callMainBrainForConfirmation(
   const prompt = buildConfirmationInterpretationPrompt(
     session, checkpoint, outcome, feedback, nodes, artifacts
   );
+  const doctrineContext = await buildResearcherDoctrinePromptBlock({
+    contextTag: checkpoint.contextTag,
+    query: `${checkpoint.contextTag} ${checkpoint.title} ${feedback ?? ""}`.trim(),
+  });
 
   const result = await generateText({
     model,
-    system: `You are the Researcher. Interpret the user's confirmation and decide how to proceed. Respond with JSON.${langNote}`,
+    system: `You are the Researcher. Interpret the user's confirmation and decide how to proceed. Respond with JSON.${langNote}${doctrineContext ? `\n\n${doctrineContext}` : ""}`,
     messages: [{ role: "user", content: prompt }],
     abortSignal,
   });
@@ -1217,6 +1325,10 @@ async function createNodesFromSpecs(
   specs: NodeCreationSpec[],
   defaultContextTag: ContextTag
 ): Promise<DeepResearchNode[]> {
+  const session = await store.getSession(sessionId);
+  if (!session) {
+    throw new Error(`Session ${sessionId} not found`);
+  }
   const existingNodes = await store.getNodes(sessionId);
   const existingNodeIds = new Set(existingNodes.map((node) => node.id));
   const existingNodeIdsByLabel = new Map<string, string>();
@@ -1226,20 +1338,14 @@ async function createNodesFromSpecs(
 
   const created: DeepResearchNode[] = [];
   const createdNodeIdsByLabel = new Map<string, string>();
-  const { validSpecs: normalizedSpecs, droppedSpecs } = normalizeNodeCreationSpecs(specs, defaultContextTag);
-  const limitedSpecs = await enforceSingleWorkerDispatch(
+  const workflowState = await loadWorkflowRuntimeState(session);
+  const limitedSpecs = await normalizeAndLimitNodeSpecs(
     sessionId,
-    normalizedSpecs,
+    specs,
+    defaultContextTag,
+    workflowState.workflowPolicy,
     "node creation",
   );
-
-  if (droppedSpecs.length > 0) {
-    await store.addMessage(
-      sessionId,
-      "system",
-      `${droppedSpecs.length} invalid task_graph assignment(s) were dropped before dispatch because required fields were missing or malformed.`,
-    );
-  }
 
   for (const normalizedSpec of limitedSpecs) {
     const node = await store.createNode(sessionId, {
@@ -1390,33 +1496,87 @@ function getEvidencePhaseSummary(
   };
 }
 
-function extractPlannedNodeSpecsFromCheckpoint(
-  artifacts: DeepResearchArtifact[],
-  checkpoint: CheckpointPackage,
-): NodeCreationSpec[] {
-  const taskGraph = artifacts.find((artifact) =>
-    checkpoint.artifactsToReview.includes(artifact.id) && artifact.artifactType === "task_graph"
-  ) ?? artifacts
-    .filter((artifact) => artifact.artifactType === "task_graph")
-    .slice(-1)[0];
+async function loadWorkflowRuntimeState(
+  session: DeepResearchSession,
+  provided?: Partial<Pick<WorkflowRuntimeState, "messages" | "artifacts">>,
+): Promise<WorkflowRuntimeState> {
+  const messages = provided?.messages ?? await store.getMessages(session.id);
+  const artifacts = provided?.artifacts ?? await store.getArtifacts(session.id);
+  const workstationContext = await buildWorkstationPlanningContext(session, messages);
+  const workflowPolicy = deriveWorkflowPolicy({
+    sessionTitle: session.title,
+    userMessages: getUserMessageContents(messages),
+    workstationContext,
+    artifacts,
+  });
 
-  if (!taskGraph) {
-    return [];
+  return {
+    messages,
+    artifacts,
+    workstationContext,
+    workflowPolicy,
+  };
+}
+
+function getUserMessageContents(messages: Awaited<ReturnType<typeof store.getMessages>>): string[] {
+  return messages
+    .filter((message) => message.role === "user")
+    .map((message) => message.content);
+}
+
+async function normalizeAndLimitNodeSpecs(
+  sessionId: string,
+  rawSpecs: unknown[],
+  defaultContextTag: ContextTag,
+  workflowPolicy: WorkflowPolicy,
+  source: string,
+): Promise<NodeCreationSpec[]> {
+  const { validSpecs, droppedSpecs } = normalizeNodeCreationSpecs(rawSpecs, defaultContextTag);
+  if (droppedSpecs.length > 0) {
+    await store.addMessage(
+      sessionId,
+      "system",
+      `${droppedSpecs.length} malformed task(s) were ignored before ${source}.`,
+    );
   }
 
-  const content = taskGraph.content as Record<string, unknown>;
-  const candidate =
-    content.proposedNodeSpecs ??
-    content.pendingNodeSpecs ??
-    content.nodeSpecs ??
-    ((content.decision as Record<string, unknown> | undefined)?.nodesToCreate);
-
-  if (!Array.isArray(candidate)) {
-    return [];
+  const { allowedSpecs, blockedSpecs } = filterNodeSpecsForWorkflowPolicy(validSpecs, workflowPolicy);
+  if (blockedSpecs.length > 0) {
+    await store.addMessage(
+      sessionId,
+      "system",
+      `Blocked ${blockedSpecs.length} task(s) during ${source} because they do not fit the current workflow policy: ${blockedSpecs.map((spec) => `${spec.label} (${spec.nodeType})`).join(", ")}.`,
+    );
   }
 
-  const normalized = normalizeNodeCreationSpecs(candidate, checkpoint.contextTag).validSpecs;
-  return normalized.slice(0, 1);
+  return enforceSingleWorkerDispatch(sessionId, allowedSpecs, source);
+}
+
+async function selectNextReadyNodeForWorkflow(
+  sessionId: string,
+  workflowPolicy: WorkflowPolicy,
+): Promise<DeepResearchNode | undefined> {
+  const readyNodes = (await store.getReadyNodes(sessionId))
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+
+  const blockedReadyNodes = readyNodes.filter((node) => workflowPolicy.blockedNodeTypes.has(node.nodeType));
+  if (blockedReadyNodes.length > 0) {
+    const completedAt = new Date().toISOString();
+    for (const node of blockedReadyNodes) {
+      await store.updateNode(node.id, {
+        status: "skipped",
+        completedAt,
+        error: `Skipped by workflow policy (${workflowPolicy.mode}).`,
+      });
+    }
+    await store.addMessage(
+      sessionId,
+      "system",
+      `Skipped ${blockedReadyNodes.length} ready node(s) because the session is currently in ${workflowPolicy.mode} mode: ${blockedReadyNodes.map((node) => `${node.label} (${node.nodeType})`).join(", ")}.`,
+    );
+  }
+
+  return readyNodes.find((node) => !workflowPolicy.blockedNodeTypes.has(node.nodeType));
 }
 
 async function enforceSingleWorkerDispatch(
@@ -1489,42 +1649,4 @@ function resolveNodeDependencies(
   }
 
   return [...resolved];
-}
-
-function extractJsonFromLLMResponse<T>(text: string): T {
-  const fenceMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
-  if (fenceMatch) {
-    return JSON.parse(fenceMatch[1].trim()) as T;
-  }
-
-  const firstBrace = text.indexOf("{");
-  if (firstBrace >= 0) {
-    let depth = 0;
-    let inString = false;
-    let escape = false;
-    for (let i = firstBrace; i < text.length; i++) {
-      const ch = text[i];
-      if (escape) { escape = false; continue; }
-      if (ch === "\\") { escape = true; continue; }
-      if (ch === '"') { inString = !inString; continue; }
-      if (inString) continue;
-      if (ch === "{") depth++;
-      if (ch === "}") {
-        depth--;
-        if (depth === 0) {
-          return JSON.parse(text.slice(firstBrace, i + 1)) as T;
-        }
-      }
-    }
-  }
-
-  return JSON.parse(text.trim()) as T;
-}
-
-function safeParseJson(text: string): Record<string, unknown> {
-  try {
-    return extractJsonFromLLMResponse<Record<string, unknown>>(text);
-  } catch {
-    return { text };
-  }
 }

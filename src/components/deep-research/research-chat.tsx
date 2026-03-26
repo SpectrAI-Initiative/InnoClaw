@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Send, Brain, User, CheckCircle, XCircle, Loader2, FileText, PlayCircle, Square, RotateCcw } from "lucide-react";
-import { CheckpointReview, type CheckpointData } from "./checkpoint-review";
+import { CheckpointReview } from "./checkpoint-review";
 import { ArtifactViewer } from "./artifact-viewer";
 import { isNodeDetailOnlyMessage } from "@/lib/deep-research/node-transcript";
 import {
@@ -16,12 +16,14 @@ import {
   isTerminalSessionStatus,
 } from "@/lib/deep-research/session-status";
 import { getNodeDisplayLabel, getStructuredRoleDisplayName, RESEARCHER_ROLE_ID } from "@/lib/deep-research/role-registry";
+import { getLatestFinalReportArtifact } from "@/lib/deep-research/final-report";
 import type {
   DeepResearchMessage,
   DeepResearchSession,
   DeepResearchNode,
   DeepResearchArtifact,
   ConfirmationOutcome,
+  CheckpointPackage,
 } from "@/lib/deep-research/types";
 
 interface ResearchChatProps {
@@ -61,10 +63,10 @@ export function ResearchChat({
   const pendingCheckpoint = isAwaitingConfirmation && session.pendingCheckpointId
     ? artifacts.find((a) => a.id === session.pendingCheckpointId)
     : null;
-  const pendingCheckpointData = pendingCheckpoint?.content as CheckpointData | undefined;
+  const pendingCheckpointData = pendingCheckpoint?.content as CheckpointPackage | undefined;
 
   // Get the final report artifact (for completed sessions)
-  const finalReportArtifact = artifacts.find((a) => a.artifactType === "final_report");
+  const finalReportArtifact = getLatestFinalReportArtifact(artifacts);
   const visibleMessages = messages.filter((message) => !isNodeDetailOnlyMessage(message));
 
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { getStructuredRoleDefinition } from "./role-registry";
+import { alignNodeCreationSpecWithTemplate } from "./node-spec-templates";
 import type { ContextTag, ModelRole, NodeCreationSpec, NodeType } from "./types";
 import { VALID_CONTEXT_TAGS } from "./types";
 
@@ -202,7 +203,7 @@ export function normalizeNodeCreationSpec(
     asString(rawSpec.task) ??
     `${nodeType.replace(/_/g, " ")} task`;
 
-  return {
+  return alignNodeCreationSpecWithTemplate({
     nodeType,
     label,
     assignedRole,
@@ -211,7 +212,7 @@ export function normalizeNodeCreationSpec(
     parentId: asString(rawSpec.parentId),
     branchKey: asString(rawSpec.branchKey),
     contextTag,
-  };
+  });
 }
 
 export function normalizeNodeCreationSpecs(

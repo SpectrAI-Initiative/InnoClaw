@@ -13,6 +13,9 @@ import {
   searchArticles as searchArticlesDirect,
 } from "@/lib/article-search";
 import { buildEvidenceCardFromToolResults } from "./evidence-cards";
+import { safeParseJson } from "./json-response";
+import { buildResearchMemoryPromptBlock } from "./memory-fabric";
+import { buildResearcherDoctrinePromptBlock } from "./researcher-doctrine";
 import type {
   DeepResearchNode,
   DeepResearchArtifact,
@@ -223,12 +226,26 @@ async function executeBrainNode(
   model: ReturnType<typeof getModelForRole>["model"],
   abortSignal?: AbortSignal
 ) {
+  const memoryContext = buildResearchMemoryPromptBlock({
+    session: ctx.session,
+    messages: ctx.messages,
+    artifacts: ctx.allArtifacts,
+    query: `${node.nodeType} ${node.label}`.trim(),
+  });
+  const doctrineContext = await buildResearcherDoctrinePromptBlock({
+    contextTag: ctx.session.contextTag,
+    query: `${node.nodeType} ${node.label}`.trim(),
+  });
   const systemPrompt = buildMainBrainSystemPrompt(
     ctx.session,
     ctx.messages,
     ctx.allNodes,
     ctx.allArtifacts,
-    ctx.session.contextTag
+    ctx.session.contextTag,
+    undefined,
+    undefined,
+    memoryContext,
+    doctrineContext,
   );
 
   const taskPrompt = node.input
@@ -526,16 +543,6 @@ function getArtifactTypeForNode(nodeType: string): ArtifactType | null {
     final_report: "final_report",
   };
   return map[nodeType] ?? null;
-}
-
-function safeParseJson(text: string): Record<string, unknown> {
-  try {
-    const jsonMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
-    const jsonStr = jsonMatch ? jsonMatch[1].trim() : text.trim();
-    return JSON.parse(jsonStr);
-  } catch {
-    return { text };
-  }
 }
 
 async function maybeRunDeterministicSearchFallback(

@@ -896,6 +896,59 @@ export function buildStructuredRoleReply(
   ].join("\n");
 }
 
+export function buildRuntimeRoleContract(
+  roleId: ModelRole | string,
+  nodeType?: string,
+  options?: {
+    includeResponsibilities?: boolean;
+    includeCollaboration?: boolean;
+    includePerformance?: boolean;
+    maxItemsPerSection?: number;
+  },
+): string | null {
+  const role = getStructuredRoleDefinition(roleId as ModelRole, nodeType);
+  if (!role) {
+    return null;
+  }
+
+  const prompt = getStructuredPromptForNode(role.roleId, nodeType);
+  const maxItems = options?.maxItemsPerSection ?? 3;
+  const lines: string[] = [];
+
+  lines.push(`- Active role: ${role.roleName}`);
+  lines.push(`- Core positioning: ${role.corePositioning}`);
+
+  if (prompt) {
+    lines.push(`- Active prompt objective: ${prompt.objective}`);
+    if (prompt.requiredSections.length > 0) {
+      lines.push(`- Expected sections: ${prompt.requiredSections.join(", ")}`);
+    }
+    for (const constraint of prompt.constraints.slice(0, maxItems)) {
+      lines.push(`- Constraint: ${constraint}`);
+    }
+  }
+
+  if (options?.includeResponsibilities) {
+    for (const responsibility of role.coreResponsibilities.slice(0, maxItems)) {
+      lines.push(`- Responsibility: ${responsibility}`);
+    }
+  }
+
+  if (options?.includeCollaboration) {
+    for (const requirement of role.collaborationRequirements.slice(0, maxItems)) {
+      lines.push(`- Collaboration rule: ${requirement}`);
+    }
+  }
+
+  if (options?.includePerformance) {
+    for (const standard of role.performanceStandards.slice(0, maxItems)) {
+      lines.push(`- Quality bar: ${standard}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
 export function getRoleColorToken(roleId: ModelRole | string, nodeType?: string): string {
   const normalizedRoleId = normalizeStructuredRoleId(roleId, nodeType);
   const colorMap: Record<string, string> = {
