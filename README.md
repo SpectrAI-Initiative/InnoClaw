@@ -56,20 +56,29 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 <!-- whats-new-start -->
 
 #### 2026-03-26
+- **Dynamic Model Discovery**: Agent panel now auto-fetches available models from each configured AI provider, merging live results with built-in model lists
+- **Per-Model Base URL Routing**: Chinese AI providers (shlab, qwen, moonshot, deepseek, minimax, zhipu) now support per-model `<PROVIDER>_<MODEL>_BASE_URL` env vars for flexible endpoint routing
+- **Runtime Tool-Calling Override**: Tool support can now be toggled per provider via `<PROVIDER>_TOOLS_ENABLED=true/false` without code changes
+
+
+#### 2026-03-26
 - **Node.js Runtime Update**: InnoClaw now targets Node.js 24+ and is verified against both Node.js 24 LTS and the latest Node.js 25 current release. CI and local version hints have been updated accordingly.
+
 
 
 #### 2026-03-24
 - **Multimodal LLM Support**: Paper Study and agent workflows now support both standard LLMs and multimodal LLMs (mLLM), selectable per-context in settings and the model selector
 
 
+
+<details>
+<summary>Show earlier updates</summary>
+
 #### 2026-03-23
 - **GitHub Skills Import Preview**: New pre-import preview workflow lets users browse, review, and selectively import skills from GitHub repositories before committing changes
 
 
 
-<details>
-<summary>Show earlier updates</summary>
 
 #### 2026-03-22
 - **Obsidian Note Export**: Generate structured, Obsidian-compatible paper notes with rich YAML frontmatter, figures, and wikilinks directly from the paper study panel
@@ -79,10 +88,12 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 
 
 
+
 #### 2026-03-21
 - **Remote HPC/SLURM Execution**: Deep research sessions can now run on remote clusters via SSH, supporting rjob, rlaunch, and SLURM schedulers with file staging and job lifecycle management
 - **Kubernetes Cluster Config UI**: New settings panel for runtime configuration of K8s contexts, PVC bindings, and container images across multi-cluster deployments without restarting
 - **Remote Profile Binding**: Deep research sessions can be bound to pre-configured SSH/remote compute profiles, enabling reproducible distributed research workflows
+
 
 
 
@@ -99,10 +110,12 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 
 
 
+
 #### 2026-03-19
 - **ClawHub Skill Import**: New integration to import skills directly from ClawHub via a dedicated API endpoint and import dialog
 - **Code Preview Panel**: New in-editor code preview component supporting syntax highlighting and save-status tracking
 - **Paper Study Cache**: Persistent caching layer for paper study sessions, improving reload performance and state continuity
+
 
 
 
@@ -123,37 +136,11 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 
 
 
+
 #### 2026-03-18
 - **Multimodal Vision for Paper Discussion & Ideation**: Vision-capable providers can now receive extracted PDF page images alongside text so discussion and ideation agents can analyze figures, tables, and diagrams.
 - **Paper Pages Gallery UI**: Discussion and ideation panels now show a collapsible thumbnail gallery for extracted paper pages with full-size preview dialogs.
 - **Provider Vision Capability Detection**: Provider configs now expose vision support so routes can switch between multimodal and text-only paper context automatically.
-
-
-
-
-
-
-
-
-
-#### 2026-03-17
-- **Remote Job Profile Management & SSH Hardening**: Secure remote profile creation, editing, and SSH-hardened job submission for research execution
-- **Rich Markdown Rendering in Agent Panel**: Agent messages now render tables, LaTeX math, and syntax-highlighted code blocks
-- **API Provider Settings UI**: Configure AI provider API keys and endpoints directly from the Settings page
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-17
-- **rjob Profile Config & Submission Hardening**: Remote profiles now store full rjob defaults (image, GPU, CPU, memory, mounts, charged-group, private-machine, env vars, host-network, example commands). `submitRemoteJob` builds the rjob command internally from stored config - the agent can no longer modify flags like `--charged-group` or `--image`. SSH transport fixed with `-o StrictHostKeyChecking=no -tt`, init script sourcing, and double-quote wrapping for correct quoting.
-- **Profile Editing**: Edit button (pencil icon) on remote profiles in the Remotes tab. Click to load profile into the form for updating, including all rjob config fields.
-- **Direct Job Submission Shortcut**: Agent-Long mode can skip inspect/patch/sync stages for simple job submissions: `listRemoteProfiles -> prepareJobSubmission -> approval -> submitRemoteJob`.
 
 
 
