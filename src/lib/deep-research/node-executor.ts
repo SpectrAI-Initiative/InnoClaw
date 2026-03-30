@@ -8,6 +8,14 @@ import {
   buildMainBrainSystemPrompt,
 } from "./prompts";
 import { createSearchTools } from "@/lib/ai/tools/search-tools";
+import {
+  SEARCHABLE_ARTICLE_SOURCES,
+  searchArticles as searchArticlesDirect,
+} from "@/lib/article-search";
+import { buildEvidenceCardFromToolResults } from "./evidence-cards";
+import { safeParseJson } from "./json-response";
+import { buildResearchMemoryPromptBlock } from "./memory-fabric";
+import { buildResearcherDoctrinePromptBlock } from "./researcher-doctrine";
 import type {
   DeepResearchNode,
   DeepResearchArtifact,
@@ -167,7 +175,6 @@ async function executeByNodeType(
 
     // Reviewer nodes
     case "review":
-    case "deliberate":
       return executeReview(node, ctx.allArtifacts, model, abortSignal);
 
     // Main brain audit
@@ -219,12 +226,26 @@ async function executeBrainNode(
   model: ReturnType<typeof getModelForRole>["model"],
   abortSignal?: AbortSignal
 ) {
+  const memoryContext = buildResearchMemoryPromptBlock({
+    session: ctx.session,
+    messages: ctx.messages,
+    artifacts: ctx.allArtifacts,
+    query: `${node.nodeType} ${node.label}`.trim(),
+  });
+  const doctrineContext = await buildResearcherDoctrinePromptBlock({
+    contextTag: ctx.session.contextTag,
+    query: `${node.nodeType} ${node.label}`.trim(),
+  });
   const systemPrompt = buildMainBrainSystemPrompt(
     ctx.session,
     ctx.messages,
     ctx.allNodes,
     ctx.allArtifacts,
-    ctx.session.phase
+    ctx.session.contextTag,
+    undefined,
+    undefined,
+    memoryContext,
+    doctrineContext,
   );
 
   const taskPrompt = node.input
@@ -306,33 +327,46 @@ async function executeEvidenceGather(
     `[evidence-gather] node=${node.id} toolCalls=${toolCalls.length} toolResults=${toolResults.length} steps=${result.steps?.length ?? 0}`
   );
 
-  // Extract articles from tool results as fallback if LLM text parsing fails
   let output = safeParseJson(result.text);
-  if (!output || (typeof output === "object" && Object.keys(output).length === 0)) {
-    // Try to build output from tool results directly
-    const allArticles: unknown[] = [];
-    for (const tr of toolResults) {
-      const res = (tr as { output?: unknown }).output as { articles?: unknown[]; totalCount?: number } | undefined;
-      if (res?.articles && Array.isArray(res.articles)) {
-        allArticles.push(...res.articles);
-      }
-    }
-    if (allArticles.length > 0) {
-      output = {
-        sources: allArticles,
-        totalFound: allArticles.length,
+  let recoveredFrom = "";
+
+  const directSearchResults = await maybeRunDeterministicSearchFallback(
+    query,
+    focusAreas,
+    maxSources,
+    toolResults,
+  );
+  const effectiveToolResults = directSearchResults ?? toolResults;
+  const recoveredCard = buildEvidenceCardFromToolResults(effectiveToolResults, query);
+  const searchQueries = extractSearchQueries(toolCalls, query, focusAreas);
+
+  if (!hasMeaningfulEvidencePayload(output)) {
+    output = buildEvidenceOutputFromCard(
+      recoveredCard,
+      query,
+      searchQueries,
+      recoveredCard.sourcesFound > 0
+        ? "Recovered evidence card from search results after model failed to emit valid JSON."
+        : "No usable sources were retrieved for this query.",
+      result.text,
+    );
+    recoveredFrom = directSearchResults ? "deterministic_search_fallback" : "tool_results";
+  } else {
+    output = mergeEvidenceOutputWithCard(output, recoveredCard, query, searchQueries);
+    if (countEvidenceSources(output) === 0 && recoveredCard.sourcesFound > 0) {
+      output = buildEvidenceOutputFromCard(
+        recoveredCard,
         query,
-        note: "Extracted directly from search tool results",
-      };
-    } else {
-      output = {
-        sources: [],
-        totalFound: 0,
-        query,
-        rawText: result.text?.slice(0, 2000) || "No response text",
-        note: "No articles found via search tools",
-      };
+        searchQueries,
+        "Recovered evidence card from search results because model output omitted retrieved sources.",
+        result.text,
+      );
+      recoveredFrom = directSearchResults ? "deterministic_search_fallback" : "tool_results";
     }
+  }
+
+  if (recoveredFrom) {
+    output.recoveredFrom = recoveredFrom;
   }
 
   return {
@@ -393,7 +427,7 @@ async function executeReview(
   model: ReturnType<typeof getModelForRole>["model"],
   abortSignal?: AbortSignal
 ) {
-  const role = node.assignedRole as "reviewer_a" | "reviewer_b";
+  const role = node.assignedRole as "results_and_evidence_analyst";
 
   // Target: summaries, evidence cards, execution results, provisional conclusions
   const targetArtifacts = allArtifacts.filter((a) =>
@@ -418,7 +452,7 @@ async function executeReview(
     output,
     artifacts: [{
       artifactType: "reviewer_packet" as ArtifactType,
-      title: `Review by ${role === "reviewer_a" ? "Reviewer A" : "Reviewer B"}`,
+      title: "Review by Results and Evidence Analyst",
       content: output,
       provenance: {
         sourceNodeId: node.id,
@@ -511,12 +545,168 @@ function getArtifactTypeForNode(nodeType: string): ArtifactType | null {
   return map[nodeType] ?? null;
 }
 
-function safeParseJson(text: string): Record<string, unknown> {
-  try {
-    const jsonMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
-    const jsonStr = jsonMatch ? jsonMatch[1].trim() : text.trim();
-    return JSON.parse(jsonStr);
-  } catch {
-    return { text };
+async function maybeRunDeterministicSearchFallback(
+  query: string,
+  focusAreas: string[] | undefined,
+  maxSources: number,
+  existingToolResults: unknown[],
+): Promise<Array<{ output: { articles: unknown[]; totalCount: number } }> | null> {
+  const recoveredCard = buildEvidenceCardFromToolResults(existingToolResults, query);
+  if (recoveredCard.sourcesFound > 0) {
+    return null;
   }
+
+  const keywords = buildFallbackKeywords(query, focusAreas);
+  if (keywords.length === 0) {
+    return null;
+  }
+
+  try {
+    const searchResult = await searchArticlesDirect({
+      keywords,
+      maxResults: Math.min(Math.max(maxSources, 1), 10),
+      sources: [...SEARCHABLE_ARTICLE_SOURCES],
+    });
+    return [{
+      output: {
+        articles: searchResult.articles,
+        totalCount: searchResult.totalCount,
+      },
+    }];
+  } catch (error) {
+    console.warn(`[evidence-gather] deterministic fallback search failed for query "${query}":`, error);
+    return null;
+  }
+}
+
+function buildFallbackKeywords(query: string, focusAreas: string[] | undefined): string[] {
+  const stopWords = new Set([
+    "the", "and", "for", "with", "from", "that", "this", "about", "into", "using", "used",
+    "research", "search", "literature", "papers", "paper", "find", "gather", "related",
+  ]);
+
+  const focusTokens = (focusAreas ?? [])
+    .flatMap((area) => area.replace(/[_-]/g, " ").split(/\s+/))
+    .map((token) => token.toLowerCase())
+    .filter((token) => token.length > 2);
+
+  const queryTokens = query
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .split(/\s+/)
+    .filter((token) => token.length > 2 && !stopWords.has(token));
+
+  return [...new Set([...focusTokens, ...queryTokens])].slice(0, 4);
+}
+
+function extractSearchQueries(
+  toolCalls: Array<{ toolName?: string; input?: unknown }>,
+  query: string,
+  focusAreas: string[] | undefined,
+): string[] {
+  const queries: string[] = [];
+
+  for (const call of toolCalls) {
+    if (call.toolName !== "searchArticles" || !call.input || typeof call.input !== "object") {
+      continue;
+    }
+    const keywords = Array.isArray((call.input as { keywords?: unknown[] }).keywords)
+      ? ((call.input as { keywords?: unknown[] }).keywords as unknown[])
+          .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+      : [];
+    if (keywords.length > 0) {
+      queries.push(keywords.join(" "));
+    }
+  }
+
+  if (queries.length > 0) {
+    return [...new Set(queries)];
+  }
+
+  const fallbackKeywords = buildFallbackKeywords(query, focusAreas);
+  return fallbackKeywords.length > 0 ? [fallbackKeywords.join(" ")] : [query];
+}
+
+function hasMeaningfulEvidencePayload(output: Record<string, unknown> | null | undefined): boolean {
+  if (!output) return false;
+  return countEvidenceSources(output) > 0
+    || typeof output.totalFound === "number"
+    || typeof output.papersFound === "number"
+    || typeof output.sourcesFound === "number"
+    || Array.isArray(output.rawExcerpts)
+    || typeof output.retrievalStatus === "string";
+}
+
+function countEvidenceSources(output: Record<string, unknown>): number {
+  if (Array.isArray(output.sources)) {
+    return output.sources.length;
+  }
+  if (typeof output.totalFound === "number") {
+    return output.totalFound;
+  }
+  if (typeof output.papersFound === "number") {
+    return output.papersFound;
+  }
+  if (typeof output.sourcesFound === "number") {
+    return output.sourcesFound;
+  }
+  return 0;
+}
+
+function buildEvidenceOutputFromCard(
+  card: ReturnType<typeof buildEvidenceCardFromToolResults>,
+  query: string,
+  searchQueries: string[],
+  coverageSummary: string,
+  rawResponseText?: string,
+): Record<string, unknown> {
+  return {
+    query,
+    sources: card.sources,
+    rawExcerpts: card.rawExcerpts,
+    retrievalStatus: card.retrievalStatus,
+    sourcesFound: card.sourcesFound,
+    sourcesAttempted: card.sourcesAttempted,
+    retrievalNotes: card.retrievalNotes,
+    totalFound: card.sourcesFound,
+    searchQueries,
+    coverageSummary,
+    rawResponseText: rawResponseText && rawResponseText.trim().length > 0 ? rawResponseText.slice(0, 2000) : undefined,
+    createdAt: card.createdAt,
+  };
+}
+
+function mergeEvidenceOutputWithCard(
+  output: Record<string, unknown>,
+  card: ReturnType<typeof buildEvidenceCardFromToolResults>,
+  query: string,
+  searchQueries: string[],
+): Record<string, unknown> {
+  const sourceCount = countEvidenceSources(output);
+  const retrievalStatus = typeof output.retrievalStatus === "string"
+    ? output.retrievalStatus
+    : sourceCount > 0
+      ? "success"
+      : card.retrievalStatus;
+
+  return {
+    ...output,
+    query: typeof output.query === "string" ? output.query : query,
+    rawExcerpts: Array.isArray(output.rawExcerpts) ? output.rawExcerpts : card.rawExcerpts,
+    sourcesFound: typeof output.sourcesFound === "number" ? output.sourcesFound : sourceCount,
+    sourcesAttempted: typeof output.sourcesAttempted === "number" ? output.sourcesAttempted : card.sourcesAttempted,
+    retrievalStatus,
+    retrievalNotes: typeof output.retrievalNotes === "string" ? output.retrievalNotes : card.retrievalNotes,
+    totalFound: typeof output.totalFound === "number"
+      ? output.totalFound
+      : typeof output.papersFound === "number"
+        ? output.papersFound
+        : sourceCount,
+    searchQueries: Array.isArray(output.searchQueries) ? output.searchQueries : searchQueries,
+    coverageSummary: typeof output.coverageSummary === "string"
+      ? output.coverageSummary
+      : sourceCount > 0
+        ? `Retrieved ${sourceCount} relevant source(s).`
+        : "No usable sources were retrieved for this query.",
+  };
 }

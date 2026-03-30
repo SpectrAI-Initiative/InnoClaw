@@ -1,6 +1,4 @@
-import { PROVIDERS } from "@/lib/ai/models";
-import type { ProviderId } from "@/lib/ai/models";
-import { getModelFromOverride } from "@/lib/ai/provider";
+import { getConfiguredModelSelectionFromEnv, getModelFromOverride } from "@/lib/ai/provider";
 import type { LanguageModel } from "ai";
 import type {
   ModelRole,
@@ -9,53 +7,34 @@ import type {
   BudgetUsage,
 } from "./types";
 
-// --- Default route chains per role ---
-// Enforces hierarchy: Main Brain = Opus, Reviewers = Sonnet, Workers = Kimi/Sonnet
-
 interface ModelRoute {
   provider: string;
   modelId: string;
 }
 
-const DEFAULT_ROUTES: Record<ModelRole, ModelRoute[]> = {
-  // Main Brain: Kimi first for testing, then Opus/Sonnet fallback
-  main_brain: [
-    { provider: "moonshot", modelId: "kimi-k2.5" },
-    { provider: "anthropic", modelId: "claude-opus-4-20250514" },
-    { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
-  ],
-  // Reviewer A: Kimi first for testing
-  reviewer_a: [
-    { provider: "moonshot", modelId: "kimi-k2.5" },
-    { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
-  ],
-  // Reviewer B: Kimi first for testing
-  reviewer_b: [
-    { provider: "moonshot", modelId: "kimi-k2.5" },
-    { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
-  ],
-  // Workers: Kimi first for testing
-  worker: [
-    { provider: "moonshot", modelId: "kimi-k2.5" },
-    { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
-    { provider: "openai", modelId: "gpt-4o" },
-  ],
-  // Synthesizer: same as main_brain (synthesis needs strong reasoning)
-  synthesizer: [
-    { provider: "moonshot", modelId: "kimi-k2.5" },
-    { provider: "anthropic", modelId: "claude-sonnet-4-20250514" },
-    { provider: "openai", modelId: "gpt-4o" },
-  ],
-};
+function getConfiguredRoute(config?: DeepResearchConfig): ModelRoute {
+  const resolved = config?.resolvedModel;
+  if (resolved?.provider && resolved?.modelId) {
+    return { provider: resolved.provider, modelId: resolved.modelId };
+  }
 
-/** Sentinel values that mean "not really configured". */
-const PLACEHOLDER_KEYS = new Set(["none", "null", "undefined", "placeholder", "xxx", "your-api-key-here", ""]);
+  const { providerId, modelId } = getConfiguredModelSelectionFromEnv();
+  return { provider: providerId, modelId };
+}
 
-function isProviderAvailable(provider: string): boolean {
-  const p = PROVIDERS[provider as ProviderId];
-  if (!p) return false;
-  const key = (process.env[p.envKey] ?? "").trim();
-  return key.length > 0 && !PLACEHOLDER_KEYS.has(key.toLowerCase());
+function resolveConfiguredModel(
+  config?: DeepResearchConfig,
+): { model: LanguageModel; provider: string; modelId: string } {
+  const route = getConfiguredRoute(config);
+  try {
+    const { model } = getModelFromOverride(route.provider, route.modelId);
+    return { model, provider: route.provider, modelId: route.modelId };
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Deep Research configured model "${route.provider}/${route.modelId}" could not be initialized. ${detail}`,
+    );
+  }
 }
 
 /**
@@ -66,25 +45,8 @@ export function getModelForRole(
   role: ModelRole,
   config?: DeepResearchConfig
 ): { model: LanguageModel; provider: string; modelId: string } {
-  // Check config overrides first
-  const override = config?.modelOverrides?.[role];
-  if (override && isProviderAvailable(override.provider)) {
-    const { model } = getModelFromOverride(override.provider, override.modelId);
-    return { model, provider: override.provider, modelId: override.modelId };
-  }
-
-  // Walk fallback chain
-  const chain = DEFAULT_ROUTES[role];
-  for (const route of chain) {
-    if (isProviderAvailable(route.provider)) {
-      const { model } = getModelFromOverride(route.provider, route.modelId);
-      return { model, provider: route.provider, modelId: route.modelId };
-    }
-  }
-
-  throw new Error(
-    `No available model for role "${role}". Configure at least one API key for: ${chain.map((r) => r.provider).join(", ")}`
-  );
+  void role;
+  return resolveConfiguredModel(config);
 }
 
 /**
@@ -95,28 +57,8 @@ export function getModelChainForRole(
   role: ModelRole,
   config?: DeepResearchConfig
 ): Array<{ model: LanguageModel; provider: string; modelId: string }> {
-  const results: Array<{ model: LanguageModel; provider: string; modelId: string }> = [];
-
-  // Config override first
-  const override = config?.modelOverrides?.[role];
-  if (override && isProviderAvailable(override.provider)) {
-    const { model } = getModelFromOverride(override.provider, override.modelId);
-    results.push({ model, provider: override.provider, modelId: override.modelId });
-  }
-
-  // Then walk fallback chain
-  const chain = DEFAULT_ROUTES[role];
-  for (const route of chain) {
-    if (isProviderAvailable(route.provider)) {
-      // Avoid duplicates with the override
-      if (!results.some(r => r.provider === route.provider && r.modelId === route.modelId)) {
-        const { model } = getModelFromOverride(route.provider, route.modelId);
-        results.push({ model, provider: route.provider, modelId: route.modelId });
-      }
-    }
-  }
-
-  return results;
+  void role;
+  return [resolveConfiguredModel(config)];
 }
 
 // --- Budget tracking ---

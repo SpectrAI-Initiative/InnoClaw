@@ -9,14 +9,14 @@ export function createSkillTools(workspaceId?: string | null) {
   return {
     getSkillInstructions: tool({
       description:
-        "Load detailed workflow instructions for a scientific skill (SCP Skill) by its slug. " +
-        "Returns the skill's full system prompt with step-by-step workflow, tool descriptions, " +
-        "and Python code examples. Use this when the user's request matches a skill from the catalog.",
+        "Load detailed workflow instructions for a skill by its slug. " +
+        "Returns the skill's full system prompt and any structured workflow metadata. " +
+        "Use this when the user's request matches a skill from the catalog.",
       inputSchema: z.object({
         slug: z
           .string()
           .describe(
-            "The skill slug (e.g. 'disease-reversal-prediction', 'drug_target_identification')"
+            "The skill slug (e.g. 'paper-search', 'paper-ai-search', 'daily-paper-roast')"
           ),
       }),
       execute: async ({ slug }) => {

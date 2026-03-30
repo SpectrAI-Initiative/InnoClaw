@@ -13,6 +13,15 @@ import {
 } from "@/components/ui/tooltip";
 import type { ArticleSource } from "@/lib/article-search/types";
 
+const SOURCE_OPTIONS: Array<{ source: ArticleSource; labelKey: string }> = [
+  { source: "arxiv", labelKey: "sourceArxiv" },
+  { source: "huggingface", labelKey: "sourceHuggingFace" },
+  { source: "semantic-scholar", labelKey: "sourceSemanticScholar" },
+  { source: "biorxiv", labelKey: "sourceBioRxiv" },
+  { source: "pubmed", labelKey: "sourcePubMed" },
+  { source: "pubchem", labelKey: "sourcePubChem" },
+];
+
 const PRESET_KEYWORDS = [
   "LLM",
   "transformer",
@@ -242,31 +251,18 @@ export function PaperSearchBar({
       </div>
 
       {/* Source toggles + search button */}
-      <div className="flex items-center gap-2">
-        <Button
-          variant={sources.includes("arxiv") ? "default" : "outline"}
-          size="xs"
-          onClick={() => toggleSource("arxiv")}
-          className="text-xs"
-        >
-          {t("sourceArxiv")}
-        </Button>
-        <Button
-          variant={sources.includes("huggingface") ? "default" : "outline"}
-          size="xs"
-          onClick={() => toggleSource("huggingface")}
-          className="text-xs"
-        >
-          {t("sourceHuggingFace")}
-        </Button>
-        <Button
-          variant={sources.includes("semantic-scholar") ? "default" : "outline"}
-          size="xs"
-          onClick={() => toggleSource("semantic-scholar")}
-          className="text-xs"
-        >
-          {t("sourceSemanticScholar")}
-        </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        {SOURCE_OPTIONS.map((option) => (
+          <Button
+            key={option.source}
+            variant={sources.includes(option.source) ? "default" : "outline"}
+            size="xs"
+            onClick={() => toggleSource(option.source)}
+            className="text-xs"
+          >
+            {t(option.labelKey)}
+          </Button>
+        ))}
 
         <div className="flex-1" />
 

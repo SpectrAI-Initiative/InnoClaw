@@ -137,13 +137,13 @@ export async function generateExecutionPlan(
   const plannerNode = await store.createNode(session.id, {
     nodeType: "validation_plan",
     label: "Generate execution plan",
-    assignedRole: "main_brain",
+    assignedRole: "experiment_architecture_designer",
     input: {
       validationPlan,
       hasClaimMap: !!claimMap,
       hasSynthesis: !!(synthesisArtifacts && synthesisArtifacts.length > 0),
     },
-    phase: "validation_planning",
+    contextTag: "planning",
   });
 
   await store.updateNode(plannerNode.id, {
@@ -302,22 +302,22 @@ export function executionPlanToNodeSpecs(
   const specs: NodeCreationSpec[] = [];
 
   // Map stage numbers to node IDs (will be filled after creation)
-  const stageToPhase: Record<string, "resource_acquisition" | "experiment_execution"> = {
-    data_download: "resource_acquisition",
-    preprocess: "resource_acquisition",
-    execute: "experiment_execution",
-    monitor: "experiment_execution",
-    result_collect: "experiment_execution",
+  const stageToContextTag: Record<string, "planning"> = {
+    data_download: "planning",
+    preprocess: "planning",
+    execute: "planning",
+    monitor: "planning",
+    result_collect: "planning",
   };
 
   for (const stage of plan.stages) {
     const nodeType = mapStageNodeType(stage.nodeType);
-    const phase = stageToPhase[stage.nodeType] ?? "experiment_execution";
+    const contextTag = stageToContextTag[stage.nodeType] ?? "planning";
 
     specs.push({
       nodeType,
       label: `Stage ${stage.stageNumber}: ${stage.name}`,
-      assignedRole: "worker",
+      assignedRole: "experiment_operations_engineer",
       input: {
         stageNumber: stage.stageNumber,
         description: stage.description,
@@ -326,7 +326,7 @@ export function executionPlanToNodeSpecs(
         dataRequirements: stage.dataRequirements,
         estimatedGPUHours: stage.estimatedGPUHours,
       },
-      phase,
+      contextTag,
     });
   }
 

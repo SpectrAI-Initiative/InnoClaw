@@ -235,7 +235,7 @@ async function fetchRemotePdf(
  */
 export async function fetchRemotePaperContent(
   article: {
-    id: string;
+    id?: string;
     url: string;
     pdfUrl?: string;
     source: string;
@@ -254,7 +254,7 @@ export async function fetchRemotePaperContent(
     article.url.includes("arxiv.org") ||
     article.url.includes("huggingface.co/papers/");
   const arxivId = isArxiv
-    ? extractArxivId(article.id, article.url)
+    ? extractArxivId(article.id ?? "", article.url)
     : null;
 
   // --- Strategy 1: arXiv HTML (best quality — has figures) ---

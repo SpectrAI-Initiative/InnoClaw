@@ -1,10 +1,13 @@
 import { tool } from "ai";
 import { z } from "zod";
 import {
+  ALL_ARTICLE_SOURCES,
+  SEARCHABLE_ARTICLE_SOURCES,
   searchArticles as doSearchArticles,
   findRelatedArticles,
 } from "@/lib/article-search";
 import type { Article } from "@/lib/article-search";
+import { readPaperText, resolvePaperPdfUrl } from "@/lib/article-search/paper-content";
 import { PAPER } from "@/lib/constants";
 
 /** Format an Article for LLM-friendly output. */
@@ -25,7 +28,7 @@ export function createSearchTools() {
   return {
     searchArticles: tool({
       description:
-        "Search for academic articles from arXiv, Semantic Scholar, and Hugging Face Daily Papers. " +
+        "Search for academic articles from arXiv, Semantic Scholar, Hugging Face Daily Papers, bioRxiv, PubMed, and PubChem-linked literature. " +
         "Returns matching articles with title, authors, abstract, link, and date. " +
         "Supports keyword search with optional date filtering. " +
         "After displaying results, users can ask for a detailed summary of specific articles and related article recommendations.",
@@ -57,16 +60,16 @@ export function createSearchTools() {
               "Only return articles published before this date (ISO 8601, e.g. '2025-12-31')"
             ),
           sources: z
-            .array(z.enum(["arxiv", "huggingface", "semantic-scholar"]))
+            .array(z.enum(SEARCHABLE_ARTICLE_SOURCES))
             .optional()
             .describe(
-              "Data sources to search (default: all three — 'arxiv', 'huggingface', and 'semantic-scholar')"
+              "Data sources to search (default: all supported paper sources)"
             ),
           findRelatedTo: z
             .object({
               id: z.string(),
               title: z.string(),
-              source: z.enum(["arxiv", "huggingface", "semantic-scholar"]),
+              source: z.enum(SEARCHABLE_ARTICLE_SOURCES),
             })
             .optional()
             .describe(
@@ -128,6 +131,62 @@ export function createSearchTools() {
           articles: result.articles.map(formatArticle),
           totalCount: result.totalCount,
           errors: result.errors,
+        };
+      },
+    }),
+    readPaper: tool({
+      description:
+        "Download a paper PDF over HTTPS when needed and extract readable text from the paper. " +
+        "Use this after searchArticles when you need to verify findings beyond the abstract.",
+      inputSchema: z
+        .object({
+          title: z.string().optional().describe("Paper title for reference"),
+          url: z.string().describe("Canonical paper URL or local file path"),
+          pdfUrl: z
+            .string()
+            .optional()
+            .describe("Direct PDF URL when available; arXiv links will be normalized to HTTPS"),
+          source: z
+            .enum(ALL_ARTICLE_SOURCES)
+            .describe("Source of the paper"),
+          maxChars: z
+            .number()
+            .min(1000)
+            .max(120000)
+            .optional()
+            .describe("Maximum number of characters to extract from the paper text"),
+        }),
+      execute: async ({ title, url, pdfUrl, source, maxChars }) => {
+        const result = await readPaperText(
+          {
+            title,
+            url,
+            pdfUrl,
+            source,
+          },
+          { maxChars },
+        );
+
+        if (!result) {
+          return {
+            title,
+            url,
+            pdfUrl: resolvePaperPdfUrl({ title, url, pdfUrl, source }),
+            source,
+            downloaded: false,
+            error: "Could not resolve or read a paper PDF for this source.",
+          };
+        }
+
+        return {
+          title,
+          url,
+          pdfUrl: result.pdfUrl ?? resolvePaperPdfUrl({ title, url, pdfUrl, source }),
+          source,
+          downloaded: true,
+          charsExtracted: result.charsExtracted,
+          truncated: result.truncated,
+          text: result.text,
         };
       },
     }),

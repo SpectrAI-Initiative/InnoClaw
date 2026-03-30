@@ -3,7 +3,19 @@
  */
 
 /** Supported data sources for article search. */
-export type ArticleSource = "arxiv" | "huggingface" | "semantic-scholar" | "local";
+export const SEARCHABLE_ARTICLE_SOURCES = [
+  "arxiv",
+  "huggingface",
+  "semantic-scholar",
+  "biorxiv",
+  "pubmed",
+  "pubchem",
+] as const;
+
+export const ALL_ARTICLE_SOURCES = [...SEARCHABLE_ARTICLE_SOURCES, "local"] as const;
+
+export type SearchableArticleSource = typeof SEARCHABLE_ARTICLE_SOURCES[number];
+export type ArticleSource = typeof ALL_ARTICLE_SOURCES[number];
 
 /** A single article returned from search. */
 export interface Article {

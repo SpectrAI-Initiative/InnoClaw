@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { getConfiguredModelSelection } from "@/lib/ai/provider";
 import {
   deepResearchSessions,
   deepResearchMessages,
@@ -13,7 +14,6 @@ import { nanoid } from "nanoid";
 import {
   DEFAULT_CONFIG,
   createEmptyUsage,
-  PHASE_STAGE_NUMBER,
 } from "./types";
 import type {
   DeepResearchSession,
@@ -29,7 +29,7 @@ import type {
   NodeCreationSpec,
   MessageRole,
   SessionStatus,
-  Phase,
+  ContextTag,
   NodeStatus,
   ConfirmationOutcome,
   CheckpointPackage,
@@ -55,13 +55,41 @@ function toJson(val: unknown): string | null {
   return JSON.stringify(val);
 }
 
+function normalizePersistedContextTag(raw: string | null | undefined): ContextTag {
+  if (!raw) return "intake";
+  const normalized = raw.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (normalized === "final_report" || normalized === "report") return "final_report";
+  if (normalized === "planning" || normalized === "plan") return "planning";
+  if (normalized === "intake" || normalized === "start") return "intake";
+  return "planning";
+}
+
+function normalizePersistedSessionStatus(raw: SessionStatus): SessionStatus {
+  switch (raw) {
+    case "awaiting_additional_literature":
+    case "literature_blocked":
+    case "execution_prepared":
+      return "awaiting_user_confirmation";
+    case "literature_in_progress":
+    case "validation_planning_in_progress":
+    case "execution_in_progress":
+      return "running";
+    default:
+      return raw;
+  }
+}
+
+function normalizePersistedNodeType(raw: string): DeepResearchNode["nodeType"] {
+  return (raw === "deliberate" ? "audit" : raw) as DeepResearchNode["nodeType"];
+}
+
 function parseSession(row: typeof deepResearchSessions.$inferSelect): DeepResearchSession {
   return {
     id: row.id,
     workspaceId: row.workspaceId,
     title: row.title,
-    status: row.status as SessionStatus,
-    phase: row.phase as Phase,
+    status: normalizePersistedSessionStatus(row.status as SessionStatus),
+    contextTag: normalizePersistedContextTag(row.phase),
     config: parseJson<DeepResearchConfig>(row.configJson, DEFAULT_CONFIG),
     budget: parseJson<BudgetUsage>(row.budgetJson, createEmptyUsage()),
     pendingCheckpointId: row.pendingCheckpointId ?? null,
@@ -93,7 +121,7 @@ function parseNode(row: typeof deepResearchNodes.$inferSelect): DeepResearchNode
     id: row.id,
     sessionId: row.sessionId,
     parentId: row.parentId,
-    nodeType: row.nodeType as DeepResearchNode["nodeType"],
+    nodeType: normalizePersistedNodeType(row.nodeType as DeepResearchNode["nodeType"]),
     label: row.label,
     status: row.status as NodeStatus,
     assignedRole: row.assignedRole as DeepResearchNode["assignedRole"],
@@ -107,7 +135,7 @@ function parseNode(row: typeof deepResearchNodes.$inferSelect): DeepResearchNode
     branchKey: row.branchKey,
     retryOfId: row.retryOfId,
     retryCount: row.retryCount,
-    phase: ((row as Record<string, unknown>).phase as Phase) ?? "intake",
+    contextTag: normalizePersistedContextTag((row as Record<string, unknown>).phase as string | null | undefined),
     requiresConfirmation: row.requiresConfirmation,
     confirmedAt: row.confirmedAt,
     confirmedBy: row.confirmedBy,
@@ -116,7 +144,7 @@ function parseNode(row: typeof deepResearchNodes.$inferSelect): DeepResearchNode
     positionY: row.positionY,
     startedAt: row.startedAt,
     completedAt: row.completedAt,
-    stageNumber: ((row as Record<string, unknown>).stageNumber as number) ?? PHASE_STAGE_NUMBER[((row as Record<string, unknown>).phase as Phase) ?? "intake"] ?? 0,
+    stageNumber: ((row as Record<string, unknown>).stageNumber as number) ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -159,9 +187,16 @@ export async function createSession(
 ): Promise<DeepResearchSession> {
   const id = nanoid();
   const now = new Date().toISOString();
+
+  const configuredModel = await getConfiguredModelSelection();
   const fullConfig: DeepResearchConfig = {
     ...DEFAULT_CONFIG,
     ...config,
+    resolvedModel: config?.resolvedModel ?? {
+      provider: configuredModel.providerId,
+      modelId: configuredModel.modelId,
+    },
+    modelOverrides: undefined,
     budget: { ...DEFAULT_CONFIG.budget, ...config?.budget },
     literature: { ...DEFAULT_CONFIG.literature, ...config?.literature },
     execution: { ...DEFAULT_CONFIG.execution, ...config?.execution },
@@ -217,7 +252,7 @@ export async function updateSession(
   sessionId: string,
   updates: Partial<{
     status: SessionStatus;
-    phase: Phase;
+    contextTag: ContextTag;
     config: DeepResearchConfig;
     budget: BudgetUsage;
     pendingCheckpointId: string | null;
@@ -233,7 +268,7 @@ export async function updateSession(
     updatedAt: new Date().toISOString(),
   };
   if (updates.status !== undefined) dbUpdates.status = updates.status;
-  if (updates.phase !== undefined) dbUpdates.phase = updates.phase;
+  if (updates.contextTag !== undefined) dbUpdates.phase = updates.contextTag;
   if (updates.config !== undefined) dbUpdates.configJson = toJson(updates.config);
   if (updates.budget !== undefined) dbUpdates.budgetJson = toJson(updates.budget);
   if (updates.pendingCheckpointId !== undefined) dbUpdates.pendingCheckpointId = updates.pendingCheckpointId;
@@ -248,12 +283,6 @@ export async function updateSession(
     .update(deepResearchSessions)
     .set(dbUpdates)
     .where(eq(deepResearchSessions.id, sessionId));
-
-  if (updates.phase) {
-    await appendEvent(sessionId, "phase_changed", undefined, "system", undefined, undefined, {
-      phase: updates.phase,
-    });
-  }
 }
 
 // --- Messages ---
@@ -304,6 +333,14 @@ export async function getMessages(sessionId: string): Promise<DeepResearchMessag
 
 // --- Nodes ---
 
+export async function getNode(nodeId: string): Promise<DeepResearchNode | null> {
+  const [row] = await db
+    .select()
+    .from(deepResearchNodes)
+    .where(eq(deepResearchNodes.id, nodeId));
+  return row ? parseNode(row) : null;
+}
+
 export async function createNode(
   sessionId: string,
   spec: NodeCreationSpec
@@ -315,14 +352,14 @@ export async function createNode(
     id,
     sessionId,
     parentId: spec.parentId ?? null,
-    nodeType: spec.nodeType,
+    nodeType: normalizePersistedNodeType(spec.nodeType),
     label: spec.label,
     status: "pending",
     assignedRole: spec.assignedRole,
     inputJson: toJson(spec.input ?? null),
     dependsOnJson: toJson(spec.dependsOn ?? []),
     branchKey: spec.branchKey ?? null,
-    phase: spec.phase ?? null,
+    phase: spec.contextTag ?? null,
     retryCount: 0,
     requiresConfirmation: true,
     createdAt: now,
@@ -331,10 +368,10 @@ export async function createNode(
   } as any);
 
   await appendEvent(sessionId, "node_created", id, "system", undefined, undefined, {
-    nodeType: spec.nodeType,
+    nodeType: normalizePersistedNodeType(spec.nodeType),
     label: spec.label,
     role: spec.assignedRole,
-    phase: spec.phase,
+    contextTag: spec.contextTag,
   });
 
   const [row] = await db
@@ -347,25 +384,31 @@ export async function createNode(
 export async function updateNode(
   nodeId: string,
   updates: Partial<{
+    nodeType: DeepResearchNode["nodeType"];
+    contextTag: ContextTag;
     status: NodeStatus;
-    assignedModel: string;
-    output: Record<string, unknown>;
+    assignedModel: string | null;
+    dependsOn: string[];
+    output: Record<string, unknown> | null;
     error: string | null;
     supersededById: string;
-    startedAt: string;
-    completedAt: string;
+    startedAt: string | null;
+    completedAt: string | null;
     positionX: number;
     positionY: number;
-    confirmedAt: string;
-    confirmedBy: string;
-    confirmationOutcome: ConfirmationOutcome;
+    confirmedAt: string | null;
+    confirmedBy: string | null;
+    confirmationOutcome: ConfirmationOutcome | null;
   }>
 ): Promise<void> {
   const dbUpdates: Record<string, unknown> = {
     updatedAt: new Date().toISOString(),
   };
+  if (updates.nodeType !== undefined) dbUpdates.nodeType = normalizePersistedNodeType(updates.nodeType);
+  if (updates.contextTag !== undefined) dbUpdates.phase = updates.contextTag;
   if (updates.status !== undefined) dbUpdates.status = updates.status;
   if (updates.assignedModel !== undefined) dbUpdates.assignedModel = updates.assignedModel;
+  if (updates.dependsOn !== undefined) dbUpdates.dependsOnJson = toJson(updates.dependsOn);
   if (updates.output !== undefined) dbUpdates.outputJson = toJson(updates.output);
   if (updates.error !== undefined) dbUpdates.error = updates.error;
   if (updates.supersededById !== undefined) dbUpdates.supersededById = updates.supersededById;
@@ -571,7 +614,7 @@ export async function getEvents(
   return rows.map(parseEvent);
 }
 
-// --- Requirements (Phase 1) ---
+// --- Requirements ---
 
 export async function saveRequirementState(
   sessionId: string,
@@ -609,7 +652,7 @@ export async function getLatestRequirementState(
   return parseJson<RequirementState>(rows[0].stateJson, null as unknown as RequirementState);
 }
 
-// --- Execution Records (Phase 5) ---
+// --- Execution Records ---
 
 export async function createExecutionRecord(
   sessionId: string,

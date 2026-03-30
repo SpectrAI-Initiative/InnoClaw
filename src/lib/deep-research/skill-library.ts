@@ -132,19 +132,19 @@ defaultSkillRegistry.register(skill(
 
 // --- Review Skills ---
 defaultSkillRegistry.register(skill(
-  "scientific_review", "Scientific Review",
-  "Dimension-based scientific audit: problem definition, literature grounding, feasibility, etc.",
-  "review", "scientific_review", "reviewer_a", 5000,
+  "research_review", "Research Review",
+  "Research audit covering evidence quality, methodological soundness, and decision readiness.",
+  "review", "review", "results_and_evidence_analyst", 5000,
 ));
 defaultSkillRegistry.register(skill(
   "experimental_design_review", "Experimental Design Review",
   "Review experimental design for methodological soundness, controls, and statistical power",
-  "review", "scientific_review", "reviewer_a", 4000,
+  "review", "review", "results_and_evidence_analyst", 4000,
 ));
 defaultSkillRegistry.register(skill(
   "execution_readiness_review", "Execution Readiness Review",
   "Assess whether an experiment plan is ready for actual execution (data, code, resources)",
-  "review", "scientific_review", "reviewer_b", 3000,
+  "review", "review", "results_and_evidence_analyst", 3000,
 ));
 
 // --- Execution Skills ---
@@ -209,7 +209,7 @@ defaultSkillRegistry.register(skill(
 ));
 defaultSkillRegistry.register(skill(
   "worker_fanout_design", "Worker Fanout Design",
-  "Decompose a parent experiment into parallel/staged workers for seed sweeps, ablations, hyperparameter search",
+  "Decompose a parent experiment into staged workers for seed sweeps, ablations, hyperparameter search",
   "execution", "execute", "main_brain", 3000,
 ));
 defaultSkillRegistry.register(skill(

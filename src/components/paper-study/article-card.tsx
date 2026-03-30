@@ -43,6 +43,20 @@ export function ArticleCard({
     (article.source === "arxiv"
       ? article.url.replace("/abs/", "/pdf/")
       : null);
+  const sourceLabel =
+    article.source === "arxiv"
+      ? t("sourceArxiv")
+      : article.source === "semantic-scholar"
+        ? t("sourceSemanticScholar")
+        : article.source === "biorxiv"
+          ? t("sourceBioRxiv")
+          : article.source === "pubmed"
+            ? t("sourcePubMed")
+            : article.source === "pubchem"
+              ? t("sourcePubChem")
+              : article.source === "local"
+                ? t("sourceLocal")
+                : t("sourceHuggingFace");
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -104,13 +118,7 @@ export function ArticleCard({
           variant="secondary"
           className="text-[10px] px-1.5 py-0"
         >
-          {article.source === "arxiv"
-            ? t("sourceArxiv")
-            : article.source === "semantic-scholar"
-              ? t("sourceSemanticScholar")
-              : article.source === "local"
-                ? t("sourceLocal")
-                : t("sourceHuggingFace")}
+          {sourceLabel}
         </Badge>
         {date && <span>{date}</span>}
         {article.score !== undefined && article.score > 0 && (

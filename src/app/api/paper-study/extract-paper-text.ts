@@ -4,13 +4,7 @@ import {
   fetchRemotePaperContent,
   type RemotePaperContent,
 } from "@/lib/paper-study/remote-paper-fetcher";
-
-interface ArticleRef {
-  id: string;
-  url: string;
-  pdfUrl?: string;
-  source: string;
-}
+import type { PaperArticleRef } from "./article-ref";
 
 /**
  * Extract full paper text for feeding into discussion/ideation agents.
@@ -20,7 +14,7 @@ interface ArticleRef {
  * @param maxChars - truncate to this many characters to fit context windows
  */
 export async function extractPaperFullText(
-  article: ArticleRef,
+  article: PaperArticleRef,
   maxChars: number = 30_000,
 ): Promise<string | undefined> {
   if (article.source === "local") {
@@ -52,7 +46,7 @@ export async function extractPaperFullText(
  * Returns both text and figure information for richer context.
  */
 export async function extractPaperFullContent(
-  article: ArticleRef,
+  article: PaperArticleRef,
   maxChars: number = 30_000,
 ): Promise<RemotePaperContent> {
   if (article.source === "local") {

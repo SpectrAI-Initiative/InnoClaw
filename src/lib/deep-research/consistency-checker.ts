@@ -1,7 +1,7 @@
 // =============================================================
 // Deep Research — Post-Step Consistency Checker
 // =============================================================
-// Enforces runtime invariants after each phase transition.
+// Enforces runtime invariants after each context transition.
 
 import type {
   DeepResearchSession,
@@ -9,10 +9,9 @@ import type {
   DeepResearchArtifact,
   ConsistencyReport,
 } from "./types";
-import { PHASE_STAGE_NUMBER } from "./types";
 
 /**
- * Check state machine integrity after each phase transition.
+ * Check state machine integrity after each context transition.
  * Returns warnings (logged) and errors (halt-worthy).
  */
 export function checkConsistency(
@@ -35,7 +34,7 @@ export function checkConsistency(
   }
 
   // 2. All completed nodes should have at least one output artifact
-  const noArtifactTypes = new Set(["plan", "deliberate"]);
+  const noArtifactTypes = new Set(["plan", "audit"]);
   for (const node of nodes) {
     if (node.status !== "completed") continue;
     if (noArtifactTypes.has(node.nodeType)) continue;
@@ -81,7 +80,7 @@ export function checkConsistency(
     );
   }
 
-  // 7. INVARIANT B: Session phase should be consistent with node statuses
+  // 7. INVARIANT B: Session context should be consistent with node statuses
   if (session.status === "completed") {
     const pendingNodes = nodes.filter((n) =>
       !["completed", "failed", "skipped", "superseded"].includes(n.status)
@@ -102,12 +101,11 @@ export function checkConsistency(
       n.status !== "superseded" &&
       n.status !== "skipped" &&
       n.status !== "completed" &&
-      n.status !== "failed" &&
-      PHASE_STAGE_NUMBER[n.phase] < PHASE_STAGE_NUMBER["final_report"]
+      n.status !== "failed"
     );
     if (activeRequiredPending.length > 0) {
       warnings.push(
-        `Final report is active but ${activeRequiredPending.length} earlier-phase node(s) are still pending: ${activeRequiredPending.map(n => `"${n.label}" (${n.status}, phase=${n.phase})`).join(", ")}`
+        `Final report is active but ${activeRequiredPending.length} non-terminal node(s) are still pending: ${activeRequiredPending.map(n => `"${n.label}" (${n.status}, context=${n.contextTag})`).join(", ")}`
       );
     }
   }
@@ -150,23 +148,7 @@ export function checkConsistency(
     }
   }
 
-  // 11. Stage ordering: no node should be running if earlier-stage required nodes are pending
-  const runningNodes = nodes.filter(n => n.status === "running");
-  for (const running of runningNodes) {
-    const runningStage = PHASE_STAGE_NUMBER[running.phase] ?? 99;
-    const blockingPending = nodes.filter(n =>
-      n.id !== running.id &&
-      n.status === "pending" &&
-      (PHASE_STAGE_NUMBER[n.phase] ?? 99) < runningStage
-    );
-    if (blockingPending.length > 0) {
-      warnings.push(
-        `Node "${running.label}" (stage ${runningStage}) is running but ${blockingPending.length} earlier-stage node(s) are still pending`
-      );
-    }
-  }
-
-  // 12. INVARIANT C: Check for auto-confirm events (should never exist)
+  // 11. INVARIANT C: Check for auto-confirm events (should never exist)
   // This is checked at the event level — if any confirmation event lacks explicitUserAction, flag it
 
   return {

@@ -200,7 +200,7 @@ export function IntakeScreen({ workspaceId, onCreated, onCancel }: IntakeScreenP
                 rows={12}
               />
               <p className="text-[11px] text-muted-foreground">
-                The Main Brain will analyze your input and create a structured research plan.
+                Your input becomes the initial Deep Research context and can drive either the executable workflow or the structured role workspace, depending on the session configuration.
               </p>
             </TabsContent>
 

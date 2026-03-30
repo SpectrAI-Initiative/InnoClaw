@@ -5,17 +5,26 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Send, Brain, User, CheckCircle, XCircle, Loader2, FileText, Tag, PlayCircle, Square, RotateCcw } from "lucide-react";
+import { Send, Brain, User, CheckCircle, XCircle, Loader2, FileText, PlayCircle, Square, RotateCcw } from "lucide-react";
 import { CheckpointReview } from "./checkpoint-review";
 import { ArtifactViewer } from "./artifact-viewer";
+import { isNodeDetailOnlyMessage } from "@/lib/deep-research/node-transcript";
+import {
+  isActiveSessionStatus,
+  isAwaitingConfirmationSessionStatus,
+  isCompletedSessionStatus,
+  isTerminalSessionStatus,
+} from "@/lib/deep-research/session-status";
+import { getNodeDisplayLabel, getStructuredRoleDisplayName, RESEARCHER_ROLE_ID } from "@/lib/deep-research/role-registry";
+import { getLatestFinalReportArtifact } from "@/lib/deep-research/final-report";
 import type {
   DeepResearchMessage,
   DeepResearchSession,
   DeepResearchNode,
   DeepResearchArtifact,
   ConfirmationOutcome,
+  CheckpointPackage,
 } from "@/lib/deep-research/types";
-import { PHASE_STAGE_NUMBER, type Phase } from "@/lib/deep-research/types";
 
 interface ResearchChatProps {
   session: DeepResearchSession;
@@ -41,27 +50,30 @@ export const ResearchChat = memo(function ResearchChat({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const awaitingApprovalNodes = nodes.filter((n) => n.status === "awaiting_approval");
-  const isRunning = session.status === "running";
-  const isAwaitingConfirmation = session.status === "awaiting_user_confirmation";
-  const isCompleted = session.status === "completed" || session.status === "final_report_generated";
+  const isRunning = isActiveSessionStatus(session.status);
+  const isAwaitingConfirmation = isAwaitingConfirmationSessionStatus(session.status);
+  const isCompleted = isCompletedSessionStatus(session.status);
   const isFailed = session.status === "failed";
   const isCancelled = session.status === "cancelled";
   const isStopped = session.status === "stopped_by_user";
-  const isTerminal = isCompleted || isFailed || isCancelled || isStopped;
+  const isTerminal = isTerminalSessionStatus(session.status);
+  const assistantLabel = getStructuredRoleDisplayName(RESEARCHER_ROLE_ID);
 
   // Get the pending checkpoint data
   const pendingCheckpoint = isAwaitingConfirmation && session.pendingCheckpointId
     ? artifacts.find((a) => a.id === session.pendingCheckpointId)
     : null;
+  const pendingCheckpointData = pendingCheckpoint?.content as CheckpointPackage | undefined;
 
   // Get the final report artifact (for completed sessions)
-  const finalReportArtifact = artifacts.find((a) => a.artifactType === "final_report");
+  const finalReportArtifact = getLatestFinalReportArtifact(artifacts);
+  const visibleMessages = messages.filter((message) => !isNodeDetailOnlyMessage(message));
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages.length, isAwaitingConfirmation, isCompleted]);
+  }, [visibleMessages.length, isAwaitingConfirmation, isCompleted]);
 
   const handleSend = async () => {
     const content = input.trim();
@@ -85,9 +97,7 @@ export const ResearchChat = memo(function ResearchChat({
   const handleCheckpointConfirm = async (outcome: ConfirmationOutcome, feedback?: string) => {
     // Use the checkpoint's nodeId directly, fall back to first awaiting node
     const awaitingConfirmationNodes = nodes.filter((n) => n.status === "awaiting_user_confirmation");
-    const checkpointNodeId = pendingCheckpoint
-      ? (pendingCheckpoint.content as unknown as { nodeId?: string })?.nodeId
-      : undefined;
+    const checkpointNodeId = pendingCheckpointData?.nodeId;
     const targetNodeId = checkpointNodeId || awaitingConfirmationNodes[0]?.id;
     if (!targetNodeId) return;
     await onConfirm(targetNodeId, outcome, feedback);
@@ -108,7 +118,7 @@ export const ResearchChat = memo(function ResearchChat({
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50">
         <Brain className="h-4 w-4 text-purple-500" />
-        <span className="text-sm font-medium flex-1">Main Brain</span>
+        <span className="text-sm font-medium flex-1">{assistantLabel}</span>
         <Badge
           variant={
             isRunning ? "default"
@@ -121,15 +131,12 @@ export const ResearchChat = memo(function ResearchChat({
         >
           {session.status.replace(/_/g, " ")}
         </Badge>
-        <Badge variant="outline" className="text-[10px]">
-          S{PHASE_STAGE_NUMBER[session.phase as Phase] ?? "?"} — {session.phase}
-        </Badge>
       </div>
 
       {/* Messages */}
       <ScrollArea className="flex-1 min-h-0" ref={scrollRef}>
         <div className="p-3 space-y-3">
-          {messages.map((msg) => {
+          {visibleMessages.map((msg) => {
             const relatedNode = msg.relatedNodeId
               ? nodes.find(n => n.id === msg.relatedNodeId) ?? null
               : null;
@@ -157,18 +164,12 @@ export const ResearchChat = memo(function ResearchChat({
                   >
                     {msg.content}
                   </div>
-                  {/* Phase badge + related node/artifact chips */}
+                  {/* Related node/artifact chips */}
                   {msg.role !== "user" && (relatedNode || relatedArts.length > 0) && (
                     <div className="flex flex-wrap gap-1 px-1">
                       {relatedNode && (
-                        <Badge variant="secondary" className="text-[9px] gap-0.5">
-                          <Tag className="h-2.5 w-2.5" />
-                          S{PHASE_STAGE_NUMBER[relatedNode.phase as Phase] ?? "?"} {relatedNode.phase}
-                        </Badge>
-                      )}
-                      {relatedNode && (
                         <Badge variant="outline" className="text-[9px]">
-                          {relatedNode.label.slice(0, 30)}{relatedNode.label.length > 30 ? "..." : ""}
+                          {getNodeDisplayLabel(relatedNode.label).slice(0, 30)}{getNodeDisplayLabel(relatedNode.label).length > 30 ? "..." : ""}
                         </Badge>
                       )}
                       {relatedArts.map(a => (
@@ -199,31 +200,7 @@ export const ResearchChat = memo(function ResearchChat({
           {/* Checkpoint review panel */}
           {isAwaitingConfirmation && pendingCheckpoint && (
             <CheckpointReview
-              checkpoint={pendingCheckpoint.content as unknown as {
-                title: string;
-                humanSummary: string;
-                currentFindings: string;
-                openQuestions: string[];
-                recommendedNextAction: string;
-                continueWillDo?: string;
-                alternativeNextActions: string[];
-                artifactsToReview: string[];
-                phase: string;
-                stepType: string;
-                mainBrainAudit?: {
-                  whatWasCompleted: string;
-                  resultAssessment: "good" | "acceptable" | "concerning" | "problematic";
-                  issuesAndRisks: string[];
-                  recommendedNextAction: string;
-                  continueWillDo: string;
-                  alternativeActions: Array<{ label: string; description: string; actionType: string }>;
-                  canProceed: boolean;
-                };
-                literatureRoundInfo?: { roundNumber: number; papersCollected: number; coverageSummary: string };
-                reviewerBattleInfo?: { combinedVerdict: string; combinedConfidence: number; agreements: string[]; disagreements: string[]; needsMoreLiterature: boolean; needsExperimentalValidation: boolean };
-                executionInfo?: { stepsCompleted: number; stepsTotal: number; currentStatus: string };
-                transitionAction?: { nextPhase: string; description: string };
-              }}
+              checkpoint={pendingCheckpointData!}
               artifacts={artifacts}
               onConfirm={handleCheckpointConfirm}
             />
@@ -237,12 +214,9 @@ export const ResearchChat = memo(function ResearchChat({
                 <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">
                   Awaiting your decision
                 </span>
-                <Badge variant="outline" className="text-[10px]">
-                  S{PHASE_STAGE_NUMBER[session.phase as Phase] ?? "?"} — {session.phase.replace(/_/g, " ")}
-                </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                The session is paused and waiting for your input. You can continue to the next phase, or stop the research.
+                The session is paused and waiting for your input. You can continue and let the Researcher choose the next workflow, or stop the research.
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -296,7 +270,7 @@ export const ResearchChat = memo(function ResearchChat({
                     <span className="font-medium">No final report artifact found.</span>
                   </div>
                   <p>
-                    You can view all research artifacts by clicking on nodes in the workflow graph on the right.
+                    You can view all research artifacts by opening nodes from the Roadmap tab.
                     Look for nodes of type &quot;final_report&quot; or &quot;synthesize&quot; to find the research conclusions.
                   </p>
                 </div>
@@ -347,7 +321,7 @@ export const ResearchChat = memo(function ResearchChat({
           </div>
           {awaitingApprovalNodes.map((node) => (
             <div key={node.id} className="flex items-center gap-2">
-              <span className="text-xs flex-1 truncate">{node.label}</span>
+              <span className="text-xs flex-1 truncate">{getNodeDisplayLabel(node.label)}</span>
               <Button
                 size="sm"
                 variant="outline"
@@ -379,7 +353,7 @@ export const ResearchChat = memo(function ResearchChat({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message the Main Brain..."
+              placeholder={`Message the ${assistantLabel}...`}
               className="min-h-[40px] max-h-[120px] resize-none text-sm"
               rows={1}
             />

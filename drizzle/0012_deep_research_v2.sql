@@ -5,15 +5,21 @@
 
 -- Sessions: track round/loop counters
 ALTER TABLE deep_research_sessions ADD COLUMN literature_round INTEGER NOT NULL DEFAULT 0;
+--> statement-breakpoint
 ALTER TABLE deep_research_sessions ADD COLUMN reviewer_round INTEGER NOT NULL DEFAULT 0;
+--> statement-breakpoint
 ALTER TABLE deep_research_sessions ADD COLUMN execution_loop INTEGER NOT NULL DEFAULT 0;
+--> statement-breakpoint
 
 -- Messages: link to nodes and artifacts
 ALTER TABLE deep_research_messages ADD COLUMN related_node_id TEXT;
+--> statement-breakpoint
 ALTER TABLE deep_research_messages ADD COLUMN related_artifact_ids_json TEXT; -- JSON: string[]
+--> statement-breakpoint
 
 -- Nodes: track which phase spawned them
 ALTER TABLE deep_research_nodes ADD COLUMN phase TEXT;
+--> statement-breakpoint
 
 -- Artifacts: add type index for efficient filtering
 CREATE INDEX IF NOT EXISTS dr_artifacts_type_idx ON deep_research_artifacts(artifact_type);

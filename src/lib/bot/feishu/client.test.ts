@@ -519,6 +519,6 @@ describe("Feishu adapter", () => {
       expect(files).toHaveLength(0);
 
       await fsp.default.rm(destDir, { recursive: true }).catch(() => {});
-    });
+    }, 15000);
   });
 });

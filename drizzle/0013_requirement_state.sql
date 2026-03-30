@@ -8,9 +8,10 @@ CREATE TABLE IF NOT EXISTS deep_research_requirements (
   state_json TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS dr_requirements_session_idx ON deep_research_requirements(session_id);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS dr_requirements_version_idx ON deep_research_requirements(session_id, version);
-
+--> statement-breakpoint
 -- Add requirement_version column to deep_research_nodes
 ALTER TABLE deep_research_nodes ADD COLUMN requirement_version INTEGER DEFAULT 0;

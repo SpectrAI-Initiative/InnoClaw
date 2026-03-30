@@ -9,9 +9,12 @@ import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
 import { and, eq, or, isNull } from "drizzle-orm";
 import { parseSkillRow } from "@/lib/db/skills-utils";
+import { ensureProjectDefaultSkills } from "@/lib/db/default-skills";
 
 export async function POST(req: NextRequest) {
   try {
+    await ensureProjectDefaultSkills();
+
     const { messages: uiMessages, workspaceId, cwd, skillId, paramValues, mode, llmProvider, llmModel, sessionCreatedAt } =
       await req.json();
 

@@ -9,7 +9,11 @@ import { PaperSearchBar } from "./paper-search-bar";
 import { ArticleCard } from "./article-card";
 import { PaperSummarySection } from "./paper-summary-section";
 import { PaperRoastSection } from "./paper-roast-section";
-import type { Article, ArticleSource } from "@/lib/article-search/types";
+import {
+  type Article,
+  type ArticleSource,
+  SEARCHABLE_ARTICLE_SOURCES,
+} from "@/lib/article-search/types";
 import type { PaperStudyCacheData } from "@/lib/hooks/use-paper-study-cache";
 
 /** Composite key for identifying an article across sources. */
@@ -36,7 +40,9 @@ export function PaperStudyPanel({
   const [keywords, setKeywords] = useState<string[]>(initialCache?.keywords ?? []);
   const [dateFrom, setDateFrom] = useState(initialCache?.dateFrom ?? "");
   const [dateTo, setDateTo] = useState(initialCache?.dateTo ?? "");
-  const [sources, setSources] = useState<ArticleSource[]>(initialCache?.sources ?? ["arxiv", "huggingface", "semantic-scholar"]);
+  const [sources, setSources] = useState<ArticleSource[]>(
+    initialCache?.sources ?? [...SEARCHABLE_ARTICLE_SOURCES]
+  );
 
   // Results
   const [articles, setArticles] = useState<Article[]>(initialCache?.articles ?? []);
@@ -336,7 +342,7 @@ export function PaperStudyPanel({
       setKeywords(expandedKeywords);
 
       // Step 2: Search all sources with expanded keywords
-      const allSources: ArticleSource[] = ["arxiv", "huggingface", "semantic-scholar"];
+      const allSources: ArticleSource[] = [...SEARCHABLE_ARTICLE_SOURCES];
       setSources(allSources);
 
       const searchRes = await fetch("/api/paper-study/search", {

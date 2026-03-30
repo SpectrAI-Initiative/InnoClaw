@@ -131,6 +131,18 @@ export async function getConfiguredModelWithProvider(): Promise<{
   modelId: string;
   model: LanguageModel;
 }> {
+  const { providerId: provider, modelId } = await getConfiguredModelSelection();
+
+  return { providerId: provider, modelId, model: buildLanguageModel(provider, modelId) };
+}
+
+/**
+ * Read the currently configured provider/model ids from app settings.
+ */
+export async function getConfiguredModelSelection(): Promise<{
+  providerId: string;
+  modelId: string;
+}> {
   const settings = await db
     .select()
     .from(appSettings)
@@ -139,10 +151,25 @@ export async function getConfiguredModelWithProvider(): Promise<{
   const providerRow = settings.find((s) => s.key === "llm_provider");
   const modelRow = settings.find((s) => s.key === "llm_model");
 
-  const provider = providerRow?.value || DEFAULT_PROVIDER;
-  const modelId = modelRow?.value || DEFAULT_MODEL;
+  return {
+    providerId: providerRow?.value || DEFAULT_PROVIDER,
+    modelId: modelRow?.value || DEFAULT_MODEL,
+  };
+}
 
-  return { providerId: provider, modelId, model: buildLanguageModel(provider, modelId) };
+/**
+ * Read the current provider/model ids from the live process environment.
+ * Settings PATCH updates process.env immediately, so this stays aligned with
+ * the Settings page without requiring an async DB round-trip.
+ */
+export function getConfiguredModelSelectionFromEnv(): {
+  providerId: string;
+  modelId: string;
+} {
+  return {
+    providerId: process.env.LLM_PROVIDER || DEFAULT_PROVIDER,
+    modelId: process.env.LLM_MODEL || DEFAULT_MODEL,
+  };
 }
 
 /**

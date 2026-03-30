@@ -1,5 +1,5 @@
 // =============================================================
-// Deep Research — DAG Validator (Phase 7)
+// Deep Research — DAG Validator
 // =============================================================
 
 import type { DeepResearchNode, DAGValidationResult, DAGError } from "./types";

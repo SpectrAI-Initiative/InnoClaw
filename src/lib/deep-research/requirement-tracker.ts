@@ -8,7 +8,7 @@ import type {
   Requirement,
   Constraint,
   RequirementDiff,
-  Phase,
+  ContextTag,
 } from "./types";
 
 /**
@@ -17,7 +17,7 @@ import type {
  */
 export function createInitialRequirements(
   intakeArtifact: Record<string, unknown>,
-  phase: Phase = "intake"
+  contextTag: ContextTag = "intake"
 ): RequirementState {
   const requirements: Requirement[] = [];
   const constraints: Constraint[] = [];
@@ -32,7 +32,7 @@ export function createInitialRequirements(
       priority: "critical",
       status: "active",
       satisfiedByNodeIds: [],
-      addedAtPhase: phase,
+      addedAtContextTag: contextTag,
     });
   }
 
@@ -46,7 +46,7 @@ export function createInitialRequirements(
       priority: "high",
       status: "active",
       satisfiedByNodeIds: [],
-      addedAtPhase: phase,
+      addedAtContextTag: contextTag,
     });
   }
 
@@ -59,7 +59,7 @@ export function createInitialRequirements(
       type: "scope",
       value: c,
       status: "active",
-      addedAtPhase: phase,
+      addedAtContextTag: contextTag,
     });
   }
 
@@ -70,7 +70,7 @@ export function createInitialRequirements(
     type: "budget",
     value: "system_default",
     status: "active",
-    addedAtPhase: phase,
+    addedAtContextTag: contextTag,
   });
 
   return {

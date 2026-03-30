@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <a href="https://SpectrAI-Initiative.github.io/InnoClaw/">Documentation</a> · <a href="#quick-start">Quick Start</a> · <a href="#community-support">Community</a>
+  <a href="https://SpectrAI-Initiative.github.io/InnoClaw/">Documentation</a> · <a href="#quick-start">Install & Use</a> · <a href="#community-support">Community</a>
 </p>
 
 <p align="center">
@@ -56,20 +56,29 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 <!-- whats-new-start -->
 
 #### 2026-03-26
+- **Dynamic Model Discovery**: Agent panel now auto-fetches available models from each configured AI provider, merging live results with built-in model lists
+- **Per-Model Base URL Routing**: Chinese AI providers (shlab, qwen, moonshot, deepseek, minimax, zhipu) now support per-model `<PROVIDER>_<MODEL>_BASE_URL` env vars for flexible endpoint routing
+- **Runtime Tool-Calling Override**: Tool support can now be toggled per provider via `<PROVIDER>_TOOLS_ENABLED=true/false` without code changes
+
+
+#### 2026-03-26
 - **Node.js Runtime Update**: InnoClaw now targets Node.js 24+ and is verified against both Node.js 24 LTS and the latest Node.js 25 current release. CI and local version hints have been updated accordingly.
+
 
 
 #### 2026-03-24
 - **Multimodal LLM Support**: Paper Study and agent workflows now support both standard LLMs and multimodal LLMs (mLLM), selectable per-context in settings and the model selector
 
 
+
+<details>
+<summary>Show earlier updates</summary>
+
 #### 2026-03-23
 - **GitHub Skills Import Preview**: New pre-import preview workflow lets users browse, review, and selectively import skills from GitHub repositories before committing changes
 
 
 
-<details>
-<summary>Show earlier updates</summary>
 
 #### 2026-03-22
 - **Obsidian Note Export**: Generate structured, Obsidian-compatible paper notes with rich YAML frontmatter, figures, and wikilinks directly from the paper study panel
@@ -79,10 +88,12 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 
 
 
+
 #### 2026-03-21
 - **Remote HPC/SLURM Execution**: Deep research sessions can now run on remote clusters via SSH, supporting rjob, rlaunch, and SLURM schedulers with file staging and job lifecycle management
 - **Kubernetes Cluster Config UI**: New settings panel for runtime configuration of K8s contexts, PVC bindings, and container images across multi-cluster deployments without restarting
 - **Remote Profile Binding**: Deep research sessions can be bound to pre-configured SSH/remote compute profiles, enabling reproducible distributed research workflows
+
 
 
 
@@ -99,10 +110,12 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 
 
 
+
 #### 2026-03-19
 - **ClawHub Skill Import**: New integration to import skills directly from ClawHub via a dedicated API endpoint and import dialog
 - **Code Preview Panel**: New in-editor code preview component supporting syntax highlighting and save-status tracking
 - **Paper Study Cache**: Persistent caching layer for paper study sessions, improving reload performance and state continuity
+
 
 
 
@@ -123,37 +136,11 @@ It is built for researchers, developers, labs, and self-hosters who want more th
 
 
 
+
 #### 2026-03-18
 - **Multimodal Vision for Paper Discussion & Ideation**: Vision-capable providers can now receive extracted PDF page images alongside text so discussion and ideation agents can analyze figures, tables, and diagrams.
 - **Paper Pages Gallery UI**: Discussion and ideation panels now show a collapsible thumbnail gallery for extracted paper pages with full-size preview dialogs.
 - **Provider Vision Capability Detection**: Provider configs now expose vision support so routes can switch between multimodal and text-only paper context automatically.
-
-
-
-
-
-
-
-
-
-#### 2026-03-17
-- **Remote Job Profile Management & SSH Hardening**: Secure remote profile creation, editing, and SSH-hardened job submission for research execution
-- **Rich Markdown Rendering in Agent Panel**: Agent messages now render tables, LaTeX math, and syntax-highlighted code blocks
-- **API Provider Settings UI**: Configure AI provider API keys and endpoints directly from the Settings page
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-17
-- **rjob Profile Config & Submission Hardening**: Remote profiles now store full rjob defaults (image, GPU, CPU, memory, mounts, charged-group, private-machine, env vars, host-network, example commands). `submitRemoteJob` builds the rjob command internally from stored config - the agent can no longer modify flags like `--charged-group` or `--image`. SSH transport fixed with `-o StrictHostKeyChecking=no -tt`, init script sourcing, and double-quote wrapping for correct quoting.
-- **Profile Editing**: Edit button (pencil icon) on remote profiles in the Remotes tab. Click to load profile into the form for updating, including all rjob config fields.
-- **Direct Job Submission Shortcut**: Agent-Long mode can skip inspect/patch/sync stages for simple job submissions: `listRemoteProfiles -> prepareJobSubmission -> approval -> submitRemoteJob`.
 
 
 
@@ -190,6 +177,7 @@ Instead of juggling separate tools for files, notes, literature review, and auto
 
 ## 🚀 Quick Start
 
+For a stable self-hosted deployment, prefer a tagged release over a moving `main` branch snapshot:
 Runtime requirement:
 - Node.js `24+` required
 - Node.js `24 LTS` recommended for stable deployments
@@ -205,14 +193,89 @@ nvm use
 ```bash
 git clone https://github.com/SpectrAI-Initiative/InnoClaw.git
 cd InnoClaw
+git fetch --tags
+# Optional but recommended for production:
+# git checkout vX.Y.Z
+```
+
+InnoClaw requires Node.js 20+ (`package.json` is the source of truth for runtime requirements).
+
+### 1. Install
+
+```bash
 npm install
+cp .env.example .env.local
+mkdir -p ./data /absolute/path/to/workspaces
+npx drizzle-kit migrate
+```
+
+Set `WORKSPACE_ROOTS` in `.env.local` to one or more absolute local paths, for example:
+
+```ini
+WORKSPACE_ROOTS=/absolute/path/to/workspaces
+OPENAI_API_KEY=sk-...
+```
+
+Notes:
+
+- `WORKSPACE_ROOTS` directories must already exist before startup
+- `npx drizzle-kit migrate` creates or upgrades the SQLite schema at `./data/innoclaw.db` by default
+- If the repo lives on NFS/CIFS or another network filesystem, set `DATABASE_URL` and `NEXT_BUILD_DIR` to local disk paths in `.env.local`
+
+### 2. Run
+
+```bash
 npm run dev
 ```
 
-- Open `http://localhost:3000`
-- Configure one AI provider from the Settings page
-- Open or clone a workspace, then click `Sync` to build the RAG index
-- Need OS-specific prerequisites or production setup? See `docs/getting-started/installation.md`
+Open `http://localhost:3000`.
+
+### 3. First Use
+
+After the UI opens:
+
+1. Configure at least one model provider in `Settings`
+2. Open an existing folder or create a workspace under `WORKSPACE_ROOTS`
+3. Click `Sync` so InnoClaw builds the RAG index for that workspace
+4. Start with grounded chat, then move into paper study, notes, skills, or research execution
+
+### 4. Typical Usage Flow
+
+- **Grounded chat**: ask questions over your files and code with citations
+- **Paper study**: search papers, summarize them, and run structured multi-agent discussion
+- **Skills**: import reusable scientific workflows and trigger them from the agent panel
+- **Research execution**: review code, prepare jobs, submit to Shell/Slurm/`rjob`, and track artifacts
+
+### 5. Keeping Versions Up to Date
+
+Version changes matter because upgrades can introduce new environment variables, dependency changes, and database migrations.
+
+- For production, pin to a release tag and upgrade deliberately instead of tracking `main`
+- Check `CHANGELOG.md` before every upgrade
+- Compare your `.env.local` against `.env.example` after pulling updates
+- Re-run `npm install` and `npx drizzle-kit migrate` after every version bump
+
+Recommended upgrade flow:
+
+```bash
+git fetch --tags
+git checkout vX.Y.Z
+npm install
+npx drizzle-kit migrate
+npm run build
+```
+
+If you intentionally track `main`, use:
+
+```bash
+git pull
+npm install
+npx drizzle-kit migrate
+```
+
+If the required Node.js major version changes between releases, reinstall dependencies under the new Node version before starting the app again.
+
+Need OS-specific prerequisites or production setup? See `docs/getting-started/installation.md`, `docs/getting-started/deployment.md`, and `CHANGELOG.md`.
 
 ## 🛠️ What You Can Do
 

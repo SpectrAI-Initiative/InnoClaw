@@ -1,5 +1,5 @@
 // =============================================================
-// Deep Research — Synthesizer Role
+// Deep Research — Results and Evidence Analysis Synthesis
 // =============================================================
 // Dedicated synthesis: reads evidence cards, builds structured claim
 // maps, identifies gaps. Replaces the pattern where evidence_gather
@@ -33,7 +33,7 @@ export function buildSynthesizerPrompt(
     ? `\n## Research Requirements\n- Goal: ${requirementState.currentApprovedGoal}\n- Active requirements: ${requirementState.requirements.filter(r => r.status === "active").map(r => r.text).join("; ")}`
     : "";
 
-  return `You are the Synthesizer. Your job is to read evidence cards and produce a structured ClaimMap.
+  return `You are operating as the Results and Evidence Analyst. Your job is to read evidence cards and produce a structured ClaimMap.
 
 ## STRICT RULES
 1. Build claims ONLY from the evidence provided below. Do NOT fabricate.
@@ -97,25 +97,25 @@ export async function executeSynthesis(
   claimMap: ClaimMap;
   artifacts: DeepResearchArtifact[];
 }> {
-  // Use the synthesizer role (falls back to main_brain chain)
-  const { model } = getModelForRole("synthesizer", session.config);
+  // Use the results-and-evidence role for synthesis work.
+  const { model } = getModelForRole("results_and_evidence_analyst", session.config);
 
-  const budgetCheck = checkBudget("synthesizer", session.budget, session.config.budget);
+  const budgetCheck = checkBudget("results_and_evidence_analyst", session.budget, session.config.budget);
   if (!budgetCheck.allowed) {
-    throw new Error(`Synthesizer budget exceeded: ${budgetCheck.reason}`);
+    throw new Error(`Results and Evidence Analyst budget exceeded: ${budgetCheck.reason}`);
   }
 
   // Create synthesize_claims node
   const synthNode = await store.createNode(session.id, {
     nodeType: "synthesize_claims",
-    label: "Build claim map from evidence cards",
-    assignedRole: "synthesizer",
+    label: "Results and Evidence Analyst: Build claim map from evidence cards",
+    assignedRole: "results_and_evidence_analyst",
     input: {
       totalCards: evidenceCards.cards.length,
       totalSources: evidenceCards.totalSources,
       retrievalSummary: evidenceCards.retrievalSummary,
     },
-    phase: "literature_synthesis",
+    contextTag: "planning",
   });
 
   await store.updateNode(synthNode.id, {
@@ -128,13 +128,13 @@ export async function executeSynthesis(
 
     const result = await generateText({
       model,
-      system: "You are a research synthesizer. Produce a structured ClaimMap from evidence. Respond ONLY with valid JSON.",
+      system: "You are operating as the Results and Evidence Analyst. Produce a structured ClaimMap from evidence. Respond ONLY with valid JSON.",
       messages: [{ role: "user", content: prompt }],
       abortSignal,
     });
 
     const tokens = result.usage?.totalTokens ?? 0;
-    const budget = trackUsage(session.budget, "synthesizer", synthNode.id, tokens);
+    const budget = trackUsage(session.budget, "results_and_evidence_analyst", synthNode.id, tokens);
     await store.updateSession(session.id, { budget });
 
     // Parse claim map
@@ -151,7 +151,7 @@ export async function executeSynthesis(
     const provenance: ArtifactProvenance = {
       sourceNodeId: synthNode.id,
       sourceArtifactIds: [],
-      model: "synthesizer",
+      model: "results_and_evidence_analyst",
       generatedAt: new Date().toISOString(),
     };
 
@@ -164,7 +164,7 @@ export async function executeSynthesis(
       provenance,
     );
 
-    await store.appendEvent(session.id, "synthesis_completed", synthNode.id, "synthesizer", undefined, undefined, {
+    await store.appendEvent(session.id, "synthesis_completed", synthNode.id, "results_and_evidence_analyst", undefined, undefined, {
       claimsCount: claimMap.claims.length,
       contradictionsCount: claimMap.contradictions.length,
       gapsCount: claimMap.gaps.length,
@@ -211,10 +211,10 @@ export function buildRevisionPrompt(
     ).join("\n")}`
     : "";
 
-  return `You are the Synthesizer performing a TARGETED REVISION of an existing ClaimMap.
+  return `You are operating as the Results and Evidence Analyst and performing a TARGETED REVISION of an existing ClaimMap.
 
 ## CONTEXT
-The scientific reviewers have identified specific issues that must be fixed.
+The review assessment has identified specific issues that must be fixed.
 You must revise the ClaimMap to address EACH revision point below.
 
 ## STRICT RULES
@@ -248,23 +248,23 @@ export async function executeRevisionSynthesis(
   claimMap: ClaimMap;
   artifacts: DeepResearchArtifact[];
 }> {
-  const { model } = getModelForRole("synthesizer", session.config);
-  const budgetCheck = checkBudget("synthesizer", session.budget, session.config.budget);
+  const { model } = getModelForRole("results_and_evidence_analyst", session.config);
+  const budgetCheck = checkBudget("results_and_evidence_analyst", session.budget, session.config.budget);
   if (!budgetCheck.allowed) {
-    throw new Error(`Synthesizer budget exceeded: ${budgetCheck.reason}`);
+    throw new Error(`Results and Evidence Analyst budget exceeded: ${budgetCheck.reason}`);
   }
 
   const synthNode = await store.createNode(session.id, {
     nodeType: "synthesize_claims",
-    label: `Revise claim map (addressing ${revisionRequest.revisionPoints.length} reviewer points)`,
-    assignedRole: "synthesizer",
+    label: `Results and Evidence Analyst: Revise claim map (addressing ${revisionRequest.revisionPoints.length} critique points)`,
+    assignedRole: "results_and_evidence_analyst",
     input: {
       revisionFromRound: revisionRequest.fromRound,
       issueCount: revisionRequest.issueIds.length,
       revisionPointCount: revisionRequest.revisionPoints.length,
       antiPatternCount: revisionRequest.antiPatternsToFix.length,
     },
-    phase: "literature_synthesis",
+    contextTag: "planning",
   });
 
   await store.updateNode(synthNode.id, {
@@ -277,13 +277,13 @@ export async function executeRevisionSynthesis(
 
     const result = await generateText({
       model,
-      system: "You are a research synthesizer revising an existing ClaimMap based on reviewer feedback. Respond ONLY with valid JSON.",
+      system: "You are operating as the Results and Evidence Analyst and revising an existing ClaimMap based on critique feedback. Respond ONLY with valid JSON.",
       messages: [{ role: "user", content: prompt }],
       abortSignal,
     });
 
     const tokens = result.usage?.totalTokens ?? 0;
-    const budget = trackUsage(session.budget, "synthesizer", synthNode.id, tokens);
+    const budget = trackUsage(session.budget, "results_and_evidence_analyst", synthNode.id, tokens);
     await store.updateSession(session.id, { budget });
 
     const claimMap = parseClaimMap(result.text);
@@ -297,7 +297,7 @@ export async function executeRevisionSynthesis(
     const provenance: ArtifactProvenance = {
       sourceNodeId: synthNode.id,
       sourceArtifactIds: [revisionRequest.targetClaimMapId],
-      model: "synthesizer",
+      model: "results_and_evidence_analyst",
       generatedAt: new Date().toISOString(),
     };
 
@@ -310,7 +310,7 @@ export async function executeRevisionSynthesis(
       provenance,
     );
 
-    await store.appendEvent(session.id, "synthesis_completed", synthNode.id, "synthesizer", undefined, undefined, {
+    await store.appendEvent(session.id, "synthesis_completed", synthNode.id, "results_and_evidence_analyst", undefined, undefined, {
       revision: true,
       fromRound: revisionRequest.fromRound,
       claimsCount: claimMap.claims.length,
@@ -364,7 +364,7 @@ function parseClaimMap(text: string): ClaimMap {
         }
       }
     }
-    throw new Error("Failed to parse ClaimMap from synthesizer output");
+    throw new Error("Failed to parse ClaimMap from Results and Evidence Analyst output");
   }
 }
 

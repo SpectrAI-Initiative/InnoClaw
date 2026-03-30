@@ -14,13 +14,16 @@ import path from "path";
 const fakeChatModel = { modelId: "test" };
 
 // Track calls to createOpenAI so we can assert baseURL / apiKey
-const createOpenAISpy = vi.fn(() => ({
-  chat: vi.fn(() => fakeChatModel),
-}));
+const createOpenAISpy = vi.fn((config: unknown) => {
+  void config;
+  return {
+    chat: vi.fn(() => fakeChatModel),
+  };
+});
 
 vi.mock("@ai-sdk/openai", () => ({
   openai: { chat: vi.fn(() => fakeChatModel) },
-  createOpenAI: (...args: unknown[]) => createOpenAISpy(...args),
+  createOpenAI: (config: unknown) => createOpenAISpy(config),
 }));
 
 vi.mock("@ai-sdk/anthropic", () => ({
@@ -61,7 +64,7 @@ describe("getPerModelProvider – base URL resolution", () => {
     // Re-apply mocks after resetModules
     vi.doMock("@ai-sdk/openai", () => ({
       openai: { chat: vi.fn(() => fakeChatModel) },
-      createOpenAI: (...args: unknown[]) => createOpenAISpy(...args),
+      createOpenAI: (config: unknown) => createOpenAISpy(config),
     }));
     vi.doMock("@ai-sdk/anthropic", () => ({
       createAnthropic: vi.fn(() => vi.fn(() => fakeChatModel)),

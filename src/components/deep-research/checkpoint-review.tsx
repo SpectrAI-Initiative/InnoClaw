@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-
+import { ArtifactViewer } from "./artifact-viewer";
 import {
   CheckCircle,
   XCircle,
@@ -17,66 +17,87 @@ import {
   HelpCircle,
   ArrowRight,
 } from "lucide-react";
-import type { DeepResearchArtifact } from "@/lib/deep-research/types";
-import type { ConfirmationOutcome } from "@/lib/deep-research/types";
-import { PHASE_STAGE_NUMBER, type Phase } from "@/lib/deep-research/types";
-
-interface MainBrainAuditData {
-  whatWasCompleted: string;
-  resultAssessment: "good" | "acceptable" | "concerning" | "problematic";
-  issuesAndRisks: string[];
-  recommendedNextAction: string;
-  continueWillDo: string;
-  alternativeActions: Array<{ label: string; description: string; actionType: string }>;
-  canProceed: boolean;
-}
-
-interface LiteratureRoundInfo {
-  roundNumber: number;
-  papersCollected: number;
-  coverageSummary: string;
-}
-
-interface ReviewerBattleInfo {
-  combinedVerdict: string;
-  combinedConfidence: number;
-  agreements: string[];
-  disagreements: string[];
-  needsMoreLiterature: boolean;
-  needsExperimentalValidation: boolean;
-}
-
-interface ExecutionInfo {
-  stepsCompleted: number;
-  stepsTotal: number;
-  currentStatus: string;
-}
-
-interface CheckpointData {
-  title: string;
-  humanSummary: string;
-  currentFindings: string;
-  openQuestions: string[];
-  recommendedNextAction: string;
-  continueWillDo?: string;
-  alternativeNextActions: string[];
-  artifactsToReview: string[];
-  phase: string;
-  stepType: string;
-  mainBrainAudit?: MainBrainAuditData;
-  literatureRoundInfo?: LiteratureRoundInfo;
-  reviewerBattleInfo?: ReviewerBattleInfo;
-  executionInfo?: ExecutionInfo;
-  transitionAction?: { nextPhase: string; description: string };
-  evidenceStatusNote?: string;
-  emptyStreams?: string[];
-  successStreams?: string[];
-}
+import type {
+  CheckpointPackage,
+  ConfirmationOutcome,
+  DeepResearchArtifact,
+  MainBrainAudit,
+} from "@/lib/deep-research/types";
 
 interface CheckpointReviewProps {
-  checkpoint: CheckpointData;
+  checkpoint: CheckpointPackage;
   artifacts: DeepResearchArtifact[];
   onConfirm: (outcome: ConfirmationOutcome, feedback?: string) => Promise<void>;
+}
+
+const ASSESSMENT_BADGE_CLASS: Record<MainBrainAudit["resultAssessment"], string> = {
+  good: "border-green-300 text-green-600",
+  acceptable: "border-blue-300 text-blue-600",
+  concerning: "border-yellow-300 text-yellow-600",
+  problematic: "border-red-300 text-red-600",
+};
+
+const ACTION_BUTTONS: Array<{
+  outcome: ConfirmationOutcome;
+  label: string;
+  icon: typeof CheckCircle;
+  variant?: "default" | "outline";
+  className?: string;
+}> = [
+  { outcome: "confirmed", label: "Continue", icon: CheckCircle },
+  { outcome: "revision_requested", label: "Revise", icon: RotateCcw, variant: "outline" },
+  { outcome: "branch_requested", label: "Branch", icon: GitBranch, variant: "outline" },
+  { outcome: "rejected", label: "Reject", icon: XCircle, variant: "outline", className: "text-red-600" },
+  { outcome: "stopped", label: "Stop", icon: Square, variant: "outline", className: "text-red-600" },
+];
+
+function CheckpointCallout({
+  icon: Icon,
+  label,
+  children,
+  tone,
+}: {
+  icon: typeof ArrowRight;
+  label: string;
+  children: React.ReactNode;
+  tone: "blue" | "green" | "emerald" | "slate";
+}) {
+  const styles = {
+    blue: {
+      container: "bg-blue-50 dark:bg-blue-950/50",
+      icon: "text-blue-600 dark:text-blue-400",
+      label: "text-blue-800 dark:text-blue-200",
+      body: "text-blue-700 dark:text-blue-300",
+    },
+    green: {
+      container: "bg-green-50 dark:bg-green-950/50",
+      icon: "text-green-600 dark:text-green-400",
+      label: "text-green-800 dark:text-green-200",
+      body: "text-green-700 dark:text-green-300",
+    },
+    emerald: {
+      container: "bg-emerald-50 dark:bg-emerald-950/40",
+      icon: "text-emerald-600 dark:text-emerald-400",
+      label: "text-emerald-800 dark:text-emerald-200",
+      body: "text-emerald-700 dark:text-emerald-300",
+    },
+    slate: {
+      container: "bg-slate-50 dark:bg-slate-900/50",
+      icon: "text-slate-600 dark:text-slate-400",
+      label: "text-slate-800 dark:text-slate-200",
+      body: "text-slate-700 dark:text-slate-300",
+    },
+  }[tone];
+
+  return (
+    <div className={`flex items-start gap-2 rounded p-2 text-xs ${styles.container}`}>
+      <Icon className={`mt-0.5 h-3 w-3 shrink-0 ${styles.icon}`} />
+      <div>
+        <span className={`font-medium ${styles.label}`}>{label}</span>
+        <span className={styles.body}>{children}</span>
+      </div>
+    </div>
+  );
 }
 
 export function CheckpointReview({ checkpoint, artifacts, onConfirm }: CheckpointReviewProps) {
@@ -84,10 +105,14 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
   const [submitting, setSubmitting] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [showFindings, setShowFindings] = useState(false);
+  const isAnswerRequired = checkpoint.interactionMode === "answer_required";
 
   const relatedArtifacts = artifacts.filter((a) =>
     checkpoint.artifactsToReview.includes(a.id)
   );
+  const taskGraphArtifacts = relatedArtifacts.filter((artifact) => artifact.artifactType === "task_graph");
+  const evidenceArtifacts = relatedArtifacts.filter((artifact) => artifact.artifactType === "evidence_card");
+  const otherArtifacts = relatedArtifacts.filter((artifact) => !["evidence_card", "task_graph"].includes(artifact.artifactType));
 
   const handleAction = async (outcome: ConfirmationOutcome) => {
     setSubmitting(true);
@@ -109,9 +134,6 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
         <span className="text-sm font-semibold flex-1 text-amber-900 dark:text-amber-100">
           {checkpoint.title}
         </span>
-        <Badge variant="outline" className="text-[10px] shrink-0">
-          Stage {PHASE_STAGE_NUMBER[checkpoint.phase as Phase] ?? "?"} — {checkpoint.phase}
-        </Badge>
         {expanded ? (
           <ChevronUp className="h-4 w-4 text-muted-foreground" />
         ) : (
@@ -160,19 +182,14 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
             </div>
           )}
 
-          {/* Main Brain Audit */}
+          {/* Researcher Audit */}
           {checkpoint.mainBrainAudit && (
             <div className="p-2 border rounded space-y-2">
               <div className="flex items-center gap-2 text-xs">
-                <span className="font-semibold">Main Brain Assessment:</span>
+                <span className="font-semibold">Researcher Assessment:</span>
                 <Badge
                   variant="outline"
-                  className={`text-[10px] ${
-                    checkpoint.mainBrainAudit.resultAssessment === "good" ? "text-green-600 border-green-300" :
-                    checkpoint.mainBrainAudit.resultAssessment === "acceptable" ? "text-blue-600 border-blue-300" :
-                    checkpoint.mainBrainAudit.resultAssessment === "concerning" ? "text-yellow-600 border-yellow-300" :
-                    "text-red-600 border-red-300"
-                  }`}
+                  className={`text-[10px] ${ASSESSMENT_BADGE_CLASS[checkpoint.mainBrainAudit.resultAssessment]}`}
                 >
                   {checkpoint.mainBrainAudit.resultAssessment}
                 </Badge>
@@ -198,17 +215,32 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
               <Badge variant="secondary" className="text-[10px]">
                 Lit. Round {checkpoint.literatureRoundInfo.roundNumber}
               </Badge>
-              <span>{checkpoint.literatureRoundInfo.papersCollected} papers collected</span>
+              <span>
+                {checkpoint.literatureRoundInfo.papersCollected} papers across {checkpoint.literatureRoundInfo.retrievalTaskCount} retrieval task(s)
+              </span>
+              <Badge variant="outline" className="text-[10px] text-green-600 border-green-300">
+                {checkpoint.literatureRoundInfo.successfulTaskCount} with evidence
+              </Badge>
+              {checkpoint.literatureRoundInfo.emptyTaskCount > 0 && (
+                <Badge variant="outline" className="text-[10px] text-orange-600 border-orange-300">
+                  {checkpoint.literatureRoundInfo.emptyTaskCount} empty
+                </Badge>
+              )}
+              {checkpoint.literatureRoundInfo.failedTaskCount > 0 && (
+                <Badge variant="outline" className="text-[10px] text-red-600 border-red-300">
+                  {checkpoint.literatureRoundInfo.failedTaskCount} failed
+                </Badge>
+              )}
             </div>
           )}
 
-          {checkpoint.reviewerBattleInfo && (
+          {checkpoint.reviewInfo && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Badge variant="secondary" className="text-[10px]">
-                Reviewers: {checkpoint.reviewerBattleInfo.combinedVerdict}
+                Reviewer: {checkpoint.reviewInfo.combinedVerdict}
               </Badge>
-              <span>Confidence: {((checkpoint.reviewerBattleInfo.combinedConfidence) * 100).toFixed(0)}%</span>
-              {checkpoint.reviewerBattleInfo.needsMoreLiterature && (
+              <span>Confidence: {((checkpoint.reviewInfo.combinedConfidence) * 100).toFixed(0)}%</span>
+              {checkpoint.reviewInfo.needsMoreLiterature && (
                 <Badge variant="outline" className="text-[10px] text-amber-600">Need more lit.</Badge>
               )}
             </div>
@@ -223,43 +255,38 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
             </div>
           )}
 
-          {/* Evidence stream health */}
-          {(checkpoint.emptyStreams?.length || checkpoint.successStreams?.length) && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              {checkpoint.successStreams && checkpoint.successStreams.length > 0 && (
-                <Badge variant="secondary" className="text-[10px] text-green-600 border-green-300">
-                  {checkpoint.successStreams.length} stream(s) with evidence
-                </Badge>
-              )}
-              {checkpoint.emptyStreams && checkpoint.emptyStreams.length > 0 && (
-                <Badge variant="outline" className="text-[10px] text-orange-600 border-orange-300">
-                  {checkpoint.emptyStreams.length} empty stream(s)
-                </Badge>
-              )}
-            </div>
-          )}
-
           {/* "Continue will do" — mandatory per spec */}
           {(checkpoint.transitionAction?.description || checkpoint.continueWillDo || checkpoint.mainBrainAudit?.continueWillDo) && (
-            <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-950/50 rounded text-xs">
-              <ArrowRight className="h-3 w-3 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
-              <div>
-                <span className="font-medium text-blue-800 dark:text-blue-200">Continue will: </span>
-                <span className="text-blue-700 dark:text-blue-300">
-                  {checkpoint.transitionAction?.description || checkpoint.continueWillDo || checkpoint.mainBrainAudit?.continueWillDo}
-                </span>
-              </div>
-            </div>
+            <CheckpointCallout
+              icon={ArrowRight}
+              label={isAnswerRequired ? "Next step after your reply: " : "Continue will: "}
+              tone="blue"
+            >
+              {checkpoint.transitionAction?.description || checkpoint.continueWillDo || checkpoint.mainBrainAudit?.continueWillDo}
+            </CheckpointCallout>
           )}
 
           {/* Recommended action */}
-          <div className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950/50 rounded text-xs">
-            <ArrowRight className="h-3 w-3 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
-            <div>
-              <span className="font-medium text-green-800 dark:text-green-200">Recommended: </span>
-              <span className="text-green-700 dark:text-green-300">{checkpoint.recommendedNextAction}</span>
-            </div>
-          </div>
+          <CheckpointCallout icon={ArrowRight} label="Next step: " tone="green">
+            {checkpoint.recommendedNextAction}
+          </CheckpointCallout>
+
+          {checkpoint.recommendedWorker && (
+            <CheckpointCallout icon={ArrowRight} label="Next task owner: " tone="emerald">
+              {checkpoint.recommendedWorker.roleName} ({checkpoint.recommendedWorker.nodeType}) - {checkpoint.recommendedWorker.label}
+            </CheckpointCallout>
+          )}
+
+          {checkpoint.promptUsed && (
+            <CheckpointCallout icon={FileText} label="Prompt used: " tone="slate">
+              <>
+                {checkpoint.promptUsed.title}
+                <div className="mt-1 text-muted-foreground">
+                  {checkpoint.promptUsed.kind} - {checkpoint.promptUsed.objective}
+                </div>
+              </>
+            </CheckpointCallout>
+          )}
 
           {/* Alternative actions */}
           {checkpoint.alternativeNextActions.length > 0 && (
@@ -269,10 +296,44 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
             </div>
           )}
 
+          {evidenceArtifacts.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Evidence Cards
+              </div>
+              <div className="space-y-3">
+                {evidenceArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="rounded-lg border bg-background p-3">
+                    <ArtifactViewer
+                      artifact={artifact}
+                      disableScroll
+                      evidenceExcerptLimit={Number.POSITIVE_INFINITY}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {taskGraphArtifacts.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Planned Worker Payload
+              </div>
+              <div className="space-y-3">
+                {taskGraphArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="rounded-lg border bg-background p-3">
+                    <ArtifactViewer artifact={artifact} disableScroll />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Related artifacts */}
-          {relatedArtifacts.length > 0 && (
+          {otherArtifacts.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {relatedArtifacts.map((a) => (
+              {otherArtifacts.map((a) => (
                 <Badge key={a.id} variant="secondary" className="text-[10px]">
                   {a.artifactType}: {a.title}
                 </Badge>
@@ -280,67 +341,37 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
             </div>
           )}
 
-          {/* Feedback input */}
-          <Textarea
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            placeholder="Optional: Add feedback, instructions, or corrections..."
-            className="text-sm min-h-[60px] max-h-[120px] resize-none bg-background"
-            rows={2}
-          />
+          {isAnswerRequired ? (
+            <div className="rounded border border-amber-300 bg-amber-100/60 px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100">
+              This checkpoint is waiting for your reply in chat. Once you answer the clarification questions below, the Researcher will resume automatically.
+            </div>
+          ) : (
+            <>
+              <Textarea
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder="Optional: Add feedback, instructions, or corrections..."
+                className="text-sm min-h-[60px] max-h-[120px] resize-none bg-background"
+                rows={2}
+              />
 
-          {/* Action buttons */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              className="h-7 px-3 text-xs gap-1.5"
-              onClick={() => handleAction("confirmed")}
-              disabled={submitting}
-            >
-              <CheckCircle className="h-3.5 w-3.5" />
-              Continue
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 px-3 text-xs gap-1.5"
-              onClick={() => handleAction("revision_requested")}
-              disabled={submitting}
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              Revise
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 px-3 text-xs gap-1.5"
-              onClick={() => handleAction("branch_requested")}
-              disabled={submitting}
-            >
-              <GitBranch className="h-3.5 w-3.5" />
-              Branch
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 px-3 text-xs gap-1.5 text-red-600"
-              onClick={() => handleAction("rejected")}
-              disabled={submitting}
-            >
-              <XCircle className="h-3.5 w-3.5" />
-              Reject
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 px-3 text-xs gap-1.5 text-red-600"
-              onClick={() => handleAction("stopped")}
-              disabled={submitting}
-            >
-              <Square className="h-3.5 w-3.5" />
-              Stop
-            </Button>
-          </div>
+              <div className="flex flex-wrap gap-2">
+                {ACTION_BUTTONS.map(({ outcome, label, icon: Icon, variant, className }) => (
+                  <Button
+                    key={outcome}
+                    size="sm"
+                    variant={variant}
+                    className={`h-7 gap-1.5 px-3 text-xs ${className ?? ""}`.trim()}
+                    onClick={() => handleAction(outcome)}
+                    disabled={submitting}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </Button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

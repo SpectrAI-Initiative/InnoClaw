@@ -38,9 +38,11 @@ yarn-error.log*
 .vercel
 
 # claude code
-.claude/
+.claude/*
 !.claude/commands/
 !.claude/commands/**
+!.claude/skills/
+!.claude/skills/**
 
 # research history
 history/

@@ -42,9 +42,10 @@ describe("arxiv", () => {
       title: "Test Paper Title",
       authors: ["John Doe", "Jane Smith"],
       abstract: "This is a test abstract about transformers.",
+      url: "https://arxiv.org/abs/2401.12345v1",
       source: "arxiv",
     });
-    expect(result[0].pdfUrl).toBe("http://arxiv.org/pdf/2401.12345v1");
+    expect(result[0].pdfUrl).toBe("https://arxiv.org/pdf/2401.12345v1");
   });
 
   it("returns empty array for empty keywords", async () => {
@@ -241,11 +242,12 @@ describe("searchArticles (index)", () => {
 
     const result = await searchArticles({
       keywords: ["llm"],
+      sources: ["arxiv", "huggingface"],
     });
 
     expect(result.totalCount).toBeGreaterThanOrEqual(1);
     expect(result.articles.length).toBeGreaterThanOrEqual(1);
-  });
+  }, 15000);
 
   it("returns errors when a source fails", async () => {
     const { searchArticles } = await import("./index");
@@ -311,6 +313,38 @@ describe("findRelatedArticles", () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(hfData),
+      })
+      .mockImplementation((url: string) => {
+        if (url.includes("semanticscholar")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ data: [] }),
+          });
+        }
+        if (url.includes("api.biorxiv.org")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ collection: [] }),
+          });
+        }
+        if (url.includes("esearch.fcgi")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ esearchresult: { idlist: [] } }),
+          });
+        }
+        if (url.includes("pubchem.ncbi.nlm.nih.gov")) {
+          return Promise.resolve({
+            ok: false,
+            status: 404,
+            statusText: "Not Found",
+            json: () => Promise.resolve({}),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        });
       });
 
     const sourceArticle: Article = {
@@ -327,5 +361,83 @@ describe("findRelatedArticles", () => {
 
     // Should return articles and exclude the source article
     expect(related.every((a) => a.id !== sourceArticle.id)).toBe(true);
+  });
+});
+
+describe("pubmed", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+    vi.resetModules();
+  });
+
+  it("parses PubMed search and efetch responses", async () => {
+    const { searchPubMed } = await import("./pubmed");
+
+    const efetchXml = `<?xml version="1.0" encoding="UTF-8"?>
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation>
+      <PMID>12345678</PMID>
+      <Article>
+        <ArticleTitle>Cell-state dynamics in test systems</ArticleTitle>
+        <Abstract>
+          <AbstractText Label="Background">Background abstract.</AbstractText>
+          <AbstractText>Detailed abstract body.</AbstractText>
+        </Abstract>
+        <AuthorList>
+          <Author>
+            <ForeName>Ada</ForeName>
+            <LastName>Lovelace</LastName>
+          </Author>
+          <Author>
+            <ForeName>Grace</ForeName>
+            <LastName>Hopper</LastName>
+          </Author>
+        </AuthorList>
+        <ArticleDate>
+          <Year>2025</Year>
+          <Month>03</Month>
+          <Day>10</Day>
+        </ArticleDate>
+      </Article>
+    </MedlineCitation>
+    <PubmedData>
+      <ArticleIdList>
+        <ArticleId IdType="doi">10.1000/test-doi</ArticleId>
+        <ArticleId IdType="pmc">PMC123456</ArticleId>
+      </ArticleIdList>
+    </PubmedData>
+  </PubmedArticle>
+</PubmedArticleSet>`;
+
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes("esearch.fcgi")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ esearchresult: { idlist: ["12345678"] } }),
+        });
+      }
+      if (url.includes("efetch.fcgi")) {
+        return Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve(efetchXml),
+        });
+      }
+      return Promise.reject(new Error(`Unexpected URL: ${url}`));
+    });
+
+    const result = await searchPubMed({ keywords: ["cell state"] });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      id: "12345678",
+      title: "Cell-state dynamics in test systems",
+      authors: ["Ada Lovelace", "Grace Hopper"],
+      abstract: "Background: Background abstract.\n\nDetailed abstract body.",
+      url: "https://pubmed.ncbi.nlm.nih.gov/12345678/",
+      pdfUrl: "https://pmc.ncbi.nlm.nih.gov/articles/PMC123456/pdf",
+      publishedDate: "2025-03-10",
+      source: "pubmed",
+    });
   });
 });

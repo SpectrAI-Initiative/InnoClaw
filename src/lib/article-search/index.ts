@@ -5,13 +5,28 @@
  * source-specific clients (arXiv, Hugging Face) and applies caching.
  */
 
-import type { Article, SearchParams, SearchResult } from "./types";
+import {
+  SEARCHABLE_ARTICLE_SOURCES,
+  type Article,
+  type SearchParams,
+  type SearchResult,
+} from "./types";
 import { searchArxiv } from "./arxiv";
 import { searchHuggingFace } from "./huggingface";
 import { searchSemanticScholar } from "./semantic-scholar";
+import { searchBioRxiv } from "./biorxiv";
+import { searchPubMed } from "./pubmed";
+import { searchPubChem } from "./pubchem";
 import { SearchCache } from "./cache";
 
-export type { Article, SearchParams, SearchResult, ArticleSource } from "./types";
+export {
+  ALL_ARTICLE_SOURCES,
+  SEARCHABLE_ARTICLE_SOURCES,
+  type Article,
+  type SearchParams,
+  type SearchResult,
+  type ArticleSource,
+} from "./types";
 
 /** Shared cache instance (15-minute TTL). */
 const cache = new SearchCache<Article[]>(15);
@@ -24,7 +39,7 @@ const cache = new SearchCache<Article[]>(15);
 export async function searchArticles(
   params: SearchParams
 ): Promise<SearchResult> {
-  const sources = params.sources ?? ["arxiv", "huggingface", "semantic-scholar"];
+  const sources = params.sources ?? [...SEARCHABLE_ARTICLE_SOURCES];
   const allArticles: Article[] = [];
   const errors: Record<string, string> = {};
 
@@ -47,6 +62,12 @@ export async function searchArticles(
         articles = await searchHuggingFace(params);
       } else if (source === "semantic-scholar") {
         articles = await searchSemanticScholar(params);
+      } else if (source === "biorxiv") {
+        articles = await searchBioRxiv(params);
+      } else if (source === "pubmed") {
+        articles = await searchPubMed(params);
+      } else if (source === "pubchem") {
+        articles = await searchPubChem(params);
       } else {
         articles = [];
       }

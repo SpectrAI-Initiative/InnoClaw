@@ -9,6 +9,7 @@ export const ALL_TOOLS = [
   "listDirectory",
   "grep",
   "searchArticles",
+  "readPaper",
   "listMcpTools",
 ] as const;
 

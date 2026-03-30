@@ -57,6 +57,7 @@ type ProviderOption = {
   name: string;
   models: ModelOption[];
 };
+type AgentModelOptionsKey = readonly ["agent-model-options", ...ProviderId[]];
 
 function normalizeModelKey(modelId: string): string {
   return modelId.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
@@ -295,13 +296,19 @@ export function AgentPanel({
     return configured.filter((id): id is ProviderId => Boolean(PROVIDERS[id as ProviderId]));
   }, [settings?.configuredProviders]);
 
+  const modelOptionsKey = useMemo<AgentModelOptionsKey | null>(() => {
+    if (configuredProviderIds.length === 0) {
+      return null;
+    }
+    return ["agent-model-options", ...configuredProviderIds];
+  }, [configuredProviderIds]);
+
   const { data: discoveredModelsByProvider, mutate: refreshDiscoveredModels } = useSWR<
     Record<string, ModelOption[]>
   >(
-    configuredProviderIds.length > 0
-      ? (["agent-model-options", ...configuredProviderIds] as const)
-      : null,
-    async ([, ...providerIds]) => {
+    modelOptionsKey,
+    async (key: AgentModelOptionsKey) => {
+      const [, ...providerIds] = key;
       const entries = await Promise.all(
         providerIds.map(async (providerId) => {
           try {
@@ -318,23 +325,23 @@ export function AgentPanel({
   );
 
   const availableProviders = useMemo<ProviderOption[]>(() => {
-    return configuredProviderIds
-      .map((id) => {
-        const provider = PROVIDERS[id];
-        if (!provider) return null;
+    const providers: ProviderOption[] = [];
+    for (const id of configuredProviderIds) {
+      const provider = PROVIDERS[id];
+      if (!provider) continue;
 
-        const knownIds = new Set(provider.models.map((model) => model.id));
-        const extraModels = (discoveredModelsByProvider?.[id] ?? []).filter(
-          (model) => !knownIds.has(model.id),
-        );
+      const knownIds = new Set(provider.models.map((model) => model.id));
+      const extraModels = (discoveredModelsByProvider?.[id] ?? []).filter(
+        (model) => !knownIds.has(model.id),
+      );
 
-        return {
-          id: provider.id,
-          name: provider.name,
-          models: [...provider.models, ...extraModels],
-        };
-      })
-      .filter((provider): provider is ProviderOption => provider !== null);
+      providers.push({
+        id: provider.id,
+        name: provider.name,
+        models: [...provider.models, ...extraModels],
+      });
+    }
+    return providers;
   }, [configuredProviderIds, discoveredModelsByProvider]);
 
   const settingsFallback = useMemo<ModelSelection | null>(() => {
@@ -761,6 +768,15 @@ export function AgentPanel({
   // Resolved provider/model (avoids repeating fallback chain)
   const resolvedProvider = selectedProvider ?? settings?.llmProvider ?? DEFAULT_PROVIDER;
   const resolvedModel = selectedModel ?? settings?.llmModel ?? DEFAULT_MODEL;
+  const resolvedProviderName = useMemo(
+    () => PROVIDERS[resolvedProvider as ProviderId]?.name ?? resolvedProvider,
+    [resolvedProvider]
+  );
+  const resolvedModelDisplayName = useMemo(() => {
+    const provider = PROVIDERS[resolvedProvider as ProviderId];
+    const model = provider?.models.find((m) => m.id === resolvedModel);
+    return model?.name ?? resolvedModel;
+  }, [resolvedProvider, resolvedModel]);
 
   const overflowThreshold = getOverflowThresholdChars(
     resolvedProvider,
@@ -1190,6 +1206,19 @@ export function AgentPanel({
 
   return (
     <div ref={containerRef} className="relative flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm overflow-hidden">
+      <div className="relative z-10 flex items-center justify-between gap-3 border-b border-agent-border/70 bg-agent-bg/90 px-3 py-2 backdrop-blur-sm shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <Bot className="h-4 w-4 shrink-0 text-agent-accent" />
+          <span className="text-xs text-agent-muted shrink-0">Current model</span>
+          <Badge variant="outline" className="max-w-[220px] truncate text-[10px]">
+            {resolvedModelDisplayName}
+          </Badge>
+        </div>
+        <Badge variant="secondary" className="max-w-[160px] truncate text-[10px] shrink-0">
+          {resolvedProviderName}
+        </Badge>
+      </div>
+
       {/* Messages */}
       <ScrollArea className="relative z-10 flex-1 [&_[data-slot=scroll-area-viewport]]:!overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:hidden" ref={scrollRef}>
         <div className="p-3 space-y-5 overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>

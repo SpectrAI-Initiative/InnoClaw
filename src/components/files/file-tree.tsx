@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { PAPER_ELIGIBLE_EXTENSIONS, CODE_EXTS, IMAGE_EXTS } from "@/lib/constants";
+import { CODE_EXTS, IMAGE_EXTS } from "@/lib/constants";
 import { useClipboard as useSystemClipboard } from "@/lib/hooks/use-clipboard";
 import {
   ChevronRight,
@@ -20,8 +20,6 @@ import {
   Scissors,
   ClipboardPaste,
   ClipboardCopy,
-  MessageSquare,
-  Lightbulb,
 } from "lucide-react";
 import {
   ContextMenu,
@@ -79,8 +77,6 @@ interface FileTreeProps {
   onRefresh: () => void;
   selectedPath: string | null;
   refreshKey?: number;
-  onDiscussFile?: (path: string) => void;
-  onIdeateFile?: (path: string) => void;
 }
 
 function getFileIcon(name: string, type: string) {
@@ -106,8 +102,6 @@ interface TreeNodeProps {
   onRefresh: () => void;
   selectedPath: string | null;
   refreshKey?: number;
-  onDiscussFile?: (path: string) => void;
-  onIdeateFile?: (path: string) => void;
 }
 
 function TreeNode({
@@ -117,8 +111,6 @@ function TreeNode({
   onRefresh,
   selectedPath,
   refreshKey,
-  onDiscussFile,
-  onIdeateFile,
 }: TreeNodeProps) {
   const t = useTranslations("files");
   const tCommon = useTranslations("common");
@@ -452,23 +444,6 @@ function TreeNode({
               {tCommon("open")}
             </ContextMenuItem>
           )}
-          {!isDirectory && PAPER_ELIGIBLE_EXTENSIONS.some((ext) => entry.name.toLowerCase().endsWith(`.${ext}`)) && (onDiscussFile || onIdeateFile) && (
-            <>
-              <ContextMenuSeparator />
-              {onDiscussFile && (
-                <ContextMenuItem onClick={() => onDiscussFile(entry.path)}>
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  {t("discussPaper")}
-                </ContextMenuItem>
-              )}
-              {onIdeateFile && (
-                <ContextMenuItem onClick={() => onIdeateFile(entry.path)}>
-                  <Lightbulb className="mr-2 h-4 w-4" />
-                  {t("ideatePaper")}
-                </ContextMenuItem>
-              )}
-            </>
-          )}
           <ContextMenuItem onClick={handleCopy}>
             <Copy className="mr-2 h-4 w-4" />
             {t("copy")}
@@ -556,8 +531,6 @@ function TreeNode({
                 onRefresh={onRefresh}
                 selectedPath={selectedPath}
                 refreshKey={refreshKey}
-                onDiscussFile={onDiscussFile}
-                onIdeateFile={onIdeateFile}
               />
             ))
           )}
@@ -573,8 +546,6 @@ export function FileTree({
   onRefresh,
   selectedPath,
   refreshKey,
-  onDiscussFile,
-  onIdeateFile,
 }: FileTreeProps) {
   const t = useTranslations("files");
   const tCommon = useTranslations("common");
@@ -626,8 +597,6 @@ export function FileTree({
           onRefresh={onRefresh}
           selectedPath={selectedPath}
           refreshKey={refreshKey}
-          onDiscussFile={onDiscussFile}
-          onIdeateFile={onIdeateFile}
         />
       ))}
     </div>

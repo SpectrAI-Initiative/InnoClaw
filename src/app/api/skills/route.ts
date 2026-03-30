@@ -5,11 +5,14 @@ import { eq, or, isNull, and, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { slugify } from "@/lib/utils/slugify";
 import { parseSkillRow } from "@/lib/db/skills-utils";
+import { ensureProjectDefaultSkills } from "@/lib/db/default-skills";
 
 // GET /api/skills?workspaceId=xxx
 // Returns global skills + workspace-specific skills
 export async function GET(request: NextRequest) {
   try {
+    await ensureProjectDefaultSkills();
+
     const { searchParams } = new URL(request.url);
     const workspaceId = searchParams.get("workspaceId");
 

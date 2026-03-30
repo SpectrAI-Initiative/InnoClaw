@@ -12,7 +12,6 @@ import { Header } from "@/components/layout/header";
 import { FileBrowser } from "@/components/files/file-browser";
 import { AgentPanel } from "@/components/agent/agent-panel";
 import { AgentSessionTabs } from "@/components/agent/agent-session-tabs";
-import { PaperStudyPanel } from "@/components/paper-study/paper-study-panel";
 import { ArticlePreview } from "@/components/paper-study/article-preview";
 import { NotesPanel } from "@/components/notes/notes-panel";
 import { FilePreviewPanel } from "@/components/preview/file-preview-panel";
@@ -22,14 +21,12 @@ import { useAgentSessions } from "@/lib/hooks/use-agent-sessions";
 import { usePreviewTabs } from "@/lib/hooks/use-preview-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Bot, GraduationCap, Server, FlaskConical, Microscope, Maximize2, Loader2 } from "lucide-react";
-import { ClusterPanel } from "@/components/cluster/cluster-panel";
-import { ResearchExecPanel } from "@/components/research-exec/research-exec-panel";
+import { Bot, Microscope, Maximize2, Loader2 } from "lucide-react";
 import { DeepResearchPanel } from "@/components/deep-research/deep-research-panel";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LanguageToggle } from "@/components/layout/language-toggle";
 
-type MiddlePanel = "agent" | "report" | "paperStudy" | "cluster" | "research" | "deepResearch";
+type MiddlePanel = "agent" | "report" | "deepResearch";
 
 export default function WorkspacePage({
   params,
@@ -57,8 +54,6 @@ export default function WorkspacePage({
     renameSession,
   } = useAgentSessions(workspaceId);
   const t = useTranslations("report");
-  const tc = useTranslations("cluster");
-  const tRex = useTranslations("researchExec");
   const tCommon = useTranslations("common");
   const [loadingSessions, setLoadingSessions] = useState<Record<string, boolean>>({});
   const [extractingArticle, setExtractingArticle] = useState(false);
@@ -152,8 +147,6 @@ export default function WorkspacePage({
               isGitRepo={workspace.isGitRepo}
               onFileSelect={openFileTab}
               selectedFilePath={null}
-              onDiscussFile={(path) => handleFileToArticle(path)}
-              onIdeateFile={(path) => handleFileToArticle(path)}
             />
           </ResizablePanel>
 
@@ -193,39 +186,6 @@ export default function WorkspacePage({
                         >
                           <Bot className="h-3.5 w-3.5" />
                           <span className="text-xs hidden lg:inline">Agent</span>
-                        </Button>
-                        <Button
-                          variant={middlePanel === "paperStudy" ? "default" : "ghost"}
-                          size="sm"
-                          onClick={() => setMiddlePanel("paperStudy")}
-                          title={t("paperStudyToggle")}
-                          aria-label={t("paperStudyToggle")}
-                          className="h-7 px-2 gap-1"
-                        >
-                          <GraduationCap className="h-3.5 w-3.5" />
-                          <span className="text-xs hidden lg:inline">Paper</span>
-                        </Button>
-                        <Button
-                          variant={middlePanel === "cluster" ? "default" : "ghost"}
-                          size="sm"
-                          onClick={() => setMiddlePanel("cluster")}
-                          title={tc("clusterToggle")}
-                          aria-label={tc("clusterToggle")}
-                          className="h-7 px-2 gap-1"
-                        >
-                          <Server className="h-3.5 w-3.5" />
-                          <span className="text-xs hidden lg:inline">Cluster</span>
-                        </Button>
-                        <Button
-                          variant={middlePanel === "research" ? "default" : "ghost"}
-                          size="sm"
-                          onClick={() => setMiddlePanel("research")}
-                          title={tRex("panelToggle")}
-                          aria-label={tRex("panelToggle")}
-                          className="h-7 px-2 gap-1"
-                        >
-                          <FlaskConical className="h-3.5 w-3.5" />
-                          <span className="text-xs hidden lg:inline">Research</span>
                         </Button>
                         <Button
                           variant={middlePanel === "deepResearch" ? "default" : "ghost"}
@@ -285,27 +245,9 @@ export default function WorkspacePage({
                       </div>
                     </div>
                   </div>
-                  <div className={middlePanel === "paperStudy" ? "flex-1 min-h-0" : "hidden"}>
-                    <PaperStudyPanel
-                      workspaceId={workspaceId}
-                      onArticleSelect={(a) => { if (a) openArticleTab(a); }}
-                    />
+                  <div className={middlePanel === "deepResearch" ? "flex-1 min-h-0" : "hidden"}>
+                    <DeepResearchPanel workspaceId={workspaceId} />
                   </div>
-                  {middlePanel === "cluster" && (
-                    <div className="flex-1 min-h-0">
-                      <ClusterPanel workspaceId={workspaceId} />
-                    </div>
-                  )}
-                  {middlePanel === "research" && (
-                    <div className="flex-1 min-h-0">
-                      <ResearchExecPanel workspaceId={workspaceId} />
-                    </div>
-                  )}
-                  {middlePanel === "deepResearch" && (
-                    <div className="flex-1 min-h-0">
-                      <DeepResearchPanel workspaceId={workspaceId} />
-                    </div>
-                  )}
                 </div>
               </ResizablePanel>
 

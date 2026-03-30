@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchArticles } from "@/lib/article-search";
-import type { ArticleSource } from "@/lib/article-search";
+import {
+  SEARCHABLE_ARTICLE_SOURCES,
+  type ArticleSource,
+} from "@/lib/article-search";
 
-const VALID_SOURCES = new Set<string>(["arxiv", "huggingface", "semantic-scholar"]);
+const VALID_SOURCES = new Set<string>(SEARCHABLE_ARTICLE_SOURCES);
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,14 +18,14 @@ export async function POST(req: NextRequest) {
       ? sources.filter((s: string) => VALID_SOURCES.has(s)) as ArticleSource[]
       : undefined;
 
-    // When no keywords, only HuggingFace daily papers work (arXiv/semantic-scholar require keywords)
+    // When no keywords, only HuggingFace daily papers work.
     const effectiveSources: ArticleSource[] | undefined = keywordList.length === 0
       ? ["huggingface"]
       : (requestedSources && requestedSources.length > 0 ? requestedSources : undefined);
 
     if (keywordList.length === 0 && effectiveSources?.every(s => s !== "huggingface")) {
       return NextResponse.json(
-        { error: "Keywords are required for arXiv search" },
+        { error: "Keywords are required for non-HuggingFace search" },
         { status: 400 }
       );
     }

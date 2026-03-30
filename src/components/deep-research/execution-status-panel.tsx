@@ -33,7 +33,6 @@ import type { RemoteExecutionProfile, RJobProfileConfig } from "@/lib/research-e
 interface ExecutionStatusPanelProps {
   executions: PersistedExecutionRecord[];
   workspaceId: string;
-  sessionId: string;
   remoteProfileId: string | null;
   onBindProfile: (profileId: string | null) => void;
 }
@@ -59,7 +58,6 @@ function rjobSummary(jsonStr: string | null | undefined): string | null {
 export const ExecutionStatusPanel = memo(function ExecutionStatusPanel({
   executions,
   workspaceId,
-  sessionId: _sessionId,
   remoteProfileId,
   onBindProfile,
 }: ExecutionStatusPanelProps) {
@@ -265,7 +263,7 @@ export const ExecutionStatusPanel = memo(function ExecutionStatusPanel({
         {/* ============== Execution Records Section ============== */}
         {executions.length === 0 ? (
           <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
-            No execution records yet. They will appear during the experiment execution phase.
+            No execution records yet. They will appear once execution tasks start running.
           </div>
         ) : (
           <>

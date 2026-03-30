@@ -61,7 +61,7 @@ function parseSkillMd(content, fallbackName, fallbackSlug) {
   const name = getQuotedValue("name") || fallbackName;
   const description = getQuotedValue("description") || null;
 
-  // Parse allowed-tools as YAML list
+  // Parse allowed-tools as YAML list, with CSV fallback for older files
   let allowedTools = null;
   const toolsMatch = frontmatter.match(
     /^allowed-tools:\s*\n((?:\s+-\s+.+\n?)*)/m
@@ -71,6 +71,14 @@ function parseSkillMd(content, fallbackName, fallbackSlug) {
       .split("\n")
       .map((l) => l.replace(/^\s*-\s*/, "").trim())
       .filter(Boolean);
+  } else {
+    const allowedToolsRaw = getValue("allowed-tools");
+    if (allowedToolsRaw) {
+      allowedTools = allowedToolsRaw
+        .split(",")
+        .map((l) => l.trim())
+        .filter(Boolean);
+    }
   }
 
   return { name, slug: fallbackSlug, description, systemPrompt: body, allowedTools };

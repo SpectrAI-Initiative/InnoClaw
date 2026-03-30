@@ -1,5 +1,5 @@
 // =============================================================
-// Deep Research — Stale Plan Detector (Phase 2)
+// Deep Research — Stale Plan Detector
 // =============================================================
 
 import type { DeepResearchNode, RequirementDiff } from "./types";

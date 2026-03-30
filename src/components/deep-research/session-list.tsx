@@ -71,7 +71,7 @@ export function SessionList({ sessions, onSelect, onCreateNew, onDeleted }: Sess
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">{s.title}</div>
                       <div className="text-xs text-muted-foreground mt-0.5">
-                        {new Date(s.createdAt).toLocaleDateString()} &middot; {s.phase}
+                        {new Date(s.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                     <Badge className={STATUS_COLORS[s.status] || ""} variant="secondary">

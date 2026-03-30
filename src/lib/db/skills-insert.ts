@@ -10,6 +10,11 @@ import { nanoid } from "nanoid";
 import type { SkillExportData } from "@/types";
 import { slugify } from "@/lib/utils/slugify";
 
+function stripWrappingQuotes(value: string | undefined | null): string | null {
+  if (!value) return null;
+  return value.replace(/^["']|["']$/g, "");
+}
+
 /** Import a single SkillExportData into the DB, returns the inserted skill id or null */
 export async function insertSkill(
   data: SkillExportData,
@@ -104,25 +109,34 @@ export function parseSkillMd(
     return m?.[1]?.trim();
   };
 
-  const name = getValue("name") || fallbackSlug;
-  const description = getValue("description") || null;
-  const slugFromFrontmatter = getValue("slug");
+  const name = stripWrappingQuotes(getValue("name")) || fallbackSlug;
+  const description = stripWrappingQuotes(getValue("description"));
+  const slugFromFrontmatter = stripWrappingQuotes(getValue("slug"));
   const slug = slugFromFrontmatter || fallbackSlug || slugify(name);
 
-  // Extract allowed-tools from command frontmatter (e.g., "Bash(git add:*), Bash(git commit:*)")
-  const allowedToolsRaw = getValue("allowed-tools");
+  // Extract allowed-tools from either a YAML list or a single-line CSV value.
   let allowedTools: string[] | null = null;
-  if (allowedToolsRaw) {
-    // Extract tool names from patterns like "Bash(git add:*)" → "bash"
-    const toolNames = new Set<string>();
-    for (const part of allowedToolsRaw.split(",")) {
-      const toolMatch = part.trim().match(/^(\w+)/);
-      if (toolMatch) {
-        toolNames.add(toolMatch[1].toLowerCase());
-      }
+  const allowedToolsBlock = frontmatter.match(
+    /^allowed-tools:\s*\n((?:\s+-\s+.+\n?)*)/m
+  );
+  if (allowedToolsBlock) {
+    const tools = allowedToolsBlock[1]
+      .split("\n")
+      .map((line) => line.replace(/^\s*-\s*/, "").trim())
+      .filter(Boolean);
+    if (tools.length > 0) {
+      allowedTools = Array.from(new Set(tools));
     }
-    if (toolNames.size > 0) {
-      allowedTools = Array.from(toolNames);
+  } else {
+    const allowedToolsRaw = getValue("allowed-tools");
+    if (allowedToolsRaw) {
+      const tools = allowedToolsRaw
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean);
+      if (tools.length > 0) {
+        allowedTools = Array.from(new Set(tools));
+      }
     }
   }
 

@@ -1,13 +1,6 @@
 import type { ModelMessage, UserContent, TextPart, ImagePart } from "ai";
 import { extractPaperContent, extractPaperFullText, type PaperContentPart } from "./extract-paper-content";
-
-interface ArticleRef {
-  id?: string;
-  url: string;
-  source: string;
-  pdfUrl?: string;
-  title?: string;
-}
+import type { PaperArticleRef } from "./article-ref";
 
 interface PaperModelContext {
   paperContent?: PaperContentPart[];
@@ -38,7 +31,7 @@ function paperContentToUserContent(parts: PaperContentPart[]): UserContentPart[]
 }
 
 export async function buildPaperModelContext(
-  article: ArticleRef,
+  article: PaperArticleRef,
   visionCapable: boolean,
   maxTextChars: number = 30_000,
   maxImagePages: number = 20,
@@ -68,7 +61,7 @@ export async function buildPaperModelContext(
 }
 
 export function buildPaperChatContextMessage(
-  article: Pick<ArticleRef, "title">,
+  article: Pick<PaperArticleRef, "title">,
   context: PaperModelContext,
   supportsVision: boolean,
 ): ModelMessage | null {

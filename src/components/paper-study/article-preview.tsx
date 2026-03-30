@@ -269,6 +269,21 @@ export function ArticlePreview({
   const date = article?.publishedDate
     ? new Date(article.publishedDate).toLocaleDateString()
     : "";
+  const sourceLabel = !article
+    ? ""
+    : article.source === "arxiv"
+      ? t("sourceArxiv")
+      : article.source === "semantic-scholar"
+        ? t("sourceSemanticScholar")
+        : article.source === "biorxiv"
+          ? t("sourceBioRxiv")
+          : article.source === "pubmed"
+            ? t("sourcePubMed")
+            : article.source === "pubchem"
+              ? t("sourcePubChem")
+              : article.source === "local"
+                ? t("sourceLocal")
+                : t("sourceHuggingFace");
 
   // Chat transport with article context — stable reference per article + relatedNotes
   const chatId = article
@@ -716,13 +731,7 @@ export function ArticlePreview({
             <ScrollArea className="h-full p-4">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <Badge variant="secondary" className="text-xs">
-                  {article.source === "arxiv"
-                    ? t("sourceArxiv")
-                    : article.source === "semantic-scholar"
-                      ? t("sourceSemanticScholar")
-                      : article.source === "local"
-                        ? t("sourceLocal")
-                        : t("sourceHuggingFace")}
+                  {sourceLabel}
                 </Badge>
                 {date && (
                   <span className="text-xs text-muted-foreground">

@@ -1,7 +1,7 @@
 /**
  * arXiv API client.
  *
- * Uses the arXiv Atom API (http://export.arxiv.org/api/query) to search for
+ * Uses the arXiv Atom API (https://export.arxiv.org/api/query) to search for
  * papers by keyword, with optional date filtering.
  *
  * Rate-limit: arXiv asks for a 3-second delay between requests.
@@ -9,6 +9,11 @@
  */
 
 import type { Article, SearchParams } from "./types";
+import {
+  buildArxivAbsUrl,
+  extractArxivIdFromUrl,
+  normalizeArxivUrl,
+} from "./url-utils";
 
 const ARXIV_API_URL = "https://export.arxiv.org/api/query";
 
@@ -74,7 +79,7 @@ function parseAtomResponse(xml: string): Article[] {
       return match ? match[1].trim() : "";
     };
 
-    const id = getTag("id");
+    const rawId = getTag("id");
     const title = getTag("title").replace(/\s+/g, " ");
     const abstract = getTag("summary").replace(/\s+/g, " ");
     const published = getTag("published");
@@ -87,18 +92,20 @@ function parseAtomResponse(xml: string): Article[] {
     const pdfMatch = entry.match(
       /<link[^>]*title="pdf"[^>]*href="([^"]+)"/
     );
-    const pdfUrl = pdfMatch ? pdfMatch[1] : undefined;
+    const pdfUrl = pdfMatch ? normalizeArxivUrl(pdfMatch[1]) : undefined;
 
-    // arXiv ID from the full URL (handle http/https and optional www)
-    const arxivId = id.replace(/^https?:\/\/(?:www\.)?arxiv\.org\/abs\//, "");
+    const normalizedIdUrl = rawId ? normalizeArxivUrl(rawId) : "";
+    const arxivId = normalizedIdUrl
+      ? extractArxivIdFromUrl(normalizedIdUrl) ?? normalizedIdUrl
+      : "";
 
-    if (title && id) {
+    if (title && rawId) {
       articles.push({
         id: arxivId,
         title,
         authors,
         abstract,
-        url: id,
+        url: buildArxivAbsUrl(arxivId),
         pdfUrl,
         publishedDate: published,
         source: "arxiv",
