@@ -1,38 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exec } from "child_process";
 import path from "path";
+import { z } from "zod";
 import { validatePath } from "@/lib/files/filesystem";
 import { buildSafeExecEnv, resolveHome } from "@/lib/env";
 
 const EXEC_TIMEOUT = 30_000; // 30 seconds
 const MAX_COMMAND_LENGTH = 4096;
 
+const ExecBodySchema = z.object({
+  command: z.string().min(1).max(MAX_COMMAND_LENGTH).refine(
+    (s) => !s.includes("\0"),
+    { message: "Invalid input: contains null bytes" }
+  ),
+  cwd: z.string().min(1).refine(
+    (s) => !s.includes("\0"),
+    { message: "Invalid input: contains null bytes" }
+  ),
+});
+
 export async function POST(req: NextRequest) {
   try {
-    const { command, cwd } = await req.json();
-
-    if (!command || typeof command !== "string") {
-      return NextResponse.json({ error: "Missing command" }, { status: 400 });
+    const parsed = ExecBodySchema.safeParse(await req.json());
+    if (!parsed.success) {
+      const msg = parsed.error.issues.map((i) => i.message).join("; ");
+      return NextResponse.json({ error: msg }, { status: 400 });
     }
-
-    if (!cwd || typeof cwd !== "string") {
-      return NextResponse.json({ error: "Missing cwd" }, { status: 400 });
-    }
-
-    // Reject null bytes and overly long commands
-    if (command.includes("\0") || cwd.includes("\0")) {
-      return NextResponse.json(
-        { error: "Invalid input: contains null bytes" },
-        { status: 400 }
-      );
-    }
-
-    if (command.length > MAX_COMMAND_LENGTH) {
-      return NextResponse.json(
-        { error: `Command too long (max ${MAX_COMMAND_LENGTH} characters)` },
-        { status: 400 }
-      );
-    }
+    const { command, cwd } = parsed.data;
 
     // Validate the working directory is within allowed workspace roots
     let validatedCwd: string;

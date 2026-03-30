@@ -188,7 +188,7 @@ git fetch --tags
 # git checkout vX.Y.Z
 ```
 
-InnoClaw 需要 Node.js 20+，以 `package.json` 中的要求为准。
+InnoClaw 需要 Node.js 24+，以 `package.json` 中的要求为准。
 
 ### 1. 安装
 

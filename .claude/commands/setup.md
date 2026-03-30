@@ -28,7 +28,7 @@ You are an interactive setup assistant for the InnoClaw project. Guide the user 
 
 Verify the following are installed and meet minimum versions:
 
-1. **Node.js** — Run `node --version`, require >= 20.9.0
+1. **Node.js** — Run `node --version`, require >= 24.0.0
 2. **npm** — Run `npm --version`
 3. **Git** — Run `git --version`
 

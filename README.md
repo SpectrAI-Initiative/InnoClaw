@@ -198,7 +198,7 @@ git fetch --tags
 # git checkout vX.Y.Z
 ```
 
-InnoClaw requires Node.js 20+ (`package.json` is the source of truth for runtime requirements).
+InnoClaw requires Node.js 24+ (`package.json` is the source of truth for runtime requirements).
 
 ### 1. Install
 
