@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,6 +25,10 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { modelSupportsVision, PROVIDERS, CONTEXT_MODES } from "@/lib/ai/models";
+import {
+  resolveModelSelection,
+  type ModelCatalogEntry,
+} from "@/lib/ai/model-selection";
 import { cn } from "@/lib/utils";
 import { ScheduledTasksCard } from "@/components/scheduled-tasks/scheduled-tasks-card";
 import { useStyleTheme } from "@/lib/hooks/use-style-theme";
@@ -79,27 +83,87 @@ export default function SettingsPage() {
   });
   const [k8sSaving, setK8sSaving] = useState(false);
 
+  const mergeModelOptions = useCallback(
+    (providerId: string, remote: ModelCatalogEntry[] = []) => {
+      const knownModels = PROVIDERS[providerId as keyof typeof PROVIDERS]?.models || [];
+      const knownIds = new Set(knownModels.map((entry) => entry.id));
+      return [...knownModels, ...remote.filter((entry) => !knownIds.has(entry.id))];
+    },
+    [],
+  );
+
+  const applyResolvedSelection = useCallback(
+    (providerId: string, requestedModel: string, remote: ModelCatalogEntry[] = []) => {
+      const trimmedModel = requestedModel.trim();
+      if (!trimmedModel) {
+        setModel("__custom__");
+        setCustomModel("");
+        return;
+      }
+
+      const providerName = PROVIDERS[providerId as keyof typeof PROVIDERS]?.name ?? providerId;
+      const resolved = resolveModelSelection(
+        { provider: providerId, model: trimmedModel },
+        [{
+          id: providerId,
+          name: providerName,
+          models: mergeModelOptions(providerId, remote),
+        }],
+        { unmatchedKind: remote.length > 0 ? "not-found" : "custom" },
+      );
+
+      if (resolved && resolved.matchKind !== "unmatched") {
+        setModel(resolved.resolvedModel);
+        setCustomModel("");
+        return;
+      }
+
+      setModel("__custom__");
+      setCustomModel(trimmedModel);
+    },
+    [mergeModelOptions],
+  );
+
+  const effectiveModel = model === "__custom__" ? customModel : model;
+
   const fetchRemoteModels = useCallback(
-    async (prov: string) => {
+    async (
+      prov: string,
+      options?: {
+        silent?: boolean;
+        requestedModel?: string;
+      },
+    ) => {
       setFetchingModels(true);
       try {
         const res = await fetch(`/api/models?provider=${prov}`);
         const data = await res.json();
         if (res.ok && Array.isArray(data.models)) {
           setRemoteModels(data.models);
-          toast.success(
-            t("fetchModelsSuccess", { count: data.models.length }),
+          applyResolvedSelection(
+            prov,
+            options?.requestedModel ?? "",
+            data.models,
           );
+          if (!options?.silent) {
+            toast.success(
+              t("fetchModelsSuccess", { count: data.models.length }),
+            );
+          }
         } else {
-          toast.error(data.error || tCommon("error"));
+          if (!options?.silent) {
+            toast.error(data.error || tCommon("error"));
+          }
         }
       } catch {
-        toast.error(tCommon("error"));
+        if (!options?.silent) {
+          toast.error(tCommon("error"));
+        }
       } finally {
         setFetchingModels(false);
       }
     },
-    [t, tCommon],
+    [applyResolvedSelection, t, tCommon],
   );
 
   useEffect(() => {
@@ -110,16 +174,7 @@ export default function SettingsPage() {
         const prov = data.llmProvider || "openai";
         setProvider(prov);
         const m = data.llmModel || "gpt-4o-mini";
-        const known = (
-          PROVIDERS[prov as keyof typeof PROVIDERS]?.models || []
-        ).some((pm) => pm.id === m);
-        if (known) {
-          setModel(m);
-          setCustomModel("");
-        } else {
-          setModel("__custom__");
-          setCustomModel(m);
-        }
+        applyResolvedSelection(prov, m);
         setContextMode(data.contextMode || "normal");
         setMaxMode(data.maxMode ?? true);
         if (data.providerBaseUrls) {
@@ -128,11 +183,11 @@ export default function SettingsPage() {
         if (data.k8sConfig) {
           setK8sConfig(data.k8sConfig);
         }
+        if (data.providerKeys?.[prov]) {
+          void fetchRemoteModels(prov, { silent: true, requestedModel: m });
+        }
       });
-  }, []);
-
-  /** The model ID that will be saved */
-  const effectiveModel = model === "__custom__" ? customModel : model;
+  }, [applyResolvedSelection, fetchRemoteModels]);
 
   const handleSave = async () => {
     if (!effectiveModel.trim()) {
@@ -273,14 +328,30 @@ export default function SettingsPage() {
 
   const providerModels =
     PROVIDERS[provider as keyof typeof PROVIDERS]?.models || [];
-  const selectedKnownModel = providerModels.find((m) => m.id === model);
-  const selectedKnownModelSupportsVision = selectedKnownModel
-    ? modelSupportsVision(provider, selectedKnownModel.id)
-    : null;
-
-  // Merge hardcoded models with remote models, avoiding duplicates
-  const hardcodedIds = new Set<string>(providerModels.map((m) => m.id));
-  const extraRemote = remoteModels.filter((m) => !hardcodedIds.has(m.id));
+  const mergedModelOptions = useMemo(
+    () => mergeModelOptions(provider, remoteModels),
+    [mergeModelOptions, provider, remoteModels],
+  );
+  const resolvedCurrentSelection = useMemo(() => {
+    const trimmedModel = effectiveModel.trim();
+    if (!trimmedModel) return null;
+    const providerName = PROVIDERS[provider as keyof typeof PROVIDERS]?.name ?? provider;
+    return resolveModelSelection(
+      { provider, model: trimmedModel },
+      [{ id: provider, name: providerName, models: mergedModelOptions }],
+      { unmatchedKind: remoteModels.length > 0 ? "not-found" : "custom" },
+    );
+  }, [effectiveModel, mergedModelOptions, provider, remoteModels.length]);
+  const selectedKnownModelSupportsVision =
+    resolvedCurrentSelection?.matchKind !== "unmatched" && resolvedCurrentSelection
+      ? modelSupportsVision(provider, resolvedCurrentSelection.resolvedModel)
+      : null;
+  const triggerModelLabel = resolvedCurrentSelection?.displayName
+    || effectiveModel.trim()
+    || t("customModel");
+  const extraRemote = mergedModelOptions.filter(
+    (entry) => !providerModels.some((modelEntry) => modelEntry.id === entry.id),
+  );
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -409,6 +480,12 @@ export default function SettingsPage() {
                       if (firstModel) {
                         setModel(firstModel);
                         setCustomModel("");
+                        if (settings?.providerKeys?.[v]) {
+                          void fetchRemoteModels(v, {
+                            silent: true,
+                            requestedModel: firstModel,
+                          });
+                        }
                       }
                     }}
                   >
@@ -432,7 +509,7 @@ export default function SettingsPage() {
                       variant="outline"
                       size="sm"
                       disabled={fetchingModels}
-                      onClick={() => fetchRemoteModels(provider)}
+                      onClick={() => fetchRemoteModels(provider, { requestedModel: effectiveModel })}
                     >
                       {fetchingModels
                         ? t("fetchingModels")
@@ -447,7 +524,31 @@ export default function SettingsPage() {
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        <span className="truncate">{triggerModelLabel}</span>
+                        {resolvedCurrentSelection?.unmatchedKind && (
+                          <Badge
+                            variant="outline"
+                            className="shrink-0 px-1 py-0 text-[10px] leading-4 border-slate-500/40 text-slate-700 dark:text-slate-300"
+                          >
+                            {resolvedCurrentSelection.unmatchedKind === "not-found"
+                              ? tCommon("modelNotFound")
+                              : tCommon("customModel")}
+                          </Badge>
+                        )}
+                        {typeof selectedKnownModelSupportsVision === "boolean" && (
+                          <Badge
+                            variant="outline"
+                            className={`shrink-0 px-1 py-0 text-[10px] leading-4 ${
+                              selectedKnownModelSupportsVision
+                                ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                                : "border-amber-500/40 text-amber-700 dark:text-amber-300"
+                            }`}
+                          >
+                            {selectedKnownModelSupportsVision ? tCommon("multimodal") : tCommon("textOnly")}
+                          </Badge>
+                        )}
+                      </div>
                     </SelectTrigger>
                     <SelectContent>
                       {providerModels.map((m) => (
@@ -493,6 +594,19 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground">
                       {selectedKnownModelSupportsVision ? tCommon("multimodal") : tCommon("textOnly")}
                     </p>
+                  )}
+                  {resolvedCurrentSelection?.unmatchedKind && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Badge
+                        variant="outline"
+                        className="px-1 py-0 text-[10px] leading-4 border-slate-500/40 text-slate-700 dark:text-slate-300"
+                      >
+                        {resolvedCurrentSelection.unmatchedKind === "not-found"
+                          ? tCommon("modelNotFound")
+                          : tCommon("customModel")}
+                      </Badge>
+                      <span className="truncate">{resolvedCurrentSelection.requestedModel}</span>
+                    </div>
                   )}
                   {model === "__custom__" && (
                     <Input

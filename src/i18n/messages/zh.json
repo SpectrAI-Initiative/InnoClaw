@@ -17,6 +17,8 @@
     "refresh": "刷新",
     "error": "错误",
     "success": "成功",
+    "customModel": "自定义",
+    "modelNotFound": "未发现",
     "modified": "已修改",
     "workspace": "工作区",
     "datasets": "数据集",
@@ -136,6 +138,9 @@
     "selectNone": "取消全选",
     "nextStep": "下一步",
     "cancel": "取消",
+    "removeImage": "移除图片",
+    "imageInputUnsupported": "当前模型不支持图片输入。",
+    "imagePasteFailed": "粘贴图片失败。",
     "memoryPreviewTitle": "记忆预览",
     "memoryPreviewDesc": "保存前查看并编辑对话记忆。",
     "memoryNoteTitle": "标题",
@@ -302,7 +307,10 @@
     "newSession": "新会话",
     "closeSession": "关闭会话",
     "closeConfirm": "再次点击关闭",
-    "renameSession": "重命名"
+    "renameSession": "重命名",
+    "removeImage": "移除图片",
+    "imageInputUnsupported": "当前模型不支持图片输入。",
+    "imagePasteFailed": "粘贴图片失败。"
   },
   "report": {
     "tabReport": "研究报告",

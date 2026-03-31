@@ -143,6 +143,7 @@ export async function getConfiguredModelSelection(): Promise<{
   providerId: string;
   modelId: string;
 }> {
+  const env = getCurrentEnv();
   const settings = await db
     .select()
     .from(appSettings)
@@ -152,23 +153,23 @@ export async function getConfiguredModelSelection(): Promise<{
   const modelRow = settings.find((s) => s.key === "llm_model");
 
   return {
-    providerId: providerRow?.value || DEFAULT_PROVIDER,
-    modelId: modelRow?.value || DEFAULT_MODEL,
+    providerId: env.LLM_PROVIDER || providerRow?.value || DEFAULT_PROVIDER,
+    modelId: env.LLM_MODEL || modelRow?.value || DEFAULT_MODEL,
   };
 }
 
 /**
- * Read the current provider/model ids from the live process environment.
- * Settings PATCH updates process.env immediately, so this stays aligned with
- * the Settings page without requiring an async DB round-trip.
+ * Read the current provider/model ids from the latest live environment.
+ * `.env.local` overrides process.env so manual edits are visible immediately.
  */
 export function getConfiguredModelSelectionFromEnv(): {
   providerId: string;
   modelId: string;
 } {
+  const env = getCurrentEnv();
   return {
-    providerId: process.env.LLM_PROVIDER || DEFAULT_PROVIDER,
-    modelId: process.env.LLM_MODEL || DEFAULT_MODEL,
+    providerId: env.LLM_PROVIDER || DEFAULT_PROVIDER,
+    modelId: env.LLM_MODEL || DEFAULT_MODEL,
   };
 }
 

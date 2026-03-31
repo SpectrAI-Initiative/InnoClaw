@@ -43,12 +43,15 @@ export async function GET() {
     }
 
     const env = getCurrentEnv();
+    const llmProvider =
+      env.LLM_PROVIDER || settingsMap["llm_provider"] || "openai";
+    const llmModel = env.LLM_MODEL || settingsMap["llm_model"] || "gpt-4o-mini";
     const hasHfToken = !!settingsMap["hf_token"] || !!env.HF_TOKEN;
     const { providerKeys, providerBaseUrls } = getProviderEnvInfo();
 
     return NextResponse.json({
-      llmProvider: settingsMap["llm_provider"] || "openai",
-      llmModel: settingsMap["llm_model"] || "gpt-4o-mini",
+      llmProvider,
+      llmModel,
       contextMode: settingsMap["context_mode"] || "normal",
       maxMode: settingsMap["max_mode"] !== "false",
       workspaceRoots: getWorkspaceRoots(),

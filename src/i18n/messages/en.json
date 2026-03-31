@@ -17,6 +17,8 @@
     "refresh": "Refresh",
     "error": "Error",
     "success": "Success",
+    "customModel": "Custom",
+    "modelNotFound": "Not Found",
     "modified": "Modified",
     "workspace": "Workspace",
     "datasets": "Datasets",
@@ -136,6 +138,9 @@
     "selectNone": "Deselect All",
     "nextStep": "Next",
     "cancel": "Cancel",
+    "removeImage": "Remove image",
+    "imageInputUnsupported": "The current model does not support image input.",
+    "imagePasteFailed": "Failed to paste image.",
     "memoryPreviewTitle": "Memory Preview",
     "memoryPreviewDesc": "Review and edit the conversation memory before saving.",
     "memoryNoteTitle": "Title",
@@ -269,7 +274,10 @@
     "newSession": "New Session",
     "closeSession": "Close Session",
     "closeConfirm": "Click again to close",
-    "renameSession": "Rename"
+    "renameSession": "Rename",
+    "removeImage": "Remove image",
+    "imageInputUnsupported": "The current model does not support image input.",
+    "imagePasteFailed": "Failed to paste image."
   },
   "report": {
     "tabReport": "Research report",

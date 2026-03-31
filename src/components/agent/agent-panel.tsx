@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState, useMemo, useCallback } from "react"
 import { useTranslations, useLocale } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import type { UIMessage } from "ai";
+import type { FileUIPart, UIMessage } from "ai";
 import { agentStreamManager } from "@/lib/agent/agent-stream-manager";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -47,21 +47,24 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ParticleEffect, ThinkingIndicator, FloatingOrbs } from "@/components/ui/particle-effect";
 import type { Skill } from "@/types";
 import { swrFetcher as fetcher } from "@/lib/fetcher";
+import {
+  resolveModelSelection,
+  type ModelCatalogEntry,
+  type ProviderModelCatalog,
+} from "@/lib/ai/model-selection";
 import { AgentMessage } from "./agent-message";
+import { toast } from "sonner";
+import {
+  createImageFileParts,
+  extractImageFilesFromClipboard,
+} from "@/lib/ai/message-attachments";
+import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
 
 type AgentMode = "long-agent" | "agent" | "plan" | "ask";
 type ModelSelection = { provider: string; model: string };
-type ModelOption = { id: string; name: string };
-type ProviderOption = {
-  id: string;
-  name: string;
-  models: ModelOption[];
-};
 type AgentModelOptionsKey = readonly ["agent-model-options", ...ProviderId[]];
-
-function normalizeModelKey(modelId: string): string {
-  return modelId.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-}
+type ModelOption = ModelCatalogEntry;
+type ProviderOption = ProviderModelCatalog;
 
 /** Pixel threshold for considering the user "at the bottom" of the scroll area */
 const BOTTOM_THRESHOLD_PX = 80;
@@ -147,6 +150,7 @@ export function AgentPanel({
   const userScrolledUp = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [input, setInput] = useState("");
+  const [pendingImages, setPendingImages] = useState<FileUIPart[]>([]);
   const [mode, setMode] = useState<AgentMode>("agent");
   const [userSelection, setUserSelection] = useState<ModelSelection | null>(
     () => readStoredModelSelection("innoclaw-agent-model-selection")
@@ -358,33 +362,20 @@ export function AgentPanel({
     };
   }, [configuredProviderIds, settings?.llmModel, settings?.llmProvider]);
 
-  const canonicalSelection = useMemo<ModelSelection | null>(() => {
+  const resolvedSelection = useMemo(() => {
     const selection = userSelection ?? settingsFallback;
-    if (!selection) return null;
+    const unmatchedKind =
+      selection && (discoveredModelsByProvider?.[selection.provider]?.length ?? 0) > 0
+        ? "not-found"
+        : "custom";
+    return resolveModelSelection(selection, availableProviders, { unmatchedKind });
+  }, [availableProviders, discoveredModelsByProvider, settingsFallback, userSelection]);
 
-    const provider = availableProviders.find((entry) => entry.id === selection.provider);
-    if (!provider) {
-      return selection;
-    }
-
-    const matchedModel = provider.models.find((entry) => entry.id === selection.model)
-      ?? provider.models.find(
-        (entry) => normalizeModelKey(entry.id) === normalizeModelKey(selection.model),
-      );
-
-    if (!matchedModel) {
-      return selection;
-    }
-
-    if (matchedModel.id === selection.model) {
-      return selection;
-    }
-
-    return {
-      provider: selection.provider,
-      model: matchedModel.id,
-    };
-  }, [availableProviders, settingsFallback, userSelection]);
+  const canonicalSelection = useMemo<ModelSelection | null>(() => (
+    resolvedSelection
+      ? { provider: resolvedSelection.provider, model: resolvedSelection.resolvedModel }
+      : null
+  ), [resolvedSelection]);
 
   useEffect(() => {
     if (!userSelection) return;
@@ -448,16 +439,15 @@ export function AgentPanel({
   }, []);
 
   const modelDisplayName = useMemo(() => {
-    if (!selectedProvider || !selectedModel) return t("modelLabel");
-    const provider = availableProviders.find((entry) => entry.id === selectedProvider);
-    const model = provider?.models.find((entry) => entry.id === selectedModel);
-    return model?.name ?? selectedModel;
-  }, [availableProviders, selectedProvider, selectedModel, t]);
+    return resolvedSelection?.displayName ?? t("modelLabel");
+  }, [resolvedSelection, t]);
 
   const selectedSupportsVision = useMemo(() => {
-    if (!selectedProvider || !selectedModel) return null;
+    if (!selectedProvider || !selectedModel || resolvedSelection?.matchKind === "unmatched") {
+      return null;
+    }
     return modelSupportsVision(selectedProvider, selectedModel);
-  }, [selectedProvider, selectedModel]);
+  }, [resolvedSelection?.matchKind, selectedProvider, selectedModel]);
 
   // Mutable body object — allows injecting skillId/paramValues before each send
   const agentBody = useMemo(
@@ -777,6 +767,10 @@ export function AgentPanel({
     const model = provider?.models.find((m) => m.id === resolvedModel);
     return model?.name ?? resolvedModel;
   }, [resolvedProvider, resolvedModel]);
+  const supportsVision = useMemo(
+    () => modelSupportsVision(resolvedProvider, resolvedModel),
+    [resolvedProvider, resolvedModel],
+  );
 
   const overflowThreshold = getOverflowThresholdChars(
     resolvedProvider,
@@ -1001,7 +995,15 @@ export function AgentPanel({
     skill: Skill,
     paramValues: Record<string, string>
   ) => {
+    if (pendingImages.length > 0 && !supportsVision) {
+      setActiveSkill(null);
+      toast.error(t("imageInputUnsupported"));
+      return;
+    }
+
+    const files = pendingImages;
     setInput("");
+    setPendingImages([]);
     setActiveSkill(null);
 
     // Inject skill context into the mutable body before sending
@@ -1014,7 +1016,10 @@ export function AgentPanel({
     try {
       await sendMessage({
         text: `/${skill.slug}${Object.keys(paramValues).length > 0 ? " " + Object.entries(paramValues).map(([k, v]) => `${k}="${v}"`).join(" ") : ""}`,
+        ...(files.length > 0 ? { files } : {}),
       });
+    } catch {
+      setPendingImages(files);
     } finally {
       // Clear skill context after sending, even if sendMessage throws
       delete agentBody.skillId;
@@ -1024,7 +1029,11 @@ export function AgentPanel({
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || isLoading || !aiEnabled || isSummarizing) return;
+    if ((!text && pendingImages.length === 0) || isLoading || !aiEnabled || isSummarizing) return;
+    if (pendingImages.length > 0 && !supportsVision) {
+      toast.error(t("imageInputUnsupported"));
+      return;
+    }
     userScrolledUp.current = false;
 
     // Check if input matches a skill slug
@@ -1047,12 +1056,49 @@ export function AgentPanel({
       }
     }
 
+    const files = pendingImages;
     setInput("");
+    setPendingImages([]);
     setShowAutocomplete(false);
     agentBody.mode = mode; // ensure mode is current before every request
     agentBody.llmProvider = selectedProvider;
     agentBody.llmModel = selectedModel;
-    await sendMessage({ text });
+    try {
+      await sendMessage({
+        ...(text ? { text } : {}),
+        ...(files.length > 0 ? { files } : {}),
+      });
+    } catch {
+      setInput(text);
+      setPendingImages(files);
+    }
+  };
+
+  const handleInputPaste = async (
+    event: React.ClipboardEvent<HTMLTextAreaElement>,
+  ) => {
+    const imageFiles = extractImageFilesFromClipboard(event.clipboardData);
+    if (imageFiles.length === 0) return;
+
+    event.preventDefault();
+
+    if (!supportsVision) {
+      toast.error(t("imageInputUnsupported"));
+      return;
+    }
+
+    try {
+      const nextImages = await createImageFileParts(imageFiles);
+      setPendingImages((current) => [...current, ...nextImages]);
+    } catch {
+      toast.error(t("imagePasteFailed"));
+    }
+  };
+
+  const removePendingImage = (index: number) => {
+    setPendingImages((current) =>
+      current.filter((_, currentIndex) => currentIndex !== index),
+    );
   };
 
   const handleStop = () => {
@@ -1091,6 +1137,7 @@ export function AgentPanel({
       setMessages([]);
     }
     setInput("");
+    setPendingImages([]);
   };
 
   // Step 2: generate preview from selected messages
@@ -1311,7 +1358,7 @@ export function AgentPanel({
       </div>
 
       {/* Input area with autocomplete */}
-      <div className="relative z-10 bg-agent-bg/80 backdrop-blur-sm shrink-0 overflow-hidden" style={{ height: inputHeight }}>
+      <div className="relative z-10 flex shrink-0 flex-col overflow-hidden bg-agent-bg/80 backdrop-blur-sm" style={{ height: inputHeight }}>
         {/* Slash command autocomplete */}
         {showAutocomplete && availableSkills.length > 0 && (
           <SkillAutocomplete
@@ -1322,7 +1369,15 @@ export function AgentPanel({
           />
         )}
 
-        <div className="flex items-start gap-2 px-3 py-2 h-full">
+        <ImageAttachmentGrid
+          attachments={pendingImages}
+          onRemove={removePendingImage}
+          className="px-3 pt-2"
+          imageClassName="h-16 w-16"
+          removeLabel={t("removeImage")}
+        />
+
+        <div className="flex min-h-0 flex-1 items-start gap-2 px-3 py-2">
           {/* Model selector */}
           <DropdownMenu
             onOpenChange={(open) => {
@@ -1334,6 +1389,16 @@ export function AgentPanel({
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1.5 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors mt-1.5 max-w-[220px]">
                 <span className="truncate">{modelDisplayName}</span>
+                {resolvedSelection?.unmatchedKind && (
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 px-1 py-0 text-[10px] leading-4 border-slate-500/40 text-slate-300"
+                  >
+                    {resolvedSelection.unmatchedKind === "not-found"
+                      ? tCommon("modelNotFound")
+                      : tCommon("customModel")}
+                  </Badge>
+                )}
                 {typeof selectedSupportsVision === "boolean" && (
                   <Badge
                     variant="outline"
@@ -1432,6 +1497,7 @@ export function AgentPanel({
             onChange={(e) => {
               handleInputChange(e.target.value);
             }}
+            onPaste={handleInputPaste}
             onKeyDown={(e) => {
               // Enter without Shift sends message, Shift+Enter creates new line
               if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && !showAutocomplete) {

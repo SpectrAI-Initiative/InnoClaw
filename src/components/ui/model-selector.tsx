@@ -16,6 +16,10 @@ import { Badge } from "@/components/ui/badge";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/fetcher";
 import { modelSupportsVision, PROVIDERS, type ProviderId } from "@/lib/ai/models";
+import {
+  resolveModelSelection,
+  type ProviderModelCatalog,
+} from "@/lib/ai/model-selection";
 
 interface ModelSelectorProps {
   storageKey: string;
@@ -29,13 +33,14 @@ function readStoredSelection(storageKey: string): { provider: string; model: str
     const stored = localStorage.getItem(storageKey);
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (parsed?.provider && parsed?.model) {
-        const providerDef = PROVIDERS[parsed.provider as ProviderId];
-        if (providerDef && providerDef.models.some((m: { id: string }) => m.id === parsed.model)) {
-          return parsed;
-        }
+      if (
+        typeof parsed?.provider === "string" &&
+        parsed.provider &&
+        typeof parsed?.model === "string" &&
+        parsed.model
+      ) {
+        return parsed;
       }
-      // Invalid stored selection — clean up
       localStorage.removeItem(storageKey);
     }
   } catch {
@@ -52,21 +57,49 @@ export function useModelSelection(storageKey: string) {
 
   const { data: settings } = useSWR("/api/settings", swrFetcher);
 
+  const availableProviders = useMemo<ProviderModelCatalog[]>(() => {
+    const configured = settings?.configuredProviders as string[] | undefined;
+    if (!configured) return [];
+    return configured
+      .map((id: string) => PROVIDERS[id as ProviderId])
+      .filter(Boolean);
+  }, [settings?.configuredProviders]);
+
   // Derive effective provider/model: user selection > settings fallback
   const settingsFallback = useMemo(() => {
     if (!settings?.llmProvider || !settings?.llmModel) return null;
     const configuredProviders = settings.configuredProviders as string[] | undefined;
     const provider = settings.llmProvider as string;
     const model = settings.llmModel as string;
-    const providerDef = PROVIDERS[provider as ProviderId];
-    if (providerDef && (!configuredProviders || configuredProviders.includes(provider)) && providerDef.models.some((m) => m.id === model)) {
-      return { provider, model };
+    if (
+      configuredProviders &&
+      configuredProviders.length > 0 &&
+      !configuredProviders.includes(provider)
+    ) {
+      return null;
     }
-    return null;
-  }, [settings]);
+    return resolveModelSelection(
+      { provider, model },
+      availableProviders,
+      { unmatchedKind: "custom" },
+    );
+  }, [availableProviders, settings]);
 
-  const selectedProvider = userSelection?.provider ?? settingsFallback?.provider ?? null;
-  const selectedModel = userSelection?.model ?? settingsFallback?.model ?? null;
+  const resolvedUserSelection = useMemo(
+    () => resolveModelSelection(userSelection, availableProviders, { unmatchedKind: "custom" }),
+    [availableProviders, userSelection],
+  );
+
+  const resolvedSelection = resolvedUserSelection ?? settingsFallback;
+  const canonicalSelection = useMemo(
+    () => resolvedSelection
+      ? { provider: resolvedSelection.provider, model: resolvedSelection.resolvedModel }
+      : null,
+    [resolvedSelection],
+  );
+
+  const selectedProvider = canonicalSelection?.provider ?? null;
+  const selectedModel = canonicalSelection?.model ?? null;
 
   const handleModelChange = useCallback((providerId: string, modelId: string) => {
     setUserSelection({ provider: providerId, model: modelId });
@@ -78,24 +111,15 @@ export function useModelSelection(storageKey: string) {
   }, [storageKey]);
 
   const modelDisplayName = useMemo(() => {
-    if (!selectedProvider || !selectedModel) return null;
-    const provider = PROVIDERS[selectedProvider as ProviderId];
-    const model = provider?.models.find((m) => m.id === selectedModel);
-    return model?.name ?? selectedModel;
-  }, [selectedProvider, selectedModel]);
-
-  const availableProviders = useMemo(() => {
-    const configured = settings?.configuredProviders as string[] | undefined;
-    if (!configured) return [];
-    return configured
-      .map((id: string) => PROVIDERS[id as ProviderId])
-      .filter(Boolean);
-  }, [settings?.configuredProviders]);
+    return resolvedSelection?.displayName ?? null;
+  }, [resolvedSelection]);
 
   return {
     selectedProvider,
     selectedModel,
     modelDisplayName,
+    modelMatchKind: resolvedSelection?.matchKind ?? null,
+    unmatchedKind: resolvedSelection?.unmatchedKind ?? null,
     availableProviders,
     handleModelChange,
   };
@@ -112,6 +136,8 @@ export function ModelSelector({
     selectedProvider,
     selectedModel,
     modelDisplayName,
+    modelMatchKind,
+    unmatchedKind,
     availableProviders,
     handleModelChange,
   } = useModelSelection(storageKey);
@@ -125,9 +151,9 @@ export function ModelSelector({
   );
 
   const selectedSupportsVision = useMemo(() => {
-    if (!selectedProvider || !selectedModel) return null;
+    if (!selectedProvider || !selectedModel || modelMatchKind === "unmatched") return null;
     return modelSupportsVision(selectedProvider, selectedModel);
-  }, [selectedProvider, selectedModel]);
+  }, [modelMatchKind, selectedProvider, selectedModel]);
 
   return (
     <DropdownMenu>
@@ -136,6 +162,14 @@ export function ModelSelector({
           className={`flex items-center gap-1.5 shrink-0 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors max-w-[220px] ${className ?? ""}`}
         >
           <span className="truncate">{modelDisplayName || label}</span>
+          {unmatchedKind && (
+            <Badge
+              variant="outline"
+              className="shrink-0 px-1 py-0 text-[10px] leading-4 border-slate-500/40 text-slate-700 dark:text-slate-300"
+            >
+              {unmatchedKind === "not-found" ? tCommon("modelNotFound") : tCommon("customModel")}
+            </Badge>
+          )}
           {typeof selectedSupportsVision === "boolean" && (
             <Badge
               variant="outline"

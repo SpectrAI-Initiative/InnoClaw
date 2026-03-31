@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState, useMemo, useCallback } from "react"
 import { useTranslations, useLocale } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { TextStreamChatTransport } from "ai";
-import type { UIMessage } from "ai";
+import type { FileUIPart, UIMessage } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Send, Bot, User, AlertCircle, Check, Circle, CheckCheck, Brain } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 import {
   markdownComponents,
   remarkPlugins,
@@ -19,7 +20,11 @@ import {
 } from "@/lib/markdown/shared-components";
 import useSWR from "swr";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getOverflowThresholdChars, getMessageTextLength } from "@/lib/ai/models";
+import {
+  getOverflowThresholdChars,
+  getMessageTextLength,
+  modelSupportsVision,
+} from "@/lib/ai/models";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +34,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { swrFetcher as fetcher } from "@/lib/fetcher";
+import {
+  createImageFileParts,
+  extractImageFilesFromClipboard,
+  getImageFileParts,
+} from "@/lib/ai/message-attachments";
+import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
 
 // --- Selectable options support ---
 
@@ -289,6 +300,7 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
   const locale = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
+  const [pendingImages, setPendingImages] = useState<FileUIPart[]>([]);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const summarizingRef = useRef(false);
   const failedAtCountRef = useRef(-1);
@@ -321,6 +333,10 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
   });
 
   const isLoading = status === "submitted" || status === "streaming";
+  const supportsVision = modelSupportsVision(
+    settings?.llmProvider ?? "openai",
+    settings?.llmModel ?? "gpt-4o-mini",
+  );
 
   // --- Auto-memory: summarize and evict when context overflows ---
   const overflowThreshold = getOverflowThresholdChars(
@@ -525,9 +541,54 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || isLoading || !aiEnabled || isSummarizing) return;
+    if ((!text && pendingImages.length === 0) || isLoading || !aiEnabled || isSummarizing) {
+      return;
+    }
+    if (pendingImages.length > 0 && !supportsVision) {
+      toast.error(t("imageInputUnsupported"));
+      return;
+    }
+
+    const files = pendingImages;
     setInput("");
-    await sendMessage({ text });
+    setPendingImages([]);
+
+    try {
+      await sendMessage({
+        ...(text ? { text } : {}),
+        ...(files.length > 0 ? { files } : {}),
+      });
+    } catch {
+      setInput(text);
+      setPendingImages(files);
+    }
+  };
+
+  const handleInputPaste = async (
+    event: React.ClipboardEvent<HTMLTextAreaElement>,
+  ) => {
+    const imageFiles = extractImageFilesFromClipboard(event.clipboardData);
+    if (imageFiles.length === 0) return;
+
+    event.preventDefault();
+
+    if (!supportsVision) {
+      toast.error(t("imageInputUnsupported"));
+      return;
+    }
+
+    try {
+      const nextImages = await createImageFileParts(imageFiles);
+      setPendingImages((current) => [...current, ...nextImages]);
+    } catch {
+      toast.error(t("imagePasteFailed"));
+    }
+  };
+
+  const removePendingImage = (index: number) => {
+    setPendingImages((current) =>
+      current.filter((_, currentIndex) => currentIndex !== index),
+    );
   };
 
   const getMessageText = (message: (typeof messages)[number]) => {
@@ -610,7 +671,16 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
                       sendMessage={sendMessage}
                     />
                   ) : (
-                    <p className="whitespace-pre-wrap">{getMessageText(message)}</p>
+                    <div className="space-y-2">
+                      <ImageAttachmentGrid
+                        attachments={getImageFileParts(message)}
+                        imageClassName="h-32 w-32"
+                        removeLabel={t("removeImage")}
+                      />
+                      {getMessageText(message) ? (
+                        <p className="whitespace-pre-wrap">{getMessageText(message)}</p>
+                      ) : null}
+                    </div>
                   )}
                 </div>
                 {message.role === "user" && (
@@ -646,24 +716,41 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
 
       {/* Input */}
       <div className="border-t p-4">
-        <div className="flex gap-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={aiEnabled ? t("placeholder") : t("disabledState")}
-            className="min-h-[40px] max-h-[120px] resize-none"
-            rows={1}
-            disabled={!aiEnabled || isSummarizing}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
+        <div className="space-y-3">
+          <ImageAttachmentGrid
+            attachments={pendingImages}
+            onRemove={removePendingImage}
+            removeLabel={t("removeImage")}
           />
-          <Button size="icon" disabled={!aiEnabled || isLoading || isSummarizing || !input.trim()} onClick={handleSend}>
-            <Send className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onPaste={handleInputPaste}
+              placeholder={aiEnabled ? t("placeholder") : t("disabledState")}
+              className="min-h-[40px] max-h-[120px] resize-none"
+              rows={1}
+              disabled={!aiEnabled || isSummarizing}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+            />
+            <Button
+              size="icon"
+              disabled={
+                !aiEnabled ||
+                isLoading ||
+                isSummarizing ||
+                (!input.trim() && pendingImages.length === 0)
+              }
+              onClick={handleSend}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 

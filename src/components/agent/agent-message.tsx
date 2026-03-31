@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Bot, Brain, ChevronDown, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import type { UIMessage } from "ai";
@@ -12,6 +13,8 @@ import {
   rehypePlugins,
   markdownComponents,
 } from "@/lib/markdown/shared-components";
+import { getImageFileParts } from "@/lib/ai/message-attachments";
+import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
 
 /** XML tag used to identify compacted context summary messages. */
 const CONTEXT_SUMMARY_TAG_PREFIX = "<context_summary>";
@@ -71,6 +74,7 @@ function ContextSummaryBlock({ text }: { text: string }) {
 }
 
 export function AgentMessage({ message }: { message: UIMessage }) {
+  const t = useTranslations("agent");
   const isUser = message.role === "user";
 
   if (isUser) {
@@ -90,7 +94,16 @@ export function AgentMessage({ message }: { message: UIMessage }) {
     return (
       <div className="group flex gap-3 items-start justify-end animate-slide-in-up">
         <div className="max-w-[85%] rounded-2xl rounded-tr-sm px-4 py-2.5 bg-blue-500/25 border border-blue-500/35 hover:border-blue-500/50 transition-all duration-300 shadow-sm shadow-blue-500/10">
-          <span className="text-agent-foreground whitespace-pre-wrap leading-relaxed text-sm">{text}</span>
+          <div className="space-y-2">
+            <ImageAttachmentGrid
+              attachments={getImageFileParts(message)}
+              imageClassName="h-32 w-32"
+              removeLabel={t("removeImage")}
+            />
+            {text ? (
+              <span className="text-agent-foreground whitespace-pre-wrap leading-relaxed text-sm">{text}</span>
+            ) : null}
+          </div>
         </div>
       </div>
     );

@@ -77,6 +77,37 @@ describe("getPerModelProvider – base URL resolution", () => {
     return mod.getModelFromOverride(provider, model);
   }
 
+  async function importProviderModule(
+    settingsRows: Array<{ key: string; value: string }> = [],
+  ) {
+    vi.resetModules();
+
+    vi.doMock("@ai-sdk/openai", () => ({
+      openai: { chat: vi.fn(() => fakeChatModel) },
+      createOpenAI: (config: unknown) => createOpenAISpy(config),
+    }));
+    vi.doMock("@ai-sdk/anthropic", () => ({
+      createAnthropic: vi.fn(() => vi.fn(() => fakeChatModel)),
+    }));
+    vi.doMock("drizzle-orm", () => ({
+      inArray: vi.fn(() => Symbol("inArray")),
+    }));
+    vi.doMock("@/lib/db", () => ({
+      db: {
+        select: vi.fn(() => ({
+          from: vi.fn(() => ({
+            where: vi.fn(async () => settingsRows),
+          })),
+        })),
+      },
+    }));
+    vi.doMock("@/lib/db/schema", () => ({
+      appSettings: { key: "key" },
+    }));
+
+    return import("./provider");
+  }
+
   it("uses per-model base URL when set", async () => {
     process.env.MOONSHOT_API_KEY = "sk-test";
     process.env.MOONSHOT_KIMI_K2_5_BASE_URL = "https://per-model.example.com/v1";
@@ -164,5 +195,50 @@ describe("getPerModelProvider – base URL resolution", () => {
       delete process.env[`${envPrefix}_API_KEY`];
       delete process.env[`${envPrefix}_BASE_URL`];
     }
+  });
+
+  it("prefers .env.local over stored settings for the configured model selection", async () => {
+    fs.writeFileSync(
+      path.join(tmpDir, ".env.local"),
+      "LLM_PROVIDER=openai\nLLM_MODEL=gpt-5.4\n",
+    );
+
+    const mod = await importProviderModule([
+      { key: "llm_provider", value: "anthropic" },
+      { key: "llm_model", value: "claude-sonnet-4-20250514" },
+    ]);
+
+    await expect(mod.getConfiguredModelSelection()).resolves.toEqual({
+      providerId: "openai",
+      modelId: "gpt-5.4",
+    });
+  });
+
+  it("falls back to stored settings when .env.local does not define the model selection", async () => {
+    const mod = await importProviderModule([
+      { key: "llm_provider", value: "anthropic" },
+      { key: "llm_model", value: "claude-sonnet-4-20250514" },
+    ]);
+
+    await expect(mod.getConfiguredModelSelection()).resolves.toEqual({
+      providerId: "anthropic",
+      modelId: "claude-sonnet-4-20250514",
+    });
+  });
+
+  it("reads .env.local in getConfiguredModelSelectionFromEnv", async () => {
+    process.env.LLM_PROVIDER = "openai";
+    process.env.LLM_MODEL = "gpt-4o-mini";
+    fs.writeFileSync(
+      path.join(tmpDir, ".env.local"),
+      "LLM_PROVIDER=openai\nLLM_MODEL=gpt-5.4\n",
+    );
+
+    const mod = await importProviderModule();
+
+    expect(mod.getConfiguredModelSelectionFromEnv()).toEqual({
+      providerId: "openai",
+      modelId: "gpt-5.4",
+    });
   });
 });
