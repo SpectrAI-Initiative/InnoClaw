@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { FileEntry } from "@/types";
 import {
   filterWorkspaceImageEntries,
+  focusAgentInputAfterDialogClose,
   getWorkspaceImageMimeType,
   getWorkspaceImageDisplayPath,
   isWorkspaceImagePath,
@@ -55,5 +56,26 @@ describe("workspace image picker utils", () => {
     expect(getWorkspaceImageMimeType("/workspace/icon.ico")).toBe("image/x-icon");
     expect(getWorkspaceImageMimeType("/workspace/scan.bmp")).toBe("image/bmp");
     expect(getWorkspaceImageMimeType("/workspace/photo.png", "image/png")).toBe("image/png");
+  });
+
+  it("prevents dialog focus restoration and returns focus to the agent input", () => {
+    let prevented = false;
+    let focused = false;
+
+    focusAgentInputAfterDialogClose(
+      {
+        preventDefault() {
+          prevented = true;
+        },
+      },
+      {
+        focus() {
+          focused = true;
+        },
+      }
+    );
+
+    expect(prevented).toBe(true);
+    expect(focused).toBe(true);
   });
 });

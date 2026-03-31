@@ -24,12 +24,14 @@ import {
   filterWorkspaceImageEntries,
   getWorkspaceImageDisplayPath,
 } from "./workspace-image-picker-utils";
+import type { DialogContentProps } from "@radix-ui/react-dialog";
 
 interface WorkspaceImagePickerDialogProps {
   open: boolean;
   workspaceRoot: string;
   onClose: () => void;
   onSelect: (filePath: string) => void;
+  onCloseAutoFocus?: DialogContentProps["onCloseAutoFocus"];
 }
 
 export function WorkspaceImagePickerDialog({
@@ -37,6 +39,7 @@ export function WorkspaceImagePickerDialog({
   workspaceRoot,
   onClose,
   onSelect,
+  onCloseAutoFocus,
 }: WorkspaceImagePickerDialogProps) {
   const t = useTranslations("agent");
   const tCommon = useTranslations("common");
@@ -81,7 +84,10 @@ export function WorkspaceImagePickerDialog({
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <DialogContent className="max-w-lg h-[65vh] flex flex-col p-0 gap-0">
+      <DialogContent
+        className="max-w-lg h-[65vh] flex flex-col p-0 gap-0"
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
         <DialogHeader className="px-4 py-3 border-b shrink-0">
           <DialogTitle className="text-sm font-semibold">
             {t("workspaceImagePickerTitle")}

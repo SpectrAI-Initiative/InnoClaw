@@ -59,3 +59,16 @@ export function getWorkspaceImageDisplayPath(
 
   return `${rootName}/${relativePath}`;
 }
+
+export function focusAgentInputAfterDialogClose(
+  event: { preventDefault?: () => void },
+  input:
+    | {
+        focus: () => void;
+      }
+    | null
+    | undefined
+): void {
+  event.preventDefault?.();
+  input?.focus();
+}

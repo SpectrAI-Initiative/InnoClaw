@@ -67,6 +67,7 @@ import {
   shouldAutocompleteCaptureEnter,
 } from "./slash-command";
 import { getWorkspaceImageMimeType } from "./workspace-image-picker-utils";
+import { focusAgentInputAfterDialogClose } from "./workspace-image-picker-utils";
 
 type AgentMode = "long-agent" | "agent" | "plan" | "ask";
 type ModelSelection = { provider: string; model: string };
@@ -1622,6 +1623,9 @@ export function AgentPanel({
         workspaceRoot={folderPath}
         onClose={() => setShowWorkspaceImagePicker(false)}
         onSelect={(filePath) => void handleWorkspaceImageSelect(filePath)}
+        onCloseAutoFocus={(event) =>
+          focusAgentInputAfterDialogClose(event, inputRef.current)
+        }
       />
 
       {/* Skill parameter dialog */}
