@@ -310,7 +310,12 @@
     "renameSession": "重命名",
     "removeImage": "移除图片",
     "imageInputUnsupported": "当前模型不支持图片输入。",
-    "imagePasteFailed": "粘贴图片失败。"
+    "imagePasteFailed": "粘贴图片失败。",
+    "workspaceImagePickerTitle": "附加工作区图片",
+    "workspaceImagePickerAttach": "附加图片",
+    "workspaceImagePickerEmpty": "当前文件夹没有图片。",
+    "workspaceImageBrowseFailed": "浏览工作区图片失败。",
+    "workspaceImageAttachFailed": "附加工作区图片失败。"
   },
   "report": {
     "tabReport": "研究报告",
