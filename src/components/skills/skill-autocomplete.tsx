@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Zap } from "lucide-react";
 import type { Skill } from "@/types";
+import { getMatchingSkillsForSlashQuery } from "@/components/agent/slash-command";
 
 interface SkillAutocompleteProps {
   query: string;
@@ -23,12 +24,7 @@ export function SkillAutocomplete({
   const listRef = useRef<HTMLDivElement>(null);
   const [trackedQuery, setTrackedQuery] = useState(query);
 
-  const filtered = skills.filter(
-    (s) =>
-      s.isEnabled &&
-      (s.slug.includes(query.toLowerCase()) ||
-        s.name.toLowerCase().includes(query.toLowerCase()))
-  );
+  const filtered = getMatchingSkillsForSlashQuery(skills, query);
 
   if (trackedQuery !== query) {
     setTrackedQuery(query);

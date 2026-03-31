@@ -60,6 +60,10 @@ import {
   stripFilePartsForStorage,
 } from "@/lib/ai/message-attachments";
 import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
+import {
+  getMatchingSkillsForSlashQuery,
+  shouldAutocompleteCaptureEnter,
+} from "./slash-command";
 
 type AgentMode = "long-agent" | "agent" | "plan" | "ask";
 type ModelSelection = { provider: string; model: string };
@@ -1263,6 +1267,14 @@ export function AgentPanel({
   };
 
   const slashQuery = input.startsWith("/") ? input.slice(1) : "";
+  const matchingSlashSkills = useMemo(
+    () => getMatchingSkillsForSlashQuery(availableSkills, slashQuery),
+    [availableSkills, slashQuery]
+  );
+  const autocompleteCapturesEnter = shouldAutocompleteCaptureEnter(
+    showAutocomplete,
+    matchingSlashSkills
+  );
 
   return (
     <div ref={containerRef} className="relative flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm overflow-hidden">
@@ -1373,7 +1385,7 @@ export function AgentPanel({
       {/* Input area with autocomplete */}
       <div className="relative z-10 flex shrink-0 flex-col overflow-hidden bg-agent-bg/80 backdrop-blur-sm" style={{ height: inputHeight }}>
         {/* Slash command autocomplete */}
-        {showAutocomplete && availableSkills.length > 0 && (
+        {autocompleteCapturesEnter && (
           <SkillAutocomplete
             query={slashQuery}
             skills={availableSkills}
@@ -1513,7 +1525,7 @@ export function AgentPanel({
             onPaste={handleInputPaste}
             onKeyDown={(e) => {
               // Enter without Shift sends message, Shift+Enter creates new line
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && !showAutocomplete) {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && !autocompleteCapturesEnter) {
                 e.preventDefault();
                 handleSend();
               }
