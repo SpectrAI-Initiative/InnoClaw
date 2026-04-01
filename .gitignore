@@ -64,3 +64,4 @@ docs/locales/*/LC_MESSAGES/*.mo
 docs/locales/*/LC_MESSAGES/**/*.mo
 reference/
 batch-test-logs/
+.worktrees/

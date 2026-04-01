@@ -277,7 +277,12 @@
     "renameSession": "Rename",
     "removeImage": "Remove image",
     "imageInputUnsupported": "The current model does not support image input.",
-    "imagePasteFailed": "Failed to paste image."
+    "imagePasteFailed": "Failed to paste image.",
+    "workspaceImagePickerTitle": "Attach workspace image",
+    "workspaceImagePickerAttach": "Attach image",
+    "workspaceImagePickerEmpty": "No images in this folder.",
+    "workspaceImageBrowseFailed": "Failed to browse workspace images.",
+    "workspaceImageAttachFailed": "Failed to attach workspace image."
   },
   "report": {
     "tabReport": "Research report",

@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Bot,
   ChevronDown,
+  ImagePlus,
   Loader2,
   Square,
   Brain,
@@ -53,6 +54,7 @@ import {
   type ProviderModelCatalog,
 } from "@/lib/ai/model-selection";
 import { AgentMessage } from "./agent-message";
+import { WorkspaceImagePickerDialog } from "./workspace-image-picker-dialog";
 import { toast } from "sonner";
 import {
   createImageFileParts,
@@ -64,6 +66,8 @@ import {
   getMatchingSkillsForSlashQuery,
   shouldAutocompleteCaptureEnter,
 } from "./slash-command";
+import { getWorkspaceImageMimeType } from "./workspace-image-picker-utils";
+import { focusAgentInputAfterDialogClose } from "./workspace-image-picker-utils";
 
 type AgentMode = "long-agent" | "agent" | "plan" | "ask";
 type ModelSelection = { provider: string; model: string };
@@ -193,6 +197,7 @@ export function AgentPanel({
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const [showParamDialog, setShowParamDialog] = useState(false);
+  const [showWorkspaceImagePicker, setShowWorkspaceImagePicker] = useState(false);
 
   // Auto-memory state
   const [isSummarizing, setIsSummarizing] = useState(false);
@@ -1118,6 +1123,36 @@ export function AgentPanel({
     );
   };
 
+  const handleWorkspaceImageSelect = async (filePath: string) => {
+    if (!supportsVision) {
+      toast.error(t("imageInputUnsupported"));
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/files/raw?path=${encodeURIComponent(filePath)}`);
+      if (!response.ok) {
+        throw new Error("Failed to read workspace image");
+      }
+
+      const blob = await response.blob();
+      const filename = filePath.split("/").pop() || "workspace-image";
+      const file = new File([blob], filename, {
+        type: getWorkspaceImageMimeType(filePath, blob.type),
+      });
+      const nextImages = await createImageFileParts([file]);
+
+      if (nextImages.length === 0) {
+        throw new Error("No image attachment created");
+      }
+
+      setPendingImages((current) => [...current, ...nextImages]);
+      setShowWorkspaceImagePicker(false);
+    } catch {
+      toast.error(t("workspaceImageAttachFailed"));
+    }
+  };
+
   const handleStop = () => {
     stop();
     // Also stop the background stream manager
@@ -1516,6 +1551,15 @@ export function AgentPanel({
           <span className="text-agent-purple font-bold shrink-0 select-none mt-1.5">
             &gt;
           </span>
+          <button
+            type="button"
+            onClick={() => setShowWorkspaceImagePicker(true)}
+            title={t("workspaceImagePickerTitle")}
+            className="mt-1 shrink-0 rounded p-1 text-agent-accent transition-colors hover:bg-agent-card-hover"
+            disabled={!aiEnabled || isSummarizing}
+          >
+            <ImagePlus className="h-4 w-4" />
+          </button>
           <textarea
             ref={inputRef}
             value={input}
@@ -1573,6 +1617,16 @@ export function AgentPanel({
           </div>
         </div>
       </div>
+
+      <WorkspaceImagePickerDialog
+        open={showWorkspaceImagePicker}
+        workspaceRoot={folderPath}
+        onClose={() => setShowWorkspaceImagePicker(false)}
+        onSelect={(filePath) => void handleWorkspaceImageSelect(filePath)}
+        onCloseAutoFocus={(event) =>
+          focusAgentInputAfterDialogClose(event, inputRef.current)
+        }
+      />
 
       {/* Skill parameter dialog */}
       {activeSkill && (

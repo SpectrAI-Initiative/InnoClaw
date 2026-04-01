@@ -10,6 +10,8 @@ const MIME_TYPES: Record<string, string> = {
   gif: "image/gif",
   svg: "image/svg+xml",
   webp: "image/webp",
+  bmp: "image/bmp",
+  ico: "image/x-icon",
   stl: "model/stl",
   obj: "text/plain",
   ply: "application/x-ply",
