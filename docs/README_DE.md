@@ -47,22 +47,31 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 <!-- whats-new-start -->
 
+#### 2026-03-31
+- **Eingefuegte Bilder unterstuetzt**: Benutzer koennen Bilder jetzt direkt in die Chat-Eingabe einfuegen fuer multimodale KI-Konversationen
+- **Deep-Research-Rollenstudio**: Das neue Rollenstudio-Panel ermoeglicht das Konfigurieren und Verwalten benutzerdefinierter Forscherrollen im Deep-Research-Workflow
+- **Erweiterte Quellen fuer die Artikelsuche**: BioRxiv, PubMed und PubChem wurden als durchsuchbare Artikelquellen in Paper Study hinzugefuegt
+
+
 #### 2026-03-26
 - **Dynamische Modellerkennung**: Das Agenten-Panel ruft verfuegbare Modelle automatisch von jedem konfigurierten KI-Anbieter ab und fuegt sie mit der eingebauten Liste zusammen
 - **Modellspezifisches Base-URL-Routing**: Chinesische KI-Anbieter (shlab, qwen, moonshot, deepseek, minimax, zhipu) unterstuetzen `<PROVIDER>_<MODEL>_BASE_URL`-Umgebungsvariablen fuer flexibles Endpunkt-Routing
 - **Laufzeit-Umschalter fuer Tool-Aufruf**: Tool-Unterstuetzung kann per Anbieter ueber `<PROVIDER>_TOOLS_ENABLED=true/false` ohne Codeaenderungen aktiviert oder deaktiviert werden
 
 
+
+<details>
+<summary>Aeltere Updates anzeigen</summary>
+
 #### 2026-03-24
 - **Multimodaler LLM-Support**: Papierrecherche und Agenten-Workflows unterstuetzen jetzt Standard-LLMs und multimodale LLMs (mLLM), kontextbezogen auswaehlbar in den Einstellungen und der Modellauswahl.
 
 
 
-<details>
-<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-03-23
 - **GitHub-Faehigkeiten Import-Vorschau**: Neuer Vorschau-Workflow vor dem Import ermoeglicht das Durchsuchen, Pruefen und selektive Importieren von Faehigkeiten aus GitHub-Repositories
+
 
 
 
@@ -76,10 +85,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-21
 - **Entfernte HPC/SLURM-Ausfuehrung**: Tiefe Recherche-Sitzungen koennen jetzt ueber SSH auf entfernten Clustern ausgefuehrt werden, mit Unterstuetzung fuer rjob, rlaunch und SLURM sowie Datei-Staging und Job-Lifecycle-Verwaltung
 - **Kubernetes-Cluster-Konfigurationsoberflaeche**: Neues Einstellungspanel zur Laufzeitkonfiguration von K8s-Kontexten, PVC-Bindungen und Container-Images in Multi-Cluster-Umgebungen ohne Neustart
 - **Entfernte Profil-Bindung**: Tiefe Recherche-Sitzungen koennen an vorkonfigurierte SSH/Remote-Rechenprofile gebunden werden, was reproduzierbare verteilte Forschungs-Workflows ermoeglicht
+
 
 
 
@@ -98,10 +109,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-19
 - **ClawHub-Skill-Import**: Neue Integration zum direkten Importieren von Skills aus ClawHub ueber einen dedizierten API-Endpunkt und einen Import-Dialog
 - **Code-Vorschaufenster**: Neue In-Editor-Komponente fuer die Code-Vorschau mit Syntaxhervorhebung und Verfolgung des Speicherstatus
 - **Paper-Studie-Cache**: Persistente Caching-Schicht fuer Paper-Studien-Sitzungen zur Verbesserung der Neulade-Performance und Zustandskontinuitaet
+
 
 
 
@@ -124,24 +137,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-18
 - **Multimodale Vision fuer Paper-Diskussion und Ideation**: Vision-faehige Anbieter erhalten jetzt extrahierte PDF-Seitenbilder zusammen mit Text, damit Agents Abbildungen, Tabellen und Diagramme direkt analysieren koennen.
 - **Paper-Seitengalerie-UI**: Die Discussion- und Ideation-Panels zeigen jetzt eine einklappbare Miniaturgalerie der extrahierten Paper-Seiten mit Grossansicht im Dialog.
 - **Erkennung der Vision-Faehigkeit von Anbietern**: Provider-Konfigurationen enthalten jetzt Vision-Support, sodass Routen automatisch zwischen multimodalem und rein textbasiertem Kontext wechseln koennen.
 
-
-
-
-
-
-
-
-
-
-#### 2026-03-17
-- **Remote-Job-Profilverwaltung und SSH-Haertung**: sichere Erstellung, Bearbeitung und SSH-gehaertete Einreichung von Forschungsjobs auf Remote-Systemen
-- **Rich Markdown Rendering im Agent Panel**: Agent-Nachrichten rendern jetzt Tabellen, LaTeX-Mathematik und syntaxhervorgehobene Codebloecke
-- **API-Provider-Settings-UI**: API-Keys und Endpunkte fuer KI-Provider direkt auf der Settings-Seite konfigurieren
 
 
 

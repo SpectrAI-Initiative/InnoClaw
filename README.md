@@ -122,10 +122,17 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 <!-- whats-new-start -->
 
+#### 2026-03-31
+- **Pasted Image Support**: Users can now paste images directly into the chat input for multimodal AI conversations
+- **Deep Research Role Studio**: New Role Studio panel lets users configure and manage custom researcher roles in the deep research workflow
+- **Expanded Paper Search Sources**: Added BioRxiv, PubMed, and PubChem as searchable paper sources in Paper Study
+
+
 #### 2026-03-26
 - **Dynamic Model Discovery**: Agent panel now auto-fetches available models from each configured AI provider, merging live results with built-in model lists
 - **Per-Model Base URL Routing**: Chinese AI providers (shlab, qwen, moonshot, deepseek, minimax, zhipu) now support per-model `<PROVIDER>_<MODEL>_BASE_URL` env vars for flexible endpoint routing
 - **Runtime Tool-Calling Override**: Tool support can now be toggled per provider via `<PROVIDER>_TOOLS_ENABLED=true/false` without code changes
+
 
 
 #### 2026-03-26
@@ -133,16 +140,19 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
+<details>
+<summary>Show earlier updates</summary>
+
 #### 2026-03-24
 - **Multimodal LLM Support**: Paper Study and agent workflows now support both standard LLMs and multimodal LLMs (mLLM), selectable per-context in settings and the model selector
 
 
 
-<details>
-<summary>Show earlier updates</summary>
 
 #### 2026-03-23
 - **GitHub Skills Import Preview**: New pre-import preview workflow lets users browse, review, and selectively import skills from GitHub repositories before committing changes
+
 
 
 
@@ -151,6 +161,7 @@ Go from code inspection to job submission and result analysis. Review repositori
 - **Obsidian Note Export**: Generate structured, Obsidian-compatible paper notes with rich YAML frontmatter, figures, and wikilinks directly from the paper study panel
 - **Per-Task Model Selector**: New model selector UI component lets users override the default AI model for individual paper study tasks (summary, roast, notes, etc.)
 - **Note Discussion View**: New full-page discussion view for paper notes, enabling threaded AI-assisted conversations around generated note content
+
 
 
 
@@ -166,9 +177,11 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
 #### 2026-03-20
 - **Deep Research Module**: Full AI-driven scientific research pipeline with multi-phase orchestration, reviewer deliberation, execution planning, and workflow graph UI
 - **Execution Pipeline**: Automated experiment execution system with Slurm job submission, dataset management, preprocessing, and remote executor support
+
 
 
 
@@ -181,17 +194,12 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
 #### 2026-03-18
 - **Multimodal Vision for Paper Analysis**: PDF images are now extracted and analyzed visually during paper discussion and research ideation sessions
 - **Claude Code Skills Integration**: Import skills directly from local folders or Claude Code projects via a new dedicated import workflow
 
 
-
-
-#### 2026-03-18
-- **Multimodal Vision for Paper Discussion & Ideation**: Vision-capable providers can now receive extracted PDF page images alongside text so discussion and ideation agents can analyze figures, tables, and diagrams.
-- **Paper Pages Gallery UI**: Discussion and ideation panels now show a collapsible thumbnail gallery for extracted paper pages with full-size preview dialogs.
-- **Provider Vision Capability Detection**: Provider configs now expose vision support so routes can switch between multimodal and text-only paper context automatically.
 
 
 
