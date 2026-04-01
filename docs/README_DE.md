@@ -47,11 +47,20 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 <!-- whats-new-start -->
 
+#### 2026-04-01
+- **Text-zu-CAD-Faehigkeit**: Neue Agenten-Faehigkeit, die natuerlichsprachige Beschreibungen mit CadQuery in 3D-CAD-Modelle (STL/STEP) umwandelt, mit automatischer Einrichtung der Umgebung
+- **Arbeitsbereich-Bildauswahl**: Neues Dialog-UI im Agenten-Panel zum Durchsuchen und Auswaehlen von Bildern aus dem Arbeitsbereich zum Anhaengen an Konversationen
+
+
 #### 2026-03-31
 - **Eingefuegte Bilder unterstuetzt**: Benutzer koennen Bilder jetzt direkt in die Chat-Eingabe einfuegen fuer multimodale KI-Konversationen
 - **Deep-Research-Rollenstudio**: Das neue Rollenstudio-Panel ermoeglicht das Konfigurieren und Verwalten benutzerdefinierter Forscherrollen im Deep-Research-Workflow
 - **Erweiterte Quellen fuer die Artikelsuche**: BioRxiv, PubMed und PubChem wurden als durchsuchbare Artikelquellen in Paper Study hinzugefuegt
 
+
+
+<details>
+<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-03-26
 - **Dynamische Modellerkennung**: Das Agenten-Panel ruft verfuegbare Modelle automatisch von jedem konfigurierten KI-Anbieter ab und fuegt sie mit der eingebauten Liste zusammen
@@ -60,11 +69,10 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
-<details>
-<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-03-24
 - **Multimodaler LLM-Support**: Papierrecherche und Agenten-Workflows unterstuetzen jetzt Standard-LLMs und multimodale LLMs (mLLM), kontextbezogen auswaehlbar in den Einstellungen und der Modellauswahl.
+
 
 
 
@@ -76,10 +84,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-22
 - **Obsidian-Notizexport**: Generieren Sie strukturierte, Obsidian-kompatible Notizen mit reichhaltigem YAML-Frontmatter, Abbildungen und Wikilinks direkt aus dem Paper-Studienpanel
 - **Modellauswahl pro Aufgabe**: Eine neue Modellauswahl-UI-Komponente erlaubt es Nutzern, das Standard-KI-Modell fuer einzelne Paper-Studienaufgaben (Zusammenfassung, Kritik, Notizen usw.) zu ueberschreiben
 - **Notiz-Diskussionsansicht**: Neue ganzseitige Diskussionsansicht fuer Paper-Notizen, die gebuendelte KI-gestuetzte Gespraeche rund um generierten Notizinhalt ermoeglichen
+
 
 
 
@@ -98,9 +108,11 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-20
 - **Tiefenforschungsmodul**: Vollstaendige KI-gesteuerte wissenschaftliche Forschungs-Pipeline mit Mehrphasen-Orchestrierung, Gutachter-Diskussion, Ausfuehrungsplanung und Workflow-Grafik-Oberflaeche
 - **Ausfuehrungs-Pipeline**: Automatisiertes System zur Experimentausfuehrung mit Slurm-Job-Uebermittlung, Datensatzverwaltung, Vorverarbeitung und Unterstuetzung fuer entfernte Ausfuehrer
+
 
 
 
@@ -124,24 +136,11 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-18
 - **Multimodale Bildanalyse fuer Papierauswertung**: PDF-Bilder werden jetzt waehrend Diskussions- und Forschungsideensitzungen visuell extrahiert und analysiert
 - **Claude Code Skills-Integration**: Importieren Sie Skills direkt aus lokalen Ordnern oder Claude Code-Projekten ueber einen neuen dedizierten Import-Workflow
 
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-18
-- **Multimodale Vision fuer Paper-Diskussion und Ideation**: Vision-faehige Anbieter erhalten jetzt extrahierte PDF-Seitenbilder zusammen mit Text, damit Agents Abbildungen, Tabellen und Diagramme direkt analysieren koennen.
-- **Paper-Seitengalerie-UI**: Die Discussion- und Ideation-Panels zeigen jetzt eine einklappbare Miniaturgalerie der extrahierten Paper-Seiten mit Grossansicht im Dialog.
-- **Erkennung der Vision-Faehigkeit von Anbietern**: Provider-Konfigurationen enthalten jetzt Vision-Support, sodass Routen automatisch zwischen multimodalem und rein textbasiertem Kontext wechseln koennen.
 
 
 

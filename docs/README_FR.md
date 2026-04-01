@@ -47,11 +47,20 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 <!-- whats-new-start -->
 
+#### 2026-04-01
+- **Competence Text-to-CAD**: Nouvelle competence d'agent qui convertit des descriptions en langage naturel en modeles CAD 3D (STL/STEP) via CadQuery, avec configuration automatique de l'environnement
+- **Selecteur d'images de l'espace de travail**: Nouvelle interface de dialogue dans le panneau agent pour parcourir et selectionner des images de l'espace de travail a joindre aux conversations
+
+
 #### 2026-03-31
 - **Support du collage d'images**: Les utilisateurs peuvent maintenant coller des images directement dans la saisie du chat pour des conversations IA multimodales
 - **Role Studio pour la recherche approfondie**: Le nouveau panneau Role Studio permet de configurer et gerer des roles de chercheur personnalises dans le flux de recherche approfondie
 - **Sources de recherche d'articles elargies**: BioRxiv, PubMed et PubChem ont ete ajoutes comme sources interrogeables dans Paper Study
 
+
+
+<details>
+<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-03-26
 - **Decouverte dynamique des modeles**: Le panneau agent recupere automatiquement les modeles disponibles de chaque fournisseur IA configure et les fusionne avec la liste integree
@@ -60,11 +69,10 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
-<details>
-<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-03-24
 - **Support LLM multimodal**: Les flux de recherche de documents et d'agents prennent desormais en charge les LLM standard et multimodaux (mLLM), selectionnables par contexte dans les parametres et le selecteur de modele.
+
 
 
 
@@ -76,10 +84,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-22
 - **Export de notes Obsidian**: Generez des notes structurees compatibles Obsidian avec frontmatter YAML enrichi, figures et wikilinks directement depuis le panneau d'etude de l'article
 - **Selecteur de modele par tache**: Un nouveau composant UI de selection de modele permet aux utilisateurs de remplacer le modele AI par defaut pour chaque tache d'etude (resume, critique, notes, etc.)
 - **Vue de discussion des notes**: Nouvelle vue de discussion pleine page pour les notes d'articles, permettant des conversations assistees par IA autour du contenu des notes generees
+
 
 
 
@@ -98,9 +108,11 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-20
 - **Module de recherche approfondie**: Pipeline de recherche scientifique entierement pilote par IA avec orchestration multi-phases, deliberation des evaluateurs, planification d'execution et interface graphique de flux de travail
 - **Pipeline d'execution**: Systeme d'execution d'experiences automatise avec soumission de jobs Slurm, gestion de jeux de donnees, preprocessement et support d'executeurs distants
+
 
 
 
@@ -124,24 +136,11 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-18
 - **Vision Multimodale pour l'Analyse d'Articles**: Les images PDF sont desormais extraites et analysees visuellement lors des sessions de discussion et d'ideation de recherche
 - **Integration des Competences Claude Code**: Importez des competences directement depuis des dossiers locaux ou des projets Claude Code via un nouveau flux d'importation dedie
 
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-18
-- **Vision multimodale pour discussion et ideation d'articles** : les fournisseurs compatibles vision recoivent maintenant les images de pages PDF extraites en plus du texte afin d'analyser figures, tableaux et schemas.
-- **UI de galerie des pages d'article** : les panneaux Discussion et Ideation affichent maintenant une galerie repliable de miniatures de pages avec apercu en grand format.
-- **Detection de la capacite vision des fournisseurs** : la configuration des fournisseurs expose maintenant la prise en charge vision pour basculer automatiquement entre contexte multimodal et texte seul.
 
 
 
