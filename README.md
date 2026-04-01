@@ -62,6 +62,8 @@ npm run dev                          # open http://localhost:3000
 
 After the UI opens: **Settings** → configure a model provider → open a workspace → click **Sync** → start chatting.
 
+> **Security**: InnoClaw includes shell execution and remote job submission capabilities. See [SECURITY.md](SECURITY.md) for deployment hardening and trust boundary documentation.
+
 <details>
 <summary>Environment variables, upgrade flow, and advanced setup</summary>
 
@@ -88,9 +90,19 @@ npm run build
 
 Check `CHANGELOG.md` before every upgrade. Compare `.env.local` against `.env.example` for new variables.
 
-For OS-specific prerequisites, production deployment, and Docker: see [Installation](docs/getting-started/installation.md) and [Deployment](docs/getting-started/deployment.md).
+For OS-specific prerequisites and production deployment: see [Installation](docs/getting-started/installation.md) and [Deployment](docs/getting-started/deployment.md).
 
 </details>
+
+### Docker Deployment
+
+```bash
+git clone https://github.com/SpectrAI-Initiative/InnoClaw.git && cd InnoClaw
+cp .env.production.example .env.production.local   # edit: set API key + WORKSPACE_ROOTS
+docker compose up -d                                # open http://localhost:3000
+```
+
+See the full [Docker Deployment Guide](docs/docker.md) for volumes, reverse proxy, backups, and upgrades.
 
 ---
 

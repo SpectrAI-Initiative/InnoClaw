@@ -1,0 +1,19 @@
+services:
+  innoclaw:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.production.local
+    volumes:
+      # Persistent data: SQLite DB, HF datasets, embeddings
+      - innoclaw-data:/app/data
+      # Mount your research directories here.
+      # Must match the paths listed in WORKSPACE_ROOTS.
+      # Example: expose ~/research as /research inside the container,
+      #          then set WORKSPACE_ROOTS=/research in .env.production.local
+      - ${HOST_WORKSPACE_PATH:-./workspace}:/research
+    restart: unless-stopped
+
+volumes:
+  innoclaw-data:

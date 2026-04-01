@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+
+# Build output
+.next
+
+# Data (mounted as volumes at runtime)
+data/
+
+# Local env (secrets)
+.env.local
+.env.production.local
+
+# Version control
+.git
+.gitignore
+
+# IDE / editor
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CI / docs not needed in image
+.github
+.claude
+CLAUDE.md

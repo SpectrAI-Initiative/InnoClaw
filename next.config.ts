@@ -11,6 +11,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   serverExternalPackages: ["better-sqlite3", "pdf-parse", "@larksuiteoapi/node-sdk"],
   // Allow overriding the .next build directory via env var.
   // Useful on network/shared filesystems where Turbopack cache persistence fails.
