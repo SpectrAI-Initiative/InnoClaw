@@ -47,10 +47,20 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 <!-- whats-new-start -->
 
+#### 2026-04-02
+- **Docker-Deployment-Unterstuetzung**: Dockerfile, docker-compose.yml und eine vollstaendige Docker-Deployment-Anleitung fuer selbst gehostete Produktionsumgebungen hinzugefuegt
+- **200+ neue integrierte Skills**: Skill-Bibliothek erweitert um Bioinformatik, Chemoinformatik, Genomik, Physik und Drug-Discovery-Pipelines
+- **Skill-Creator-Framework**: Neuer Meta-Skill mit Werkzeugen fuer Evaluierung, Benchmarking und Validierung zum Erstellen und Testen eigener Skills
+
+
 #### 2026-04-01
 - **Text-zu-CAD-Faehigkeit**: Neue Agenten-Faehigkeit, die natuerlichsprachige Beschreibungen mit CadQuery in 3D-CAD-Modelle (STL/STEP) umwandelt, mit automatischer Einrichtung der Umgebung
 - **Arbeitsbereich-Bildauswahl**: Neues Dialog-UI im Agenten-Panel zum Durchsuchen und Auswaehlen von Bildern aus dem Arbeitsbereich zum Anhaengen an Konversationen
 
+
+
+<details>
+<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-03-31
 - **Eingefuegte Bilder unterstuetzt**: Benutzer koennen Bilder jetzt direkt in die Chat-Eingabe einfuegen fuer multimodale KI-Konversationen
@@ -59,13 +69,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
-<details>
-<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-03-26
 - **Dynamische Modellerkennung**: Das Agenten-Panel ruft verfuegbare Modelle automatisch von jedem konfigurierten KI-Anbieter ab und fuegt sie mit der eingebauten Liste zusammen
 - **Modellspezifisches Base-URL-Routing**: Chinesische KI-Anbieter (shlab, qwen, moonshot, deepseek, minimax, zhipu) unterstuetzen `<PROVIDER>_<MODEL>_BASE_URL`-Umgebungsvariablen fuer flexibles Endpunkt-Routing
 - **Laufzeit-Umschalter fuer Tool-Aufruf**: Tool-Unterstuetzung kann per Anbieter ueber `<PROVIDER>_TOOLS_ENABLED=true/false` ohne Codeaenderungen aktiviert oder deaktiviert werden
+
 
 
 
@@ -77,8 +86,10 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-23
 - **GitHub-Faehigkeiten Import-Vorschau**: Neuer Vorschau-Workflow vor dem Import ermoeglicht das Durchsuchen, Pruefen und selektive Importieren von Faehigkeiten aus GitHub-Repositories
+
 
 
 
@@ -96,10 +107,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-21
 - **Entfernte HPC/SLURM-Ausfuehrung**: Tiefe Recherche-Sitzungen koennen jetzt ueber SSH auf entfernten Clustern ausgefuehrt werden, mit Unterstuetzung fuer rjob, rlaunch und SLURM sowie Datei-Staging und Job-Lifecycle-Verwaltung
 - **Kubernetes-Cluster-Konfigurationsoberflaeche**: Neues Einstellungspanel zur Laufzeitkonfiguration von K8s-Kontexten, PVC-Bindungen und Container-Images in Multi-Cluster-Umgebungen ohne Neustart
 - **Entfernte Profil-Bindung**: Tiefe Recherche-Sitzungen koennen an vorkonfigurierte SSH/Remote-Rechenprofile gebunden werden, was reproduzierbare verteilte Forschungs-Workflows ermoeglicht
+
 
 
 
@@ -122,24 +135,11 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-19
 - **ClawHub-Skill-Import**: Neue Integration zum direkten Importieren von Skills aus ClawHub ueber einen dedizierten API-Endpunkt und einen Import-Dialog
 - **Code-Vorschaufenster**: Neue In-Editor-Komponente fuer die Code-Vorschau mit Syntaxhervorhebung und Verfolgung des Speicherstatus
 - **Paper-Studie-Cache**: Persistente Caching-Schicht fuer Paper-Studien-Sitzungen zur Verbesserung der Neulade-Performance und Zustandskontinuitaet
-
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-18
-- **Multimodale Bildanalyse fuer Papierauswertung**: PDF-Bilder werden jetzt waehrend Diskussions- und Forschungsideensitzungen visuell extrahiert und analysiert
-- **Claude Code Skills-Integration**: Importieren Sie Skills direkt aus lokalen Ordnern oder Claude Code-Projekten ueber einen neuen dedizierten Import-Workflow
 
 
 
