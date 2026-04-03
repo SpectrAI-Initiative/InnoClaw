@@ -228,7 +228,7 @@ function buildResearchMemoryProfile({
   const openQuestions = dedupeStrings([
     ...(checkpoint?.openQuestions ?? []),
     ...((claimMap?.gaps ?? []).map((gap) => gap.topic)),
-    ...((review?.literatureGaps ?? []) ?? []),
+    ...(review?.literatureGaps ?? []),
   ]).slice(0, 8);
 
   const activeHypotheses = dedupeStrings([
@@ -565,12 +565,12 @@ function buildResearchMemorySnapshot(
   ]).slice(0, 6);
   const contestedFacts = dedupeStrings([
     ...((latestClaimMap?.contradictions ?? []).map((contradiction) => contradiction.description)),
-    ...((latestReview?.openIssues ?? []) ?? []),
+    ...(latestReview?.openIssues ?? []),
   ]).slice(0, 6);
   const unresolvedGaps = dedupeStrings([
     ...profile.openQuestions,
     ...((latestClaimMap?.gaps ?? []).map((gap) => gap.topic)),
-    ...((latestReview?.literatureGaps ?? []) ?? []),
+    ...(latestReview?.literatureGaps ?? []),
   ]).slice(0, 8);
   const focusAreas = dedupeStrings(items.flatMap((item) => item.tags)).slice(0, 8);
   const relatedArtifactIds = dedupeStrings(
