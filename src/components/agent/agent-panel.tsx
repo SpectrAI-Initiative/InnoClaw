@@ -6,7 +6,6 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { FileUIPart, UIMessage } from "ai";
 import { agentStreamManager } from "@/lib/agent/agent-stream-manager";
-import { CostTracker, type CostSnapshot } from "@/lib/agent/cost-tracker";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AlertCircle,
@@ -49,11 +48,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ParticleEffect, ThinkingIndicator, FloatingOrbs } from "@/components/ui/particle-effect";
 import type { Skill } from "@/types";
 import { swrFetcher as fetcher } from "@/lib/fetcher";
-import {
-  resolveModelSelection,
-  type ModelCatalogEntry,
-  type ProviderModelCatalog,
-} from "@/lib/ai/model-selection";
+import { useModelSelection } from "@/lib/hooks/use-model-selection";
+import { useCostTracking } from "@/lib/hooks/use-cost-tracking";
 import { AgentMessage } from "./agent-message";
 import { CostDisplay } from "./cost-display";
 import { MemoryPanel } from "./memory-panel";
@@ -68,19 +64,19 @@ import {
 } from "@/lib/ai/message-attachments";
 import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
 import {
+  BUILTIN_COMMANDS,
   getMatchingSkillsForSlashQuery,
   shouldAutocompleteCaptureEnter,
   type BuiltinCommand,
 } from "./slash-command";
 import { extractMemoryTags } from "@/lib/agent/kairos-memory";
+import { getMessageText } from "./message-utils";
+import { useDraggableDialog, ResizeHandles } from "./use-draggable-dialog";
 import { getWorkspaceImageMimeType } from "./workspace-image-picker-utils";
 import { focusAgentInputAfterDialogClose } from "./workspace-image-picker-utils";
 
 type AgentMode = "long-agent" | "agent" | "plan" | "ask";
 type ModelSelection = { provider: string; model: string };
-type AgentModelOptionsKey = readonly ["agent-model-options", ...ProviderId[]];
-type ModelOption = ModelCatalogEntry;
-type ProviderOption = ProviderModelCatalog;
 
 /** Pixel threshold for considering the user "at the bottom" of the scroll area */
 const BOTTOM_THRESHOLD_PX = 80;
@@ -115,30 +111,6 @@ const MODE_PLACEHOLDER_KEYS: Record<AgentMode, "placeholder" | "placeholderLongA
   ask: "placeholderAsk",
 };
 
-function readStoredModelSelection(storageKey: string): ModelSelection | null {
-  try {
-    if (typeof window === "undefined" || !window.localStorage) {
-      return null;
-    }
-    const stored = window.localStorage.getItem(storageKey);
-    if (!stored) {
-      return null;
-    }
-    const parsed = JSON.parse(stored);
-    if (
-      typeof parsed?.provider === "string" &&
-      parsed.provider &&
-      typeof parsed?.model === "string" &&
-      parsed.model
-    ) {
-      return { provider: parsed.provider, model: parsed.model };
-    }
-  } catch {
-    // Ignore storage access and parse errors.
-  }
-  return null;
-}
-
 // --- Main Panel ---
 
 interface AgentPanelProps {
@@ -168,11 +140,6 @@ export function AgentPanel({
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<FileUIPart[]>([]);
   const [mode, setMode] = useState<AgentMode>("agent");
-  const [userSelection, setUserSelection] = useState<ModelSelection | null>(
-    () => readStoredModelSelection("innoclaw-agent-model-selection")
-  );
-
-  const MODEL_SELECTION_STORAGE_KEY = "innoclaw-agent-model-selection";
 
   // Draggable input area height
   const [inputHeight, setInputHeight] = useState(80);
@@ -212,31 +179,6 @@ export function AgentPanel({
   const summarizingRef = useRef(false);
   const failedAtCountRef = useRef(-1);
 
-  // Cost tracking state
-  const costTrackerRef = useRef(new CostTracker());
-  const [costSnapshot, setCostSnapshot] = useState<CostSnapshot | null>(null);
-  const costStorageKey = `agent-cost:${workspaceId}:${sessionId}`;
-
-  // Restore cost tracker from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(costStorageKey);
-      if (saved) {
-        const data = JSON.parse(saved) as CostSnapshot;
-        costTrackerRef.current = CostTracker.fromJSON(data);
-        setCostSnapshot(costTrackerRef.current.getSnapshot());
-      } else {
-        costTrackerRef.current = new CostTracker();
-        setCostSnapshot(null);
-      }
-    } catch {
-      costTrackerRef.current = new CostTracker();
-    }
-  }, [costStorageKey]);
-
-  // Ref for cost estimation (populated after resolvedModel is available)
-  const prevMessageCountRef = useRef(0);
-
   // Memory panel state
   const [showMemoryPanel, setShowMemoryPanel] = useState(false);
   const [showCostDisplay, setShowCostDisplay] = useState(true);
@@ -262,84 +204,10 @@ export function AgentPanel({
   // Track overflow-triggered dialog: stores messages to keep after memory save
   const overflowKeepRef = useRef<UIMessage[] | null>(null);
 
-  // Draggable + resizable dialog state
-  const [dialogPos, setDialogPos] = useState({ x: 0, y: 0 });
-  const [dialogSize, setDialogSize] = useState({ width: 512, height: 520 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [resizeEdge, setResizeEdge] = useState<string | null>(null);
-  const dragStartRef = useRef({ mouseX: 0, mouseY: 0, posX: 0, posY: 0 });
-  const resizeStartRef = useRef({ mouseX: 0, mouseY: 0, w: 0, h: 0, posX: 0, posY: 0 });
-
-  // Reset dialog position/size when opened
-  useEffect(() => {
-    if (showMemoryPreview) {
-      setDialogPos({ x: 0, y: 0 });
-      setDialogSize({ width: 512, height: 520 });
-    }
-  }, [showMemoryPreview]);
-
-  // Global pointer listeners for dragging
-  useEffect(() => {
-    if (!isDragging) return;
-    const onMove = (e: PointerEvent) => {
-      const s = dragStartRef.current;
-      setDialogPos({ x: s.posX + e.clientX - s.mouseX, y: s.posY + e.clientY - s.mouseY });
-    };
-    const onUp = () => setIsDragging(false);
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-  }, [isDragging]);
-
-  // Global pointer listeners for resizing (all edges/corners)
-  useEffect(() => {
-    if (!resizeEdge) return;
-    const onMove = (e: PointerEvent) => {
-      const s = resizeStartRef.current;
-      const dx = e.clientX - s.mouseX;
-      const dy = e.clientY - s.mouseY;
-      let newW = s.w, newH = s.h, newX = s.posX, newY = s.posY;
-
-      if (resizeEdge.includes("e")) newW = s.w + dx;
-      if (resizeEdge.includes("w")) { newW = s.w - dx; newX = s.posX + dx; }
-      if (resizeEdge.includes("s")) newH = s.h + dy;
-      if (resizeEdge.includes("n")) { newH = s.h - dy; newY = s.posY + dy; }
-
-      // Enforce minimums and clamp position
-      if (newW < 360) { newW = 360; if (resizeEdge.includes("w")) newX = s.posX + s.w - 360; }
-      if (newH < 300) { newH = 300; if (resizeEdge.includes("n")) newY = s.posY + s.h - 300; }
-
-      setDialogSize({ width: newW, height: newH });
-      setDialogPos({ x: newX, y: newY });
-    };
-    const onUp = () => setResizeEdge(null);
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-  }, [resizeEdge]);
-
-  const onDragStart = useCallback((e: React.PointerEvent) => {
-    // Don't drag when clicking close button or inputs
-    if ((e.target as HTMLElement).closest("button")) return;
-    dragStartRef.current = { mouseX: e.clientX, mouseY: e.clientY, posX: dialogPos.x, posY: dialogPos.y };
-    setIsDragging(true);
-  }, [dialogPos]);
-
-  const onEdgeResizeStart = useCallback((e: React.PointerEvent, edge: string) => {
-    e.stopPropagation();
-    resizeStartRef.current = {
-      mouseX: e.clientX, mouseY: e.clientY,
-      w: dialogSize.width, h: dialogSize.height,
-      posX: dialogPos.x, posY: dialogPos.y,
-    };
-    setResizeEdge(edge);
-  }, [dialogSize, dialogPos]);
+  // Shared draggable + resizable dialog (message-select and memory-preview are mutually exclusive)
+  const { dialogStyle, onDragStart, onEdgeResizeStart } = useDraggableDialog({
+    open: showMessageSelect || showMemoryPreview,
+  });
 
   const { data: settings } = useSWR("/api/settings", fetcher);
   const aiEnabled = settings?.hasAIKey ?? false;
@@ -350,54 +218,6 @@ export function AgentPanel({
     return configured.filter((id): id is ProviderId => Boolean(PROVIDERS[id as ProviderId]));
   }, [settings?.configuredProviders]);
 
-  const modelOptionsKey = useMemo<AgentModelOptionsKey | null>(() => {
-    if (configuredProviderIds.length === 0) {
-      return null;
-    }
-    return ["agent-model-options", ...configuredProviderIds];
-  }, [configuredProviderIds]);
-
-  const { data: discoveredModelsByProvider, mutate: refreshDiscoveredModels } = useSWR<
-    Record<string, ModelOption[]>
-  >(
-    modelOptionsKey,
-    async (key: AgentModelOptionsKey) => {
-      const [, ...providerIds] = key;
-      const entries = await Promise.all(
-        providerIds.map(async (providerId) => {
-          try {
-            const response = await fetch(`/api/models?provider=${encodeURIComponent(providerId)}`);
-            const data = await response.json().catch(() => ({}));
-            return [providerId, Array.isArray(data.models) ? data.models : []] as const;
-          } catch {
-            return [providerId, []] as const;
-          }
-        }),
-      );
-      return Object.fromEntries(entries);
-    },
-  );
-
-  const availableProviders = useMemo<ProviderOption[]>(() => {
-    const providers: ProviderOption[] = [];
-    for (const id of configuredProviderIds) {
-      const provider = PROVIDERS[id];
-      if (!provider) continue;
-
-      const knownIds = new Set(provider.models.map((model) => model.id));
-      const extraModels = (discoveredModelsByProvider?.[id] ?? []).filter(
-        (model) => !knownIds.has(model.id),
-      );
-
-      providers.push({
-        id: provider.id,
-        name: provider.name,
-        models: [...provider.models, ...extraModels],
-      });
-    }
-    return providers;
-  }, [configuredProviderIds, discoveredModelsByProvider]);
-
   const settingsFallback = useMemo<ModelSelection | null>(() => {
     if (!settings?.llmProvider || !settings?.llmModel) return null;
     if (
@@ -406,98 +226,24 @@ export function AgentPanel({
     ) {
       return null;
     }
-    return {
-      provider: settings.llmProvider as string,
-      model: settings.llmModel as string,
-    };
+    return { provider: settings.llmProvider as string, model: settings.llmModel as string };
   }, [configuredProviderIds, settings?.llmModel, settings?.llmProvider]);
 
-  const resolvedSelection = useMemo(() => {
-    const selection = userSelection ?? settingsFallback;
-    const unmatchedKind =
-      selection && (discoveredModelsByProvider?.[selection.provider]?.length ?? 0) > 0
-        ? "not-found"
-        : "custom";
-    return resolveModelSelection(selection, availableProviders, { unmatchedKind });
-  }, [availableProviders, discoveredModelsByProvider, settingsFallback, userSelection]);
-
-  const canonicalSelection = useMemo<ModelSelection | null>(() => (
-    resolvedSelection
-      ? { provider: resolvedSelection.provider, model: resolvedSelection.resolvedModel }
-      : null
-  ), [resolvedSelection]);
-
-  useEffect(() => {
-    if (!userSelection) return;
-
-    const providerStillConfigured =
-      configuredProviderIds.length === 0 ||
-      configuredProviderIds.includes(userSelection.provider as ProviderId);
-    const providerExists = Boolean(PROVIDERS[userSelection.provider as ProviderId]);
-
-    if (providerExists && providerStillConfigured) {
-      return;
-    }
-
-    setUserSelection(null);
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.removeItem(MODEL_SELECTION_STORAGE_KEY);
-      }
-    } catch {
-      // Ignore storage access errors.
-    }
-  }, [configuredProviderIds, userSelection]);
-
-  useEffect(() => {
-    if (!userSelection || !canonicalSelection) return;
-    if (
-      canonicalSelection.provider === userSelection.provider &&
-      canonicalSelection.model === userSelection.model
-    ) {
-      return;
-    }
-
-    setUserSelection(canonicalSelection);
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.setItem(
-          MODEL_SELECTION_STORAGE_KEY,
-          JSON.stringify(canonicalSelection),
-        );
-      }
-    } catch {
-      // Ignore storage access errors.
-    }
-  }, [MODEL_SELECTION_STORAGE_KEY, canonicalSelection, userSelection]);
-
-  const selectedProvider = canonicalSelection?.provider ?? null;
-  const selectedModel = canonicalSelection?.model ?? null;
-
-  const handleModelChange = useCallback((providerId: string, modelId: string) => {
-    setUserSelection({ provider: providerId, model: modelId });
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.setItem(
-          MODEL_SELECTION_STORAGE_KEY,
-          JSON.stringify({ provider: providerId, model: modelId })
-        );
-      }
-    } catch {
-      // Ignore storage access errors; state has already been updated
-    }
-  }, []);
-
-  const modelDisplayName = useMemo(() => {
-    return resolvedSelection?.displayName ?? t("modelLabel");
-  }, [resolvedSelection, t]);
-
-  const selectedSupportsVision = useMemo(() => {
-    if (!selectedProvider || !selectedModel || resolvedSelection?.matchKind === "unmatched") {
-      return null;
-    }
-    return modelSupportsVision(selectedProvider, selectedModel);
-  }, [resolvedSelection?.matchKind, selectedProvider, selectedModel]);
+  const {
+    selectedProvider,
+    selectedModel,
+    modelDisplayName,
+    resolvedSelection,
+    availableProviders,
+    selectedSupportsVision,
+    handleModelChange,
+    refreshDiscoveredModels,
+  } = useModelSelection({
+    storageKey: "innoclaw-agent-model-selection",
+    configuredProviderIds,
+    settingsFallback,
+    fallbackDisplayName: t("modelLabel"),
+  });
 
   // Mutable body object — allows injecting skillId/paramValues before each send
   const agentBody = useMemo(
@@ -848,39 +594,12 @@ export function AgentPanel({
     [totalMessageChars, contextWindowChars]
   );
 
-  // Estimate cost from messages using character-based token estimation (~4 chars/token)
-  useEffect(() => {
-    if (status === "streaming" || status === "submitted") return;
-    if (messages.length <= prevMessageCountRef.current) {
-      prevMessageCountRef.current = messages.length;
-      return;
-    }
-    const newMessages = messages.slice(prevMessageCountRef.current);
-    prevMessageCountRef.current = messages.length;
-
-    let inputChars = 0;
-    let outputChars = 0;
-    for (const msg of newMessages) {
-      const textLen = msg.parts
-        ?.filter((p) => (p as Record<string, unknown>).type === "text")
-        .reduce((sum, p) => sum + ((p as Record<string, string>).text?.length ?? 0), 0) ?? 0;
-      if (msg.role === "user") inputChars += textLen;
-      else outputChars += textLen;
-    }
-
-    if (inputChars + outputChars > 0) {
-      const model = resolvedModel ?? "unknown";
-      costTrackerRef.current.addUsage(model, {
-        inputTokens: Math.ceil(inputChars / 4),
-        outputTokens: Math.ceil(outputChars / 4),
-      });
-      const snapshot = costTrackerRef.current.getSnapshot();
-      setCostSnapshot(snapshot);
-      try {
-        localStorage.setItem(costStorageKey, JSON.stringify(snapshot));
-      } catch { /* ignore */ }
-    }
-  }, [messages, status, resolvedModel, costStorageKey]);
+  const { costSnapshot } = useCostTracking({
+    storageKey: `agent-cost:${workspaceId}:${sessionId}`,
+    messages,
+    status,
+    resolvedModel,
+  });
 
   // Extract <memory> tags from assistant messages and save to daily log
   const lastMemoryExtractRef = useRef(0);
@@ -895,10 +614,7 @@ export function AgentPanel({
 
     for (const msg of newMessages) {
       if (msg.role !== "assistant") continue;
-      const text = msg.parts
-        ?.filter((p) => (p as Record<string, unknown>).type === "text")
-        .map((p) => (p as Record<string, string>).text)
-        .join("") ?? "";
+      const text = getMessageText(msg);
       const memories = extractMemoryTags(text);
       for (const mem of memories) {
         fetch("/api/agent/memory", {
@@ -915,10 +631,7 @@ export function AgentPanel({
     if (status === "streaming" || status === "submitted") return undefined;
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].role === "assistant") {
-        return messages[i].parts
-          ?.filter((p) => (p as Record<string, unknown>).type === "text")
-          .map((p) => (p as Record<string, string>).text)
-          .join("") ?? undefined;
+        return getMessageText(messages[i]) || undefined;
       }
     }
     return undefined;
@@ -1122,7 +835,7 @@ export function AgentPanel({
     }
   };
 
-  const handleBuiltinCommand = (command: BuiltinCommand) => {
+  const handleBuiltinCommand = (command: BuiltinCommand, args?: string) => {
     setShowAutocomplete(false);
     setInput("");
     switch (command.slug) {
@@ -1143,7 +856,18 @@ export function AgentPanel({
         setShowMemoryPanel(true);
         break;
       case "remember":
-        setInput("/remember ");
+        if (args) {
+          fetch("/api/agent/memory", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ workspaceId, action: "remember", text: args }),
+          }).then((res) => {
+            if (res.ok) toast.success("Memory saved");
+            else toast.error("Failed to save memory");
+          }).catch(() => toast.error("Failed to save memory"));
+        } else {
+          setInput("/remember ");
+        }
         break;
       case "dream":
         toast.info("Starting dream consolidation...");
@@ -1213,58 +937,9 @@ export function AgentPanel({
       const parts = text.slice(1).split(/\s+/);
       const cmd = parts[0].toLowerCase();
       const args = parts.slice(1).join(" ");
-
-      if (cmd === "compact") {
-        setInput("");
-        setShowAutocomplete(false);
-        // Trigger context compaction with optional instructions
-        if (messages.length >= 4) {
-          const keepCount = Math.max(2, Math.floor(messages.length * 0.3));
-          const toSummarize = messages.slice(0, messages.length - keepCount);
-          const toKeep = messages.slice(messages.length - keepCount);
-          summarizeAndEvict(toSummarize, toKeep, "overflow");
-        } else {
-          toast.info("Not enough messages to compact");
-        }
-        return;
-      }
-      if (cmd === "cost") {
-        setInput("");
-        setShowAutocomplete(false);
-        setShowCostDisplay((prev) => !prev);
-        return;
-      }
-      if (cmd === "memory") {
-        setInput("");
-        setShowAutocomplete(false);
-        setShowMemoryPanel(true);
-        return;
-      }
-      if (cmd === "remember" && args) {
-        setInput("");
-        setShowAutocomplete(false);
-        fetch("/api/agent/memory", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ workspaceId, action: "remember", text: args }),
-        }).then((res) => {
-          if (res.ok) toast.success("Memory saved");
-          else toast.error("Failed to save memory");
-        }).catch(() => toast.error("Failed to save memory"));
-        return;
-      }
-      if (cmd === "dream") {
-        setInput("");
-        setShowAutocomplete(false);
-        toast.info("Starting dream consolidation...");
-        fetch("/api/agent/memory", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ workspaceId, action: "dream" }),
-        }).then((res) => {
-          if (res.ok) toast.success("Dream consolidation complete");
-          else toast.error("Dream consolidation failed");
-        }).catch(() => toast.error("Dream consolidation failed"));
+      const builtinMatch = BUILTIN_COMMANDS.find((c) => c.slug === cmd);
+      if (builtinMatch) {
+        handleBuiltinCommand(builtinMatch, args);
         return;
       }
     }
@@ -1377,13 +1052,6 @@ export function AgentPanel({
       setMessages((prev) => scrubStuckToolParts(prev));
     }, 100);
   };
-
-  // Helper: extract plain text from a message
-  const getMessageText = (message: UIMessage) =>
-    message.parts
-      ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-      .map((p) => p.text)
-      .join("") ?? "";
 
   // Messages that have renderable text content (used for selection UI)
   const selectableMessages = useMemo(
@@ -1561,11 +1229,7 @@ export function AgentPanel({
             messages.map((message) => {
               // Filter out auto-continue messages (user messages with only "Continue" / "继续")
               if (message.role === "user") {
-                const text = message.parts
-                  ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-                  .map((p) => p.text)
-                  .join("")
-                  .trim();
+                const text = getMessageText(message).trim();
                 if (text === "Continue" || text === "继续") return null;
               }
               return <AgentMessage key={message.id} message={message} />;
@@ -1885,13 +1549,7 @@ export function AgentPanel({
       }}>
         <DialogContent
           className="flex flex-col !p-0 overflow-hidden"
-          style={{
-            width: dialogSize.width,
-            height: dialogSize.height,
-            maxWidth: "none",
-            maxHeight: "none",
-            transform: `translate(calc(-50% + ${dialogPos.x}px), calc(-50% + ${dialogPos.y}px))`,
-          }}
+          style={dialogStyle}
         >
           <DialogHeader
             className="cursor-move select-none px-6 pt-6 pb-2"
@@ -1987,16 +1645,7 @@ export function AgentPanel({
             </Button>
           </DialogFooter>
 
-          {/* Edge resize handles */}
-          <div className="absolute top-0 left-3 right-3 h-1.5 cursor-n-resize" onPointerDown={(e) => onEdgeResizeStart(e, "n")} />
-          <div className="absolute bottom-0 left-3 right-3 h-1.5 cursor-s-resize" onPointerDown={(e) => onEdgeResizeStart(e, "s")} />
-          <div className="absolute left-0 top-3 bottom-3 w-1.5 cursor-w-resize" onPointerDown={(e) => onEdgeResizeStart(e, "w")} />
-          <div className="absolute right-0 top-3 bottom-3 w-1.5 cursor-e-resize" onPointerDown={(e) => onEdgeResizeStart(e, "e")} />
-          {/* Corner resize handles */}
-          <div className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "nw")} />
-          <div className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize" onPointerDown={(e) => onEdgeResizeStart(e, "ne")} />
-          <div className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "sw")} />
-          <div className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize" onPointerDown={(e) => onEdgeResizeStart(e, "se")} />
+          <ResizeHandles onEdgeResizeStart={onEdgeResizeStart} />
         </DialogContent>
       </Dialog>
 
@@ -2006,13 +1655,7 @@ export function AgentPanel({
       }}>
         <DialogContent
           className="flex flex-col !p-0 overflow-hidden"
-          style={{
-            width: dialogSize.width,
-            height: dialogSize.height,
-            maxWidth: "none",
-            maxHeight: "none",
-            transform: `translate(calc(-50% + ${dialogPos.x}px), calc(-50% + ${dialogPos.y}px))`,
-          }}
+          style={dialogStyle}
         >
           {/* Drag handle */}
           <DialogHeader
@@ -2053,16 +1696,7 @@ export function AgentPanel({
             </Button>
           </DialogFooter>
 
-          {/* Edge resize handles */}
-          <div className="absolute top-0 left-3 right-3 h-1.5 cursor-n-resize" onPointerDown={(e) => onEdgeResizeStart(e, "n")} />
-          <div className="absolute bottom-0 left-3 right-3 h-1.5 cursor-s-resize" onPointerDown={(e) => onEdgeResizeStart(e, "s")} />
-          <div className="absolute left-0 top-3 bottom-3 w-1.5 cursor-w-resize" onPointerDown={(e) => onEdgeResizeStart(e, "w")} />
-          <div className="absolute right-0 top-3 bottom-3 w-1.5 cursor-e-resize" onPointerDown={(e) => onEdgeResizeStart(e, "e")} />
-          {/* Corner resize handles */}
-          <div className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "nw")} />
-          <div className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize" onPointerDown={(e) => onEdgeResizeStart(e, "ne")} />
-          <div className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "sw")} />
-          <div className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize" onPointerDown={(e) => onEdgeResizeStart(e, "se")} />
+          <ResizeHandles onEdgeResizeStart={onEdgeResizeStart} />
         </DialogContent>
       </Dialog>
 

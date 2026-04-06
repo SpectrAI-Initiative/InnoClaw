@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
 import { getConfiguredModelWithProvider, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
-import { createAgentTools } from "@/lib/ai/agent-tools";
+import { createAgentTools } from "@/lib/ai/tools";
 import { buildAgentSystemPrompt, buildAgentLongSystemPrompt, buildPlanSystemPrompt, buildAskSystemPrompt } from "@/lib/ai/prompts";
 import { buildSkillSystemPrompt } from "@/lib/ai/skill-prompt";
 import { runtimeProviderSupportsTools } from "@/lib/ai/runtime-capabilities";

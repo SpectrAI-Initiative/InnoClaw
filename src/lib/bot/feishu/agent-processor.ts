@@ -13,7 +13,7 @@ import {
   type UIMessage,
 } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
-import { createAgentTools } from "@/lib/ai/agent-tools";
+import { createAgentTools } from "@/lib/ai/tools";
 import {
   buildAgentSystemPrompt,
   buildPlanSystemPrompt,
