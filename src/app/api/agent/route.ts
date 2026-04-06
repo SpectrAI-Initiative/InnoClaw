@@ -188,7 +188,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return result.toUIMessageStreamResponse();
+    // Resolve the model ID string for cost tracking on the client side
+    const modelIdStr = typeof model === "string" ? model : model.modelId;
+
+    return result.toUIMessageStreamResponse({
+      headers: {
+        "X-Agent-Model": modelIdStr,
+        "X-Agent-Provider": providerId,
+      },
+    });
   } catch (error) {
     console.error("Agent error:", error);
     return new Response(

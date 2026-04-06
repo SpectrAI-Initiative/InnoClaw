@@ -6,6 +6,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { FileUIPart, UIMessage } from "ai";
 import { agentStreamManager } from "@/lib/agent/agent-stream-manager";
+import { CostTracker, type CostSnapshot } from "@/lib/agent/cost-tracker";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AlertCircle,
@@ -54,6 +55,10 @@ import {
   type ProviderModelCatalog,
 } from "@/lib/ai/model-selection";
 import { AgentMessage } from "./agent-message";
+import { CostDisplay } from "./cost-display";
+import { MemoryPanel } from "./memory-panel";
+import { BuddyAvatar } from "./buddy-avatar";
+import { BuddyHatchDialog } from "./buddy-hatch-dialog";
 import { WorkspaceImagePickerDialog } from "./workspace-image-picker-dialog";
 import { toast } from "sonner";
 import {
@@ -65,7 +70,10 @@ import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
 import {
   getMatchingSkillsForSlashQuery,
   shouldAutocompleteCaptureEnter,
+  BUILTIN_COMMANDS,
+  type BuiltinCommand,
 } from "./slash-command";
+import { extractMemoryTags } from "@/lib/agent/kairos-memory";
 import { getWorkspaceImageMimeType } from "./workspace-image-picker-utils";
 import { focusAgentInputAfterDialogClose } from "./workspace-image-picker-utils";
 
@@ -204,6 +212,39 @@ export function AgentPanel({
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const summarizingRef = useRef(false);
   const failedAtCountRef = useRef(-1);
+
+  // Cost tracking state
+  const costTrackerRef = useRef(new CostTracker());
+  const [costSnapshot, setCostSnapshot] = useState<CostSnapshot | null>(null);
+  const costStorageKey = `agent-cost:${workspaceId}:${sessionId}`;
+
+  // Restore cost tracker from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(costStorageKey);
+      if (saved) {
+        const data = JSON.parse(saved) as CostSnapshot;
+        costTrackerRef.current = CostTracker.fromJSON(data);
+        setCostSnapshot(costTrackerRef.current.getSnapshot());
+      } else {
+        costTrackerRef.current = new CostTracker();
+        setCostSnapshot(null);
+      }
+    } catch {
+      costTrackerRef.current = new CostTracker();
+    }
+  }, [costStorageKey]);
+
+  // Ref for cost estimation (populated after resolvedModel is available)
+  const prevMessageCountRef = useRef(0);
+
+  // Memory panel state
+  const [showMemoryPanel, setShowMemoryPanel] = useState(false);
+  const [showCostDisplay, setShowCostDisplay] = useState(true);
+
+  // Buddy companion state
+  const [showBuddyHatch, setShowBuddyHatch] = useState(false);
+  const [buddyKey, setBuddyKey] = useState(0);
 
   // Memory preview dialog state
   const [showMessageSelect, setShowMessageSelect] = useState(false);
@@ -808,6 +849,82 @@ export function AgentPanel({
     [totalMessageChars, contextWindowChars]
   );
 
+  // Estimate cost from messages using character-based token estimation (~4 chars/token)
+  useEffect(() => {
+    if (status === "streaming" || status === "submitted") return;
+    if (messages.length <= prevMessageCountRef.current) {
+      prevMessageCountRef.current = messages.length;
+      return;
+    }
+    const newMessages = messages.slice(prevMessageCountRef.current);
+    prevMessageCountRef.current = messages.length;
+
+    let inputChars = 0;
+    let outputChars = 0;
+    for (const msg of newMessages) {
+      const textLen = msg.parts
+        ?.filter((p) => (p as Record<string, unknown>).type === "text")
+        .reduce((sum, p) => sum + ((p as Record<string, string>).text?.length ?? 0), 0) ?? 0;
+      if (msg.role === "user") inputChars += textLen;
+      else outputChars += textLen;
+    }
+
+    if (inputChars + outputChars > 0) {
+      const model = resolvedModel ?? "unknown";
+      costTrackerRef.current.addUsage(model, {
+        inputTokens: Math.ceil(inputChars / 4),
+        outputTokens: Math.ceil(outputChars / 4),
+      });
+      const snapshot = costTrackerRef.current.getSnapshot();
+      setCostSnapshot(snapshot);
+      try {
+        localStorage.setItem(costStorageKey, JSON.stringify(snapshot));
+      } catch { /* ignore */ }
+    }
+  }, [messages, status, resolvedModel, costStorageKey]);
+
+  // Extract <memory> tags from assistant messages and save to daily log
+  const lastMemoryExtractRef = useRef(0);
+  useEffect(() => {
+    if (status !== "ready") return;
+    if (messages.length <= lastMemoryExtractRef.current) {
+      lastMemoryExtractRef.current = messages.length;
+      return;
+    }
+    const newMessages = messages.slice(lastMemoryExtractRef.current);
+    lastMemoryExtractRef.current = messages.length;
+
+    for (const msg of newMessages) {
+      if (msg.role !== "assistant") continue;
+      const text = msg.parts
+        ?.filter((p) => (p as Record<string, unknown>).type === "text")
+        .map((p) => (p as Record<string, string>).text)
+        .join("") ?? "";
+      const memories = extractMemoryTags(text);
+      for (const mem of memories) {
+        fetch("/api/agent/memory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspaceId, action: "remember", text: mem }),
+        }).catch(() => { /* best-effort */ });
+      }
+    }
+  }, [messages, status, workspaceId]);
+
+  // Last assistant message text for buddy reactions
+  const lastAssistantMessage = useMemo(() => {
+    if (status === "streaming" || status === "submitted") return undefined;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant") {
+        return messages[i].parts
+          ?.filter((p) => (p as Record<string, unknown>).type === "text")
+          .map((p) => (p as Record<string, string>).text)
+          .join("") ?? undefined;
+      }
+    }
+    return undefined;
+  }, [messages, status]);
+
   const summarizeAndEvict = async (
     messagesToSummarize: UIMessage[],
     messagesToKeep: UIMessage[],
@@ -1006,6 +1123,43 @@ export function AgentPanel({
     }
   };
 
+  const handleBuiltinCommand = (command: BuiltinCommand) => {
+    setShowAutocomplete(false);
+    setInput("");
+    switch (command.slug) {
+      case "compact":
+        if (messages.length >= 4) {
+          const keepCount = Math.max(2, Math.floor(messages.length * 0.3));
+          const toSummarize = messages.slice(0, messages.length - keepCount);
+          const toKeep = messages.slice(messages.length - keepCount);
+          summarizeAndEvict(toSummarize, toKeep, "overflow");
+        } else {
+          toast.info("Not enough messages to compact");
+        }
+        break;
+      case "cost":
+        setShowCostDisplay((prev) => !prev);
+        break;
+      case "memory":
+        setShowMemoryPanel(true);
+        break;
+      case "remember":
+        setInput("/remember ");
+        break;
+      case "dream":
+        toast.info("Starting dream consolidation...");
+        fetch("/api/agent/memory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspaceId, action: "dream" }),
+        }).then((res) => {
+          if (res.ok) toast.success("Dream consolidation complete");
+          else toast.error("Dream consolidation failed");
+        }).catch(() => toast.error("Dream consolidation failed"));
+        break;
+    }
+  };
+
   // Execute skill after params are collected
   const executeSkill = async (
     skill: Skill,
@@ -1054,6 +1208,67 @@ export function AgentPanel({
       return;
     }
     userScrolledUp.current = false;
+
+    // Handle built-in slash commands before skill matching
+    if (text.startsWith("/")) {
+      const parts = text.slice(1).split(/\s+/);
+      const cmd = parts[0].toLowerCase();
+      const args = parts.slice(1).join(" ");
+
+      if (cmd === "compact") {
+        setInput("");
+        setShowAutocomplete(false);
+        // Trigger context compaction with optional instructions
+        if (messages.length >= 4) {
+          const keepCount = Math.max(2, Math.floor(messages.length * 0.3));
+          const toSummarize = messages.slice(0, messages.length - keepCount);
+          const toKeep = messages.slice(messages.length - keepCount);
+          summarizeAndEvict(toSummarize, toKeep, "overflow");
+        } else {
+          toast.info("Not enough messages to compact");
+        }
+        return;
+      }
+      if (cmd === "cost") {
+        setInput("");
+        setShowAutocomplete(false);
+        setShowCostDisplay((prev) => !prev);
+        return;
+      }
+      if (cmd === "memory") {
+        setInput("");
+        setShowAutocomplete(false);
+        setShowMemoryPanel(true);
+        return;
+      }
+      if (cmd === "remember" && args) {
+        setInput("");
+        setShowAutocomplete(false);
+        fetch("/api/agent/memory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspaceId, action: "remember", text: args }),
+        }).then((res) => {
+          if (res.ok) toast.success("Memory saved");
+          else toast.error("Failed to save memory");
+        }).catch(() => toast.error("Failed to save memory"));
+        return;
+      }
+      if (cmd === "dream") {
+        setInput("");
+        setShowAutocomplete(false);
+        toast.info("Starting dream consolidation...");
+        fetch("/api/agent/memory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspaceId, action: "dream" }),
+        }).then((res) => {
+          if (res.ok) toast.success("Dream consolidation complete");
+          else toast.error("Dream consolidation failed");
+        }).catch(() => toast.error("Dream consolidation failed"));
+        return;
+      }
+    }
 
     // Check if input matches a skill slug
     if (text.startsWith("/")) {
@@ -1425,6 +1640,7 @@ export function AgentPanel({
             query={slashQuery}
             skills={availableSkills}
             onSelect={handleSkillSelect}
+            onBuiltinSelect={handleBuiltinCommand}
             onClose={() => setShowAutocomplete(false)}
           />
         )}
@@ -1581,6 +1797,15 @@ export function AgentPanel({
             autoFocus
           />
           <div className="flex items-center gap-1 shrink-0 mt-1">
+            {/* Buddy avatar */}
+            <BuddyAvatar
+              key={buddyKey}
+              workspaceId={workspaceId}
+              lastAssistantMessage={lastAssistantMessage}
+              onHatchRequest={() => setShowBuddyHatch(true)}
+            />
+            {/* Cost display */}
+            {showCostDisplay && <CostDisplay snapshot={costSnapshot} />}
             {/* Context usage percentage */}
             {messages.length > 0 && (
               <span
@@ -1626,6 +1851,20 @@ export function AgentPanel({
         onCloseAutoFocus={(event) =>
           focusAgentInputAfterDialogClose(event, inputRef.current)
         }
+      />
+
+      {/* KAIROS Memory panel */}
+      <MemoryPanel
+        open={showMemoryPanel}
+        onOpenChange={setShowMemoryPanel}
+        workspaceId={workspaceId}
+      />
+
+      {/* Buddy hatch dialog */}
+      <BuddyHatchDialog
+        open={showBuddyHatch}
+        onOpenChange={setShowBuddyHatch}
+        onHatched={() => setBuddyKey((k) => k + 1)}
       />
 
       {/* Skill parameter dialog */}
