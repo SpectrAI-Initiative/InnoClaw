@@ -141,6 +141,8 @@ export async function POST(req: NextRequest) {
         title: `Memory Consolidation ${now.slice(0, 10)}`,
         content: consolidated,
         type: "memory",
+        createdAt: now,
+        updatedAt: now,
       });
 
       return NextResponse.json({
