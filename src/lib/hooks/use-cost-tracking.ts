@@ -38,7 +38,9 @@ export function useCostTracking({
       costTrackerRef.current = new CostTracker();
       setCostSnapshot(null);
     }
-  }, [storageKey]);
+    // Sync message counter so already-persisted messages are not re-counted
+    prevMessageCountRef.current = messages.length;
+  }, [storageKey]); // eslint-disable-line react-hooks/exhaustive-deps -- messages intentionally read once at restore
 
   // Estimate cost from messages using character-based token estimation (~4 chars/token)
   useEffect(() => {
