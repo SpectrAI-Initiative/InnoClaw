@@ -51,11 +51,21 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 <!-- whats-new-start -->
 
+#### 2026-04-12
+- **Docker-Deployment-Support**: InnoClaw mit Docker und docker-compose selbst hosten, mit Anleitungen fuer Setup, Volumes und Upgrades
+- **200+ integrierte Skills**: Deutliche Erweiterung sofort nutzbarer wissenschaftlicher Skills fuer Bioinformatik, Chemie, Genomik und Physik
+- **Skill-Erstellungsframework**: Neues Meta-Skill zum Erstellen, Bewerten, Benchmarken und Validieren eigener Skills
+
+
 #### 2026-04-02
 - **Docker-Deployment-Unterstuetzung**: Dockerfile, docker-compose.yml und eine vollstaendige Docker-Deployment-Anleitung fuer selbst gehostete Produktionsumgebungen hinzugefuegt
 - **200+ neue integrierte Skills**: Skill-Bibliothek erweitert um Bioinformatik, Chemoinformatik, Genomik, Physik und Drug-Discovery-Pipelines
 - **Skill-Creator-Framework**: Neuer Meta-Skill mit Werkzeugen fuer Evaluierung, Benchmarking und Validierung zum Erstellen und Testen eigener Skills
 
+
+
+<details>
+<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-04-01
 - **Text-zu-CAD-Faehigkeit**: Neue Agenten-Faehigkeit, die natuerlichsprachige Beschreibungen mit CadQuery in 3D-CAD-Modelle (STL/STEP) umwandelt, mit automatischer Einrichtung der Umgebung
@@ -63,13 +73,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
-<details>
-<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-03-31
 - **Eingefuegte Bilder unterstuetzt**: Benutzer koennen Bilder jetzt direkt in die Chat-Eingabe einfuegen fuer multimodale KI-Konversationen
 - **Deep-Research-Rollenstudio**: Das neue Rollenstudio-Panel ermoeglicht das Konfigurieren und Verwalten benutzerdefinierter Forscherrollen im Deep-Research-Workflow
 - **Erweiterte Quellen fuer die Artikelsuche**: BioRxiv, PubMed und PubChem wurden als durchsuchbare Artikelquellen in Paper Study hinzugefuegt
+
 
 
 
@@ -83,8 +92,10 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-24
 - **Multimodaler LLM-Support**: Papierrecherche und Agenten-Workflows unterstuetzen jetzt Standard-LLMs und multimodale LLMs (mLLM), kontextbezogen auswaehlbar in den Einstellungen und der Modellauswahl.
+
 
 
 
@@ -100,10 +111,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-22
 - **Obsidian-Notizexport**: Generieren Sie strukturierte, Obsidian-kompatible Notizen mit reichhaltigem YAML-Frontmatter, Abbildungen und Wikilinks direkt aus dem Paper-Studienpanel
 - **Modellauswahl pro Aufgabe**: Eine neue Modellauswahl-UI-Komponente erlaubt es Nutzern, das Standard-KI-Modell fuer einzelne Paper-Studienaufgaben (Zusammenfassung, Kritik, Notizen usw.) zu ueberschreiben
 - **Notiz-Diskussionsansicht**: Neue ganzseitige Diskussionsansicht fuer Paper-Notizen, die gebuendelte KI-gestuetzte Gespraeche rund um generierten Notizinhalt ermoeglichen
+
 
 
 
@@ -126,24 +139,10 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-20
 - **Tiefenforschungsmodul**: Vollstaendige KI-gesteuerte wissenschaftliche Forschungs-Pipeline mit Mehrphasen-Orchestrierung, Gutachter-Diskussion, Ausfuehrungsplanung und Workflow-Grafik-Oberflaeche
 - **Ausfuehrungs-Pipeline**: Automatisiertes System zur Experimentausfuehrung mit Slurm-Job-Uebermittlung, Datensatzverwaltung, Vorverarbeitung und Unterstuetzung fuer entfernte Ausfuehrer
-
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-19
-- **ClawHub-Skill-Import**: Neue Integration zum direkten Importieren von Skills aus ClawHub ueber einen dedizierten API-Endpunkt und einen Import-Dialog
-- **Code-Vorschaufenster**: Neue In-Editor-Komponente fuer die Code-Vorschau mit Syntaxhervorhebung und Verfolgung des Speicherstatus
-- **Paper-Studie-Cache**: Persistente Caching-Schicht fuer Paper-Studien-Sitzungen zur Verbesserung der Neulade-Performance und Zustandskontinuitaet
 
 
 

@@ -51,11 +51,21 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 <!-- whats-new-start -->
 
+#### 2026-04-12
+- **Prise en charge du deploiement Docker**: Hebergez InnoClaw vous-meme avec Docker et docker-compose, avec des guides pour l installation, les volumes et les mises a niveau
+- **200+ competences integrees**: Forte extension des competences scientifiques pretes a l emploi en bioinformatique, chimie, genomique et physique
+- **Cadre de creation de competences**: Nouvelle meta-competence pour creer, evaluer, benchmarker et valider des competences personnalisees
+
+
 #### 2026-04-02
 - **Support du deploiement Docker**: Ajout d'un Dockerfile, docker-compose.yml et d'un guide complet de deploiement Docker pour les configurations de production auto-hebergees
 - **200+ nouveaux skills integres**: Bibliotheque de skills enrichie avec des pipelines en bioinformatique, chemoinformatique, genomique, physique et decouverte de medicaments
 - **Framework de creation de skills**: Nouveau meta-skill avec outils d'evaluation, de benchmarking et de validation pour construire et tester des skills personnalises
 
+
+
+<details>
+<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-04-01
 - **Competence Text-to-CAD**: Nouvelle competence d'agent qui convertit des descriptions en langage naturel en modeles CAD 3D (STL/STEP) via CadQuery, avec configuration automatique de l'environnement
@@ -63,13 +73,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
-<details>
-<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-03-31
 - **Support du collage d'images**: Les utilisateurs peuvent maintenant coller des images directement dans la saisie du chat pour des conversations IA multimodales
 - **Role Studio pour la recherche approfondie**: Le nouveau panneau Role Studio permet de configurer et gerer des roles de chercheur personnalises dans le flux de recherche approfondie
 - **Sources de recherche d'articles elargies**: BioRxiv, PubMed et PubChem ont ete ajoutes comme sources interrogeables dans Paper Study
+
 
 
 
@@ -83,8 +92,10 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-24
 - **Support LLM multimodal**: Les flux de recherche de documents et d'agents prennent desormais en charge les LLM standard et multimodaux (mLLM), selectionnables par contexte dans les parametres et le selecteur de modele.
+
 
 
 
@@ -100,10 +111,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-22
 - **Export de notes Obsidian**: Generez des notes structurees compatibles Obsidian avec frontmatter YAML enrichi, figures et wikilinks directement depuis le panneau d'etude de l'article
 - **Selecteur de modele par tache**: Un nouveau composant UI de selection de modele permet aux utilisateurs de remplacer le modele AI par defaut pour chaque tache d'etude (resume, critique, notes, etc.)
 - **Vue de discussion des notes**: Nouvelle vue de discussion pleine page pour les notes d'articles, permettant des conversations assistees par IA autour du contenu des notes generees
+
 
 
 
@@ -126,24 +139,10 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-20
 - **Module de recherche approfondie**: Pipeline de recherche scientifique entierement pilote par IA avec orchestration multi-phases, deliberation des evaluateurs, planification d'execution et interface graphique de flux de travail
 - **Pipeline d'execution**: Systeme d'execution d'experiences automatise avec soumission de jobs Slurm, gestion de jeux de donnees, preprocessement et support d'executeurs distants
-
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-19
-- **Importation de competences ClawHub**: Nouvelle integration pour importer des competences directement depuis ClawHub via un point d'API dedie et une boite de dialogue d'importation
-- **Panneau de previsualisation du code**: Nouveau composant de previsualisation de code integre a l'editeur, avec coloration syntaxique et suivi de l'etat de sauvegarde
-- **Cache de session d'etude**: Couche de mise en cache persistante pour les sessions d'etude de documents, ameliorant les performances de rechargement et la continuite d'etat
 
 
 
