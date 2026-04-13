@@ -18,3 +18,43 @@
   border-color: var(--sy-c-link);
   background-color: var(--sy-c-bg-mute);
 }
+
+html[lang="en"] .workflow-overview-zh,
+html[lang="en-us"] .workflow-overview-zh,
+html[lang="en-gb"] .workflow-overview-zh {
+  display: none;
+}
+
+html[lang="zh-cn"] .workflow-overview-en,
+html[lang="zh"] .workflow-overview-en {
+  display: none;
+}
+
+html[lang="en"] .language-diagram-zh,
+html[lang="en-us"] .language-diagram-zh,
+html[lang="en-gb"] .language-diagram-zh {
+  display: none;
+}
+
+html[lang="zh-cn"] .language-diagram-en,
+html[lang="zh"] .language-diagram-en {
+  display: none;
+}
+
+.workflow-overview-en,
+.workflow-overview-zh {
+  margin: 1rem 0 1.5rem;
+}
+
+.workflow-overview-en img,
+.workflow-overview-zh img {
+  width: min(420px, 100%);
+  border: 1px solid var(--sy-c-divider);
+  border-radius: 12px;
+  background: var(--sy-c-bg);
+}
+
+.language-diagram-en,
+.language-diagram-zh {
+  margin: 1rem 0;
+}

@@ -1,3 +1,7 @@
+---
+orphan: true
+---
+
 # README Homepage Redesign Plan
 
 ## Goal

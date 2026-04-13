@@ -1,0 +1,13 @@
+{%- set is_zh = language and language.lower().startswith("zh") -%}
+<div class="sy-foot-copyright">
+  {%- if show_copyright -%}
+    <p>{{ copyright }}</p>
+  {% endif %}
+  <p>
+    {% if is_zh %}使用 {% else %}Made with {% endif %}
+    {% if show_sphinx %}
+    <a href="https://www.sphinx-doc.org/">Sphinx</a>{% if is_zh %} 与 {% else %} and {% endif %}
+    {% endif %}
+    <a href="https://shibuya.lepture.com">{% if is_zh %}Shibuya 主题{% else %}Shibuya theme{% endif %}</a>{% if is_zh %} 构建。{% else %}.{% endif %}
+  </p>
+</div>

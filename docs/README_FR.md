@@ -1,3 +1,7 @@
+---
+orphan: true
+---
+
 # InnoClaw
 
 <p align="center">

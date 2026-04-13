@@ -1,3 +1,5 @@
+import sys
+
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -28,6 +30,7 @@ myst_heading_anchors = 3
 source_suffix = {
     ".md": "markdown",
 }
+templates_path = ["_templates"]
 
 # The master toctree document
 master_doc = "index"
@@ -44,13 +47,25 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for HTML output -------------------------------------------------
 html_theme = "shibuya"
 
+is_zh = str(language).lower().startswith("zh") or any(
+    arg.lower() == "language=zh_cn" for arg in sys.argv
+)
+
 html_theme_options = {
     "github_url": "https://github.com/SpectrAI-Initiative/InnoClaw",
-    "nav_links": [
-        {"title": "Getting Started", "url": "getting-started/overview"},
-        {"title": "Usage", "url": "usage/features"},
-        {"title": "Development", "url": "development/contributing"},
-    ],
+    "nav_links": (
+        [
+            {"title": "快速入门", "url": "getting-started/overview"},
+            {"title": "使用", "url": "usage/features"},
+            {"title": "开发", "url": "development/contributing"},
+        ]
+        if is_zh
+        else [
+            {"title": "Getting Started", "url": "getting-started/overview"},
+            {"title": "Usage", "url": "usage/features"},
+            {"title": "Development", "url": "development/contributing"},
+        ]
+    ),
 }
 
 html_baseurl = "https://SpectrAI-Initiative.github.io/InnoClaw/"
@@ -64,7 +79,7 @@ html_context = {
 
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
-html_title = "InnoClaw Documentation"
+html_title = "InnoClaw 文档" if is_zh else "InnoClaw Documentation"
 
 # -- Options for linkcheck ---------------------------------------------------
 linkcheck_ignore = [

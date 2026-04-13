@@ -4,6 +4,8 @@ Welcome to the **InnoClaw** documentation — an AI-powered research assistant w
 
 Users open server-side folders as workspaces, browse and manage files, and chat with AI grounded in workspace files via RAG (Retrieval-Augmented Generation).
 
+For contributor workflow inside a repository clone, start with the repository root `AGENTS.md`, then use the development pages below for detailed setup, testing, and documentation procedures.
+
 ```{toctree}
 :maxdepth: 2
 :caption: Getting Started
@@ -35,10 +37,13 @@ notifications/index
 :maxdepth: 2
 :caption: Development Guide
 
+development/repository-guidelines
 development/contributing
+development/collaboration
 development/project-structure
 development/local-development
 development/testing
+development/agent-development
 development/documentation
 ```
 
@@ -47,14 +52,4 @@ development/documentation
 :caption: Troubleshooting
 
 troubleshooting/faq
-```
-
-```{toctree}
-:hidden:
-
-README_CN
-README_JA
-README_FR
-README_DE
-development/readme-homepage-redesign
 ```
