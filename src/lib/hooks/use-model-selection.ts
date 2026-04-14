@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import {
   PROVIDERS,
@@ -118,47 +118,36 @@ export function useModelSelection({
     [resolvedSelection],
   );
 
-  // --- Sync selection in effects when provider is removed or canonical drifts ---
-  useEffect(() => {
-    if (
-      userSelection &&
-      !(
-        Boolean(PROVIDERS[userSelection.provider as ProviderId]) &&
-        (configuredProviderIds.length === 0 ||
-          configuredProviderIds.includes(userSelection.provider as ProviderId))
-      )
-    ) {
-      setUserSelection(null);
-      try {
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.removeItem(storageKey);
-        }
-      } catch { /* ignore */ }
-    }
-  }, [userSelection, configuredProviderIds, storageKey]);
+  // --- Sync selection during render when provider is removed or canonical drifts ---
+  const isProviderValid =
+    userSelection &&
+    Boolean(PROVIDERS[userSelection.provider as ProviderId]) &&
+    (configuredProviderIds.length === 0 ||
+      configuredProviderIds.includes(userSelection.provider as ProviderId));
 
-  useEffect(() => {
-    if (!userSelection || !canonicalSelection) return;
-    // Skip if the user selection's provider was already cleared above
-    if (
-      !(
-        Boolean(PROVIDERS[userSelection.provider as ProviderId]) &&
-        (configuredProviderIds.length === 0 ||
-          configuredProviderIds.includes(userSelection.provider as ProviderId))
-      )
-    ) return;
-    if (
-      canonicalSelection.provider !== userSelection.provider ||
-      canonicalSelection.model !== userSelection.model
-    ) {
-      setUserSelection(canonicalSelection);
-      try {
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem(storageKey, JSON.stringify(canonicalSelection));
-        }
-      } catch { /* ignore */ }
-    }
-  }, [userSelection, canonicalSelection, configuredProviderIds, storageKey]);
+  if (userSelection && !isProviderValid) {
+    setUserSelection(null);
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.removeItem(storageKey);
+      }
+    } catch { /* ignore */ }
+  }
+
+  if (
+    userSelection &&
+    isProviderValid &&
+    canonicalSelection &&
+    (canonicalSelection.provider !== userSelection.provider ||
+      canonicalSelection.model !== userSelection.model)
+  ) {
+    setUserSelection(canonicalSelection);
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem(storageKey, JSON.stringify(canonicalSelection));
+      }
+    } catch { /* ignore */ }
+  }
 
   const selectedProvider = canonicalSelection?.provider ?? null;
   const selectedModel = canonicalSelection?.model ?? null;

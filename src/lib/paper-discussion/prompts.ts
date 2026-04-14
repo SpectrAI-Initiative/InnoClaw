@@ -22,12 +22,14 @@ Your task: Frame the discussion. Define the agenda. Identify key technical quest
   evidence_summary: `CURRENT STAGE: Evidence Summary
 Your task: Summarize the paper's claims, method, setup, and results. Ground everything with evidence from the paper.
 - Present what the paper explicitly says vs. what is inferred vs. what is missing.
-- Attach evidence references whenever available.`,
+- Attach evidence references whenever available.
+- When referencing external work for comparison, use numbered inline citations **[N]** and include a References section at the end with full markdown-formatted entries.`,
 
   critique: `CURRENT STAGE: Critical Analysis
 Your task: Challenge the evidence and claims. Identify weaknesses, missing baselines, threats to validity, and overclaims.
 - Mark each issue with severity: Critical / Moderate / Minor.
-- Separate confirmed weaknesses from potential concerns.`,
+- Separate confirmed weaknesses from potential concerns.
+- When identifying missing baselines or comparing to external methods, cite specific papers using numbered inline citations **[N]** and include a References section at the end.`,
 
   reproducibility_check: `CURRENT STAGE: Reproducibility Check
 Your task: Assess reproducibility. Extract implementation-critical details. Identify gaps in what's needed to reproduce the results.
@@ -41,8 +43,9 @@ Your task: Synthesize the discussion. Summarize agreement, disagreement, and ope
 
   final_report: `CURRENT STAGE: Final Report
 Your task: Write the final structured report synthesizing the entire discussion.
-- Use EXACTLY the required output format with all 7 sections.
+- Use EXACTLY the required output format with all 8 sections (including ## 8. References).
 - Do not introduce new claims that were not discussed.
+- Consolidate all numbered inline citations from the discussion into the References section with full markdown formatting: N. **Author(s)** (Year). *Title.* Venue. [DOI/URL](link)
 - End with "Overall take: ..."`,
 };
 

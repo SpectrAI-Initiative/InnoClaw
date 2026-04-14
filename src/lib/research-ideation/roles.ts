@@ -18,7 +18,16 @@ Rules every panelist must follow:
 4. Be constructive: point out limitations, then suggest fixes.
 5. Respect the stage you are in — do not anticipate later stages.
 6. Write in the locale requested by the user (en / zh).
-7. In quick mode be concise and focus on the most critical points; in full mode be comprehensive.`;
+7. In quick mode be concise and focus on the most critical points; in full mode be comprehensive.
+
+Citation rules (MANDATORY):
+8. When referencing external knowledge, methods, findings, datasets, or claims, you MUST provide numbered inline citations (e.g. **[1]**, **[2]**) in the text body.
+9. All cited references MUST be collected in a **References** section at the end of your output.
+10. Each reference MUST use this markdown format:
+    N. **AuthorLastName, A. et al.** (Year). *Paper Title.* Journal/Venue. [DOI:xxx](https://doi.org/xxx) or [URL](url)
+11. Only cite references you are confident are real published works. If uncertain, mark the claim as **[needs verification]** instead.
+12. Do NOT fabricate or hallucinate references. Fewer real citations are always better than fake ones.
+13. The seed paper itself should be cited as **[0]** at the top of the References section.`;
 
 // =============================================================
 // ROLE SYSTEM PROMPTS
@@ -54,6 +63,10 @@ For each hypothesis:
 - **Novelty**: [What makes this different from existing work]
 - **Connection to seed paper**: [How this extends or challenges the paper]
 - **Estimated impact**: High / Medium / Low
+- **Supporting references**: [At least 1 numbered inline citation **[N]** to relevant prior work]
+
+End with a **References** section listing all cited works in markdown format:
+N. **Author(s)** (Year). *Title.* Venue. [DOI/URL](link)
 
 Tone:
 - Creative but rigorous, specific, forward-looking.`;
@@ -116,13 +129,17 @@ Output structure:
 For each selected hypothesis:
 ### Experiment for Hypothesis [N]: [Title]
 - **Protocol**: [Step-by-step]
-- **Baselines**: [List with justification]
+- **Baselines**: [List with justification and inline citations **[N]** for each baseline method]
 - **Controls & Ablations**: [What to vary]
 - **Metrics**: [Primary and secondary]
 - **Expected outcome if hypothesis holds**: [Description]
 - **Expected outcome if hypothesis fails**: [Description]
 - **Minimum Viable Experiment**: [Simplified version]
 - **Timeline**: [Estimate for MVE and full experiment]
+- **Key references**: [Cite sources for baseline methods and adopted protocols]
+
+End with a **References** section listing all cited works in markdown format:
+N. **Author(s)** (Year). *Title.* Venue. [DOI/URL](link)
 
 Tone:
 - Precise, operational, engineering-minded.`;
@@ -222,6 +239,10 @@ For each selected hypothesis:
 
 ## 6. Overall Assessment
 [2-3 sentence verdict on the most promising research direction and why]
+
+## 7. References
+[0]. **[Seed paper authors]** (Year). *[Seed paper title].* Venue. [DOI/URL](link)
+[Consolidate all numbered inline citations from the entire discussion. Each entry uses markdown: **Author(s)** (Year). *Title.* Venue. [DOI](link)]
 
 Writing guidance:
 - Be crisp and hierarchical.
