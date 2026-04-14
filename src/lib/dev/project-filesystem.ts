@@ -159,9 +159,11 @@ export function assessPathLocking(
 
 export function assessDistDirLocking(
   projectDir: string,
+  distDir?: string,
   mountInfoContent?: string
 ): DistDirLockAssessment {
-  return assessPathLocking(projectDir, mountInfoContent);
+  const distDirPath = path.resolve(projectDir, distDir ?? ".next");
+  return assessPathLocking(distDirPath, mountInfoContent);
 }
 
 export function resolveNextBuildDir(

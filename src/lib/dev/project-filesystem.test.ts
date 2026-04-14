@@ -43,6 +43,7 @@ describe("project-filesystem", () => {
   it("disables dist-dir locking on lockless network filesystems", () => {
     const assessment = assessDistDirLocking(
       "/mnt/data/project",
+      undefined,
       "202 201 0:50 / /mnt/data rw,relatime - nfs 10.0.0.1:/data rw,vers=3,local_lock=none"
     );
 
@@ -54,10 +55,25 @@ describe("project-filesystem", () => {
   it("keeps dist-dir locking on normal local filesystems", () => {
     const assessment = assessDistDirLocking(
       "/workspace/project",
+      undefined,
       "145 128 0:44 / /workspace rw,relatime - ext4 /dev/sda1 rw"
     );
 
     expect(assessment.disableLock).toBe(false);
+  });
+
+  it("assesses the configured dist dir instead of the project root", () => {
+    const assessment = assessDistDirLocking(
+      "/workspace/project",
+      ".next-local",
+      [
+        "145 128 0:44 / /workspace/project rw,relatime - nfs 10.0.0.1:/project rw,vers=3,local_lock=none",
+        "146 145 0:45 / /workspace/project/.next-local rw,relatime - ext4 /dev/sda1 rw",
+      ].join("\n")
+    );
+
+    expect(assessment.disableLock).toBe(false);
+    expect(assessment.mount?.mountPoint).toBe("/workspace/project/.next-local");
   });
 
   it("assesses arbitrary paths on lockless mounts", () => {

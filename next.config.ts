@@ -10,7 +10,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const projectDir = __dirname;
 const resolvedBuildDir = resolveNextBuildDir(projectDir, process.env.NEXT_BUILD_DIR);
-const distDirLocking = assessDistDirLocking(projectDir);
+const distDirLocking = assessDistDirLocking(projectDir, resolvedBuildDir.distDir);
 
 if (resolvedBuildDir.warning) {
   console.warn(`[next.config] ${resolvedBuildDir.warning}`);
