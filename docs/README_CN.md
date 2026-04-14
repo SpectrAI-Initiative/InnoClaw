@@ -216,7 +216,7 @@ OPENAI_API_KEY=sk-...
 
 - `WORKSPACE_ROOTS` 中的目录需要提前创建，应用不会自动创建
 - `npx drizzle-kit migrate` 会初始化或升级默认位于 `./data/innoclaw.db` 的 SQLite 数据库
-- 如果项目放在 NFS/CIFS 等网络文件系统上，请把 `DATABASE_URL` 和 `NEXT_BUILD_DIR` 指到本地磁盘路径
+- 如果项目放在 NFS/CIFS 或其他禁用了本地文件锁的挂载上，InnoClaw 现在会自动关闭 Next 的 dist-dir 锁，让 `npm run dev` 能启动；但 SQLite 仍然建议把 `DATABASE_URL` 指到本地磁盘。`NEXT_BUILD_DIR` 如果要设置，必须仍然位于仓库内，例如 `.next-local`。
 
 ### 2. 启动
 

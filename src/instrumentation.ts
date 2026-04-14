@@ -84,7 +84,7 @@ export async function register() {
 
     // Run database migrations
     const { runMigrations } = await import("@/lib/db/migrate");
-    runMigrations();
+    await runMigrations();
 
     // Start the Feishu WebSocket client (if configured)
     const { startFeishuWSClient } = await import(

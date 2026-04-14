@@ -128,11 +128,13 @@ npx drizzle-kit migrate
 
 ## Build Configuration
 
-If the project resides on a network filesystem (NFS, CIFS, etc.), the Next.js build cache may fail. Set a local build directory:
+If the project resides on a network filesystem (NFS, CIFS, etc.) or another mount without local file locking, InnoClaw automatically disables Next's dist-dir lock so `npm run dev` can start. `NEXT_BUILD_DIR` is still available if you want an alternate build directory inside the repo:
 
 ```ini
-NEXT_BUILD_DIR=/tmp/innoclaw-next
+NEXT_BUILD_DIR=.next-local
 ```
+
+`NEXT_BUILD_DIR` must stay within the project root on Next.js 16 / Turbopack. Absolute paths such as `/tmp/innoclaw-next` are not valid here.
 
 ## Proxy Configuration
 

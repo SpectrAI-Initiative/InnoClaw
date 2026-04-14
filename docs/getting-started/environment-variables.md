@@ -8,7 +8,7 @@ A complete reference of all environment variables used by InnoClaw.
 |----------|------|----------|---------|-------------|
 | `WORKSPACE_ROOTS` | `string` | **Yes** | — | Comma-separated absolute paths where workspaces can be created. Directories must exist on the server. |
 | `DATABASE_URL` | `string` | No | `./data/innoclaw.db` | SQLite database filesystem path. Set to a local path when the project resides on NFS or another network filesystem. |
-| `NEXT_BUILD_DIR` | `string` | No | `.next` | Next.js build output directory. Set to a local filesystem path to avoid Turbopack cache errors on network/shared filesystems. |
+| `NEXT_BUILD_DIR` | `string` | No | `.next` | Next.js build output directory inside the project root (for example `.next-local`). On Next.js 16 / Turbopack this cannot point outside the repo. |
 
 ## AI Provider Configuration
 

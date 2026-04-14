@@ -76,7 +76,7 @@ OPENAI_API_KEY=sk-...
 
 - `WORKSPACE_ROOTS` directories must already exist before startup
 - `npx drizzle-kit migrate` creates or upgrades the SQLite schema at `./data/innoclaw.db`
-- If the repo lives on NFS/CIFS, set `DATABASE_URL` and `NEXT_BUILD_DIR` to local disk paths
+- If the repo lives on NFS/CIFS or another mount without local file locking, InnoClaw now disables Next's dist-dir lock automatically so `npm run dev` can start. You should still set `DATABASE_URL` to a local disk path for SQLite. `NEXT_BUILD_DIR`, if used, must stay inside the repo (for example `.next-local`).
 
 **Upgrading:**
 
@@ -304,5 +304,4 @@ Go from code inspection to job submission and result analysis. Review repositori
 - **License** — Apache-2.0, see `LICENSE`
 - **Repository** — https://github.com/SpectrAI-Initiative/InnoClaw
 - **Docs** — https://SpectrAI-Initiative.github.io/InnoClaw/
-
 
