@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getConfiguredModelSelection } from "@/lib/ai/provider";
 import { getSession, updateSession } from "./event-store";
-import { buildDeepResearchConfigWithRoleOverrides } from "./model-overrides";
+import {
+  buildDeepResearchConfigForResolvedModel,
+  hasDeepResearchModelConfigDrift,
+} from "./model-overrides";
 import type { DeepResearchSession } from "./types";
 
 export class DeepResearchApiError extends Error {
@@ -36,23 +39,12 @@ export async function requireSession(sessionId: string): Promise<DeepResearchSes
 
   if (session.config.interfaceOnly !== true) {
     const configuredModel = await getConfiguredModelSelection();
-    const nextConfig = buildDeepResearchConfigWithRoleOverrides({
-      config: {
-        ...session.config,
-        resolvedModel: {
-          provider: configuredModel.providerId,
-          modelId: configuredModel.modelId,
-        },
-      },
-      resolvedModel: {
-        provider: configuredModel.providerId,
-        modelId: configuredModel.modelId,
-      },
-    });
-    const needsModelSync =
-      session.config.resolvedModel?.provider !== nextConfig.resolvedModel?.provider
-      || session.config.resolvedModel?.modelId !== nextConfig.resolvedModel?.modelId
-      || JSON.stringify(session.config.modelOverrides ?? null) !== JSON.stringify(nextConfig.modelOverrides ?? null);
+    const resolvedModel = {
+      provider: configuredModel.providerId,
+      modelId: configuredModel.modelId,
+    };
+    const nextConfig = buildDeepResearchConfigForResolvedModel(session.config, resolvedModel);
+    const needsModelSync = hasDeepResearchModelConfigDrift(session.config, nextConfig);
 
     if (needsModelSync) {
       await updateSession(sessionId, {

@@ -17,9 +17,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { DeepResearchSession, DeepResearchArtifact } from "@/lib/deep-research/types";
 import {
-  extractFinalReportCitationCoverage,
-  extractFinalReportTextWithFallbackReferences,
   getLatestFinalReportArtifact,
+  resolveFinalReportPresentation,
 } from "@/lib/deep-research/final-report";
 
 interface FinalReportViewProps {
@@ -33,8 +32,7 @@ export function FinalReportView({ session, artifacts }: FinalReportViewProps) {
   const [copied, setCopied] = useState(false);
 
   const finalReport = getLatestFinalReportArtifact(artifacts);
-  const reportText = finalReport ? extractFinalReportTextWithFallbackReferences(finalReport, artifacts) : "";
-  const citationCoverage = extractFinalReportCitationCoverage(finalReport, artifacts);
+  const { reportText, citationCoverage } = resolveFinalReportPresentation(finalReport, artifacts);
 
   const handleSaveToWorkspace = async () => {
     setSaving(true);

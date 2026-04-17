@@ -13,6 +13,11 @@ export interface FinalReportCitationCoverageSummary {
   revisedForCoverage: boolean;
 }
 
+export interface FinalReportPresentation {
+  reportText: string;
+  citationCoverage: FinalReportCitationCoverageSummary | null;
+}
+
 export function extractFinalReportText(artifact: DeepResearchArtifact): string {
   const content = artifact.content;
   const candidates = [
@@ -105,5 +110,22 @@ export function extractFinalReportCitationCoverage(
     hasReferencesSection,
     meetsCoverage: record.citedCitationCount >= record.minimumRequiredCitationCount && hasReferencesSection,
     revisedForCoverage: artifact.content.revisedForCoverage === true,
+  };
+}
+
+export function resolveFinalReportPresentation(
+  artifact: DeepResearchArtifact | null,
+  artifacts: DeepResearchArtifact[],
+): FinalReportPresentation {
+  if (!artifact) {
+    return {
+      reportText: "",
+      citationCoverage: null,
+    };
+  }
+
+  return {
+    reportText: extractFinalReportTextWithFallbackReferences(artifact, artifacts),
+    citationCoverage: extractFinalReportCitationCoverage(artifact, artifacts),
   };
 }

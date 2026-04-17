@@ -17,8 +17,8 @@ import {
 } from "@/lib/deep-research/session-status";
 import { getNodeDisplayLabel, getStructuredRoleDisplayName, RESEARCHER_ROLE_ID } from "@/lib/deep-research/role-registry";
 import {
-  extractFinalReportCitationCoverage,
   getLatestFinalReportArtifact,
+  resolveFinalReportPresentation,
 } from "@/lib/deep-research/final-report";
 import type {
   DeepResearchMessage,
@@ -70,7 +70,7 @@ export const ResearchChat = memo(function ResearchChat({
 
   // Get the final report artifact (for completed sessions)
   const finalReportArtifact = getLatestFinalReportArtifact(artifacts);
-  const finalReportCitationCoverage = extractFinalReportCitationCoverage(finalReportArtifact, artifacts);
+  const { citationCoverage: finalReportCitationCoverage } = resolveFinalReportPresentation(finalReportArtifact, artifacts);
   const visibleMessages = messages.filter((message) => !isNodeDetailOnlyMessage(message));
 
   useEffect(() => {

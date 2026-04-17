@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getConfiguredModelSelection } from "@/lib/ai/provider";
 import { deleteSession, updateSession } from "@/lib/deep-research/event-store";
 import { ensureInterfaceShell, isInterfaceOnlySession } from "@/lib/deep-research/interface-shell";
-import { buildDeepResearchConfigWithRoleOverrides } from "@/lib/deep-research/model-overrides";
+import {
+  buildDeepResearchConfigForResolvedModel,
+  hasDeepResearchModelConfigDrift,
+} from "@/lib/deep-research/model-overrides";
 import { runManager } from "@/lib/deep-research/run-manager";
 import {
   handleDeepResearchRouteError,
@@ -25,45 +28,24 @@ export async function GET(_req: NextRequest, { params }: DeepResearchRouteParams
     const sessionId = await readSessionId(params);
     const session = await requireSession(sessionId);
     const configuredModel = await getConfiguredModelSelection();
+    const resolvedModel = {
+      provider: configuredModel.providerId,
+      modelId: configuredModel.modelId,
+    };
     if (isLegacyInterfaceShellSession(session)) {
-      const nextConfig = buildDeepResearchConfigWithRoleOverrides({
-        config: {
-          ...session.config,
-          interfaceOnly: false,
-          resolvedModel: {
-            provider: configuredModel.providerId,
-            modelId: configuredModel.modelId,
-          },
-        },
-        resolvedModel: {
-          provider: configuredModel.providerId,
-          modelId: configuredModel.modelId,
-        },
-      });
+      const nextConfig = buildDeepResearchConfigForResolvedModel(
+        session.config,
+        resolvedModel,
+        { interfaceOnly: false },
+      );
       await updateSession(sessionId, {
         config: nextConfig,
       });
       return NextResponse.json(await requireSession(sessionId));
     }
-    const nextConfig = buildDeepResearchConfigWithRoleOverrides({
-      config: {
-        ...session.config,
-        resolvedModel: {
-          provider: configuredModel.providerId,
-          modelId: configuredModel.modelId,
-        },
-      },
-      resolvedModel: {
-        provider: configuredModel.providerId,
-        modelId: configuredModel.modelId,
-      },
-    });
+    const nextConfig = buildDeepResearchConfigForResolvedModel(session.config, resolvedModel);
     const needsModelSync =
-      session.config.interfaceOnly !== true && (
-        session.config.resolvedModel?.provider !== nextConfig.resolvedModel?.provider
-        || session.config.resolvedModel?.modelId !== nextConfig.resolvedModel?.modelId
-        || JSON.stringify(session.config.modelOverrides ?? null) !== JSON.stringify(nextConfig.modelOverrides ?? null)
-      );
+      session.config.interfaceOnly !== true && hasDeepResearchModelConfigDrift(session.config, nextConfig);
     if (needsModelSync) {
       await updateSession(sessionId, {
         config: nextConfig,
@@ -116,16 +98,16 @@ export async function PATCH(req: NextRequest, { params }: DeepResearchRouteParam
       }
       const session = await requireSession(sessionId);
       const parsedOverrides = parseModelOverridesRecord(body.modelOverrides);
-      updates.config = buildDeepResearchConfigWithRoleOverrides({
-        config: {
+      updates.config = buildDeepResearchConfigForResolvedModel(
+        {
           ...session.config,
           modelOverrides: parsedOverrides,
         },
-        resolvedModel: session.config.resolvedModel ?? {
+        session.config.resolvedModel ?? {
           provider: configuredModel.providerId,
           modelId: configuredModel.modelId,
         },
-      });
+      );
     }
 
     if (Object.keys(updates).length === 0) {

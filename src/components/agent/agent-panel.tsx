@@ -32,19 +32,8 @@ import { getOverflowThresholdChars, getMessageTextLength, getContextWindowChars,
 import type { ProviderId } from "@/lib/ai/models";
 import { SkillAutocomplete } from "@/components/skills/skill-autocomplete";
 import { SkillParameterDialog } from "@/components/skills/skill-parameter-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ParticleEffect, ThinkingIndicator, FloatingOrbs } from "@/components/ui/particle-effect";
 import type { Skill } from "@/types";
 import { swrFetcher as fetcher } from "@/lib/fetcher";
@@ -70,10 +59,21 @@ import {
   type BuiltinCommand,
 } from "./slash-command";
 import { extractMemoryTags } from "@/lib/agent/kairos-memory";
+import {
+  buildOverflowCompactionPlan,
+  excludeKeptMessages,
+  getRenderableMessages,
+  requestConversationSummaryPreview,
+  saveConversationMemoryNote,
+} from "@/lib/agent/conversation-compaction";
 import { getMessageText } from "./message-utils";
 import { useDraggableDialog, ResizeHandles } from "./use-draggable-dialog";
 import { getWorkspaceImageMimeType } from "./workspace-image-picker-utils";
 import { focusAgentInputAfterDialogClose } from "./workspace-image-picker-utils";
+import {
+  ConversationMemoryPreviewDialog,
+  ConversationMessageSelectionDialog,
+} from "@/components/conversation/conversation-compaction-dialogs";
 
 type AgentMode = "long-agent" | "agent" | "plan" | "ask";
 type ModelSelection = { provider: string; model: string };
@@ -717,34 +717,13 @@ export function AgentPanel({
     if (restoreGenRef.current > 0 || isSummarizing) return;
     if (showMessageSelect || showMemoryPreview) return; // Don't trigger while dialog is open
     if (status !== "ready" && status !== "error") return;
-    if (messages.length < 4) return;
-    if (messages.length === failedAtCountRef.current) return;
-
-    // Reuse pre-computed totalMessageChars for the early-exit check
-    if (totalMessageChars <= overflowThreshold) return;
-
-    // Need per-message sizes only for split-point calculation
-    const messageSizes = messages.map((m) => getMessageTextLength(m));
-
-    // Find split point: keep newest ~20% by character count
-    let keepFromIndex = messages.length;
-    let accumulatedChars = 0;
-    const targetKeepChars = totalMessageChars * 0.2;
-
-    for (let i = messages.length - 1; i >= 0; i--) {
-      accumulatedChars += messageSizes[i];
-      if (accumulatedChars >= targetKeepChars) {
-        keepFromIndex = i;
-        break;
-      }
-    }
-
-    // Keep at least the last 2 messages
-    keepFromIndex = Math.min(keepFromIndex, messages.length - 2);
-    if (keepFromIndex <= 0) return;
-
-    const toSummarize = messages.slice(0, keepFromIndex);
-    const toKeep = messages.slice(keepFromIndex);
+    const plan = buildOverflowCompactionPlan({
+      messages,
+      overflowThreshold,
+      failedAtCount: failedAtCountRef.current,
+    });
+    if (!plan) return;
+    const { toSummarize, toKeep } = plan;
 
     // In long-agent mode, auto-summarize without user interaction to keep the pipeline flowing
     if (mode === "long-agent") {
@@ -755,9 +734,7 @@ export function AgentPanel({
     // Show message selection dialog instead of auto-summarizing
     overflowKeepRef.current = toKeep;
     // Only pre-select messages with renderable text content
-    setSelectedMessageIds(new Set(
-      toSummarize.filter((m) => getMessageTextLength(m) > 0).map((m) => m.id)
-    ));
+    setSelectedMessageIds(new Set(getRenderableMessages(toSummarize).map((message) => message.id)));
     setShowMessageSelect(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, status, isSummarizing, showMessageSelect, showMemoryPreview]);
@@ -1055,7 +1032,7 @@ export function AgentPanel({
 
   // Messages that have renderable text content (used for selection UI)
   const selectableMessages = useMemo(
-    () => messages.filter((m) => getMessageTextLength(m) > 0),
+    () => getRenderableMessages(messages),
     [messages]
   );
 
@@ -1083,24 +1060,14 @@ export function AgentPanel({
     setIsSummarizing(true);
     setSummaryError(null);
     try {
-      const res = await fetch("/api/agent/summarize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workspaceId,
-          messages: selected,
-          trigger: overflowKeepRef.current ? "overflow" : "clear",
-          preview: true,
-          compact: true,
-          locale,
-          sessionName,
-        }),
+      const data = await requestConversationSummaryPreview({
+        workspaceId,
+        messages: selected,
+        trigger: overflowKeepRef.current ? "overflow" : "clear",
+        compact: true,
+        locale,
+        sessionName,
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({ error: "Summarization failed" }));
-        throw new Error(errData.error || "Summarization failed");
-      }
-      const data = await res.json();
       setMemoryPreviewTitle(data.title);
       setMemoryPreviewContent(data.content);
       setShowMemoryPreview(true);
@@ -1117,9 +1084,7 @@ export function AgentPanel({
     if (overflowKeepRef.current) {
       // User cancelled during overflow — fall back to silent auto-summarize
       const toKeep = overflowKeepRef.current;
-      const toSummarize = messages.filter(
-        (m) => !toKeep.some((k) => k.id === m.id)
-      );
+      const toSummarize = excludeKeptMessages(messages, toKeep);
       overflowKeepRef.current = null;
       summarizeAndEvict(toSummarize, toKeep, "overflow");
     }
@@ -1129,22 +1094,11 @@ export function AgentPanel({
     setShowMemoryPreview(false);
     setIsSummarizing(true);
     try {
-      const res = await fetch("/api/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workspaceId,
-          title: memoryPreviewTitle,
-          content: memoryPreviewContent,
-          type: "memory",
-        }),
+      await saveConversationMemoryNote({
+        workspaceId,
+        title: memoryPreviewTitle,
+        content: memoryPreviewContent,
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        const errorMessage =
-          errData && typeof errData.error === "string" ? errData.error : t("memoryError");
-        throw new Error(errorMessage);
-      }
       if (overflowKeepRef.current) {
         // Overflow: keep recent messages, inject compact summary as context
         const contextSummary = makeContextSummaryMessage(memoryPreviewContent, t("contextCompactedNotice"));
@@ -1168,9 +1122,7 @@ export function AgentPanel({
     if (overflowKeepRef.current) {
       // User cancelled memory preview during overflow — fall back to silent auto-summarize
       const toKeep = overflowKeepRef.current;
-      const toSummarize = messages.filter(
-        (m) => !toKeep.some((k) => k.id === m.id)
-      );
+      const toSummarize = excludeKeptMessages(messages, toKeep);
       overflowKeepRef.current = null;
       summarizeAndEvict(toSummarize, toKeep, "overflow");
     }
@@ -1543,162 +1495,70 @@ export function AgentPanel({
         />
       )}
 
-      {/* Message selection dialog */}
-      <Dialog open={showMessageSelect} onOpenChange={(open) => {
-        if (!open) handleSelectCancel();
-      }}>
-        <DialogContent
-          className="flex flex-col !p-0 overflow-hidden"
-          style={dialogStyle}
-        >
-          <DialogHeader
-            className="cursor-move select-none px-6 pt-6 pb-2"
-            onPointerDown={onDragStart}
-          >
-            <DialogTitle>{t("selectMessagesTitle")}</DialogTitle>
-            <DialogDescription>{t("selectMessagesDesc")}</DialogDescription>
-          </DialogHeader>
+      <ConversationMessageSelectionDialog
+        open={showMessageSelect}
+        onCancel={handleSelectCancel}
+        messages={messages}
+        selectedMessageIds={selectedMessageIds}
+        getMessageText={getMessageText}
+        onToggleMessage={toggleMessage}
+        onSelectAll={() => setSelectedMessageIds(new Set(selectableMessages.map((m) => m.id)))}
+        onSelectNone={() => setSelectedMessageIds(new Set())}
+        onConfirm={handleSelectNext}
+        onClearAll={() => {
+          setShowMessageSelect(false);
+          setSelectedMessageIds(new Set());
+          setMessages([]);
+        }}
+        labels={{
+          title: t("selectMessagesTitle"),
+          description: t("selectMessagesDesc"),
+          roleUser: t("roleUser"),
+          roleAssistant: t("roleAssistant"),
+          selectAll: t("selectAll"),
+          selectNone: t("selectNone"),
+          cancel: tCommon("cancel"),
+          clearAll: t("clearAll"),
+          confirm: t("nextStep"),
+        }}
+        selectedCount={selectedMessageIds.size}
+        totalCount={selectableMessages.length}
+        showCount
+        variant="terminal"
+        className="flex flex-col !p-0 overflow-hidden"
+        style={dialogStyle}
+        headerClassName="cursor-move select-none px-6 pt-6 pb-2"
+        footerClassName="px-6 pb-6 pt-2"
+        scrollAreaClassName="flex-1 min-h-0 px-6"
+        onHeaderPointerDown={onDragStart}
+        footerExtra={<ResizeHandles onEdgeResizeStart={onEdgeResizeStart} />}
+      />
 
-          <div className="flex items-center gap-3 px-6 pb-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedMessageIds(new Set(selectableMessages.map((m) => m.id)))}
-            >
-              {t("selectAll")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedMessageIds(new Set())}
-            >
-              {t("selectNone")}
-            </Button>
-            <span className="text-xs text-muted-foreground ml-auto">
-              {selectedMessageIds.size} / {selectableMessages.length}
-            </span>
-          </div>
-
-          <ScrollArea className="flex-1 min-h-0 px-6">
-            <div className="space-y-2 py-2 pr-4" role="listbox" aria-multiselectable="true">
-              {messages.map((msg) => {
-                const text = getMessageText(msg);
-                if (!text) return null;
-                const checked = selectedMessageIds.has(msg.id);
-                return (
-                  <div
-                    key={msg.id}
-                    role="option"
-                    aria-selected={checked}
-                    tabIndex={0}
-                    className={`flex items-start gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
-                      checked
-                        ? "border-[#7aa2f7]/50 bg-[#7aa2f7]/5"
-                        : "border-[#30363d] hover:border-[#484f58]"
-                    }`}
-                    onClick={() => toggleMessage(msg.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        toggleMessage(msg.id);
-                      }
-                    }}
-                  >
-                    <Checkbox
-                      checked={checked}
-                      onCheckedChange={() => toggleMessage(msg.id)}
-                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                      className="mt-0.5 shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span className={`text-xs font-medium ${
-                        msg.role === "user" ? "text-[#bb9af7]" : "text-[#7aa2f7]"
-                      }`}>
-                        {msg.role === "user" ? t("roleUser") : t("roleAssistant")}
-                      </span>
-                      <p className="text-xs text-[#c9d1d9] line-clamp-3 mt-0.5 whitespace-pre-wrap">
-                        {text}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </ScrollArea>
-
-          <DialogFooter className="px-6 pb-6 pt-2">
-            <Button variant="outline" onClick={handleSelectCancel}>
-              {tCommon("cancel")}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                setShowMessageSelect(false);
-                setSelectedMessageIds(new Set());
-                setMessages([]);
-              }}
-            >
-              {t("clearAll")}
-            </Button>
-            <Button onClick={handleSelectNext} disabled={selectedMessageIds.size === 0}>
-              {t("nextStep")}
-            </Button>
-          </DialogFooter>
-
-          <ResizeHandles onEdgeResizeStart={onEdgeResizeStart} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Memory preview dialog */}
-      <Dialog open={showMemoryPreview} onOpenChange={(open) => {
-        if (!open) handleMemoryCancel();
-      }}>
-        <DialogContent
-          className="flex flex-col !p-0 overflow-hidden"
-          style={dialogStyle}
-        >
-          {/* Drag handle */}
-          <DialogHeader
-            className="cursor-move select-none px-6 pt-6 pb-2"
-            onPointerDown={onDragStart}
-          >
-            <DialogTitle>{t("memoryPreviewTitle")}</DialogTitle>
-            <DialogDescription>{t("memoryPreviewDesc")}</DialogDescription>
-          </DialogHeader>
-
-          <ScrollArea className="flex-1 min-h-0 px-6">
-            <div className="space-y-4 py-2 pr-4">
-              <div className="space-y-1.5">
-                <Label>{t("memoryNoteTitle")}</Label>
-                <Input
-                  value={memoryPreviewTitle}
-                  onChange={(e) => setMemoryPreviewTitle(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t("memoryNoteContent")}</Label>
-                <Textarea
-                  value={memoryPreviewContent}
-                  onChange={(e) => setMemoryPreviewContent(e.target.value)}
-                  rows={12}
-                  className="font-mono text-xs"
-                />
-              </div>
-            </div>
-          </ScrollArea>
-
-          <DialogFooter className="px-6 pb-6 pt-2">
-            <Button variant="outline" onClick={handleMemoryCancel}>
-              {tCommon("cancel")}
-            </Button>
-            <Button onClick={handleMemoryConfirm} disabled={!memoryPreviewTitle.trim()}>
-              {tCommon("confirm")}
-            </Button>
-          </DialogFooter>
-
-          <ResizeHandles onEdgeResizeStart={onEdgeResizeStart} />
-        </DialogContent>
-      </Dialog>
+      <ConversationMemoryPreviewDialog
+        open={showMemoryPreview}
+        onCancel={handleMemoryCancel}
+        titleValue={memoryPreviewTitle}
+        contentValue={memoryPreviewContent}
+        onTitleChange={setMemoryPreviewTitle}
+        onContentChange={setMemoryPreviewContent}
+        onConfirm={handleMemoryConfirm}
+        confirmDisabled={!memoryPreviewTitle.trim()}
+        labels={{
+          title: t("memoryPreviewTitle"),
+          description: t("memoryPreviewDesc"),
+          cancel: tCommon("cancel"),
+          confirm: tCommon("confirm"),
+          memoryTitle: t("memoryNoteTitle"),
+          memoryContent: t("memoryNoteContent"),
+        }}
+        variant="terminal"
+        className="flex flex-col !p-0 overflow-hidden"
+        style={dialogStyle}
+        headerClassName="cursor-move select-none px-6 pt-6 pb-2"
+        footerClassName="px-6 pb-6 pt-2"
+        onHeaderPointerDown={onDragStart}
+        footerExtra={<ResizeHandles onEdgeResizeStart={onEdgeResizeStart} />}
+      />
 
       {/* Particle effects overlay - renders on top of content but allows click-through */}
       <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">

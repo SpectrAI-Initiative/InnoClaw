@@ -2,7 +2,7 @@ import { getCurrentEnv } from "@/lib/ai/provider-env";
 import { PROVIDERS } from "@/lib/ai/models";
 import type { DeepResearchConfig } from "./types";
 
-type ModelRoute = { provider: string; modelId: string };
+export type ModelRoute = { provider: string; modelId: string };
 
 const LONG_FORM_FINAL_REPORT_PREFERENCES: ModelRoute[] = [
   { provider: "anthropic", modelId: "claude-opus-4-6" },
@@ -80,4 +80,28 @@ export function buildDeepResearchConfigWithRoleOverrides(input: {
     resolvedModel: input.resolvedModel,
     modelOverrides: mergedOverrides,
   };
+}
+
+export function buildDeepResearchConfigForResolvedModel(
+  config: DeepResearchConfig,
+  resolvedModel: ModelRoute,
+  overrides?: Partial<DeepResearchConfig>,
+): DeepResearchConfig {
+  return buildDeepResearchConfigWithRoleOverrides({
+    config: {
+      ...config,
+      ...overrides,
+      resolvedModel,
+    },
+    resolvedModel,
+  });
+}
+
+export function hasDeepResearchModelConfigDrift(
+  currentConfig: DeepResearchConfig,
+  nextConfig: DeepResearchConfig,
+): boolean {
+  return currentConfig.resolvedModel?.provider !== nextConfig.resolvedModel?.provider
+    || currentConfig.resolvedModel?.modelId !== nextConfig.resolvedModel?.modelId
+    || JSON.stringify(currentConfig.modelOverrides ?? null) !== JSON.stringify(nextConfig.modelOverrides ?? null);
 }
