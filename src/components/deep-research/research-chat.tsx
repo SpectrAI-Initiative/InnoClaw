@@ -16,7 +16,10 @@ import {
   isTerminalSessionStatus,
 } from "@/lib/deep-research/session-status";
 import { getNodeDisplayLabel, getStructuredRoleDisplayName, RESEARCHER_ROLE_ID } from "@/lib/deep-research/role-registry";
-import { getLatestFinalReportArtifact } from "@/lib/deep-research/final-report";
+import {
+  extractFinalReportCitationCoverage,
+  getLatestFinalReportArtifact,
+} from "@/lib/deep-research/final-report";
 import type {
   DeepResearchMessage,
   DeepResearchSession,
@@ -67,6 +70,7 @@ export const ResearchChat = memo(function ResearchChat({
 
   // Get the final report artifact (for completed sessions)
   const finalReportArtifact = getLatestFinalReportArtifact(artifacts);
+  const finalReportCitationCoverage = extractFinalReportCitationCoverage(finalReportArtifact, artifacts);
   const visibleMessages = messages.filter((message) => !isNodeDetailOnlyMessage(message));
 
   useEffect(() => {
@@ -254,9 +258,20 @@ export const ResearchChat = memo(function ResearchChat({
             <div className="space-y-3">
               <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/50 rounded-lg border border-green-200 dark:border-green-800">
                 <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
-                <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                  Research completed
-                </span>
+                <div className="min-w-0">
+                  <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                    Research completed
+                  </span>
+                  {finalReportCitationCoverage && (
+                    <div className="mt-1 text-[11px] text-green-700 dark:text-green-300">
+                      Citations {finalReportCitationCoverage.citedCitationCount}/{finalReportCitationCoverage.availableCitationCount}
+                      {" · "}
+                      target {finalReportCitationCoverage.minimumRequiredCitationCount}
+                      {" · "}
+                      {finalReportCitationCoverage.hasReferencesSection ? "references present" : "references missing"}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {finalReportArtifact ? (

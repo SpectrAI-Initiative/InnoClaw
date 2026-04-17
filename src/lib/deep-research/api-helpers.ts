@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfiguredModelSelection } from "@/lib/ai/provider";
 import { getSession, updateSession } from "./event-store";
+import { buildDeepResearchConfigWithRoleOverrides } from "./model-overrides";
 import type { DeepResearchSession } from "./types";
 
 export class DeepResearchApiError extends Error {
@@ -35,21 +36,27 @@ export async function requireSession(sessionId: string): Promise<DeepResearchSes
 
   if (session.config.interfaceOnly !== true) {
     const configuredModel = await getConfiguredModelSelection();
+    const nextConfig = buildDeepResearchConfigWithRoleOverrides({
+      config: {
+        ...session.config,
+        resolvedModel: {
+          provider: configuredModel.providerId,
+          modelId: configuredModel.modelId,
+        },
+      },
+      resolvedModel: {
+        provider: configuredModel.providerId,
+        modelId: configuredModel.modelId,
+      },
+    });
     const needsModelSync =
-      session.config.resolvedModel?.provider !== configuredModel.providerId
-      || session.config.resolvedModel?.modelId !== configuredModel.modelId
-      || session.config.modelOverrides !== undefined;
+      session.config.resolvedModel?.provider !== nextConfig.resolvedModel?.provider
+      || session.config.resolvedModel?.modelId !== nextConfig.resolvedModel?.modelId
+      || JSON.stringify(session.config.modelOverrides ?? null) !== JSON.stringify(nextConfig.modelOverrides ?? null);
 
     if (needsModelSync) {
       await updateSession(sessionId, {
-        config: {
-          ...session.config,
-          resolvedModel: {
-            provider: configuredModel.providerId,
-            modelId: configuredModel.modelId,
-          },
-          modelOverrides: undefined,
-        },
+        config: nextConfig,
       });
       session = await getSession(sessionId);
       if (!session) {

@@ -1,4 +1,3 @@
-import { defineConfig } from "drizzle-kit";
 import fs from "fs";
 
 // Load .env.local so DATABASE_URL is available when running `npx drizzle-kit migrate`.
@@ -18,11 +17,11 @@ try {
   // .env.local may not exist; that's fine – DATABASE_URL will use the default.
 }
 
-export default defineConfig({
+export default {
   schema: "./src/lib/db/schema.ts",
   out: "./drizzle",
   dialect: "sqlite",
   dbCredentials: {
     url: process.env.DATABASE_URL || "./data/innoclaw.db",
   },
-});
+};

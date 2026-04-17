@@ -4,6 +4,7 @@ import * as store from "./event-store";
 import { extractJsonFromLLMResponse } from "./json-response";
 import { buildMainBrainSystemPrompt } from "./prompts";
 import { buildResearchMemoryPromptBlock } from "./memory-fabric";
+import { buildResearchContextArchivePromptBlock } from "./context-archive";
 import { buildResearcherDoctrinePromptBlock } from "./researcher-doctrine";
 import type {
   DeepResearchSession,
@@ -46,10 +47,21 @@ export async function callMainBrain(
     requirementState,
     query: `${session.contextTag} ${session.title} ${latestUserMessage}`.trim(),
   });
+  const archiveContext = await buildResearchContextArchivePromptBlock({
+    session,
+    messages,
+    artifacts,
+    query: `${session.contextTag} ${session.title} ${latestUserMessage}`.trim(),
+    topK: 5,
+    maxChars: 2200,
+  });
   const doctrineContext = await buildResearcherDoctrinePromptBlock({
     contextTag: session.contextTag,
     query: `${session.contextTag} ${session.title} ${latestUserMessage}`.trim(),
   });
+  const combinedMemoryContext = [memoryContext, archiveContext]
+    .filter((block): block is string => typeof block === "string" && block.length > 0)
+    .join("\n\n");
 
   const modelChain = getModelChainForRole("main_brain", session.config);
   let systemPrompt = buildMainBrainSystemPrompt(
@@ -60,7 +72,7 @@ export async function callMainBrain(
     session.contextTag,
     requirementState,
     workstationContext,
-    memoryContext,
+    combinedMemoryContext || null,
     doctrineContext,
   );
 

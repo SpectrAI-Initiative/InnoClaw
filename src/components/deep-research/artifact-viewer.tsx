@@ -10,8 +10,21 @@ import type { NodeDispatchPreview } from "@/lib/deep-research/node-spec-template
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getNodeDisplayLabel } from "@/lib/deep-research/role-registry";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import {
+  getMarkdownArtifactText,
+  resolveArtifactRendererKind,
+} from "./artifact-renderer-registry";
+import {
+  normalizeDisplayList,
+  truncateDisplayList,
+} from "./artifact-display-utils";
+import {
+  ArtifactCard,
+  ArtifactNotice,
+  ArtifactSection,
+  MarkdownDisplay,
+  SectionList,
+} from "./artifact-renderer-primitives";
 
 interface ArtifactViewerProps {
   artifact: DeepResearchArtifact;
@@ -55,23 +68,19 @@ function renderContent(
   content: Record<string, unknown>,
   options?: { evidenceExcerptLimit?: number },
 ) {
-  if (looksLikeTaskBoard(content)) {
-    return <TaskBoardDisplay data={content} />;
-  }
+  switch (resolveArtifactRendererKind(type, content)) {
+    case "task_board":
+      return <TaskBoardDisplay data={content} />;
 
-  if (looksLikeCollaborationPacket(content)) {
-    return <CollaborationPacketDisplay data={content} />;
-  }
+    case "collaboration_packet":
+      return <CollaborationPacketDisplay data={content} />;
 
-  if (looksLikeRoleSpecification(content)) {
-    return <RoleSpecificationDisplay data={content} />;
-  }
+    case "role_specification":
+      return <RoleSpecificationDisplay data={content} />;
 
-  if (looksLikeProtocolGraph(content)) {
-    return <ProtocolGraphDisplay data={content} />;
-  }
+    case "protocol_graph":
+      return <ProtocolGraphDisplay data={content} />;
 
-  switch (type) {
     case "research_brief":
       return <KeyValueDisplay data={content} />;
 
@@ -79,8 +88,7 @@ function renderContent(
       return <EvidenceCardDisplay data={content} excerptLimit={options?.evidenceExcerptLimit ?? 5} />;
 
     case "structured_summary":
-    case "literature_round_summary":
-      return <MarkdownDisplay text={content.summary as string || JSON.stringify(content, null, 2)} />;
+      return <StructuredSummaryDisplay data={content} />;
 
     case "reviewer_packet":
       return <ReviewerPacketDisplay data={content} />;
@@ -104,7 +112,6 @@ function renderContent(
       return <ExecutionPlanDisplay data={content} />;
 
     case "step_result":
-    case "experiment_result":
       return <StepResultDisplay data={content} />;
 
     case "memory_profile":
@@ -117,13 +124,7 @@ function renderContent(
       return <MemoryIndexDisplay data={content} />;
 
     case "final_report":
-      return <MarkdownDisplay text={
-        content.text as string
-        || content.report as string
-        || content.messageToUser as string
-        || content.content as string
-        || JSON.stringify(content, null, 2)
-      } />;
+      return <MarkdownDisplay text={getMarkdownArtifactText(content)} />;
 
     case "task_graph":
       return <TaskGraphDisplay data={content} />;
@@ -134,30 +135,6 @@ function renderContent(
     default:
       return <pre className="text-xs bg-muted p-3 rounded overflow-auto">{JSON.stringify(content, null, 2)}</pre>;
   }
-}
-
-function looksLikeTaskBoard(content: Record<string, unknown>): boolean {
-  return typeof content.objective === "string"
-    && Array.isArray(content.assignments)
-    && typeof content.coordinatorRoleId === "string";
-}
-
-function looksLikeCollaborationPacket(content: Record<string, unknown>): boolean {
-  return typeof content.roleName === "string"
-    && typeof content.workflowSegment === "string"
-    && content.packet != null
-    && typeof content.packet === "object";
-}
-
-function looksLikeRoleSpecification(content: Record<string, unknown>): boolean {
-  return typeof content.roleName === "string"
-    && typeof content.workflowSegment === "string"
-    && Array.isArray(content.prompts)
-    && Array.isArray(content.skills);
-}
-
-function looksLikeProtocolGraph(content: Record<string, unknown>): boolean {
-  return Array.isArray(content.roles) && Array.isArray(content.protocols);
 }
 
 function RoleSpecificationDisplay({ data }: { data: Record<string, unknown> }) {
@@ -367,101 +344,6 @@ function ProtocolGraphDisplay({ data }: { data: Record<string, unknown> }) {
   );
 }
 
-function ArtifactSection({
-  title,
-  children,
-  className = "space-y-2",
-}: {
-  title: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</div>
-      {children}
-    </div>
-  );
-}
-
-function ArtifactCard({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <div className={`rounded border p-3 ${className}`.trim()}>{children}</div>;
-}
-
-function ArtifactNotice({
-  title,
-  children,
-  tone = "muted",
-}: {
-  title?: string;
-  children: React.ReactNode;
-  tone?: "muted" | "blue" | "green" | "yellow" | "emerald" | "slate";
-}) {
-  const toneStyles: Record<typeof tone, { container: string; title: string; body: string }> = {
-    muted: {
-      container: "bg-muted",
-      title: "text-muted-foreground",
-      body: "text-foreground",
-    },
-    blue: {
-      container: "bg-blue-50 dark:bg-blue-950/50",
-      title: "text-blue-800 dark:text-blue-200",
-      body: "text-blue-700 dark:text-blue-300",
-    },
-    green: {
-      container: "bg-green-50 dark:bg-green-950/50",
-      title: "text-green-800 dark:text-green-200",
-      body: "text-green-700 dark:text-green-300",
-    },
-    yellow: {
-      container: "bg-yellow-50 dark:bg-yellow-950",
-      title: "text-yellow-800 dark:text-yellow-200",
-      body: "text-yellow-700 dark:text-yellow-300",
-    },
-    emerald: {
-      container: "bg-emerald-50 dark:bg-emerald-950/40",
-      title: "text-emerald-800 dark:text-emerald-200",
-      body: "text-emerald-700 dark:text-emerald-300",
-    },
-    slate: {
-      container: "bg-slate-50 dark:bg-slate-900/50",
-      title: "text-slate-800 dark:text-slate-200",
-      body: "text-slate-700 dark:text-slate-300",
-    },
-  };
-  const styles = toneStyles[tone];
-
-  return (
-    <div className={`rounded p-2 text-xs ${styles.container}`}>
-      {title ? <div className={`mb-1 font-medium ${styles.title}`}>{title}</div> : null}
-      <div className={styles.body}>{children}</div>
-    </div>
-  );
-}
-
-function SectionList({ title, items, compact = false }: { title: string; items: string[]; compact?: boolean }) {
-  if (items.length === 0) {
-    return null;
-  }
-
-  return (
-    <div>
-      <div className={`font-medium text-muted-foreground ${compact ? "text-[11px] mb-1" : "text-xs mb-1.5"}`}>{title}</div>
-      <ul className={`${compact ? "text-[11px]" : "text-xs"} space-y-0.5 list-disc pl-4 text-muted-foreground`}>
-        {items.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 function KeyValueDisplay({ data }: { data: Record<string, unknown> }) {
   return (
     <div className="space-y-2">
@@ -562,7 +444,9 @@ function EvidenceCardDisplay({
       {sources.length > 0 ? (
         <ArtifactSection title={`Sources (${sources.length})`}>
           <div className="space-y-2">
-            {sources.map((source, index) => (
+            {sources.map((source, index) => {
+              const authorNames = normalizeDisplayList(source.authors);
+              return (
               <ArtifactCard key={`${source.title}-${index}`} className="space-y-2">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 space-y-1">
@@ -589,9 +473,9 @@ function EvidenceCardDisplay({
                   </Badge>
                 </div>
 
-                {source.authors && source.authors.length > 0 ? (
+                {authorNames.length > 0 ? (
                   <div className="text-xs text-muted-foreground">
-                    {truncateList(source.authors, 4)}
+                    {truncateDisplayList(authorNames, 4)}
                   </div>
                 ) : null}
 
@@ -601,7 +485,8 @@ function EvidenceCardDisplay({
                   </div>
                 ) : null}
               </ArtifactCard>
-            ))}
+              );
+            })}
           </div>
         </ArtifactSection>
       ) : (
@@ -704,20 +589,111 @@ function formatSourceMetadata(source: SourceEntry): string {
   return parts.length > 0 ? parts.join(" • ") : "Source metadata unavailable";
 }
 
-function truncateList(items: string[], maxItems: number): string {
-  if (items.length <= maxItems) {
-    return items.join(", ");
-  }
-
-  return `${items.slice(0, maxItems).join(", ")} +${items.length - maxItems} more`;
-}
-
 function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) {
     return text;
   }
 
   return `${text.slice(0, maxLength).trimEnd()}...`;
+}
+
+function StructuredSummaryDisplay({ data }: { data: Record<string, unknown> }) {
+  const chapterPackets = Array.isArray(data.chapterPackets)
+    ? data.chapterPackets.filter((packet): packet is Record<string, unknown> => Boolean(packet) && typeof packet === "object")
+    : [];
+  const crossSectionThemes = Array.isArray(data.crossSectionThemes)
+    ? data.crossSectionThemes.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    : [];
+  const globalOpenQuestions = Array.isArray(data.globalOpenQuestions)
+    ? data.globalOpenQuestions.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    : [];
+
+  if (chapterPackets.length === 0) {
+    return <MarkdownDisplay text={data.summary as string || JSON.stringify(data, null, 2)} />;
+  }
+
+  return (
+    <div className="space-y-3">
+      {typeof data.summary === "string" && data.summary.trim().length > 0 ? (
+        <ArtifactCard className="text-sm leading-relaxed">
+          {data.summary}
+        </ArtifactCard>
+      ) : null}
+
+      {chapterPackets.map((packet, index) => {
+        const title = typeof packet.title === "string" ? packet.title : `Chapter Packet ${index + 1}`;
+        const takeaways = Array.isArray(packet.keyTakeaways)
+          ? packet.keyTakeaways.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+          : [];
+        const citationKeys = Array.isArray(packet.citationKeys)
+          ? packet.citationKeys.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+          : [];
+        const openQuestions = Array.isArray(packet.openQuestions)
+          ? packet.openQuestions.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+          : [];
+        const claims = Array.isArray(packet.claims)
+          ? packet.claims.filter((claim): claim is Record<string, unknown> => Boolean(claim) && typeof claim === "object")
+          : [];
+
+        return (
+          <ArtifactCard key={`${title}-${index}`} className="space-y-2">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1 min-w-0">
+                <div className="text-sm font-medium leading-snug">{title}</div>
+                {typeof packet.summary === "string" && packet.summary.trim().length > 0 ? (
+                  <div className="text-xs text-muted-foreground">{packet.summary}</div>
+                ) : null}
+              </div>
+              <Badge variant="outline" className="text-[10px] shrink-0">
+                Packet {index + 1}
+              </Badge>
+            </div>
+
+            {takeaways.length > 0 ? (
+              <SectionList title="Key Takeaways" items={takeaways} compact />
+            ) : null}
+
+            {claims.length > 0 ? (
+              <ArtifactSection title={`Claims (${claims.length})`}>
+                <div className="space-y-2">
+                  {claims.slice(0, 6).map((claim, claimIndex) => (
+                    <ArtifactCard key={`${title}-claim-${claimIndex}`} className="space-y-1">
+                      <div className="text-sm">{typeof claim.text === "string" ? claim.text : JSON.stringify(claim)}</div>
+                      {typeof claim.strength === "string" ? (
+                        <div className="text-[11px] text-muted-foreground">Strength: {claim.strength}</div>
+                      ) : null}
+                    </ArtifactCard>
+                  ))}
+                </div>
+              </ArtifactSection>
+            ) : null}
+
+            {citationKeys.length > 0 ? (
+              <SectionList title="Citation Keys" items={citationKeys} compact />
+            ) : null}
+
+            {openQuestions.length > 0 ? (
+              <SectionList title="Open Questions" items={openQuestions} compact />
+            ) : null}
+
+            {typeof packet.recommendedSectionText === "string" && packet.recommendedSectionText.trim().length > 0 ? (
+              <ArtifactSection title="Section Seed">
+                <MarkdownDisplay text={packet.recommendedSectionText} />
+              </ArtifactSection>
+            ) : null}
+          </ArtifactCard>
+        );
+      })}
+
+      {crossSectionThemes.length > 0 ? (
+        <SectionList title="Cross-Section Themes" items={crossSectionThemes} />
+      ) : null}
+
+      {globalOpenQuestions.length > 0 ? (
+        <SectionList title="Global Open Questions" items={globalOpenQuestions} />
+      ) : null}
+    </div>
+  );
 }
 
 function ReviewerPacketDisplay({ data }: { data: Record<string, unknown> }) {
@@ -801,14 +777,6 @@ function StepResultDisplay({ data }: { data: Record<string, unknown> }) {
           {JSON.stringify(data.outputs, null, 2)}
         </pre>
       )}
-    </div>
-  );
-}
-
-function MarkdownDisplay({ text }: { text: string }) {
-  return (
-    <div className="prose prose-sm dark:prose-invert max-w-none">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
     </div>
   );
 }

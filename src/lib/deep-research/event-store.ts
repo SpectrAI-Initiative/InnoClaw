@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/schema";
 import { eq, and, desc, gt } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { buildDeepResearchConfigWithRoleOverrides } from "./model-overrides";
 import {
   DEFAULT_CONFIG,
   createEmptyUsage,
@@ -189,18 +190,22 @@ export async function createSession(
   const now = new Date().toISOString();
 
   const configuredModel = await getConfiguredModelSelection();
-  const fullConfig: DeepResearchConfig = {
+  const fullConfigBase: DeepResearchConfig = {
     ...DEFAULT_CONFIG,
     ...config,
     resolvedModel: config?.resolvedModel ?? {
       provider: configuredModel.providerId,
       modelId: configuredModel.modelId,
     },
-    modelOverrides: undefined,
+    modelOverrides: config?.modelOverrides,
     budget: { ...DEFAULT_CONFIG.budget, ...config?.budget },
     literature: { ...DEFAULT_CONFIG.literature, ...config?.literature },
     execution: { ...DEFAULT_CONFIG.execution, ...config?.execution },
   };
+  const fullConfig = buildDeepResearchConfigWithRoleOverrides({
+    config: fullConfigBase,
+    resolvedModel: fullConfigBase.resolvedModel!,
+  });
   const usage = createEmptyUsage();
 
   await db.insert(deepResearchSessions).values({

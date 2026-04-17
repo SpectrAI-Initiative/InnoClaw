@@ -112,7 +112,8 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
   );
   const taskGraphArtifacts = relatedArtifacts.filter((artifact) => artifact.artifactType === "task_graph");
   const evidenceArtifacts = relatedArtifacts.filter((artifact) => artifact.artifactType === "evidence_card");
-  const otherArtifacts = relatedArtifacts.filter((artifact) => !["evidence_card", "task_graph"].includes(artifact.artifactType));
+  const finalReportArtifacts = relatedArtifacts.filter((artifact) => artifact.artifactType === "final_report");
+  const otherArtifacts = relatedArtifacts.filter((artifact) => !["evidence_card", "task_graph", "final_report"].includes(artifact.artifactType));
 
   const handleAction = async (outcome: ConfirmationOutcome) => {
     setSubmitting(true);
@@ -322,6 +323,21 @@ export function CheckpointReview({ checkpoint, artifacts, onConfirm }: Checkpoin
               </div>
               <div className="space-y-3">
                 {taskGraphArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="rounded-lg border bg-background p-3">
+                    <ArtifactViewer artifact={artifact} disableScroll />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {finalReportArtifacts.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Final Report Draft
+              </div>
+              <div className="space-y-3">
+                {finalReportArtifacts.map((artifact) => (
                   <div key={artifact.id} className="rounded-lg border bg-background p-3">
                     <ArtifactViewer artifact={artifact} disableScroll />
                   </div>

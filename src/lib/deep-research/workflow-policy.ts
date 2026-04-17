@@ -105,6 +105,7 @@ export function deriveWorkflowPolicy(input: {
     mode === "analysis_only"
       ? `- Experimental execution is blocked unless the user later explicitly requests it. Blocked node types: ${Array.from(blockedNodeTypes).join(", ")}`
       : "- Experimental execution is allowed when justified by the confirmed plan.",
+    "- For conceptual framework design, taxonomy building, architecture comparison, or literature-structuring tasks, use summarize/review/final_report style nodes rather than validation_plan.",
     "- On the first planning pass, you MUST produce a complete plan in messageToUser, explain which phases are needed, and explicitly name any phases you are skipping.",
     "- Do not treat experiment design/execution as mandatory. Choose only the phases required by the user's question and the workstation evidence.",
   ].join("\n");

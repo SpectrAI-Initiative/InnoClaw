@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { writeFile } from "@/lib/files/filesystem";
 import path from "path";
 import {
-  extractFinalReportText,
+  extractFinalReportTextWithFallbackReferences,
   getLatestFinalReportArtifact,
 } from "@/lib/deep-research/final-report";
 
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // Extract report text from artifact content
-    const reportText = extractFinalReportText(finalReport);
+    const reportText = extractFinalReportTextWithFallbackReferences(finalReport, artifacts);
 
     // Build the full markdown document with metadata header
     const now = new Date();

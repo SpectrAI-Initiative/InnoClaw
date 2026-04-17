@@ -72,13 +72,21 @@ export function DeepResearchPanel({
   const { sessions, mutate: mutateSessions } = useDeepResearchSessions(workspaceId);
   const { session, mutate: mutateSession } = useDeepResearchSession(activeSessionId ?? undefined);
   const { messages, mutate: mutateMessages } = useDeepResearchMessages(activeSessionId ?? undefined);
-  const { nodes } = useDeepResearchNodes(activeSessionId ?? undefined);
-  const { artifacts } = useDeepResearchArtifacts(activeSessionId ?? undefined);
+  const { nodes, mutate: mutateNodes } = useDeepResearchNodes(activeSessionId ?? undefined);
+  const { artifacts, mutate: mutateArtifacts } = useDeepResearchArtifacts(activeSessionId ?? undefined);
   const { events } = useDeepResearchEvents(activeSessionId ?? undefined);
   const activeSessionPath = activeSessionId ? `/api/deep-research/sessions/${activeSessionId}` : null;
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) ?? null;
   const isInterfaceOnly = session?.config.interfaceOnly === true;
+  const refreshActiveSessionResources = useCallback(async () => {
+    await Promise.all([
+      mutateSession(),
+      mutateMessages(),
+      mutateNodes(),
+      mutateArtifacts(),
+    ]);
+  }, [mutateArtifacts, mutateMessages, mutateNodes, mutateSession]);
   const resetSessionChrome = useCallback(() => {
     setSelectedNodeId(null);
     setDrawerOpen(false);
@@ -185,10 +193,10 @@ export function DeepResearchPanel({
         "Failed to send message",
       );
       if (response) {
-        await Promise.all([mutateMessages(), mutateSession()]);
+        await refreshActiveSessionResources();
       }
     },
-    [mutateMessages, mutateSession, runSessionRequest],
+    [refreshActiveSessionResources, runSessionRequest],
   );
 
   const handleApprove = useCallback(
@@ -203,13 +211,13 @@ export function DeepResearchPanel({
         "Failed to process approval",
       );
       if (response) {
-        await mutateSession();
+        await refreshActiveSessionResources();
         if (response.message) {
           toast(response.message);
         }
       }
     },
-    [mutateSession, runSessionRequest],
+    [refreshActiveSessionResources, runSessionRequest],
   );
 
   const handleConfirm = useCallback(
@@ -224,7 +232,16 @@ export function DeepResearchPanel({
         "Failed to process confirmation",
       );
       if (response) {
-        await mutateSession();
+        await refreshActiveSessionResources();
+
+        window.setTimeout(() => {
+          void refreshActiveSessionResources();
+        }, 800);
+
+        window.setTimeout(() => {
+          void refreshActiveSessionResources();
+        }, 2200);
+
         if (response.message) {
           toast(response.message);
           return;
@@ -238,7 +255,7 @@ export function DeepResearchPanel({
         );
       }
     },
-    [mutateSession, runSessionRequest],
+    [refreshActiveSessionResources, runSessionRequest],
   );
 
   const handleStartRun = useCallback(async () => {
@@ -248,14 +265,14 @@ export function DeepResearchPanel({
       "Failed to start research",
     );
     if (response) {
-      await mutateSession();
+      await refreshActiveSessionResources();
       if (response.disabled) {
         toast(response.message ?? "Deep Research is running in interface-only mode.");
         return;
       }
       toast.success("Research started");
     }
-  }, [mutateSession, runSessionRequest]);
+  }, [refreshActiveSessionResources, runSessionRequest]);
 
   const handleNodeSelect = useCallback((nodeId: string) => {
     setSelectedNodeId(nodeId);
@@ -434,6 +451,7 @@ export function DeepResearchPanel({
                     artifacts={artifacts}
                     selectedNode={selectedNode}
                     resolvedModel={session.config.resolvedModel ?? null}
+                    modelOverrides={session.config.modelOverrides ?? null}
                     onSelectRoleNode={handleRoleNodeSelect}
                     onSendMessage={handleSendMessage}
                   />

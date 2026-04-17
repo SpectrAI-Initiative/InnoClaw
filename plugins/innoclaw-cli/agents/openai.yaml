@@ -1,0 +1,9 @@
+interface:
+  display_name: "InnoClaw CLI"
+  short_description: "Run InnoClaw app workflows and Deep Research sessions from the terminal"
+  icon_small: "./assets/innoclaw-cli-small.svg"
+  icon_large: "./assets/innoclaw-cli-logo.svg"
+  default_prompt: "Use InnoClaw CLI to run the local app, create a Deep Research session, and export the resulting report."
+
+dependencies:
+  tools: []

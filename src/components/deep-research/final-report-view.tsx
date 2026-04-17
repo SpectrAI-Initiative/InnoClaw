@@ -17,7 +17,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { DeepResearchSession, DeepResearchArtifact } from "@/lib/deep-research/types";
 import {
-  extractFinalReportText,
+  extractFinalReportCitationCoverage,
+  extractFinalReportTextWithFallbackReferences,
   getLatestFinalReportArtifact,
 } from "@/lib/deep-research/final-report";
 
@@ -32,7 +33,8 @@ export function FinalReportView({ session, artifacts }: FinalReportViewProps) {
   const [copied, setCopied] = useState(false);
 
   const finalReport = getLatestFinalReportArtifact(artifacts);
-  const reportText = finalReport ? extractFinalReportText(finalReport) : "";
+  const reportText = finalReport ? extractFinalReportTextWithFallbackReferences(finalReport, artifacts) : "";
+  const citationCoverage = extractFinalReportCitationCoverage(finalReport, artifacts);
 
   const handleSaveToWorkspace = async () => {
     setSaving(true);
@@ -137,6 +139,33 @@ export function FinalReportView({ session, artifacts }: FinalReportViewProps) {
           </span>
         )}
       </div>
+
+      {citationCoverage && (
+        <div className="px-4 py-2 border-b border-border/50 bg-blue-50/40 dark:bg-blue-950/20">
+          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            <Badge variant="outline" className="text-[10px]">
+              Citations {citationCoverage.citedCitationCount}/{citationCoverage.availableCitationCount}
+            </Badge>
+            <Badge
+              variant="outline"
+              className={citationCoverage.meetsCoverage ? "text-green-600 border-green-300" : "text-amber-600 border-amber-300"}
+            >
+              Target {citationCoverage.minimumRequiredCitationCount}
+            </Badge>
+            <Badge
+              variant="outline"
+              className={citationCoverage.hasReferencesSection ? "text-green-600 border-green-300" : "text-red-600 border-red-300"}
+            >
+              {citationCoverage.hasReferencesSection ? "References present" : "References missing"}
+            </Badge>
+            {citationCoverage.revisedForCoverage && (
+              <Badge variant="secondary" className="text-[10px]">
+                Coverage revised
+              </Badge>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Report content — full height, scrollable */}
       <ScrollArea className="flex-1 min-h-0">
