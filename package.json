@@ -99,7 +99,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.183.1",
     "drizzle-kit": "^0.31.10",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-next": "16.2.2",
     "shadcn": "^4.1.2",
     "tailwindcss": "^4",
