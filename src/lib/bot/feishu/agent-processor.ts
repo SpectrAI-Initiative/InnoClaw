@@ -13,7 +13,6 @@ import {
   type UIMessage,
 } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
-import { createAgentTools } from "@/lib/ai/tools";
 import {
   buildAgentSystemPrompt,
   buildPlanSystemPrompt,
@@ -73,6 +72,7 @@ function getSystemPrompt(mode: AgentMode, cwd: string): string {
 }
 
 async function getTools(mode: AgentMode, cwd: string) {
+  const { createAgentTools } = await import("@/lib/ai/tools");
   if (mode === "plan" || mode === "ask") {
     return createAgentTools(cwd, ["readFile", "listDirectory", "grep"]);
   }

@@ -79,8 +79,8 @@ export async function register() {
     }
 
     // Ensure .env.local exists (generate from .env.example if missing)
-    const { ensureEnvLocal } = await import("@/lib/env-file");
-    ensureEnvLocal();
+    const { ensureEnvLocalForStartup } = await import("@/lib/env-file");
+    ensureEnvLocalForStartup();
 
     // Run database migrations
     const { runMigrations } = await import("@/lib/db/migrate");

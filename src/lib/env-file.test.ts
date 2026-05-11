@@ -51,6 +51,16 @@ describe("ensureEnvLocal", () => {
     const content = fs.readFileSync(path.join(tmpDir, ".env.local"), "utf-8");
     expect(content).toContain("# InnoClaw configuration");
   });
+
+  it("returns false instead of throwing when startup cannot create .env.local", async () => {
+    const { ensureEnvLocalForStartup } = await import("./env-file");
+
+    expect(
+      ensureEnvLocalForStartup(() => {
+        throw new Error("EACCES");
+      })
+    ).toBe(false);
+  });
 });
 
 describe("updateEnvLocal", () => {
