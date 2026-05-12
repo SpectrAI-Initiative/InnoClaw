@@ -76,9 +76,6 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isPublicPath(pathname) || isPublicApi(pathname)) {
-    if (AUTH_PUBLIC_PATHS.has(pathname) && await hasValidSessionMarker(request)) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
     return NextResponse.next();
   }
 
