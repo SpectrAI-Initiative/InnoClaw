@@ -18,7 +18,8 @@ function stripWrappingQuotes(value: string | undefined | null): string | null {
 /** Import a single SkillExportData into the DB, returns the inserted skill id or null */
 export async function insertSkill(
   data: SkillExportData,
-  workspaceId: string | null
+  workspaceId: string | null,
+  ownerUserId?: string | null
 ): Promise<string | null> {
   try {
     const normalizedSlug = slugify(data.slug);
@@ -54,6 +55,7 @@ export async function insertSkill(
 
     await db.insert(skills).values({
       id,
+      ownerUserId: ownerUserId ?? null,
       workspaceId: workspaceId || null,
       name: data.name,
       slug: finalSlug,

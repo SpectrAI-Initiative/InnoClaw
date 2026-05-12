@@ -17,7 +17,7 @@ try {
   // .env.local may not exist; that's fine – DATABASE_URL will use the default.
 }
 
-export default {
+const config = {
   schema: "./src/lib/db/schema.ts",
   out: "./drizzle",
   dialect: "sqlite",
@@ -25,3 +25,5 @@ export default {
     url: process.env.DATABASE_URL || "./data/innoclaw.db",
   },
 };
+
+export default config;

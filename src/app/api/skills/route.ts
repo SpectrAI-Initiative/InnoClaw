@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { skills, workspaces } from "@/lib/db/schema";
+import { skills } from "@/lib/db/schema";
 import { eq, or, isNull, and, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { slugify } from "@/lib/utils/slugify";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 import { ensureProjectDefaultSkills } from "@/lib/db/default-skills";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { requireAuth } from "@/lib/auth/server";
+import { jsonError, jsonException } from "@/lib/api-errors";
 
 // GET /api/skills?workspaceId=xxx
 // Returns global skills + workspace-specific skills
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     await ensureProjectDefaultSkills();
 
     const { searchParams } = new URL(request.url);
@@ -39,15 +47,18 @@ export async function GET(request: NextRequest) {
     const parsed = allSkills.map(parseSkillRow);
     return NextResponse.json(parsed);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to list skills";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to list skills");
   }
 }
 
 // POST /api/skills
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const body = await request.json();
     const {
       workspaceId,
@@ -68,33 +79,20 @@ export async function POST(request: NextRequest) {
       typeof systemPrompt !== "string" ||
       !systemPrompt.trim()
     ) {
-      return NextResponse.json(
-        { error: "Missing required fields: name, slug, systemPrompt" },
-        { status: 400 }
-      );
+      return jsonError("Missing required fields: name, slug, systemPrompt", 400);
     }
 
     const normalizedSlug = slugify(slug);
 
     if (!normalizedSlug) {
-      return NextResponse.json(
-        { error: "Invalid slug: slug must contain at least one alphanumeric character after normalization" },
-        { status: 400 }
-      );
+      return jsonError("Invalid slug: slug must contain at least one alphanumeric character after normalization", 400);
     }
 
     // Validate workspace exists if workspaceId is provided
     if (workspaceId) {
-      const ws = await db
-        .select()
-        .from(workspaces)
-        .where(eq(workspaces.id, workspaceId))
-        .limit(1);
-      if (ws.length === 0) {
-        return NextResponse.json(
-          { error: "Workspace not found" },
-          { status: 404 }
-        );
+      const access = await requireWorkspaceAccess(request, workspaceId);
+      if (access instanceof NextResponse) {
+        return access;
       }
     }
 
@@ -113,10 +111,7 @@ export async function POST(request: NextRequest) {
       .limit(1);
 
     if (existing.length > 0) {
-      return NextResponse.json(
-        { error: "A skill with this slug already exists in the same scope" },
-        { status: 409 }
-      );
+      return jsonError("A skill with this slug already exists in the same scope", 409);
     }
 
     const id = nanoid();
@@ -124,6 +119,7 @@ export async function POST(request: NextRequest) {
 
     await db.insert(skills).values({
       id,
+      ownerUserId: auth.user.id,
       workspaceId: workspaceId || null,
       name,
       slug: normalizedSlug,
@@ -145,8 +141,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(parseSkillRow(skill[0]), { status: 201 });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to create skill";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to create skill");
   }
 }

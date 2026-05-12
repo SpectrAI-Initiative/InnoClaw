@@ -11,8 +11,8 @@ describe("search-tools startup", () => {
       throw new Error("paper-content should not load during module import");
     });
 
-    const module = await import("./search-tools");
+    const imported = await import("./search-tools");
 
-    expect(module.createSearchTools).toEqual(expect.any(Function));
+    expect(imported.createSearchTools).toEqual(expect.any(Function));
   });
 });

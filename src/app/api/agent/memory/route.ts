@@ -6,6 +6,8 @@ import { nanoid } from "nanoid";
 import { streamText } from "ai";
 import { getConfiguredModelWithProvider } from "@/lib/ai/provider";
 import { formatDailyLogEntry, todayKey, buildDreamPrompt } from "@/lib/agent/kairos-memory";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { jsonError, jsonException, requiredSearchParam } from "@/lib/api-errors";
 
 /**
  * GET /api/agent/memory?workspaceId=xxx
@@ -13,9 +15,13 @@ import { formatDailyLogEntry, todayKey, buildDreamPrompt } from "@/lib/agent/kai
  */
 export async function GET(req: NextRequest) {
   try {
-    const workspaceId = req.nextUrl.searchParams.get("workspaceId");
-    if (!workspaceId) {
-      return NextResponse.json({ error: "Missing workspaceId" }, { status: 400 });
+    const workspaceId = requiredSearchParam(req, "workspaceId");
+    if (workspaceId instanceof NextResponse) {
+      return workspaceId;
+    }
+    const access = await requireWorkspaceAccess(req, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const memoryNotes = await db
@@ -35,8 +41,7 @@ export async function GET(req: NextRequest) {
       count: memoryNotes.length,
     });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : "Failed to load memory";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return jsonException(error, "Failed to load memory");
   }
 }
 
@@ -49,12 +54,16 @@ export async function POST(req: NextRequest) {
     const { workspaceId, action, text } = await req.json();
 
     if (!workspaceId || !action) {
-      return NextResponse.json({ error: "Missing workspaceId or action" }, { status: 400 });
+      return jsonError("Missing workspaceId or action", 400);
+    }
+    const access = await requireWorkspaceAccess(req, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     if (action === "remember") {
       if (!text) {
-        return NextResponse.json({ error: "Missing text for remember" }, { status: 400 });
+        return jsonError("Missing text for remember", 400);
       }
 
       const today = todayKey();
@@ -152,9 +161,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
+    return jsonError(`Unknown action: ${action}`, 400);
   } catch (error) {
-    const msg = error instanceof Error ? error.message : "Memory operation failed";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return jsonException(error, "Memory operation failed");
   }
 }

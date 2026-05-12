@@ -3,6 +3,8 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { insertSkill, parseSkillMd } from "@/lib/db/skills-insert";
+import { requireAuth } from "@/lib/auth/server";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 /** Resolve the Claude Code config directory.
  *  Defaults to ~/.claude but can be overridden via the request body,
@@ -103,11 +105,23 @@ async function discoverClaudeSkills(
 // Body: { claudePath?: string, workspaceId?: string }
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const body = await request.json().catch(() => ({}));
     const { claudePath, workspaceId } = body as {
       claudePath?: string;
       workspaceId?: string | null;
     };
+
+    if (workspaceId) {
+      const access = await requireWorkspaceAccess(request, workspaceId);
+      if (access instanceof NextResponse) {
+        return access;
+      }
+    }
 
     const claudeDir = resolveClaudeDir(claudePath);
 
@@ -156,7 +170,7 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      const id = await insertSkill(parsed, workspaceId || null);
+      const id = await insertSkill(parsed, workspaceId || null, auth.user.id);
       if (id) {
         imported++;
         importedNames.push(parsed.name);
@@ -180,6 +194,11 @@ export async function POST(request: NextRequest) {
 // Returns discovered skill files without importing (preview)
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const { searchParams } = new URL(request.url);
     const claudePath = searchParams.get("path") || undefined;
     const claudeDir = resolveClaudeDir(claudePath);

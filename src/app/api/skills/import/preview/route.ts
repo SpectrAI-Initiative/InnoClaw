@@ -7,12 +7,18 @@ import {
   batchProcess,
   type PreviewSkillItem,
 } from "@/lib/skills/github-fetch";
+import { requireAuth } from "@/lib/auth/server";
 
 // POST /api/skills/import/preview
 // Body: { url: string }
 // Returns: { skills: PreviewSkillItem[], branch: string, owner: string, repo: string }
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const body = await request.json();
     const { url } = body;
 

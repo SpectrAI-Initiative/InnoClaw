@@ -2,13 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { requireNoteAccess } from "@/lib/auth/ownership";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ noteId: string }> }
 ) {
   try {
     const { noteId } = await params;
+    const access = await requireNoteAccess(request, noteId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
 
     const note = await db
       .select()
@@ -34,6 +39,10 @@ export async function PATCH(
 ) {
   try {
     const { noteId } = await params;
+    const access = await requireNoteAccess(request, noteId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
     const body = await request.json();
 
     await db
@@ -59,11 +68,15 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ noteId: string }> }
 ) {
   try {
     const { noteId } = await params;
+    const access = await requireNoteAccess(request, noteId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
 
     await db.delete(notes).where(eq(notes.id, noteId));
 

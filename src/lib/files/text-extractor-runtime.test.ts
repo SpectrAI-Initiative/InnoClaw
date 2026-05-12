@@ -11,9 +11,9 @@ describe("text-extractor startup", () => {
       throw new Error("pdf parser should not load during module import");
     });
 
-    const module = await import("./text-extractor");
+    const imported = await import("./text-extractor");
 
-    expect(module.extractText).toEqual(expect.any(Function));
-    expect(module.isSupportedFile).toEqual(expect.any(Function));
+    expect(imported.extractText).toEqual(expect.any(Function));
+    expect(imported.isSupportedFile).toEqual(expect.any(Function));
   });
 });

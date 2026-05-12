@@ -7,6 +7,7 @@ import {
   parseRequiredString,
   parseOptionalStringArray,
 } from "@/lib/deep-research/api-helpers";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,6 +15,10 @@ export async function GET(req: NextRequest) {
       req.nextUrl.searchParams.get("workspaceId"),
       "Missing workspaceId",
     );
+    const access = await requireWorkspaceAccess(req, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
     const sessions = await listSessions(workspaceId);
     return NextResponse.json(sessions);
   } catch (error) {
@@ -25,6 +30,10 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const workspaceId = parseRequiredString(body.workspaceId, "Missing workspaceId");
+    const access = await requireWorkspaceAccess(req, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
     const title = parseRequiredString(body.title, "Missing title");
     const content = parseOptionalString(body.content, "Invalid content");
     const files = parseOptionalStringArray(body.files, "Invalid files");

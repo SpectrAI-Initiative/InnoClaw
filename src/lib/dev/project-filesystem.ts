@@ -116,7 +116,7 @@ export function assessPathLocking(
   targetPath: string,
   mountInfoContent?: string
 ): DistDirLockAssessment {
-  if (process.platform !== "linux") {
+  if (!mountInfoContent && process.platform !== "linux") {
     return { disableLock: false };
   }
 

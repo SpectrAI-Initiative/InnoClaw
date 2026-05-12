@@ -11,10 +11,15 @@ import {
   requireSession,
   type DeepResearchRouteParams,
 } from "@/lib/deep-research/api-helpers";
+import { requireDeepResearchSessionAccess } from "@/lib/auth/ownership";
 
 export async function POST(req: NextRequest, { params }: DeepResearchRouteParams) {
   try {
     const sessionId = await readSessionId(params);
+    const access = await requireDeepResearchSessionAccess(req, sessionId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
     const body = await req.json();
     if (!isRecord(body) || typeof body.approved !== "boolean") {
       return NextResponse.json({ error: "Missing nodeId or approved (boolean)" }, { status: 400 });

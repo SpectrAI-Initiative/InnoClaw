@@ -6,6 +6,7 @@ import { buildChatSystemPrompt } from "@/lib/ai/prompts";
 import { db } from "@/lib/db";
 import { chatMessages } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,10 @@ export async function POST(req: NextRequest) {
 
     if (!workspaceId) {
       return new Response("Missing workspaceId", { status: 400 });
+    }
+    const access = await requireWorkspaceAccess(req, workspaceId);
+    if (access instanceof Response) {
+      return access;
     }
 
     if (!isAIAvailable()) {

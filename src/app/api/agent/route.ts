@@ -10,6 +10,7 @@ import { skills } from "@/lib/db/schema";
 import { and, eq, or, isNull } from "drizzle-orm";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 import { ensureProjectDefaultSkills } from "@/lib/db/default-skills";
+import { requirePathAccess, requireSkillAccess, requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,6 +21,14 @@ export async function POST(req: NextRequest) {
 
     if (!workspaceId || !cwd || typeof cwd !== "string") {
       return new Response("Missing workspaceId or cwd", { status: 400 });
+    }
+    const workspaceAccess = await requireWorkspaceAccess(req, workspaceId);
+    if (workspaceAccess instanceof Response) {
+      return workspaceAccess;
+    }
+    const pathAccess = await requirePathAccess(req, cwd);
+    if (pathAccess instanceof Response) {
+      return pathAccess;
     }
 
     // Validate request-level model override fields before use
@@ -59,6 +68,11 @@ export async function POST(req: NextRequest) {
     let tools;
 
     if (skillId) {
+      const skillAccess = await requireSkillAccess(req, skillId);
+      if (skillAccess instanceof Response) {
+        return skillAccess;
+      }
+
       // Skill mode: load skill from DB and use skill-specific prompt + tools
       const skillRows = await db
         .select()
