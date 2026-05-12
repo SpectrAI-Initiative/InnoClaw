@@ -7,7 +7,6 @@ import {
   findRelatedArticles,
 } from "@/lib/article-search";
 import type { Article } from "@/lib/article-search";
-import { readPaperText, resolvePaperPdfUrl } from "@/lib/article-search/paper-content";
 import { PAPER } from "@/lib/constants";
 
 /** Format an Article for LLM-friendly output. */
@@ -157,6 +156,9 @@ export function createSearchTools() {
             .describe("Maximum number of characters to extract from the paper text"),
         }),
       execute: async ({ title, url, pdfUrl, source, maxChars }) => {
+        const { readPaperText, resolvePaperPdfUrl } = await import(
+          "@/lib/article-search/paper-content"
+        );
         const result = await readPaperText(
           {
             title,

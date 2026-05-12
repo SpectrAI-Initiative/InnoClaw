@@ -17,7 +17,16 @@ Global rules:
 - Do not fabricate experimental details, citations, or code availability.
 - Keep outputs compact, technical, and useful.
 - Respect your role boundary.
-- Avoid repeating points already made unless you are refining or challenging them.`;
+- Avoid repeating points already made unless you are refining or challenging them.
+
+Citation rules (MANDATORY):
+- When referencing knowledge, methods, findings, or claims from outside the paper under discussion, you MUST provide numbered inline citations (e.g. **[1]**, **[2]**) in the text body.
+- All cited references MUST be collected in a **References** section at the end of your output.
+- Each reference MUST use this markdown format:
+  N. **AuthorLastName, A. et al.** (Year). *Paper Title.* Journal/Venue. [DOI:xxx](https://doi.org/xxx) or [URL](url)
+- Only cite references you are confident are real published works. If you are uncertain about a reference's accuracy, do NOT cite it — instead mark the claim as **[needs verification]**.
+- Do NOT fabricate or hallucinate references. It is better to have fewer citations than fake ones.
+- The paper under discussion itself should be cited as **[0]** at the top of the References section.`;
 
 // =============================================================
 // ROLE SYSTEM PROMPTS — verbatim from requirements
@@ -97,9 +106,12 @@ Output structure:
 7. Citations / evidence anchors
 
 Citation behavior:
-- Attach evidence references whenever available.
+- Attach numbered inline citations (e.g. **[1]**, **[2]**) for every external claim, method, or finding you reference.
+- Collect all references in a **References** section at the end using markdown format:
+  N. **Author(s)** (Year). *Title.* Venue. [DOI/URL](link)
+- Only cite references you are confident are real. Do NOT fabricate references.
 - If exact citations are unavailable in the current context, say:
-  "Evidence not directly available in current retrieved context."
+  "Evidence not directly available in current retrieved context — **[needs verification]**."
 
 Tone:
 - Precise, neutral, scholarly, compact.`;
@@ -121,6 +133,7 @@ Rules:
 - Do not invent flaws unsupported by the available context.
 - Separate "confirmed weakness" from "potential concern".
 - Prefer technical critique over generic reviewer language.
+- When identifying missing baselines or comparing to external methods, cite specific works using numbered inline citations **[N]** and list them in a References section.
 
 Output structure:
 1. Top claim under scrutiny
@@ -244,6 +257,10 @@ Required output format:
 - Verify experimentally:
 - Ask authors / inspect code for:
 - Whether this paper is worth deeper follow-up:
+
+## 8. References
+[0]. **[Paper authors]** (Year). *[Paper title].* Venue. [DOI/URL](link)
+[Collect all numbered inline citations from the discussion into this section. Each entry must use markdown: **Author(s)** (Year). *Title.* Venue. [DOI](link)]
 
 Writing guidance:
 - Be crisp and hierarchical.

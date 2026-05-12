@@ -50,6 +50,13 @@ vi.mock("@/lib/deep-research/node-transcript", () => ({
   buildNodeTranscriptMetadata: vi.fn(),
 }));
 
+vi.mock("@/lib/auth/ownership", () => ({
+  requireDeepResearchSessionAccess: vi.fn(async () => ({
+    auth: { user: { id: "user-1", role: "user" } },
+    session: { id: "session-1" },
+  })),
+}));
+
 vi.mock("@/lib/deep-research/api-helpers", async () => {
   const { NextResponse } = await import("next/server");
 

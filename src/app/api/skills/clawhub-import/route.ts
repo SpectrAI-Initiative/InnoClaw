@@ -5,17 +5,31 @@ import { eq } from "drizzle-orm";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 import { insertSkill, parseSkillMd } from "@/lib/db/skills-insert";
 import { parseClawHubUrl } from "@/lib/utils/clawhub";
+import { requireAuth } from "@/lib/auth/server";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 const CLAWHUB_BASE = process.env.CLAWHUB_API_BASE || "https://clawhub.ai";
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const body = await req.json();
     const { url, slug: slugOverride, workspaceId } = body as {
       url: string;
       slug?: string;
       workspaceId?: string | null;
     };
+
+    if (workspaceId) {
+      const access = await requireWorkspaceAccess(req, workspaceId);
+      if (access instanceof NextResponse) {
+        return access;
+      }
+    }
 
     if (!url || typeof url !== "string") {
       return NextResponse.json(
@@ -106,7 +120,7 @@ export async function POST(req: NextRequest) {
       skillData.slug = slugOverride.trim();
     }
 
-    const insertedId = await insertSkill(skillData, workspaceId || null);
+    const insertedId = await insertSkill(skillData, workspaceId || null, auth.user.id);
     if (!insertedId) {
       return NextResponse.json(
         { error: "Failed to save skill to database" },

@@ -1,11 +1,5 @@
 import { validatePath } from "@/lib/files/filesystem";
-import { extractText, isSupportedFile, normalizeText } from "@/lib/files/text-extractor";
-import { resolvePaperPdfBuffer } from "@/lib/article-search/paper-content";
-import {
-  extractPdfPagesWithImages,
-  extractPdfPagesTextOnly,
-  type PaperContentPart,
-} from "@/lib/files/pdf-image-extractor";
+import type { PaperContentPart } from "@/lib/files/pdf-image-extractor";
 import type { PaperArticleRef } from "./article-ref";
 
 // Re-export for convenience
@@ -25,9 +19,16 @@ export async function extractPaperContent(
   maxPages: number = 20,
 ): Promise<PaperContentPart[] | undefined> {
   try {
+    const { resolvePaperPdfBuffer } = await import(
+      "@/lib/article-search/paper-content"
+    );
     const buffer = await resolvePaperPdfBuffer(article);
 
     if (buffer) {
+      const {
+        extractPdfPagesWithImages,
+        extractPdfPagesTextOnly,
+      } = await import("@/lib/files/pdf-image-extractor");
       // PDF path — extract with or without images
       const parts = withImages
         ? await extractPdfPagesWithImages(buffer, { maxPages })
@@ -37,6 +38,9 @@ export async function extractPaperContent(
 
     // Non-PDF local file — text only
     if (article.source === "local") {
+      const { extractText, isSupportedFile, normalizeText } = await import(
+        "@/lib/files/text-extractor"
+      );
       const filePath = validatePath(article.url);
       if (!isSupportedFile(filePath)) return undefined;
       const rawText = await extractText(filePath);

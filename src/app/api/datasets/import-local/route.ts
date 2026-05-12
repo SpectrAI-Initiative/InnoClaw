@@ -6,12 +6,19 @@ import { eq } from "drizzle-orm";
 import * as path from "path";
 import * as fs from "fs";
 import { buildManifest, computeStats } from "@/lib/hf-datasets/manifest";
+import { requireAuth } from "@/lib/auth/server";
+import { requirePathAccess } from "@/lib/auth/ownership";
 
 /**
  * POST /api/datasets/import-local - Import a local directory as a dataset
  */
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const body = await request.json();
     const { localPath, name } = body as {
       localPath: string;
@@ -24,6 +31,11 @@ export async function POST(request: NextRequest) {
 
     // Resolve and validate path
     const resolvedPath = path.resolve(localPath);
+    const access = await requirePathAccess(request, resolvedPath);
+    if (access instanceof NextResponse) {
+      return access;
+    }
+
     if (!fs.existsSync(resolvedPath)) {
       return NextResponse.json({ error: "Path does not exist" }, { status: 400 });
     }
@@ -49,6 +61,7 @@ export async function POST(request: NextRequest) {
 
     await db.insert(hfDatasets).values({
       id,
+      ownerUserId: auth.user.id,
       name: displayName,
       repoId: resolvedPath,
       repoType: "dataset",

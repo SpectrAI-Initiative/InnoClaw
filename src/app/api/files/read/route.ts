@@ -1,24 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "@/lib/files/filesystem";
+import { requirePathAccess } from "@/lib/auth/ownership";
+import { jsonException, requiredSearchParam } from "@/lib/api-errors";
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const filePath = searchParams.get("path");
+    const filePath = requiredSearchParam(request, "path", "Missing path parameter");
+    if (filePath instanceof NextResponse) {
+      return filePath;
+    }
 
-    if (!filePath) {
-      return NextResponse.json(
-        { error: "Missing path parameter" },
-        { status: 400 }
-      );
+    const access = await requirePathAccess(request, filePath);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const content = await readFile(filePath);
     return NextResponse.json({ content });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to read file";
-    const status = message.includes("Access denied") ? 403 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return jsonException(error, "Failed to read file");
   }
 }

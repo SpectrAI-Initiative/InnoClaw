@@ -3,32 +3,25 @@ import { db } from "@/lib/db";
 import { hfDatasets } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { cancelDownload, removeProgress } from "@/lib/hf-datasets/progress";
+import { requireDatasetAccess } from "@/lib/auth/ownership";
+import { jsonError, jsonException } from "@/lib/api-errors";
 
 type RouteParams = { params: Promise<{ datasetId: string }> };
 
 /**
  * POST /api/datasets/[datasetId]/cancel - Cancel an in-progress or paused download
  */
-export async function POST(_request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { datasetId } = await params;
-
-    const rows = await db
-      .select()
-      .from(hfDatasets)
-      .where(eq(hfDatasets.id, datasetId))
-      .limit(1);
-
-    if (rows.length === 0) {
-      return NextResponse.json({ error: "Dataset not found" }, { status: 404 });
+    const access = await requireDatasetAccess(request, datasetId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
-    const status = rows[0].status;
+    const status = access.dataset.status;
     if (status !== "downloading" && status !== "pending" && status !== "paused") {
-      return NextResponse.json(
-        { error: "Dataset is not in a cancellable state" },
-        { status: 400 }
-      );
+      return jsonError("Dataset is not in a cancellable state", 400);
     }
 
     // Try to abort if actively downloading
@@ -46,7 +39,6 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to cancel download";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to cancel download");
   }
 }

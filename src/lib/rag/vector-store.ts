@@ -10,24 +10,28 @@ import { eq } from "drizzle-orm";
 
 // In-memory cache of embeddings: chunkId -> number[]
 const embeddingCache = new Map<string, number[]>();
+let vectorTableInitialized = false;
 
 // Initialize the embeddings table
-function initializeVectorTable() {
+function ensureVectorTable() {
+  if (vectorTableInitialized) {
+    return;
+  }
+
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS chunk_embeddings (
       chunk_id TEXT PRIMARY KEY,
       embedding BLOB NOT NULL
     )
   `);
+  vectorTableInitialized = true;
 }
-
-// Ensure table exists
-initializeVectorTable();
 
 /**
  * Store an embedding for a chunk
  */
 export function insertEmbedding(chunkId: string, embedding: number[]): void {
+  ensureVectorTable();
   const buffer = Buffer.from(new Float32Array(embedding).buffer);
 
   sqlite
@@ -45,6 +49,7 @@ export function insertEmbedding(chunkId: string, embedding: number[]): void {
 export function insertEmbeddings(
   items: { chunkId: string; embedding: number[] }[]
 ): void {
+  ensureVectorTable();
   const stmt = sqlite.prepare(
     "INSERT OR REPLACE INTO chunk_embeddings (chunk_id, embedding) VALUES (?, ?)"
   );
@@ -67,6 +72,7 @@ export function insertEmbeddings(
  */
 export function deleteEmbeddings(chunkIds: string[]): void {
   if (chunkIds.length === 0) return;
+  ensureVectorTable();
 
   const placeholders = chunkIds.map(() => "?").join(",");
   sqlite
@@ -115,6 +121,7 @@ function cosineSimilarity(a: number[], b: number[]): number {
  * Load an embedding from DB or cache
  */
 function loadEmbedding(chunkId: string): number[] | null {
+  ensureVectorTable();
   if (embeddingCache.has(chunkId)) {
     return embeddingCache.get(chunkId)!;
   }

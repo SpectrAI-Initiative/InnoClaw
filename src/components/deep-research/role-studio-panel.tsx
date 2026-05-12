@@ -22,6 +22,7 @@ interface RoleStudioPanelProps {
   artifacts: DeepResearchArtifact[];
   selectedNode: DeepResearchNode | null;
   resolvedModel?: { provider: string; modelId: string } | null;
+  modelOverrides?: Partial<Record<ModelRole, { provider: string; modelId: string }>> | null;
   onSelectRoleNode?: (nodeId: string) => void;
   onSendMessage: (
     content: string,
@@ -61,6 +62,7 @@ export function RoleStudioPanel({
   artifacts,
   selectedNode,
   resolvedModel,
+  modelOverrides,
   onSelectRoleNode,
   onSendMessage,
 }: RoleStudioPanelProps) {
@@ -84,9 +86,12 @@ export function RoleStudioPanel({
         .find((node) => node.assignedRole === activeRoleId && typeof node.assignedModel === "string" && node.assignedModel.length > 0) ?? null,
     [activeRoleId, nodes],
   );
-  const activeRoleModel = resolvedModel
-    ? `${resolvedModel.provider}/${resolvedModel.modelId}`
-    : latestRoleRuntimeNode?.assignedModel ?? null;
+  const activeRoleOverride = modelOverrides?.[activeRoleId];
+  const activeRoleModel = activeRoleOverride
+    ? `${activeRoleOverride.provider}/${activeRoleOverride.modelId}`
+    : resolvedModel
+      ? `${resolvedModel.provider}/${resolvedModel.modelId}`
+      : latestRoleRuntimeNode?.assignedModel ?? null;
 
   if (!activeRole) {
     return (
@@ -185,7 +190,7 @@ export function RoleStudioPanel({
                 </Badge>
                 {activeRoleModel && (
                   <Badge variant="outline" className="text-[10px] font-mono">
-                    Model: {activeRoleModel}
+                    Model: {activeRoleModel}{activeRoleOverride ? " (Override)" : ""}
                   </Badge>
                 )}
               </div>

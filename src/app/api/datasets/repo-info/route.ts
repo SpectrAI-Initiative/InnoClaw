@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRepoInfo } from "@/lib/hf-datasets/metadata";
 import type { HfRepoType } from "@/types";
+import { requireAuth } from "@/lib/auth/server";
 
 const VALID_REPO_TYPES = new Set(["dataset", "model", "space"]);
 
@@ -10,6 +11,11 @@ const VALID_REPO_TYPES = new Set(["dataset", "model", "space"]);
  */
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const { searchParams } = new URL(request.url);
     const repoId = searchParams.get("repoId");
     const repoTypeParam = searchParams.get("repoType") || "dataset";

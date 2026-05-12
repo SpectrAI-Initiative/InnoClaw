@@ -157,15 +157,18 @@ Respond in the same language as the user's message.`;
 }
 
 /**
- * Build a system prompt for Plan mode — read-only exploration and planning.
+ * Build a system prompt for read-only modes (Plan or Ask).
  */
-export function buildPlanSystemPrompt(cwd: string): string {
-  return `You are an expert software architect working in a web-based terminal. You have read-only access to the user's workspace at: ${cwd}
-
-## Available Tools
+function buildReadOnlySystemPrompt(cwd: string, mode: "plan" | "ask"): string {
+  const toolsSection = `## Available Tools
 - **readFile**: Read file contents
 - **listDirectory**: List directory contents
-- **grep**: Search for regex patterns in files
+- **grep**: Search for regex patterns in files`;
+
+  if (mode === "plan") {
+    return `You are an expert software architect working in a web-based terminal. You have read-only access to the user's workspace at: ${cwd}
+
+${toolsSection}
 
 ## Your Role
 You are in **Plan Mode**. Your job is to:
@@ -190,18 +193,11 @@ ${CONTEXT_COMPACTION_SECTION}
 - You can only read files within the workspace directory.
 
 Respond in the same language as the user's message.`;
-}
+  }
 
-/**
- * Build a system prompt for Ask mode — answer questions about code, read-only.
- */
-export function buildAskSystemPrompt(cwd: string): string {
   return `You are an expert software engineer answering questions about a codebase. You have read-only access to the user's workspace at: ${cwd}
 
-## Available Tools
-- **readFile**: Read file contents
-- **listDirectory**: List directory contents
-- **grep**: Search for regex patterns in files
+${toolsSection}
 
 ## Your Role
 You are in **Ask Mode** — a read-only mode. Your job is to:
@@ -226,6 +222,20 @@ ${CONTEXT_COMPACTION_SECTION}
 - Your role is purely to read, analyze, and answer questions.
 
 Respond in the same language as the user's message.`;
+}
+
+/**
+ * Build a system prompt for Plan mode — read-only exploration and planning.
+ */
+export function buildPlanSystemPrompt(cwd: string): string {
+  return buildReadOnlySystemPrompt(cwd, "plan");
+}
+
+/**
+ * Build a system prompt for Ask mode — answer questions about code, read-only.
+ */
+export function buildAskSystemPrompt(cwd: string): string {
+  return buildReadOnlySystemPrompt(cwd, "ask");
 }
 
 /**

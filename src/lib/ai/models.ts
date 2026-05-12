@@ -109,6 +109,7 @@ export const PROVIDERS = {
     name: "Qwen",
     models: [
       { id: "Qwen3-235B", name: "Qwen3 235B", contextWindow: 200000, supportsVision: false },
+      { id: "Qwen3.5-122B", name: "Qwen 3.5 122B", contextWindow: 40000, supportsVision: false },
       { id: "qwen3.5-397b", name: "Qwen 3.5 397B", contextWindow: 200000, supportsVision: true },
     ] satisfies ModelDefinition[],
     envKey: "QWEN_API_KEY",

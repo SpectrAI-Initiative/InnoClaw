@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
 import { getConfiguredModelWithProvider, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
-import { createAgentTools } from "@/lib/ai/agent-tools";
+import { createAgentTools } from "@/lib/ai/tools";
 import { buildAgentSystemPrompt, buildAgentLongSystemPrompt, buildPlanSystemPrompt, buildAskSystemPrompt } from "@/lib/ai/prompts";
 import { buildSkillSystemPrompt } from "@/lib/ai/skill-prompt";
 import { runtimeProviderSupportsTools } from "@/lib/ai/runtime-capabilities";
@@ -10,6 +10,7 @@ import { skills } from "@/lib/db/schema";
 import { and, eq, or, isNull } from "drizzle-orm";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 import { ensureProjectDefaultSkills } from "@/lib/db/default-skills";
+import { requirePathAccess, requireSkillAccess, requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,6 +21,14 @@ export async function POST(req: NextRequest) {
 
     if (!workspaceId || !cwd || typeof cwd !== "string") {
       return new Response("Missing workspaceId or cwd", { status: 400 });
+    }
+    const workspaceAccess = await requireWorkspaceAccess(req, workspaceId);
+    if (workspaceAccess instanceof Response) {
+      return workspaceAccess;
+    }
+    const pathAccess = await requirePathAccess(req, cwd);
+    if (pathAccess instanceof Response) {
+      return pathAccess;
     }
 
     // Validate request-level model override fields before use
@@ -59,6 +68,11 @@ export async function POST(req: NextRequest) {
     let tools;
 
     if (skillId) {
+      const skillAccess = await requireSkillAccess(req, skillId);
+      if (skillAccess instanceof Response) {
+        return skillAccess;
+      }
+
       // Skill mode: load skill from DB and use skill-specific prompt + tools
       const skillRows = await db
         .select()
@@ -188,7 +202,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return result.toUIMessageStreamResponse();
+    // Resolve the model ID string for cost tracking on the client side
+    const modelIdStr = typeof model === "string" ? model : model.modelId;
+
+    return result.toUIMessageStreamResponse({
+      headers: {
+        "X-Agent-Model": modelIdStr,
+        "X-Agent-Provider": providerId,
+      },
+    });
   } catch (error) {
     console.error("Agent error:", error);
     return new Response(

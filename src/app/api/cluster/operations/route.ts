@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listClusterOps } from "@/lib/cluster/operations";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 /**
  * GET /api/cluster/operations?workspaceId=xxx&limit=50&offset=0
@@ -16,6 +17,13 @@ export async function GET(request: NextRequest) {
       200
     );
     const offset = Math.max(Number(searchParams.get("offset")) || 0, 0);
+
+    if (workspaceId) {
+      const access = await requireWorkspaceAccess(request, workspaceId);
+      if (access instanceof NextResponse) {
+        return access;
+      }
+    }
 
     const ops = await listClusterOps({ workspaceId, limit, offset });
     return NextResponse.json(ops);

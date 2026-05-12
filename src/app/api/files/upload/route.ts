@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { uploadFile } from "@/lib/files/filesystem";
 import path from "path";
+import { requirePathAccess } from "@/lib/auth/ownership";
+import { jsonError, jsonException } from "@/lib/api-errors";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,10 +11,12 @@ export async function POST(request: NextRequest) {
     const targetDir = formData.get("targetDir") as string | null;
 
     if (!file || !targetDir) {
-      return NextResponse.json(
-        { error: "Missing file or targetDir" },
-        { status: 400 }
-      );
+      return jsonError("Missing file or targetDir", 400);
+    }
+
+    const access = await requirePathAccess(request, targetDir);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -21,9 +25,6 @@ export async function POST(request: NextRequest) {
     await uploadFile(filePath, buffer);
     return NextResponse.json({ success: true, path: filePath });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to upload file";
-    const status = message.includes("Access denied") ? 403 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return jsonException(error, "Failed to upload file");
   }
 }

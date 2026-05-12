@@ -32,28 +32,16 @@ import { getOverflowThresholdChars, getMessageTextLength, getContextWindowChars,
 import type { ProviderId } from "@/lib/ai/models";
 import { SkillAutocomplete } from "@/components/skills/skill-autocomplete";
 import { SkillParameterDialog } from "@/components/skills/skill-parameter-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ParticleEffect, ThinkingIndicator, FloatingOrbs } from "@/components/ui/particle-effect";
 import type { Skill } from "@/types";
 import { swrFetcher as fetcher } from "@/lib/fetcher";
-import {
-  resolveModelSelection,
-  type ModelCatalogEntry,
-  type ProviderModelCatalog,
-} from "@/lib/ai/model-selection";
+import { useModelSelection } from "@/lib/hooks/use-model-selection";
+import { useCostTracking } from "@/lib/hooks/use-cost-tracking";
 import { AgentMessage } from "./agent-message";
+import { CostDisplay } from "./cost-display";
+import { MemoryPanel } from "./memory-panel";
+import { BuddyAvatar } from "./buddy-avatar";
+import { BuddyHatchDialog } from "./buddy-hatch-dialog";
 import { WorkspaceImagePickerDialog } from "./workspace-image-picker-dialog";
 import { toast } from "sonner";
 import {
@@ -63,17 +51,30 @@ import {
 } from "@/lib/ai/message-attachments";
 import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
 import {
+  BUILTIN_COMMANDS,
   getMatchingSkillsForSlashQuery,
   shouldAutocompleteCaptureEnter,
+  type BuiltinCommand,
 } from "./slash-command";
+import { extractMemoryTags } from "@/lib/agent/kairos-memory";
+import {
+  buildOverflowCompactionPlan,
+  excludeKeptMessages,
+  getRenderableMessages,
+  requestConversationSummaryPreview,
+  saveConversationMemoryNote,
+} from "@/lib/agent/conversation-compaction";
+import { getMessageText } from "./message-utils";
+import { useDraggableDialog, ResizeHandles } from "./use-draggable-dialog";
 import { getWorkspaceImageMimeType } from "./workspace-image-picker-utils";
 import { focusAgentInputAfterDialogClose } from "./workspace-image-picker-utils";
+import {
+  ConversationMemoryPreviewDialog,
+  ConversationMessageSelectionDialog,
+} from "@/components/conversation/conversation-compaction-dialogs";
 
 type AgentMode = "long-agent" | "agent" | "plan" | "ask";
 type ModelSelection = { provider: string; model: string };
-type AgentModelOptionsKey = readonly ["agent-model-options", ...ProviderId[]];
-type ModelOption = ModelCatalogEntry;
-type ProviderOption = ProviderModelCatalog;
 
 /** Pixel threshold for considering the user "at the bottom" of the scroll area */
 const BOTTOM_THRESHOLD_PX = 80;
@@ -108,30 +109,6 @@ const MODE_PLACEHOLDER_KEYS: Record<AgentMode, "placeholder" | "placeholderLongA
   ask: "placeholderAsk",
 };
 
-function readStoredModelSelection(storageKey: string): ModelSelection | null {
-  try {
-    if (typeof window === "undefined" || !window.localStorage) {
-      return null;
-    }
-    const stored = window.localStorage.getItem(storageKey);
-    if (!stored) {
-      return null;
-    }
-    const parsed = JSON.parse(stored);
-    if (
-      typeof parsed?.provider === "string" &&
-      parsed.provider &&
-      typeof parsed?.model === "string" &&
-      parsed.model
-    ) {
-      return { provider: parsed.provider, model: parsed.model };
-    }
-  } catch {
-    // Ignore storage access and parse errors.
-  }
-  return null;
-}
-
 // --- Main Panel ---
 
 interface AgentPanelProps {
@@ -161,11 +138,6 @@ export function AgentPanel({
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<FileUIPart[]>([]);
   const [mode, setMode] = useState<AgentMode>("agent");
-  const [userSelection, setUserSelection] = useState<ModelSelection | null>(
-    () => readStoredModelSelection("innoclaw-agent-model-selection")
-  );
-
-  const MODEL_SELECTION_STORAGE_KEY = "innoclaw-agent-model-selection";
 
   // Draggable input area height
   const [inputHeight, setInputHeight] = useState(80);
@@ -205,6 +177,14 @@ export function AgentPanel({
   const summarizingRef = useRef(false);
   const failedAtCountRef = useRef(-1);
 
+  // Memory panel state
+  const [showMemoryPanel, setShowMemoryPanel] = useState(false);
+  const [showCostDisplay, setShowCostDisplay] = useState(true);
+
+  // Buddy companion state
+  const [showBuddyHatch, setShowBuddyHatch] = useState(false);
+  const [buddyKey, setBuddyKey] = useState(0);
+
   // Memory preview dialog state
   const [showMessageSelect, setShowMessageSelect] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
@@ -222,84 +202,10 @@ export function AgentPanel({
   // Track overflow-triggered dialog: stores messages to keep after memory save
   const overflowKeepRef = useRef<UIMessage[] | null>(null);
 
-  // Draggable + resizable dialog state
-  const [dialogPos, setDialogPos] = useState({ x: 0, y: 0 });
-  const [dialogSize, setDialogSize] = useState({ width: 512, height: 520 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [resizeEdge, setResizeEdge] = useState<string | null>(null);
-  const dragStartRef = useRef({ mouseX: 0, mouseY: 0, posX: 0, posY: 0 });
-  const resizeStartRef = useRef({ mouseX: 0, mouseY: 0, w: 0, h: 0, posX: 0, posY: 0 });
-
-  // Reset dialog position/size when opened
-  useEffect(() => {
-    if (showMemoryPreview) {
-      setDialogPos({ x: 0, y: 0 });
-      setDialogSize({ width: 512, height: 520 });
-    }
-  }, [showMemoryPreview]);
-
-  // Global pointer listeners for dragging
-  useEffect(() => {
-    if (!isDragging) return;
-    const onMove = (e: PointerEvent) => {
-      const s = dragStartRef.current;
-      setDialogPos({ x: s.posX + e.clientX - s.mouseX, y: s.posY + e.clientY - s.mouseY });
-    };
-    const onUp = () => setIsDragging(false);
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-  }, [isDragging]);
-
-  // Global pointer listeners for resizing (all edges/corners)
-  useEffect(() => {
-    if (!resizeEdge) return;
-    const onMove = (e: PointerEvent) => {
-      const s = resizeStartRef.current;
-      const dx = e.clientX - s.mouseX;
-      const dy = e.clientY - s.mouseY;
-      let newW = s.w, newH = s.h, newX = s.posX, newY = s.posY;
-
-      if (resizeEdge.includes("e")) newW = s.w + dx;
-      if (resizeEdge.includes("w")) { newW = s.w - dx; newX = s.posX + dx; }
-      if (resizeEdge.includes("s")) newH = s.h + dy;
-      if (resizeEdge.includes("n")) { newH = s.h - dy; newY = s.posY + dy; }
-
-      // Enforce minimums and clamp position
-      if (newW < 360) { newW = 360; if (resizeEdge.includes("w")) newX = s.posX + s.w - 360; }
-      if (newH < 300) { newH = 300; if (resizeEdge.includes("n")) newY = s.posY + s.h - 300; }
-
-      setDialogSize({ width: newW, height: newH });
-      setDialogPos({ x: newX, y: newY });
-    };
-    const onUp = () => setResizeEdge(null);
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-  }, [resizeEdge]);
-
-  const onDragStart = useCallback((e: React.PointerEvent) => {
-    // Don't drag when clicking close button or inputs
-    if ((e.target as HTMLElement).closest("button")) return;
-    dragStartRef.current = { mouseX: e.clientX, mouseY: e.clientY, posX: dialogPos.x, posY: dialogPos.y };
-    setIsDragging(true);
-  }, [dialogPos]);
-
-  const onEdgeResizeStart = useCallback((e: React.PointerEvent, edge: string) => {
-    e.stopPropagation();
-    resizeStartRef.current = {
-      mouseX: e.clientX, mouseY: e.clientY,
-      w: dialogSize.width, h: dialogSize.height,
-      posX: dialogPos.x, posY: dialogPos.y,
-    };
-    setResizeEdge(edge);
-  }, [dialogSize, dialogPos]);
+  // Shared draggable + resizable dialog (message-select and memory-preview are mutually exclusive)
+  const { dialogStyle, onDragStart, onEdgeResizeStart } = useDraggableDialog({
+    open: showMessageSelect || showMemoryPreview,
+  });
 
   const { data: settings } = useSWR("/api/settings", fetcher);
   const aiEnabled = settings?.hasAIKey ?? false;
@@ -310,54 +216,6 @@ export function AgentPanel({
     return configured.filter((id): id is ProviderId => Boolean(PROVIDERS[id as ProviderId]));
   }, [settings?.configuredProviders]);
 
-  const modelOptionsKey = useMemo<AgentModelOptionsKey | null>(() => {
-    if (configuredProviderIds.length === 0) {
-      return null;
-    }
-    return ["agent-model-options", ...configuredProviderIds];
-  }, [configuredProviderIds]);
-
-  const { data: discoveredModelsByProvider, mutate: refreshDiscoveredModels } = useSWR<
-    Record<string, ModelOption[]>
-  >(
-    modelOptionsKey,
-    async (key: AgentModelOptionsKey) => {
-      const [, ...providerIds] = key;
-      const entries = await Promise.all(
-        providerIds.map(async (providerId) => {
-          try {
-            const response = await fetch(`/api/models?provider=${encodeURIComponent(providerId)}`);
-            const data = await response.json().catch(() => ({}));
-            return [providerId, Array.isArray(data.models) ? data.models : []] as const;
-          } catch {
-            return [providerId, []] as const;
-          }
-        }),
-      );
-      return Object.fromEntries(entries);
-    },
-  );
-
-  const availableProviders = useMemo<ProviderOption[]>(() => {
-    const providers: ProviderOption[] = [];
-    for (const id of configuredProviderIds) {
-      const provider = PROVIDERS[id];
-      if (!provider) continue;
-
-      const knownIds = new Set(provider.models.map((model) => model.id));
-      const extraModels = (discoveredModelsByProvider?.[id] ?? []).filter(
-        (model) => !knownIds.has(model.id),
-      );
-
-      providers.push({
-        id: provider.id,
-        name: provider.name,
-        models: [...provider.models, ...extraModels],
-      });
-    }
-    return providers;
-  }, [configuredProviderIds, discoveredModelsByProvider]);
-
   const settingsFallback = useMemo<ModelSelection | null>(() => {
     if (!settings?.llmProvider || !settings?.llmModel) return null;
     if (
@@ -366,98 +224,24 @@ export function AgentPanel({
     ) {
       return null;
     }
-    return {
-      provider: settings.llmProvider as string,
-      model: settings.llmModel as string,
-    };
+    return { provider: settings.llmProvider as string, model: settings.llmModel as string };
   }, [configuredProviderIds, settings?.llmModel, settings?.llmProvider]);
 
-  const resolvedSelection = useMemo(() => {
-    const selection = userSelection ?? settingsFallback;
-    const unmatchedKind =
-      selection && (discoveredModelsByProvider?.[selection.provider]?.length ?? 0) > 0
-        ? "not-found"
-        : "custom";
-    return resolveModelSelection(selection, availableProviders, { unmatchedKind });
-  }, [availableProviders, discoveredModelsByProvider, settingsFallback, userSelection]);
-
-  const canonicalSelection = useMemo<ModelSelection | null>(() => (
-    resolvedSelection
-      ? { provider: resolvedSelection.provider, model: resolvedSelection.resolvedModel }
-      : null
-  ), [resolvedSelection]);
-
-  useEffect(() => {
-    if (!userSelection) return;
-
-    const providerStillConfigured =
-      configuredProviderIds.length === 0 ||
-      configuredProviderIds.includes(userSelection.provider as ProviderId);
-    const providerExists = Boolean(PROVIDERS[userSelection.provider as ProviderId]);
-
-    if (providerExists && providerStillConfigured) {
-      return;
-    }
-
-    setUserSelection(null);
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.removeItem(MODEL_SELECTION_STORAGE_KEY);
-      }
-    } catch {
-      // Ignore storage access errors.
-    }
-  }, [configuredProviderIds, userSelection]);
-
-  useEffect(() => {
-    if (!userSelection || !canonicalSelection) return;
-    if (
-      canonicalSelection.provider === userSelection.provider &&
-      canonicalSelection.model === userSelection.model
-    ) {
-      return;
-    }
-
-    setUserSelection(canonicalSelection);
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.setItem(
-          MODEL_SELECTION_STORAGE_KEY,
-          JSON.stringify(canonicalSelection),
-        );
-      }
-    } catch {
-      // Ignore storage access errors.
-    }
-  }, [MODEL_SELECTION_STORAGE_KEY, canonicalSelection, userSelection]);
-
-  const selectedProvider = canonicalSelection?.provider ?? null;
-  const selectedModel = canonicalSelection?.model ?? null;
-
-  const handleModelChange = useCallback((providerId: string, modelId: string) => {
-    setUserSelection({ provider: providerId, model: modelId });
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.setItem(
-          MODEL_SELECTION_STORAGE_KEY,
-          JSON.stringify({ provider: providerId, model: modelId })
-        );
-      }
-    } catch {
-      // Ignore storage access errors; state has already been updated
-    }
-  }, []);
-
-  const modelDisplayName = useMemo(() => {
-    return resolvedSelection?.displayName ?? t("modelLabel");
-  }, [resolvedSelection, t]);
-
-  const selectedSupportsVision = useMemo(() => {
-    if (!selectedProvider || !selectedModel || resolvedSelection?.matchKind === "unmatched") {
-      return null;
-    }
-    return modelSupportsVision(selectedProvider, selectedModel);
-  }, [resolvedSelection?.matchKind, selectedProvider, selectedModel]);
+  const {
+    selectedProvider,
+    selectedModel,
+    modelDisplayName,
+    resolvedSelection,
+    availableProviders,
+    selectedSupportsVision,
+    handleModelChange,
+    refreshDiscoveredModels,
+  } = useModelSelection({
+    storageKey: "innoclaw-agent-model-selection",
+    configuredProviderIds,
+    settingsFallback,
+    fallbackDisplayName: t("modelLabel"),
+  });
 
   // Mutable body object — allows injecting skillId/paramValues before each send
   const agentBody = useMemo(
@@ -808,6 +592,49 @@ export function AgentPanel({
     [totalMessageChars, contextWindowChars]
   );
 
+  const { costSnapshot } = useCostTracking({
+    storageKey: `agent-cost:${workspaceId}:${sessionId}`,
+    messages,
+    status,
+    resolvedModel,
+  });
+
+  // Extract <memory> tags from assistant messages and save to daily log
+  const lastMemoryExtractRef = useRef(0);
+  useEffect(() => {
+    if (status !== "ready") return;
+    if (messages.length <= lastMemoryExtractRef.current) {
+      lastMemoryExtractRef.current = messages.length;
+      return;
+    }
+    const newMessages = messages.slice(lastMemoryExtractRef.current);
+    lastMemoryExtractRef.current = messages.length;
+
+    for (const msg of newMessages) {
+      if (msg.role !== "assistant") continue;
+      const text = getMessageText(msg);
+      const memories = extractMemoryTags(text);
+      for (const mem of memories) {
+        fetch("/api/agent/memory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspaceId, action: "remember", text: mem }),
+        }).catch(() => { /* best-effort */ });
+      }
+    }
+  }, [messages, status, workspaceId]);
+
+  // Last assistant message text for buddy reactions
+  const lastAssistantMessage = useMemo(() => {
+    if (status === "streaming" || status === "submitted") return undefined;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant") {
+        return getMessageText(messages[i]) || undefined;
+      }
+    }
+    return undefined;
+  }, [messages, status]);
+
   const summarizeAndEvict = async (
     messagesToSummarize: UIMessage[],
     messagesToKeep: UIMessage[],
@@ -888,34 +715,13 @@ export function AgentPanel({
     if (restoreGenRef.current > 0 || isSummarizing) return;
     if (showMessageSelect || showMemoryPreview) return; // Don't trigger while dialog is open
     if (status !== "ready" && status !== "error") return;
-    if (messages.length < 4) return;
-    if (messages.length === failedAtCountRef.current) return;
-
-    // Reuse pre-computed totalMessageChars for the early-exit check
-    if (totalMessageChars <= overflowThreshold) return;
-
-    // Need per-message sizes only for split-point calculation
-    const messageSizes = messages.map((m) => getMessageTextLength(m));
-
-    // Find split point: keep newest ~20% by character count
-    let keepFromIndex = messages.length;
-    let accumulatedChars = 0;
-    const targetKeepChars = totalMessageChars * 0.2;
-
-    for (let i = messages.length - 1; i >= 0; i--) {
-      accumulatedChars += messageSizes[i];
-      if (accumulatedChars >= targetKeepChars) {
-        keepFromIndex = i;
-        break;
-      }
-    }
-
-    // Keep at least the last 2 messages
-    keepFromIndex = Math.min(keepFromIndex, messages.length - 2);
-    if (keepFromIndex <= 0) return;
-
-    const toSummarize = messages.slice(0, keepFromIndex);
-    const toKeep = messages.slice(keepFromIndex);
+    const plan = buildOverflowCompactionPlan({
+      messages,
+      overflowThreshold,
+      failedAtCount: failedAtCountRef.current,
+    });
+    if (!plan) return;
+    const { toSummarize, toKeep } = plan;
 
     // In long-agent mode, auto-summarize without user interaction to keep the pipeline flowing
     if (mode === "long-agent") {
@@ -926,9 +732,7 @@ export function AgentPanel({
     // Show message selection dialog instead of auto-summarizing
     overflowKeepRef.current = toKeep;
     // Only pre-select messages with renderable text content
-    setSelectedMessageIds(new Set(
-      toSummarize.filter((m) => getMessageTextLength(m) > 0).map((m) => m.id)
-    ));
+    setSelectedMessageIds(new Set(getRenderableMessages(toSummarize).map((message) => message.id)));
     setShowMessageSelect(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, status, isSummarizing, showMessageSelect, showMemoryPreview]);
@@ -1006,6 +810,54 @@ export function AgentPanel({
     }
   };
 
+  const handleBuiltinCommand = (command: BuiltinCommand, args?: string) => {
+    setShowAutocomplete(false);
+    setInput("");
+    switch (command.slug) {
+      case "compact":
+        if (messages.length >= 4) {
+          const keepCount = Math.max(2, Math.floor(messages.length * 0.3));
+          const toSummarize = messages.slice(0, messages.length - keepCount);
+          const toKeep = messages.slice(messages.length - keepCount);
+          summarizeAndEvict(toSummarize, toKeep, "overflow");
+        } else {
+          toast.info("Not enough messages to compact");
+        }
+        break;
+      case "cost":
+        setShowCostDisplay((prev) => !prev);
+        break;
+      case "memory":
+        setShowMemoryPanel(true);
+        break;
+      case "remember":
+        if (args) {
+          fetch("/api/agent/memory", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ workspaceId, action: "remember", text: args }),
+          }).then((res) => {
+            if (res.ok) toast.success("Memory saved");
+            else toast.error("Failed to save memory");
+          }).catch(() => toast.error("Failed to save memory"));
+        } else {
+          setInput("/remember ");
+        }
+        break;
+      case "dream":
+        toast.info("Starting dream consolidation...");
+        fetch("/api/agent/memory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspaceId, action: "dream" }),
+        }).then((res) => {
+          if (res.ok) toast.success("Dream consolidation complete");
+          else toast.error("Dream consolidation failed");
+        }).catch(() => toast.error("Dream consolidation failed"));
+        break;
+    }
+  };
+
   // Execute skill after params are collected
   const executeSkill = async (
     skill: Skill,
@@ -1054,6 +906,18 @@ export function AgentPanel({
       return;
     }
     userScrolledUp.current = false;
+
+    // Handle built-in slash commands before skill matching
+    if (text.startsWith("/")) {
+      const parts = text.slice(1).split(/\s+/);
+      const cmd = parts[0].toLowerCase();
+      const args = parts.slice(1).join(" ");
+      const builtinMatch = BUILTIN_COMMANDS.find((c) => c.slug === cmd);
+      if (builtinMatch) {
+        handleBuiltinCommand(builtinMatch, args);
+        return;
+      }
+    }
 
     // Check if input matches a skill slug
     if (text.startsWith("/")) {
@@ -1164,16 +1028,9 @@ export function AgentPanel({
     }, 100);
   };
 
-  // Helper: extract plain text from a message
-  const getMessageText = (message: UIMessage) =>
-    message.parts
-      ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-      .map((p) => p.text)
-      .join("") ?? "";
-
   // Messages that have renderable text content (used for selection UI)
   const selectableMessages = useMemo(
-    () => messages.filter((m) => getMessageTextLength(m) > 0),
+    () => getRenderableMessages(messages),
     [messages]
   );
 
@@ -1201,24 +1058,14 @@ export function AgentPanel({
     setIsSummarizing(true);
     setSummaryError(null);
     try {
-      const res = await fetch("/api/agent/summarize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workspaceId,
-          messages: selected,
-          trigger: overflowKeepRef.current ? "overflow" : "clear",
-          preview: true,
-          compact: true,
-          locale,
-          sessionName,
-        }),
+      const data = await requestConversationSummaryPreview({
+        workspaceId,
+        messages: selected,
+        trigger: overflowKeepRef.current ? "overflow" : "clear",
+        compact: true,
+        locale,
+        sessionName,
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({ error: "Summarization failed" }));
-        throw new Error(errData.error || "Summarization failed");
-      }
-      const data = await res.json();
       setMemoryPreviewTitle(data.title);
       setMemoryPreviewContent(data.content);
       setShowMemoryPreview(true);
@@ -1235,9 +1082,7 @@ export function AgentPanel({
     if (overflowKeepRef.current) {
       // User cancelled during overflow — fall back to silent auto-summarize
       const toKeep = overflowKeepRef.current;
-      const toSummarize = messages.filter(
-        (m) => !toKeep.some((k) => k.id === m.id)
-      );
+      const toSummarize = excludeKeptMessages(messages, toKeep);
       overflowKeepRef.current = null;
       summarizeAndEvict(toSummarize, toKeep, "overflow");
     }
@@ -1247,22 +1092,11 @@ export function AgentPanel({
     setShowMemoryPreview(false);
     setIsSummarizing(true);
     try {
-      const res = await fetch("/api/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workspaceId,
-          title: memoryPreviewTitle,
-          content: memoryPreviewContent,
-          type: "memory",
-        }),
+      await saveConversationMemoryNote({
+        workspaceId,
+        title: memoryPreviewTitle,
+        content: memoryPreviewContent,
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        const errorMessage =
-          errData && typeof errData.error === "string" ? errData.error : t("memoryError");
-        throw new Error(errorMessage);
-      }
       if (overflowKeepRef.current) {
         // Overflow: keep recent messages, inject compact summary as context
         const contextSummary = makeContextSummaryMessage(memoryPreviewContent, t("contextCompactedNotice"));
@@ -1286,9 +1120,7 @@ export function AgentPanel({
     if (overflowKeepRef.current) {
       // User cancelled memory preview during overflow — fall back to silent auto-summarize
       const toKeep = overflowKeepRef.current;
-      const toSummarize = messages.filter(
-        (m) => !toKeep.some((k) => k.id === m.id)
-      );
+      const toSummarize = excludeKeptMessages(messages, toKeep);
       overflowKeepRef.current = null;
       summarizeAndEvict(toSummarize, toKeep, "overflow");
     }
@@ -1347,11 +1179,7 @@ export function AgentPanel({
             messages.map((message) => {
               // Filter out auto-continue messages (user messages with only "Continue" / "继续")
               if (message.role === "user") {
-                const text = message.parts
-                  ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-                  .map((p) => p.text)
-                  .join("")
-                  .trim();
+                const text = getMessageText(message).trim();
                 if (text === "Continue" || text === "继续") return null;
               }
               return <AgentMessage key={message.id} message={message} />;
@@ -1425,6 +1253,7 @@ export function AgentPanel({
             query={slashQuery}
             skills={availableSkills}
             onSelect={handleSkillSelect}
+            onBuiltinSelect={handleBuiltinCommand}
             onClose={() => setShowAutocomplete(false)}
           />
         )}
@@ -1581,6 +1410,15 @@ export function AgentPanel({
             autoFocus
           />
           <div className="flex items-center gap-1 shrink-0 mt-1">
+            {/* Buddy avatar */}
+            <BuddyAvatar
+              key={buddyKey}
+              workspaceId={workspaceId}
+              lastAssistantMessage={lastAssistantMessage}
+              onHatchRequest={() => setShowBuddyHatch(true)}
+            />
+            {/* Cost display */}
+            {showCostDisplay && <CostDisplay snapshot={costSnapshot} />}
             {/* Context usage percentage */}
             {messages.length > 0 && (
               <span
@@ -1628,6 +1466,20 @@ export function AgentPanel({
         }
       />
 
+      {/* KAIROS Memory panel */}
+      <MemoryPanel
+        open={showMemoryPanel}
+        onOpenChange={setShowMemoryPanel}
+        workspaceId={workspaceId}
+      />
+
+      {/* Buddy hatch dialog */}
+      <BuddyHatchDialog
+        open={showBuddyHatch}
+        onOpenChange={setShowBuddyHatch}
+        onHatched={() => setBuddyKey((k) => k + 1)}
+      />
+
       {/* Skill parameter dialog */}
       {activeSkill && (
         <SkillParameterDialog
@@ -1641,192 +1493,70 @@ export function AgentPanel({
         />
       )}
 
-      {/* Message selection dialog */}
-      <Dialog open={showMessageSelect} onOpenChange={(open) => {
-        if (!open) handleSelectCancel();
-      }}>
-        <DialogContent
-          className="flex flex-col !p-0 overflow-hidden"
-          style={{
-            width: dialogSize.width,
-            height: dialogSize.height,
-            maxWidth: "none",
-            maxHeight: "none",
-            transform: `translate(calc(-50% + ${dialogPos.x}px), calc(-50% + ${dialogPos.y}px))`,
-          }}
-        >
-          <DialogHeader
-            className="cursor-move select-none px-6 pt-6 pb-2"
-            onPointerDown={onDragStart}
-          >
-            <DialogTitle>{t("selectMessagesTitle")}</DialogTitle>
-            <DialogDescription>{t("selectMessagesDesc")}</DialogDescription>
-          </DialogHeader>
+      <ConversationMessageSelectionDialog
+        open={showMessageSelect}
+        onCancel={handleSelectCancel}
+        messages={messages}
+        selectedMessageIds={selectedMessageIds}
+        getMessageText={getMessageText}
+        onToggleMessage={toggleMessage}
+        onSelectAll={() => setSelectedMessageIds(new Set(selectableMessages.map((m) => m.id)))}
+        onSelectNone={() => setSelectedMessageIds(new Set())}
+        onConfirm={handleSelectNext}
+        onClearAll={() => {
+          setShowMessageSelect(false);
+          setSelectedMessageIds(new Set());
+          setMessages([]);
+        }}
+        labels={{
+          title: t("selectMessagesTitle"),
+          description: t("selectMessagesDesc"),
+          roleUser: t("roleUser"),
+          roleAssistant: t("roleAssistant"),
+          selectAll: t("selectAll"),
+          selectNone: t("selectNone"),
+          cancel: tCommon("cancel"),
+          clearAll: t("clearAll"),
+          confirm: t("nextStep"),
+        }}
+        selectedCount={selectedMessageIds.size}
+        totalCount={selectableMessages.length}
+        showCount
+        variant="terminal"
+        className="flex flex-col !p-0 overflow-hidden"
+        style={dialogStyle}
+        headerClassName="cursor-move select-none px-6 pt-6 pb-2"
+        footerClassName="px-6 pb-6 pt-2"
+        scrollAreaClassName="flex-1 min-h-0 px-6"
+        onHeaderPointerDown={onDragStart}
+        footerExtra={<ResizeHandles onEdgeResizeStart={onEdgeResizeStart} />}
+      />
 
-          <div className="flex items-center gap-3 px-6 pb-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedMessageIds(new Set(selectableMessages.map((m) => m.id)))}
-            >
-              {t("selectAll")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedMessageIds(new Set())}
-            >
-              {t("selectNone")}
-            </Button>
-            <span className="text-xs text-muted-foreground ml-auto">
-              {selectedMessageIds.size} / {selectableMessages.length}
-            </span>
-          </div>
-
-          <ScrollArea className="flex-1 min-h-0 px-6">
-            <div className="space-y-2 py-2 pr-4" role="listbox" aria-multiselectable="true">
-              {messages.map((msg) => {
-                const text = getMessageText(msg);
-                if (!text) return null;
-                const checked = selectedMessageIds.has(msg.id);
-                return (
-                  <div
-                    key={msg.id}
-                    role="option"
-                    aria-selected={checked}
-                    tabIndex={0}
-                    className={`flex items-start gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
-                      checked
-                        ? "border-[#7aa2f7]/50 bg-[#7aa2f7]/5"
-                        : "border-[#30363d] hover:border-[#484f58]"
-                    }`}
-                    onClick={() => toggleMessage(msg.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        toggleMessage(msg.id);
-                      }
-                    }}
-                  >
-                    <Checkbox
-                      checked={checked}
-                      onCheckedChange={() => toggleMessage(msg.id)}
-                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                      className="mt-0.5 shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span className={`text-xs font-medium ${
-                        msg.role === "user" ? "text-[#bb9af7]" : "text-[#7aa2f7]"
-                      }`}>
-                        {msg.role === "user" ? t("roleUser") : t("roleAssistant")}
-                      </span>
-                      <p className="text-xs text-[#c9d1d9] line-clamp-3 mt-0.5 whitespace-pre-wrap">
-                        {text}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </ScrollArea>
-
-          <DialogFooter className="px-6 pb-6 pt-2">
-            <Button variant="outline" onClick={handleSelectCancel}>
-              {tCommon("cancel")}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                setShowMessageSelect(false);
-                setSelectedMessageIds(new Set());
-                setMessages([]);
-              }}
-            >
-              {t("clearAll")}
-            </Button>
-            <Button onClick={handleSelectNext} disabled={selectedMessageIds.size === 0}>
-              {t("nextStep")}
-            </Button>
-          </DialogFooter>
-
-          {/* Edge resize handles */}
-          <div className="absolute top-0 left-3 right-3 h-1.5 cursor-n-resize" onPointerDown={(e) => onEdgeResizeStart(e, "n")} />
-          <div className="absolute bottom-0 left-3 right-3 h-1.5 cursor-s-resize" onPointerDown={(e) => onEdgeResizeStart(e, "s")} />
-          <div className="absolute left-0 top-3 bottom-3 w-1.5 cursor-w-resize" onPointerDown={(e) => onEdgeResizeStart(e, "w")} />
-          <div className="absolute right-0 top-3 bottom-3 w-1.5 cursor-e-resize" onPointerDown={(e) => onEdgeResizeStart(e, "e")} />
-          {/* Corner resize handles */}
-          <div className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "nw")} />
-          <div className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize" onPointerDown={(e) => onEdgeResizeStart(e, "ne")} />
-          <div className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "sw")} />
-          <div className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize" onPointerDown={(e) => onEdgeResizeStart(e, "se")} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Memory preview dialog */}
-      <Dialog open={showMemoryPreview} onOpenChange={(open) => {
-        if (!open) handleMemoryCancel();
-      }}>
-        <DialogContent
-          className="flex flex-col !p-0 overflow-hidden"
-          style={{
-            width: dialogSize.width,
-            height: dialogSize.height,
-            maxWidth: "none",
-            maxHeight: "none",
-            transform: `translate(calc(-50% + ${dialogPos.x}px), calc(-50% + ${dialogPos.y}px))`,
-          }}
-        >
-          {/* Drag handle */}
-          <DialogHeader
-            className="cursor-move select-none px-6 pt-6 pb-2"
-            onPointerDown={onDragStart}
-          >
-            <DialogTitle>{t("memoryPreviewTitle")}</DialogTitle>
-            <DialogDescription>{t("memoryPreviewDesc")}</DialogDescription>
-          </DialogHeader>
-
-          <ScrollArea className="flex-1 min-h-0 px-6">
-            <div className="space-y-4 py-2 pr-4">
-              <div className="space-y-1.5">
-                <Label>{t("memoryNoteTitle")}</Label>
-                <Input
-                  value={memoryPreviewTitle}
-                  onChange={(e) => setMemoryPreviewTitle(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t("memoryNoteContent")}</Label>
-                <Textarea
-                  value={memoryPreviewContent}
-                  onChange={(e) => setMemoryPreviewContent(e.target.value)}
-                  rows={12}
-                  className="font-mono text-xs"
-                />
-              </div>
-            </div>
-          </ScrollArea>
-
-          <DialogFooter className="px-6 pb-6 pt-2">
-            <Button variant="outline" onClick={handleMemoryCancel}>
-              {tCommon("cancel")}
-            </Button>
-            <Button onClick={handleMemoryConfirm} disabled={!memoryPreviewTitle.trim()}>
-              {tCommon("confirm")}
-            </Button>
-          </DialogFooter>
-
-          {/* Edge resize handles */}
-          <div className="absolute top-0 left-3 right-3 h-1.5 cursor-n-resize" onPointerDown={(e) => onEdgeResizeStart(e, "n")} />
-          <div className="absolute bottom-0 left-3 right-3 h-1.5 cursor-s-resize" onPointerDown={(e) => onEdgeResizeStart(e, "s")} />
-          <div className="absolute left-0 top-3 bottom-3 w-1.5 cursor-w-resize" onPointerDown={(e) => onEdgeResizeStart(e, "w")} />
-          <div className="absolute right-0 top-3 bottom-3 w-1.5 cursor-e-resize" onPointerDown={(e) => onEdgeResizeStart(e, "e")} />
-          {/* Corner resize handles */}
-          <div className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "nw")} />
-          <div className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize" onPointerDown={(e) => onEdgeResizeStart(e, "ne")} />
-          <div className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize" onPointerDown={(e) => onEdgeResizeStart(e, "sw")} />
-          <div className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize" onPointerDown={(e) => onEdgeResizeStart(e, "se")} />
-        </DialogContent>
-      </Dialog>
+      <ConversationMemoryPreviewDialog
+        open={showMemoryPreview}
+        onCancel={handleMemoryCancel}
+        titleValue={memoryPreviewTitle}
+        contentValue={memoryPreviewContent}
+        onTitleChange={setMemoryPreviewTitle}
+        onContentChange={setMemoryPreviewContent}
+        onConfirm={handleMemoryConfirm}
+        confirmDisabled={!memoryPreviewTitle.trim()}
+        labels={{
+          title: t("memoryPreviewTitle"),
+          description: t("memoryPreviewDesc"),
+          cancel: tCommon("cancel"),
+          confirm: tCommon("confirm"),
+          memoryTitle: t("memoryNoteTitle"),
+          memoryContent: t("memoryNoteContent"),
+        }}
+        variant="terminal"
+        className="flex flex-col !p-0 overflow-hidden"
+        style={dialogStyle}
+        headerClassName="cursor-move select-none px-6 pt-6 pb-2"
+        footerClassName="px-6 pb-6 pt-2"
+        onHeaderPointerDown={onDragStart}
+        footerExtra={<ResizeHandles onEdgeResizeStart={onEdgeResizeStart} />}
+      />
 
       {/* Particle effects overlay - renders on top of content but allows click-through */}
       <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">

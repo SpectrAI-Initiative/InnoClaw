@@ -1,7 +1,27 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+import {
+  assessDistDirLocking,
+  resolveNextBuildDir,
+} from "./src/lib/dev/project-filesystem";
+
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+const projectDir = __dirname;
+const resolvedBuildDir = resolveNextBuildDir(projectDir, process.env.NEXT_BUILD_DIR);
+const distDirLocking = assessDistDirLocking(projectDir, resolvedBuildDir.distDir);
+
+if (resolvedBuildDir.warning) {
+  console.warn(`[next.config] ${resolvedBuildDir.warning}`);
+}
+
+if (distDirLocking.disableLock) {
+  const mountPoint = distDirLocking.mount?.mountPoint ?? projectDir;
+  console.warn(
+    `[next.config] Detected ${distDirLocking.reason} at ${mountPoint}; disabling Next dist-dir locking so dev/build can run on this mount. SQLite should still use a local DATABASE_URL on network filesystems.`
+  );
+}
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -20,12 +40,18 @@ const serverExternalPackages = [
 const nextConfig: NextConfig = {
   output: "standalone",
   serverExternalPackages,
-  // Allow overriding the .next build directory via env var.
-  // Useful on network/shared filesystems where Turbopack cache persistence fails.
-  ...(process.env.NEXT_BUILD_DIR ? { distDir: process.env.NEXT_BUILD_DIR } : {}),
+  // Keep distDir inside the project root so Turbopack accepts it.
+  ...(resolvedBuildDir.distDir ? { distDir: resolvedBuildDir.distDir } : {}),
+  ...(distDirLocking.disableLock
+    ? {
+        experimental: {
+          lockDistDir: false,
+        },
+      }
+    : {}),
   turbopack: {
     // Set the project root explicitly to avoid lockfile detection issues.
-    root: __dirname,
+    root: projectDir,
   },
   async headers() {
     return [

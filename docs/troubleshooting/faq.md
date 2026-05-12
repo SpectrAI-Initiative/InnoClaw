@@ -115,10 +115,10 @@ SQLite requires a local filesystem for reliable locking. If the project is on NF
 DATABASE_URL=/tmp/innoclaw/innoclaw.db
 ```
 
-Also set `NEXT_BUILD_DIR` to avoid Turbopack cache errors:
+InnoClaw now disables Next's dist-dir lock automatically on lockless network filesystems, so this startup error no longer requires a special `NEXT_BUILD_DIR`. If you still want a different build directory, keep it inside the repo:
 
 ```ini
-NEXT_BUILD_DIR=/tmp/innoclaw-next
+NEXT_BUILD_DIR=.next-local
 ```
 
 ### How do I submit K8s / GPU jobs?

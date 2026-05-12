@@ -1,9 +1,5 @@
-import { extractText, isSupportedFile, normalizeText } from "@/lib/files/text-extractor";
 import { validatePath } from "@/lib/files/filesystem";
-import {
-  fetchRemotePaperContent,
-  type RemotePaperContent,
-} from "@/lib/paper-study/remote-paper-fetcher";
+import type { RemotePaperContent } from "@/lib/paper-study/remote-paper-fetcher";
 import type { PaperArticleRef } from "./article-ref";
 
 /**
@@ -19,6 +15,9 @@ export async function extractPaperFullText(
 ): Promise<string | undefined> {
   if (article.source === "local") {
     try {
+      const { extractText, isSupportedFile, normalizeText } = await import(
+        "@/lib/files/text-extractor"
+      );
       const filePath = validatePath(article.url);
       if (!isSupportedFile(filePath)) return undefined;
 
@@ -34,6 +33,9 @@ export async function extractPaperFullText(
 
   // Remote sources: arXiv, Semantic Scholar, HuggingFace, etc.
   try {
+    const { fetchRemotePaperContent } = await import(
+      "@/lib/paper-study/remote-paper-fetcher"
+    );
     const result = await fetchRemotePaperContent(article, maxChars);
     return result.fullText || undefined;
   } catch {
@@ -51,6 +53,9 @@ export async function extractPaperFullContent(
 ): Promise<RemotePaperContent> {
   if (article.source === "local") {
     try {
+      const { extractText, isSupportedFile, normalizeText } = await import(
+        "@/lib/files/text-extractor"
+      );
       const filePath = validatePath(article.url);
       if (!isSupportedFile(filePath)) {
         return { fullText: "", figures: [], source: "none" };
@@ -69,6 +74,9 @@ export async function extractPaperFullContent(
   }
 
   try {
+    const { fetchRemotePaperContent } = await import(
+      "@/lib/paper-study/remote-paper-fetcher"
+    );
     return await fetchRemotePaperContent(article, maxChars);
   } catch {
     return { fullText: "", figures: [], source: "none" };

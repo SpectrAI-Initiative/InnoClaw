@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createSdkLogger } from "./ws-client";
+import { createSdkLogger, isConstructableWsClient } from "./ws-client";
 
 beforeEach(() => {
   vi.restoreAllMocks();
@@ -99,5 +99,23 @@ describe("createSdkLogger", () => {
     // Should not throw
     logger.info("[ws]", "ws client ready");
     logger.error("[ws]", "connect failed");
+  });
+});
+
+describe("isConstructableWsClient", () => {
+  it("accepts constructor functions", () => {
+    class FakeWsClient {
+      start() {
+        return Promise.resolve();
+      }
+    }
+
+    expect(isConstructableWsClient(FakeWsClient)).toBe(true);
+  });
+
+  it("rejects non-constructors", () => {
+    expect(isConstructableWsClient(undefined)).toBe(false);
+    expect(isConstructableWsClient({})).toBe(false);
+    expect(isConstructableWsClient(() => ({ start: async () => {} }))).toBe(false);
   });
 });

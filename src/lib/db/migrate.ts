@@ -5,6 +5,12 @@ import crypto from "crypto";
 import fs from "fs";
 
 const MIGRATIONS_TABLE = "__drizzle_migrations";
+const MIGRATION_RETRY_ATTEMPTS = 10;
+const MIGRATION_RETRY_DELAY_MS = 500;
+
+const globalForMigrations = globalThis as typeof globalThis & {
+  __innoclawMigrationPromise?: Promise<void>;
+};
 
 function ensureMigrationsTable() {
   sqlite
@@ -88,7 +94,21 @@ function runSqliteMigrations(migrationsFolder: string) {
   }
 }
 
-export function runMigrations() {
+function isSqliteBusy(error: unknown): boolean {
+  if (
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "SQLITE_BUSY"
+  ) {
+    return true;
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("database is locked");
+}
+
+function runMigrationsOnce() {
   const migrationsFolder = path.join(process.cwd(), "drizzle");
   try {
     runSqliteMigrations(migrationsFolder);
@@ -110,4 +130,39 @@ export function runMigrations() {
       throw error;
     }
   }
+}
+
+async function runMigrationsWithRetry() {
+  for (let attempt = 1; attempt <= MIGRATION_RETRY_ATTEMPTS; attempt += 1) {
+    try {
+      runMigrationsOnce();
+      return;
+    } catch (error) {
+      if (!isSqliteBusy(error)) {
+        throw error;
+      }
+
+      if (attempt === MIGRATION_RETRY_ATTEMPTS) {
+        console.warn(
+          "[migrate] Database remained busy during startup. Assuming another worker/process is handling migrations and continuing."
+        );
+        return;
+      }
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, MIGRATION_RETRY_DELAY_MS)
+      );
+    }
+  }
+}
+
+export function runMigrations(): Promise<void> {
+  if (!globalForMigrations.__innoclawMigrationPromise) {
+    globalForMigrations.__innoclawMigrationPromise = runMigrationsWithRetry();
+    globalForMigrations.__innoclawMigrationPromise.catch(() => {
+      globalForMigrations.__innoclawMigrationPromise = undefined;
+    });
+  }
+
+  return globalForMigrations.__innoclawMigrationPromise;
 }

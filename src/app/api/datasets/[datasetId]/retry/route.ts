@@ -6,32 +6,25 @@ import { downloadRepo } from "@/lib/hf-datasets/downloader";
 import { buildManifest, computeStats } from "@/lib/hf-datasets/manifest";
 import { setProgress, markFinished, removeProgress } from "@/lib/hf-datasets/progress";
 import type { HfRepoType, HfDatasetSourceConfig } from "@/types";
+import { requireDatasetAccess } from "@/lib/auth/ownership";
+import { jsonError, jsonException } from "@/lib/api-errors";
 
 type RouteParams = { params: Promise<{ datasetId: string }> };
 
 /**
  * POST /api/datasets/[datasetId]/retry - Retry a failed download
  */
-export async function POST(_request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { datasetId } = await params;
-
-    const rows = await db
-      .select()
-      .from(hfDatasets)
-      .where(eq(hfDatasets.id, datasetId))
-      .limit(1);
-
-    if (rows.length === 0) {
-      return NextResponse.json({ error: "Dataset not found" }, { status: 404 });
+    const access = await requireDatasetAccess(request, datasetId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
-    const dataset = rows[0];
+    const dataset = access.dataset;
     if (dataset.status === "downloading") {
-      return NextResponse.json(
-        { error: "Dataset is already downloading" },
-        { status: 400 }
-      );
+      return jsonError("Dataset is already downloading", 400);
     }
 
     // Reset status
@@ -54,7 +47,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       : null;
 
     if (!dataset.localPath) {
-      return NextResponse.json({ error: "Dataset has no local path" }, { status: 400 });
+      return jsonError("Dataset has no local path", 400);
     }
 
     startRetryDownload(datasetId, {
@@ -67,8 +60,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to retry download";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to retry download");
   }
 }
 

@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listDirectory, addWorkspaceRoot } from "@/lib/files/filesystem";
+import { requirePathAccess } from "@/lib/auth/ownership";
+import { jsonException, requiredSearchParam } from "@/lib/api-errors";
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const dirPath = searchParams.get("path");
+    const dirPath = requiredSearchParam(request, "path", "Missing path parameter");
+    if (dirPath instanceof NextResponse) {
+      return dirPath;
+    }
 
-    if (!dirPath) {
-      return NextResponse.json(
-        { error: "Missing path parameter" },
-        { status: 400 }
-      );
+    const access = await requirePathAccess(request, dirPath);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     // Auto-register as workspace root if not already covered
@@ -19,9 +21,6 @@ export async function GET(request: NextRequest) {
     const entries = await listDirectory(dirPath);
     return NextResponse.json(entries);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to browse directory";
-    const status = message.includes("Access denied") ? 403 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return jsonException(error, "Failed to browse directory");
   }
 }
