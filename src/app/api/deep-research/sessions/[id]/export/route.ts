@@ -6,9 +6,10 @@ import { eq } from "drizzle-orm";
 import { writeFile } from "@/lib/files/filesystem";
 import path from "path";
 import {
-  extractFinalReportText,
+  extractFinalReportTextWithFallbackReferences,
   getLatestFinalReportArtifact,
 } from "@/lib/deep-research/final-report";
+import { requireDeepResearchSessionAccess } from "@/lib/auth/ownership";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -21,6 +22,10 @@ type RouteParams = { params: Promise<{ id: string }> };
 export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const { id: sessionId } = await params;
+    const access = await requireDeepResearchSessionAccess(req, sessionId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
     const body = await req.json().catch(() => ({}));
     const customFilename = body.filename as string | undefined;
 
@@ -48,7 +53,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // Extract report text from artifact content
-    const reportText = extractFinalReportText(finalReport);
+    const reportText = extractFinalReportTextWithFallbackReferences(finalReport, artifacts);
 
     // Build the full markdown document with metadata header
     const now = new Date();

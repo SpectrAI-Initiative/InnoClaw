@@ -1,3 +1,7 @@
+---
+orphan: true
+---
+
 # InnoClaw
 
 <p align="center">
@@ -47,10 +51,28 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 <!-- whats-new-start -->
 
+#### 2026-04-17
+- **InnoClaw CLI**: App im Terminal ausfuehren, Arbeitsbereiche verwalten und Deep-Research-Sitzungen erstellen, starten oder exportieren
+- **Deep-Research-Pruefpunkte**: Die Recherche pausiert jetzt an Pruefpunkten, damit du Laeufe fortsetzen, ueberarbeiten, verzweigen, ablehnen oder stoppen kannst
+- **Rollenstudio**: Neuer Deep-Research-Tab zum Pruefen spezialisierter Rollen und zum Senden gezielter Anweisungen an den Researcher oder Worker
+
+
+#### 2026-04-12
+- **Docker-Deployment-Support**: InnoClaw mit Docker und docker-compose selbst hosten, mit Anleitungen fuer Setup, Volumes und Upgrades
+- **200+ integrierte Skills**: Deutliche Erweiterung sofort nutzbarer wissenschaftlicher Skills fuer Bioinformatik, Chemie, Genomik und Physik
+- **Skill-Erstellungsframework**: Neues Meta-Skill zum Erstellen, Bewerten, Benchmarken und Validieren eigener Skills
+
+
+
+<details>
+<summary>Aeltere Updates anzeigen</summary>
+
 #### 2026-04-02
 - **Docker-Deployment-Unterstuetzung**: Dockerfile, docker-compose.yml und eine vollstaendige Docker-Deployment-Anleitung fuer selbst gehostete Produktionsumgebungen hinzugefuegt
 - **200+ neue integrierte Skills**: Skill-Bibliothek erweitert um Bioinformatik, Chemoinformatik, Genomik, Physik und Drug-Discovery-Pipelines
 - **Skill-Creator-Framework**: Neuer Meta-Skill mit Werkzeugen fuer Evaluierung, Benchmarking und Validierung zum Erstellen und Testen eigener Skills
+
+
 
 
 #### 2026-04-01
@@ -59,13 +81,14 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
-<details>
-<summary>Aeltere Updates anzeigen</summary>
+
 
 #### 2026-03-31
 - **Eingefuegte Bilder unterstuetzt**: Benutzer koennen Bilder jetzt direkt in die Chat-Eingabe einfuegen fuer multimodale KI-Konversationen
 - **Deep-Research-Rollenstudio**: Das neue Rollenstudio-Panel ermoeglicht das Konfigurieren und Verwalten benutzerdefinierter Forscherrollen im Deep-Research-Workflow
 - **Erweiterte Quellen fuer die Artikelsuche**: BioRxiv, PubMed und PubChem wurden als durchsuchbare Artikelquellen in Paper Study hinzugefuegt
+
+
 
 
 
@@ -79,6 +102,8 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
+
 #### 2026-03-24
 - **Multimodaler LLM-Support**: Papierrecherche und Agenten-Workflows unterstuetzen jetzt Standard-LLMs und multimodale LLMs (mLLM), kontextbezogen auswaehlbar in den Einstellungen und der Modellauswahl.
 
@@ -87,8 +112,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
+
 #### 2026-03-23
 - **GitHub-Faehigkeiten Import-Vorschau**: Neuer Vorschau-Workflow vor dem Import ermoeglicht das Durchsuchen, Pruefen und selektive Importieren von Faehigkeiten aus GitHub-Repositories
+
+
 
 
 
@@ -108,38 +137,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
+
 #### 2026-03-21
 - **Entfernte HPC/SLURM-Ausfuehrung**: Tiefe Recherche-Sitzungen koennen jetzt ueber SSH auf entfernten Clustern ausgefuehrt werden, mit Unterstuetzung fuer rjob, rlaunch und SLURM sowie Datei-Staging und Job-Lifecycle-Verwaltung
 - **Kubernetes-Cluster-Konfigurationsoberflaeche**: Neues Einstellungspanel zur Laufzeitkonfiguration von K8s-Kontexten, PVC-Bindungen und Container-Images in Multi-Cluster-Umgebungen ohne Neustart
 - **Entfernte Profil-Bindung**: Tiefe Recherche-Sitzungen koennen an vorkonfigurierte SSH/Remote-Rechenprofile gebunden werden, was reproduzierbare verteilte Forschungs-Workflows ermoeglicht
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-20
-- **Tiefenforschungsmodul**: Vollstaendige KI-gesteuerte wissenschaftliche Forschungs-Pipeline mit Mehrphasen-Orchestrierung, Gutachter-Diskussion, Ausfuehrungsplanung und Workflow-Grafik-Oberflaeche
-- **Ausfuehrungs-Pipeline**: Automatisiertes System zur Experimentausfuehrung mit Slurm-Job-Uebermittlung, Datensatzverwaltung, Vorverarbeitung und Unterstuetzung fuer entfernte Ausfuehrer
-
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-19
-- **ClawHub-Skill-Import**: Neue Integration zum direkten Importieren von Skills aus ClawHub ueber einen dedizierten API-Endpunkt und einen Import-Dialog
-- **Code-Vorschaufenster**: Neue In-Editor-Komponente fuer die Code-Vorschau mit Syntaxhervorhebung und Verfolgung des Speicherstatus
-- **Paper-Studie-Cache**: Persistente Caching-Schicht fuer Paper-Studien-Sitzungen zur Verbesserung der Neulade-Performance und Zustandskontinuitaet
 
 
 

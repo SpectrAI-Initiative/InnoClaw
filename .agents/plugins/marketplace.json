@@ -1,0 +1,20 @@
+{
+  "name": "innoclaw-local",
+  "interface": {
+    "displayName": "InnoClaw Local Plugins"
+  },
+  "plugins": [
+    {
+      "name": "innoclaw-cli",
+      "source": {
+        "source": "local",
+        "path": "./plugins/innoclaw-cli"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Research"
+    }
+  ]
+}

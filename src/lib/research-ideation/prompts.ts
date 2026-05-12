@@ -17,8 +17,10 @@ const STAGE_GUIDANCE: Record<IdeationStageId, string> = {
   hypothesis_generation: `CURRENT STAGE: Hypothesis Generation
 Your task: Read the seed paper. Produce 3-5 novel, testable research hypotheses that extend, challenge, or build upon the paper's findings.
 - Each hypothesis must have a clear statement, rationale, novelty assessment, and connection to the seed paper.
+- Each hypothesis MUST include at least 1 supporting reference as a numbered inline citation **[N]**.
 - If the user provided a seed idea, incorporate it as a starting point.
-- Prioritize hypotheses that balance novelty with feasibility.`,
+- Prioritize hypotheses that balance novelty with feasibility.
+- End with a **References** section listing all cited works in markdown format.`,
 
   feasibility_review: `CURRENT STAGE: Feasibility Review
 Your task: For each hypothesis from Stage 1, evaluate practical feasibility across five dimensions: data availability, compute requirements, methodological readiness, timeline, and risk.
@@ -29,8 +31,10 @@ Your task: For each hypothesis from Stage 1, evaluate practical feasibility acro
   experiment_design: `CURRENT STAGE: Experiment Design
 Your task: Select the top 2 most feasible hypotheses based on the Feasibility Checker's assessment. Design concrete, executable experiments for each.
 - Include protocol, baselines, controls, metrics, and expected outcomes.
+- For each baseline method and adopted protocol, provide numbered inline citations **[N]** to the original papers.
 - Define a Minimum Viable Experiment (MVE) achievable in 1-2 weeks.
-- Be specific enough that a graduate student could begin implementation.`,
+- Be specific enough that a graduate student could begin implementation.
+- End with a **References** section listing all cited works in markdown format.`,
 
   review: `CURRENT STAGE: Review & Critique
 Your task: Review the full transcript from all prior stages. Identify logical gaps, ethical concerns, statistical issues, missing baselines, and scope problems.
@@ -40,8 +44,9 @@ Your task: Review the full transcript from all prior stages. Identify logical ga
 
   final_report: `CURRENT STAGE: Final Report
 Your task: Synthesize the entire transcript into a structured Research Ideation Report.
-- Use the required output format with all 6 sections.
+- Use the required output format with all 7 sections (including ## 7. References).
 - Do not introduce new ideas not discussed in the transcript.
+- Consolidate all numbered inline citations from the discussion into the References section with full markdown formatting: N. **Author(s)** (Year). *Title.* Venue. [DOI/URL](link)
 - Preserve nuance — include both promise and risk for each direction.
 - End with an overall assessment of the most promising research direction.`,
 };

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { readFileBuffer } from "@/lib/files/filesystem";
+import { requirePathAccess } from "@/lib/auth/ownership";
+import { jsonException, requiredSearchParam } from "@/lib/api-errors";
 
 const MIME_TYPES: Record<string, string> = {
   pdf: "application/pdf",
@@ -28,14 +30,14 @@ const MIME_TYPES: Record<string, string> = {
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const filePath = searchParams.get("path");
+    const filePath = requiredSearchParam(request, "path", "Missing path parameter");
+    if (filePath instanceof NextResponse) {
+      return filePath;
+    }
 
-    if (!filePath) {
-      return NextResponse.json(
-        { error: "Missing path parameter" },
-        { status: 400 }
-      );
+    const access = await requirePathAccess(request, filePath);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const buffer = await readFileBuffer(filePath);
@@ -51,9 +53,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to read file";
-    const status = message.includes("Access denied") ? 403 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return jsonException(error, "Failed to read file");
   }
 }

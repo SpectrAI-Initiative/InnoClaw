@@ -2,26 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { workspaces, sources, notes } from "@/lib/db/schema";
 import { eq, count } from "drizzle-orm";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { jsonException } from "@/lib/api-errors";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ workspaceId: string }> }
 ) {
   try {
     const { workspaceId } = await params;
 
-    const workspace = await db
-      .select()
-      .from(workspaces)
-      .where(eq(workspaces.id, workspaceId))
-      .limit(1);
-
-    if (workspace.length === 0) {
-      return NextResponse.json(
-        { error: "Workspace not found" },
-        { status: 404 }
-      );
+    const access = await requireWorkspaceAccess(request, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
+    const workspace = access.workspace;
 
     // Get counts
     const [sourceCount] = await db
@@ -41,14 +36,12 @@ export async function GET(
       .where(eq(workspaces.id, workspaceId));
 
     return NextResponse.json({
-      ...workspace[0],
+      ...workspace,
       sourceCount: sourceCount.count,
       noteCount: noteCount.count,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to get workspace";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to get workspace");
   }
 }
 
@@ -58,6 +51,10 @@ export async function PATCH(
 ) {
   try {
     const { workspaceId } = await params;
+    const access = await requireWorkspaceAccess(request, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
     const body = await request.json();
 
     await db
@@ -76,25 +73,25 @@ export async function PATCH(
 
     return NextResponse.json(updated[0]);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to update workspace";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to update workspace");
   }
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ workspaceId: string }> }
 ) {
   try {
     const { workspaceId } = await params;
+    const access = await requireWorkspaceAccess(request, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
 
     await db.delete(workspaces).where(eq(workspaces.id, workspaceId));
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to delete workspace";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to delete workspace");
   }
 }

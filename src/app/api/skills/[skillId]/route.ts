@@ -4,32 +4,22 @@ import { skills } from "@/lib/db/schema";
 import { eq, ne, and, isNull } from "drizzle-orm";
 import { slugify } from "@/lib/utils/slugify";
 import { parseSkillRow } from "@/lib/db/skills-utils";
+import { requireSkillAccess } from "@/lib/auth/ownership";
+import { jsonError, jsonException } from "@/lib/api-errors";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ skillId: string }> }
 ) {
   try {
     const { skillId } = await params;
-
-    const skill = await db
-      .select()
-      .from(skills)
-      .where(eq(skills.id, skillId))
-      .limit(1);
-
-    if (skill.length === 0) {
-      return NextResponse.json(
-        { error: "Skill not found" },
-        { status: 404 }
-      );
+    const access = await requireSkillAccess(request, skillId);
+    if (access instanceof NextResponse) {
+      return access;
     }
-
-    return NextResponse.json(parseSkillRow(skill[0]));
+    return NextResponse.json(parseSkillRow(access.skill));
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to get skill";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to get skill");
   }
 }
 
@@ -39,6 +29,11 @@ export async function PATCH(
 ) {
   try {
     const { skillId } = await params;
+    const access = await requireSkillAccess(request, skillId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
+    const { skill: currentSkill } = access;
     const body = await request.json();
 
     // JSON-serialize nested fields before writing
@@ -50,39 +45,25 @@ export async function PATCH(
     if (body.slug !== undefined) {
       const normalizedSlug = slugify(body.slug);
       if (!normalizedSlug) {
-        return NextResponse.json(
-          { error: "Invalid slug: slug must contain at least one alphanumeric character after normalization" },
-          { status: 400 }
-        );
+        return jsonError("Invalid slug: slug must contain at least one alphanumeric character after normalization", 400);
       }
 
-      // Get the existing skill to determine scope for uniqueness check
-      const existingSkill = await db
+      const duplicate = await db
         .select()
         .from(skills)
-        .where(eq(skills.id, skillId))
+        .where(
+          and(
+            eq(skills.slug, normalizedSlug),
+            ne(skills.id, skillId),
+            currentSkill.workspaceId
+              ? eq(skills.workspaceId, currentSkill.workspaceId)
+              : isNull(skills.workspaceId),
+          ),
+        )
         .limit(1);
 
-      if (existingSkill.length > 0) {
-        const wid = existingSkill[0].workspaceId;
-        const duplicate = await db
-          .select()
-          .from(skills)
-          .where(
-            and(
-              eq(skills.slug, normalizedSlug),
-              ne(skills.id, skillId),
-              wid ? eq(skills.workspaceId, wid) : isNull(skills.workspaceId)
-            )
-          )
-          .limit(1);
-
-        if (duplicate.length > 0) {
-          return NextResponse.json(
-            { error: "A skill with this slug already exists in the same scope" },
-            { status: 409 }
-          );
-        }
+      if (duplicate.length > 0) {
+        return jsonError("A skill with this slug already exists in the same scope", 409);
       }
 
       updateData.slug = normalizedSlug;
@@ -104,37 +85,6 @@ export async function PATCH(
     if (body.isEnabled !== undefined) updateData.isEnabled = body.isEnabled;
 
     // Check slug uniqueness when slug is being updated
-    if (body.slug !== undefined) {
-      const current = await db
-        .select()
-        .from(skills)
-        .where(eq(skills.id, skillId))
-        .limit(1);
-
-      if (current.length > 0) {
-        const workspaceId = current[0].workspaceId;
-        const existing = await db
-          .select()
-          .from(skills)
-          .where(
-            and(
-              eq(skills.slug, body.slug),
-              workspaceId
-                ? eq(skills.workspaceId, workspaceId)
-                : isNull(skills.workspaceId)
-            )
-          )
-          .limit(1);
-
-        if (existing.length > 0 && existing[0].id !== skillId) {
-          return NextResponse.json(
-            { error: "A skill with this slug already exists in the same scope" },
-            { status: 409 }
-          );
-        }
-      }
-    }
-
     await db
       .update(skills)
       .set(updateData)
@@ -147,10 +97,7 @@ export async function PATCH(
       .limit(1);
 
     if (updated.length === 0) {
-      return NextResponse.json(
-        { error: "Skill not found" },
-        { status: 404 }
-      );
+      return jsonError("Skill not found", 404);
     }
 
     return NextResponse.json(parseSkillRow(updated[0]));
@@ -160,30 +107,27 @@ export async function PATCH(
       error instanceof Error &&
       error.message.includes("UNIQUE constraint failed")
     ) {
-      return NextResponse.json(
-        { error: "A skill with this slug already exists in the same scope" },
-        { status: 409 }
-      );
+      return jsonError("A skill with this slug already exists in the same scope", 409);
     }
-    const message =
-      error instanceof Error ? error.message : "Failed to update skill";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to update skill");
   }
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ skillId: string }> }
 ) {
   try {
     const { skillId } = await params;
+    const access = await requireSkillAccess(request, skillId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
 
-    await db.delete(skills).where(eq(skills.id, skillId));
+    await db.delete(skills).where(eq(skills.id, access.skill.id));
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to delete skill";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to delete skill");
   }
 }

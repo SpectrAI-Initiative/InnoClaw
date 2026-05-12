@@ -9,7 +9,14 @@ import type {
   DeepResearchEvent,
   PersistedExecutionRecord,
 } from "@/lib/deep-research/types";
-import { isCompletedSessionStatus } from "@/lib/deep-research/session-status";
+import {
+  ACTIVE_DEEP_RESEARCH_REFRESH_MS,
+  IDLE_DEEP_RESEARCH_REFRESH_MS,
+  getArtifactRefreshInterval,
+  getExecutionRefreshInterval,
+  getFullSessionRefreshInterval,
+  getSessionRefreshInterval,
+} from "@/lib/deep-research/refresh-policy";
 
 type DeepResearchResourceResult<T> = {
   data: T | undefined;
@@ -61,7 +68,7 @@ export function useDeepResearchSessions(workspaceId: string | undefined) {
     : null;
   const { data, error, isLoading, mutate } = useDeepResearchListResource<DeepResearchSession>(
     url,
-    30_000,
+    IDLE_DEEP_RESEARCH_REFRESH_MS,
   );
 
   return {
@@ -76,15 +83,7 @@ export function useDeepResearchSession(sessionId: string | undefined) {
   const url = sessionId ? `/api/deep-research/sessions/${sessionId}` : null;
 
   const { data, error, isLoading, mutate } = useDeepResearchResource<DeepResearchSession>(url, {
-    refreshInterval: (latestData) => {
-      if (!latestData) return 5000;
-      return isCompletedSessionStatus(latestData.status)
-        || latestData.status === "stopped_by_user"
-        || latestData.status === "failed"
-        || latestData.status === "cancelled"
-        ? 30_000
-        : 5_000;
-    },
+    refreshInterval: (latestData) => getSessionRefreshInterval(latestData ?? null),
   });
 
   return {
@@ -99,7 +98,7 @@ export function useDeepResearchMessages(sessionId: string | undefined) {
   const url = sessionId ? `/api/deep-research/sessions/${sessionId}/messages` : null;
   const { data, error, isLoading, mutate } = useDeepResearchListResource<DeepResearchMessage>(
     url,
-    2_000,
+    ACTIVE_DEEP_RESEARCH_REFRESH_MS,
   );
 
   return {
@@ -114,7 +113,7 @@ export function useDeepResearchNodes(sessionId: string | undefined) {
   const url = sessionId ? `/api/deep-research/sessions/${sessionId}/nodes` : null;
   const { data, error, isLoading, mutate } = useDeepResearchListResource<DeepResearchNode>(
     url,
-    2_000,
+    ACTIVE_DEEP_RESEARCH_REFRESH_MS,
   );
 
   return {
@@ -134,7 +133,7 @@ export function useDeepResearchArtifacts(
     : null;
   const { data, error, isLoading, mutate } = useDeepResearchListResource<DeepResearchArtifact>(
     url,
-    4_000,
+    getArtifactRefreshInterval(),
   );
 
   return {
@@ -151,7 +150,7 @@ export function useDeepResearchEvents(sessionId: string | undefined, since?: str
     : null;
   const { data, error, isLoading, mutate } = useDeepResearchListResource<DeepResearchEvent>(
     url,
-    2_000,
+    ACTIVE_DEEP_RESEARCH_REFRESH_MS,
   );
 
   return {
@@ -168,13 +167,7 @@ export function useDeepResearchExecutions(sessionId: string | undefined) {
   const { data, error, isLoading, mutate } = useDeepResearchResource<PersistedExecutionRecord[]>(
     url,
     {
-      refreshInterval: (latestData) => {
-        if (!latestData) return 5000;
-        const hasActive = latestData.some((r) =>
-          ["pending", "submitted", "running"].includes(r.status)
-        );
-        return hasActive ? 5000 : 30000;
-      },
+      refreshInterval: (latestData) => getExecutionRefreshInterval(latestData ?? null),
     },
   );
 
@@ -197,20 +190,11 @@ interface FullSessionData {
   executions: PersistedExecutionRecord[];
 }
 
-const TERMINAL_STATUSES = new Set(["completed", "stopped_by_user", "failed", "cancelled"]);
-const AWAITING_STATUSES = new Set(["awaiting_user_confirmation", "execution_prepared", "awaiting_additional_literature"]);
-
 export function useDeepResearchSessionFull(sessionId: string | undefined) {
   const url = sessionId ? `/api/deep-research/sessions/${sessionId}/full` : null;
 
   const { data, error, isLoading, mutate } = useSWR<FullSessionData>(url, fetcher, {
-    refreshInterval: (latestData) => {
-      if (!latestData?.session) return 5000;
-      const status = latestData.session.status;
-      if (TERMINAL_STATUSES.has(status)) return 60000;
-      if (AWAITING_STATUSES.has(status)) return 15000;
-      return 5000;
-    },
+    refreshInterval: (latestData) => getFullSessionRefreshInterval(latestData?.session ?? null),
   });
 
   return {

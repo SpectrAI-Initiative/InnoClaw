@@ -3,6 +3,7 @@ import { pullRepo } from "@/lib/git/github";
 import { db } from "@/lib/db";
 import { workspaces } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +14,10 @@ export async function POST(request: NextRequest) {
         { error: "Missing workspaceId" },
         { status: 400 }
       );
+    }
+    const access = await requireWorkspaceAccess(request, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const workspace = await db

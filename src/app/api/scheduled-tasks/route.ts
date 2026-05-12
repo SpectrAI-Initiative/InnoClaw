@@ -3,6 +3,10 @@ import { db } from "@/lib/db";
 import { scheduledTasks } from "@/lib/db/schema";
 import { isValidCron } from "@/lib/scheduler";
 import crypto from "crypto";
+import { requireAuth } from "@/lib/auth/server";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { jsonError, jsonException } from "@/lib/api-errors";
+import { ownedScheduledTaskFilter } from "@/lib/auth/ownership";
 
 const VALID_TASK_TYPES = [
   "daily_report",
@@ -13,14 +17,20 @@ const VALID_TASK_TYPES = [
 ] as const;
 
 /** GET /api/scheduled-tasks — list all scheduled tasks */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const tasks = await db.select().from(scheduledTasks);
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
+    const tasks = await db
+      .select()
+      .from(scheduledTasks)
+      .where(ownedScheduledTaskFilter(auth));
     return NextResponse.json(tasks);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to list scheduled tasks";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to list scheduled tasks");
   }
 }
 
@@ -28,36 +38,34 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
 
     const { name, taskType, schedule, workspaceId, config } = body;
+    if (workspaceId) {
+      const access = await requireWorkspaceAccess(request, workspaceId);
+      if (access instanceof NextResponse) {
+        return access;
+      }
+    }
 
     // Validate required fields
     if (!name || typeof name !== "string" || !name.trim()) {
-      return NextResponse.json(
-        { error: "name is required" },
-        { status: 400 }
-      );
+      return jsonError("name is required", 400);
     }
 
     if (!taskType || !VALID_TASK_TYPES.includes(taskType)) {
-      return NextResponse.json(
-        { error: `taskType must be one of: ${VALID_TASK_TYPES.join(", ")}` },
-        { status: 400 }
-      );
+      return jsonError(`taskType must be one of: ${VALID_TASK_TYPES.join(", ")}`, 400);
     }
 
     if (!schedule || typeof schedule !== "string" || !schedule.trim()) {
-      return NextResponse.json(
-        { error: "schedule is required" },
-        { status: 400 }
-      );
+      return jsonError("schedule is required", 400);
     }
 
     if (!isValidCron(schedule)) {
-      return NextResponse.json(
-        { error: "Invalid cron expression" },
-        { status: 400 }
-      );
+      return jsonError("Invalid cron expression", 400);
     }
 
     // Validate config is valid JSON if provided
@@ -66,10 +74,7 @@ export async function POST(request: NextRequest) {
         try {
           JSON.parse(config);
         } catch {
-          return NextResponse.json(
-            { error: "config must be valid JSON" },
-            { status: 400 }
-          );
+          return jsonError("config must be valid JSON", 400);
         }
       }
     }
@@ -80,6 +85,7 @@ export async function POST(request: NextRequest) {
     const newTask = {
       id,
       name: name.trim(),
+      ownerUserId: auth.user.id,
       taskType: taskType as (typeof VALID_TASK_TYPES)[number],
       schedule: schedule.trim(),
       workspaceId: workspaceId || null,
@@ -98,8 +104,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to create scheduled task";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to create scheduled task");
   }
 }

@@ -27,6 +27,7 @@ import {
   type DeepResearchRouteParams,
 } from "@/lib/deep-research/api-helpers";
 import type { CheckpointPackage, ConfirmationOutcome, ModelRole } from "@/lib/deep-research/types";
+import { requireDeepResearchSessionAccess } from "@/lib/auth/ownership";
 
 type NodeMessageRequest = {
   content: string;
@@ -154,6 +155,10 @@ function looksLikeActionableConfirmationFeedback(content: string): boolean {
 export async function POST(req: NextRequest, { params }: DeepResearchRouteParams) {
   try {
     const sessionId = await readSessionId(params);
+    const access = await requireDeepResearchSessionAccess(req, sessionId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
     const session = await requireSession(sessionId);
     const { content, relatedNodeId, metadata, relatedArtifactIds } = await parseNodeMessageRequest(req);
     if (!isInterfaceOnlySession(session)) {

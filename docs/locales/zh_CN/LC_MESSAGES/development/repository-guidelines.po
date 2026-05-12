@@ -1,0 +1,222 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: InnoClaw \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-14 00:19+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../development/repository-guidelines.md:1
+#: 7073234a0c6149c9a75d9184f923d689
+msgid "Repository Guidelines"
+msgstr "仓库规范"
+
+#: ../../development/repository-guidelines.md:3
+#: e10a5e4b3c6044d289fd71f6c23b4d57
+msgid ""
+"This page is the documentation-site entry for repository development "
+"workflow."
+msgstr "本页是面向文档站读者的仓库开发流程入口。"
+
+#: ../../development/repository-guidelines.md:5
+#: c64d1c09e5d944d3a6de893918b0dc99
+msgid ""
+"The canonical source of truth remains `AGENTS.md` at the repository root "
+"in a local clone. Use this page when you are browsing the published docs "
+"site, and use `AGENTS.md` when you are working inside the repository "
+"itself."
+msgstr ""
+"在本地仓库克隆中，权威来源仍是仓库根目录的 `AGENTS.md`。当您浏览已发布的文档站时，请使用本页；当您在仓库内部工作时，请直接以 "
+"`AGENTS.md` 为准。"
+
+#: ../../development/repository-guidelines.md:7
+#: 4806a8cf79d64d9ba43af8f751254407
+msgid "Source Of Truth"
+msgstr "规范优先级"
+
+#: ../../development/repository-guidelines.md:9
+#: 06661d8b269c4485a3d2c68bcd33d7e8
+msgid "When instructions overlap, use this order:"
+msgstr "当多份说明有重叠时，请按以下顺序处理："
+
+#: ../../development/repository-guidelines.md:11
+#: 08573867a6484e1c91ef13f2fd43a5e9
+msgid "`AGENTS.md` at the repository root"
+msgstr "仓库根目录中的 `AGENTS.md`"
+
+#: ../../development/repository-guidelines.md:12
+#: 5b12237165164d2fa2be387daaacb123
+msgid "`package.json` scripts and `docs/Makefile`"
+msgstr "`package.json` 脚本与 `docs/Makefile`"
+
+#: ../../development/repository-guidelines.md:13
+#: 613957bfbe644a69862ffcdb916c7193
+msgid "`.github/workflows/*.yml`"
+msgstr "`.github/workflows/*.yml`"
+
+#: ../../development/repository-guidelines.md:14
+#: b25ebda05a3943b482b1afdba2519b4c
+msgid "Supporting pages under `docs/development/`"
+msgstr "`docs/development/` 下的补充页面"
+
+#: ../../development/repository-guidelines.md:16
+#: a0433277f74543219b4b9ed4c3f838ce
+msgid "What This Covers"
+msgstr "本页涵盖"
+
+#: ../../development/repository-guidelines.md:18
+#: 87afb7f9ffed48f2a18a521d11f4b954
+msgid "Supported local environment"
+msgstr "受支持的本地环境"
+
+#: ../../development/repository-guidelines.md:19
+#: fbc1c3fb31c54fa3afcac2a3d5104660
+msgid "Repository boundaries for code vs. scratch content"
+msgstr "代码与临时内容的仓库边界"
+
+#: ../../development/repository-guidelines.md:20
+#: f12f174fbf4c460ebd579a01eb664b6c
+msgid "Validation commands before review"
+msgstr "提交评审前需要运行的验证命令"
+
+#: ../../development/repository-guidelines.md:21
+#: 8bd2141458db4b098c204694b0e74aa8
+msgid "Collaboration expectations in a shared worktree"
+msgstr "共享工作树中的协作要求"
+
+#: ../../development/repository-guidelines.md:22
+#: 26bbeaf284e84ca3b9d7c89ae71562c0
+msgid "Database migration expectations"
+msgstr "数据库迁移要求"
+
+#: ../../development/repository-guidelines.md:23
+#: aecc1cff90364402b6154f67a7654bca
+msgid "API route responsibilities"
+msgstr "API 路由职责"
+
+#: ../../development/repository-guidelines.md:24
+#: f9ac30448a9d4a888b89bd3fb5d554bb
+msgid "Agent and deep-research development expectations"
+msgstr "智能体与深度研究功能的开发要求"
+
+#: ../../development/repository-guidelines.md:25
+#: 6db4c61a43d84598b32f4c584ee6089f
+msgid "Documentation update requirements"
+msgstr "文档更新要求"
+
+#: ../../development/repository-guidelines.md:27
+#: 5859b0c6c85c4251bca7b3c8be56932d
+msgid "Workflow Overview"
+msgstr "流程总览"
+
+#: ../../development/repository-guidelines.md:29
+#: 85354b461b5940f1a94615e023993716
+msgid "English overview of the developer workflow from FigJam"
+msgstr "来自 FigJam 的英文开发流程总览图"
+
+#: ../../development/repository-guidelines.md:34
+#: fdafc700c4bb42388fb7202e076cbaa5
+msgid "Chinese overview of the developer workflow from FigJam"
+msgstr "来自 FigJam 的中文开发流程总览图"
+
+#: ../../development/repository-guidelines.md:39
+#: 276af624752d4be08f7b96ed35d1a9ad
+msgid ""
+"[English FigJam Board](https://www.figma.com/board/WFNaqCm92fh8ySjas6txi0"
+"/InnoClaw-Developer-Workflow-Overview?node-id=0-1&p=f)"
+msgstr ""
+"[英文 FigJam 白板](https://www.figma.com/board/WFNaqCm92fh8ySjas6txi0/InnoClaw-"
+"Developer-Workflow-Overview?node-id=0-1&p=f)"
+
+#: ../../development/repository-guidelines.md:40
+#: bb1b3758b028405f93840b2a8dda347b
+#, python-format
+msgid ""
+"[Chinese FigJam "
+"Board](https://www.figma.com/board/bSNAwMgaZmu4DXZisidzXx/InnoClaw-%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B%E6%A6%82%E8%A7%88"
+"?node-id=0-1&p=f)"
+msgstr ""
+"[中文 FigJam "
+"白板](https://www.figma.com/board/bSNAwMgaZmu4DXZisidzXx/InnoClaw-%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B%E6%A6%82%E8%A7%88"
+"?node-id=0-1&p=f)"
+
+#: ../../development/repository-guidelines.md:42
+#: 141c59c7bf04477fa20d57cddac98fc1
+msgid "Which Guide To Read Next"
+msgstr "接下来读哪一页"
+
+#: ../../development/repository-guidelines.md:44
+#: 6e2b4fc31cce43ec80dfac02b033b18f
+msgid ""
+"Read [Contributing](contributing.md) for the default branch, commit, and "
+"PR workflow."
+msgstr "阅读 [贡献指南](contributing.md)，了解默认分支、提交与 PR 流程。"
+
+#: ../../development/repository-guidelines.md:45
+#: e438ba85813548ccb3df2b549dca1cfd
+msgid ""
+"Read [Collaboration](collaboration.md) before working in a dirty tree, "
+"coordinating with another contributor, or handing work to automation."
+msgstr "在脏工作树中工作、与其他贡献者协作，或将工作交给自动化工具之前，请先阅读 [协作规范](collaboration.md)。"
+
+#: ../../development/repository-guidelines.md:46
+#: a7c05472a91249e1aa877f858159a5db
+msgid ""
+"Read [Agent Development](agent-development.md) before changing prompts, "
+"tools, streaming behavior, deep-research workflow logic, or other agent-"
+"facing contracts."
+msgstr ""
+"在修改 prompts、tools、流式行为、deep-research 工作流逻辑，或其他面向智能体的契约之前，请先阅读 [智能体开发"
+"](agent-development.md)。"
+
+#: ../../development/repository-guidelines.md:48
+#: bf378972ed2a425ca76c78c15202bd25
+msgid "Next Pages"
+msgstr "后续页面"
+
+#: ../../development/repository-guidelines.md:50
+#: b047ce4ce1164c55a649655dd833c5e2
+msgid "[Contributing](contributing.md)"
+msgstr "[贡献指南](contributing.md)"
+
+#: ../../development/repository-guidelines.md:51
+#: 0eae522193ac48e0bd09c76d1c1cac10
+msgid "[Collaboration](collaboration.md)"
+msgstr "[协作规范](collaboration.md)"
+
+#: ../../development/repository-guidelines.md:52
+#: 4e1bb868bb464ad0bfda754062810f2c
+msgid "[Project Structure](project-structure.md)"
+msgstr "[项目结构](project-structure.md)"
+
+#: ../../development/repository-guidelines.md:53
+#: ead275e12fca449094d0fdfe5af2565b
+msgid "[Local Development](local-development.md)"
+msgstr "[本地开发](local-development.md)"
+
+#: ../../development/repository-guidelines.md:54
+#: df46707e349d4e4f9c534d114968781a
+msgid "[Testing](testing.md)"
+msgstr "[测试](testing.md)"
+
+#: ../../development/repository-guidelines.md:55
+#: ddca2adef50f48dc910a99c3b64b0a7f
+msgid "[Agent Development](agent-development.md)"
+msgstr "[智能体开发](agent-development.md)"
+
+#: ../../development/repository-guidelines.md:56
+#: 352ba70d1fac4209b993e6cc6acb4a0d
+msgid "[Documentation Development](documentation.md)"
+msgstr "[文档开发](documentation.md)"

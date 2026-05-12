@@ -3,17 +3,19 @@ import { db } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { jsonError, jsonException, requiredSearchParam } from "@/lib/api-errors";
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const workspaceId = searchParams.get("workspaceId");
+    const workspaceId = requiredSearchParam(request, "workspaceId");
+    if (workspaceId instanceof NextResponse) {
+      return workspaceId;
+    }
 
-    if (!workspaceId) {
-      return NextResponse.json(
-        { error: "Missing workspaceId" },
-        { status: 400 }
-      );
+    const access = await requireWorkspaceAccess(request, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const allNotes = await db
@@ -24,9 +26,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(allNotes);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to list notes";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to list notes");
   }
 }
 
@@ -36,10 +36,12 @@ export async function POST(request: NextRequest) {
     const { workspaceId, title, content, type } = body;
 
     if (!workspaceId || !title) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return jsonError("Missing required fields", 400);
+    }
+
+    const access = await requireWorkspaceAccess(request, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const id = nanoid();
@@ -63,8 +65,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(note[0], { status: 201 });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to create note";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to create note");
   }
 }

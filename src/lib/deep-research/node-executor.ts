@@ -14,8 +14,19 @@ import {
 } from "@/lib/article-search";
 import { buildEvidenceCardFromToolResults } from "./evidence-cards";
 import { safeParseJson } from "./json-response";
+import { buildResearchContextArchivePromptBlock } from "./context-archive";
 import { buildResearchMemoryPromptBlock } from "./memory-fabric";
 import { buildResearcherDoctrinePromptBlock } from "./researcher-doctrine";
+import { resolveArtifactReferenceIds } from "./artifact-references";
+import {
+  executeFinalReportNode,
+  FinalReportExecutionError,
+  isFinalReportExecutionError,
+} from "./final-report-runtime";
+import {
+  buildClaimMapFromStructuredSummary,
+  normalizeStructuredSummaryArtifact,
+} from "./summary-packets";
 import type {
   DeepResearchNode,
   DeepResearchArtifact,
@@ -37,6 +48,11 @@ interface ExecutionResult {
   artifacts: DeepResearchArtifact[];
   tokensUsed: number;
 }
+
+export {
+  FinalReportExecutionError,
+  isFinalReportExecutionError,
+};
 
 /**
  * Execute a single node: resolve model, build prompt, call LLM, persist results.
@@ -150,17 +166,21 @@ async function executeByNodeType(
   }>;
   tokensUsed: number;
 }> {
-  const parentArtifacts = ctx.allArtifacts.filter(
+  const dependencyArtifacts = ctx.allArtifacts.filter(
     (a) => a.nodeId && node.dependsOn.includes(a.nodeId)
   );
+  const referencedArtifacts = resolveReferencedArtifacts(node.input, ctx.allArtifacts);
+  const parentArtifacts = mergeArtifactsById(dependencyArtifacts, referencedArtifacts);
 
   switch (node.nodeType) {
     // Main brain nodes
     case "intake":
     case "plan":
     case "synthesize":
-    case "final_report":
       return executeBrainNode(node, ctx, model, abortSignal);
+
+    case "final_report":
+      return executeFinalReportNode(node, ctx, model, abortSignal);
 
     // Worker evidence nodes
     case "evidence_gather":
@@ -232,10 +252,21 @@ async function executeBrainNode(
     artifacts: ctx.allArtifacts,
     query: `${node.nodeType} ${node.label}`.trim(),
   });
+  const archiveContext = await buildResearchContextArchivePromptBlock({
+    session: ctx.session,
+    messages: ctx.messages,
+    artifacts: ctx.allArtifacts,
+    query: `${node.nodeType} ${node.label}`.trim(),
+    topK: 5,
+    maxChars: 2200,
+  });
   const doctrineContext = await buildResearcherDoctrinePromptBlock({
     contextTag: ctx.session.contextTag,
     query: `${node.nodeType} ${node.label}`.trim(),
   });
+  const combinedMemoryContext = [memoryContext, archiveContext]
+    .filter((block): block is string => typeof block === "string" && block.length > 0)
+    .join("\n\n");
   const systemPrompt = buildMainBrainSystemPrompt(
     ctx.session,
     ctx.messages,
@@ -244,7 +275,7 @@ async function executeBrainNode(
     ctx.session.contextTag,
     undefined,
     undefined,
-    memoryContext,
+    combinedMemoryContext || null,
     doctrineContext,
   );
 
@@ -402,14 +433,30 @@ async function executeSummarize(
     abortSignal,
   });
 
-  const output = { summary: result.text };
+  const rawOutput = safeParseJson(result.text);
+  const output = normalizeStructuredSummaryArtifact({
+    rawOutput,
+    parentArtifacts,
+    label: node.label,
+  });
+  const claimMap = buildClaimMapFromStructuredSummary(output, parentArtifacts);
 
   return {
-    output,
+    output: output as unknown as Record<string, unknown>,
     artifacts: [{
       artifactType: "structured_summary" as ArtifactType,
       title: `Summary: ${node.label}`,
-      content: output,
+      content: output as unknown as Record<string, unknown>,
+      provenance: {
+        sourceNodeId: node.id,
+        sourceArtifactIds: parentArtifacts.map((a) => a.id),
+        model: node.assignedModel || "unknown",
+        generatedAt: new Date().toISOString(),
+      } as ArtifactProvenance,
+    }, {
+      artifactType: "claim_map" as ArtifactType,
+      title: `Claim Map: ${node.label}`,
+      content: claimMap as unknown as Record<string, unknown>,
       provenance: {
         sourceNodeId: node.id,
         sourceArtifactIds: parentArtifacts.map((a) => a.id),
@@ -597,6 +644,36 @@ function buildFallbackKeywords(query: string, focusAreas: string[] | undefined):
     .filter((token) => token.length > 2 && !stopWords.has(token));
 
   return [...new Set([...focusTokens, ...queryTokens])].slice(0, 4);
+}
+
+function resolveReferencedArtifacts(
+  input: Record<string, unknown> | null | undefined,
+  allArtifacts: DeepResearchArtifact[],
+): DeepResearchArtifact[] {
+  const resolvedIds = new Set(resolveArtifactReferenceIds(input, allArtifacts));
+  if (resolvedIds.size === 0) {
+    return [];
+  }
+
+  return allArtifacts.filter((artifact) => resolvedIds.has(artifact.id));
+}
+
+function mergeArtifactsById(
+  primaryArtifacts: DeepResearchArtifact[],
+  secondaryArtifacts: DeepResearchArtifact[],
+): DeepResearchArtifact[] {
+  const merged: DeepResearchArtifact[] = [];
+  const seen = new Set<string>();
+
+  for (const artifact of [...primaryArtifacts, ...secondaryArtifacts]) {
+    if (seen.has(artifact.id)) {
+      continue;
+    }
+    seen.add(artifact.id);
+    merged.push(artifact);
+  }
+
+  return merged;
 }
 
 function extractSearchQueries(

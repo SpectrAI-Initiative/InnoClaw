@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getConfiguredModelSelection } from "@/lib/ai/provider";
 import { getSession, updateSession } from "./event-store";
+import {
+  buildDeepResearchConfigForResolvedModel,
+  hasDeepResearchModelConfigDrift,
+} from "./model-overrides";
 import type { DeepResearchSession } from "./types";
 
 export class DeepResearchApiError extends Error {
@@ -35,21 +39,16 @@ export async function requireSession(sessionId: string): Promise<DeepResearchSes
 
   if (session.config.interfaceOnly !== true) {
     const configuredModel = await getConfiguredModelSelection();
-    const needsModelSync =
-      session.config.resolvedModel?.provider !== configuredModel.providerId
-      || session.config.resolvedModel?.modelId !== configuredModel.modelId
-      || session.config.modelOverrides !== undefined;
+    const resolvedModel = {
+      provider: configuredModel.providerId,
+      modelId: configuredModel.modelId,
+    };
+    const nextConfig = buildDeepResearchConfigForResolvedModel(session.config, resolvedModel);
+    const needsModelSync = hasDeepResearchModelConfigDrift(session.config, nextConfig);
 
     if (needsModelSync) {
       await updateSession(sessionId, {
-        config: {
-          ...session.config,
-          resolvedModel: {
-            provider: configuredModel.providerId,
-            modelId: configuredModel.modelId,
-          },
-          modelOverrides: undefined,
-        },
+        config: nextConfig,
       });
       session = await getSession(sessionId);
       if (!session) {

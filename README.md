@@ -76,7 +76,7 @@ OPENAI_API_KEY=sk-...
 
 - `WORKSPACE_ROOTS` directories must already exist before startup
 - `npx drizzle-kit migrate` creates or upgrades the SQLite schema at `./data/innoclaw.db`
-- If the repo lives on NFS/CIFS, set `DATABASE_URL` and `NEXT_BUILD_DIR` to local disk paths
+- If the repo lives on NFS/CIFS or another mount without local file locking, InnoClaw now disables Next's dist-dir lock automatically so `npm run dev` can start. You should still set `DATABASE_URL` to a local disk path for SQLite. `NEXT_BUILD_DIR`, if used, must stay inside the repo (for example `.next-local`).
 
 **Upgrading:**
 
@@ -134,10 +134,28 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 <!-- whats-new-start -->
 
+#### 2026-04-17
+- **InnoClaw CLI**: Run the app, manage workspaces, and create/run/export Deep Research sessions from the terminal
+- **Deep Research Checkpoints**: Research now pauses at review points so you can continue, revise, branch, reject, or stop runs
+- **Role Studio**: New Deep Research tab to inspect specialist roles and send targeted instructions to the Researcher or workers
+
+
+#### 2026-04-12
+- **Docker Deployment Support**: Self-host InnoClaw with Docker and docker-compose, with guides for setup, volumes, and upgrades
+- **200+ Built-in Skills**: Massive expansion of ready-to-use scientific skills across bioinformatics, chemistry, genomics, and physics
+- **Skill Creator Framework**: New meta-skill for creating, evaluating, benchmarking, and validating custom skills
+
+
+
+<details>
+<summary>Show earlier updates</summary>
+
 #### 2026-04-02
 - **Docker Deployment Support**: Added Dockerfile, docker-compose.yml, and full Docker deployment guide for self-hosted production setups
 - **200+ New Built-in Skills**: Expanded skill library with bioinformatics, cheminformatics, genomics, physics, and drug discovery pipelines
 - **Skill Creator Framework**: New meta-skill with evaluation, benchmarking, and validation tooling for building and testing custom skills
+
+
 
 
 #### 2026-04-01
@@ -146,13 +164,14 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
-<details>
-<summary>Show earlier updates</summary>
+
 
 #### 2026-03-31
 - **Pasted Image Support**: Users can now paste images directly into the chat input for multimodal AI conversations
 - **Deep Research Role Studio**: New Role Studio panel lets users configure and manage custom researcher roles in the deep research workflow
 - **Expanded Paper Search Sources**: Added BioRxiv, PubMed, and PubChem as searchable paper sources in Paper Study
+
+
 
 
 
@@ -166,6 +185,8 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
+
 #### 2026-03-26
 - **Node.js Runtime Update**: InnoClaw now targets Node.js 24+ and is verified against both Node.js 24 LTS and the latest Node.js 25 current release. CI and local version hints have been updated accordingly.
 
@@ -174,8 +195,12 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
+
 #### 2026-03-24
 - **Multimodal LLM Support**: Paper Study and agent workflows now support both standard LLMs and multimodal LLMs (mLLM), selectable per-context in settings and the model selector
+
+
 
 
 
@@ -191,6 +216,8 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
+
 #### 2026-03-22
 - **Obsidian Note Export**: Generate structured, Obsidian-compatible paper notes with rich YAML frontmatter, figures, and wikilinks directly from the paper study panel
 - **Per-Task Model Selector**: New model selector UI component lets users override the default AI model for individual paper study tasks (summary, roast, notes, etc.)
@@ -198,27 +225,6 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
-
-
-
-
-
-#### 2026-03-21
-- **Remote HPC/SLURM Execution**: Deep research sessions can now run on remote clusters via SSH, supporting rjob, rlaunch, and SLURM schedulers with file staging and job lifecycle management
-- **Kubernetes Cluster Config UI**: New settings panel for runtime configuration of K8s contexts, PVC bindings, and container images across multi-cluster deployments without restarting
-- **Remote Profile Binding**: Deep research sessions can be bound to pre-configured SSH/remote compute profiles, enabling reproducible distributed research workflows
-
-
-
-
-
-
-
-
-
-#### 2026-03-20
-- **Deep Research Module**: Full AI-driven scientific research pipeline with multi-phase orchestration, reviewer deliberation, execution planning, and workflow graph UI
-- **Execution Pipeline**: Automated experiment execution system with Slurm job submission, dataset management, preprocessing, and remote executor support
 
 
 
@@ -300,12 +306,3 @@ Go from code inspection to job submission and result analysis. Review repositori
 - **Repository** — https://github.com/SpectrAI-Initiative/InnoClaw
 - **Docs** — https://SpectrAI-Initiative.github.io/InnoClaw/
 
-## Star History
-
-<a href="https://www.star-history.com/?repos=SpectrAI-Initiative%2FInnoClaw&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=SpectrAI-Initiative/InnoClaw&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=SpectrAI-Initiative/InnoClaw&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=SpectrAI-Initiative/InnoClaw&type=date&legend=top-left" />
- </picture>
-</a>

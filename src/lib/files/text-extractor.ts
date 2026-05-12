@@ -1,6 +1,5 @@
 import * as cheerio from "cheerio";
 import { readFileBuffer, readFile } from "./filesystem";
-import { extractPdfText } from "./pdf-parser";
 import path from "path";
 import { ALL_TEXT_EXTS } from "@/lib/constants";
 
@@ -29,6 +28,7 @@ export async function extractText(filePath: string): Promise<string> {
   switch (ext) {
     case ".pdf": {
       const buffer = await readFileBuffer(filePath);
+      const { extractPdfText } = await import("./pdf-parser");
       return extractPdfText(buffer);
     }
 

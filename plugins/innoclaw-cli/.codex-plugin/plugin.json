@@ -1,0 +1,46 @@
+{
+  "name": "innoclaw-cli",
+  "version": "0.1.0",
+  "description": "Command-line plugin for operating InnoClaw and Deep Research workflows from Codex.",
+  "author": {
+    "name": "InnoClaw Contributors",
+    "email": "support@openai.com",
+    "url": "https://github.com/SpectrAI-Initiative/InnoClaw"
+  },
+  "homepage": "https://github.com/SpectrAI-Initiative/InnoClaw",
+  "repository": "https://github.com/SpectrAI-Initiative/InnoClaw",
+  "license": "Apache-2.0",
+  "keywords": [
+    "innoclaw",
+    "cli",
+    "deep-research",
+    "nextjs",
+    "research-assistant",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "InnoClaw CLI",
+    "shortDescription": "Run InnoClaw app and Deep Research workflows from the terminal",
+    "longDescription": "Use InnoClaw CLI to start the local app, run build and test commands, manage workspaces, create Deep Research sessions, start runs, and export final reports without leaving the terminal.",
+    "developerName": "InnoClaw Contributors",
+    "category": "Research",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/SpectrAI-Initiative/InnoClaw",
+    "privacyPolicyURL": "https://openai.com/policies/privacy-policy/",
+    "termsOfServiceURL": "https://openai.com/policies/terms-of-use/",
+    "defaultPrompt": [
+      "Start the local InnoClaw app and verify it is ready",
+      "Create and run a Deep Research session from the command line",
+      "Export the latest Deep Research report to the workspace"
+    ],
+    "brandColor": "#0F766E",
+    "composerIcon": "./assets/innoclaw-cli-small.svg",
+    "logo": "./assets/innoclaw-cli-logo.svg",
+    "screenshots": []
+  }
+}

@@ -58,6 +58,10 @@ COPY --from=deps /app/node_modules/drizzle-kit ./node_modules/drizzle-kit
 # ensure they exist (standalone may place them in nested paths)
 COPY --from=deps /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
 COPY --from=deps /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+# pdf-parse depends on @napi-rs/canvas at runtime for DOM geometry polyfills.
+# Copy the full namespace so the platform-specific binary package from the Linux
+# build stage is available in the production runner.
+COPY --from=deps /app/node_modules/@napi-rs ./node_modules/@napi-rs
 
 # Copy entrypoint
 COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh

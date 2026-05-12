@@ -21,6 +21,19 @@ import { getFeishuConfig } from "../types";
 import { createFeishuAdapter } from "./client";
 import { handleFeishuMessage } from "./message-handler";
 
+type FeishuWsClientLike = {
+  close?: (options?: { force?: boolean }) => void;
+  start: (options: { eventDispatcher: unknown }) => Promise<unknown>;
+};
+
+type FeishuWsClientConstructor = new (options: {
+  appId: string;
+  appSecret: string;
+  domain: (typeof lark.Domain)[keyof typeof lark.Domain];
+  loggerLevel: lark.LoggerLevel;
+  logger: ReturnType<typeof createSdkLogger>;
+}) => FeishuWsClientLike;
+
 // ---------------------------------------------------------------------------
 // Singleton guard (survives HMR in dev)
 // ---------------------------------------------------------------------------
@@ -28,8 +41,27 @@ import { handleFeishuMessage } from "./message-handler";
 // Use globalThis to prevent multiple WSClient instances during Next.js HMR
 const globalForFeishu = globalThis as unknown as {
   __feishuWsStarted?: boolean;
-  __feishuWsClient?: InstanceType<typeof lark.WSClient>;
+  __feishuWsClient?: FeishuWsClientLike;
+  __feishuWsUnsupported?: boolean;
 };
+
+export function isConstructableWsClient(value: unknown): value is FeishuWsClientConstructor {
+  if (typeof value !== "function") {
+    return false;
+  }
+
+  try {
+    Reflect.construct(String, [], value as new () => unknown);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function resolveWsClientConstructor(): FeishuWsClientConstructor | null {
+  const candidate = (lark as unknown as { WSClient?: unknown }).WSClient;
+  return isConstructableWsClient(candidate) ? candidate : null;
+}
 
 // ---------------------------------------------------------------------------
 // SDK logger
@@ -106,7 +138,7 @@ export function createSdkLogger(callbacks: {
  */
 function cleanupWsClient(reason: string, err?: unknown): void {
   try {
-    globalForFeishu.__feishuWsClient?.close({ force: true });
+    globalForFeishu.__feishuWsClient?.close?.({ force: true });
   } catch (e) {
     console.debug("[feishu-ws] Ignoring error during WSClient cleanup:", e);
   }
@@ -132,6 +164,14 @@ function cleanupWsClient(reason: string, err?: unknown): void {
 export function startFeishuWSClient(): void {
   if (globalForFeishu.__feishuWsStarted) {
     console.log("[feishu-ws] WSClient already started, skipping");
+    return;
+  }
+
+  if (globalForFeishu.__feishuWsUnsupported) {
+    console.log(
+      "[feishu-ws] Installed @larksuiteoapi/node-sdk has no WSClient export; " +
+        "HTTP webhook mode remains available at /api/bot/feishu."
+    );
     return;
   }
 
@@ -184,8 +224,18 @@ export function startFeishuWSClient(): void {
     },
   });
 
+  const WsClient = resolveWsClientConstructor();
+  if (!WsClient) {
+    globalForFeishu.__feishuWsUnsupported = true;
+    console.warn(
+      "[feishu-ws] Installed @larksuiteoapi/node-sdk does not export WSClient. " +
+        "Skipping Feishu WebSocket startup and keeping HTTP webhook mode enabled at /api/bot/feishu."
+    );
+    return;
+  }
+
   // Create WSClient for receiving events via WebSocket
-  const wsClient = new lark.WSClient({
+  const wsClient = new WsClient({
     appId: config.appId,
     appSecret: config.appSecret,
     domain: lark.Domain.Feishu,

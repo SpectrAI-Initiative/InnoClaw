@@ -1,0 +1,19 @@
+
+> innoclaw@0.2.0 predev
+> node scripts/check-deps.js
+
+
+> innoclaw@0.2.0 dev
+> next dev
+
+⨯ Failed to start server
+Error: listen EPERM: operation not permitted 0.0.0.0:3000
+    at <unknown> (Error: listen EPERM: operation not permitted 0.0.0.0:3000)
+    at new Promise (<anonymous>) {
+  code: 'EPERM',
+  errno: -1,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3000
+}
+[?25h

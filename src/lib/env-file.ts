@@ -68,6 +68,24 @@ export function ensureEnvLocal(): void {
 }
 
 /**
+ * Best-effort startup wrapper for ensureEnvLocal().
+ * Returns true when the file exists or is created, false when startup should
+ * continue without a writable env file.
+ */
+export function ensureEnvLocalForStartup(
+  createEnvLocal: () => void = ensureEnvLocal
+): boolean {
+  try {
+    createEnvLocal();
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`[env-file] Skipping .env.local bootstrap: ${message}`);
+    return false;
+  }
+}
+
+/**
  * Update (or append) key=value pairs in `.env.local`.
  *
  * - Preserves comments and unrelated lines.

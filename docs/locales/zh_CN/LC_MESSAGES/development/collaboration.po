@@ -1,0 +1,339 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: InnoClaw \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-13 23:29+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../development/collaboration.md:1 4cd2aaa810df45409c3b62c0df3c8b8e
+msgid "Collaboration"
+msgstr "协作规范"
+
+#: ../../development/collaboration.md:3 05137b1b0178431d9cf6d4f247217750
+msgid ""
+"This page defines how contributors should collaborate in a shared "
+"repository, whether the other contributor is a human teammate or an "
+"automation tool."
+msgstr ""
+"本页定义了贡献者在共享仓库中应如何协作，不论另一位贡献者是人类队友还是自动化工具。"
+
+#: ../../development/collaboration.md:5 5675fe3425c44d82adf29e9483aa4593
+msgid "Shared-Tree Workflow"
+msgstr "共享工作树流程"
+
+#: ../../development/collaboration.md:24 e0a295d5aa664e8ca574059c36752792
+msgid ""
+"This is the default collaboration path when more than one contributor or "
+"tool may touch the tree."
+msgstr ""
+"当多个贡献者或工具都可能修改当前工作树时，这就是默认协作路径。"
+
+#: ../../development/collaboration.md:26 5675fe3425c44d82adf29e9483aa4593
+msgid "Shared-Tree Discipline"
+msgstr "共享工作树纪律"
+
+#: ../../development/collaboration.md:28 9455d58ce68c42cdbb75d2a4c2eaec71
+msgid "Start by checking the current worktree state before large edits."
+msgstr "在进行大规模编辑之前，先检查当前工作树状态。"
+
+#: ../../development/collaboration.md:29 289f56671c374a7eb1f08776e7466b9d
+msgid ""
+"Treat unrelated local changes as owned by someone else unless you have "
+"clear evidence they are disposable."
+msgstr ""
+"对于与当前任务无关的本地改动，除非您有明确证据证明它们可丢弃，否则都应视为他人的工作。"
+
+#: ../../development/collaboration.md:30 48a528505810409095b52f26cb2a3d12
+msgid "Do not use destructive git commands to discard changes you did not make."
+msgstr "不要使用破坏性的 git 命令丢弃并非由您产生的改动。"
+
+#: ../../development/collaboration.md:31 94d785d524fa497a96b5db687b37d808
+msgid ""
+"Re-read files that are actively changing before editing them, especially "
+"large route handlers, shared utilities, and docs entry points."
+msgstr ""
+"在编辑正在频繁变化的文件之前，请先重新阅读其最新内容，尤其是大型 route handler、共享工"
+"具以及文档入口文件。"
+
+#: ../../development/collaboration.md:33 163f1a403a9541e9b66161aee5a0d9c4
+msgid "Before You Edit"
+msgstr "开始编辑前"
+
+#: ../../development/collaboration.md:35 252d63803e0f45238d2db8c1b9f82d84
+msgid ""
+"Decide whether the task is one concern or several. Split branches or PRs "
+"when the work mixes behavior changes, refactors, and contributor-workflow"
+" updates."
+msgstr ""
+"先判断这项任务是单一关注点还是多个关注点。若一个变更同时混入行为调整、重构和贡献者工作"
+"流更新，请拆分成不同分支或 PR。"
+
+#: ../../development/collaboration.md:36 ae7c46e31fd443a48c229d08982bcc81
+msgid ""
+"Identify the shared contracts you might change before editing. Schema, "
+"env vars, route shapes, tool names, persisted client keys, and "
+"contributor commands all need explicit follow-through."
+msgstr ""
+"在编辑前先识别您可能会改动的共享契约。Schema、环境变量、路由返回形状、工具名称、持久化"
+"客户端键以及贡献者命令都需要明确的后续处理。"
+
+#: ../../development/collaboration.md:37 aa28e5dc4fc44403a6e4ab9aed6ec79b
+msgid ""
+"Decide which validation commands and documentation updates will be "
+"required before you start writing code."
+msgstr ""
+"在开始写代码前就确定需要运行哪些验证命令，以及需要同步更新哪些文档。"
+
+#: ../../development/collaboration.md:39 a036304b432441bca8de1f6f55c27c12
+msgid "Scope Discipline"
+msgstr "范围纪律"
+
+#: ../../development/collaboration.md:41 7c51ec4a1f6343529b1615aafd6dca48
+msgid "Keep each branch or PR focused on one engineering concern."
+msgstr "让每个分支或 PR 都聚焦于一个工程关注点。"
+
+#: ../../development/collaboration.md:42 96044617ee8d422cacfcf8cc10491d3d
+msgid ""
+"Separate refactors from behavior changes unless the refactor is required "
+"to make the behavior change safe."
+msgstr ""
+"除非重构是保证行为变更安全所必需的，否则应将重构与行为修改分开。"
+
+#: ../../development/collaboration.md:43 25bc22530a3442649ca1ce215e4d727d
+msgid ""
+"Keep migrations, environment-variable changes, and API contract changes "
+"explicit rather than hiding them inside broad cleanup diffs."
+msgstr ""
+"迁移、环境变量修改和 API 契约变更要显式呈现，不要把它们藏在大而泛的清理型 diff 里。"
+
+#: ../../development/collaboration.md:44 12bf25d6f8d349ba8160bf696d21048b
+msgid ""
+"Keep generated artifacts that are required by the source change, such as "
+"migrations or `.po` updates, in the same change so reviewers can validate"
+" the full contract shift."
+msgstr ""
+"像迁移文件或 `.po` 更新这类由源变更所要求的生成产物，应与源变更放在同一个提交中，便于"
+"评审者验证完整的契约变化。"
+
+#: ../../development/collaboration.md:46 a51752cf285f4a0d9c8fd63f3be881c6
+msgid "Shared Contracts"
+msgstr "共享契约"
+
+#: ../../development/collaboration.md:48 93b71dd8eb3541e1bee47f40b0344717
+msgid "Coordinate carefully when changing any of these repository-wide contracts:"
+msgstr "当您修改以下任何仓库级共享契约时，都需要谨慎协同："
+
+#: ../../development/collaboration.md:50 48be05564a6f4784b46ee59c0adb1800
+msgid "Database schema and migrations"
+msgstr "数据库 schema 与迁移"
+
+#: ../../development/collaboration.md:51 bd454a0832a4497db92933ce6107a7af
+msgid "Environment variables and startup assumptions"
+msgstr "环境变量与启动假设"
+
+#: ../../development/collaboration.md:52 0df1eeaf3c1d460b89b400f0ea110df2
+msgid "API request and response shapes"
+msgstr "API 请求与响应形状"
+
+#: ../../development/collaboration.md:53 3f1123598568482e9c929dbf5e143d2d
+msgid "Tool names, tool privilege levels, and skill contracts"
+msgstr "工具名称、工具权限等级与技能契约"
+
+#: ../../development/collaboration.md:54 9970151851b24388aaf056b8bcbc741f
+msgid "Persisted client/session keys such as localStorage-backed agent state"
+msgstr "持久化的客户端/会话键，例如由 localStorage 支撑的智能体状态"
+
+#: ../../development/collaboration.md:55 f64135490a2642b8bf72a0126aaf4a1a
+msgid "Documentation entry points used by contributors"
+msgstr "贡献者使用的文档入口页"
+
+#: ../../development/collaboration.md:57 7dea80f5501f42f3a03d6a5863d7825a
+msgid "When you change a shared contract:"
+msgstr "当您修改共享契约时："
+
+#: ../../development/collaboration.md:59 f9d80b1e66c24d068f746f252895c222
+msgid "update the relevant docs in the same change"
+msgstr "在同一个变更中更新相关文档"
+
+#: ../../development/collaboration.md:60 4b4800050a0f4789bddcbcba6998d479
+msgid "update tests for the contract boundary"
+msgstr "更新契约边界的测试"
+
+#: ../../development/collaboration.md:61 3b6148b47af54abe9306094dddd91a84
+msgid "call out the change in the PR or handoff summary"
+msgstr "在 PR 或交接摘要中明确说明该变化"
+
+#: ../../development/collaboration.md:63 69674fa80e424b7b9619d142b39ae8c1
+msgid "Reviewability"
+msgstr "可评审性"
+
+#: ../../development/collaboration.md:65 89e1f444e8cd445780fe074e07b239a7
+msgid "Use descriptive branch names and Conventional Commits."
+msgstr "使用具描述性的分支名与 Conventional Commits。"
+
+#: ../../development/collaboration.md:66 acdcfd7894d742bb9361f895d2d21e09
+msgid "Prefer reviewable patches over large mixed diffs."
+msgstr "优先提交便于评审的小型补丁，而不是大而混杂的 diff。"
+
+#: ../../development/collaboration.md:67 80194695240a4483b09f85fbe80205da
+msgid ""
+"Include the exact verification commands you ran and the result you "
+"observed."
+msgstr ""
+"写明您实际运行过的验证命令以及观察到的结果。"
+
+#: ../../development/collaboration.md:68 ac7447cb3ff74b3ba2f1d75bdb5e2dae
+msgid ""
+"For UI or workflow changes, include screenshots, short recordings, or "
+"precise reproduction notes when practical."
+msgstr ""
+"对于 UI 或工作流变更，在可行时附上截图、短录屏或精确的复现说明。"
+
+#: ../../development/collaboration.md:70 f141daac09dc4ca6b261a6a44683ef70
+msgid "Review And Handoff Checklist"
+msgstr "评审与交接清单"
+
+#: ../../development/collaboration.md:72 5928d578330843108f2c537a933a2b8c
+msgid "Before asking for review or handing work to another contributor, include:"
+msgstr "在请求评审或将工作移交给其他贡献者之前，请包含以下内容："
+
+#: ../../development/collaboration.md:74 40d50a1f1d9c4b7abcca33ed83ce1258
+msgid "what changed and the user-facing or maintainer-facing impact"
+msgstr "变更了什么，以及它对用户或维护者有什么影响"
+
+#: ../../development/collaboration.md:75 941a5f5b06ae4d57a44a4fac7ece7c14
+msgid "which shared contracts, migrations, or risky files deserve extra review"
+msgstr "哪些共享契约、迁移或高风险文件需要额外关注"
+
+#: ../../development/collaboration.md:76 80194695240a4483b09f85fbe80205da
+msgid "the exact validation commands you ran and the result you observed"
+msgstr "您实际运行过的验证命令以及观察到的结果"
+
+#: ../../development/collaboration.md:77 8049c7e2ebf24a229fa8644850181547
+msgid "any known follow-ups, rollout steps, or unresolved risks"
+msgstr "任何已知的后续事项、上线步骤或尚未解决的风险"
+
+#: ../../development/collaboration.md:79 dda6521ebae84a0ead32f5f7a03330c5
+msgid "Use a compact handoff format when possible:"
+msgstr "在可能的情况下，使用简洁的交接格式："
+
+#: ../../development/collaboration.md:88 8ebefe5cc65f4ed7b5dcd30eb9fd5dca
+msgid "Example Handoff"
+msgstr "交接示例"
+
+#: ../../development/collaboration.md:97 ed958671554e491586d90456c429d40e
+msgid "Human And Automation Collaboration"
+msgstr "人与自动化的协作"
+
+#: ../../development/collaboration.md:99 d2dd771889bd422f8af2136dc23e89be
+msgid ""
+"Point automation tools at `AGENTS.md` before asking them to edit the "
+"repository."
+msgstr ""
+"在要求自动化工具修改仓库之前，先让它们阅读 `AGENTS.md`。"
+
+#: ../../development/collaboration.md:100 d3124f5ec35e4699b77a9e4aeed77730
+msgid "Give automation bounded tasks with clear file or subsystem scope."
+msgstr "给自动化工具分配边界清晰、文件或子系统范围明确的任务。"
+
+#: ../../development/collaboration.md:101 59a4a8fded964b41862ebf4b588ba0be
+msgid ""
+"Review generated diffs with the same skepticism you would apply to a "
+"human contribution."
+msgstr ""
+"审查自动化生成的 diff 时，应保持与审查人工提交同样的怀疑态度。"
+
+#: ../../development/collaboration.md:102 cda3cc47af5c474eb97fcc4a91d676fd
+msgid ""
+"Re-run validation after automation work instead of trusting success "
+"claims from the tool."
+msgstr ""
+"自动化工具完成后要重新运行验证，而不是直接相信它的成功声明。"
+
+#: ../../development/collaboration.md:103 a7b917f0db5a492388e2f333a1e76f68
+msgid ""
+"If an automation task changes contributor workflow, docs, or architecture"
+" boundaries, make sure the human reviewer sees those changes first."
+msgstr ""
+"如果自动化任务修改了贡献者工作流、文档或架构边界，请确保人工评审者先看到这些变化。"
+
+#: ../../development/collaboration.md:104 9e9ee66dd31c4a3099d4b270ebd7138e
+msgid ""
+"Tell automation what is out of bounds, which contracts are sensitive, and"
+" which verification commands are required before it starts editing."
+msgstr ""
+"在自动化开始编辑前，要明确告诉它哪些内容不可触碰、哪些契约敏感、以及必须运行哪些验证命"
+"令。"
+
+#: ../../development/collaboration.md:105 7927a7ff26c744a5a196eaf5b0dbf8a7
+msgid ""
+"Treat automation summaries as hints, not truth. The reviewer is still "
+"responsible for the final contract, risk, and verification checks."
+msgstr ""
+"把自动化工具的摘要当作线索，而不是真相。最终的契约、风险和验证检查责任仍在评审者。"
+
+#: ../../development/collaboration.md:107 1adf2cc98c6e4298b20aca74e32d1220
+msgid "Documentation And Translation Workflow"
+msgstr "文档与翻译工作流"
+
+#: ../../development/collaboration.md:109 ffa318d1591c4139b700bf7863707f61
+msgid "English Markdown source files are the documentation source of truth."
+msgstr "英文 Markdown 源文件是文档的权威来源。"
+
+#: ../../development/collaboration.md:110 807f2eb6de614006b41cbce9b431aa49
+msgid ""
+"When English docs change, refresh `.po` files so translation drift is "
+"visible immediately."
+msgstr ""
+"当英文文档发生变化时，请刷新 `.po` 文件，以便翻译漂移能被立即发现。"
+
+#: ../../development/collaboration.md:111 c2e15b9e94e3436385c25e94c31990b3
+msgid ""
+"Keep repository-level contributor guidance aligned across `AGENTS.md`, "
+"`CONTRIBUTING.md`, and `docs/development/`."
+msgstr ""
+"让仓库级贡献者指南在 `AGENTS.md`、`CONTRIBUTING.md` 与 `docs/development/` 之间保持"
+"一致。"
+
+#: ../../development/collaboration.md:113 6065bb71ee9c41dea82d8dcc2dab4b1f
+msgid "When To Stop And Coordinate"
+msgstr "何时应暂停并协调"
+
+#: ../../development/collaboration.md:115 04cd57ad24df458997b42075d378699c
+msgid "Pause and coordinate before proceeding if:"
+msgstr "若出现以下情况，请先暂停并协调，再继续推进："
+
+#: ../../development/collaboration.md:117 be893c0b24234d1aa97cf585f05f48e8
+msgid "another contributor's changes directly conflict with your task"
+msgstr "另一位贡献者的改动与您的任务直接冲突"
+
+#: ../../development/collaboration.md:118 b07be8123de644b5b6fc9ee86defa782
+msgid "you need to rewrite a shared contract used by multiple subsystems"
+msgstr "您需要重写一个被多个子系统使用的共享契约"
+
+#: ../../development/collaboration.md:119 ff8640c3893942009dacc27eaafc4d2e
+msgid ""
+"you are unsure whether a local-only directory is actually being treated "
+"as source by someone else's workflow"
+msgstr ""
+"您不确定某个仅本地使用的目录，是否实际上已被他人的工作流当作源码输入"
+
+#: ../../development/collaboration.md:120 0357cba0e73444b8b77d4c5ddae105a0
+msgid ""
+"a migration or execution-path change could break existing environments "
+"without a clear rollout path"
+msgstr ""
+"某项迁移或执行路径变更可能在没有明确发布路径的情况下破坏现有环境"

@@ -6,6 +6,7 @@ import {
 import { db } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,6 +17,10 @@ export async function POST(req: NextRequest) {
         { error: "Missing workspaceId" },
         { status: 400 }
       );
+    }
+    const access = await requireWorkspaceAccess(req, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const dateStr = date || getTodayDateString();

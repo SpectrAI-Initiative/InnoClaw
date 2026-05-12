@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { datasetWorkspaceLinks, hfDatasets } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { jsonException } from "@/lib/api-errors";
 
 type RouteParams = { params: Promise<{ workspaceId: string }> };
 
@@ -11,6 +13,10 @@ type RouteParams = { params: Promise<{ workspaceId: string }> };
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { workspaceId } = await params;
+    const access = await requireWorkspaceAccess(_request, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
 
     const rows = await db
       .select({
@@ -31,7 +37,6 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to list workspace datasets";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to list workspace datasets");
   }
 }
