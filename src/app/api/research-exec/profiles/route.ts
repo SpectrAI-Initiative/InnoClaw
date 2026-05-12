@@ -3,11 +3,17 @@ import { db } from "@/lib/db";
 import { remoteProfiles } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { jsonError, jsonException, requiredSearchParam } from "@/lib/api-errors";
 
 export async function GET(req: NextRequest) {
-  const workspaceId = req.nextUrl.searchParams.get("workspaceId");
-  if (!workspaceId) {
-    return NextResponse.json({ error: "Missing workspaceId" }, { status: 400 });
+  const workspaceId = requiredSearchParam(req, "workspaceId");
+  if (workspaceId instanceof NextResponse) {
+    return workspaceId;
+  }
+  const access = await requireWorkspaceAccess(req, workspaceId);
+  if (access instanceof NextResponse) {
+    return access;
   }
 
   const profiles = await db
@@ -24,10 +30,11 @@ export async function POST(req: NextRequest) {
     const { workspaceId, name, host, port, username, remotePath, schedulerType, sshKeyRef, pollIntervalSeconds, rjobConfig } = body;
 
     if (!workspaceId || !name || !host || !username || !remotePath) {
-      return NextResponse.json(
-        { error: "Missing required fields: workspaceId, name, host, username, remotePath" },
-        { status: 400 },
-      );
+      return jsonError("Missing required fields: workspaceId, name, host, username, remotePath", 400);
+    }
+    const access = await requireWorkspaceAccess(req, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const id = randomUUID();
@@ -56,8 +63,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to create profile";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to create profile");
   }
 }
 
@@ -67,7 +73,11 @@ export async function PATCH(req: NextRequest) {
     const { id, workspaceId, name, host, port, username, remotePath, schedulerType, sshKeyRef, pollIntervalSeconds, rjobConfig } = body;
 
     if (!id || !workspaceId) {
-      return NextResponse.json({ error: "Missing id or workspaceId" }, { status: 400 });
+      return jsonError("Missing id or workspaceId", 400);
+    }
+    const access = await requireWorkspaceAccess(req, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     const now = new Date().toISOString();
@@ -94,8 +104,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(updated);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to update profile";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to update profile");
   }
 }
 
@@ -104,7 +113,11 @@ export async function DELETE(req: NextRequest) {
   const workspaceId = req.nextUrl.searchParams.get("workspaceId");
 
   if (!id || !workspaceId) {
-    return NextResponse.json({ error: "Missing id or workspaceId" }, { status: 400 });
+    return jsonError("Missing id or workspaceId", 400);
+  }
+  const access = await requireWorkspaceAccess(req, workspaceId);
+  if (access instanceof NextResponse) {
+    return access;
   }
 
   await db

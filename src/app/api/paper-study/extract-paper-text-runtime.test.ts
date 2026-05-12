@@ -11,9 +11,9 @@ describe("extract-paper-text startup", () => {
       throw new Error("remote-paper-fetcher should not load during module import");
     });
 
-    const module = await import("./extract-paper-text");
+    const imported = await import("./extract-paper-text");
 
-    expect(module.extractPaperFullText).toEqual(expect.any(Function));
-    expect(module.extractPaperFullContent).toEqual(expect.any(Function));
+    expect(imported.extractPaperFullText).toEqual(expect.any(Function));
+    expect(imported.extractPaperFullContent).toEqual(expect.any(Function));
   });
 });

@@ -8,6 +8,7 @@ import { validatePath } from "@/lib/files/filesystem";
 import { jsonError } from "@/lib/api-errors";
 import { logAndIgnore } from "@/lib/utils/log";
 import { PAPER } from "@/lib/constants";
+import { requirePathAccess } from "@/lib/auth/ownership";
 import type { Article } from "@/lib/article-search/types";
 
 /**
@@ -46,6 +47,11 @@ export async function POST(req: NextRequest) {
 
     if (!filePath || typeof filePath !== "string") {
       return jsonError("Missing filePath", 400);
+    }
+
+    const access = await requirePathAccess(req, filePath);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     // Security: validate path is within workspace roots

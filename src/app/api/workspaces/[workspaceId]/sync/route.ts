@@ -1,35 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { workspaces } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 import { syncWorkspace } from "@/lib/rag/pipeline";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { jsonException } from "@/lib/api-errors";
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ workspaceId: string }> }
 ) {
   try {
     const { workspaceId } = await params;
-
-    const workspace = await db
-      .select()
-      .from(workspaces)
-      .where(eq(workspaces.id, workspaceId))
-      .limit(1);
-
-    if (workspace.length === 0) {
-      return NextResponse.json(
-        { error: "Workspace not found" },
-        { status: 404 }
-      );
+    const access = await requireWorkspaceAccess(request, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
-    const result = await syncWorkspace(workspaceId, workspace[0].folderPath);
+    const result = await syncWorkspace(workspaceId, access.workspace.folderPath);
 
     return NextResponse.json(result);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to sync workspace";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to sync workspace");
   }
 }

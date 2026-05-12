@@ -17,9 +17,9 @@ describe("extract-paper-content startup", () => {
       throw new Error("text-extractor should not load during module import");
     });
 
-    const module = await import("./extract-paper-content");
+    const imported = await import("./extract-paper-content");
 
-    expect(module.extractPaperContent).toEqual(expect.any(Function));
-    expect(module.extractPaperFullText).toEqual(expect.any(Function));
+    expect(imported.extractPaperContent).toEqual(expect.any(Function));
+    expect(imported.extractPaperFullText).toEqual(expect.any(Function));
   });
 });

@@ -36,7 +36,6 @@ import {
 } from "./session-hygiene";
 import { resolveCheckpointInteractionMode } from "./orchestrator-checkpoint";
 import type {
-  BrainDecision,
   CheckpointInteractionMode,
   ContextTag,
   DeepResearchArtifact,

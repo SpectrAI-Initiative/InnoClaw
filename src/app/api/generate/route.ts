@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { sources, notes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,10 @@ export async function POST(request: NextRequest) {
         { error: "Missing workspaceId or type" },
         { status: 400 }
       );
+    }
+    const access = await requireWorkspaceAccess(request, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     if (!isAIAvailable()) {

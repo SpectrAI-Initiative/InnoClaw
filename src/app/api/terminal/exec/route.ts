@@ -4,6 +4,7 @@ import path from "path";
 import { z } from "zod";
 import { validatePath } from "@/lib/files/filesystem";
 import { buildSafeExecEnv, resolveHome } from "@/lib/env";
+import { requirePathAccess } from "@/lib/auth/ownership";
 
 const EXEC_TIMEOUT = 30_000; // 30 seconds
 const MAX_COMMAND_LENGTH = 4096;
@@ -27,6 +28,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: msg }, { status: 400 });
     }
     const { command, cwd } = parsed.data;
+
+    const access = await requirePathAccess(req, cwd);
+    if (access instanceof NextResponse) {
+      return access;
+    }
 
     // Validate the working directory is within allowed workspace roots
     let validatedCwd: string;

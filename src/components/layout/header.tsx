@@ -7,6 +7,7 @@ import { Bot, Settings, Zap, FolderOpen, Minimize2, Database } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageToggle } from "./language-toggle";
+import { UserMenu } from "./user-menu";
 import {
   Tooltip,
   TooltipContent,
@@ -86,6 +87,7 @@ export function Header({ onToggleMinimalMode, showMinimalToggle }: HeaderProps) 
 
             <LanguageToggle />
             <ThemeToggle />
+            <UserMenu />
 
             <div className="mx-1 h-5 w-px bg-border/50" />
 

@@ -9,6 +9,8 @@ import { downloadModelScopeRepo } from "@/lib/modelscope/downloader";
 import { buildManifest, computeStats } from "@/lib/hf-datasets/manifest";
 import { setProgress, markFinished } from "@/lib/hf-datasets/progress";
 import type { HfRepoType } from "@/types";
+import { requireAuth } from "@/lib/auth/server";
+import { jsonError, jsonException } from "@/lib/api-errors";
 
 function getDatasetStorageRoot(): string {
   return process.env.HF_DATASETS_PATH || path.join(process.cwd(), "data", "hf-datasets");
@@ -17,18 +19,23 @@ function getDatasetStorageRoot(): string {
 /**
  * GET /api/datasets - List all datasets
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const rows = await db
       .select()
       .from(hfDatasets)
+      .where(eq(hfDatasets.ownerUserId, auth.user.id))
       .orderBy(desc(hfDatasets.createdAt));
 
     const result = rows.map(parseDatasetRow);
     return NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to list datasets";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to list datasets");
   }
 }
 
@@ -37,6 +44,11 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const body = await request.json();
     const {
       repoId,
@@ -57,12 +69,12 @@ export async function POST(request: NextRequest) {
     };
 
     if (!repoId) {
-      return NextResponse.json({ error: "Missing repoId" }, { status: 400 });
+      return jsonError("Missing repoId", 400);
     }
 
     const validSources = new Set(["huggingface", "modelscope"]);
     if (!validSources.has(source)) {
-      return NextResponse.json({ error: "Invalid source" }, { status: 400 });
+      return jsonError("Invalid source", 400);
     }
 
     // Derive display name from repoId
@@ -82,6 +94,7 @@ export async function POST(request: NextRequest) {
 
     await db.insert(hfDatasets).values({
       id,
+      ownerUserId: auth.user.id,
       name: displayName,
       repoId,
       repoType,
@@ -113,8 +126,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(parseDatasetRow(dataset[0]), { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to create dataset";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to create dataset");
   }
 }
 

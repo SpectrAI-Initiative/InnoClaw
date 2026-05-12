@@ -16,6 +16,8 @@ import {
   batchProcess,
   MAX_FETCH_BYTES,
 } from "@/lib/skills/github-fetch";
+import { requireAuth } from "@/lib/auth/server";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 /** Check if a hostname/IP is private, loopback, or internal */
 function isPrivateOrInternalHost(hostname: string): boolean {
@@ -86,8 +88,20 @@ function validateSkillData(data: unknown): data is SkillExportData {
 //   - url can be a direct JSON endpoint, or a GitHub repo/directory URL
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const body = await request.json();
     const { url, skill: skillData, workspaceId, paths, branch } = body;
+
+    if (workspaceId) {
+      const access = await requireWorkspaceAccess(request, workspaceId);
+      if (access instanceof NextResponse) {
+        return access;
+      }
+    }
 
     // ─── Path A: Selective GitHub import (from preview) ───
     if (url && isGitHubUrl(url) && Array.isArray(paths) && branch) {
@@ -123,7 +137,7 @@ export async function POST(request: NextRequest) {
             return;
           }
 
-          const id = await insertSkill(parsed, workspaceId || null);
+          const id = await insertSkill(parsed, workspaceId || null, auth.user.id);
           if (id) {
             imported++;
             importedNames.push(parsed.name);
@@ -167,7 +181,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const id = await insertSkill(parsed, workspaceId || null);
+        const id = await insertSkill(parsed, workspaceId || null, auth.user.id);
         if (!id) {
           return NextResponse.json(
             { error: "Failed to create skill" },
@@ -215,7 +229,7 @@ export async function POST(request: NextRequest) {
             return;
           }
 
-          const id = await insertSkill(parsed, workspaceId || null);
+          const id = await insertSkill(parsed, workspaceId || null, auth.user.id);
           if (id) {
             imported++;
             importedNames.push(parsed.name);
@@ -323,7 +337,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const id = await insertSkill(importData, workspaceId || null);
+    const id = await insertSkill(importData, workspaceId || null, auth.user.id);
     if (!id) {
       return NextResponse.json(
         { error: "Failed to create skill" },

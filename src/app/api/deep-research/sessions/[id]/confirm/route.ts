@@ -12,6 +12,7 @@ import {
   requireSession,
   type DeepResearchRouteParams,
 } from "@/lib/deep-research/api-helpers";
+import { requireDeepResearchSessionAccess } from "@/lib/auth/ownership";
 
 const VALID_OUTCOMES: ConfirmationOutcome[] = [
   "confirmed",
@@ -36,6 +37,10 @@ const EVENT_BY_OUTCOME: Record<ConfirmationOutcome, "user_confirmed" | "user_req
 export async function POST(req: NextRequest, { params }: DeepResearchRouteParams) {
   try {
     const sessionId = await readSessionId(params);
+    const access = await requireDeepResearchSessionAccess(req, sessionId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
     const body = await req.json();
     if (!isRecord(body)) {
       return NextResponse.json(

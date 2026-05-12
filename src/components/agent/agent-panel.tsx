@@ -32,8 +32,6 @@ import { getOverflowThresholdChars, getMessageTextLength, getContextWindowChars,
 import type { ProviderId } from "@/lib/ai/models";
 import { SkillAutocomplete } from "@/components/skills/skill-autocomplete";
 import { SkillParameterDialog } from "@/components/skills/skill-parameter-dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { ParticleEffect, ThinkingIndicator, FloatingOrbs } from "@/components/ui/particle-effect";
 import type { Skill } from "@/types";
 import { swrFetcher as fetcher } from "@/lib/fetcher";

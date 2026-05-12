@@ -9,6 +9,7 @@ import { updateEnvLocal } from "@/lib/env-file";
 import { PROVIDERS } from "@/lib/ai/models";
 import { getCurrentEnv } from "@/lib/ai/provider-env";
 import { getK8sConfig, SETTINGS_TO_ENV, invalidateK8sConfigCache } from "@/lib/cluster/config";
+import { requireAdmin } from "@/lib/auth/server";
 
 /**
  * Derive the base-URL env var name for a provider (e.g. "openai" → "OPENAI_BASE_URL").
@@ -33,8 +34,13 @@ function getProviderEnvInfo() {
   return { providerKeys, providerBaseUrls };
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAdmin(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const settings = await db.select().from(appSettings);
 
     const settingsMap: Record<string, string> = {};
@@ -92,6 +98,11 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const auth = await requireAdmin(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const body = await request.json();
 
     for (const [key, value] of Object.entries(body)) {

@@ -2,10 +2,45 @@ import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqli
 import { sql } from "drizzle-orm";
 
 // ============================================================
+// USERS / SESSIONS
+// ============================================================
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull(),
+  name: text("name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role", { enum: ["admin", "user"] }).notNull().default("user"),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  lastLoginAt: text("last_login_at"),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").notNull().default(sql`(datetime('now'))`),
+}, (table) => [
+  uniqueIndex("users_email_unique_idx").on(table.email),
+]);
+
+export const userSessions = sqliteTable("user_sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull(),
+  expiresAt: text("expires_at").notNull(),
+  lastSeenAt: text("last_seen_at"),
+  revokedAt: text("revoked_at"),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+}, (table) => [
+  uniqueIndex("user_sessions_token_hash_unique_idx").on(table.tokenHash),
+  index("user_sessions_user_idx").on(table.userId),
+  index("user_sessions_expires_idx").on(table.expiresAt),
+]);
+
+// ============================================================
 // WORKSPACES
 // ============================================================
 export const workspaces = sqliteTable("workspaces", {
   id: text("id").primaryKey(),
+  ownerUserId: text("owner_user_id")
+    .references(() => users.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   folderPath: text("folder_path").notNull(),
   description: text("description"),
@@ -121,6 +156,8 @@ export const appSettings = sqliteTable("app_settings", {
 // ============================================================
 export const skills = sqliteTable("skills", {
   id: text("id").primaryKey(),
+  ownerUserId: text("owner_user_id")
+    .references(() => users.id, { onDelete: "set null" }),
   workspaceId: text("workspace_id").references(() => workspaces.id, {
     onDelete: "cascade",
   }), // null = global skill
@@ -149,6 +186,8 @@ export const skills = sqliteTable("skills", {
 // ============================================================
 export const scheduledTasks = sqliteTable("scheduled_tasks", {
   id: text("id").primaryKey(),
+  ownerUserId: text("owner_user_id")
+    .references(() => users.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   taskType: text("task_type", {
     enum: ["daily_report", "weekly_report", "git_sync", "source_sync", "custom"],
@@ -208,6 +247,8 @@ export const clusterOperations = sqliteTable("cluster_operations", {
 // ============================================================
 export const hfDatasets = sqliteTable("hf_datasets", {
   id: text("id").primaryKey(),
+  ownerUserId: text("owner_user_id")
+    .references(() => users.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   repoId: text("repo_id").notNull(),
   repoType: text("repo_type").notNull().default("dataset"), // dataset | model | space

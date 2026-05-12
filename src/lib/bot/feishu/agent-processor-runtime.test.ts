@@ -11,8 +11,8 @@ describe("agent-processor startup", () => {
       throw new Error("tool registry should not load during module import");
     });
 
-    const module = await import("./agent-processor");
+    const imported = await import("./agent-processor");
 
-    expect(module.processAgentMessage).toEqual(expect.any(Function));
+    expect(imported.processAgentMessage).toEqual(expect.any(Function));
   });
 });

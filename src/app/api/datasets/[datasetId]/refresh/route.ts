@@ -4,33 +4,26 @@ import { hfDatasets } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { buildManifest, computeStats } from "@/lib/hf-datasets/manifest";
 import * as fs from "fs";
+import { requireDatasetAccess } from "@/lib/auth/ownership";
+import { jsonError, jsonException } from "@/lib/api-errors";
 
 type RouteParams = { params: Promise<{ datasetId: string }> };
 
 /**
  * POST /api/datasets/[datasetId]/refresh - Recalculate manifest & stats from disk
  */
-export async function POST(_request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { datasetId } = await params;
-
-    const rows = await db
-      .select()
-      .from(hfDatasets)
-      .where(eq(hfDatasets.id, datasetId))
-      .limit(1);
-
-    if (rows.length === 0) {
-      return NextResponse.json({ error: "Dataset not found" }, { status: 404 });
+    const access = await requireDatasetAccess(request, datasetId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
-    const dataset = rows[0];
+    const dataset = access.dataset;
 
     if (!dataset.localPath || !fs.existsSync(dataset.localPath)) {
-      return NextResponse.json(
-        { error: "Dataset files not found on disk" },
-        { status: 400 }
-      );
+      return jsonError("Dataset files not found on disk", 400);
     }
 
     const manifest = buildManifest(dataset.localPath);
@@ -59,7 +52,6 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       numFiles: totalFiles,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to refresh stats";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return jsonException(error, "Failed to refresh stats");
   }
 }
