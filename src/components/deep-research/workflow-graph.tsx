@@ -125,7 +125,7 @@ export function WorkflowGraph({ nodes, onNodeSelect }: WorkflowGraphProps) {
             <div>
               <div className="text-sm font-semibold">Roadmap</div>
               <p className="mt-1 text-xs text-muted-foreground">
-                A GitLens-style execution trail for this deep research session. Select any node to inspect its messages,
+                A GitLens-style execution trail for this auto research session. Select any node to inspect its messages,
                 artifacts, and execution history.
               </p>
             </div>
