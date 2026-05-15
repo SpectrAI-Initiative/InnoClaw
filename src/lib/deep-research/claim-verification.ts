@@ -8,10 +8,8 @@
 
 import type {
   DeepResearchArtifact,
-  DeepResearchNode,
   Claim,
   ClaimMap,
-  EvidenceCard,
   VerifiedClaim,
   ClaimVerificationReport,
   FabricationFlag,
@@ -205,7 +203,6 @@ function verifyNumericClaims(
 export interface ClaimVerificationInput {
   claimMap: ClaimMap | null;
   evidenceCards: DeepResearchArtifact[];
-  finalReportText?: string;
   config?: Partial<ClaimVerificationConfig>;
 }
 

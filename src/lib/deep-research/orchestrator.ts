@@ -21,7 +21,6 @@ import {
 import {
   reconcileSessionState,
 } from "./session-hygiene";
-import { tryQuickDecision, buildPivotRefineOverlay } from "./pivot-refine-loop";
 import { getEvolutionStore, harvestSessionLessons } from "./evolution-store";
 import { shouldAutoPause } from "./sentinel-watchdog";
 import {
@@ -37,6 +36,7 @@ import {
 import type {
   DeepResearchSession,
   ConfirmationOutcome,
+  SentinelReport,
 } from "./types";
 
 type RouteNextActionResult = {
@@ -238,10 +238,7 @@ async function routeNextAction(
       if (action === "pivot") {
         // Record pivot event
         await store.appendEvent(fresh.id, "pivot_initiated", executed.completedNode.id, "system");
-        
-        // Create new intake/plan nodes for the new direction
-        const pivotOverlay = buildPivotRefineOverlay(decision as any);
-        
+
         // Update session to restart from planning
         await store.updateSession(fresh.id, {
           status: "planning",
@@ -265,11 +262,17 @@ async function routeNextAction(
       );
       if (sentinelReportArtifacts.length > 0) {
         const latestSentinel = sentinelReportArtifacts[sentinelReportArtifacts.length - 1];
-        const sentinelContent = latestSentinel.content as Record<string, unknown> | null;
-        if (sentinelContent && shouldAutoPause(
-          { alerts: sentinelContent.alerts as any[] ?? [], overallHealth: sentinelContent.overallHealth as any, sessionId: fresh.id, checksRun: 4, checksFailed: (sentinelContent.alerts as any[] ?? []).length, recommendations: [] },
-          fresh.config.sentinel,
-        )) {
+        const sentinelContent = latestSentinel.content as unknown as Partial<SentinelReport> | null;
+        const alerts = Array.isArray(sentinelContent?.alerts) ? sentinelContent.alerts : [];
+        const sentinelReport: SentinelReport = {
+          sessionId: fresh.id,
+          alerts,
+          overallHealth: sentinelContent?.overallHealth ?? "healthy",
+          checksRun: sentinelContent?.checksRun ?? 4,
+          checksFailed: sentinelContent?.checksFailed ?? alerts.length,
+          recommendations: sentinelContent?.recommendations ?? [],
+        };
+        if (shouldAutoPause(sentinelReport, fresh.config.sentinel)) {
           await store.appendEvent(fresh.id, "sentinel_alert", executed.completedNode.id, "system");
           // Auto-pause for critical sentinel findings
           await store.updateSession(fresh.id, {

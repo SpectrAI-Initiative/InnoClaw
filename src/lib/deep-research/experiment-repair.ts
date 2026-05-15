@@ -8,11 +8,9 @@
 
 import { generateText } from "ai";
 import type { LanguageModel } from "ai";
-import { getModelForRole } from "./model-router";
 import { safeParseJson } from "./json-response";
 import type {
   DeepResearchArtifact,
-  DeepResearchNode,
   ExperimentDiagnosis,
   RepairCycleResult,
   ExperimentRepairResult,
@@ -20,7 +18,6 @@ import type {
 } from "./types";
 import { DEFAULT_EXPERIMENT_REPAIR_CONFIG } from "./config-types";
 import type { ExperimentRepairConfig } from "./config-types";
-import { buildRepairPromptOverlay as _buildRepairPromptOverlay } from "./repair-utils";
 
 // =============================================================
 // Diagnosis
@@ -226,12 +223,10 @@ function assessExperimentQuality(
  * Returns when quality is sufficient or max cycles exhausted.
  */
 export async function runExperimentRepair(
-  sessionId: string,
-  node: DeepResearchNode,
   stepResults: DeepResearchArtifact[],
   experimentResults: DeepResearchArtifact[],
-  config?: Partial<ExperimentRepairConfig>,
-  modelOverride?: LanguageModel,
+  config: Partial<ExperimentRepairConfig> | undefined,
+  model: LanguageModel,
 ): Promise<ExperimentRepairResult> {
   const cfg = { ...DEFAULT_EXPERIMENT_REPAIR_CONFIG, ...config };
 
@@ -247,40 +242,9 @@ export async function runExperimentRepair(
     };
   }
 
-  const model =
-    modelOverride ??
-    getModelForRole("repair_specialist", {
-      ...DEFAULT_EXPERIMENT_REPAIR_CONFIG,
-      budget: { maxTotalTokens: 2_000_000, maxOpusTokens: 500_000 },
-      maxWorkerFanOut: 1,
-      maxReviewerRounds: 2,
-      maxExecutionLoops: 3,
-      maxWorkerConcurrency: 1,
-      literature: {
-        maxLiteratureRounds: 3,
-        maxPapersPerRound: 10,
-        maxTotalPapers: 30,
-        maxReviewerRequestedExpansionRounds: 1,
-        maxSearchRetries: 2,
-      },
-      execution: {
-        defaultLauncherType: "rjob",
-        defaultResources: { gpu: 2, memoryMb: 200000, cpu: 32, privateMachine: "yes" },
-        defaultMounts: [],
-        defaultChargedGroup: "",
-      },
-      pivotRefine: { maxRefineIterations: 3, maxPivotCount: 2, autoRefineConfidenceThreshold: 0.6, autoVersionArtifacts: true },
-      debate: { maxDebateRounds: 3, enabledRoles: [], consensusMode: "majority" },
-      evolution: { enabled: false, timeDecayDays: 30, maxLessonsPerSession: 5, enabledCategories: [], storePath: "evolution" },
-      sentinel: { enabled: false, checkNumericSanity: true, checkEvidenceConsistency: true, checkCitationRelevance: true, autoPauseSeverityThreshold: 0.8 },
-      claimVerification: { enabled: false, minSupportingSources: 1, autoFlagUnsupported: true, crossReferenceMode: "fuzzy" },
-      experimentRepair: cfg,
-      hardwareDetection: { enabled: false, adaptCodeGeneration: true, highVramThresholdMb: 8192 },
-    }).model;
-
   const cycleHistory: RepairCycleResult[] = [];
-  let allStepResults = [...stepResults];
-  let allExperimentResults = [...experimentResults];
+  const allStepResults = [...stepResults];
+  const allExperimentResults = [...experimentResults];
 
   for (let cycle = 1; cycle <= cfg.maxRepairCycles; cycle++) {
     // Step 1: Diagnose

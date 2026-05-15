@@ -1,4 +1,5 @@
 import { generateText, stepCountIs } from "ai";
+import type { LanguageModel } from "ai";
 import { getModelForRole, getModelChainForRole, checkBudget, trackUsage } from "./model-router";
 import * as eventStore from "./event-store";
 import {
@@ -27,7 +28,7 @@ import {
   buildClaimMapFromStructuredSummary,
   normalizeStructuredSummaryArtifact,
 } from "./summary-packets";
-import { runMultiAgentDebate, buildDebateOverlay } from "./multi-agent-debate";
+import { runMultiAgentDebate } from "./multi-agent-debate";
 import { makeResearchDecision, tryQuickDecision, buildPivotRefineOverlay } from "./pivot-refine-loop";
 import { verifyClaims } from "./claim-verification";
 import { runExperimentRepair, buildRepairPromptOverlay } from "./experiment-repair";
@@ -40,6 +41,9 @@ import type {
   DeepResearchMessage,
   ArtifactType,
   ArtifactProvenance,
+  ClaimMap,
+  ClaimVerificationReport,
+  ReviewAssessment,
 } from "./types";
 
 interface ExecutionContext {
@@ -54,6 +58,8 @@ interface ExecutionResult {
   artifacts: DeepResearchArtifact[];
   tokensUsed: number;
 }
+
+type ExecutionModel = LanguageModel;
 
 export {
   FinalReportExecutionError,
@@ -160,7 +166,7 @@ export async function executeNode(
 async function executeByNodeType(
   node: DeepResearchNode,
   ctx: ExecutionContext,
-  model: ReturnType<typeof getModelForRole>["model"],
+  model: ExecutionModel,
   abortSignal?: AbortSignal
 ): Promise<{
   output: Record<string, unknown>;
@@ -242,22 +248,22 @@ async function executeByNodeType(
     // --- NEW: AutoResearchClaw features ---
 
     case "debate":
-      return executeDebateNode(node, ctx, model, abortSignal);
+      return executeDebateNode(node, ctx, model);
 
     case "pivot_refine":
-      return executePivotRefineNode(node, ctx, model, abortSignal);
+      return executePivotRefineNode(node, ctx, model);
 
     case "claim_verify":
-      return executeClaimVerifyNode(node, ctx, model, abortSignal);
+      return executeClaimVerifyNode(node, ctx);
 
     case "experiment_repair":
-      return executeExperimentRepairNode(node, ctx, model, abortSignal);
+      return executeExperimentRepairNode(node, ctx, model);
 
     case "hardware_detect":
-      return executeHardwareDetectNode(node, abortSignal);
+      return executeHardwareDetectNode(node);
 
     case "sentinel_check":
-      return executeSentinelCheckNode(node, ctx, abortSignal);
+      return executeSentinelCheckNode(node, ctx);
 
     default:
       return executeGeneric(node, parentArtifacts, model, abortSignal);
@@ -271,8 +277,7 @@ async function executeByNodeType(
 async function executeDebateNode(
   node: DeepResearchNode,
   ctx: ExecutionContext,
-  model: ReturnType<typeof getModelForRole>["model"],
-  abortSignal?: AbortSignal,
+  model: ExecutionModel,
 ) {
   const topic = (node.input as Record<string, unknown>)?.topic as string
     ?? node.label;
@@ -313,8 +318,7 @@ async function executeDebateNode(
 async function executePivotRefineNode(
   node: DeepResearchNode,
   ctx: ExecutionContext,
-  model: ReturnType<typeof getModelForRole>["model"],
-  abortSignal?: AbortSignal,
+  model: ExecutionModel,
 ) {
   const reviewArtifacts = ctx.allArtifacts.filter(
     (a) => a.artifactType === "review_assessment" || a.artifactType === "reviewer_packet",
@@ -328,9 +332,11 @@ async function executePivotRefineNode(
 
   const decisionCtx = {
     session: ctx.session,
-    reviewAssessments: reviewArtifacts.map((a) => a.content as any),
+    reviewAssessments: reviewArtifacts.map((a) => a.content as unknown as ReviewAssessment),
     experimentResults,
-    claimVerification: claimVerificationArtifact?.content as any ?? null,
+    claimVerification: claimVerificationArtifact
+      ? (claimVerificationArtifact.content as unknown as ClaimVerificationReport)
+      : null,
     executionLoops: ctx.session.executionLoop ?? 0,
     reviewerRounds: ctx.session.reviewerRound ?? 0,
     budgetRemaining:
@@ -344,7 +350,6 @@ async function executePivotRefineNode(
   if (!decision) {
     decision = await makeResearchDecision(
       decisionCtx,
-      ctx.session.config.pivotRefine,
       model,
     );
   }
@@ -372,8 +377,6 @@ async function executePivotRefineNode(
 async function executeClaimVerifyNode(
   node: DeepResearchNode,
   ctx: ExecutionContext,
-  model: ReturnType<typeof getModelForRole>["model"],
-  abortSignal?: AbortSignal,
 ) {
   const claimMapArtifact = ctx.allArtifacts.find(
     (a) => a.artifactType === "claim_map",
@@ -381,19 +384,14 @@ async function executeClaimVerifyNode(
   const evidenceCards = ctx.allArtifacts.filter(
     (a) => a.artifactType === "evidence_card",
   );
-  const finalReport = ctx.allArtifacts.find(
-    (a) => a.artifactType === "final_report",
-  );
 
-  const claimMap = claimMapArtifact?.content as any ?? null;
-  const reportText = finalReport
-    ? JSON.stringify(finalReport.content)
-    : undefined;
+  const claimMap = claimMapArtifact
+    ? (claimMapArtifact.content as unknown as ClaimMap)
+    : null;
 
   const report = verifyClaims({
     claimMap,
     evidenceCards,
-    finalReportText: reportText,
     config: ctx.session.config.claimVerification,
   });
 
@@ -417,8 +415,7 @@ async function executeClaimVerifyNode(
 async function executeExperimentRepairNode(
   node: DeepResearchNode,
   ctx: ExecutionContext,
-  model: ReturnType<typeof getModelForRole>["model"],
-  abortSignal?: AbortSignal,
+  model: ExecutionModel,
 ) {
   const stepResults = ctx.allArtifacts.filter(
     (a) => a.artifactType === "step_result",
@@ -428,8 +425,6 @@ async function executeExperimentRepairNode(
   );
 
   const repairResult = await runExperimentRepair(
-    ctx.session.id,
-    node,
     stepResults,
     experimentResults,
     ctx.session.config.experimentRepair,
@@ -457,7 +452,6 @@ async function executeExperimentRepairNode(
 
 async function executeHardwareDetectNode(
   node: DeepResearchNode,
-  abortSignal?: AbortSignal,
 ) {
   const profile = detectHardware();
 
@@ -483,7 +477,6 @@ async function executeHardwareDetectNode(
 async function executeSentinelCheckNode(
   node: DeepResearchNode,
   ctx: ExecutionContext,
-  abortSignal?: AbortSignal,
 ) {
   const report = runSentinelChecks({
     config: ctx.session.config.sentinel,
@@ -514,7 +507,7 @@ async function executeSentinelCheckNode(
 async function executeBrainNode(
   node: DeepResearchNode,
   ctx: ExecutionContext,
-  model: ReturnType<typeof getModelForRole>["model"],
+  model: ExecutionModel,
   abortSignal?: AbortSignal
 ) {
   const memoryContext = buildResearchMemoryPromptBlock({
@@ -598,7 +591,7 @@ async function executeBrainNode(
 async function executeEvidenceGather(
   node: DeepResearchNode,
   parentArtifacts: DeepResearchArtifact[],
-  model: ReturnType<typeof getModelForRole>["model"],
+  model: ExecutionModel,
   abortSignal?: AbortSignal
 ) {
   const input = (node.input as Record<string, unknown>) ?? {};
@@ -691,7 +684,7 @@ async function executeEvidenceGather(
 async function executeSummarize(
   node: DeepResearchNode,
   parentArtifacts: DeepResearchArtifact[],
-  model: ReturnType<typeof getModelForRole>["model"],
+  model: ExecutionModel,
   abortSignal?: AbortSignal
 ) {
   const systemPrompt = buildWorkerSystemPrompt(node, parentArtifacts, "summarize");
@@ -742,7 +735,7 @@ async function executeSummarize(
 async function executeReview(
   node: DeepResearchNode,
   allArtifacts: DeepResearchArtifact[],
-  model: ReturnType<typeof getModelForRole>["model"],
+  model: ExecutionModel,
   abortSignal?: AbortSignal
 ) {
   const role = node.assignedRole as "results_and_evidence_analyst";
@@ -789,7 +782,7 @@ async function executeReview(
 async function executeWorkerTask(
   node: DeepResearchNode,
   parentArtifacts: DeepResearchArtifact[],
-  model: ReturnType<typeof getModelForRole>["model"],
+  model: ExecutionModel,
   abortSignal?: AbortSignal,
   artifactType: ArtifactType = "step_result"
 ) {
@@ -827,7 +820,7 @@ async function executeWorkerTask(
 async function executeGeneric(
   node: DeepResearchNode,
   parentArtifacts: DeepResearchArtifact[],
-  model: ReturnType<typeof getModelForRole>["model"],
+  model: ExecutionModel,
   abortSignal?: AbortSignal
 ) {
   const systemPrompt = buildWorkerSystemPrompt(node, parentArtifacts, node.nodeType);

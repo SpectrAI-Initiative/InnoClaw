@@ -9,11 +9,9 @@
 
 import { generateText } from "ai";
 import type { LanguageModel } from "ai";
-import { getModelForRole } from "./model-router";
 import { safeParseJson } from "./json-response";
 import type {
   DeepResearchArtifact,
-  DeepResearchNode,
   DeepResearchSession,
   ResearchDecision,
   PivotDecision,
@@ -22,9 +20,7 @@ import type {
   ReviewAssessment,
   ClaimVerificationReport,
 } from "./types";
-import { DEFAULT_PIVOT_REFINE_CONFIG } from "./config-types";
-import type { PivotRefineConfig } from "./config-types";
-import { tryQuickDecision as _tryQuickDecision, getArtifactVersionSuffix as _getArtifactVersionSuffix, buildPivotRefineOverlay as _buildPivotRefineOverlay } from "./pivot-refine-utils";
+import { tryQuickDecision as quickRuleDecision } from "./pivot-refine-utils";
 
 // =============================================================
 // Decision System Prompt
@@ -148,30 +144,8 @@ function buildDecisionPrompt(ctx: DecisionContext): string {
 
 export async function makeResearchDecision(
   ctx: DecisionContext,
-  config?: Partial<PivotRefineConfig>,
-  modelOverride?: LanguageModel,
+  model: LanguageModel,
 ): Promise<ResearchDecision> {
-  const cfg = { ...DEFAULT_PIVOT_REFINE_CONFIG, ...config };
-
-  const model =
-    modelOverride ??
-    getModelForRole("main_brain", {
-      budget: { maxTotalTokens: 2_000_000, maxOpusTokens: 500_000 },
-      maxWorkerFanOut: 1,
-      maxReviewerRounds: 2,
-      maxExecutionLoops: 3,
-      maxWorkerConcurrency: 1,
-      literature: { maxLiteratureRounds: 3, maxPapersPerRound: 10, maxTotalPapers: 30, maxReviewerRequestedExpansionRounds: 1, maxSearchRetries: 2 },
-      execution: { defaultLauncherType: "rjob", defaultResources: { gpu: 2, memoryMb: 200000, cpu: 32, privateMachine: "yes" }, defaultMounts: [], defaultChargedGroup: "" },
-      pivotRefine: cfg,
-      debate: { maxDebateRounds: 3, enabledRoles: [], consensusMode: "majority" },
-      evolution: { enabled: false, timeDecayDays: 30, maxLessonsPerSession: 5, enabledCategories: [], storePath: "evolution" },
-      sentinel: { enabled: false, checkNumericSanity: true, checkEvidenceConsistency: true, checkCitationRelevance: true, autoPauseSeverityThreshold: 0.8 },
-      claimVerification: { enabled: false, minSupportingSources: 1, autoFlagUnsupported: true, crossReferenceMode: "fuzzy" },
-      experimentRepair: { enabled: false, maxRepairCycles: 3, qualityThreshold: 0.7, autoDiagnose: true },
-      hardwareDetection: { enabled: false, adaptCodeGeneration: true, highVramThresholdMb: 8192 },
-    } as any).model;
-
   const userPrompt = buildDecisionPrompt(ctx);
 
   const result = await generateText({
@@ -224,7 +198,7 @@ export async function makeResearchDecision(
  * Returns null if rules are inconclusive — caller should then call the LLM.
  */
 export function tryQuickDecision(ctx: DecisionContext): ResearchDecision | null {
-  return _tryQuickDecision({
+  return quickRuleDecision({
     reviewAssessments: ctx.reviewAssessments,
     claimVerification: ctx.claimVerification,
     executionLoops: ctx.executionLoops,
@@ -240,4 +214,3 @@ export function tryQuickDecision(ctx: DecisionContext): ResearchDecision | null 
 
 // Re-exported from pivot-refine-utils.ts (pure functions, no server deps)
 export { getArtifactVersionSuffix, buildPivotRefineOverlay } from "./pivot-refine-utils";
-

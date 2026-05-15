@@ -9,9 +9,7 @@
 
 import { generateText } from "ai";
 import type { LanguageModel } from "ai";
-import { getModelForRole } from "./model-router";
 import { safeParseJson } from "./json-response";
-import { buildDebateOverlay as _buildDebateOverlay, isDebateRecordValid as _isDebateRecordValid } from "./debate-utils";
 import type {
   DeepResearchArtifact,
   DebateRound,
@@ -145,6 +143,29 @@ Output as JSON:
 // Debate Orchestrator
 // =============================================================
 
+const DEFAULT_DEBATE_ROLES: DebateRole[] = ["moderator", "skeptic", "librarian", "reproducer", "scribe"];
+
+const DEBATE_ROLE_ALIASES: Record<string, DebateRole> = {
+  moderator: "moderator",
+  debate_moderator: "moderator",
+  skeptic: "skeptic",
+  debate_skeptic: "skeptic",
+  librarian: "librarian",
+  debate_librarian: "librarian",
+  reproducer: "reproducer",
+  debate_reproducer: "reproducer",
+  scribe: "scribe",
+  debate_scribe: "scribe",
+};
+
+function normalizeDebateRoles(enabledRoles: string[]): DebateRole[] {
+  const roles = enabledRoles
+    .map((role) => DEBATE_ROLE_ALIASES[role])
+    .filter((role): role is DebateRole => Boolean(role));
+  const uniqueRoles = [...new Set(roles)];
+  return uniqueRoles.length > 0 ? uniqueRoles : DEFAULT_DEBATE_ROLES;
+}
+
 async function runAgentRound(
   role: DebateRole,
   topic: string,
@@ -199,32 +220,11 @@ async function runAgentRound(
 export async function runMultiAgentDebate(
   topic: string,
   parentArtifacts: DeepResearchArtifact[],
-  config?: Partial<DebateConfig>,
-  modelOverride?: LanguageModel,
+  config: Partial<DebateConfig> | undefined,
+  model: LanguageModel,
 ): Promise<DebateRecord> {
   const cfg = { ...DEFAULT_DEBATE_CONFIG, ...config };
-  const roles: DebateRole[] = (cfg.enabledRoles as DebateRole[]).length > 0
-    ? (cfg.enabledRoles as DebateRole[])
-    : ["moderator", "skeptic", "librarian", "reproducer", "scribe"];
-
-  const model =
-    modelOverride ??
-    getModelForRole("debate_moderator", {
-      budget: { maxTotalTokens: 2_000_000, maxOpusTokens: 500_000 },
-      maxWorkerFanOut: 1,
-      maxReviewerRounds: 2,
-      maxExecutionLoops: 3,
-      maxWorkerConcurrency: 1,
-      literature: { maxLiteratureRounds: 3, maxPapersPerRound: 10, maxTotalPapers: 30, maxReviewerRequestedExpansionRounds: 1, maxSearchRetries: 2 },
-      execution: { defaultLauncherType: "rjob", defaultResources: { gpu: 2, memoryMb: 200000, cpu: 32, privateMachine: "yes" }, defaultMounts: [], defaultChargedGroup: "" },
-      pivotRefine: { maxRefineIterations: 3, maxPivotCount: 2, autoRefineConfidenceThreshold: 0.6, autoVersionArtifacts: true },
-      debate: cfg,
-      evolution: { enabled: false, timeDecayDays: 30, maxLessonsPerSession: 5, enabledCategories: [], storePath: "evolution" },
-      sentinel: { enabled: false, checkNumericSanity: true, checkEvidenceConsistency: true, checkCitationRelevance: true, autoPauseSeverityThreshold: 0.8 },
-      claimVerification: { enabled: false, minSupportingSources: 1, autoFlagUnsupported: true, crossReferenceMode: "fuzzy" },
-      experimentRepair: { enabled: false, maxRepairCycles: 3, qualityThreshold: 0.7, autoDiagnose: true },
-      hardwareDetection: { enabled: false, adaptCodeGeneration: true, highVramThresholdMb: 8192 },
-    } as any).model;
+  const roles = normalizeDebateRoles(cfg.enabledRoles);
 
   const rounds: DebateRound[] = [];
   let previousSummary = "";
