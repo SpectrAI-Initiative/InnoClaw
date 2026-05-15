@@ -25,6 +25,12 @@ const VALID_NODE_TYPES = new Set<NodeType>([
   "data_download",
   "preprocess",
   "skill_route",
+  "debate",
+  "pivot_refine",
+  "claim_verify",
+  "experiment_repair",
+  "hardware_detect",
+  "sentinel_check",
 ]);
 
 const VALID_MODEL_ROLES = new Set<ModelRole>([
@@ -38,6 +44,12 @@ const VALID_MODEL_ROLES = new Set<ModelRole>([
   "research_asset_reuse_specialist",
   "worker",
   "synthesizer",
+  "debate_moderator",
+  "debate_skeptic",
+  "debate_librarian",
+  "sentinel_watchdog",
+  "repair_specialist",
+  "hardware_profiler",
 ]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {

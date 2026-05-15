@@ -5,12 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   CheckCircle,
   Download,
   Loader2,
   FileText,
   Copy,
   Check,
+  FileDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -30,6 +38,9 @@ export function FinalReportView({ session, artifacts }: FinalReportViewProps) {
   const [saving, setSaving] = useState(false);
   const [savedPath, setSavedPath] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [latexConference, setLatexConference] = useState("neurips_2025");
+  const [exportingLatex, setExportingLatex] = useState(false);
+  const [compilingPdf, setCompilingPdf] = useState(false);
 
   const finalReport = getLatestFinalReportArtifact(artifacts);
   const { reportText, citationCoverage } = resolveFinalReportPresentation(finalReport, artifacts);
@@ -67,6 +78,109 @@ export function FinalReportView({ session, artifacts }: FinalReportViewProps) {
     }
   };
 
+  const handleExportLaTeX = async () => {
+    setExportingLatex(true);
+    try {
+      const res = await fetch(
+        `/api/deep-research/sessions/${session.id}/export/latex?conference=${latexConference}`,
+        { method: "GET" },
+      );
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to generate LaTeX");
+      }
+      const data = await res.json();
+
+      // Download .tex file
+      const texBlob = new Blob([data.texContent], { type: "text/plain" });
+      const texUrl = URL.createObjectURL(texBlob);
+      const texAnchor = document.createElement("a");
+      texAnchor.href = texUrl;
+      texAnchor.download = `${session.title.replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, "_").slice(0, 40)}_${latexConference}.tex`;
+      texAnchor.click();
+      URL.revokeObjectURL(texUrl);
+
+      // Also download .bib if present
+      if (data.bibContent) {
+        const bibBlob = new Blob([data.bibContent], { type: "text/plain" });
+        const bibUrl = URL.createObjectURL(bibBlob);
+        const bibAnchor = document.createElement("a");
+        bibAnchor.href = bibUrl;
+        bibAnchor.download = "references.bib";
+        bibAnchor.click();
+        URL.revokeObjectURL(bibUrl);
+      }
+
+      toast.success(
+        `LaTeX exported (${data.wordCount} words, ${data.bibEntryCount} references, ${latexConference.replace("_", " ").toUpperCase()})`,
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to export LaTeX");
+    } finally {
+      setExportingLatex(false);
+    }
+  };
+
+  const handleCompilePdf = async () => {
+    setCompilingPdf(true);
+    try {
+      const res = await fetch(
+        `/api/deep-research/sessions/${session.id}/export/latex/compile?conference=${latexConference}`,
+        { method: "POST" },
+      );
+
+      // Check content-type: if PDF, download it; if JSON, it's an error/fallback
+      const contentType = res.headers.get("content-type") || "";
+
+      if (contentType.includes("application/pdf")) {
+        // Success — download PDF
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `${session.title.replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, "_").slice(0, 40)}.pdf`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        toast.success("PDF compiled and downloaded");
+      } else {
+        // Server returned JSON — built-in compiler could not produce a PDF, fall back to .tex download
+        const data = await res.json();
+
+        // Download .tex file
+        if (data.texContent) {
+          const texBlob = new Blob([data.texContent], { type: "text/plain" });
+          const texUrl = URL.createObjectURL(texBlob);
+          const texAnchor = document.createElement("a");
+          texAnchor.href = texUrl;
+          texAnchor.download = `${session.title.replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, "_").slice(0, 40)}_${latexConference}.tex`;
+          texAnchor.click();
+          URL.revokeObjectURL(texUrl);
+        }
+
+        // Download .bib file
+        if (data.bibContent) {
+          const bibBlob = new Blob([data.bibContent], { type: "text/plain" });
+          const bibUrl = URL.createObjectURL(bibBlob);
+          const bibAnchor = document.createElement("a");
+          bibAnchor.href = bibUrl;
+          bibAnchor.download = "references.bib";
+          bibAnchor.click();
+          URL.revokeObjectURL(bibUrl);
+        }
+
+        const hint = data.hint || "Install XeLaTeX, LuaLaTeX, or BasicTeX.";
+        toast.warning(
+          `LaTeX compiler could not finish — .tex + .bib downloaded. ${hint}`,
+          { duration: 8000 },
+        );
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "PDF compilation failed — download .tex and compile locally");
+    } finally {
+      setCompilingPdf(false);
+    }
+  };
+
   if (!finalReport) {
     return (
       <div className="flex flex-col h-full">
@@ -99,43 +213,89 @@ export function FinalReportView({ session, artifacts }: FinalReportViewProps) {
       </div>
 
       {/* Action bar */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-muted/30 shrink-0">
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7 px-3 text-xs gap-1.5"
-          onClick={handleSaveToWorkspace}
-          disabled={saving || !!savedPath}
-        >
-          {saving ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : savedPath ? (
-            <Check className="h-3 w-3 text-green-500" />
-          ) : (
-            <Download className="h-3 w-3" />
-          )}
-          {savedPath ? "Saved" : "Save to Workspace"}
-        </Button>
+      <div className="flex flex-col gap-2 px-4 py-2 border-b border-border/50 bg-muted/30 shrink-0">
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 px-3 text-xs gap-1.5"
+            onClick={handleSaveToWorkspace}
+            disabled={saving || !!savedPath}
+          >
+            {saving ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : savedPath ? (
+              <Check className="h-3 w-3 text-green-500" />
+            ) : (
+              <Download className="h-3 w-3" />
+            )}
+            {savedPath ? "Saved" : "Save"}
+          </Button>
 
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7 px-3 text-xs gap-1.5"
-          onClick={handleCopy}
-        >
-          {copied ? (
-            <Check className="h-3 w-3 text-green-500" />
-          ) : (
-            <Copy className="h-3 w-3" />
-          )}
-          {copied ? "Copied" : "Copy"}
-        </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 px-3 text-xs gap-1.5"
+            onClick={handleCopy}
+          >
+            {copied ? (
+              <Check className="h-3 w-3 text-green-500" />
+            ) : (
+              <Copy className="h-3 w-3" />
+            )}
+            {copied ? "Copied" : "Copy"}
+          </Button>
 
-        {savedPath && (
-          <span className="text-[10px] text-muted-foreground truncate flex-1 text-right">
-            {savedPath}
-          </span>
-        )}
+          <div className="w-px h-4 bg-border" />
+
+          {/* LaTeX template selector */}
+          <Select value={latexConference} onValueChange={setLatexConference}>
+            <SelectTrigger className="h-7 w-[140px] text-[11px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="neurips_2025">NeurIPS 2025</SelectItem>
+              <SelectItem value="iclr_2026">ICLR 2026</SelectItem>
+              <SelectItem value="icml_2026">ICML 2026</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            size="sm"
+            variant="default"
+            className="h-7 px-3 text-xs gap-1.5"
+            onClick={handleExportLaTeX}
+            disabled={exportingLatex}
+          >
+            {exportingLatex ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <FileDown className="h-3 w-3" />
+            )}
+            Export LaTeX
+          </Button>
+
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7 px-3 text-xs gap-1.5"
+            onClick={handleCompilePdf}
+            disabled={compilingPdf}
+          >
+            {compilingPdf ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <FileText className="h-3 w-3" />
+            )}
+            Compile PDF
+          </Button>
+
+          {savedPath && (
+            <span className="text-[10px] text-muted-foreground truncate flex-1 text-right">
+              {savedPath}
+            </span>
+          )}
+        </div>
       </div>
 
       {citationCoverage && (

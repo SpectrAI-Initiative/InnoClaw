@@ -102,7 +102,11 @@ ${roleContract || "  (no structured role contract available)"}
 - Each major section must contain a coherent argumentative arc rather than a loose collection of observations.
 - When the user asked for a survey / review / overview / taxonomy / mechanism summary, produce a literature-review-style report rather than a brief conclusion note.
 - Cite provenance inline when possible using source titles, model names, benchmark names, years, or artifact labels from the provided context.
-- If some parts of the request are under-supported, explicitly label them as uncertain instead of inventing details.`;
+- If some parts of the request are under-supported, explicitly label them as uncertain instead of inventing details.
+- Use standard LaTeX math notation for equations and formulas (inline $...$ and display \[...\]).
+- Format tables as markdown tables (they will be auto-converted to LaTeX).
+- Use \cite{key} for citations where possible.
+- Structure sections with clear academic headings: Introduction, Related Work, Methodology, Results, Discussion, Conclusion.`;
 }
 
 export function buildFinalReportPlannerSystemPrompt(
@@ -602,6 +606,7 @@ export function buildFinalReportCitationEntries(
   const entries: FinalReportCitationEntry[] = [];
   const seen = new Set<string>();
 
+  // Extract from evidence cards (primary source)
   for (const artifact of artifacts) {
     if (artifact.artifactType !== "evidence_card" || !Array.isArray(artifact.content.sources)) {
       continue;
@@ -637,6 +642,77 @@ export function buildFinalReportCitationEntries(
         doi: typeof entry.doi === "string" && entry.doi.trim().length > 0 ? entry.doi.trim() : undefined,
         query,
       });
+    }
+  }
+
+  // Extract from structured summaries (chapter packets contain citation info)
+  for (const artifact of artifacts) {
+    if (artifact.artifactType !== "structured_summary") continue;
+    
+    const content = artifact.content as Record<string, unknown> | null;
+    if (!content) continue;
+
+    const chapterPackets = (content.chapterPackets as Array<Record<string, unknown>>) ?? [];
+    for (const packet of chapterPackets) {
+      // Extract from supportingQuotes
+      const quotes = (packet.supportingQuotes as Array<Record<string, unknown>>) ?? [];
+      for (const quote of quotes) {
+        const citeKey = typeof quote.citationKey === "string" ? quote.citationKey.trim() : null;
+        const srcTitle = typeof quote.sourceTitle === "string" ? quote.sourceTitle.trim() : null;
+        if (!srcTitle) continue;
+        const key = citeKey ?? srcTitle;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        entries.push({
+          citationKey: key,
+          title: srcTitle,
+          query: typeof packet.title === "string" ? packet.title : "Structured summary",
+        });
+      }
+
+      // Extract from claims citation keys
+      const claims = (packet.claims as Array<Record<string, unknown>>) ?? [];
+      for (const claim of claims) {
+        const citeKeys = Array.isArray(claim.citationKeys) ? claim.citationKeys as string[] : [];
+        for (const ck of citeKeys) {
+          if (seen.has(ck)) continue;
+          seen.add(ck);
+          entries.push({
+            citationKey: ck,
+            title: ck,
+            query: typeof packet.title === "string" ? packet.title : "Claim reference",
+          });
+        }
+      }
+    }
+  }
+
+  // Extract from evidence card collections
+  for (const artifact of artifacts) {
+    if (artifact.artifactType !== "evidence_card_collection") continue;
+    
+    const coll = artifact.content as Record<string, unknown> | null;
+    if (!coll) continue;
+    
+    const cards = (coll.cards as Array<Record<string, unknown>>) ?? [];
+    for (const card of cards) {
+      const sources = (card.sources as Array<Record<string, unknown>>) ?? [];
+      for (const source of sources) {
+        const title = typeof source.title === "string" && source.title.trim().length > 0 ? source.title.trim() : null;
+        if (!title) continue;
+        const year = typeof source.year === "number" ? source.year : undefined;
+        const key = year ? `${title}, ${year}` : title;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        entries.push({
+          citationKey: key,
+          title,
+          year,
+          venue: typeof source.venue === "string" ? source.venue : undefined,
+          url: typeof source.url === "string" ? source.url : undefined,
+          query: typeof card.query === "string" ? card.query : "Evidence collection",
+        });
+      }
     }
   }
 

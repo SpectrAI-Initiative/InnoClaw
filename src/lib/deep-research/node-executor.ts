@@ -27,6 +27,12 @@ import {
   buildClaimMapFromStructuredSummary,
   normalizeStructuredSummaryArtifact,
 } from "./summary-packets";
+import { runMultiAgentDebate, buildDebateOverlay } from "./multi-agent-debate";
+import { makeResearchDecision, tryQuickDecision, buildPivotRefineOverlay } from "./pivot-refine-loop";
+import { verifyClaims } from "./claim-verification";
+import { runExperimentRepair, buildRepairPromptOverlay } from "./experiment-repair";
+import { detectHardware, buildHardwarePromptBlock } from "./hardware-detection";
+import { runSentinelChecks } from "./sentinel-watchdog";
 import type {
   DeepResearchNode,
   DeepResearchArtifact,
@@ -233,9 +239,274 @@ async function executeByNodeType(
         tokensUsed: 0,
       };
 
+    // --- NEW: AutoResearchClaw features ---
+
+    case "debate":
+      return executeDebateNode(node, ctx, model, abortSignal);
+
+    case "pivot_refine":
+      return executePivotRefineNode(node, ctx, model, abortSignal);
+
+    case "claim_verify":
+      return executeClaimVerifyNode(node, ctx, model, abortSignal);
+
+    case "experiment_repair":
+      return executeExperimentRepairNode(node, ctx, model, abortSignal);
+
+    case "hardware_detect":
+      return executeHardwareDetectNode(node, abortSignal);
+
+    case "sentinel_check":
+      return executeSentinelCheckNode(node, ctx, abortSignal);
+
     default:
       return executeGeneric(node, parentArtifacts, model, abortSignal);
   }
+}
+
+// =============================================================
+// NEW: AutoResearchClaw Feature Node Handlers
+// =============================================================
+
+async function executeDebateNode(
+  node: DeepResearchNode,
+  ctx: ExecutionContext,
+  model: ReturnType<typeof getModelForRole>["model"],
+  abortSignal?: AbortSignal,
+) {
+  const topic = (node.input as Record<string, unknown>)?.topic as string
+    ?? node.label;
+
+  const debateRecord = await runMultiAgentDebate(
+    topic,
+    ctx.allArtifacts,
+    ctx.session.config.debate,
+    model,
+  );
+
+  const output = {
+    topic: debateRecord.topic,
+    consensusReached: debateRecord.consensusReached,
+    finalConsensus: debateRecord.finalConsensus,
+    totalRounds: debateRecord.totalRounds,
+    keyInsights: debateRecord.keyInsights,
+    actionItems: debateRecord.actionItems,
+  };
+
+  return {
+    output: output as unknown as Record<string, unknown>,
+    artifacts: [{
+      artifactType: "debate_record" as ArtifactType,
+      title: `Debate: ${topic}`,
+      content: output as unknown as Record<string, unknown>,
+      provenance: {
+        sourceNodeId: node.id,
+        sourceArtifactIds: ctx.allArtifacts.map((a) => a.id).slice(-10),
+        model: node.assignedModel || "unknown",
+        generatedAt: new Date().toISOString(),
+      } as ArtifactProvenance,
+    }],
+    tokensUsed: 0,
+  };
+}
+
+async function executePivotRefineNode(
+  node: DeepResearchNode,
+  ctx: ExecutionContext,
+  model: ReturnType<typeof getModelForRole>["model"],
+  abortSignal?: AbortSignal,
+) {
+  const reviewArtifacts = ctx.allArtifacts.filter(
+    (a) => a.artifactType === "review_assessment" || a.artifactType === "reviewer_packet",
+  );
+  const experimentResults = ctx.allArtifacts.filter(
+    (a) => a.artifactType === "experiment_result" || a.artifactType === "step_result",
+  );
+  const claimVerificationArtifact = ctx.allArtifacts.find(
+    (a) => a.artifactType === "claim_verification_report",
+  );
+
+  const decisionCtx = {
+    session: ctx.session,
+    reviewAssessments: reviewArtifacts.map((a) => a.content as any),
+    experimentResults,
+    claimVerification: claimVerificationArtifact?.content as any ?? null,
+    executionLoops: ctx.session.executionLoop ?? 0,
+    reviewerRounds: ctx.session.reviewerRound ?? 0,
+    budgetRemaining:
+      ctx.session.config.budget.maxTotalTokens - ctx.session.budget.totalTokens,
+  };
+
+  // Try quick rule-based decision first
+  let decision = tryQuickDecision(decisionCtx);
+
+  // Fall back to LLM decision if rules are inconclusive
+  if (!decision) {
+    decision = await makeResearchDecision(
+      decisionCtx,
+      ctx.session.config.pivotRefine,
+      model,
+    );
+  }
+
+  // Build pivot/refine overlay for context
+  const overlay = buildPivotRefineOverlay(decision);
+
+  return {
+    output: decision as unknown as Record<string, unknown>,
+    artifacts: [{
+      artifactType: "pivot_decision" as ArtifactType,
+      title: `Research Decision: ${decision.action.toUpperCase()}`,
+      content: { ...decision, overlay } as unknown as Record<string, unknown>,
+      provenance: {
+        sourceNodeId: node.id,
+        sourceArtifactIds: ctx.allArtifacts.map((a) => a.id).slice(-10),
+        model: node.assignedModel || "unknown",
+        generatedAt: new Date().toISOString(),
+      } as ArtifactProvenance,
+    }],
+    tokensUsed: 0,
+  };
+}
+
+async function executeClaimVerifyNode(
+  node: DeepResearchNode,
+  ctx: ExecutionContext,
+  model: ReturnType<typeof getModelForRole>["model"],
+  abortSignal?: AbortSignal,
+) {
+  const claimMapArtifact = ctx.allArtifacts.find(
+    (a) => a.artifactType === "claim_map",
+  );
+  const evidenceCards = ctx.allArtifacts.filter(
+    (a) => a.artifactType === "evidence_card",
+  );
+  const finalReport = ctx.allArtifacts.find(
+    (a) => a.artifactType === "final_report",
+  );
+
+  const claimMap = claimMapArtifact?.content as any ?? null;
+  const reportText = finalReport
+    ? JSON.stringify(finalReport.content)
+    : undefined;
+
+  const report = verifyClaims({
+    claimMap,
+    evidenceCards,
+    finalReportText: reportText,
+    config: ctx.session.config.claimVerification,
+  });
+
+  return {
+    output: report as unknown as Record<string, unknown>,
+    artifacts: [{
+      artifactType: "claim_verification_report" as ArtifactType,
+      title: "Claim Verification Report",
+      content: report as unknown as Record<string, unknown>,
+      provenance: {
+        sourceNodeId: node.id,
+        sourceArtifactIds: evidenceCards.map((a) => a.id),
+        model: node.assignedModel || "system",
+        generatedAt: new Date().toISOString(),
+      } as ArtifactProvenance,
+    }],
+    tokensUsed: 0,
+  };
+}
+
+async function executeExperimentRepairNode(
+  node: DeepResearchNode,
+  ctx: ExecutionContext,
+  model: ReturnType<typeof getModelForRole>["model"],
+  abortSignal?: AbortSignal,
+) {
+  const stepResults = ctx.allArtifacts.filter(
+    (a) => a.artifactType === "step_result",
+  );
+  const experimentResults = ctx.allArtifacts.filter(
+    (a) => a.artifactType === "experiment_result",
+  );
+
+  const repairResult = await runExperimentRepair(
+    ctx.session.id,
+    node,
+    stepResults,
+    experimentResults,
+    ctx.session.config.experimentRepair,
+    model,
+  );
+
+  const overlay = buildRepairPromptOverlay(repairResult.cycleHistory);
+
+  return {
+    output: repairResult as unknown as Record<string, unknown>,
+    artifacts: [{
+      artifactType: "repair_cycle_log" as ArtifactType,
+      title: `Experiment Repair: ${repairResult.success ? "SUCCESS" : "EXHAUSTED"}`,
+      content: { ...repairResult, overlay } as unknown as Record<string, unknown>,
+      provenance: {
+        sourceNodeId: node.id,
+        sourceArtifactIds: [...stepResults, ...experimentResults].map((a) => a.id),
+        model: node.assignedModel || "unknown",
+        generatedAt: new Date().toISOString(),
+      } as ArtifactProvenance,
+    }],
+    tokensUsed: 0,
+  };
+}
+
+async function executeHardwareDetectNode(
+  node: DeepResearchNode,
+  abortSignal?: AbortSignal,
+) {
+  const profile = detectHardware();
+
+  const promptBlock = buildHardwarePromptBlock(profile);
+
+  return {
+    output: profile as unknown as Record<string, unknown>,
+    artifacts: [{
+      artifactType: "hardware_profile" as ArtifactType,
+      title: `Hardware Profile: ${profile.gpuName}`,
+      content: { ...profile, promptBlock } as unknown as Record<string, unknown>,
+      provenance: {
+        sourceNodeId: node.id,
+        sourceArtifactIds: [],
+        model: "system_hardware_detection",
+        generatedAt: new Date().toISOString(),
+      } as ArtifactProvenance,
+    }],
+    tokensUsed: 0,
+  };
+}
+
+async function executeSentinelCheckNode(
+  node: DeepResearchNode,
+  ctx: ExecutionContext,
+  abortSignal?: AbortSignal,
+) {
+  const report = runSentinelChecks({
+    config: ctx.session.config.sentinel,
+    artifacts: ctx.allArtifacts,
+    nodes: ctx.allNodes,
+    session: ctx.session,
+  });
+
+  return {
+    output: report as unknown as Record<string, unknown>,
+    artifacts: [{
+      artifactType: "sentinel_report" as ArtifactType,
+      title: `Sentinel Report: ${report.overallHealth.toUpperCase()}`,
+      content: report as unknown as Record<string, unknown>,
+      provenance: {
+        sourceNodeId: node.id,
+        sourceArtifactIds: ctx.allArtifacts.map((a) => a.id).slice(-20),
+        model: "system_sentinel",
+        generatedAt: new Date().toISOString(),
+      } as ArtifactProvenance,
+    }],
+    tokensUsed: 0,
+  };
 }
 
 // --- Executor implementations ---
@@ -588,6 +859,12 @@ function getArtifactTypeForNode(nodeType: string): ArtifactType | null {
     validation_plan: "validation_plan",
     result_compare: "validation_report",
     final_report: "final_report",
+    debate: "debate_record",
+    pivot_refine: "pivot_decision",
+    claim_verify: "claim_verification_report",
+    experiment_repair: "repair_cycle_log",
+    hardware_detect: "hardware_profile",
+    sentinel_check: "sentinel_report",
   };
   return map[nodeType] ?? null;
 }

@@ -55,7 +55,7 @@ export function buildEvidenceGatherPrompt(
   query: string,
   constraints?: { maxSources?: number; focusAreas?: string[] },
 ): string {
-  const maxSources = constraints?.maxSources ?? 10;
+  const maxSources = constraints?.maxSources ?? 15;
   return `Search for and gather evidence related to:
 
 ## Query
@@ -67,33 +67,55 @@ ${query}
 
 ## Instructions
 
-**You MUST use the searchArticles tool to find papers.** Do not skip tool usage.
+**You MUST use the searchArticles tool to find papers.** Do not skip tool usage. Call the tool at least 3 times with different keyword variations.
 
-1. First, call searchArticles with broad keywords extracted from the query (2-4 keywords).
-2. If the first search returns few results, try again with different/broader keywords.
-3. Try variations: synonyms, related terms, shorter keyword lists.
-4. Search both arXiv and Hugging Face sources.
+1. First, call searchArticles with broad keywords extracted from the query (3-5 keywords).
+2. Call searchArticles again with alternative keywords (synonyms, related terms, different angles).
+3. Call searchArticles a third time with more specific/narrow keywords if needed.
+4. If results are still thin, try shorter keyword lists or broader terms.
+5. Search ALL available sources: arXiv, Semantic Scholar, bioRxiv, PubMed.
 
-For each source found, extract:
-1. Source (paper title, URL)
-2. Relevant findings or excerpts
-3. Methodology used
-4. Confidence in evidence quality (high/medium/low)
-5. How it relates to the query
+For each source found, you MUST extract ALL of the following:
+1. **Full citation**: Authors (all), year, title, journal/venue/conference, DOI if available
+2. **Relevant findings**: Direct quotes or paraphrased findings with page/section context
+3. **Methodology**: What approach/methods were used
+4. **Confidence**: high/medium/low in the evidence quality
+5. **Relevance**: How this specific finding relates to the query
+
+## CRITICAL — Citation Requirements
+- Every source MUST include authors and year for proper citation tracking
+- Format each citation as: "Author1, Author2, et al. (Year). Title. Venue."
+- Include DOI or URL for every cited paper
+- Track ALL papers found by the search tool, not just the first few
 
 After searching, respond with a JSON object:
 \`\`\`json
 {
-  "sources": [{ "title": "...", "url": "...", "findings": "...", "methodology": "...", "confidence": "high|medium|low", "relevance": "..." }],
+  "sources": [
+    {
+      "title": "Full paper title",
+      "authors": ["Author1 Last", "Author2 Last"],
+      "year": 2024,
+      "venue": "Conference or Journal name",
+      "doi": "10.xxxx/xxxxx",
+      "url": "https://...",
+      "findings": "Key findings relevant to the query",
+      "methodology": "Methods used",
+      "confidence": "high|medium|low",
+      "relevance": "How this relates to the query",
+      "citationKey": "Author1 et al., 2024"
+    }
+  ],
   "totalFound": <number>,
-  "searchQueries": ["keywords used..."],
-  "coverageSummary": "Brief description of what was found"
+  "searchQueries": ["keywords used in search 1", "keywords used in search 2"],
+  "coverageSummary": "Thorough description of what was found across all searches",
+  "citationCount": <number of unique papers found>
 }
 \`\`\`
 
-Be systematic. Cover the query from multiple angles if possible.
-STOP when you have found ${maxSources} relevant sources or exhausted available search results.
-Do NOT do unbounded searching. Quality over quantity.`;
+Be systematic and thorough. Cover the query from multiple angles.
+AIM for at LEAST ${maxSources} sources. More sources = better coverage.
+Quality AND quantity both matter for research depth.`;
 }
 
 export function buildValidationPlanPrompt(

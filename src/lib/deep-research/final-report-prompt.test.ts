@@ -14,6 +14,7 @@ import {
   getMinimumRequiredCitationCount,
   normalizeFinalReportSectionPlan,
 } from "./prompts";
+import { DEFAULT_CONFIG } from "./config-types";
 import type {
   DeepResearchArtifact,
   DeepResearchMessage,
@@ -29,6 +30,7 @@ function createSession(): DeepResearchSession {
     status: "running",
     contextTag: "final_report",
     config: {
+      ...DEFAULT_CONFIG,
       budget: { maxTotalTokens: 100000, maxOpusTokens: 100000 },
       maxWorkerFanOut: 1,
       maxReviewerRounds: 2,

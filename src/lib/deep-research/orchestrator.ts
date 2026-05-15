@@ -21,6 +21,9 @@ import {
 import {
   reconcileSessionState,
 } from "./session-hygiene";
+import { tryQuickDecision, buildPivotRefineOverlay } from "./pivot-refine-loop";
+import { getEvolutionStore, harvestSessionLessons } from "./evolution-store";
+import { shouldAutoPause } from "./sentinel-watchdog";
 import {
   generateCheckpointAndHalt,
 } from "./orchestrator-checkpoint";
@@ -115,6 +118,24 @@ export async function runDeepResearch(
       error: message,
       contextTag: session.contextTag,
     });
+  } finally {
+    // --- Evolution Harvesting: extract lessons when session completes ---
+    const finalSession = await store.getSession(sessionId);
+    if (finalSession && (finalSession.status === "completed" || finalSession.status === "failed")) {
+      try {
+        const evolutionStore = getEvolutionStore("./data", finalSession.config.evolution);
+        const lessons = await harvestSessionLessons(sessionId, evolutionStore);
+        if (lessons.length > 0) {
+          console.log(`[evolution] Extracted ${lessons.length} lessons from session ${sessionId}`);
+          await store.appendEvent(sessionId, "evolution_lesson_extracted", undefined, "system", undefined, undefined, {
+            lessonCount: lessons.length,
+            categories: [...new Set(lessons.map((l) => l.category))],
+          });
+        }
+      } catch (evErr) {
+        console.warn(`[evolution] Failed to harvest lessons: ${evErr}`);
+      }
+    }
   }
 }
 
@@ -205,6 +226,62 @@ async function routeNextAction(
       languageState,
       abortSignal,
     );
+
+    // --- PIVOT/REFINE check after node completion ---
+    const pivotArtifact = artifacts.find(
+      (a) => a.artifactType === "pivot_decision" && a.nodeId === executed.completedNode.id,
+    );
+    if (pivotArtifact) {
+      const decision = (pivotArtifact.content as Record<string, unknown>) ?? {};
+      const action = decision.action as string;
+      
+      if (action === "pivot") {
+        // Record pivot event
+        await store.appendEvent(fresh.id, "pivot_initiated", executed.completedNode.id, "system");
+        
+        // Create new intake/plan nodes for the new direction
+        const pivotOverlay = buildPivotRefineOverlay(decision as any);
+        
+        // Update session to restart from planning
+        await store.updateSession(fresh.id, {
+          status: "planning",
+          contextTag: "planning",
+          pendingCheckpointId: null,
+        });
+        
+        return { shouldContinue: true };
+      }
+      
+      if (action === "refine") {
+        await store.appendEvent(fresh.id, "refine_initiated", executed.completedNode.id, "system");
+        // Continue — the refine decision will be used by subsequent execution nodes
+      }
+    }
+
+    // --- Sentinel check after node completion ---
+    try {
+      const sentinelReportArtifacts = artifacts.filter(
+        (a) => a.artifactType === "sentinel_report",
+      );
+      if (sentinelReportArtifacts.length > 0) {
+        const latestSentinel = sentinelReportArtifacts[sentinelReportArtifacts.length - 1];
+        const sentinelContent = latestSentinel.content as Record<string, unknown> | null;
+        if (sentinelContent && shouldAutoPause(
+          { alerts: sentinelContent.alerts as any[] ?? [], overallHealth: sentinelContent.overallHealth as any, sessionId: fresh.id, checksRun: 4, checksFailed: (sentinelContent.alerts as any[] ?? []).length, recommendations: [] },
+          fresh.config.sentinel,
+        )) {
+          await store.appendEvent(fresh.id, "sentinel_alert", executed.completedNode.id, "system");
+          // Auto-pause for critical sentinel findings
+          await store.updateSession(fresh.id, {
+            status: "awaiting_user_confirmation",
+            pendingCheckpointId: executed.completedNode.id,
+          });
+          return { shouldContinue: false };
+        }
+      }
+    } catch {
+      // Sentinel check failure should not block pipeline
+    }
 
     if (executed.requiresCheckpoint || shouldPauseAfterCompletedNode({ isFinalStep: executed.isFinalStep })) {
       await generateCheckpointAndHalt({
