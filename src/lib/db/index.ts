@@ -36,6 +36,29 @@ function getSqliteErrorCode(err: unknown): string | undefined {
   return undefined;
 }
 
+function createReadonlyDatabaseStartupError(
+  action: string,
+  cause: unknown
+): Error {
+  const message = [
+    "[db] SQLite database is read-only during startup. InnoClaw cannot continue.",
+    `Database path: ${DB_PATH}`,
+    `Failed action: ${action}.`,
+    "",
+    "Suggested fixes:",
+    "- Make DATABASE_URL point to a writable local filesystem path.",
+    "- If you are running in Docker, mount /app/data read-write and ensure the runtime user can write it.",
+    "- If the database is on a network/shared filesystem, move it to local disk.",
+    "- Fix permissions or the mount, then restart the app.",
+  ].join("\n");
+
+  const error = new Error(message);
+  if (cause !== undefined) {
+    (error as Error & { cause?: unknown }).cause = cause;
+  }
+  return error;
+}
+
 function trySetDeleteJournalMode(): void {
   try {
     sqlite.pragma("journal_mode = DELETE");
@@ -45,6 +68,13 @@ function trySetDeleteJournalMode(): void {
         "[db] SQLite journal mode stayed unchanged because the database was busy during startup. Use a local DATABASE_URL for reliable locking on network filesystems."
       );
       return;
+    }
+
+    if (getSqliteErrorCode(err) === "SQLITE_READONLY") {
+      throw createReadonlyDatabaseStartupError(
+        "set SQLite journal_mode to DELETE",
+        err
+      );
     }
 
     throw err;
@@ -70,6 +100,11 @@ if (dbLocking.disableLock) {
 
     if (code === "SQLITE_IOERR_SHMMAP" || code === "SQLITE_BUSY") {
       trySetDeleteJournalMode();
+    } else if (code === "SQLITE_READONLY") {
+      throw createReadonlyDatabaseStartupError(
+        "set SQLite journal_mode to WAL",
+        err
+      );
     } else {
       throw err;
     }
