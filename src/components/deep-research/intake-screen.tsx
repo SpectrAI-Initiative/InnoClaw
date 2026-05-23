@@ -152,7 +152,7 @@ export function IntakeScreen({ workspaceId, onCreated, onCancel }: IntakeScreenP
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <Brain className="h-5 w-5 text-purple-500" />
-        <h2 className="text-base font-semibold">New Deep Research</h2>
+        <h2 className="text-base font-semibold">New Auto Research</h2>
       </div>
 
       {/* Body */}
@@ -200,7 +200,7 @@ export function IntakeScreen({ workspaceId, onCreated, onCancel }: IntakeScreenP
                 rows={12}
               />
               <p className="text-[11px] text-muted-foreground">
-                Your input becomes the initial Deep Research context and can drive either the executable workflow or the structured role workspace, depending on the session configuration.
+                Your input becomes the initial Auto Research context and can drive either the executable workflow or the structured role workspace, depending on the session configuration.
               </p>
             </TabsContent>
 

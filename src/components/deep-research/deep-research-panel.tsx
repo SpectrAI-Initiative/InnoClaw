@@ -267,7 +267,7 @@ export function DeepResearchPanel({
     if (response) {
       await refreshActiveSessionResources();
       if (response.disabled) {
-        toast(response.message ?? "Deep Research is running in interface-only mode.");
+        toast(response.message ?? "Auto Research is running in interface-only mode.");
         return;
       }
       toast.success("Research started");

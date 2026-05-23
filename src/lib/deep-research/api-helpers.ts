@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getConfiguredModelSelection } from "@/lib/ai/provider";
+import { requireDeepResearchSessionAccess } from "@/lib/auth/ownership";
 import { getSession, updateSession } from "./event-store";
+import { ensureInterfaceShell, isInterfaceOnlySession } from "./interface-shell";
 import {
   buildDeepResearchConfigForResolvedModel,
   hasDeepResearchModelConfigDrift,
@@ -55,6 +57,24 @@ export async function requireSession(sessionId: string): Promise<DeepResearchSes
         throw new DeepResearchApiError("Session not found", 404);
       }
     }
+  }
+
+  return session;
+}
+
+export async function requireAccessibleDeepResearchSession(
+  request: NextRequest,
+  sessionId: string,
+  options?: { ensureInterfaceShell?: boolean },
+): Promise<DeepResearchSession | NextResponse> {
+  const access = await requireDeepResearchSessionAccess(request, sessionId);
+  if (access instanceof NextResponse) {
+    return access;
+  }
+
+  const session = await requireSession(sessionId);
+  if (options?.ensureInterfaceShell !== false && isInterfaceOnlySession(session)) {
+    await ensureInterfaceShell(session);
   }
 
   return session;

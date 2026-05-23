@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { getRouteCandidatesForRole } from "./model-router";
+import { DEFAULT_CONFIG } from "./config-types";
 import type { DeepResearchConfig } from "./types";
 
 function createConfig(overrides?: Partial<DeepResearchConfig>): DeepResearchConfig {
   return {
+    ...DEFAULT_CONFIG,
     interfaceOnly: false,
     budget: {
       maxTotalTokens: 100000,

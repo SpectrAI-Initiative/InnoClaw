@@ -7,14 +7,11 @@ import type {
   DeepResearchNode,
   DeepResearchArtifact,
   DeepResearchEvent,
-  PersistedExecutionRecord,
 } from "@/lib/deep-research/types";
 import {
   ACTIVE_DEEP_RESEARCH_REFRESH_MS,
   IDLE_DEEP_RESEARCH_REFRESH_MS,
   getArtifactRefreshInterval,
-  getExecutionRefreshInterval,
-  getFullSessionRefreshInterval,
   getSessionRefreshInterval,
 } from "@/lib/deep-research/refresh-policy";
 
@@ -155,55 +152,6 @@ export function useDeepResearchEvents(sessionId: string | undefined, since?: str
 
   return {
     events: data,
-    isLoading,
-    error,
-    mutate,
-  };
-}
-
-export function useDeepResearchExecutions(sessionId: string | undefined) {
-  const url = sessionId ? `/api/deep-research/sessions/${sessionId}/executions` : null;
-
-  const { data, error, isLoading, mutate } = useDeepResearchResource<PersistedExecutionRecord[]>(
-    url,
-    {
-      refreshInterval: (latestData) => getExecutionRefreshInterval(latestData ?? null),
-    },
-  );
-
-  return {
-    executions: Array.isArray(data) ? data : [],
-    isLoading,
-    error,
-    mutate,
-  };
-}
-
-// --- Consolidated hook: fetches everything in one request ---
-
-interface FullSessionData {
-  session: DeepResearchSession;
-  messages: DeepResearchMessage[];
-  nodes: DeepResearchNode[];
-  artifacts: DeepResearchArtifact[];
-  events: DeepResearchEvent[];
-  executions: PersistedExecutionRecord[];
-}
-
-export function useDeepResearchSessionFull(sessionId: string | undefined) {
-  const url = sessionId ? `/api/deep-research/sessions/${sessionId}/full` : null;
-
-  const { data, error, isLoading, mutate } = useSWR<FullSessionData>(url, fetcher, {
-    refreshInterval: (latestData) => getFullSessionRefreshInterval(latestData?.session ?? null),
-  });
-
-  return {
-    session: data?.session ?? null,
-    messages: data?.messages ?? [],
-    nodes: data?.nodes ?? [],
-    artifacts: data?.artifacts ?? [],
-    events: data?.events ?? [],
-    executions: data?.executions ?? [],
     isLoading,
     error,
     mutate,

@@ -1,23 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getEvents } from "@/lib/deep-research/event-store";
-import { ensureInterfaceShell, isInterfaceOnlySession } from "@/lib/deep-research/interface-shell";
-import { requireSession } from "@/lib/deep-research/api-helpers";
-import { requireDeepResearchSessionAccess } from "@/lib/auth/ownership";
+import {
+  handleDeepResearchRouteError,
+  readSessionId,
+  requireAccessibleDeepResearchSession,
+  type DeepResearchRouteParams,
+} from "@/lib/deep-research/api-helpers";
 
-type RouteParams = { params: Promise<{ id: string }> };
+export async function GET(req: NextRequest, { params }: DeepResearchRouteParams) {
+  try {
+    const sessionId = await readSessionId(params);
+    const session = await requireAccessibleDeepResearchSession(req, sessionId);
+    if (session instanceof NextResponse) {
+      return session;
+    }
+    const since = req.nextUrl.searchParams.get("since") ?? undefined;
 
-export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { id: sessionId } = await params;
-  const access = await requireDeepResearchSessionAccess(req, sessionId);
-  if (access instanceof NextResponse) {
-    return access;
+    const events = await getEvents(sessionId, since);
+    return NextResponse.json(events);
+  } catch (error) {
+    return handleDeepResearchRouteError(error, "Failed to fetch events");
   }
-  const session = await requireSession(sessionId);
-  if (isInterfaceOnlySession(session)) {
-    await ensureInterfaceShell(session);
-  }
-  const since = req.nextUrl.searchParams.get("since") ?? undefined;
-
-  const events = await getEvents(sessionId, since);
-  return NextResponse.json(events);
 }

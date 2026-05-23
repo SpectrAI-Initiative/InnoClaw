@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bot, LogIn } from "lucide-react";
@@ -8,13 +8,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuthUser } from "@/lib/hooks/use-auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { user, isLoading } = useAuthUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isLoading || !user) {
+      return;
+    }
+
+    const next = new URLSearchParams(window.location.search).get("next");
+    const fallback = user.role === "admin" ? "/admin/users" : "/";
+    router.replace(next && next !== "/" ? next : fallback);
+    router.refresh();
+  }, [isLoading, router, user]);
+
+  function resolvePostLoginPath(role: "admin" | "user"): string {
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (next && next !== "/") {
+      return next;
+    }
+    return role === "admin" ? "/admin/users" : "/";
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,9 +56,16 @@ export default function LoginPage() {
       return;
     }
 
-    const next = new URLSearchParams(window.location.search).get("next") || "/";
-    router.replace(next);
+    router.replace(resolvePostLoginPath(data.user?.role === "admin" ? "admin" : "user"));
     router.refresh();
+  }
+
+  if (user) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+        <p className="text-sm text-muted-foreground">Redirecting...</p>
+      </main>
+    );
   }
 
   return (

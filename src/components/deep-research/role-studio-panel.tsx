@@ -138,7 +138,7 @@ export function RoleStudioPanel({
                 <div className="text-sm font-semibold">Role Studio</div>
               </div>
               <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                Write directly to the Researcher or any worker role from the Deep Research tab.
+                Write directly to the Researcher or any worker role from the Auto Research tab.
               </p>
             </div>
 
@@ -236,7 +236,7 @@ export function RoleStudioPanel({
               />
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[11px] text-muted-foreground">
-                  Messages sent here use the existing Deep Research session pipeline. When a structured role node exists, the message is attached to that node; otherwise it is stored as a role-targeted session instruction.
+                  Messages sent here use the existing Auto Research session pipeline. When a structured role node exists, the message is attached to that node; otherwise it is stored as a role-targeted session instruction.
                 </p>
                 <Button
                   size="sm"

@@ -191,12 +191,12 @@ export default function WorkspacePage({
                           variant={middlePanel === "deepResearch" ? "default" : "ghost"}
                           size="sm"
                           onClick={() => setMiddlePanel("deepResearch")}
-                          title="Deep Research"
-                          aria-label="Deep Research"
+                          title="Auto Research"
+                          aria-label="Auto Research"
                           className="h-7 px-2 gap-1"
                         >
                           <Microscope className="h-3.5 w-3.5" />
-                          <span className="text-xs hidden lg:inline">Deep Research</span>
+                          <span className="text-xs hidden lg:inline">Auto Research</span>
                         </Button>
                       </div>
                     </div>

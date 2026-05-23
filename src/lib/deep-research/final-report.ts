@@ -129,3 +129,12 @@ export function resolveFinalReportPresentation(
     citationCoverage: extractFinalReportCitationCoverage(artifact, artifacts),
   };
 }
+
+
+// =============================================================
+// LaTeX Academic Paper Export (from AutoResearchClaw)
+// =============================================================
+// Server-only code moved to ./latex-paper-server.ts to prevent
+// database/fs imports from leaking into client bundles.
+// Import buildLaTeXPaper directly from ./latex-paper-builder on server.
+

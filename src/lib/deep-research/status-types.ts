@@ -56,7 +56,13 @@ export type NodeType =
   | "synthesize_claims"
   | "data_download"
   | "preprocess"
-  | "skill_route";
+  | "skill_route"
+  | "debate"
+  | "pivot_refine"
+  | "claim_verify"
+  | "experiment_repair"
+  | "hardware_detect"
+  | "sentinel_check";
 
 export type NodeStatus =
   | "pending"
@@ -79,7 +85,13 @@ export type ModelRole =
   | "results_and_evidence_analyst"
   | "research_asset_reuse_specialist"
   | "worker"
-  | "synthesizer";
+  | "synthesizer"
+  | "debate_moderator"
+  | "debate_skeptic"
+  | "debate_librarian"
+  | "sentinel_watchdog"
+  | "repair_specialist"
+  | "hardware_profiler";
 
 export type ArtifactType =
   | "research_brief"
@@ -104,7 +116,18 @@ export type ArtifactType =
   | "memory_profile"
   | "memory_snapshot"
   | "memory_index"
-  | "data_manifest";
+  | "data_manifest"
+  | "debate_record"
+  | "pivot_decision"
+  | "claim_verification_report"
+  | "repair_cycle_log"
+  | "hardware_profile"
+  | "sentinel_report"
+  | "evolution_lesson"
+  | "verified_registry"
+  | "fabrication_flag"
+  | "latex_export"
+  | "latex_bib";
 
 export type EventType =
   | "session_created"
@@ -143,7 +166,22 @@ export type EventType =
   | "skill_routing_completed"
   | "synthesis_completed"
   | "execution_plan_created"
-  | "data_download_completed";
+  | "data_download_completed"
+  | "debate_round_started"
+  | "debate_round_completed"
+  | "pivot_initiated"
+  | "refine_initiated"
+  | "claim_verified"
+  | "claim_fabricated"
+  | "repair_cycle_initiated"
+  | "repair_cycle_completed"
+  | "repair_success"
+  | "repair_exhausted"
+  | "hardware_detected"
+  | "sentinel_alert"
+  | "evolution_lesson_extracted"
+  | "evolution_overlay_injected"
+  | "branch_exploration_started";
 
 export type MessageRole = "user" | "main_brain" | "system";
 

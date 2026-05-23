@@ -41,7 +41,7 @@ export function SessionList({ sessions, onSelect, onCreateNew, onDeleted }: Sess
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
         <div className="flex items-center gap-2">
           <Brain className="h-4 w-4 text-purple-500" />
-          <h3 className="text-sm font-semibold">Deep Research</h3>
+          <h3 className="text-sm font-semibold">Auto Research</h3>
         </div>
         <Button size="sm" onClick={onCreateNew} className="h-7 px-2 gap-1">
           <Plus className="h-3.5 w-3.5" />
@@ -54,7 +54,7 @@ export function SessionList({ sessions, onSelect, onCreateNew, onDeleted }: Sess
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <Brain className="h-10 w-10 mb-3 opacity-30" />
             <p className="text-sm">No research sessions yet</p>
-            <p className="text-xs mt-1">Start a new deep research session</p>
+            <p className="text-xs mt-1">Start a new auto research session</p>
           </div>
         ) : (
           <div className="p-2 space-y-1">

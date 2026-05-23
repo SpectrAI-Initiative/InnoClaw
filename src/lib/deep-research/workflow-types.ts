@@ -459,3 +459,229 @@ export interface ResearchMemoryRetrievalResult {
   items: Array<ResearchMemoryItem & { retrievalScore: number }>;
   query: string;
 }
+
+// =============================================================
+// PIVOT / REFINE Types (from AutoResearchClaw)
+// =============================================================
+
+export type ResearchDecisionAction = "proceed" | "refine" | "pivot" | "request_review";
+
+export interface ResearchDecision {
+  action: ResearchDecisionAction;
+  rationale: string;
+  confidence: number;
+  /** When pivoting: the new research direction. */
+  newDirection?: string;
+  /** When refining: what specifically to refine. */
+  refinementTargets?: string[];
+  /** Suggested node types to create for the next step. */
+  suggestedNextNodes: string[];
+  /** Artifact version tracking. */
+  artifactVersionIncrement?: number;
+}
+
+export interface PivotDecision extends ResearchDecision {
+  action: "pivot";
+  newDirection: string;
+  /** What didn't work in the current direction. */
+  failureAnalysis: string;
+  /** Alternative hypotheses to explore. */
+  alternativeHypotheses: string[];
+}
+
+export interface RefineDecision extends ResearchDecision {
+  action: "refine";
+  refinementTargets: string[];
+  /** What specific parameters / methods to change. */
+  parameterChanges: Record<string, unknown>;
+  /** Expected improvement from refinement. */
+  expectedImprovement: string;
+}
+
+// =============================================================
+// Multi-Agent Debate Types (from AutoResearchClaw)
+// =============================================================
+
+export type DebateRole = "moderator" | "skeptic" | "librarian" | "reproducer" | "scribe";
+
+export interface DebateAgentOutput {
+  role: DebateRole;
+  perspective: string;
+  arguments: string[];
+  evidenceRefs: string[];
+  confidenceScore: number;
+  suggestedActions: string[];
+}
+
+export interface DebateRound {
+  roundNumber: number;
+  topic: string;
+  agentOutputs: DebateAgentOutput[];
+  consensusReached: boolean;
+  consensusSummary: string;
+  dissentingViews: string[];
+  unresolvedIssues: string[];
+}
+
+export interface DebateRecord {
+  topic: string;
+  rounds: DebateRound[];
+  finalConsensus: string;
+  totalRounds: number;
+  consensusReached: boolean;
+  keyInsights: string[];
+  actionItems: string[];
+}
+
+// =============================================================
+// Evolution Store Types (from AutoResearchClaw)
+// =============================================================
+
+export type LessonCategory = "system" | "experiment" | "literature" | "hypothesis" | "writing" | "review";
+export type LessonSeverity = "critical" | "high" | "medium" | "low";
+
+export interface EvolutionLesson {
+  id: string;
+  category: LessonCategory;
+  severity: LessonSeverity;
+  stage: string;
+  description: string;
+  /** What we learned and how to improve. */
+  recommendation: string;
+  /** The session this lesson was extracted from. */
+  sourceSessionId: string;
+  /** The node that triggered this lesson. */
+  sourceNodeId?: string;
+  /** When the lesson was recorded. */
+  recordedAt: string;
+  /** Tags for searchability. */
+  tags: string[];
+  /** JSON string of relevant context data. */
+  contextData?: Record<string, unknown>;
+}
+
+export interface EvolutionOverlay {
+  /** Lessons relevant to the current stage/context. */
+  lessons: EvolutionLesson[];
+  /** Weighted relevance score (0-1) incorporating time-decay. */
+  relevanceScore: number;
+  /** Formatted prompt overlay text for injection. */
+  promptOverlay: string;
+}
+
+// =============================================================
+// Claim Verification Types (from AutoResearchClaw)
+// =============================================================
+
+export type ClaimVerificationStatus = "verified" | "partially_verified" | "unverified" | "fabricated" | "pending";
+
+export interface VerifiedClaim {
+  claimId: string;
+  claimText: string;
+  status: ClaimVerificationStatus;
+  supportingSourceIds: string[];
+  contradictingSourceIds: string[];
+  confidenceScore: number;
+  /** Whether the numeric values in this claim are grounded in experiment data. */
+  numericGrounded: boolean;
+  /** Ground-truth values from verified registry. */
+  groundTruthValues?: Record<string, number>;
+  /** Any discrepancies found. */
+  discrepancies: string[];
+}
+
+export interface ClaimVerificationReport {
+  totalClaims: number;
+  verifiedCount: number;
+  partiallyVerifiedCount: number;
+  unverifiedCount: number;
+  fabricatedCount: number;
+  claims: VerifiedClaim[];
+  overallTrustScore: number;
+  recommendations: string[];
+}
+
+export interface FabricationFlag {
+  claimId: string;
+  claimText: string;
+  reason: string;
+  severity: "warning" | "critical";
+  suggestedFix: string;
+}
+
+// =============================================================
+// Experiment Repair Types (from AutoResearchClaw)
+// =============================================================
+
+export type DeficiencyType = "nan_inf" | "runtime_error" | "low_performance" | "missing_output" | "incomplete" | "other";
+
+export interface ExperimentDiagnosis {
+  deficiencyType: DeficiencyType;
+  description: string;
+  affectedFiles: string[];
+  errorMessages: string[];
+  rootCause: string;
+  fixable: boolean;
+}
+
+export interface RepairCycleResult {
+  cycle: number;
+  diagnosis: ExperimentDiagnosis;
+  repairApplied: boolean;
+  repairDescription: string;
+  qualityAfterRepair: number;
+  error?: string;
+}
+
+export interface ExperimentRepairResult {
+  success: boolean;
+  totalCycles: number;
+  finalQuality: number;
+  cycleHistory: RepairCycleResult[];
+  finalDiagnosis?: ExperimentDiagnosis;
+}
+
+// =============================================================
+// Hardware Detection Types (from AutoResearchClaw)
+// =============================================================
+
+export type GpuType = "cuda" | "mps" | "cpu";
+export type HardwareTier = "high" | "limited" | "cpu_only";
+
+export interface HardwareProfile {
+  hasGpu: boolean;
+  gpuType: GpuType;
+  gpuName: string;
+  vramMb: number | null;
+  tier: HardwareTier;
+  warning: string;
+  /** Recommended packages and frameworks for this hardware. */
+  recommendedPackages: string[];
+  /** Whether code generation should be adapted for this hardware. */
+  adaptCodeGeneration: boolean;
+}
+
+// =============================================================
+// Sentinel Watchdog Types (from AutoResearchClaw)
+// =============================================================
+
+export type SentinelAlertType = "nan_inf_detected" | "evidence_mismatch" | "citation_fabrication" | "quality_degradation" | "budget_exceeded";
+
+export interface SentinelAlert {
+  alertType: SentinelAlertType;
+  severity: "info" | "warning" | "critical";
+  message: string;
+  nodeId?: string;
+  artifactId?: string;
+  details: Record<string, unknown>;
+  detectedAt: string;
+}
+
+export interface SentinelReport {
+  sessionId: string;
+  alerts: SentinelAlert[];
+  overallHealth: "healthy" | "degraded" | "critical";
+  checksRun: number;
+  checksFailed: number;
+  recommendations: string[];
+}
