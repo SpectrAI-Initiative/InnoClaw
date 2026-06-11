@@ -4,7 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { deepResearchSessions, hfDatasets, notes, scheduledTasks, skills, workspaces } from "@/lib/db/schema";
 import { isWithinWorkspace } from "@/lib/files/filesystem";
-import { forbiddenResponse, requireAuth, type AuthContext } from "./server";
+import { forbiddenResponse, requireAuth, HEADLESS_ADMIN_ID, type AuthContext } from "./server";
+
+function isHeadless(auth: AuthContext): boolean {
+  return auth.user.id === HEADLESS_ADMIN_ID;
+}
 
 export function ownedWorkspaceFilter(auth: AuthContext) {
   if (auth.user.role === "admin") {
@@ -42,7 +46,7 @@ export async function requireWorkspaceAccess(
   const [workspace] = await db
     .select()
     .from(workspaces)
-    .where(and(eq(workspaces.id, workspaceId), ownedWorkspaceFilter(auth)))
+    .where(isHeadless(auth) ? eq(workspaces.id, workspaceId) : and(eq(workspaces.id, workspaceId), ownedWorkspaceFilter(auth)))
     .limit(1);
 
   if (!workspace) {
@@ -109,7 +113,7 @@ export async function requireSkillAccess(
   const [skill] = await db
     .select()
     .from(skills)
-    .where(and(eq(skills.id, skillId), ownedSkillFilter(auth)))
+    .where(isHeadless(auth) ? eq(skills.id, skillId) : and(eq(skills.id, skillId), ownedSkillFilter(auth)))
     .limit(1);
 
   if (!skill) {
@@ -178,6 +182,10 @@ export async function requireWorkspacePathsAccess(
   const auth = await requireAuth(request);
   if (auth instanceof NextResponse) {
     return auth;
+  }
+
+  if (isHeadless(auth)) {
+    return { auth };
   }
 
   const rows = await db

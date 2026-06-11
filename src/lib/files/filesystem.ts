@@ -68,8 +68,10 @@ export function addWorkspaceRoot(targetPath: string): void {
 
   if (alreadyCovered) return;
 
-  // Keep at most 3 roots (FIFO — drop the oldest when over limit)
-  const newRoots = [...roots, resolved].slice(-3).join(",");
+  // Keep all explicitly registered roots. Dropping older roots makes a DB
+  // workspace record diverge from the in-memory path sandbox and can break
+  // long-running headless workflows that revisit earlier workspaces.
+  const newRoots = [...roots, resolved].join(",");
   updateEnvLocal({ WORKSPACE_ROOTS: newRoots });
   process.env.WORKSPACE_ROOTS = newRoots;
 }

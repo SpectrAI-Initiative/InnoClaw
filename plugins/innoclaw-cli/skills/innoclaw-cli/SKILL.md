@@ -7,6 +7,29 @@ description: Use the local InnoClaw CLI to run app workflows and Deep Research s
 
 Use the `innoclaw` command from the repository root for local operation.
 
+Bare `innoclaw` starts the interactive CLI and treats the current shell directory as the workspace.
+
+## Interactive and auth
+
+```bash
+innoclaw
+innoclaw auth status
+innoclaw auth login
+innoclaw auth logout
+```
+
+- The CLI auto-starts the local app on `localhost:3000` when needed.
+- When auth is enabled, the CLI opens the browser login page and waits for a dedicated CLI session handoff.
+- For headless and CI-style runs, start the app with `DISABLE_AUTH=true npm run dev`.
+
+## Non-interactive agent runs
+
+```bash
+innoclaw run --prompt "Summarize this workspace"
+printf 'Create a plan for the current repo' | innoclaw run
+innoclaw batch --input jobs.json --workers 4
+```
+
 ## Command groups
 
 ### App lifecycle
@@ -44,6 +67,7 @@ innoclaw research export --session-id <session-id>
 
 ## Usage notes
 
-- `research create`, `research run`, and `research export` require the local app server to be running.
+- `research create`, `research run`, and `research export` use the same local app runtime and auth flow as `innoclaw`.
 - `workspace add` expects a filesystem path that already exists on disk.
-- The CLI is intentionally thin: it wraps existing repo commands and HTTP APIs rather than bypassing them.
+- `innoclaw`, `run`, and `batch` auto-bind the current shell directory as a workspace if needed.
+- The CLI stays thin: it wraps the existing local app and HTTP APIs rather than bypassing them.

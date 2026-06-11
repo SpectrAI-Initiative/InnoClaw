@@ -1,43 +1,95 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  buildAuthPageHref,
+  completeCliBrowserHandoff,
+  parseCliHandoffParams,
+} from "@/lib/auth/cli-handoff";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const loginHref = buildAuthPageHref("/login", searchParams);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function resumeCliSession() {
+      if (!parseCliHandoffParams(searchParams)) {
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await fetch("/api/auth/me");
+        if (!res.ok) {
+          return;
+        }
+        await completeCliBrowserHandoff(searchParams);
+        if (cancelled) {
+          return;
+        }
+        router.replace(searchParams.get("next") || "/");
+        router.refresh();
+      } catch (resumeError) {
+        if (!cancelled) {
+          setError(resumeError instanceof Error ? resumeError.message : "Failed to resume CLI session");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void resumeCliSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router, searchParams]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, name, password }),
-    });
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, password }),
+      });
 
-    const data = await res.json().catch(() => ({}));
-    setLoading(false);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Registration failed");
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Registration failed");
-      return;
+      await completeCliBrowserHandoff(searchParams);
+
+      const next = searchParams.get("next") || (data.requiresSetup ? "/settings" : "/");
+      router.replace(next);
+      router.refresh();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Registration failed");
+    } finally {
+      setLoading(false);
     }
-
-    router.replace(data.requiresSetup ? "/settings" : "/");
-    router.refresh();
   }
 
   return (
@@ -94,7 +146,7 @@ export default function RegisterPage() {
           </form>
           <p className="mt-5 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link className="font-medium text-primary hover:underline" href="/login">
+            <Link className="font-medium text-primary hover:underline" href={loginHref}>
               Sign in
             </Link>
           </p>

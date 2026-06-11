@@ -72,11 +72,19 @@ function isPublicApi(pathname: string): boolean {
   return AUTH_PUBLIC_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+function hasCliHandoffParams(request: NextRequest): boolean {
+  return request.nextUrl.searchParams.has("cliCallback") && request.nextUrl.searchParams.has("cliNonce");
+}
+
 export async function middleware(request: NextRequest) {
+  if (process.env.DISABLE_AUTH === "true") {
+    return NextResponse.next();
+  }
+
   const { pathname } = request.nextUrl;
 
   if (isPublicPath(pathname) || isPublicApi(pathname)) {
-    if (AUTH_PUBLIC_PATHS.has(pathname) && await hasValidSessionMarker(request)) {
+    if (AUTH_PUBLIC_PATHS.has(pathname) && !hasCliHandoffParams(request) && await hasValidSessionMarker(request)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next();

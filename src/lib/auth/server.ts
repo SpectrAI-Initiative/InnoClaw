@@ -315,7 +315,27 @@ export function forbiddenResponse(message = "Forbidden"): NextResponse {
   return NextResponse.json({ error: message }, { status: 403 });
 }
 
+export const HEADLESS_ADMIN_ID = "headless";
+
+const HEADLESS_ADMIN_CONTEXT: AuthContext = {
+  user: {
+    id: HEADLESS_ADMIN_ID,
+    email: "headless@local",
+    name: "Headless Runner",
+    role: "admin",
+    isActive: true,
+    lastLoginAt: null,
+    createdAt: new Date(0).toISOString(),
+    updatedAt: new Date(0).toISOString(),
+  },
+  session: { id: HEADLESS_ADMIN_ID, expiresAt: "2099-01-01T00:00:00.000Z" },
+  token: HEADLESS_ADMIN_ID,
+};
+
 export async function requireAuth(request: NextRequest): Promise<AuthContext | NextResponse> {
+  if (process.env.DISABLE_AUTH === "true") {
+    return HEADLESS_ADMIN_CONTEXT;
+  }
   const auth = await getAuthContext(request);
   if (!auth) {
     return unauthorizedResponse();

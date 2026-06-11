@@ -5,6 +5,26 @@ cd "$(dirname "$0")"
 
 PORT=3000
 
+server_responding() {
+    command -v curl >/dev/null 2>&1 || return 1
+    curl --noproxy "*" -fsS -o /dev/null -I "http://127.0.0.1:$PORT/login" >/dev/null 2>&1
+}
+
+pid_elapsed_seconds() {
+    ps -p "$1" -o etimes= 2>/dev/null | tr -d ' '
+}
+
+pid_workdir() {
+    readlink "/proc/$1/cwd" 2>/dev/null
+}
+
+is_repo_dev_process() {
+    local pid=$1
+    local cwd=$(pid_workdir "$pid")
+    local cmdline=$(ps -p "$pid" -o args= 2>/dev/null)
+    [ "$cwd" = "$PWD" ] && echo "$cmdline" | grep -qE "(npm run dev|next dev|node.*next)"
+}
+
 # Check if already running
 if [ -f .dev.pid ]; then
     PID=$(cat .dev.pid)
@@ -12,8 +32,31 @@ if [ -f .dev.pid ]; then
         echo "Invalid PID in .dev.pid, removing file"
         rm -f .dev.pid
     elif ps -p "$PID" > /dev/null 2>&1; then
-        echo "Dev server is already running (PID: $PID)"
-        exit 1
+        if server_responding; then
+            echo "Dev server is already running (PID: $PID)"
+            exit 0
+        fi
+
+        PID_AGE=$(pid_elapsed_seconds "$PID")
+        if is_repo_dev_process "$PID" && [ -n "$PID_AGE" ] && [ "$PID_AGE" -le 30 ]; then
+            echo "Dev server is still starting (PID: $PID, age: ${PID_AGE}s)"
+            exit 0
+        fi
+
+        if is_repo_dev_process "$PID"; then
+            echo "Dev server PID $PID is not healthy. Restarting it..."
+            kill "$PID" 2>/dev/null
+            sleep 2
+            if ps -p "$PID" > /dev/null 2>&1; then
+                echo "Force killing stale dev server..."
+                kill -9 "$PID" 2>/dev/null
+                sleep 1
+            fi
+        else
+            PID_CWD=$(pid_workdir "$PID")
+            echo ".dev.pid points to a live non-server process (PID: $PID${PID_CWD:+, cwd: $PID_CWD}). Removing stale file."
+        fi
+        rm -f .dev.pid
     else
         rm -f .dev.pid
     fi

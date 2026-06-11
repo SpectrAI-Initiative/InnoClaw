@@ -4,7 +4,7 @@ import { workspaces } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { pathExists, isDirectory, addWorkspaceRoot } from "@/lib/files/filesystem";
-import { requireAuth } from "@/lib/auth/server";
+import { requireAuth, HEADLESS_ADMIN_ID } from "@/lib/auth/server";
 import { ownedWorkspaceFilter } from "@/lib/auth/ownership";
 import { jsonError, jsonException } from "@/lib/api-errors";
 
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const allWorkspaces = await db
       .select()
       .from(workspaces)
-      .where(ownedWorkspaceFilter(auth))
+      .where(auth.user.id === HEADLESS_ADMIN_ID ? undefined : ownedWorkspaceFilter(auth))
       .orderBy(desc(workspaces.lastOpenedAt));
 
     return NextResponse.json(allWorkspaces);
@@ -72,6 +72,13 @@ export async function POST(request: NextRequest) {
       if (existingOwner && existingOwner !== auth.user.id) {
         return jsonError("This folder is already registered to another account", 409);
       }
+      if (!existingOwner && auth.user.id === HEADLESS_ADMIN_ID) {
+        await db
+          .update(workspaces)
+          .set({ lastOpenedAt: new Date().toISOString() })
+          .where(eq(workspaces.id, existing[0].id));
+        return NextResponse.json(existing[0]);
+      }
       if (!existingOwner && auth.user.role === "admin") {
         await db
           .update(workspaces)
@@ -86,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     await db.insert(workspaces).values({
       id,
-      ownerUserId: auth.user.id,
+      ownerUserId: auth.user.id === HEADLESS_ADMIN_ID ? null : auth.user.id,
       name,
       folderPath,
       isGitRepo: isGitRepo || false,
