@@ -8,10 +8,15 @@ import {
   findUserByEmail,
   normalizeUserEmail,
 } from "@/lib/auth/server";
+import { isAuthDisabled } from "@/lib/auth/mode";
 import { verifyPassword } from "@/lib/auth/password";
 import { jsonError } from "@/lib/api-errors";
 
 export async function POST(request: NextRequest) {
+  if (isAuthDisabled()) {
+    return jsonError("Authentication is disabled", 403);
+  }
+
   try {
     const body = await request.json();
     const email = typeof body.email === "string" ? body.email.trim() : "";
