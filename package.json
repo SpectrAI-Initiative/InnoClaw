@@ -31,9 +31,11 @@
   "scripts": {
     "predev": "node scripts/check-deps.js",
     "dev": "next dev",
+    "dev:no-auth": "cross-env AUTH_MODE=disabled next dev",
     "prebuild": "node scripts/check-deps.js",
     "build": "next build",
     "start": "next start",
+    "start:no-auth": "cross-env AUTH_MODE=disabled next start",
     "lint": "eslint",
     "test": "vitest run"
   },
@@ -98,6 +100,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.184.1",
+    "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",

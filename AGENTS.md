@@ -76,6 +76,20 @@ bash dev-status.sh
 bash dev-stop.sh
 ```
 
+For trusted single-user/local development without login:
+
+```bash
+npm run dev:no-auth
+```
+
+For a production build already created with authentication disabled at runtime:
+
+```bash
+npm run start:no-auth
+```
+
+Do not use disabled auth on an untrusted network unless another access-control layer protects the service.
+
 Use `npx tsc --noEmit` for a fast type-only pass when you do not need a full production build. The authoritative production verification remains `npm run build`.
 
 ## Validation Matrix

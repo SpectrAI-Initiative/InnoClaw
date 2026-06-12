@@ -22,6 +22,28 @@ Useful follow-up pages:
 - [Collaboration](collaboration.md)
 - [Agent Development](agent-development.md)
 
+## Local Development Commands
+
+Start the app with the default local authentication flow:
+
+```bash
+npm run dev
+```
+
+For trusted single-user/local development without login:
+
+```bash
+npm run dev:no-auth
+```
+
+For a production build already created with authentication disabled at runtime:
+
+```bash
+npm run start:no-auth
+```
+
+Do not use disabled auth on an untrusted network unless another access-control layer protects the service.
+
 ## Which Guide To Use
 
 - Use [Repository Guidelines](repository-guidelines.md) as the repository-wide source of truth for local workflow, validation, and documentation follow-through.
