@@ -42,7 +42,13 @@ gettext_compact = False
 gettext_uuid = True
 
 # Exclude patterns
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    # Internal planning artifacts are kept in-repo but are not public docs.
+    "superpowers/**",
+]
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "shibuya"
