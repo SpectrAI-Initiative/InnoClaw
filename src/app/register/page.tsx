@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserPlus } from "lucide-react";
@@ -8,14 +8,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuthUser } from "@/lib/hooks/use-auth";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { isAuthDisabled } = useAuthUser();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthDisabled) {
+      router.replace("/");
+      router.refresh();
+    }
+  }, [isAuthDisabled, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,6 +47,14 @@ export default function RegisterPage() {
 
     router.replace(data.requiresSetup ? "/settings" : "/");
     router.refresh();
+  }
+
+  if (isAuthDisabled) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+        <p className="text-sm text-muted-foreground">Authentication is disabled. Redirecting...</p>
+      </main>
+    );
   }
 
   return (

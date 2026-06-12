@@ -12,13 +12,19 @@ import { useAuthUser } from "@/lib/hooks/use-auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, isLoading } = useAuthUser();
+  const { user, isLoading, isAuthDisabled } = useAuthUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (isAuthDisabled) {
+      router.replace("/");
+      router.refresh();
+      return;
+    }
+
     if (isLoading || !user) {
       return;
     }
@@ -27,7 +33,7 @@ export default function LoginPage() {
     const fallback = user.role === "admin" ? "/admin/users" : "/";
     router.replace(next && next !== "/" ? next : fallback);
     router.refresh();
-  }, [isLoading, router, user]);
+  }, [isAuthDisabled, isLoading, router, user]);
 
   function resolvePostLoginPath(role: "admin" | "user"): string {
     const next = new URLSearchParams(window.location.search).get("next");
@@ -58,6 +64,14 @@ export default function LoginPage() {
 
     router.replace(resolvePostLoginPath(data.user?.role === "admin" ? "admin" : "user"));
     router.refresh();
+  }
+
+  if (isAuthDisabled) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+        <p className="text-sm text-muted-foreground">Authentication is disabled. Redirecting...</p>
+      </main>
+    );
   }
 
   if (user) {

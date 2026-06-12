@@ -16,7 +16,7 @@ import { useAuthUser } from "@/lib/hooks/use-auth";
 
 export function UserMenu() {
   const router = useRouter();
-  const { user } = useAuthUser();
+  const { user, isAuthDisabled } = useAuthUser();
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
@@ -25,6 +25,10 @@ export function UserMenu() {
   }
 
   if (!user) {
+    return null;
+  }
+
+  if (isAuthDisabled) {
     return null;
   }
 

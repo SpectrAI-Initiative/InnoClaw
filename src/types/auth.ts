@@ -8,3 +8,14 @@ export interface PublicUser {
   createdAt: string;
   updatedAt: string;
 }
+
+export type AuthMode = "local" | "disabled";
+
+export interface AuthMeResponse {
+  user: PublicUser;
+  session: {
+    expiresAt: string;
+  };
+  authMode: AuthMode;
+  isAuthDisabled: boolean;
+}
