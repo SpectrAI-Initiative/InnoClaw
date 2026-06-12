@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  AUTH_PUBLIC_API_PREFIXES,
-  AUTH_PUBLIC_PATHS,
   AUTH_SESSION_COOKIE,
   AUTH_SESSION_EXPIRES_COOKIE,
   AUTH_SESSION_SIGNATURE_COOKIE,
 } from "@/lib/auth/constants";
+import { getAuthMiddlewareAction } from "@/lib/auth/middleware-policy";
+import { isAuthDisabled } from "@/lib/auth/mode";
 
 function getSigningSecret(): string {
   return (
@@ -56,35 +56,22 @@ async function hasValidSessionMarker(request: NextRequest): Promise<boolean> {
   return (await signToken(token)) === signature;
 }
 
-function isPublicPath(pathname: string): boolean {
-  if (AUTH_PUBLIC_PATHS.has(pathname)) {
-    return true;
-  }
-
-  return (
-    pathname.startsWith("/_next/") ||
-    pathname.startsWith("/favicon") ||
-    pathname.includes(".")
-  );
-}
-
-function isPublicApi(pathname: string): boolean {
-  return AUTH_PUBLIC_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-}
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const authDisabled = isAuthDisabled();
 
-  if (isPublicPath(pathname) || isPublicApi(pathname)) {
+  const hasSession = authDisabled ? false : await hasValidSessionMarker(request);
+  const action = getAuthMiddlewareAction({
+    pathname,
+    authDisabled,
+    hasSession,
+  });
+
+  if (action.type === "next") {
     return NextResponse.next();
   }
 
-  const hasSession = await hasValidSessionMarker(request);
-  if (hasSession) {
-    return NextResponse.next();
-  }
-
-  if (pathname.startsWith("/api/")) {
+  if (action.type === "unauthorized-json") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
