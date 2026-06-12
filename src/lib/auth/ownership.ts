@@ -5,8 +5,29 @@ import { db } from "@/lib/db";
 import { deepResearchSessions, hfDatasets, notes, scheduledTasks, skills, workspaces } from "@/lib/db/schema";
 import { isWithinWorkspace } from "@/lib/files/filesystem";
 import { forbiddenResponse, requireAuth, type AuthContext } from "./server";
+import { isAuthDisabled } from "./mode";
+
+export function getOwnerUserIdForWrite(auth: AuthContext): string | null {
+  return isAuthDisabled() ? null : auth.user.id;
+}
+
+export function canAccessOwner(auth: AuthContext, ownerUserId: string | null): boolean {
+  if (isAuthDisabled()) {
+    return true;
+  }
+
+  if (auth.user.role === "admin" && ownerUserId === null) {
+    return true;
+  }
+
+  return ownerUserId === auth.user.id;
+}
 
 export function ownedWorkspaceFilter(auth: AuthContext) {
+  if (isAuthDisabled()) {
+    return undefined;
+  }
+
   if (auth.user.role === "admin") {
     return or(eq(workspaces.ownerUserId, auth.user.id), isNull(workspaces.ownerUserId));
   }
@@ -15,18 +36,30 @@ export function ownedWorkspaceFilter(auth: AuthContext) {
 }
 
 export function ownedDatasetFilter(auth: AuthContext) {
+  if (isAuthDisabled()) {
+    return undefined;
+  }
+
   return auth.user.role === "admin"
     ? or(eq(hfDatasets.ownerUserId, auth.user.id), isNull(hfDatasets.ownerUserId))
     : eq(hfDatasets.ownerUserId, auth.user.id);
 }
 
 export function ownedScheduledTaskFilter(auth: AuthContext) {
+  if (isAuthDisabled()) {
+    return undefined;
+  }
+
   return auth.user.role === "admin"
     ? or(eq(scheduledTasks.ownerUserId, auth.user.id), isNull(scheduledTasks.ownerUserId))
     : eq(scheduledTasks.ownerUserId, auth.user.id);
 }
 
 export function ownedSkillFilter(auth: AuthContext) {
+  if (isAuthDisabled()) {
+    return undefined;
+  }
+
   return or(eq(skills.ownerUserId, auth.user.id), isNull(skills.ownerUserId));
 }
 

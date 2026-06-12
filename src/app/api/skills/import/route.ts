@@ -17,7 +17,7 @@ import {
   MAX_FETCH_BYTES,
 } from "@/lib/skills/github-fetch";
 import { requireAuth } from "@/lib/auth/server";
-import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { getOwnerUserIdForWrite, requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 /** Check if a hostname/IP is private, loopback, or internal */
 function isPrivateOrInternalHost(hostname: string): boolean {
@@ -103,6 +103,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const ownerUserId = getOwnerUserIdForWrite(auth);
+
     // ─── Path A: Selective GitHub import (from preview) ───
     if (url && isGitHubUrl(url) && Array.isArray(paths) && branch) {
       const gh = parseGitHubUrl(url);
@@ -137,7 +139,7 @@ export async function POST(request: NextRequest) {
             return;
           }
 
-          const id = await insertSkill(parsed, workspaceId || null, auth.user.id);
+          const id = await insertSkill(parsed, workspaceId || null, ownerUserId);
           if (id) {
             imported++;
             importedNames.push(parsed.name);
@@ -181,7 +183,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const id = await insertSkill(parsed, workspaceId || null, auth.user.id);
+        const id = await insertSkill(parsed, workspaceId || null, ownerUserId);
         if (!id) {
           return NextResponse.json(
             { error: "Failed to create skill" },
@@ -229,7 +231,7 @@ export async function POST(request: NextRequest) {
             return;
           }
 
-          const id = await insertSkill(parsed, workspaceId || null, auth.user.id);
+          const id = await insertSkill(parsed, workspaceId || null, ownerUserId);
           if (id) {
             imported++;
             importedNames.push(parsed.name);
@@ -337,7 +339,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const id = await insertSkill(importData, workspaceId || null, auth.user.id);
+    const id = await insertSkill(importData, workspaceId || null, ownerUserId);
     if (!id) {
       return NextResponse.json(
         { error: "Failed to create skill" },

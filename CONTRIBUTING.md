@@ -12,6 +12,8 @@ For detailed contribution guidelines, development setup, and coding conventions,
 - [Project Structure](docs/development/project-structure.md)
 - [Testing](docs/development/testing.md)
 
+For trusted local single-user development without login, see the no-auth startup commands in [Local Development](docs/development/local-development.md).
+
 ## Reporting Issues
 
 - **Bugs & Features**: [GitHub Issues](https://github.com/SpectrAI-Initiative/InnoClaw/issues)

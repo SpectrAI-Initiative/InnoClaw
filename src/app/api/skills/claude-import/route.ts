@@ -4,7 +4,7 @@ import path from "path";
 import os from "os";
 import { insertSkill, parseSkillMd } from "@/lib/db/skills-insert";
 import { requireAuth } from "@/lib/auth/server";
-import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { getOwnerUserIdForWrite, requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 /** Resolve the Claude Code config directory.
  *  Defaults to ~/.claude but can be overridden via the request body,
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      const id = await insertSkill(parsed, workspaceId || null, auth.user.id);
+      const id = await insertSkill(parsed, workspaceId || null, getOwnerUserIdForWrite(auth));
       if (id) {
         imported++;
         importedNames.push(parsed.name);

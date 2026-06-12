@@ -4,9 +4,8 @@ import { scheduledTasks } from "@/lib/db/schema";
 import { isValidCron } from "@/lib/scheduler";
 import crypto from "crypto";
 import { requireAuth } from "@/lib/auth/server";
-import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { getOwnerUserIdForWrite, ownedScheduledTaskFilter, requireWorkspaceAccess } from "@/lib/auth/ownership";
 import { jsonError, jsonException } from "@/lib/api-errors";
-import { ownedScheduledTaskFilter } from "@/lib/auth/ownership";
 
 const VALID_TASK_TYPES = [
   "daily_report",
@@ -85,7 +84,7 @@ export async function POST(request: NextRequest) {
     const newTask = {
       id,
       name: name.trim(),
-      ownerUserId: auth.user.id,
+      ownerUserId: getOwnerUserIdForWrite(auth),
       taskType: taskType as (typeof VALID_TASK_TYPES)[number],
       schedule: schedule.trim(),
       workspaceId: workspaceId || null,

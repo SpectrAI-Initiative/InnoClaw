@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hfDatasets } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
-import { eq, desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import * as path from "path";
 import { downloadRepo } from "@/lib/hf-datasets/downloader";
 import { downloadModelScopeRepo } from "@/lib/modelscope/downloader";
@@ -10,6 +10,7 @@ import { buildManifest, computeStats } from "@/lib/hf-datasets/manifest";
 import { setProgress, markFinished } from "@/lib/hf-datasets/progress";
 import type { HfRepoType } from "@/types";
 import { requireAuth } from "@/lib/auth/server";
+import { getOwnerUserIdForWrite, ownedDatasetFilter } from "@/lib/auth/ownership";
 import { jsonError, jsonException } from "@/lib/api-errors";
 
 function getDatasetStorageRoot(): string {
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     const rows = await db
       .select()
       .from(hfDatasets)
-      .where(eq(hfDatasets.ownerUserId, auth.user.id))
+      .where(ownedDatasetFilter(auth))
       .orderBy(desc(hfDatasets.createdAt));
 
     const result = rows.map(parseDatasetRow);
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     await db.insert(hfDatasets).values({
       id,
-      ownerUserId: auth.user.id,
+      ownerUserId: getOwnerUserIdForWrite(auth),
       name: displayName,
       repoId,
       repoType,

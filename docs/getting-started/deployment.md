@@ -59,9 +59,14 @@ npm run build
 # 5. Start the production server (default port 3000)
 npm run start
 
+# Or start without application-level registration/login
+npm run start:no-auth
+
 # Or specify a custom port
 PORT=8080 npm run start
 ```
+
+`npm run start:no-auth` sets `AUTH_MODE=disabled`. Anyone who can reach the service gets admin-level access, so use it only behind trusted network access or another access-control layer.
 
 ## Option 2: PM2 Process Manager
 
@@ -74,6 +79,9 @@ npm install -g pm2
 # Build and start
 npm run build
 pm2 start npm --name "innoclaw" -- start
+
+# Or start without application-level registration/login
+pm2 start npm --name "innoclaw-no-auth" -- run start:no-auth
 
 # Check status
 pm2 status
@@ -93,7 +101,7 @@ pm2 save
 Create a `Dockerfile` in the project root:
 
 ```dockerfile
-FROM node:20-alpine
+FROM node:24-alpine
 
 # Install git (required for GitHub integration)
 RUN apk add --no-cache git python3 make g++
@@ -133,6 +141,8 @@ services:
       - /data/projects:/data/projects
     environment:
       - WORKSPACE_ROOTS=/data/research,/data/projects
+      # Set AUTH_MODE=disabled only behind trusted network access or another access-control layer.
+      # - AUTH_MODE=disabled
       - OPENAI_API_KEY=sk-xxx
       - ANTHROPIC_API_KEY=sk-ant-xxx
       - GEMINI_API_KEY=your-gemini-key

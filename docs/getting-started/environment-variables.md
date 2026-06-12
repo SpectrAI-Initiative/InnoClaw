@@ -9,7 +9,7 @@ A complete reference of all environment variables used by InnoClaw.
 | `WORKSPACE_ROOTS` | `string` | **Yes** | — | Comma-separated absolute paths where workspaces can be created. Directories must exist on the server. |
 | `DATABASE_URL` | `string` | No | `./data/innoclaw.db` | SQLite database filesystem path. Set to a local path when the project resides on NFS or another network filesystem. |
 | `AUTH_SECRET` | `string` | Recommended | Development fallback | Long random secret used to sign local authentication session cookies. Set this in production. |
-| `AUTH_MODE` | `string` | No | `local` | Authentication mode. Set to `disabled` only for trusted local or single-user deployments to bypass registration/login. |
+| `AUTH_MODE` | `string` | No | `local` | Authentication mode. Set to `disabled` only for trusted local or single-user deployments to bypass registration/login and grant every request admin-level access. |
 | `NEXT_BUILD_DIR` | `string` | No | `.next` | Next.js build output directory inside the project root (for example `.next-local`). On Next.js 16 / Turbopack this cannot point outside the repo. |
 
 ## AI Provider Configuration
@@ -135,6 +135,6 @@ EMBEDDING_MODEL=google/gemini-embedding-001
 ## Security Notes
 
 - All API keys and tokens are used **server-side only** and are never exposed to the browser client.
-- `AUTH_MODE=disabled` removes application-level authentication. Use it only behind trusted local access or another access-control layer.
+- `AUTH_MODE=disabled` removes application-level authentication. Anyone who can reach the service gets admin-level access, so use it only behind trusted local access or another access-control layer.
 - Store your `.env.local` file securely and do not commit it to version control.
 - The `.gitignore` file already excludes `.env*` files (except `.env.example`).

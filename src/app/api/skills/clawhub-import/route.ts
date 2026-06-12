@@ -6,7 +6,7 @@ import { parseSkillRow } from "@/lib/db/skills-utils";
 import { insertSkill, parseSkillMd } from "@/lib/db/skills-insert";
 import { parseClawHubUrl } from "@/lib/utils/clawhub";
 import { requireAuth } from "@/lib/auth/server";
-import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { getOwnerUserIdForWrite, requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 const CLAWHUB_BASE = process.env.CLAWHUB_API_BASE || "https://clawhub.ai";
 
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       skillData.slug = slugOverride.trim();
     }
 
-    const insertedId = await insertSkill(skillData, workspaceId || null, auth.user.id);
+    const insertedId = await insertSkill(skillData, workspaceId || null, getOwnerUserIdForWrite(auth));
     if (!insertedId) {
       return NextResponse.json(
         { error: "Failed to save skill to database" },

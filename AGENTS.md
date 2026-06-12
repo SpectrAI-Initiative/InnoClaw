@@ -88,7 +88,7 @@ For a production build already created with authentication disabled at runtime:
 npm run start:no-auth
 ```
 
-Do not use disabled auth on an untrusted network unless another access-control layer protects the service.
+Disabled auth gives anyone who can reach the service admin-level access. Do not use it on an untrusted network unless another access-control layer protects the service.
 
 Use `npx tsc --noEmit` for a fast type-only pass when you do not need a full production build. The authoritative production verification remains `npm run build`.
 

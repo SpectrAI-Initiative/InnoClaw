@@ -10,6 +10,14 @@ npm run dev
 
 This starts the Next.js development server with hot module replacement (HMR). The application is available at **http://localhost:3000**.
 
+For trusted single-user/local development without registration or login:
+
+```bash
+npm run dev:no-auth
+```
+
+Disabled auth gives anyone who can reach the service admin-level access. Do not use it on an untrusted network unless another access-control layer protects the service.
+
 ### Development Features
 
 - **Hot Reload** — Changes to components and pages are reflected immediately

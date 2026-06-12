@@ -11,8 +11,15 @@ import {
   workspaces,
 } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/server";
+import { isAuthDisabled } from "@/lib/auth/mode";
 import { hashPassword } from "@/lib/auth/password";
 import { jsonError } from "@/lib/api-errors";
+
+const AUTH_DISABLED_USER_MANAGEMENT_ERROR = "User management is disabled when authentication is disabled";
+
+function rejectUserManagementWhenAuthDisabled(): NextResponse | null {
+  return isAuthDisabled() ? jsonError(AUTH_DISABLED_USER_MANAGEMENT_ERROR, 403) : null;
+}
 
 function publicUserRow(user: typeof users.$inferSelect) {
   return {
@@ -54,6 +61,11 @@ async function assertNotLastActiveAdmin(targetUserId: string): Promise<NextRespo
 }
 
 export async function GET(request: NextRequest) {
+  const authDisabledResponse = rejectUserManagementWhenAuthDisabled();
+  if (authDisabledResponse) {
+    return authDisabledResponse;
+  }
+
   const auth = await requireAdmin(request);
   if (auth instanceof NextResponse) {
     return auth;
@@ -64,6 +76,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const authDisabledResponse = rejectUserManagementWhenAuthDisabled();
+  if (authDisabledResponse) {
+    return authDisabledResponse;
+  }
+
   const auth = await requireAdmin(request);
   if (auth instanceof NextResponse) {
     return auth;
@@ -104,6 +121,11 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const authDisabledResponse = rejectUserManagementWhenAuthDisabled();
+  if (authDisabledResponse) {
+    return authDisabledResponse;
+  }
+
   const auth = await requireAdmin(request);
   if (auth instanceof NextResponse) {
     return auth;
@@ -155,6 +177,11 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const authDisabledResponse = rejectUserManagementWhenAuthDisabled();
+  if (authDisabledResponse) {
+    return authDisabledResponse;
+  }
+
   const auth = await requireAdmin(request);
   if (auth instanceof NextResponse) {
     return auth;

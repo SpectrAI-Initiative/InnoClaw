@@ -31,9 +31,12 @@ Edit `.env.production.local` before starting. Key variables:
 | `OPENAI_API_KEY` | At least one AI key | OpenAI API key |
 | `ANTHROPIC_API_KEY` | | Anthropic API key |
 | `DATABASE_URL` | No | SQLite path (default: `./data/innoclaw.db`) |
+| `AUTH_MODE` | No | Set to `disabled` only for trusted deployments that should bypass registration/login |
 | `LLM_PROVIDER` | No | Default provider (`openai`, `anthropic`, etc.) |
 
 See [.env.production.example](../.env.production.example) for the full list.
+
+To run without application-level registration or login, set `AUTH_MODE=disabled` in `.env.production.local` before starting the container. Anyone who can reach the service gets admin-level access, so use it only behind trusted network access or another access-control layer.
 
 ### Volumes
 

@@ -14,6 +14,12 @@ describe("auth middleware policy", () => {
     });
   });
 
+  it("redirects user management pages when auth is disabled", () => {
+    expect(getAuthMiddlewareAction({ pathname: "/admin/users", authDisabled: true, hasSession: false })).toEqual({
+      type: "redirect-home",
+    });
+  });
+
   it("redirects protected pages without a session in local auth mode", () => {
     expect(getAuthMiddlewareAction({ pathname: "/workspace/abc", authDisabled: false, hasSession: false })).toEqual({
       type: "redirect-login",

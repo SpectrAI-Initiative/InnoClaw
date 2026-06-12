@@ -3,7 +3,8 @@ import { AUTH_PUBLIC_API_PREFIXES, AUTH_PUBLIC_PATHS } from "./constants";
 export type AuthMiddlewareAction =
   | { type: "next" }
   | { type: "unauthorized-json" }
-  | { type: "redirect-login" };
+  | { type: "redirect-login" }
+  | { type: "redirect-home" };
 
 export interface AuthMiddlewarePolicyInput {
   pathname: string;
@@ -23,11 +24,19 @@ export function isPublicApi(pathname: string): boolean {
   return AUTH_PUBLIC_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+function isDisabledAuthAccountPath(pathname: string): boolean {
+  return pathname === "/admin/users" || pathname.startsWith("/admin/users/");
+}
+
 export function getAuthMiddlewareAction({
   pathname,
   authDisabled,
   hasSession,
 }: AuthMiddlewarePolicyInput): AuthMiddlewareAction {
+  if (authDisabled && isDisabledAuthAccountPath(pathname)) {
+    return { type: "redirect-home" };
+  }
+
   if (authDisabled || isPublicPath(pathname) || isPublicApi(pathname) || hasSession) {
     return { type: "next" };
   }

@@ -5,7 +5,7 @@ import { desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { pathExists, isDirectory, addWorkspaceRoot } from "@/lib/files/filesystem";
 import { requireAuth } from "@/lib/auth/server";
-import { ownedWorkspaceFilter } from "@/lib/auth/ownership";
+import { canAccessOwner, getOwnerUserIdForWrite, ownedWorkspaceFilter } from "@/lib/auth/ownership";
 import { jsonError, jsonException } from "@/lib/api-errors";
 
 export async function GET(request: NextRequest) {
@@ -56,7 +56,12 @@ export async function POST(request: NextRequest) {
       .where(eq(workspaces.folderPath, folderPath))
       .limit(1);
 
-    const ownedExisting = existing.find((workspace) => workspace.ownerUserId === auth.user.id);
+    const ownerUserId = getOwnerUserIdForWrite(auth);
+    const ownedExisting = existing.find((workspace) => (
+      ownerUserId === null
+        ? canAccessOwner(auth, workspace.ownerUserId)
+        : workspace.ownerUserId === ownerUserId
+    ));
     if (ownedExisting) {
       // Reopen existing workspace
       await db
@@ -69,13 +74,13 @@ export async function POST(request: NextRequest) {
 
     if (existing.length > 0) {
       const existingOwner = existing[0].ownerUserId;
-      if (existingOwner && existingOwner !== auth.user.id) {
+      if (existingOwner && existingOwner !== ownerUserId) {
         return jsonError("This folder is already registered to another account", 409);
       }
-      if (!existingOwner && auth.user.role === "admin") {
+      if (!existingOwner && auth.user.role === "admin" && ownerUserId !== null) {
         await db
           .update(workspaces)
-          .set({ ownerUserId: auth.user.id, lastOpenedAt: new Date().toISOString() })
+          .set({ ownerUserId, lastOpenedAt: new Date().toISOString() })
           .where(eq(workspaces.id, existing[0].id));
         return NextResponse.json(existing[0]);
       }
@@ -86,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     await db.insert(workspaces).values({
       id,
-      ownerUserId: auth.user.id,
+      ownerUserId,
       name,
       folderPath,
       isGitRepo: isGitRepo || false,

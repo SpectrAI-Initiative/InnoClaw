@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 import { slugify } from "@/lib/utils/slugify";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 import { ensureProjectDefaultSkills } from "@/lib/db/default-skills";
-import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { getOwnerUserIdForWrite, requireWorkspaceAccess } from "@/lib/auth/ownership";
 import { requireAuth } from "@/lib/auth/server";
 import { jsonError, jsonException } from "@/lib/api-errors";
 
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     await db.insert(skills).values({
       id,
-      ownerUserId: auth.user.id,
+      ownerUserId: getOwnerUserIdForWrite(auth),
       workspaceId: workspaceId || null,
       name,
       slug: normalizedSlug,
