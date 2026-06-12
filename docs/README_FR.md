@@ -51,10 +51,18 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 <!-- whats-new-start -->
 
+#### 2026-06-12
+- **Mode d'authentification desactive**: Executez l'application sans authentification pour les deploiements mono-utilisateur ou de developpement
+
+
 #### 2026-05-12
 - **Authentification utilisateur locale**: Ajout de l'inscription integree, de la connexion, de la deconnexion et de la prise en charge des sessions persistantes.
 - **Gestion des utilisateurs admin**: Ajout d'une page admin pour creer des comptes et gerer les roles, les acces, les mots de passe et la propriete.
 
+
+
+<details>
+<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-04-17
 - **CLI InnoClaw**: Lancez l application, gerez les espaces de travail, et creez, executez ou exportez des sessions Deep Research depuis le terminal
@@ -63,8 +71,6 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
-<details>
-<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-04-12
 - **Prise en charge du deploiement Docker**: Hebergez InnoClaw vous-meme avec Docker et docker-compose, avec des guides pour l installation, les volumes et les mises a niveau
@@ -74,10 +80,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-04-02
 - **Support du deploiement Docker**: Ajout d'un Dockerfile, docker-compose.yml et d'un guide complet de deploiement Docker pour les configurations de production auto-hebergees
 - **200+ nouveaux skills integres**: Bibliotheque de skills enrichie avec des pipelines en bioinformatique, chemoinformatique, genomique, physique et decouverte de medicaments
 - **Framework de creation de skills**: Nouveau meta-skill avec outils d'evaluation, de benchmarking et de validation pour construire et tester des skills personnalises
+
 
 
 
@@ -92,10 +100,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-31
 - **Support du collage d'images**: Les utilisateurs peuvent maintenant coller des images directement dans la saisie du chat pour des conversations IA multimodales
 - **Role Studio pour la recherche approfondie**: Le nouveau panneau Role Studio permet de configurer et gerer des roles de chercheur personnalises dans le flux de recherche approfondie
 - **Sources de recherche d'articles elargies**: BioRxiv, PubMed et PubChem ont ete ajoutes comme sources interrogeables dans Paper Study
+
 
 
 
@@ -115,6 +125,7 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-24
 - **Support LLM multimodal**: Les flux de recherche de documents et d'agents prennent desormais en charge les LLM standard et multimodaux (mLLM), selectionnables par contexte dans les parametres et le selecteur de modele.
 
@@ -126,22 +137,9 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-23
 - **Apercu d'importation de competences GitHub**: Nouveau flux de previsualisation avant importation permettant de parcourir, examiner et importer selectivement des competences depuis des depots GitHub
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-22
-- **Export de notes Obsidian**: Generez des notes structurees compatibles Obsidian avec frontmatter YAML enrichi, figures et wikilinks directement depuis le panneau d'etude de l'article
-- **Selecteur de modele par tache**: Un nouveau composant UI de selection de modele permet aux utilisateurs de remplacer le modele AI par defaut pour chaque tache d'etude (resume, critique, notes, etc.)
-- **Vue de discussion des notes**: Nouvelle vue de discussion pleine page pour les notes d'articles, permettant des conversations assistees par IA autour du contenu des notes generees
 
 
 

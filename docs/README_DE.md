@@ -51,10 +51,18 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 <!-- whats-new-start -->
 
+#### 2026-06-12
+- **Deaktivierter Authentifizierungsmodus**: Fuehren Sie die Anwendung ohne Authentifizierung fuer Einzelnutzer- oder Entwicklungsbereitstellungen aus
+
+
 #### 2026-05-12
 - **Lokale Benutzerauthentifizierung**: Integrierte Kontoregistrierung, Anmelden, Abmelden und persistente Sitzungen hinzugefuegt.
 - **Admin-Benutzerverwaltung**: Eine Admin-Benutzerseite hinzugefuegt, um Konten zu erstellen und Rollen, Zugriffe, Passwoerter und Eigentum zu verwalten.
 
+
+
+<details>
+<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-04-17
 - **InnoClaw CLI**: App im Terminal ausfuehren, Arbeitsbereiche verwalten und Deep-Research-Sitzungen erstellen, starten oder exportieren
@@ -63,8 +71,6 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
-<details>
-<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-04-12
 - **Docker-Deployment-Support**: InnoClaw mit Docker und docker-compose selbst hosten, mit Anleitungen fuer Setup, Volumes und Upgrades
@@ -74,10 +80,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-04-02
 - **Docker-Deployment-Unterstuetzung**: Dockerfile, docker-compose.yml und eine vollstaendige Docker-Deployment-Anleitung fuer selbst gehostete Produktionsumgebungen hinzugefuegt
 - **200+ neue integrierte Skills**: Skill-Bibliothek erweitert um Bioinformatik, Chemoinformatik, Genomik, Physik und Drug-Discovery-Pipelines
 - **Skill-Creator-Framework**: Neuer Meta-Skill mit Werkzeugen fuer Evaluierung, Benchmarking und Validierung zum Erstellen und Testen eigener Skills
+
 
 
 
@@ -92,10 +100,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-31
 - **Eingefuegte Bilder unterstuetzt**: Benutzer koennen Bilder jetzt direkt in die Chat-Eingabe einfuegen fuer multimodale KI-Konversationen
 - **Deep-Research-Rollenstudio**: Das neue Rollenstudio-Panel ermoeglicht das Konfigurieren und Verwalten benutzerdefinierter Forscherrollen im Deep-Research-Workflow
 - **Erweiterte Quellen fuer die Artikelsuche**: BioRxiv, PubMed und PubChem wurden als durchsuchbare Artikelquellen in Paper Study hinzugefuegt
+
 
 
 
@@ -115,6 +125,7 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-24
 - **Multimodaler LLM-Support**: Papierrecherche und Agenten-Workflows unterstuetzen jetzt Standard-LLMs und multimodale LLMs (mLLM), kontextbezogen auswaehlbar in den Einstellungen und der Modellauswahl.
 
@@ -126,22 +137,9 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-23
 - **GitHub-Faehigkeiten Import-Vorschau**: Neuer Vorschau-Workflow vor dem Import ermoeglicht das Durchsuchen, Pruefen und selektive Importieren von Faehigkeiten aus GitHub-Repositories
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-22
-- **Obsidian-Notizexport**: Generieren Sie strukturierte, Obsidian-kompatible Notizen mit reichhaltigem YAML-Frontmatter, Abbildungen und Wikilinks direkt aus dem Paper-Studienpanel
-- **Modellauswahl pro Aufgabe**: Eine neue Modellauswahl-UI-Komponente erlaubt es Nutzern, das Standard-KI-Modell fuer einzelne Paper-Studienaufgaben (Zusammenfassung, Kritik, Notizen usw.) zu ueberschreiben
-- **Notiz-Diskussionsansicht**: Neue ganzseitige Diskussionsansicht fuer Paper-Notizen, die gebuendelte KI-gestuetzte Gespraeche rund um generierten Notizinhalt ermoeglichen
 
 
 
