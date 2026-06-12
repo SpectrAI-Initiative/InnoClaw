@@ -19,6 +19,7 @@ import {
   AUTH_SESSION_REFRESH_DAYS,
   AUTH_SESSION_SIGNATURE_COOKIE,
 } from "./constants";
+import { ANONYMOUS_AUTH_CONTEXT, isAuthDisabled } from "./mode";
 import type { PublicUser } from "@/types/auth";
 
 export type AuthRole = "admin" | "user";
@@ -224,6 +225,10 @@ function getTokenFromRequest(request: NextRequest): string | null {
 }
 
 export async function getAuthContext(request?: NextRequest): Promise<AuthContext | null> {
+  if (isAuthDisabled()) {
+    return ANONYMOUS_AUTH_CONTEXT;
+  }
+
   const token = request ? getTokenFromRequest(request) : await getTokenFromCookies();
   if (!token) {
     return null;
@@ -277,6 +282,10 @@ export async function refreshAuthSessionIfNeeded(
   response: NextResponse,
   auth: AuthContext,
 ): Promise<NextResponse> {
+  if (isAuthDisabled()) {
+    return response;
+  }
+
   const expiresAtMs = new Date(auth.session.expiresAt).getTime();
   if (expiresAtMs - Date.now() > sessionRefreshMs()) {
     return response;
@@ -296,6 +305,10 @@ export async function refreshAuthSessionIfNeeded(
 }
 
 export async function revokeCurrentSession(request: NextRequest): Promise<void> {
+  if (isAuthDisabled()) {
+    return;
+  }
+
   const token = getTokenFromRequest(request);
   if (!token) {
     return;
