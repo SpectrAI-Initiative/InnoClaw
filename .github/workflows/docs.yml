@@ -68,7 +68,7 @@ jobs:
           fi
 
       - name: Upload artifact
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'SpectrAI-Initiative/InnoClaw'
         uses: actions/upload-pages-artifact@v5
         with:
           path: docs/_build/html
@@ -78,7 +78,7 @@ jobs:
         run: sphinx-build -b linkcheck docs docs/_build/linkcheck --keep-going
 
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'SpectrAI-Initiative/InnoClaw'
     needs: build
     runs-on: ubuntu-latest
     environment:
