@@ -13,6 +13,11 @@ function isPathUnderRoot(resolved: string, root: string): boolean {
   return n === r || n.startsWith(r + "/");
 }
 
+function getWorkspaceRootsMaxEntries(): number {
+  const raw = Number.parseInt(process.env.WORKSPACE_ROOTS_MAX_ENTRIES || "64", 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : 64;
+}
+
 /**
  * Parse workspace roots from environment variable
  */
@@ -68,10 +73,20 @@ export function addWorkspaceRoot(targetPath: string): void {
 
   if (alreadyCovered) return;
 
-  // Keep all explicitly registered roots. Dropping older roots makes a DB
+  // Keep all explicitly registered roots unless a newly added parent root
+  // covers them. Dropping older roots makes a DB
   // workspace record diverge from the in-memory path sandbox and can break
   // long-running headless workflows that revisit earlier workspaces.
-  const newRoots = [...roots, resolved].join(",");
+  const compactedRoots = roots.filter((root) => !isPathUnderRoot(root, resolved));
+  const nextRoots = [...compactedRoots, resolved];
+  const maxEntries = getWorkspaceRootsMaxEntries();
+  if (nextRoots.length > maxEntries) {
+    throw new Error(
+      `WORKSPACE_ROOTS limit exceeded (${nextRoots.length}/${maxEntries}). Configure a broader root or increase WORKSPACE_ROOTS_MAX_ENTRIES.`
+    );
+  }
+
+  const newRoots = nextRoots.join(",");
   updateEnvLocal({ WORKSPACE_ROOTS: newRoots });
   process.env.WORKSPACE_ROOTS = newRoots;
 }

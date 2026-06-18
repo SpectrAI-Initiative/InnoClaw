@@ -43,6 +43,8 @@ Shared flags:
   --skill <skill-id>       Run a specific skill instead of the default agent
   --provider <provider>    Override model provider for this run
   --model <model>          Override model name for this run
+  --mode <agent|ask|plan|long-agent>
+                          Agent run mode for interactive/run/batch defaults
 
 Examples:
   innoclaw

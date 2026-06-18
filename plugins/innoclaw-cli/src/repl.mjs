@@ -208,9 +208,8 @@ export async function startRepl(apiClient, {
         llmProvider: activeProvider,
         llmModel: activeModel,
         onHeaders(headers) {
-          if (headers.provider || headers.model) {
-            sessionState = sessionState;
-          }
+          activeProvider = headers.provider || activeProvider;
+          activeModel = headers.model || activeModel;
         },
         onSnapshot(message) {
           renderer.onSnapshot(message);
