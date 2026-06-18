@@ -2,21 +2,28 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Bot, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  buildAuthPageHref,
+  completeCliBrowserHandoff,
+  parseCliHandoffParams,
+} from "@/lib/auth/cli-handoff";
 import { useAuthUser } from "@/lib/hooks/use-auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isLoading, isAuthDisabled } = useAuthUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const registerHref = buildAuthPageHref("/register", searchParams);
 
   useEffect(() => {
     if (isAuthDisabled) {
@@ -29,14 +36,19 @@ export default function LoginPage() {
       return;
     }
 
-    const next = new URLSearchParams(window.location.search).get("next");
+    const handoff = parseCliHandoffParams(searchParams);
+    if (handoff) {
+      return;
+    }
+
+    const next = searchParams.get("next");
     const fallback = user.role === "admin" ? "/admin/users" : "/";
     router.replace(next && next !== "/" ? next : fallback);
     router.refresh();
-  }, [isAuthDisabled, isLoading, router, user]);
+  }, [isAuthDisabled, isLoading, router, searchParams, user]);
 
   function resolvePostLoginPath(role: "admin" | "user"): string {
-    const next = new URLSearchParams(window.location.search).get("next");
+    const next = searchParams.get("next");
     if (next && next !== "/") {
       return next;
     }
@@ -48,22 +60,27 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json().catch(() => ({}));
-    setLoading(false);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Login failed");
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Login failed");
-      return;
+      await completeCliBrowserHandoff(searchParams);
+      router.replace(resolvePostLoginPath(data.user?.role === "admin" ? "admin" : "user"));
+      router.refresh();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Login failed");
+    } finally {
+      setLoading(false);
     }
-
-    router.replace(resolvePostLoginPath(data.user?.role === "admin" ? "admin" : "user"));
-    router.refresh();
   }
 
   if (isAuthDisabled) {
@@ -74,7 +91,7 @@ export default function LoginPage() {
     );
   }
 
-  if (user) {
+  if (user && !parseCliHandoffParams(searchParams)) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background px-4">
         <p className="text-sm text-muted-foreground">Redirecting...</p>
@@ -126,7 +143,7 @@ export default function LoginPage() {
           </form>
           <p className="mt-5 text-center text-sm text-muted-foreground">
             No account yet?{" "}
-            <Link className="font-medium text-primary hover:underline" href="/register">
+            <Link className="font-medium text-primary hover:underline" href={registerHref}>
               Create one
             </Link>
           </p>

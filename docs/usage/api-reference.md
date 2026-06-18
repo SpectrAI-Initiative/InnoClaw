@@ -2,6 +2,72 @@
 
 InnoClaw provides a set of REST API endpoints served by Next.js API routes. All endpoints are under the `/api/` path.
 
+## Auth
+
+### Login
+
+```
+POST /api/auth/login
+```
+
+Creates a browser session for a local user account.
+
+### Register
+
+```
+POST /api/auth/register
+```
+
+Creates a local user account and signs the user in.
+
+### Current Session
+
+```
+GET /api/auth/me
+```
+
+Returns the signed-in user and session expiry, or `401` if the request is unauthenticated.
+
+### CLI Session Handoff
+
+```
+POST /api/auth/cli-session
+```
+
+Requires an authenticated browser session. Mints a fresh CLI session for the same user and returns the cookie triple needed by the terminal client.
+
+**Request Body:**
+
+```json
+{
+  "nonce": "cli-login-nonce"
+}
+```
+
+**Response:**
+
+```json
+{
+  "nonce": "cli-login-nonce",
+  "expiresAt": "2026-06-20T00:00:00.000Z",
+  "user": {
+    "id": "user-123",
+    "email": "user@example.com",
+    "name": "User",
+    "role": "user",
+    "isActive": true,
+    "lastLoginAt": null,
+    "createdAt": "2026-05-20T00:00:00.000Z",
+    "updatedAt": "2026-05-20T00:00:00.000Z"
+  },
+  "cookies": {
+    "innoclaw_session": "token",
+    "innoclaw_session_expires": "2026-06-20T00:00:00.000Z",
+    "innoclaw_session_sig": "signature"
+  }
+}
+```
+
 ## Workspaces
 
 ### List Workspaces
@@ -11,6 +77,8 @@ GET /api/workspaces
 ```
 
 Returns all workspaces.
+
+When auth is enabled, this endpoint requires a valid browser or CLI session cookie set. With `AUTH_MODE=disabled`, the trusted no-auth path returns the anonymous admin context.
 
 **Response:**
 
@@ -35,7 +103,8 @@ POST /api/workspaces
 
 ```json
 {
-  "path": "/data/research/my-project"
+  "name": "my-project",
+  "folderPath": "/data/research/my-project"
 }
 ```
 
