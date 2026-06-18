@@ -7,9 +7,49 @@ PORT=3000
 
 server_responding() {
     command -v curl >/dev/null 2>&1 || return 1
-    local status
-    status=$(curl --noproxy "*" -fsS -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/api/auth/me" 2>/dev/null) || return 1
-    [ "$status" = "200" ] || [ "$status" = "401" ]
+    command -v node >/dev/null 2>&1 || return 1
+
+    local body_file meta status content_type node_status
+    body_file=$(mktemp) || return 1
+    meta=$(curl --noproxy "*" -fsS -o "$body_file" -w "%{http_code}\n%{content_type}" "http://127.0.0.1:$PORT/api/auth/me" 2>/dev/null) || {
+        rm -f "$body_file"
+        return 1
+    }
+    status=$(printf '%s\n' "$meta" | sed -n '1p')
+    content_type=$(printf '%s\n' "$meta" | sed -n '2p')
+
+    case "${content_type,,}" in
+        *application/json*) ;;
+        *)
+            rm -f "$body_file"
+            return 1
+            ;;
+    esac
+
+    node - "$status" "$body_file" <<'NODE'
+const [status, bodyPath] = process.argv.slice(2);
+const { readFileSync } = require("node:fs");
+
+let body;
+try {
+  body = JSON.parse(readFileSync(bodyPath, "utf8"));
+} catch {
+  process.exit(1);
+}
+
+if (status === "200" && body && typeof body.authMode === "string" && body.user) {
+  process.exit(0);
+}
+
+if (status === "401" && body?.error === "Unauthorized") {
+  process.exit(0);
+}
+
+process.exit(1);
+NODE
+    node_status=$?
+    rm -f "$body_file"
+    return "$node_status"
 }
 
 pid_elapsed_seconds() {

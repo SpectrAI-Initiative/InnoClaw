@@ -10,6 +10,10 @@ async function pingServer(baseUrl) {
         redirect: "manual",
         signal: AbortSignal.timeout(3_000),
       });
+      const contentType = response.headers?.get?.("content-type") ?? "";
+      if (!contentType.toLowerCase().includes("application/json")) {
+        continue;
+      }
       const body = await response.json();
       if (
         response.status === 200
