@@ -85,6 +85,24 @@ describe("innoclaw-cli batch client", () => {
     })).rejects.toThrow("Batch item 1 has unsupported mode: review");
   });
 
+  it("rejects an unsupported default mode before any API call", async () => {
+    const inputPath = await writeBatch([
+      { id: "default-mode", prompt: "Use the default" },
+    ]);
+
+    const { runBatch } = await import("../../../plugins/innoclaw-cli/src/batch-client.mjs");
+
+    await expect(runBatch({}, {
+      inputPath,
+      defaultCwd: tempDir,
+      defaultMode: "review",
+      outputDir: path.join(tempDir, "runs"),
+    })).rejects.toThrow("Unsupported default mode: review");
+
+    expect(ensureWorkspaceMock).not.toHaveBeenCalled();
+    expect(runAgentStreamMock).not.toHaveBeenCalled();
+  });
+
   it("writes the selected mode to batch results", async () => {
     const inputPath = await writeBatch([
       { id: "long", prompt: "Run long", mode: "long-agent" },

@@ -60,6 +60,10 @@ export async function runBatch(apiClient, {
   jsonl = false,
   failFast = false,
 } = {}) {
+  if (!VALID_RUN_MODES.has(defaultMode)) {
+    throw new Error(`Unsupported default mode: ${defaultMode}`);
+  }
+
   const allEntries = await readBatchInput(inputPath);
   let entries = allEntries;
 
