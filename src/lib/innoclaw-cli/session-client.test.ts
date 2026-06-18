@@ -15,6 +15,7 @@ describe("innoclaw-cli session client", () => {
     spawnMock.mockReset();
     vi.restoreAllMocks();
     vi.resetModules();
+    vi.doUnmock("node:fs/promises");
   });
 
   it("reports browser launch failure when the launcher emits an async error", async () => {
@@ -96,5 +97,53 @@ describe("innoclaw-cli session client", () => {
     expect(sessionDirMode).toBe(0o700);
     expect(sessionFileMode).toBe(0o600);
     expect(saved.sessions["http://localhost:3000"].cookies.innoclaw_session).toBe("token-456");
+  });
+
+  it("does not write token material directly into an existing permissive POSIX session file", async () => {
+    if (process.platform === "win32") {
+      return;
+    }
+
+    const homeDir = await mkdtemp(path.join(os.tmpdir(), "innoclaw-cli-session-"));
+    const sessionDir = path.join(homeDir, ".innoclaw");
+    const sessionFile = path.join(sessionDir, "cli-sessions.json");
+    await mkdir(sessionDir);
+    await writeFile(sessionFile, JSON.stringify({ version: 1, sessions: {} }), { encoding: "utf-8", mode: 0o666 });
+    await chmod(sessionDir, 0o777);
+    await chmod(sessionFile, 0o666);
+
+    const actualFs = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
+    const directWrites: string[] = [];
+    vi.doMock("node:fs/promises", () => ({
+      ...actualFs,
+      writeFile: vi.fn(async (file: Parameters<typeof writeFile>[0], data: Parameters<typeof writeFile>[1], options) => {
+        if (path.resolve(String(file)) === path.resolve(sessionFile) && String(data).includes("token-direct-write")) {
+          directWrites.push(String(file));
+        }
+        return actualFs.writeFile(file, data, options);
+      }),
+    }));
+
+    vi.spyOn(os, "homedir").mockReturnValue(homeDir);
+    const { createSessionManager } = await import("../../../plugins/innoclaw-cli/src/session-client.mjs");
+    const manager = createSessionManager("http://localhost:3000", () => ({
+      requestJson: vi.fn(),
+    }));
+
+    const beforeStat = await stat(sessionFile);
+    await manager.save({
+      cookies: {
+        innoclaw_session: "token-direct-write",
+        innoclaw_session_expires: "2026-06-20T00:00:00.000Z",
+        innoclaw_session_sig: "sig-direct-write",
+      },
+      expiresAt: "2026-06-20T00:00:00.000Z",
+      updatedAt: "2026-06-18T00:00:00.000Z",
+    });
+    const afterStat = await stat(sessionFile);
+
+    expect(directWrites).toEqual([]);
+    expect(afterStat.ino).not.toBe(beforeStat.ino);
+    expect(afterStat.mode & 0o777).toBe(0o600);
   });
 });
