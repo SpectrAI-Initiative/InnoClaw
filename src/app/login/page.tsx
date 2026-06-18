@@ -12,6 +12,7 @@ import {
   buildAuthPageHref,
   completeCliBrowserHandoff,
   parseCliHandoffParams,
+  resolveSafeRedirectPath,
 } from "@/lib/auth/cli-handoff";
 import { useAuthUser } from "@/lib/hooks/use-auth";
 
@@ -42,18 +43,14 @@ export default function LoginPage() {
       return;
     }
 
-    const next = searchParams.get("next");
     const fallback = user.role === "admin" ? "/admin/users" : "/";
-    router.replace(next && next !== "/" ? next : fallback);
+    router.replace(resolveSafeRedirectPath(searchParams.get("next"), fallback));
     router.refresh();
   }, [cliHandoff, isAuthDisabled, isLoading, router, searchParams, user]);
 
   function resolvePostLoginPath(role: "admin" | "user"): string {
-    const next = searchParams.get("next");
-    if (next && next !== "/") {
-      return next;
-    }
-    return role === "admin" ? "/admin/users" : "/";
+    const fallback = role === "admin" ? "/admin/users" : "/";
+    return resolveSafeRedirectPath(searchParams.get("next"), fallback);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

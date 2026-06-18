@@ -11,6 +11,7 @@ import {
   createCliSessionHandoffPayload,
   isLoopbackHostname,
   parseCliHandoffParams,
+  resolveSafeRedirectPath,
 } from "./cli-handoff";
 
 const originalAuthMode = process.env.AUTH_MODE;
@@ -64,6 +65,22 @@ describe("cli-handoff", () => {
     expect(buildAuthPageHref("/register", params)).toBe(
       "/register?next=%2F&cliCallback=http%3A%2F%2Flocalhost%3A43123%2Fcallback&cliNonce=nonce-456",
     );
+  });
+
+  it.each([
+    ["javascript:alert(1)"],
+    ["https://evil.example"],
+    ["//evil.example"],
+    ["/workspace\\evil"],
+    ["/workspace/%5Cevil"],
+    ["/workspace/\u0000evil"],
+    ["/workspace/%00evil"],
+  ])("rejects unsafe redirect path %s", (next) => {
+    expect(resolveSafeRedirectPath(next, "/fallback")).toBe("/fallback");
+  });
+
+  it.each(["/settings", "/workspace/id"])("allows app-local redirect path %s", (next) => {
+    expect(resolveSafeRedirectPath(next, "/fallback")).toBe(next);
   });
 
   it("creates a CLI session payload with the auth cookie triple", () => {

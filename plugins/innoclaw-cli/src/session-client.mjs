@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
-import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { ApiError } from "./http.mjs";
 
 const COOKIE_NAMES = [
@@ -52,11 +52,22 @@ async function loadStore() {
 async function saveStore(store) {
   await mkdir(SESSION_DIR, { recursive: true, mode: 0o700 });
   if (process.platform !== "win32") {
-    await chmod(SESSION_DIR, 0o700).catch(() => {});
+    await chmod(SESSION_DIR, 0o700);
   }
-  await writeFile(SESSION_FILE, JSON.stringify(store, null, 2), { encoding: "utf-8", mode: 0o600 });
-  if (process.platform !== "win32") {
-    await chmod(SESSION_FILE, 0o600).catch(() => {});
+
+  const tempFile = path.join(SESSION_DIR, `.cli-sessions.${process.pid}.${randomUUID()}.tmp`);
+  try {
+    await writeFile(tempFile, JSON.stringify(store, null, 2), { encoding: "utf-8", mode: 0o600 });
+    if (process.platform !== "win32") {
+      await chmod(tempFile, 0o600);
+    }
+    await rename(tempFile, SESSION_FILE);
+    if (process.platform !== "win32") {
+      await chmod(SESSION_FILE, 0o600);
+    }
+  } catch (error) {
+    await unlink(tempFile).catch(() => {});
+    throw error;
   }
 }
 

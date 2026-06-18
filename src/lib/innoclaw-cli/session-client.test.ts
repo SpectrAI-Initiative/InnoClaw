@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import { mkdtemp, stat } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -59,5 +59,42 @@ describe("innoclaw-cli session client", () => {
     const sessionFileMode = (await stat(path.join(homeDir, ".innoclaw", "cli-sessions.json"))).mode & 0o777;
     expect(sessionDirMode).toBe(0o700);
     expect(sessionFileMode).toBe(0o600);
+  });
+
+  it("tightens an existing permissive POSIX session file before final save", async () => {
+    if (process.platform === "win32") {
+      return;
+    }
+
+    const homeDir = await mkdtemp(path.join(os.tmpdir(), "innoclaw-cli-session-"));
+    const sessionDir = path.join(homeDir, ".innoclaw");
+    const sessionFile = path.join(sessionDir, "cli-sessions.json");
+    await mkdir(sessionDir);
+    await writeFile(sessionFile, JSON.stringify({ version: 1, sessions: {} }), { encoding: "utf-8", mode: 0o666 });
+    await chmod(sessionDir, 0o777);
+    await chmod(sessionFile, 0o666);
+
+    vi.spyOn(os, "homedir").mockReturnValue(homeDir);
+    const { createSessionManager } = await import("../../../plugins/innoclaw-cli/src/session-client.mjs");
+    const manager = createSessionManager("http://localhost:3000", () => ({
+      requestJson: vi.fn(),
+    }));
+
+    await manager.save({
+      cookies: {
+        innoclaw_session: "token-456",
+        innoclaw_session_expires: "2026-06-20T00:00:00.000Z",
+        innoclaw_session_sig: "sig-456",
+      },
+      expiresAt: "2026-06-20T00:00:00.000Z",
+      updatedAt: "2026-06-18T00:00:00.000Z",
+    });
+
+    const sessionDirMode = (await stat(sessionDir)).mode & 0o777;
+    const sessionFileMode = (await stat(sessionFile)).mode & 0o777;
+    const saved = JSON.parse(await readFile(sessionFile, "utf-8"));
+    expect(sessionDirMode).toBe(0o700);
+    expect(sessionFileMode).toBe(0o600);
+    expect(saved.sessions["http://localhost:3000"].cookies.innoclaw_session).toBe("token-456");
   });
 });

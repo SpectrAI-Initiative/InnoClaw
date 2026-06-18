@@ -25,6 +25,8 @@ export interface CliSessionHandoffPayload {
   cookies: CliSessionCookies;
 }
 
+const CONTROL_CHAR_PATTERN = /[\u0000-\u001f\u007f]/;
+
 function getResponseError(payload: unknown, fallback: string): string {
   if (payload && typeof payload === "object" && "error" in payload && typeof payload.error === "string") {
     return payload.error;
@@ -64,10 +66,35 @@ export function parseCliHandoffParams(searchParams: SearchParamSource): CliHando
   }
 }
 
+export function resolveSafeRedirectPath(value: string | null | undefined, fallback = "/"): string {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return fallback;
+  }
+  if (value.includes("\\") || CONTROL_CHAR_PATTERN.test(value)) {
+    return fallback;
+  }
+
+  try {
+    const decoded = decodeURIComponent(value);
+    if (decoded.startsWith("//") || decoded.includes("\\") || CONTROL_CHAR_PATTERN.test(decoded)) {
+      return fallback;
+    }
+  } catch {
+    return fallback;
+  }
+
+  return value;
+}
+
 export function buildAuthPageHref(basePath: string, searchParams: SearchParamSource): string {
   const url = new URL(basePath, "http://innoclaw.local");
 
-  for (const key of ["next", "cliCallback", "cliNonce"]) {
+  const next = resolveSafeRedirectPath(searchParams.get("next"), "");
+  if (next) {
+    url.searchParams.set("next", next);
+  }
+
+  for (const key of ["cliCallback", "cliNonce"]) {
     const value = searchParams.get(key);
     if (value?.trim()) {
       url.searchParams.set(key, value);

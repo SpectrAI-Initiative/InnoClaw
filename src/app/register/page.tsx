@@ -12,6 +12,7 @@ import {
   buildAuthPageHref,
   completeCliBrowserHandoff,
   parseCliHandoffParams,
+  resolveSafeRedirectPath,
 } from "@/lib/auth/cli-handoff";
 import { useAuthUser } from "@/lib/hooks/use-auth";
 
@@ -55,8 +56,7 @@ export default function RegisterPage() {
 
       await completeCliBrowserHandoff(searchParams);
 
-      const next = searchParams.get("next") || (data.requiresSetup ? "/settings" : "/");
-      router.replace(next);
+      router.replace(resolvePostRegisterPath(data.requiresSetup));
       router.refresh();
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Registration failed");
@@ -66,7 +66,7 @@ export default function RegisterPage() {
   }
 
   function resolvePostRegisterPath(requiresSetup = false): string {
-    return searchParams.get("next") || (requiresSetup ? "/settings" : "/");
+    return resolveSafeRedirectPath(searchParams.get("next"), requiresSetup ? "/settings" : "/");
   }
 
   async function handleCliHandoffClick() {
