@@ -7,7 +7,9 @@ PORT=3000
 
 server_responding() {
     command -v curl >/dev/null 2>&1 || return 1
-    curl --noproxy "*" -fsS -o /dev/null -I "http://127.0.0.1:$PORT/login" >/dev/null 2>&1
+    local status
+    status=$(curl --noproxy "*" -fsS -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/api/auth/me" 2>/dev/null) || return 1
+    [ "$status" = "200" ] || [ "$status" = "401" ]
 }
 
 pid_elapsed_seconds() {
@@ -32,18 +34,20 @@ if [ -f .dev.pid ]; then
         echo "Invalid PID in .dev.pid, removing file"
         rm -f .dev.pid
     elif ps -p "$PID" > /dev/null 2>&1; then
-        if server_responding; then
+        if ! is_repo_dev_process "$PID"; then
+            PID_CWD=$(pid_workdir "$PID")
+            echo ".dev.pid points to a live non-server process (PID: $PID${PID_CWD:+, cwd: $PID_CWD}). Removing stale file."
+            rm -f .dev.pid
+        elif server_responding; then
             echo "Dev server is already running (PID: $PID)"
             exit 0
-        fi
+        else
+            PID_AGE=$(pid_elapsed_seconds "$PID")
+            if [ -n "$PID_AGE" ] && [ "$PID_AGE" -le 30 ]; then
+                echo "Dev server is still starting (PID: $PID, age: ${PID_AGE}s)"
+                exit 0
+            fi
 
-        PID_AGE=$(pid_elapsed_seconds "$PID")
-        if is_repo_dev_process "$PID" && [ -n "$PID_AGE" ] && [ "$PID_AGE" -le 30 ]; then
-            echo "Dev server is still starting (PID: $PID, age: ${PID_AGE}s)"
-            exit 0
-        fi
-
-        if is_repo_dev_process "$PID"; then
             echo "Dev server PID $PID is not healthy. Restarting it..."
             kill "$PID" 2>/dev/null
             sleep 2
@@ -52,11 +56,8 @@ if [ -f .dev.pid ]; then
                 kill -9 "$PID" 2>/dev/null
                 sleep 1
             fi
-        else
-            PID_CWD=$(pid_workdir "$PID")
-            echo ".dev.pid points to a live non-server process (PID: $PID${PID_CWD:+, cwd: $PID_CWD}). Removing stale file."
+            rm -f .dev.pid
         fi
-        rm -f .dev.pid
     else
         rm -f .dev.pid
     fi
@@ -65,63 +66,45 @@ fi
 # Check if port is occupied
 check_port() {
     local port=$1
-    local pid=$(lsof -t -i:$port 2>/dev/null)
-    if [ -n "$pid" ]; then
-        echo "Port $port is occupied by process: $pid"
-        local process_name=$(ps -p "$pid" -o comm= 2>/dev/null)
-        echo "Process name: $process_name"
+    local pids=$(lsof -t -i:$port 2>/dev/null)
+    if [ -n "$pids" ]; then
+        echo "Port $port is occupied by process: $pids"
+        for pid in $pids; do
+            local process_name=$(ps -p "$pid" -o comm= 2>/dev/null)
+            local cmdline=$(ps -p "$pid" -o args= 2>/dev/null)
+            echo "Process $pid: ${process_name:-unknown} ${cmdline:+($cmdline)}"
+        done
         return 0
     fi
     return 1
 }
 
-kill_port_process() {
+port_owned_by_pid_file() {
     local port=$1
-    # Only kill node/next processes, not VSCode port forwarding
+    [ -f .dev.pid ] || return 1
+    local expected_pid=$(cat .dev.pid)
+    echo "$expected_pid" | grep -qE '^[0-9]+$' || return 1
+    is_repo_dev_process "$expected_pid" || return 1
+
     local pids=$(lsof -t -i:$port 2>/dev/null)
-    if [ -n "$pids" ]; then
-        for pid in $pids; do
-            local cmdline=$(ps -p "$pid" -o args= 2>/dev/null)
-            # Skip VSCode related processes
-            if echo "$cmdline" | grep -qE "(vscode|code-server|sshd)"; then
-                echo "Skipping VSCode/SSH process: $pid ($cmdline)"
-                continue
-            fi
-            # Only kill node/next related processes
-            if echo "$cmdline" | grep -qE "(node|next|npm)"; then
-                echo "Killing process $pid on port $port ($cmdline)..."
-                kill "$pid" 2>/dev/null
-                sleep 2
-                if ps -p "$pid" > /dev/null 2>&1; then
-                    echo "Force killing..."
-                    kill -9 "$pid" 2>/dev/null
-                    sleep 1
-                fi
-            fi
-        done
-        if lsof -t -i:$port > /dev/null 2>&1; then
-            # Check if remaining process is VSCode
-            local remaining=$(lsof -t -i:$port 2>/dev/null | head -1)
-            local remaining_cmd=$(ps -p "$remaining" -o args= 2>/dev/null)
-            if echo "$remaining_cmd" | grep -qE "(vscode|code-server|sshd)"; then
-                echo "Port $port still used by VSCode (safe to ignore)"
-                return 0
-            fi
-            echo "Failed to free port $port"
-            return 1
+    [ -n "$pids" ] || return 1
+    for pid in $pids; do
+        if [ "$pid" = "$expected_pid" ]; then
+            return 0
         fi
-        echo "Port $port is now free"
-    fi
-    return 0
+    done
+    return 1
 }
 
 # Check and resolve port conflict
 if check_port $PORT; then
-    echo "Attempting to free port $PORT..."
-    if ! kill_port_process $PORT; then
-        echo "Error: Could not free port $PORT. Please manually resolve."
-        exit 1
+    if port_owned_by_pid_file $PORT && server_responding; then
+        echo "Dev server is already running (PID: $(cat .dev.pid))"
+        exit 0
     fi
+    echo "Error: Port $PORT is already in use by a process not managed by this repo's .dev.pid."
+    echo "Stop that process or remove the conflict before running dev-start.sh."
+    exit 1
 fi
 
 # Install dependencies if needed

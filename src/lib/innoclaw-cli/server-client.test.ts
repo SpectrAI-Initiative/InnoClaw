@@ -24,7 +24,13 @@ describe("innoclaw-cli ensureServerReady", () => {
     const fetchMock = vi.fn()
       .mockRejectedValueOnce(new Error("offline"))
       .mockRejectedValueOnce(new Error("booting"))
-      .mockResolvedValueOnce({ status: 200 });
+      .mockResolvedValueOnce({
+        status: 200,
+        json: async () => ({
+          user: { id: "user-1" },
+          authMode: "disabled",
+        }),
+      });
     vi.stubGlobal("fetch", fetchMock);
 
     spawnMock.mockImplementation(() => {
@@ -47,10 +53,36 @@ describe("innoclaw-cli ensureServerReady", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
-  it("accepts a local server that is reachable on 127.0.0.1 when localhost fetch fails", async () => {
-    const fetchMock = vi.fn()
-      .mockRejectedValueOnce(new Error("localhost unavailable"))
-      .mockResolvedValueOnce({ status: 200 });
+  it("does not treat an arbitrary login page as a reachable InnoClaw server", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      status: 200,
+      json: async () => {
+        throw new SyntaxError("Unexpected token '<'");
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
+
+    await expect(ensureServerReady({
+      appRoot: "/tmp/innoclaw-app",
+      baseUrl: "https://example.com",
+      autoStart: false,
+      waitTimeoutMs: 1_000,
+    })).rejects.toThrow("InnoClaw is not reachable at https://example.com");
+
+    expect(spawnMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith("https://example.com/api/auth/me", expect.any(Object));
+  });
+
+  it("accepts an authenticated InnoClaw auth probe", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      status: 200,
+      json: async () => ({
+        user: { id: "user-1", email: "dev@example.com" },
+        authMode: "oauth",
+      }),
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
@@ -62,7 +94,50 @@ describe("innoclaw-cli ensureServerReady", () => {
     })).resolves.toBeUndefined();
 
     expect(spawnMock).not.toHaveBeenCalled();
-    expect(fetchMock).toHaveBeenNthCalledWith(1, "http://localhost:3000/login", expect.any(Object));
-    expect(fetchMock).toHaveBeenNthCalledWith(2, "http://127.0.0.1:3000/login", expect.any(Object));
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3000/api/auth/me", expect.any(Object));
+  });
+
+  it("accepts an unauthenticated InnoClaw auth probe", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      status: 401,
+      json: async () => ({ error: "Unauthorized" }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
+
+    await expect(ensureServerReady({
+      appRoot: "/tmp/innoclaw-app",
+      baseUrl: "http://localhost:3000",
+      waitTimeoutMs: 1_000,
+    })).resolves.toBeUndefined();
+
+    expect(spawnMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3000/api/auth/me", expect.any(Object));
+  });
+
+  it("accepts a local server that is reachable on 127.0.0.1 when localhost fetch fails", async () => {
+    const fetchMock = vi.fn()
+      .mockRejectedValueOnce(new Error("localhost unavailable"))
+      .mockResolvedValueOnce({
+        status: 200,
+        json: async () => ({
+          user: { id: "user-1" },
+          authMode: "disabled",
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
+
+    await expect(ensureServerReady({
+      appRoot: "/tmp/innoclaw-app",
+      baseUrl: "http://localhost:3000",
+      waitTimeoutMs: 1_000,
+    })).resolves.toBeUndefined();
+
+    expect(spawnMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "http://localhost:3000/api/auth/me", expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(2, "http://127.0.0.1:3000/api/auth/me", expect.any(Object));
   });
 });
