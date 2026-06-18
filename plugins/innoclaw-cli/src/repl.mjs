@@ -17,14 +17,14 @@ function printDivider() {
   console.log("=".repeat(72));
 }
 
-function printHeader({ baseUrl, workspace, cwd, session, provider, model, skill }) {
+function printHeader({ baseUrl, workspace, cwd, session, provider, model, skill, mode }) {
   printDivider();
   console.log("InnoClaw CLI");
   console.log(`workspace: ${workspace.name} (${workspace.id})`);
   console.log(`cwd:       ${cwd}`);
   console.log(`server:    ${baseUrl}`);
   console.log(`auth:      ${session?.user?.email || "AUTH_MODE=disabled"}`);
-  console.log(`mode:      agent${skill ? ` | skill=${skill}` : ""}`);
+  console.log(`mode:      ${mode}${skill ? ` | skill=${skill}` : ""}`);
   if (provider || model) {
     console.log(`model:     ${provider || "default"} / ${model || "default"}`);
   }
@@ -103,6 +103,7 @@ export async function startRepl(apiClient, {
   skill = null,
   provider = null,
   model = null,
+  mode = "agent",
   onLogout,
 } = {}) {
   const rl = readline.createInterface({
@@ -131,6 +132,7 @@ export async function startRepl(apiClient, {
     provider: activeProvider,
     model: activeModel,
     skill,
+    mode,
   });
 
   try {
@@ -202,7 +204,7 @@ export async function startRepl(apiClient, {
         messages,
         workspaceId: workspace.id,
         cwd,
-        mode: "agent",
+        mode,
         skillId: skill,
         paramValues: skill ? { user_input: input } : undefined,
         llmProvider: activeProvider,

@@ -358,6 +358,7 @@ async function handleInteractive(flags) {
     skill: getOptionalFlag(flags, "skill"),
     provider: getOptionalFlag(flags, "provider"),
     model: getOptionalFlag(flags, "model"),
+    mode: getRunMode(flags),
     onLogout: async () => {
       await context.sessionManager.revoke();
     },
@@ -439,6 +440,7 @@ async function handleBatch(flags, positional) {
     defaultSkill: getOptionalFlag(flags, "skill") || undefined,
     defaultProvider: getOptionalFlag(flags, "provider") || undefined,
     defaultModel: getOptionalFlag(flags, "model") || undefined,
+    defaultMode: getRunMode(flags),
     workers,
     startId: getOptionalFlag(flags, "start-id") || undefined,
     ids: parseListFlag(flags, "ids"),

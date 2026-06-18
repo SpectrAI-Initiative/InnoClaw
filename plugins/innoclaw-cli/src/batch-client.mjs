@@ -4,6 +4,8 @@ import { performance } from "node:perf_hooks";
 import { ensureWorkspace } from "./workspace-client.mjs";
 import { getMessageText, makeUserMessage, runAgentStream } from "./agent-client.mjs";
 
+const VALID_RUN_MODES = new Set(["agent", "ask", "plan", "long-agent"]);
+
 function timestampForPath() {
   return new Date().toISOString().replace(/[:.]/g, "-");
 }
@@ -17,9 +19,14 @@ function normalizeBatchEntries(entries) {
     if (typeof prompt !== "string" || prompt.trim().length === 0) {
       throw new Error(`Batch item ${index + 1} is missing a non-empty prompt`);
     }
+    const mode = entry?.mode;
+    if (mode !== undefined && (!VALID_RUN_MODES.has(mode))) {
+      throw new Error(`Batch item ${index + 1} has unsupported mode: ${mode}`);
+    }
     return {
       id: typeof entry.id === "string" && entry.id.trim() ? entry.id.trim() : `item-${index + 1}`,
       prompt: prompt.trim(),
+      mode: typeof mode === "string" ? mode : null,
       skill: typeof entry.skill === "string" ? entry.skill : null,
       cwd: entry.cwd || entry.workspace || null,
       provider: typeof entry.provider === "string" ? entry.provider : null,
@@ -44,6 +51,7 @@ export async function runBatch(apiClient, {
   defaultSkill = null,
   defaultProvider = null,
   defaultModel = null,
+  defaultMode = "agent",
   workers = 2,
   startId = null,
   ids = [],
@@ -100,6 +108,7 @@ export async function runBatch(apiClient, {
     const skill = entry.skill || defaultSkill;
     const provider = entry.provider || defaultProvider;
     const model = entry.model || defaultModel;
+    const mode = entry.mode || defaultMode;
     const workspace = await resolveWorkspace(cwd);
 
     const startedAt = new Date().toISOString();
@@ -112,7 +121,7 @@ export async function runBatch(apiClient, {
         messages: [makeUserMessage(entry.prompt)],
         workspaceId: workspace.id,
         cwd,
-        mode: "agent",
+        mode,
         skillId: skill,
         paramValues: skill
           ? { user_input: entry.prompt, ...(entry.params || {}) }
@@ -131,6 +140,7 @@ export async function runBatch(apiClient, {
         status: "done",
         workspaceId: workspace.id,
         cwd,
+        mode,
         skill,
         provider,
         model,
@@ -153,6 +163,7 @@ export async function runBatch(apiClient, {
         status: "error",
         workspaceId: workspace.id,
         cwd,
+        mode,
         skill,
         provider,
         model,
