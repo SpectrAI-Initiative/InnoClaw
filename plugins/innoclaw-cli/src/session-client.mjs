@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { ApiError } from "./http.mjs";
 
 const COOKIE_NAMES = [
@@ -50,8 +50,14 @@ async function loadStore() {
 }
 
 async function saveStore(store) {
-  await mkdir(SESSION_DIR, { recursive: true });
-  await writeFile(SESSION_FILE, JSON.stringify(store, null, 2), "utf-8");
+  await mkdir(SESSION_DIR, { recursive: true, mode: 0o700 });
+  if (process.platform !== "win32") {
+    await chmod(SESSION_DIR, 0o700).catch(() => {});
+  }
+  await writeFile(SESSION_FILE, JSON.stringify(store, null, 2), { encoding: "utf-8", mode: 0o600 });
+  if (process.platform !== "win32") {
+    await chmod(SESSION_FILE, 0o600).catch(() => {});
+  }
 }
 
 function getResponseSetCookies(response) {

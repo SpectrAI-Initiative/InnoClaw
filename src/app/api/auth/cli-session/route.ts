@@ -8,9 +8,14 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth/server";
 import { createCliSessionHandoffPayload } from "@/lib/auth/cli-handoff";
+import { isAuthDisabled } from "@/lib/auth/mode";
 
 export async function POST(request: NextRequest) {
   try {
+    if (isAuthDisabled()) {
+      return jsonError("Authentication is disabled", 403);
+    }
+
     const auth = await getAuthContext(request);
     if (!auth) {
       return unauthorizedResponse();
