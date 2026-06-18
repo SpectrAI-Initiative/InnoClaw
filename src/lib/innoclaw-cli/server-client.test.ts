@@ -1,5 +1,7 @@
 import { EventEmitter } from "node:events";
-import { readFile } from "node:fs/promises";
+import { chmod, copyFile, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const spawnMock = vi.fn();
@@ -173,33 +175,168 @@ describe("innoclaw-cli ensureServerReady", () => {
 });
 
 describe("dev-start.sh", () => {
-  it("requires the auth probe to return JSON with an InnoClaw auth shape", async () => {
-    const script = await readFile("dev-start.sh", "utf8");
-    const serverResponding = script.slice(
-      script.indexOf("server_responding() {"),
-      script.indexOf("pid_elapsed_seconds() {"),
-    );
+  function toBashPath(windowsPath: string) {
+    const normalized = windowsPath.replace(/\\/g, "/");
+    return normalized.replace(/^([A-Za-z]):/, (_, drive: string) => `/${drive.toLowerCase()}`);
+  }
 
-    expect(serverResponding).toContain("application/json");
-    expect(serverResponding).toContain("authMode");
-    expect(serverResponding).toContain("user");
-    expect(serverResponding).toContain("Unauthorized");
+  async function runDevStart(
+    args: string[],
+    options: { cwd?: string; env?: NodeJS.ProcessEnv } = {},
+  ) {
+    const { execFile } = await vi.importActual<typeof import("node:child_process")>("node:child_process");
+    const bashPath = "C:\\Program Files\\Git\\bin\\bash.exe";
+
+    return new Promise<{ stdout: string; stderr: string; code: number | null }>((resolve) => {
+      execFile(
+        bashPath,
+        ["dev-start.sh", ...args],
+        {
+          cwd: options.cwd ?? process.cwd(),
+          env: {
+            ...process.env,
+            ...options.env,
+          },
+        },
+        (error, stdout, stderr) => {
+          resolve({
+            stdout,
+            stderr,
+            code: typeof error?.code === "number" ? error.code : 0,
+          });
+        },
+      );
+    });
+  }
+
+  async function withStubPath(
+    stubs: Record<string, string>,
+    run: (stubDir: string) => Promise<void>,
+  ) {
+    const stubDir = await mkdtemp(path.join(tmpdir(), "innoclaw-dev-start-"));
+    try {
+      await Promise.all(Object.entries(stubs).map(async ([name, contents]) => {
+        const stubPath = path.join(stubDir, name);
+        await writeFile(stubPath, contents);
+        await chmod(stubPath, 0o755);
+      }));
+      await run(stubDir);
+    } finally {
+      await rm(stubDir, { recursive: true, force: true });
+    }
+  }
+
+  async function withDevStartCopy(run: (scriptDir: string) => Promise<void>) {
+    const scriptDir = await mkdtemp(path.join(tmpdir(), "innoclaw-dev-start-script-"));
+    try {
+      const scriptPath = path.join(scriptDir, "dev-start.sh");
+      await copyFile(path.join(process.cwd(), "dev-start.sh"), scriptPath);
+      await chmod(scriptPath, 0o755);
+      await run(scriptDir);
+    } finally {
+      await rm(scriptDir, { recursive: true, force: true });
+    }
+  }
+
+  it("accepts a 401 JSON Unauthorized auth probe", async () => {
+    await withStubPath({
+      "curl": `#!/bin/sh
+body_file=""
+fail_on_http_error=0
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -*f*) fail_on_http_error=1 ;;
+  esac
+  if [ "$1" = "-o" ]; then
+    body_file="$2"
+    shift 2
+    continue
+  fi
+  shift
+done
+printf '{"error":"Unauthorized"}' > "$body_file"
+printf '401\\napplication/json'
+if [ "$fail_on_http_error" -eq 1 ]; then
+  exit 22
+fi
+`,
+    }, async (stubDir) => {
+      await withDevStartCopy(async (scriptDir) => {
+        const result = await runDevStart(["server_responding"], {
+          cwd: scriptDir,
+          env: {
+            INNOCLAW_DEV_START_TEST_HOOK: "1",
+            INNOCLAW_DEV_START_TEST_PATH: toBashPath(stubDir),
+          },
+        });
+
+        expect(result).toMatchObject({ code: 0 });
+      });
+    });
   });
 
-  it("keeps the unrelated occupied-port branch fail-fast without killing processes", async () => {
-    const script = await readFile("dev-start.sh", "utf8");
-    const portConflictBranch = script.slice(
-      script.indexOf("if check_port $PORT; then"),
-      script.indexOf("# Install dependencies if needed"),
-    );
-    const unrelatedPortBranch = portConflictBranch.slice(
-      portConflictBranch.indexOf("echo \"Error: Port $PORT is already in use"),
-      portConflictBranch.indexOf("exit 1") + "exit 1".length,
-    );
+  it("rejects text/plain even when the body looks like a valid auth probe", async () => {
+    await withStubPath({
+      "curl": `#!/bin/sh
+body_file=""
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = "-o" ]; then
+    body_file="$2"
+    shift 2
+    continue
+  fi
+  shift
+done
+printf '{"user":{"id":"user-1"},"authMode":"disabled"}' > "$body_file"
+printf '200\\ntext/plain'
+`,
+    }, async (stubDir) => {
+      await withDevStartCopy(async (scriptDir) => {
+        const result = await runDevStart(["server_responding"], {
+          cwd: scriptDir,
+          env: {
+            INNOCLAW_DEV_START_TEST_HOOK: "1",
+            INNOCLAW_DEV_START_TEST_PATH: toBashPath(stubDir),
+          },
+        });
 
-    expect(unrelatedPortBranch).toContain("exit 1");
-    expect(unrelatedPortBranch).not.toContain("kill");
-    expect(unrelatedPortBranch).not.toContain("npm");
-    expect(unrelatedPortBranch).not.toContain("npx");
+        expect(result).toMatchObject({ code: 1 });
+      });
+    });
+  });
+
+  it("exits on an unrelated occupied port without invoking kill", async () => {
+    await withStubPath({
+      "lsof": `#!/bin/sh
+printf '4242\\n'
+`,
+      "ps": `#!/bin/sh
+case "$*" in
+  *"-o comm="*) printf 'node\\n' ;;
+  *"-o args="*) printf 'node unrelated-server.js\\n' ;;
+  *) exit 0 ;;
+esac
+`,
+      "kill": `#!/bin/sh
+printf 'kill should not be called\\n' > "$KILL_MARKER"
+exit 1
+`,
+    }, async (stubDir) => {
+      const killMarker = path.join(stubDir, "kill-called");
+      await withDevStartCopy(async (scriptDir) => {
+        const result = await runDevStart([], {
+          cwd: scriptDir,
+          env: {
+            INNOCLAW_DEV_START_TEST_PATH: toBashPath(stubDir),
+            KILL_MARKER: killMarker,
+          },
+        });
+
+        await expect(rm(killMarker, { force: false })).rejects.toThrow();
+        expect(result.code).toBe(1);
+        expect(result.stdout).toContain("Port 3000 is occupied");
+        expect(result.stdout).toContain("not managed by this repo's .dev.pid");
+      });
+    });
   });
 });

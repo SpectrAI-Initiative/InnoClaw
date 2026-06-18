@@ -5,13 +5,18 @@ cd "$(dirname "$0")"
 
 PORT=3000
 
+if [ -n "${INNOCLAW_DEV_START_TEST_PATH:-}" ]; then
+    PATH="${INNOCLAW_DEV_START_TEST_PATH}:$PATH"
+    hash -r
+fi
+
 server_responding() {
     command -v curl >/dev/null 2>&1 || return 1
     command -v node >/dev/null 2>&1 || return 1
 
     local body_file meta status content_type node_status
     body_file=$(mktemp) || return 1
-    meta=$(curl --noproxy "*" -fsS -o "$body_file" -w "%{http_code}\n%{content_type}" "http://127.0.0.1:$PORT/api/auth/me" 2>/dev/null) || {
+    meta=$(curl --noproxy "*" -sS -o "$body_file" -w "%{http_code}\n%{content_type}" "http://127.0.0.1:$PORT/api/auth/me" 2>/dev/null) || {
         rm -f "$body_file"
         return 1
     }
@@ -66,6 +71,19 @@ is_repo_dev_process() {
     local cmdline=$(ps -p "$pid" -o args= 2>/dev/null)
     [ "$cwd" = "$PWD" ] && echo "$cmdline" | grep -qE "(npm run dev|next dev|node.*next)"
 }
+
+if [ "${INNOCLAW_DEV_START_TEST_HOOK:-}" = "1" ]; then
+    case "${1:-}" in
+        server_responding)
+            server_responding
+            exit $?
+            ;;
+        *)
+            echo "Unknown dev-start test hook: ${1:-}" >&2
+            exit 64
+            ;;
+    esac
+fi
 
 # Check if already running
 if [ -f .dev.pid ]; then
