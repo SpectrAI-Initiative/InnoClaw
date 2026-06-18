@@ -185,7 +185,7 @@ describe("dev-start.sh", () => {
     options: { cwd?: string; env?: Partial<NodeJS.ProcessEnv> } = {},
   ) {
     const { execFile } = await vi.importActual<typeof import("node:child_process")>("node:child_process");
-    const bashPath = "C:\\Program Files\\Git\\bin\\bash.exe";
+    const bashPath = process.platform === "win32" ? "C:\\Program Files\\Git\\bin\\bash.exe" : "bash";
 
     return new Promise<{ stdout: string; stderr: string; code: number | null }>((resolve) => {
       execFile(
@@ -202,7 +202,7 @@ describe("dev-start.sh", () => {
           resolve({
             stdout,
             stderr,
-            code: typeof error?.code === "number" ? error.code : 0,
+            code: typeof error?.code === "number" ? error.code : error ? 1 : 0,
           });
         },
       );
