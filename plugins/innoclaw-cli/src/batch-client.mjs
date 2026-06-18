@@ -45,6 +45,24 @@ async function appendEvent(logFile, line) {
   await appendFile(logFile, `${line}\n`, "utf-8");
 }
 
+/**
+ * @param {unknown} apiClient
+ * @param {{
+ *   inputPath?: string,
+ *   defaultCwd?: string,
+ *   defaultSkill?: string | null,
+ *   defaultProvider?: string | null,
+ *   defaultModel?: string | null,
+ *   defaultMode?: string,
+ *   workers?: number,
+ *   startId?: string | null,
+ *   ids?: string[],
+ *   limit?: number | null,
+ *   outputDir?: string | null,
+ *   jsonl?: boolean,
+ *   failFast?: boolean,
+ * }} [options]
+ */
 export async function runBatch(apiClient, {
   inputPath,
   defaultCwd,

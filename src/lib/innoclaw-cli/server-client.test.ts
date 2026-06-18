@@ -182,7 +182,7 @@ describe("dev-start.sh", () => {
 
   async function runDevStart(
     args: string[],
-    options: { cwd?: string; env?: NodeJS.ProcessEnv } = {},
+    options: { cwd?: string; env?: Partial<NodeJS.ProcessEnv> } = {},
   ) {
     const { execFile } = await vi.importActual<typeof import("node:child_process")>("node:child_process");
     const bashPath = "C:\\Program Files\\Git\\bin\\bash.exe";

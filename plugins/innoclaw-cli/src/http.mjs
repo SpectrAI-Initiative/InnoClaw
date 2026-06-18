@@ -35,6 +35,13 @@ function buildErrorMessage(response, payload) {
   return `${response.status} ${response.statusText}`;
 }
 
+/**
+ * @param {{
+ *   baseUrl: string,
+ *   getCookieHeader?: () => string | null | undefined | Promise<string | null | undefined>,
+ *   onResponse?: (response: Response) => void | Promise<void>,
+ * }} options
+ */
 export function createApiClient({ baseUrl, getCookieHeader, onResponse }) {
   async function request(path, {
     method = "GET",

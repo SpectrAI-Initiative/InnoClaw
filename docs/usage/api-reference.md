@@ -87,7 +87,7 @@ When auth is enabled, this endpoint requires a valid browser or CLI session cook
   {
     "id": "workspace-uuid",
     "name": "my-project",
-    "rootPath": "/data/research/my-project",
+    "folderPath": "/data/research/my-project",
     "createdAt": "2025-01-01T00:00:00.000Z"
   }
 ]
@@ -763,8 +763,8 @@ POST /api/git/clone
 
 ```json
 {
-  "url": "https://github.com/user/repo.git",
-  "rootPath": "/data/research"
+  "repoUrl": "https://github.com/user/repo.git",
+  "targetFolderName": "repo"
 }
 ```
 
