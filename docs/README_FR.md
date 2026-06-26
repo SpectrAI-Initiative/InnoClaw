@@ -51,9 +51,17 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 <!-- whats-new-start -->
 
+#### 2026-06-26
+- **Support CLI Runtime**: Interface de ligne de commande interactive avec REPL, operations par lot et integration d'agent pour les workflows bases sur terminal
+
+
 #### 2026-06-12
 - **Mode d'authentification desactive**: Executez l'application sans authentification pour les deploiements mono-utilisateur ou de developpement
 
+
+
+<details>
+<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-05-12
 - **Authentification utilisateur locale**: Ajout de l'inscription integree, de la connexion, de la deconnexion et de la prise en charge des sessions persistantes.
@@ -61,13 +69,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
-<details>
-<summary>Afficher les mises a jour precedentes</summary>
 
 #### 2026-04-17
 - **CLI InnoClaw**: Lancez l application, gerez les espaces de travail, et creez, executez ou exportez des sessions Deep Research depuis le terminal
 - **Points de controle Deep Research**: La recherche peut maintenant faire pause aux etapes de revue pour continuer, reviser, creer une branche, rejeter ou arreter
 - **Studio des roles**: Nouvel onglet Deep Research pour examiner les roles specialises et envoyer des consignes ciblees au Researcher ou aux workers
+
 
 
 
@@ -81,10 +88,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-04-02
 - **Support du deploiement Docker**: Ajout d'un Dockerfile, docker-compose.yml et d'un guide complet de deploiement Docker pour les configurations de production auto-hebergees
 - **200+ nouveaux skills integres**: Bibliotheque de skills enrichie avec des pipelines en bioinformatique, chemoinformatique, genomique, physique et decouverte de medicaments
 - **Framework de creation de skills**: Nouveau meta-skill avec outils d'evaluation, de benchmarking et de validation pour construire et tester des skills personnalises
+
 
 
 
@@ -101,10 +110,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-31
 - **Support du collage d'images**: Les utilisateurs peuvent maintenant coller des images directement dans la saisie du chat pour des conversations IA multimodales
 - **Role Studio pour la recherche approfondie**: Le nouveau panneau Role Studio permet de configurer et gerer des roles de chercheur personnalises dans le flux de recherche approfondie
 - **Sources de recherche d'articles elargies**: BioRxiv, PubMed et PubChem ont ete ajoutes comme sources interrogeables dans Paper Study
+
 
 
 
@@ -126,20 +137,9 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-24
 - **Support LLM multimodal**: Les flux de recherche de documents et d'agents prennent desormais en charge les LLM standard et multimodaux (mLLM), selectionnables par contexte dans les parametres et le selecteur de modele.
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-23
-- **Apercu d'importation de competences GitHub**: Nouveau flux de previsualisation avant importation permettant de parcourir, examiner et importer selectivement des competences depuis des depots GitHub
 
 
 
