@@ -2,22 +2,32 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  buildAuthPageHref,
+  completeCliBrowserHandoff,
+  parseCliHandoffParams,
+  resolveSafeRedirectPath,
+} from "@/lib/auth/cli-handoff";
 import { useAuthUser } from "@/lib/hooks/use-auth";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { isAuthDisabled } = useAuthUser();
+  const searchParams = useSearchParams();
+  const { user, isAuthDisabled } = useAuthUser();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cliHandoffLoading, setCliHandoffLoading] = useState(false);
+  const loginHref = buildAuthPageHref("/login", searchParams);
+  const cliHandoff = parseCliHandoffParams(searchParams);
 
   useEffect(() => {
     if (isAuthDisabled) {
@@ -31,28 +41,78 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, name, password }),
-    });
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, password }),
+      });
 
-    const data = await res.json().catch(() => ({}));
-    setLoading(false);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Registration failed");
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Registration failed");
-      return;
+      await completeCliBrowserHandoff(searchParams);
+
+      router.replace(resolvePostRegisterPath(data.requiresSetup));
+      router.refresh();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Registration failed");
+    } finally {
+      setLoading(false);
     }
+  }
 
-    router.replace(data.requiresSetup ? "/settings" : "/");
-    router.refresh();
+  function resolvePostRegisterPath(requiresSetup = false): string {
+    return resolveSafeRedirectPath(searchParams.get("next"), requiresSetup ? "/settings" : "/");
+  }
+
+  async function handleCliHandoffClick() {
+    setCliHandoffLoading(true);
+    setError("");
+
+    try {
+      await completeCliBrowserHandoff(searchParams);
+      router.replace(resolvePostRegisterPath());
+      router.refresh();
+    } catch (handoffError) {
+      setError(handoffError instanceof Error ? handoffError.message : "CLI sign-in failed");
+    } finally {
+      setCliHandoffLoading(false);
+    }
   }
 
   if (isAuthDisabled) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background px-4">
         <p className="text-sm text-muted-foreground">Authentication is disabled. Redirecting...</p>
+      </main>
+    );
+  }
+
+  if (user && cliHandoff) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md border-border/70 shadow-lg">
+          <CardHeader className="space-y-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <UserPlus className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl">Complete CLI sign-in</CardTitle>
+              <CardDescription>Authorize the CLI to use your current browser session.</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button className="w-full gap-2" type="button" disabled={cliHandoffLoading} onClick={handleCliHandoffClick}>
+              <UserPlus className="h-4 w-4" />
+              {cliHandoffLoading ? "Completing..." : "Complete CLI sign-in"}
+            </Button>
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -111,7 +171,7 @@ export default function RegisterPage() {
           </form>
           <p className="mt-5 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link className="font-medium text-primary hover:underline" href="/login">
+            <Link className="font-medium text-primary hover:underline" href={loginHref}>
               Sign in
             </Link>
           </p>

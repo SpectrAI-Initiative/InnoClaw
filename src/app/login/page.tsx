@@ -2,21 +2,31 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Bot, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  buildAuthPageHref,
+  completeCliBrowserHandoff,
+  parseCliHandoffParams,
+  resolveSafeRedirectPath,
+} from "@/lib/auth/cli-handoff";
 import { useAuthUser } from "@/lib/hooks/use-auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isLoading, isAuthDisabled } = useAuthUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cliHandoffLoading, setCliHandoffLoading] = useState(false);
+  const registerHref = buildAuthPageHref("/register", searchParams);
+  const cliHandoff = parseCliHandoffParams(searchParams);
 
   useEffect(() => {
     if (isAuthDisabled) {
@@ -29,18 +39,18 @@ export default function LoginPage() {
       return;
     }
 
-    const next = new URLSearchParams(window.location.search).get("next");
+    if (cliHandoff) {
+      return;
+    }
+
     const fallback = user.role === "admin" ? "/admin/users" : "/";
-    router.replace(next && next !== "/" ? next : fallback);
+    router.replace(resolveSafeRedirectPath(searchParams.get("next"), fallback));
     router.refresh();
-  }, [isAuthDisabled, isLoading, router, user]);
+  }, [cliHandoff, isAuthDisabled, isLoading, router, searchParams, user]);
 
   function resolvePostLoginPath(role: "admin" | "user"): string {
-    const next = new URLSearchParams(window.location.search).get("next");
-    if (next && next !== "/") {
-      return next;
-    }
-    return role === "admin" ? "/admin/users" : "/";
+    const fallback = role === "admin" ? "/admin/users" : "/";
+    return resolveSafeRedirectPath(searchParams.get("next"), fallback);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -48,22 +58,42 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json().catch(() => ({}));
-    setLoading(false);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Login failed");
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Login failed");
-      return;
+      await completeCliBrowserHandoff(searchParams);
+      router.replace(resolvePostLoginPath(data.user?.role === "admin" ? "admin" : "user"));
+      router.refresh();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Login failed");
+    } finally {
+      setLoading(false);
     }
+  }
 
-    router.replace(resolvePostLoginPath(data.user?.role === "admin" ? "admin" : "user"));
-    router.refresh();
+  async function handleCliHandoffClick() {
+    setCliHandoffLoading(true);
+    setError("");
+
+    try {
+      await completeCliBrowserHandoff(searchParams);
+      router.replace(resolvePostLoginPath(user?.role === "admin" ? "admin" : "user"));
+      router.refresh();
+    } catch (handoffError) {
+      setError(handoffError instanceof Error ? handoffError.message : "CLI sign-in failed");
+    } finally {
+      setCliHandoffLoading(false);
+    }
   }
 
   if (isAuthDisabled) {
@@ -74,10 +104,35 @@ export default function LoginPage() {
     );
   }
 
-  if (user) {
+  if (user && !cliHandoff) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background px-4">
         <p className="text-sm text-muted-foreground">Redirecting...</p>
+      </main>
+    );
+  }
+
+  if (user && cliHandoff) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md border-border/70 shadow-lg">
+          <CardHeader className="space-y-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Bot className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl">Complete CLI sign-in</CardTitle>
+              <CardDescription>Authorize the CLI to use your current browser session.</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button className="w-full gap-2" type="button" disabled={cliHandoffLoading} onClick={handleCliHandoffClick}>
+              <LogIn className="h-4 w-4" />
+              {cliHandoffLoading ? "Completing..." : "Complete CLI sign-in"}
+            </Button>
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -126,7 +181,7 @@ export default function LoginPage() {
           </form>
           <p className="mt-5 text-center text-sm text-muted-foreground">
             No account yet?{" "}
-            <Link className="font-medium text-primary hover:underline" href="/register">
+            <Link className="font-medium text-primary hover:underline" href={registerHref}>
               Create one
             </Link>
           </p>

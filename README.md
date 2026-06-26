@@ -62,6 +62,22 @@ npm run dev                          # open http://localhost:3000
 
 After the UI opens: **Settings** → configure a model provider → open a workspace → click **Sync** → start chatting.
 
+### Optional CLI
+
+```bash
+npm link
+innoclaw
+innoclaw run --prompt "Summarize the current workspace"
+```
+
+The CLI uses the same local app runtime as the web UI. When auth is enabled, it auto-starts the app, opens the browser login page on `localhost`, and stores a dedicated CLI session after sign-in. For trusted headless automation, start the app with authentication disabled.
+
+Headless local run mode:
+
+```bash
+npm run dev:no-auth
+```
+
 > **Security**: InnoClaw includes shell execution and remote job submission capabilities. See [SECURITY.md](SECURITY.md) for deployment hardening and trust boundary documentation.
 
 <details>
@@ -141,6 +157,7 @@ Go from code inspection to job submission and result analysis. Review repositori
 #### 2026-05-12
 - **Local User Authentication**: Added built-in account registration, sign-in, sign-out, and persistent session support.
 - **Admin User Management**: Added an admin users page to create accounts and manage roles, access, passwords, and ownership.
+- **CLI Login Handoff**: `innoclaw` now supports interactive terminal mode, one-shot `run`, JSON `batch`, and browser-to-CLI session handoff.
 
 
 
@@ -306,4 +323,3 @@ Go from code inspection to job submission and result analysis. Review repositori
 - **License** — Apache-2.0, see `LICENSE`
 - **Repository** — https://github.com/SpectrAI-Initiative/InnoClaw
 - **Docs** — https://SpectrAI-Initiative.github.io/InnoClaw/
-
