@@ -51,9 +51,17 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 <!-- whats-new-start -->
 
+#### 2026-06-26
+- **CLI-Laufzeitunterstuetzung**: Interaktive Kommandozeilenschnittstelle mit REPL, Batch-Operationen und Agentintegration fuer terminalbasierte Workflows
+
+
 #### 2026-06-12
 - **Deaktivierter Authentifizierungsmodus**: Fuehren Sie die Anwendung ohne Authentifizierung fuer Einzelnutzer- oder Entwicklungsbereitstellungen aus
 
+
+
+<details>
+<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-05-12
 - **Lokale Benutzerauthentifizierung**: Integrierte Kontoregistrierung, Anmelden, Abmelden und persistente Sitzungen hinzugefuegt.
@@ -61,13 +69,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
-<details>
-<summary>Aeltere Updates anzeigen</summary>
 
 #### 2026-04-17
 - **InnoClaw CLI**: App im Terminal ausfuehren, Arbeitsbereiche verwalten und Deep-Research-Sitzungen erstellen, starten oder exportieren
 - **Deep-Research-Pruefpunkte**: Die Recherche pausiert jetzt an Pruefpunkten, damit du Laeufe fortsetzen, ueberarbeiten, verzweigen, ablehnen oder stoppen kannst
 - **Rollenstudio**: Neuer Deep-Research-Tab zum Pruefen spezialisierter Rollen und zum Senden gezielter Anweisungen an den Researcher oder Worker
+
 
 
 
@@ -81,10 +88,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-04-02
 - **Docker-Deployment-Unterstuetzung**: Dockerfile, docker-compose.yml und eine vollstaendige Docker-Deployment-Anleitung fuer selbst gehostete Produktionsumgebungen hinzugefuegt
 - **200+ neue integrierte Skills**: Skill-Bibliothek erweitert um Bioinformatik, Chemoinformatik, Genomik, Physik und Drug-Discovery-Pipelines
 - **Skill-Creator-Framework**: Neuer Meta-Skill mit Werkzeugen fuer Evaluierung, Benchmarking und Validierung zum Erstellen und Testen eigener Skills
+
 
 
 
@@ -101,10 +110,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-31
 - **Eingefuegte Bilder unterstuetzt**: Benutzer koennen Bilder jetzt direkt in die Chat-Eingabe einfuegen fuer multimodale KI-Konversationen
 - **Deep-Research-Rollenstudio**: Das neue Rollenstudio-Panel ermoeglicht das Konfigurieren und Verwalten benutzerdefinierter Forscherrollen im Deep-Research-Workflow
 - **Erweiterte Quellen fuer die Artikelsuche**: BioRxiv, PubMed und PubChem wurden als durchsuchbare Artikelquellen in Paper Study hinzugefuegt
+
 
 
 
@@ -126,20 +137,9 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-24
 - **Multimodaler LLM-Support**: Papierrecherche und Agenten-Workflows unterstuetzen jetzt Standard-LLMs und multimodale LLMs (mLLM), kontextbezogen auswaehlbar in den Einstellungen und der Modellauswahl.
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-23
-- **GitHub-Faehigkeiten Import-Vorschau**: Neuer Vorschau-Workflow vor dem Import ermoeglicht das Durchsuchen, Pruefen und selektive Importieren von Faehigkeiten aus GitHub-Repositories
 
 
 

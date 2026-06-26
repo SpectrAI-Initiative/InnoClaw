@@ -150,9 +150,17 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 <!-- whats-new-start -->
 
+#### 2026-06-26
+- **CLI Runtime Support**: Interactive command-line interface with REPL, batch operations, and agent integration for terminal-based workflows
+
+
 #### 2026-06-12
 - **Disabled Auth Mode**: Run the application without authentication for single-user or development deployments
 
+
+
+<details>
+<summary>Show earlier updates</summary>
 
 #### 2026-05-12
 - **Local User Authentication**: Added built-in account registration, sign-in, sign-out, and persistent session support.
@@ -161,13 +169,12 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
-<details>
-<summary>Show earlier updates</summary>
 
 #### 2026-04-17
 - **InnoClaw CLI**: Run the app, manage workspaces, and create/run/export Deep Research sessions from the terminal
 - **Deep Research Checkpoints**: Research now pauses at review points so you can continue, revise, branch, reject, or stop runs
 - **Role Studio**: New Deep Research tab to inspect specialist roles and send targeted instructions to the Researcher or workers
+
 
 
 
@@ -181,10 +188,12 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
 #### 2026-04-02
 - **Docker Deployment Support**: Added Dockerfile, docker-compose.yml, and full Docker deployment guide for self-hosted production setups
 - **200+ New Built-in Skills**: Expanded skill library with bioinformatics, cheminformatics, genomics, physics, and drug discovery pipelines
 - **Skill Creator Framework**: New meta-skill with evaluation, benchmarking, and validation tooling for building and testing custom skills
+
 
 
 
@@ -201,10 +210,12 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
 #### 2026-03-31
 - **Pasted Image Support**: Users can now paste images directly into the chat input for multimodal AI conversations
 - **Deep Research Role Studio**: New Role Studio panel lets users configure and manage custom researcher roles in the deep research workflow
 - **Expanded Paper Search Sources**: Added BioRxiv, PubMed, and PubChem as searchable paper sources in Paper Study
+
 
 
 
@@ -226,20 +237,10 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
 #### 2026-03-26
 - **Node.js Runtime Update**: InnoClaw now targets Node.js 24+ and is verified against both Node.js 24 LTS and the latest Node.js 25 current release. CI and local version hints have been updated accordingly.
 
-
-
-
-
-
-
-
-
-
-#### 2026-03-24
-- **Multimodal LLM Support**: Paper Study and agent workflows now support both standard LLMs and multimodal LLMs (mLLM), selectable per-context in settings and the model selector
 
 
 
