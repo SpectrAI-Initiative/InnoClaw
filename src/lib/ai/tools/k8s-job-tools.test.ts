@@ -33,6 +33,24 @@ function createCtx(overrides: Partial<ToolContext> = {}): ToolContext {
   };
 }
 
+type ExecutableTool<Result> = {
+  execute: (
+    input: Record<string, unknown>,
+    options: { toolCallId: string; messages: [] },
+  ) => Promise<Result>;
+};
+
+interface PrepareK8sJobResult {
+  success: boolean;
+  jobSpecHash: string;
+  review: Record<string, unknown>;
+}
+
+interface RunK8sJobResult {
+  success: boolean;
+  error?: string;
+}
+
 describe("createK8sJobTools", () => {
   it("prepares a job and returns a review hash", async () => {
     const executor = {
@@ -50,7 +68,9 @@ describe("createK8sJobTools", () => {
       recordClusterOp,
     });
 
-    const result = await (tools.prepareK8sJob as any).execute(
+    const result = await (
+      tools.prepareK8sJob as unknown as ExecutableTool<PrepareK8sJobResult>
+    ).execute(
       {
         profileId: "cpu-smoke",
         jobName: "smoke-test",
@@ -86,7 +106,9 @@ describe("createK8sJobTools", () => {
       recordClusterOp: vi.fn().mockResolvedValue("op-1"),
     });
 
-    const result = await (tools.runK8sJob as any).execute(
+    const result = await (
+      tools.runK8sJob as unknown as ExecutableTool<RunK8sJobResult>
+    ).execute(
       {
         profileId: "cpu-smoke",
         jobName: "smoke-test",
