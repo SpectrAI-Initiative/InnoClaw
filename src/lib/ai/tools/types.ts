@@ -1,4 +1,5 @@
 import type { K8sConfig } from "@/lib/cluster/config";
+import type { K8sJobConfig } from "@/lib/cluster/job-profiles";
 
 /** Shared context passed to each tool factory. */
 export interface ToolContext {
@@ -10,6 +11,8 @@ export interface ToolContext {
   kubeconfigPath: string;
   /** Full K8s cluster configuration loaded from DB (primary) with env fallback. */
   k8sConfig: K8sConfig;
+  /** Generic K8s Job cluster/profile configuration. */
+  k8sJobConfig: K8sJobConfig;
   /** Base environment variables for exec calls. */
   baseExecEnv: NodeJS.ProcessEnv;
   /** Optional workspace ID for recording cluster operations. */

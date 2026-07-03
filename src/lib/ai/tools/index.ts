@@ -2,9 +2,11 @@ import path from "path";
 import { validatePath } from "@/lib/files/filesystem";
 import { baseExecEnv } from "@/lib/utils/shell";
 import { getK8sConfig } from "@/lib/cluster/config";
+import { getK8sJobConfig } from "@/lib/cluster/job-profiles";
 import { createFileTools } from "./file-tools";
 import { createShellTools } from "./shell-tools";
 import { createK8sTools } from "./k8s-tools";
+import { createK8sJobTools } from "./k8s-job-tools";
 import { createSearchTools } from "./search-tools";
 import { createSkillTools } from "./skill-tools";
 import { createMcpTools } from "./mcp-tools";
@@ -25,6 +27,7 @@ export async function createAgentTools(
 
   // Load K8s config from DB (primary) with env fallback
   const k8sConfig = await getK8sConfig();
+  const k8sJobConfig = await getK8sJobConfig();
 
   const rawKubeconfigPath =
     k8sConfig.kubeconfigPath ||
@@ -54,6 +57,7 @@ export async function createAgentTools(
     resolvePath,
     kubeconfigPath,
     k8sConfig,
+    k8sJobConfig,
     baseExecEnv,
     workspaceId,
     researchHistoryDir,
@@ -64,6 +68,7 @@ export async function createAgentTools(
     ...createShellTools(ctx),
     ...createFileTools(ctx),
     ...createK8sTools(ctx),
+    ...createK8sJobTools(ctx),
     ...createSearchTools(),
     ...createSkillTools(workspaceId),
     ...createMcpTools(ctx),
