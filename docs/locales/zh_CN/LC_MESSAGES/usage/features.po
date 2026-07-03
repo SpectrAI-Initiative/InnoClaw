@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,336 +19,741 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../usage/features.md:1 e9046ce4d5de44d2a32e2d41e7c0760a
+#: ../../usage/features.md:1 3e0b6ed238e04253994f69b4d49f2f3e
 msgid "Core Features"
 msgstr "核心功能"
 
-#: ../../usage/features.md:3 9f59185771684d6cb8d105c3630ffa37
+#: ../../usage/features.md:3 06f5f60eb8234591930d48587fb97eae
 msgid ""
-"InnoClaw provides a rich set of features for AI-powered research and "
-"file management."
+"InnoClaw provides a rich set of features for AI-powered research and file"
+" management."
 msgstr "InnoClaw 提供了丰富的 AI 驱动研究和文件管理功能。"
 
-#: ../../usage/features.md:5 d8c916a2fb314c5cabe488ee7de07235
+#: ../../usage/features.md:5 a4806bf9708242ee93c64e60aac756d8
 msgid "Workspace Management"
 msgstr "工作空间管理"
 
-#: ../../usage/features.md:7 1941e8b1bbd74fbfb0d7c77d2a01cafb
+#: ../../usage/features.md:7 abc0707e3c5c4a99adc44f6ced90ce93
 msgid ""
 "Workspaces map server-side folders into the application. Each workspace "
 "is a persistent container for files, chat history, and notes."
 msgstr "工作空间将服务器端文件夹映射到应用程序中。每个工作空间是文件、对话历史和笔记的持久化容器。"
 
-#: ../../usage/features.md:9 499699a4ec3d4491bca3c24d2d22c3a5
+#: ../../usage/features.md:9 bb283055e1ca4a9db44b62272d0e04c4
 msgid ""
 "**Create** workspaces from any allowed root directory (configured via "
 "`WORKSPACE_ROOTS`)"
 msgstr "从任何允许的根目录（通过 `WORKSPACE_ROOTS` 配置）**创建**工作空间"
 
-#: ../../usage/features.md:10 536713e48f9d40c5a75391c6ccce42f5
+#: ../../usage/features.md:10 f0864b8333184a83aba76342dd1493b5
 msgid "**Open** existing workspaces from the home page"
 msgstr "从首页**打开**已有的工作空间"
 
-#: ../../usage/features.md:11 856b41bfd21946c28535b424a0c0424d
+#: ../../usage/features.md:11 a25305d752f34bbd9c2d00841cb34243
 msgid ""
 "**Delete** workspaces (removes only the database record; files on disk "
 "are preserved)"
 msgstr "**删除**工作空间（仅删除数据库记录；磁盘上的文件会被保留）"
 
-#: ../../usage/features.md:12 5433820fa126488ea774717656fb5e38
+#: ../../usage/features.md:12 cc7082541d7a4beba0d83615573f3f87
 msgid "**GitHub Clone** — Clone a GitHub repository directly as a new workspace"
 msgstr "**GitHub 克隆** —— 直接将 GitHub 仓库克隆为新的工作空间"
 
-#: ../../usage/features.md:14 b32fc4b68a0e4c15b63dad4c36503027
+#: ../../usage/features.md:14 f7165c0b46e64a40a480b4a1accc3960
 msgid "File Browser"
 msgstr "文件浏览器"
 
-#: ../../usage/features.md:16 3dc26183d4f74492a096173f28b61ed6
+#: ../../usage/features.md:16 d633c8ea417d4dc5a02e899101af2b8b
 msgid "The file browser provides full file management within a workspace:"
 msgstr "文件浏览器提供工作空间内的完整文件管理功能："
 
-#: ../../usage/features.md:18 2d15b696e40941fbb1d7d861983498ad
+#: ../../usage/features.md:18 913ea66936c7454287831462ff4155f1
 msgid "**Tree View** — Hierarchical directory browsing with expand/collapse"
 msgstr "**树形视图** —— 支持展开/折叠的层级目录浏览"
 
-#: ../../usage/features.md:19 9f92370552a04b4db649be64b3e8bef9
+#: ../../usage/features.md:19 4a455d10291d4d5c98ce5431062c2daa
 msgid "**Upload** — Drag-and-drop or click to upload files"
 msgstr "**上传** —— 拖放或点击上传文件"
 
-#: ../../usage/features.md:20 8f3961970b6c45ee9c1cc97256ecfa22
+#: ../../usage/features.md:20 b23d241d579143a1a334a0d04a26bde3
 msgid "**Create** — New files and folders"
 msgstr "**创建** —— 新建文件和文件夹"
 
-#: ../../usage/features.md:21 b1e0c8a898314380813c7d7fe1e7817c
+#: ../../usage/features.md:21 6934483833774e3b98ece84e1683f637
 msgid "**Edit** — Open files in the built-in editor"
 msgstr "**编辑** —— 在内置编辑器中打开文件"
 
-#: ../../usage/features.md:22 afe0846b02a145cc86679b4ca1a6d07b
+#: ../../usage/features.md:22 faef180b9fb942abb47c3651596830ad
 msgid "**Rename / Delete** — Right-click context menu"
 msgstr "**重命名 / 删除** —— 右键上下文菜单"
 
-#: ../../usage/features.md:23 c7711c533f0e42f3a3099ff20c84423b
+#: ../../usage/features.md:23 984188233c5a4fe8853f33e5d31ab6c3
+#, fuzzy
 msgid ""
 "**Preview** — Preview images, PDFs, 3D models (STL, OBJ, GLTF, etc.), and"
-" more"
+" molecular structures (MOL)"
 msgstr "**预览** —— 预览图片、PDF、3D 模型（STL、OBJ、GLTF 等）及更多格式"
 
-#: ../../usage/features.md:24 877109a348764f83b2b89131415207ba
+#: ../../usage/features.md:24 d08db35f072b46269abc2e484b269eb8
 msgid "**Sync** — Trigger RAG indexing to enable AI-powered search"
 msgstr "**同步** —— 触发 RAG 索引以启用 AI 搜索"
 
-#: ../../usage/features.md:26 481b63e4678248e58d490f2fba60b009
+#: ../../usage/features.md:26 63829ea1cdb14a97ab84e3ccc93b8691
 msgid "RAG Chat"
 msgstr "RAG 对话"
 
-#: ../../usage/features.md:28 6f99f2f2c9a04df2beba0c66b53dc476
+#: ../../usage/features.md:28 36423ba002ba448d946b18396d33f0be
 msgid ""
 "The AI chat interface uses Retrieval-Augmented Generation to answer "
 "questions based on your workspace files:"
 msgstr "AI 对话界面使用检索增强生成技术，基于您的工作空间文件回答问题："
 
-#: ../../usage/features.md:30 3f476665b702482eb03e7b64dc48df1f
+#: ../../usage/features.md:30 f80d08127f5c43a49bbb148e3a5f9e93
 msgid "**Sync** your workspace to index files into the vector store"
 msgstr "**同步**工作空间以将文件索引到向量存储中"
 
-#: ../../usage/features.md:31 370400e5866e4b72ac93e2c9c8db2eaf
+#: ../../usage/features.md:31 6f10c5f57c7d4b34b6fa539b6d793815
 msgid "**Ask questions** in the chat panel"
 msgstr "在对话面板中**提问**"
 
-#: ../../usage/features.md:32 dc7ee73a59f146beb1bf643cb710f4bc
+#: ../../usage/features.md:32 ccb0c680d53947098033b873930276e1
 msgid ""
 "**Receive answers** with `[Source: filename]` citations pointing to the "
 "relevant files"
 msgstr "**接收回答**，附带 `[Source: filename]` 引用指向相关文件"
 
-#: ../../usage/features.md:33 fdfcab4c00c54352a610411824ab0ba8
+#: ../../usage/features.md:33 bda7a1f5cc444e8dbb8ab0502c04df07
 msgid "**Multi-turn conversations** — Context is maintained across messages"
 msgstr "**多轮对话** —— 上下文在消息之间保持连续"
 
-#: ../../usage/features.md:35 92c52b2b589c4a0297c571c6ae33c09c
+#: ../../usage/features.md:35 19863049ed394a97b108d72b65e9baa8
 msgid "Supported File Types for RAG"
 msgstr "RAG 支持的文件类型"
 
-#: ../../usage/features.md:37 b6ac274044194a08ba581f31d8959bc3
+#: ../../usage/features.md:37 1e1112c2c9d84669afa6883614529938
 msgid "The following file types are supported for text extraction and indexing:"
 msgstr "以下文件类型支持文本提取和索引："
 
-#: ../../usage/features.md 8ed9d45259a74ea4ba9ceb648ae03c9c
+#: ../../usage/features.md a261dd55188e4369b0b4c83730824962
 msgid "Category"
 msgstr "分类"
 
-#: ../../usage/features.md e53532f7884e4411a0f3632036f1b3fb
+#: ../../usage/features.md 31f76eaffd254811ae965f739119fd60
 msgid "Extensions"
 msgstr "扩展名"
 
-#: ../../usage/features.md 509ab24de35a4348b959bbb1a761f4e2
+#: ../../usage/features.md bf68f592ba0a471e8d070a9ff9bf9f4a
 msgid "Documents"
 msgstr "文档"
 
-#: ../../usage/features.md 9e8c77596e4c43939d89c58debe25811
+#: ../../usage/features.md 0da971a98c6d4ef5afc5eb0d1d6dee5d
 msgid "`.pdf`, `.txt`, `.md`, `.html`"
 msgstr "`.pdf`、`.txt`、`.md`、`.html`"
 
-#: ../../usage/features.md 3fd180551cf04fbab046099ad765d013
+#: ../../usage/features.md 668f1b1469114bd08ad13e29b83e9ad9
 msgid "Data"
 msgstr "数据"
 
-#: ../../usage/features.md 53a21b81f69543b5aa3a74027f9516f8
+#: ../../usage/features.md f72244455d4d474d9d8055d3f258a857
 msgid "`.json`, `.csv`"
 msgstr "`.json`、`.csv`"
 
-#: ../../usage/features.md 49d78c8739534d8bbea68f5d414ce982
+#: ../../usage/features.md f06974c294b24509b3f2404796438317
 msgid "Code"
 msgstr "代码"
 
-#: ../../usage/features.md f5a24279a1c548e7b4cdecc4daad16c8
+#: ../../usage/features.md 8dd5c81075f24d24ab20e38fe3c74682
 msgid ""
 "`.js`, `.ts`, `.py`, `.java`, `.go`, `.rs`, `.cpp`, `.c`, `.rb`, `.php`, "
 "and more"
 msgstr "`.js`、`.ts`、`.py`、`.java`、`.go`、`.rs`、`.cpp`、`.c`、`.rb`、`.php` 等"
 
-#: ../../usage/features.md:45 ba044bdae75d49f5a559a201d684b146
+#: ../../usage/features.md:45 58b57202fa014434b3f1ab33e5a4ab3d
 msgid "Note Generation"
 msgstr "笔记生成"
 
-#: ../../usage/features.md:47 b45c96c632234817b7e3844581a1663b
+#: ../../usage/features.md:47 22c5f8f02c5948a2a948450d1e1f700a
 msgid "Automatically generate structured notes from your workspace content:"
 msgstr "从工作空间内容自动生成结构化笔记："
 
-#: ../../usage/features.md 0bf2c41522164acf9bb2d488dc14b7c5
+#: ../../usage/features.md 26d1b109a0434cc1acd3e0058a4a8990
 msgid "Type"
 msgstr "类型"
 
-#: ../../usage/features.md 7af34985b97346c08a0d465b98847e81
+#: ../../usage/features.md 155e294adb0d4edb8af0fcd63844e9b9
+#: beabe65b947c4f82b402a8f3fa059938 ea9e987069f74e3eaa05f2e5721b8930
 msgid "Description"
 msgstr "描述"
 
-#: ../../usage/features.md b9f7d233dfc44a61be4a7ba3bd65fcbb
+#: ../../usage/features.md 879690e1ddc84b9d84170ab98fc781fc
 msgid "**Summary**"
 msgstr "**摘要**"
 
-#: ../../usage/features.md effa1ee8ad5342c0835198c8f5a207ac
+#: ../../usage/features.md ff7405014c61452d8ede7bee51bf636b
 msgid "Concise overview of key points"
 msgstr "关键要点的简明概述"
 
-#: ../../usage/features.md 43df6e75e8744be3af15aabc77ebbd1e
+#: ../../usage/features.md 7818dfb90e4241749a06c7847eaef652
 msgid "**FAQ**"
 msgstr "**常见问题**"
 
-#: ../../usage/features.md 7f0888016d5e4a68a236a456ce033399
+#: ../../usage/features.md 438b1e84e03a407a9f765f275664ef51
 msgid "Frequently asked questions with answers"
 msgstr "包含答案的常见问题"
 
-#: ../../usage/features.md 27d5caa588a34f34b190f3e188908ee8
+#: ../../usage/features.md a7c6e1c8717343b1a5e3e062366c007c
 msgid "**Brief**"
 msgstr "**简报**"
 
-#: ../../usage/features.md 9ec5c26a258f4200a57f1ac187615ce1
+#: ../../usage/features.md 31d4067d528c487d82caad3192c919f6
 msgid "Executive-style briefing document"
 msgstr "高管风格的简报文档"
 
-#: ../../usage/features.md 4b8f8ea9631a4d089cdf03d7afda86e3
+#: ../../usage/features.md 143f6cdf54af4f749e16f4ed124eefe0
 msgid "**Timeline**"
 msgstr "**时间线**"
 
-#: ../../usage/features.md c706e6e921ff4304a03c9898036d7375
+#: ../../usage/features.md e8eeec32dc0a499d97dafb53082999c4
 msgid "Chronological sequence of events"
 msgstr "按时间顺序排列的事件"
 
-#: ../../usage/features.md:56 d12daf0ccac84edebb1d2aec8c78e3cf
+#: ../../usage/features.md b99e6ca699784def9afdd1c94cc955b6
+#, fuzzy
+msgid "**Memory**"
+msgstr "**摘要**"
+
+#: ../../usage/features.md 9c51ce4f39d24766a5c464036257cd39
+msgid "Agent conversation memory summaries"
+msgstr ""
+
+#: ../../usage/features.md 9988443d7fc845e9a047a356bd41e158
+msgid "**Daily Report**"
+msgstr ""
+
+#: ../../usage/features.md f5763ce690ab479ead877ff8da7fc2d3
+msgid "Auto-generated daily workspace activity report"
+msgstr ""
+
+#: ../../usage/features.md 504aa735c5c3448fb74505f328e28702
+msgid "**Weekly Report**"
+msgstr ""
+
+#: ../../usage/features.md d2f37367596749b6b78dd1414327c828
+msgid "Auto-generated weekly workspace activity report"
+msgstr ""
+
+#: ../../usage/features.md:59 ad262f3c95d4495396f33046638a54a2
 msgid "Notes can also be created and edited manually."
 msgstr "笔记也可以手动创建和编辑。"
 
-#: ../../usage/features.md:58 00057bb2c6504b1993b39a09e63a1cdd
+#: ../../usage/features.md:61 9e68ac2063264c32a2217ee264c6d149
 msgid "Agent Mode"
 msgstr "Agent 模式"
 
-#: ../../usage/features.md:60 e2efd68834a546b3b542bdc4f45d8b6c
+#: ../../usage/features.md:63 0683cdc5796641b6bad17fc8622528e8
 msgid ""
 "The Agent mode provides an autonomous AI assistant with access to system "
 "tools:"
 msgstr "Agent 模式提供一个可访问系统工具的自主 AI 助手："
 
-#: ../../usage/features.md:62 f681bc7d86c741048e17cbf16ec176cc
-msgid "**Bash** — Execute shell commands"
-msgstr "**Bash** —— 执行 Shell 命令"
+#: ../../usage/features.md 7d5d024e6b3e48f7b736890547ae8d88
+msgid "Tool"
+msgstr ""
 
-#: ../../usage/features.md:63 39361537c7b94cadb7bd2fe99f0f8e75
-msgid "**File Operations** — Read, write, and list directory contents"
-msgstr "**文件操作** —— 读取、写入和列出目录内容"
+#: ../../usage/features.md 0f798285e4b445238cbaef23ec94ce01
+#, fuzzy
+msgid "**bash**"
+msgstr "**常见问题**"
 
-#: ../../usage/features.md:64 e11ac746edbd407e8531a90587885cd4
-msgid "**Grep** — Search file contents with regular expressions"
+#: ../../usage/features.md 7aa295d62b4d4b768b4522ac7d770734
+msgid "Execute shell commands (configurable timeout up to 300s)"
+msgstr ""
+
+#: ../../usage/features.md 5312831407c04b3a95bd8f297ea4b6d1
+#, fuzzy
+msgid "**readFile**"
+msgstr "**简报**"
+
+#: ../../usage/features.md 7e211b5a366244d18b957ceae750d15e
+msgid "Read file contents within workspace"
+msgstr ""
+
+#: ../../usage/features.md 87979c0b1bcf40e08da1eb88f5339738
+#, fuzzy
+msgid "**writeFile**"
+msgstr "**简报**"
+
+#: ../../usage/features.md 6fe0338addf741368db6d928e44bec25
+msgid "Create or overwrite files"
+msgstr ""
+
+#: ../../usage/features.md 0c33ba7b0a444edb9c12a20d7cf061a1
+msgid "**listDirectory**"
+msgstr ""
+
+#: ../../usage/features.md 7aedb103bff5488e97b2a114d7628c54
+msgid "List directory contents with metadata"
+msgstr ""
+
+#: ../../usage/features.md a90c55d0791442c095ca2db66e21ddc5
+#, fuzzy
+msgid "**grep**"
+msgstr "**简报**"
+
+#: ../../usage/features.md 2b15154c116e40b0b5712a3915ed4b5a
+#, fuzzy
+msgid "Search file contents with regular expressions"
 msgstr "**Grep** —— 使用正则表达式搜索文件内容"
 
-#: ../../usage/features.md:65 338586ff39b94ea1b1ce67ee9d3259c3
-msgid "**kubectl** — Kubernetes cluster management (when configured)"
+#: ../../usage/features.md a7a19241dc6644828ddded857388a4e4
+msgid "**searchArticles**"
+msgstr ""
+
+#: ../../usage/features.md e997d1e03b1846158b3e9c6bb1a68f8c
+msgid "Search arXiv and Hugging Face Daily Papers"
+msgstr ""
+
+#: ../../usage/features.md 4a3575ee90f448a2b75d1a0c57dfeab3
+msgid "**getSkillInstructions**"
+msgstr ""
+
+#: ../../usage/features.md f56355a715284e479a364a690993a386
+msgid "Load SCP scientific skill workflows"
+msgstr ""
+
+#: ../../usage/features.md fbd1a74284e6429aa39168cb30c2c614
+#, fuzzy
+msgid "**kubectl**"
+msgstr "**简报**"
+
+#: ../../usage/features.md bbf31f914bba408eb7010f157e84a34a
+#, fuzzy
+msgid "Kubernetes cluster management (read-only by default)"
 msgstr "**kubectl** —— Kubernetes 集群管理（配置后可用）"
 
-#: ../../usage/features.md:67 ef574b29969341d3b273b1754a73e08b
-msgid ""
-"Agent mode is useful for tasks that require interacting with the file "
-"system or running commands."
-msgstr "Agent 模式适用于需要与文件系统交互或运行命令的任务。"
+#: ../../usage/features.md 132aef1b19ff4213bef6454850f2695c
+msgid "**prepareK8sJob / runK8sJob**"
+msgstr ""
 
-#: ../../usage/features.md:69 4b1005dee2f94ebba6a956d79c17bb13
+#: ../../usage/features.md 187c164978234fe7bbb0e13037a919d8
+msgid "Prepare and submit standard Kubernetes `batch/v1 Job` resources"
+msgstr ""
+
+#: ../../usage/features.md 8709570126574e1292b4a5d3ad3862de
+msgid "**waitForK8sJob / collectK8sJobLogs**"
+msgstr ""
+
+#: ../../usage/features.md c70e9d45730e47569228587a3cf08678
+msgid "Monitor generic Jobs and collect bounded logs"
+msgstr ""
+
+#: ../../usage/features.md:78 73371b6fa438422cbed3b76bde23f456
+msgid "Agent mode supports three sub-modes:"
+msgstr ""
+
+#: ../../usage/features.md caac41eef5cd4e59bd5bb4456be46446
+#, fuzzy
+msgid "Mode"
+msgstr "模型"
+
+#: ../../usage/features.md f8af09da089a420b8fb3915bdc0626b5
+msgid "Tools Available"
+msgstr ""
+
+#: ../../usage/features.md 32b4819f3c664aa382d2fe5329782963
+msgid "Use Case"
+msgstr ""
+
+#: ../../usage/features.md 0f896745191b411d9f80e9dedafa8594
+#, fuzzy
+msgid "**Agent**"
+msgstr "**Anthropic**"
+
+#: ../../usage/features.md 137d24830a054997803feb4c8f7d4f1e
+msgid "All tools"
+msgstr ""
+
+#: ../../usage/features.md 7d1a1eded76d45fdb3e724451c0a173b
+msgid "Full autonomous execution"
+msgstr ""
+
+#: ../../usage/features.md 616d93d25a234d48b7136d7918ca3a2e
+#, fuzzy
+msgid "**Plan**"
+msgstr "**OpenAI**"
+
+#: ../../usage/features.md c6920a72e19e44bf947133f64556e48b
+#: e7f5ca9150ef4dfdb5a09dcce0ef1f32
+msgid "readFile, listDirectory, grep"
+msgstr ""
+
+#: ../../usage/features.md 0cb027adca434a1db59017b932babe4c
+msgid "Read-only analysis and planning"
+msgstr ""
+
+#: ../../usage/features.md fd7cd1a5ac9e41c08ad697fad3d7be38
+#, fuzzy
+msgid "**Ask**"
+msgstr "**常见问题**"
+
+#: ../../usage/features.md f0e2fafcbd2841238e9cb548b503fc3c
+msgid "Simple question answering"
+msgstr ""
+
+#: ../../usage/features.md:86 dd3cd78c054248fcb8eb832f75edef4e
 msgid "Skills"
 msgstr "技能"
 
-#: ../../usage/features.md:71 9baf033d7a84465cbcbbaee157639c0a
-msgid "Skills are reusable prompt templates for common tasks:"
+#: ../../usage/features.md:88 96429cffa6da4816a40225f120b758a1
+#, fuzzy
+msgid "Skills are reusable AI workflow templates:"
 msgstr "技能是用于常见任务的可复用提示词模板："
 
-#: ../../usage/features.md:73 c82ea0361a8f467e9a88fb71b62ee77f
-msgid "Create custom skills with specific instructions"
+#: ../../usage/features.md:90 25f0a1e3d2fa431795095f3baeb191ab
+msgid ""
+"**206 built-in SCP (Science Context Protocol) skills** from the Intern-"
+"Discovery Platform, covering 8 research domains:"
+msgstr ""
+
+#: ../../usage/features.md:91 37007fffb25745fc96931057625e640d
+msgid "Drug Discovery & Pharmacology (71 skills)"
+msgstr ""
+
+#: ../../usage/features.md:92 ace7b10670a446a1ac609c52352a1112
+msgid "Genomics & Genetic Analysis (41 skills)"
+msgstr ""
+
+#: ../../usage/features.md:93 e511edf90a30409bb2855e7e49209c3a
+msgid "Protein Science & Engineering (38 skills)"
+msgstr ""
+
+#: ../../usage/features.md:94 abf8da68adcd49fab30a1e6b2b559544
+msgid "Chemistry & Molecular Science (24 skills)"
+msgstr ""
+
+#: ../../usage/features.md:95 0f19930ee10e4c9c85af4217713f3596
+msgid "Physics & Engineering Computation (18 skills)"
+msgstr ""
+
+#: ../../usage/features.md:96 53f07ce5cb6b4b5db85f6e4168dda0aa
+msgid "Experimental Automation & Literature Mining (7 skills)"
+msgstr ""
+
+#: ../../usage/features.md:97 121719c139fd4717bee717e601f3e2c3
+msgid "Earth & Environmental Science (5 skills)"
+msgstr ""
+
+#: ../../usage/features.md:98 91e71b67f77a4d9db6a0642e71e4550b
+msgid "Cross-domain utility skills (2 skills)"
+msgstr ""
+
+#: ../../usage/features.md:99 4f967e63d2d74414aaf031aff333ec54
+#, fuzzy
+msgid "Create **custom skills** with specific system prompts and instructions"
 msgstr "创建具有特定指令的自定义技能"
 
-#: ../../usage/features.md:74 6e36878c4b444e0aaf311eff6056e45f
-msgid "Configure which tools a skill can access"
+#: ../../usage/features.md:100 afe89d65c24e41e4b8391aaa92fb52f4
+#, fuzzy
+msgid "Configure **allowed tools** per skill to control access"
 msgstr "配置技能可以访问的工具"
 
-#: ../../usage/features.md:75 9313ed9140394d009eb8c839ca3dfd58
-msgid "Skills can be triggered from the chat interface"
+#: ../../usage/features.md:101 7e2d1ac218b84f4ab8ab10fa29627de4
+msgid "Define **parameters** with `{{paramName}}` template injection"
+msgstr ""
+
+#: ../../usage/features.md:102 c25c9a48ce164857924bf75b9ee6416a
+msgid "Define **multi-step workflows** with tool hints per step"
+msgstr ""
+
+#: ../../usage/features.md:103 9b7d80f612bf4fc4bdda8f0f3fb010f2
+msgid "**Import/export** skills as JSON for sharing"
+msgstr ""
+
+#: ../../usage/features.md:105 25044ff572284bd58b86d0e2bb75c23e
+#, fuzzy
+msgid ""
+"Skills can be triggered from the Agent panel or auto-matched based on "
+"user intent."
 msgstr "可以从对话界面触发技能"
 
-#: ../../usage/features.md:76 1e040ab7c0e94610923efbae799a4e20
-msgid "Built-in skills for common operations"
-msgstr "内置常用操作技能"
+#: ../../usage/features.md:107 21179d004e04412da6fd1484866465ac
+msgid "Article / Paper Search"
+msgstr ""
 
-#: ../../usage/features.md:78 8dc5ea74385e45c8b92da24567ee1738
+#: ../../usage/features.md:109 729e1c1974a74abe91ac0a5169420b4e
+msgid "Search and study academic papers directly from the application:"
+msgstr ""
+
+#: ../../usage/features.md:111 c8de0037df784d71aef07569bcb1ecca
+msgid "**Search Sources** — arXiv and Hugging Face Daily Papers"
+msgstr ""
+
+#: ../../usage/features.md:112 dd07da515f67471487ef610f13ffdf43
+msgid "**Filter** by keywords, date range, and source"
+msgstr ""
+
+#: ../../usage/features.md:113 2e20a113c06c478193f1ceb14be60fd4
+msgid "**Related Articles** — Find papers related to a given article"
+msgstr ""
+
+#: ../../usage/features.md:114 9c57067d3eb8408cae424b73e9711e1b
+msgid ""
+"**Paper Study UI** — Dedicated interface for searching, fetching, "
+"summarizing, and chatting about papers"
+msgstr ""
+
+#: ../../usage/features.md:115 5b7225ba08c34fbbbb1fe2ab73f252e0
+msgid ""
+"**Agent Integration** — The `searchArticles` tool is available in Agent "
+"mode"
+msgstr ""
+
+#: ../../usage/features.md:117 fab4c702d3f34a0db2b72f1273be5b87
+msgid "Scheduled Tasks"
+msgstr ""
+
+#: ../../usage/features.md:119 7599b6c31ca4402b82fc8575f1c44289
+msgid "Automate recurring operations with cron-based scheduled tasks:"
+msgstr ""
+
+#: ../../usage/features.md eda79c5d51594bfeadc92c3e529dc2e4
+#, fuzzy
+msgid "Task Type"
+msgstr "类型"
+
+#: ../../usage/features.md b322b5caf0174c29b6befb670ad110ad
+msgid "`daily_report`"
+msgstr ""
+
+#: ../../usage/features.md 0deeef17432e40e2b20509efcb6355f8
+msgid "Generate daily workspace activity report"
+msgstr ""
+
+#: ../../usage/features.md 9b019024184443c4bb588625f64dad7c
+msgid "`weekly_report`"
+msgstr ""
+
+#: ../../usage/features.md 44215262815446fd8eb887dccded26e5
+msgid "Generate weekly workspace activity report"
+msgstr ""
+
+#: ../../usage/features.md 65dc5808751f4cdd80b8bba83df03d08
+msgid "`git_sync`"
+msgstr ""
+
+#: ../../usage/features.md 961e66347a2549c2a7e972b81dd7f6b4
+msgid "Automatically pull Git repositories"
+msgstr ""
+
+#: ../../usage/features.md 6b5aa3f35aee439a971ee1aece06f8dc
+msgid "`source_sync`"
+msgstr ""
+
+#: ../../usage/features.md 38d8552831374a38b61229813252682c
+msgid "Re-index workspace files"
+msgstr ""
+
+#: ../../usage/features.md f2f1cfefe50a46139104d25c967aaa33
+msgid "`custom`"
+msgstr ""
+
+#: ../../usage/features.md 94e81b6db6be4f62b492abbb0975e6d1
+msgid "User-defined workflows"
+msgstr ""
+
+#: ../../usage/features.md:129 f5803bf824234134bcf44f79ae8a35c9
+msgid ""
+"Tasks can be global or workspace-specific, with execution tracking "
+"(status, errors, last run time)."
+msgstr ""
+
+#: ../../usage/features.md:131 9d3978d4c149473586b6d84ae25b621e
+#, fuzzy
+msgid "Dataset Management"
+msgstr "工作空间管理"
+
+#: ../../usage/features.md:133 c46a097748274e49828e6b7b10948083
+msgid "Download and manage datasets from HuggingFace Hub and ModelScope:"
+msgstr ""
+
+#: ../../usage/features.md:135 cc7b59818ae349c6ac1d43262bef8bf8
+msgid "**Download** datasets, models, or spaces from HuggingFace or ModelScope"
+msgstr ""
+
+#: ../../usage/features.md:136 d1c8db2a210843deb91528b0fca1b238
+msgid "**Import** existing local directories as datasets"
+msgstr ""
+
+#: ../../usage/features.md:137 feb52b2ce97e49f48be6a69d8de0b795
+msgid "**Lifecycle** — Pause, resume, cancel, and retry downloads"
+msgstr ""
+
+#: ../../usage/features.md:138 39d90483330047e7b42506532f684384
+msgid "**Progress Tracking** — Real-time download progress monitoring (0–100%)"
+msgstr ""
+
+#: ../../usage/features.md:139 5fe5cd8ac14c4d37bb20249169a1ec01
+msgid "**File Preview** — Preview dataset contents with split selection"
+msgstr ""
+
+#: ../../usage/features.md:140 35bdc629ae574cc58adc05c498435df1
+msgid "**Workspace Linking** — Link datasets to workspaces (many-to-many)"
+msgstr ""
+
+#: ../../usage/features.md:141 3f6c84548d8e4779a8b256677a1ef7ae
+msgid "**File Filtering** — Specify allow/ignore patterns for selective downloads"
+msgstr ""
+
+#: ../../usage/features.md:143 d575e1eedef94d13961c3dec24eec98a
+msgid "Cluster / Kubernetes Integration"
+msgstr ""
+
+#: ../../usage/features.md:145 a273bcadfe1948c8a93a3dfb68817df0
+msgid "Monitor and manage Kubernetes clusters for workload automation:"
+msgstr ""
+
+#: ../../usage/features.md:147 116d5fea2ffa4cc78e980e65f66d8ed0
+msgid "**Cluster Status** — View nodes, jobs, and pods at a glance"
+msgstr ""
+
+#: ../../usage/features.md:148 f030e5874896453594013e2821671588
+msgid ""
+"**prepareK8sJob / runK8sJob** - Prepare and submit standard Kubernetes "
+"`batch/v1 Job` resources from structured inputs and configured profiles."
+msgstr ""
+
+#: ../../usage/features.md:149 99f50d3bd7bd4965b57a1c61ee293eea
+msgid ""
+"**waitForK8sJob / collectK8sJobLogs** - Monitor generic Jobs and collect "
+"bounded logs."
+msgstr ""
+
+#: ../../usage/features.md:150 98a44f6470ac4873acf5a7fb95fbfd06
+msgid ""
+"**kubectl** - Read cluster status and run approved scoped commands when "
+"configured."
+msgstr ""
+
+#: ../../usage/features.md:151 03f94519b820450c8ac01c7d8fa1f37c
+msgid "**Audit Trail** — Full operation history with workspace-level filtering"
+msgstr ""
+
+#: ../../usage/features.md:153 3431bb854f7f448ea02d749690152be7
+msgid ""
+"Generic Job scheduling requires `KUBECONFIG_PATH` plus either generic "
+"`K8S_*` environment variables or a private profile file."
+msgstr ""
+
+#: ../../usage/features.md:155 5727407427b94cb283616f487e18b5de
 msgid "Multi-LLM Support"
 msgstr "多 LLM 支持"
 
-#: ../../usage/features.md:80 c62e1d910bc040f997f27fabff8bd81f
+#: ../../usage/features.md:157 fc3c3282386b4df2be51c8f6dba17491
 msgid "Switch between different AI providers and models:"
 msgstr "在不同的 AI 提供商和模型之间切换："
 
-#: ../../usage/features.md 923a9d67c275471795733a9065a7b73b
+#: ../../usage/features.md 6e8d48586e6c4845beaf31d58af93c07
 msgid "Provider"
 msgstr "提供商"
 
-#: ../../usage/features.md e37a743d2b384980aaf979f1c8fc16e4
+#: ../../usage/features.md 75b0c5027631478b951fc02ed72f7305
 msgid "Models"
 msgstr "模型"
 
-#: ../../usage/features.md 693bae1c6c8d418ca49cc06f2827fcd3
+#: ../../usage/features.md 54db9d5d612b47199e485c2ce6fec739
 msgid "**OpenAI**"
 msgstr "**OpenAI**"
 
-#: ../../usage/features.md ab62362083e54645866ae6ae2437c12f
-msgid "GPT-4o, GPT-4, GPT-3.5, and compatible models"
-msgstr "GPT-4o、GPT-4、GPT-3.5 及兼容模型"
+#: ../../usage/features.md 9406109b80704dd08dbcebff073e43c6
+msgid ""
+"GPT-5.2, GPT-4.1, GPT-4.1 Mini, GPT-4.1 Nano, GPT-4o, GPT-4o Mini, o3, o3"
+" Mini, o4 Mini"
+msgstr ""
 
-#: ../../usage/features.md 9b75322a8e1d44d8a8bf0e4908c3228e
+#: ../../usage/features.md 59f01b2de1914995a240b372ef9a94b1
 msgid "**Anthropic**"
 msgstr "**Anthropic**"
 
-#: ../../usage/features.md 5adf2d87adb5405fa48bfc9780b9e265
-msgid "Claude 3.5, Claude 3, and compatible models"
-msgstr "Claude 3.5、Claude 3 及兼容模型"
+#: ../../usage/features.md 8104de208b244e80aeb325efd7cc86b2
+msgid "Claude Opus 4.6, Claude Sonnet 4, Claude 3.7 Sonnet, Claude 3.5 Haiku"
+msgstr ""
 
-#: ../../usage/features.md:87 cdc2a602efbb4f038865f7d9beb58cef
+#: ../../usage/features.md 862b9cc5c55b47dd894394a054f0cda7
+#, fuzzy
+msgid "**Gemini**"
+msgstr "**OpenAI**"
+
+#: ../../usage/features.md 70ad2496375c465593e44b0580de7c28
 msgid ""
-"Custom endpoints are supported via `OPENAI_BASE_URL` and "
-"`ANTHROPIC_BASE_URL` for third-party providers."
+"Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3 Flash, Gemini 3 Pro, Gemini "
+"3.1 Pro (Thinking)"
+msgstr ""
+
+#: ../../usage/features.md:165 ef9f04ae79204dd7855d4e5076bcfb21
+#, fuzzy
+msgid ""
+"Custom endpoints are supported via `OPENAI_BASE_URL`, "
+"`ANTHROPIC_BASE_URL`, and `GEMINI_BASE_URL` for third-party providers or "
+"self-hosted models."
 msgstr "通过 `OPENAI_BASE_URL` 和 `ANTHROPIC_BASE_URL` 支持第三方提供商的自定义端点。"
 
-#: ../../usage/features.md:89 ac0f9b45e86e48d793ea6dcc3eb4cc6f
+#: ../../usage/features.md:167 09bbd325bce74fb39df61f3bef6c222a
 msgid "Bilingual UI"
 msgstr "双语界面"
 
-#: ../../usage/features.md:91 92763469a1ac466584362a560608c4ce
+#: ../../usage/features.md:169 88933f3e9dff4828912c074cee31b3f8
 msgid "The user interface supports both Chinese and English:"
 msgstr "用户界面同时支持中文和英文："
 
-#: ../../usage/features.md:93 9fef91deb6084541b14a11b37eaed147
+#: ../../usage/features.md:171 1bb62129c0074a6bb36e81ee1eca4761
 msgid "Click the **language toggle** in the top navigation bar"
 msgstr "点击顶部导航栏中的**语言切换**按钮"
 
-#: ../../usage/features.md:94 133d63b559184171a3ea973a48cc1c49
+#: ../../usage/features.md:172 de682d5129474e6fbaed76889edef4ea
 msgid "All UI elements, labels, and messages are translated"
 msgstr "所有 UI 元素、标签和消息均已翻译"
 
-#: ../../usage/features.md:95 c1abf662e1204a71b42fd112924291dd
+#: ../../usage/features.md:173 23fd19ecd1154bc6ad18197ee122d205
 msgid "Language preference is persisted across sessions"
 msgstr "语言偏好在会话之间持久保存"
 
-#: ../../usage/features.md:97 d2940db4c969457b94fa9681c7e90131
+#: ../../usage/features.md:175 cc7d6c9b7183449989de3b0c18eced03
 msgid "Dark Mode"
 msgstr "暗色模式"
 
-#: ../../usage/features.md:99 8df9ed95b49547cca13bf06b50595c47
+#: ../../usage/features.md:177 6fd9f0b2791045cba793a6e5467c6213
 msgid "Toggle between light and dark themes:"
 msgstr "在浅色和深色主题之间切换："
 
-#: ../../usage/features.md:101 548b366c862b4fe184cb2b0d2e6a4aa1
+#: ../../usage/features.md:179 c44c77d140b0433fbd217ad02a82c82d
 msgid "Click the **theme toggle** in the top navigation bar"
 msgstr "点击顶部导航栏中的**主题切换**按钮"
 
-#: ../../usage/features.md:102 9f41e76743ef45ac9455f24691552a23
+#: ../../usage/features.md:180 ad71f3863b2045cb9ca0aa92f94fb207
 msgid "Applies to all panels including the file browser, chat, and editor"
 msgstr "应用于所有面板，包括文件浏览器、对话和编辑器"
 
-#: ../../usage/features.md:103 f9a1729e00ad466692d4324916abf7f4
+#: ../../usage/features.md:181 a207e2bd227c46338a128b696cbb0ab9
 msgid "Theme preference is persisted across sessions"
 msgstr "主题偏好在会话之间持久保存"
+
+#~ msgid "**Bash** — Execute shell commands"
+#~ msgstr "**Bash** —— 执行 Shell 命令"
+
+#~ msgid "**File Operations** — Read, write, and list directory contents"
+#~ msgstr "**文件操作** —— 读取、写入和列出目录内容"
+
+#~ msgid ""
+#~ "Agent mode is useful for tasks "
+#~ "that require interacting with the file"
+#~ " system or running commands."
+#~ msgstr "Agent 模式适用于需要与文件系统交互或运行命令的任务。"
+
+#~ msgid "Built-in skills for common operations"
+#~ msgstr "内置常用操作技能"
+
+#~ msgid "GPT-4o, GPT-4, GPT-3.5, and compatible models"
+#~ msgstr "GPT-4o、GPT-4、GPT-3.5 及兼容模型"
+
+#~ msgid "Claude 3.5, Claude 3, and compatible models"
+#~ msgstr "Claude 3.5、Claude 3 及兼容模型"

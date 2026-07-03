@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,18 +19,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../getting-started/overview.md:1 85ccce458f5d4739bf0f5ed78e1dd862
+#: ../../getting-started/overview.md:1 1a33edeb3d6d4272a161d433b810b6ee
 msgid "Overview"
 msgstr "概述"
 
-#: ../../getting-started/overview.md:3 66ced06868b442ebb38a0ed0b5959ac0
+#: ../../getting-started/overview.md:3 5169f371090148d7a49aee9c45306e0d
 msgid "What is InnoClaw?"
 msgstr "什么是 InnoClaw？"
 
-#: ../../getting-started/overview.md:5 9078981815fa4a5199dcce75e48697ce
+#: ../../getting-started/overview.md:5 525001ab37ed40b79555b94ac23b1dfc
 msgid ""
-"InnoClaw is an AI-powered research assistant web application similar to"
-" Google NotebookLM. It lets you open server-side folders as "
+"InnoClaw is an AI-powered research assistant web application similar to "
+"Google NotebookLM. It lets you open server-side folders as "
 "**workspaces**, browse and manage files, and chat with AI grounded in "
 "your workspace files via **RAG** (Retrieval-Augmented Generation)."
 msgstr ""
@@ -38,161 +38,196 @@ msgstr ""
 "应用程序。它允许您将服务器端文件夹作为**工作空间**打开，浏览和管理文件，并通过 **RAG**（检索增强生成）与基于工作空间文件的 AI "
 "进行对话。"
 
-#: ../../getting-started/overview.md:7 6d90ba0d5943423b83c5547985e49126
+#: ../../getting-started/overview.md:7 c87a9f29773145e8818ab0d5c4180df0
 msgid "Key Features"
 msgstr "核心功能"
 
-#: ../../getting-started/overview.md:9 c38049e4804a4a67a3a35cad0083581d
+#: ../../getting-started/overview.md:9 9af1a4501879478a9256a4e96afacbb4
 msgid "**Workspace Management** — Map server folders as persistent workspaces"
 msgstr "**工作空间管理** —— 将服务器文件夹映射为持久化工作空间"
 
-#: ../../getting-started/overview.md:10 b7530b2c85e547e8b23f3bebcb571f00
+#: ../../getting-started/overview.md:10 3a34c48a51c34654bdbb9a3b595a4068
 msgid "**File Browser** — Tree view with upload, create, edit, rename, and delete"
 msgstr "**文件浏览器** —— 树形视图，支持上传、创建、编辑、重命名和删除"
 
-#: ../../getting-started/overview.md:11 ea85798a03f94e77b153787b2ad5dda2
+#: ../../getting-started/overview.md:11 0a02a35ae62b4deeb3f9d1fd651b79b7
 msgid ""
 "**GitHub Integration** — Clone and pull GitHub repositories (including "
 "private ones)"
 msgstr "**GitHub 集成** —— 克隆和拉取 GitHub 仓库（包括私有仓库）"
 
-#: ../../getting-started/overview.md:12 41fb30c8e4cd43ddb31005588de2357e
+#: ../../getting-started/overview.md:12 f9213267e7394db2a6f0797a854da3ec
 msgid ""
 "**RAG Chat** — AI answers questions based on workspace file content with "
 "source citations"
 msgstr "**RAG 对话** —— AI 基于工作空间文件内容回答问题，并附带来源引用"
 
-#: ../../getting-started/overview.md:13 240631d41a6b4e2681b0fcbaab55b4cb
-msgid "**Note Generation** — Auto-generate summaries, FAQs, briefs, and timelines"
+#: ../../getting-started/overview.md:13 749410dbf1fc481eb8c5350492919a33
+#, fuzzy
+msgid ""
+"**Note Generation** — Auto-generate summaries, FAQs, briefs, timelines, "
+"and daily/weekly reports"
 msgstr "**笔记生成** —— 自动生成摘要、常见问题、简报和时间线"
 
-#: ../../getting-started/overview.md:14 0e9964022bf24937a68391a185ca398a
-msgid "**Multi-LLM Support** — Switch between OpenAI GPT and Anthropic Claude"
+#: ../../getting-started/overview.md:14 2408a2a5fc244e1f82af5af548f630f0
+#, fuzzy
+msgid ""
+"**Multi-LLM Support** — Switch between OpenAI GPT, Anthropic Claude, and "
+"Google Gemini"
 msgstr "**多 LLM 支持** —— 在 OpenAI GPT 和 Anthropic Claude 之间切换"
 
-#: ../../getting-started/overview.md:15 350697090e1e48989db28256a763f2b4
+#: ../../getting-started/overview.md:15 48c8c390f9c94fb795b1b474912af5c1
 msgid "**Bilingual UI** — Chinese / English toggle"
 msgstr "**双语界面** —— 中文 / 英文切换"
 
-#: ../../getting-started/overview.md:16 d62e9f6331ed4962be26ddd4572f5b36
+#: ../../getting-started/overview.md:16 bdff42889adc4d1c96a408b8bd71c91a
 msgid "**Dark Mode** — Light and dark theme support"
 msgstr "**暗色模式** —— 支持浅色和深色主题"
 
-#: ../../getting-started/overview.md:17 ac8dd06e52474a54a4b1f3b77d679622
+#: ../../getting-started/overview.md:17 bb386140ab5b47daad4835a5d1df15a5
 msgid "**Bot Integrations** — Feishu (Lark) and WeChat Enterprise bot support"
 msgstr "**机器人集成** —— 支持飞书和企业微信机器人"
 
-#: ../../getting-started/overview.md:18 8a7581d0ab224312b6cd29b393c24da8
+#: ../../getting-started/overview.md:18 d434aafac9b540bd8a4c94e84df9491e
+#, fuzzy
 msgid ""
 "**Agent Mode** — Autonomous AI agent with tool usage (bash, file "
-"operations, kubectl)"
+"operations, kubectl, article search)"
 msgstr "**Agent 模式** —— 具备工具调用能力的自主 AI 代理（bash、文件操作、kubectl）"
 
-#: ../../getting-started/overview.md:19 0c09e6288c2d4c7e8ed48c5513e53ea3
-msgid "**Skills** — Reusable prompt templates for common tasks"
-msgstr "**技能** —— 用于常见任务的可复用提示词模板"
+#: ../../getting-started/overview.md:19 7b7d88be74f34d34a6feca0acdd69811
+msgid ""
+"**Skills** — 206 built-in SCP scientific skills plus custom workflow "
+"templates"
+msgstr ""
 
-#: ../../getting-started/overview.md:21 2e8570b2d14b46bcb870a5ce1709e82a
+#: ../../getting-started/overview.md:20 73af17df5d8340108989a9fabd782eca
+msgid "**Article / Paper Search** — Search arXiv and Hugging Face Daily Papers"
+msgstr ""
+
+#: ../../getting-started/overview.md:21 bdb6a25922754e91a1c8fd6c18eff498
+msgid ""
+"**Scheduled Tasks** — Cron-based automated tasks (daily/weekly reports, "
+"git sync, source sync)"
+msgstr ""
+
+#: ../../getting-started/overview.md:22 2efe5678915348f7a60aff588c2d7278
+msgid ""
+"**Dataset Management** — Download and manage datasets from HuggingFace "
+"Hub and ModelScope"
+msgstr ""
+
+#: ../../getting-started/overview.md:23 2ff0426cc4754451a6a9295872f85579
+msgid ""
+"**Cluster Integration** — Kubernetes cluster management with Volcano GPU "
+"job submission"
+msgstr ""
+
+#: ../../getting-started/overview.md:25 0c71062be1ca405bb282923d6c3d94ee
 msgid "Architecture"
 msgstr "架构"
 
-#: ../../getting-started/overview.md:23 a0b08d4ae087467daf1f2eeeafa2cb5e
+#: ../../getting-started/overview.md:27 f791fbc19d9c4912b18ce0e91efa79e0
 msgid "The following diagram shows the high-level architecture of InnoClaw:"
 msgstr "下图展示了 InnoClaw 的高层架构："
 
-#: ../../getting-started/overview.md:64 2b48b3653b8847428d6de32caa2eff76
+#: ../../getting-started/overview.md:83 149b52f72e8d4665aa3949af304fd238
 msgid "Tech Stack"
 msgstr "技术栈"
 
-#: ../../getting-started/overview.md:25 bd68e380e1cb4129ab283c2c12103568
+#: ../../getting-started/overview.md:29 9adcfd922fdd421d8080cf21797acd8a
 msgid "Category"
 msgstr "分类"
 
-#: ../../getting-started/overview.md:25 9a74b551defd4df48f677e14a93b9e92
+#: ../../getting-started/overview.md:29 16b12b542b9c4920be8bbedc5127e365
 msgid "Technology"
 msgstr "技术"
 
-#: ../../getting-started/overview.md:25 1fb01b7c89404372ab3dc7140ba7eaf0
+#: ../../getting-started/overview.md:29 86d9cfa9245b4430ac938cc62b464065
 msgid "Framework"
 msgstr "框架"
 
-#: ../../getting-started/overview.md:25 e283f4cbb48a4e93af1be3a64a5779c2
+#: ../../getting-started/overview.md:29 d6885fe908214409aeac94c0b40cf194
 msgid "Next.js 16 (App Router) + TypeScript"
 msgstr "Next.js 16 (App Router) + TypeScript"
 
-#: ../../getting-started/overview.md:25 368146562904483481427acd8a19368d
+#: ../../getting-started/overview.md:29 1b0030b6afa84e13a7af54b030a0574e
 msgid "UI"
 msgstr "UI"
 
-#: ../../getting-started/overview.md:25 aadd0569ef2f48598f8b02192fb09a1e
+#: ../../getting-started/overview.md:29 35ed448dad474d4e91e85dd333a0f2c5
 msgid "Tailwind CSS 4 + shadcn/ui + Radix UI"
 msgstr "Tailwind CSS 4 + shadcn/ui + Radix UI"
 
-#: ../../getting-started/overview.md:25 b2866c3ce45b44f0b09d01ad11c74ba6
+#: ../../getting-started/overview.md:29 d15795d804694e16a90806b9b7ff823a
 msgid "AI"
 msgstr "AI"
 
-#: ../../getting-started/overview.md:25 766ddf5428684dfdbec4d4c273d6b290
-msgid "Vercel AI SDK 6 + OpenAI + Anthropic"
+#: ../../getting-started/overview.md:29 817459579d49488b8e29a7fbec83f480
+#, fuzzy
+msgid "Vercel AI SDK 6 + OpenAI + Anthropic + Gemini"
 msgstr "Vercel AI SDK 6 + OpenAI + Anthropic"
 
-#: ../../getting-started/overview.md:25 4c8b3e7541f347ca83bc120ef529d093
+#: ../../getting-started/overview.md:29 4155c46d0daf42d4a22d68658d85c99d
 msgid "Database"
 msgstr "数据库"
 
-#: ../../getting-started/overview.md:25 fbdd5d9a518d40ce9bf811bc8dbaf09d
+#: ../../getting-started/overview.md:29 ba25f24eeb504d769411b852662e007d
 msgid "SQLite (better-sqlite3 + Drizzle ORM)"
 msgstr "SQLite (better-sqlite3 + Drizzle ORM)"
 
-#: ../../getting-started/overview.md:25 f69590a6dc704363b583c6263899e6e0
+#: ../../getting-started/overview.md:29 7ac8335f6d6447d49fcd4ea755ca9e24
 msgid "Vector Search"
 msgstr "向量搜索"
 
-#: ../../getting-started/overview.md:25 1f76f842695e44658d1be885e757c1b9
+#: ../../getting-started/overview.md:29 7b5f884bc5774ccba94c96e1363e32b6
 msgid "Pure JS cosine similarity (no extensions needed)"
 msgstr "纯 JS 余弦相似度（无需额外扩展）"
 
-#: ../../getting-started/overview.md:25 af41944050d24eb38defa5c1a69e46cd
+#: ../../getting-started/overview.md:29 c5627dabafa94c46b1978207f7fd0d75
 msgid "i18n"
 msgstr "国际化"
 
-#: ../../getting-started/overview.md:25 f5e2af23eac0458d83ee0abcf357c7f2
+#: ../../getting-started/overview.md:29 bb3a477ada4d42b6ae145124813e9be4
 msgid "next-intl (Chinese / English)"
 msgstr "next-intl（中文 / 英文）"
 
-#: ../../getting-started/overview.md:25 a9ab5f3abfb04565b1ea0c41951a7d1c
+#: ../../getting-started/overview.md:29 7532fa7c2f3f4150b84d7407e1fc9119
 msgid "Theme"
 msgstr "主题"
 
-#: ../../getting-started/overview.md:25 f064a0fd61ed4c74b7ddcbd9efa57cc5
+#: ../../getting-started/overview.md:29 32aebc8062a944e8a096dfb299b75cda
 msgid "next-themes"
 msgstr "next-themes"
 
-#: ../../getting-started/overview.md:76 ee428acab1e84f84b75e828f2d2dd15c
+#: ../../getting-started/overview.md:95 4ee75633d7a24c67a6b992a1172979e6
 msgid "RAG Pipeline"
 msgstr "RAG 流水线"
 
-#: ../../getting-started/overview.md:78 9fa7c3c5aaae4fc2b77bcbd759a67916
+#: ../../getting-started/overview.md:97 6870b5c786a94ff08f1c49546c165621
 msgid ""
-"The core feature of InnoClaw is RAG-based AI chat. The pipeline works "
-"in three stages:"
+"The core feature of InnoClaw is RAG-based AI chat. The pipeline works in "
+"three stages:"
 msgstr "InnoClaw 的核心功能是基于 RAG 的 AI 对话。流水线分为三个阶段："
 
-#: ../../getting-started/overview.md:103 b85eac1ba9af438fb46c321400d49476
+#: ../../getting-started/overview.md:122 aa8610c641da46d48f4d10693b9f87a8
 msgid ""
 "**Indexing** — When the user clicks \"Sync\", files are scanned, text is "
 "extracted, chunked, and embedded into vectors stored in SQLite."
 msgstr "**索引** —— 当用户点击\"同步\"时，扫描文件，提取文本，分块，并将向量嵌入存储到 SQLite 中。"
 
-#: ../../getting-started/overview.md:104 0b72a2dd8be24ec4af0c2b088e4def62
+#: ../../getting-started/overview.md:123 170792ce2d894a929870d456514dc827
 msgid ""
 "**Retrieval** — When the user asks a question, the question is embedded "
 "and compared against all stored vectors using cosine similarity to find "
 "the top 8 most relevant chunks."
 msgstr "**检索** —— 当用户提问时，将问题向量化，并使用余弦相似度与所有存储的向量进行比较，找到最相关的前 8 个文本块。"
 
-#: ../../getting-started/overview.md:105 d5a324c3d5014ff0a620155036821976
+#: ../../getting-started/overview.md:124 39dbaa9dd6d04a8e93920b64978fec1b
 msgid ""
 "**Generation** — The relevant chunks and the user's question are sent to "
 "the LLM, which generates a streaming answer with source citations."
 msgstr "**生成** —— 将相关文本块和用户的问题发送给 LLM，生成带有来源引用的流式回答。"
+
+#~ msgid "**Skills** — Reusable prompt templates for common tasks"
+#~ msgstr "**技能** —— 用于常见任务的可复用提示词模板"

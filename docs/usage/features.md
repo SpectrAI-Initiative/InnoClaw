@@ -72,8 +72,8 @@ The Agent mode provides an autonomous AI assistant with access to system tools:
 | **searchArticles** | Search arXiv and Hugging Face Daily Papers |
 | **getSkillInstructions** | Load SCP scientific skill workflows |
 | **kubectl** | Kubernetes cluster management (read-only by default) |
-| **submitK8sJob** | Submit Volcano K8s jobs to Ascend 910B NPU clusters |
-| **collectJobResults** | Collect K8s job logs and status |
+| **prepareK8sJob / runK8sJob** | Prepare and submit standard Kubernetes `batch/v1 Job` resources |
+| **waitForK8sJob / collectK8sJobLogs** | Monitor generic Jobs and collect bounded logs |
 
 Agent mode supports three sub-modes:
 
@@ -142,15 +142,15 @@ Download and manage datasets from HuggingFace Hub and ModelScope:
 
 ## Cluster / Kubernetes Integration
 
-Monitor and manage Kubernetes clusters for GPU-accelerated workloads:
+Monitor and manage Kubernetes clusters for workload automation:
 
 - **Cluster Status** — View nodes, jobs, and pods at a glance
-- **kubectl / vcctl** — Execute cluster commands via Agent mode
-- **Volcano Job Submission** — Submit jobs to Ascend 910B NPU clusters
-- **Result Collection** — Collect job logs, status, and exit codes
+- **prepareK8sJob / runK8sJob** - Prepare and submit standard Kubernetes `batch/v1 Job` resources from structured inputs and configured profiles.
+- **waitForK8sJob / collectK8sJobLogs** - Monitor generic Jobs and collect bounded logs.
+- **kubectl** - Read cluster status and run approved scoped commands when configured.
 - **Audit Trail** — Full operation history with workspace-level filtering
 
-Requires `KUBECONFIG_PATH` and related `K8S_*` environment variables to be configured.
+Generic Job scheduling requires `KUBECONFIG_PATH` plus either generic `K8S_*` environment variables or a private profile file.
 
 ## Multi-LLM Support
 

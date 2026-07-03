@@ -1,0 +1,798 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: InnoClaw \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../README_FR.md:5 19befaccd8fd407c89c4a38df44b6b77
+msgid "InnoClaw"
+msgstr ""
+
+#: ../../README_FR.md:36 abb1208a7e3a4a4eb8f916612e60f720
+msgid ""
+"Cette traduction peut etre mise a jour plus lentement que la page "
+"d'accueil anglaise `../README.md`. Pour les toutes dernieres nouveautes, "
+"consultez d'abord les pages anglaise et chinoise."
+msgstr ""
+
+#: ../../README_FR.md:38 04cd3e92e15a4ea0a7470fd6313295cc
+msgid ""
+"InnoClaw transforme les dossiers cote serveur en espaces de travail IA "
+"natifs pour le chat ancre dans les documents, l'etude d'articles, les "
+"workflows scientifiques et l'execution de recherche."
+msgstr ""
+
+#: ../../README_FR.md:40 abe0bab4e97343c7a549eeefdf99f23b
+msgid ""
+"Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du "
+"self-hosting qui veulent plus qu'une simple interface de chat : des "
+"reponses citees sur de vrais fichiers, des competences reutilisables, et "
+"un chemin clair de la lecture a l'execution."
+msgstr ""
+
+#: ../../README_FR.md:42 5b4c87cf8e1441f59c1d8339462caaa5
+msgid ""
+"Workflow : Ouvrir un workspace -> Synchroniser les fichiers dans le RAG "
+"-> Poser des questions avec sources -> Etudier des articles -> Lancer une"
+" discussion multi-agent -> Generer des notes et des idees -> Executer des"
+" taches de recherche a distance"
+msgstr ""
+
+#: ../../README_FR.md:46 8c675e9685e3440c8f47f9406168fb56
+msgid "🔥 Nouveautes"
+msgstr ""
+
+#: ../../README_FR.md:48 0a0c4d8cc3f64b0fbfc3992684e01164
+msgid "Dernieres mises a jour"
+msgstr ""
+
+#: ../../README_FR.md:50 1b425fbc0dad4313be74f1d2c2f46783
+msgid ""
+"*Cette section est synchronisee automatiquement sous forme de resume "
+"traduit leger. Pour les mises a jour les plus rapides, consultez "
+"`../README.md` et `README_CN.md`.*"
+msgstr ""
+
+#: ../../README_FR.md:54 8af9247100d342bf8dd8c833f2d5384e
+msgid "2026-06-26"
+msgstr ""
+
+#: ../../README_FR.md:55 24ddc534bed0453797fa2feaf0054078
+msgid ""
+"**Support CLI Runtime**: Interface de ligne de commande interactive avec "
+"REPL, operations par lot et integration d'agent pour les workflows bases "
+"sur terminal"
+msgstr ""
+
+#: ../../README_FR.md:58 02eabd780f2c4195aee84f241a7e93f9
+msgid "2026-06-12"
+msgstr ""
+
+#: ../../README_FR.md:59 44e6be56b2aa4bb6b5e4f0b9e358be4e
+msgid ""
+"**Mode d'authentification desactive**: Executez l'application sans "
+"authentification pour les deploiements mono-utilisateur ou de "
+"developpement"
+msgstr ""
+
+#: ../../README_FR.md:66 191c841ee8d24a8fac96c2133d2581dd
+msgid "2026-05-12"
+msgstr ""
+
+#: ../../README_FR.md:67 f5c8327bb8184937935ae16556ab3ca7
+msgid ""
+"**Authentification utilisateur locale**: Ajout de l'inscription integree,"
+" de la connexion, de la deconnexion et de la prise en charge des sessions"
+" persistantes."
+msgstr ""
+
+#: ../../README_FR.md:68 5513d0f1d763442c9eb634d6bceeaf19
+msgid ""
+"**Gestion des utilisateurs admin**: Ajout d'une page admin pour creer des"
+" comptes et gerer les roles, les acces, les mots de passe et la "
+"propriete."
+msgstr ""
+
+#: ../../README_FR.md:73 cc6117018c0e45f9bcb1dd2c68df7129
+msgid "2026-04-17"
+msgstr ""
+
+#: ../../README_FR.md:74 2b7847ebe7de429aa56120a78ead8132
+msgid ""
+"**CLI InnoClaw**: Lancez l application, gerez les espaces de travail, et "
+"creez, executez ou exportez des sessions Deep Research depuis le terminal"
+msgstr ""
+
+#: ../../README_FR.md:75 303c2fcbfc704a829848297d72a9fdc1
+msgid ""
+"**Points de controle Deep Research**: La recherche peut maintenant faire "
+"pause aux etapes de revue pour continuer, reviser, creer une branche, "
+"rejeter ou arreter"
+msgstr ""
+
+#: ../../README_FR.md:76 18f4de77f7464734ac0133b3057b8586
+msgid ""
+"**Studio des roles**: Nouvel onglet Deep Research pour examiner les roles"
+" specialises et envoyer des consignes ciblees au Researcher ou aux "
+"workers"
+msgstr ""
+
+#: ../../README_FR.md:82 9065660dfa224fb6bb7f08e188863b68
+msgid "2026-04-12"
+msgstr ""
+
+#: ../../README_FR.md:83 fbfd0afe1f9a4026b5ea42af3c30226f
+msgid ""
+"**Prise en charge du deploiement Docker**: Hebergez InnoClaw vous-meme "
+"avec Docker et docker-compose, avec des guides pour l installation, les "
+"volumes et les mises a niveau"
+msgstr ""
+
+#: ../../README_FR.md:84 7d848d39af58443882663269fa0baa20
+msgid ""
+"**200+ competences integrees**: Forte extension des competences "
+"scientifiques pretes a l emploi en bioinformatique, chimie, genomique et "
+"physique"
+msgstr ""
+
+#: ../../README_FR.md:85 02eb12207ef145129348c09ec0fce69e
+msgid ""
+"**Cadre de creation de competences**: Nouvelle meta-competence pour "
+"creer, evaluer, benchmarker et valider des competences personnalisees"
+msgstr ""
+
+#: ../../README_FR.md:92 e380d37c0efe4ec18793dabd0a2def99
+msgid "2026-04-02"
+msgstr ""
+
+#: ../../README_FR.md:93 7a64d4dbbb3a410d96406587cf570d9e
+msgid ""
+"**Support du deploiement Docker**: Ajout d'un Dockerfile, docker-"
+"compose.yml et d'un guide complet de deploiement Docker pour les "
+"configurations de production auto-hebergees"
+msgstr ""
+
+#: ../../README_FR.md:94 2cca3d23a7214b2c947a5e263210f95f
+msgid ""
+"**200+ nouveaux skills integres**: Bibliotheque de skills enrichie avec "
+"des pipelines en bioinformatique, chemoinformatique, genomique, physique "
+"et decouverte de medicaments"
+msgstr ""
+
+#: ../../README_FR.md:95 4565888fe2584b96b7938a3de74abd48
+msgid ""
+"**Framework de creation de skills**: Nouveau meta-skill avec outils "
+"d'evaluation, de benchmarking et de validation pour construire et tester "
+"des skills personnalises"
+msgstr ""
+
+#: ../../README_FR.md:103 e09fe90b7cd849d6aee46feed8c67247
+msgid "2026-04-01"
+msgstr ""
+
+#: ../../README_FR.md:104 710bb0b67caa4f488ceb687f08324811
+msgid ""
+"**Competence Text-to-CAD**: Nouvelle competence d'agent qui convertit des"
+" descriptions en langage naturel en modeles CAD 3D (STL/STEP) via "
+"CadQuery, avec configuration automatique de l'environnement"
+msgstr ""
+
+#: ../../README_FR.md:105 92466a98ed5a489aa68d82a17c9199f7
+msgid ""
+"**Selecteur d'images de l'espace de travail**: Nouvelle interface de "
+"dialogue dans le panneau agent pour parcourir et selectionner des images "
+"de l'espace de travail a joindre aux conversations"
+msgstr ""
+
+#: ../../README_FR.md:114 eae12a5cf45d42f2af72991b649da28a
+msgid "2026-03-31"
+msgstr ""
+
+#: ../../README_FR.md:115 e4c053d1d6c941e885e8d6d2267e702b
+msgid ""
+"**Support du collage d'images**: Les utilisateurs peuvent maintenant "
+"coller des images directement dans la saisie du chat pour des "
+"conversations IA multimodales"
+msgstr ""
+
+#: ../../README_FR.md:116 9d45956d6a2747a084b3818d9638b576
+msgid ""
+"**Role Studio pour la recherche approfondie**: Le nouveau panneau Role "
+"Studio permet de configurer et gerer des roles de chercheur personnalises"
+" dans le flux de recherche approfondie"
+msgstr ""
+
+#: ../../README_FR.md:117 75e5a4d576674c2184630a3b5df934fa
+msgid ""
+"**Sources de recherche d'articles elargies**: BioRxiv, PubMed et PubChem "
+"ont ete ajoutes comme sources interrogeables dans Paper Study"
+msgstr ""
+
+#: ../../README_FR.md:127 a3ac1f55d6314a368ff61f90e55ad9a8
+msgid "2026-03-26"
+msgstr ""
+
+#: ../../README_FR.md:128 ea9dd8a58b6741cab1b7437db08b5c51
+msgid ""
+"**Decouverte dynamique des modeles**: Le panneau agent recupere "
+"automatiquement les modeles disponibles de chaque fournisseur IA "
+"configure et les fusionne avec la liste integree"
+msgstr ""
+
+#: ../../README_FR.md:129 3099971231874b53909fc517b420d922
+msgid ""
+"**Routage Base URL par modele**: Les fournisseurs IA chinois (shlab, "
+"qwen, moonshot, deepseek, minimax, zhipu) supportent des variables "
+"d'environnement `<PROVIDER>_<MODEL>_BASE_URL` par modele pour un routage "
+"flexible"
+msgstr ""
+
+#: ../../README_FR.md:130 9021069953c843c5b6703e58574fb6d5
+msgid ""
+"**Activation des outils a la volee**: Le support des outils peut etre "
+"active ou desactive par fournisseur via "
+"`<PROVIDER>_TOOLS_ENABLED=true/false` sans modification du code"
+msgstr ""
+
+#: ../../README_FR.md:141 ff8efd95dc2746089b8b3b9f9acc114a
+msgid "2026-03-24"
+msgstr ""
+
+#: ../../README_FR.md:142 21df79a434ed47c392d8d4d999211342
+msgid ""
+"**Support LLM multimodal**: Les flux de recherche de documents et "
+"d'agents prennent desormais en charge les LLM standard et multimodaux "
+"(mLLM), selectionnables par contexte dans les parametres et le selecteur "
+"de modele."
+msgstr ""
+
+#: ../../README_FR.md:161 500529659e234d769b16dce7bc8353eb
+msgid "🧭 Qu'est-ce qu'InnoClaw ?"
+msgstr ""
+
+#: ../../README_FR.md:163 b9afadab522f4b87a6c4190000bfb8f3
+msgid ""
+"InnoClaw est une application web auto-hebergee pour le travail de "
+"connaissance oriente recherche. Elle combine la gestion de workspaces, le"
+" chat RAG, la recherche et la revue d'articles, des competences "
+"scientifiques reutilisables, et l'execution pilotee par Agent au meme "
+"endroit."
+msgstr ""
+
+#: ../../README_FR.md:165 3210d1d8a76c44198ca46c31e8727375
+msgid ""
+"Au lieu de jongler entre un navigateur de fichiers, un outil de notes, un"
+" lecteur d'articles et une console d'automatisation, vous gardez tout "
+"dans un seul workspace : ouvrir un dossier, synchroniser le contenu, "
+"poser des questions ancrees, etudier des articles, et lancer des taches "
+"de recherche multi-etapes."
+msgstr ""
+
+#: ../../README_FR.md:167 69678654f69543ffbe0a5a9036a58a37
+msgid "✨ Pourquoi InnoClaw"
+msgstr ""
+
+#: ../../README_FR.md:169 2a9da792c9944093b5e403e93632c3d8
+msgid ""
+"**Workspace d'abord** - Traitez les dossiers serveur comme des workspaces"
+" de recherche persistants avec fichiers, notes, historique de chat et "
+"contexte d'execution"
+msgstr ""
+
+#: ../../README_FR.md:170 418c8d78a4904e98bdf13f60d4d52926
+msgid ""
+"**Reponses IA ancrees** - Obtenez des reponses RAG avec citations sur vos"
+" propres documents et votre code"
+msgstr ""
+
+#: ../../README_FR.md:171 1988907a6fa14b1aa4ddc1abcc00c4d9
+msgid ""
+"**Workflows natifs pour la recherche** - Etudiez des articles, lancez des"
+" discussions multi-agent structurees et derivez de nouvelles directions "
+"depuis la litterature"
+msgstr ""
+
+#: ../../README_FR.md:172 ac033a8698af4911937356f089ad5531
+msgid ""
+"**Competences scientifiques integrees** - Importez et utilisez 206 "
+"competences scientifiques SCP couvrant notamment la decouverte de "
+"medicaments, la genomique et les proteines"
+msgstr ""
+
+#: ../../README_FR.md:173 864f34c8dbfa49568f6fa86bc3b9bce3
+msgid ""
+"**Execution, pas seulement conversation** - Passez de la lecture et de la"
+" planification a la soumission de jobs, la supervision, la collecte de "
+"resultats et les recommandations suivantes"
+msgstr ""
+
+#: ../../README_FR.md:174 b9cfce3be0b541dc957cfc1293db3f18
+msgid ""
+"**Auto-heberge et multi-modeles** - Fonctionne avec OpenAI, Anthropic, "
+"Gemini et des endpoints compatibles"
+msgstr ""
+
+#: ../../README_FR.md:176 182ca76703d04bdd902e12020c1f0a4f
+msgid "<a id=\"fr-quick-start\"></a>"
+msgstr ""
+
+#: ../../README_FR.md:178 a0e3890fb88340d1be258e02cdcc6cc7
+msgid "🚀 Demarrage rapide"
+msgstr ""
+
+#: ../../README_FR.md:187 d31a938e7e5b431ebed58cce297dcb2e
+msgid "Ouvrez `http://localhost:3000`"
+msgstr ""
+
+#: ../../README_FR.md:188 2ccae87b338f4c0097390cba37b0eb30
+msgid "Configurez un fournisseur IA dans la page Settings"
+msgstr ""
+
+#: ../../README_FR.md:189 33f25ba9fb0f4f93acd12f904c76c857
+msgid ""
+"Ouvrez ou clonez un workspace, puis cliquez sur `Sync` pour construire "
+"l'index RAG"
+msgstr ""
+
+#: ../../README_FR.md:190 ae6a6a14c78744ac85e19564248a11e8
+msgid ""
+"Pour les prerequis par OS et le deploiement en production, voir `getting-"
+"started/installation.md`"
+msgstr ""
+
+#: ../../README_FR.md:192 4096b58e5a444782865ad7f30b8be57b
+msgid "🛠️ Ce que vous pouvez faire"
+msgstr ""
+
+#: ../../README_FR.md:194 2497f24450ae44cd893e15f556be4a97
+msgid "Dialoguer avec des fichiers et du code locaux avec citations"
+msgstr ""
+
+#: ../../README_FR.md:195 49881e9daf7c4d8f931654254ef382dd
+msgid "Rechercher, resumer et relire des articles dans un seul workspace"
+msgstr ""
+
+#: ../../README_FR.md:196 cd6ad16569a6442bb931b171b5f4f31b
+msgid ""
+"Lancer des discussions structurees a 5 roles pour la critique et la "
+"reproductibilite"
+msgstr ""
+
+#: ../../README_FR.md:197 2e95c4f96d9e42ac8716d1eab27507c6
+msgid "Generer resumes, FAQ, briefs, timelines et idees de recherche"
+msgstr ""
+
+#: ../../README_FR.md:198 7d5945667e0a405d8c0cdf3dee988a5a
+msgid ""
+"Importer des competences scientifiques et declencher des workflows "
+"reutilisables"
+msgstr ""
+
+#: ../../README_FR.md:199 a22df78dc140445c9436d91dee838a0c
+msgid ""
+"Gerer des taches de recherche distantes avec gates d'approbation, "
+"supervision et analyse des resultats"
+msgstr ""
+
+#: ../../README_FR.md:201 3f90f1ffdf7c46e7bcf62d88119bf6f9
+msgid "🗺️ Choisissez votre point d'entree"
+msgstr ""
+
+#: ../../README_FR.md 01ac320a52c14e79bf7a1a7cff11400d
+msgid "Si vous voulez..."
+msgstr ""
+
+#: ../../README_FR.md e1df4e57b80345f9ba770305507df81d
+msgid "Commencer ici"
+msgstr ""
+
+#: ../../README_FR.md 736308399f4d45f0825b2cad813e2890
+msgid "Et ensuite"
+msgstr ""
+
+#: ../../README_FR.md 55c41d3a69b94e06af5347df066eaf6e
+msgid "Dialoguer avec vos propres fichiers"
+msgstr ""
+
+#: ../../README_FR.md d872ce989d684284a0c19dedd7cf42e8
+msgid "**Workspace + chat RAG**"
+msgstr ""
+
+#: ../../README_FR.md 4119531b9b8840438521d09ab496d231
+msgid "Ouvrez un dossier, cliquez sur `Sync` et posez des questions citees"
+msgstr ""
+
+#: ../../README_FR.md ed2209bf9f214cb7ad4f8ce8326a4975
+msgid "Lire et deconstruire des articles"
+msgstr ""
+
+#: ../../README_FR.md a5f9a61f90e84a1eae777006afc580d6
+msgid "**Etude d'articles**"
+msgstr ""
+
+#: ../../README_FR.md dfd83f34be8c4306b64468d0dd39fd03
+msgid ""
+"Recherchez des articles, resumez-les, puis passez a la discussion ou aux "
+"notes"
+msgstr ""
+
+#: ../../README_FR.md 0242d8a93eb941b9b3c6537dbe266e30
+msgid "Tester des idees sous plusieurs angles"
+msgstr ""
+
+#: ../../README_FR.md be46750d82b64e3e84302f07bb7ae7b8
+msgid "**Discussion multi-agent**"
+msgstr ""
+
+#: ../../README_FR.md 65033fa7f2fb439683a7d822dbd1f05c
+msgid ""
+"Lancez des revues par roles pour la critique, la collecte de preuves et "
+"la reproductibilite"
+msgstr ""
+
+#: ../../README_FR.md 31edcd1c693a4efcabaa102fe39f381a
+msgid "Transformer la lecture en nouvelles directions"
+msgstr ""
+
+#: ../../README_FR.md 9beafeeed98e415aad39d8e30e53203c
+msgid "**Ideation de recherche**"
+msgstr ""
+
+#: ../../README_FR.md c5e8cf82cb154ec68d50840a6cdbeb0a
+msgid ""
+"Generez des pistes, comparez des options et sauvegardez les sorties dans "
+"les notes"
+msgstr ""
+
+#: ../../README_FR.md 5cec3cd8d3554412a78a233140a648bd
+msgid "Executer le travail de recherche sur une infrastructure distante"
+msgstr ""
+
+#: ../../README_FR.md 08ae7de80b4c4f0f8b5fc1ee5ee6bd6c
+msgid "**Espace d'execution de recherche**"
+msgstr ""
+
+#: ../../README_FR.md 0f6c42e8bc8b43c0a2c1a37b737833ce
+msgid ""
+"Revoyez le code, approuvez les changements, soumettez des jobs, "
+"surveillez et collectez les resultats"
+msgstr ""
+
+#: ../../README_FR.md:211 eb61f9c5e6dc4f948424a0ec336dd703
+msgid "🧩 Comment tout s'articule"
+msgstr ""
+
+#: ../../README_FR.md 64c29f16adc74436bbb8ccfbc43e0a1d
+msgid "Couche"
+msgstr ""
+
+#: ../../README_FR.md 2ea6c4205c774603a1e94acdd47dbd36
+msgid "Role dans le workflow"
+msgstr ""
+
+#: ../../README_FR.md 6ca49e684d27401fadc3f65673003154
+msgid "**Workspace**"
+msgstr ""
+
+#: ../../README_FR.md c7ba0c3d45d144cdbbadb299c079f44f
+msgid "Conserve les fichiers, notes, contexte de session et etat du projet"
+msgstr ""
+
+#: ../../README_FR.md 094e5595838846c8bf709a744c5ab44b
+msgid "**Connaissance**"
+msgstr ""
+
+#: ../../README_FR.md d08b13fa335042478bfb006ea0783efc
+msgid "Synchronise les fichiers dans l'index RAG pour garder les reponses ancrees"
+msgstr ""
+
+#: ../../README_FR.md 4b0398c3e1ff42e286af5f88eee5c47c
+msgid "**Atelier articles**"
+msgstr ""
+
+#: ../../README_FR.md 1d74f45a65bc45918a50f9661362a7eb
+msgid ""
+"Gere la recherche, le resume, la discussion et l'ideation autour de la "
+"litterature"
+msgstr ""
+
+#: ../../README_FR.md 6cde5ed54c274bf7865286ece91d1eb4
+msgid "**Skills**"
+msgstr ""
+
+#: ../../README_FR.md 21b7b85386b34b70b8d6ea3c8d0381ad
+msgid ""
+"Ajoute des workflows de domaine reutilisables et des capacites guidees "
+"par outils"
+msgstr ""
+
+#: ../../README_FR.md c9928bd1ce624c10ba54519047d89200
+msgid "**Execution**"
+msgstr ""
+
+#: ../../README_FR.md 7924041d53fc4684bfcf24f6b7c3e3cc
+msgid "Etend le workflow vers les jobs distants et les boucles d'experimentation"
+msgstr ""
+
+#: ../../README_FR.md:221 a0b71926ba3744f7bd8513538bd5047a
+msgid "🔄 Workflows cles"
+msgstr ""
+
+#: ../../README_FR.md:223 5074f3d141e341828efc9bdc9cee7da7
+msgid "📄 Etude d'articles"
+msgstr ""
+
+#: ../../README_FR.md:225 b10f42a0064f46fe8acff53ee06a70e7
+msgid ""
+"Recherchez la litterature, previsualisez des articles, resumez-les, puis "
+"passez directement a la discussion ou a l'ideation."
+msgstr ""
+
+#: ../../README_FR.md:227 fce1a9e015bb429a984e3755a90ae5ce
+msgid "Recherche multi-source dans une seule UI"
+msgstr ""
+
+#: ../../README_FR.md:228 a27e904130e743e6b248068419523ab0
+msgid "Expansion de requete assistee par IA pour une couverture plus large"
+msgstr ""
+
+#: ../../README_FR.md:229 126c49f85f924f4d8266ee45928cd299
+msgid "Previsualisation des articles sans quitter le contexte du workspace"
+msgstr ""
+
+#: ../../README_FR.md:230 e68e608619564666aaa21d440b26808b
+msgid "Sauvegarde des sorties dans les notes pour reutilisation"
+msgstr ""
+
+#: ../../README_FR.md:232 2bd30eba8a6a433d9e1d43c54e9b9e2b
+msgid "🧠 Discussion multi-agent"
+msgstr ""
+
+#: ../../README_FR.md:234 9279df2939ad4622a60257310699e36d
+msgid ""
+"Lancez une revue structuree d'article avec des roles tels que moderateur,"
+" bibliographe, sceptique, reproducer et scribe."
+msgstr ""
+
+#: ../../README_FR.md:236 9dfe782bfbdb4776a074c9fc8d43022c
+msgid "Flux de discussion deterministe par etapes"
+msgstr ""
+
+#: ../../README_FR.md:237 d727645df5b74b308b44e77ccd8968ab
+msgid ""
+"Comparaison des preuves, methodes, limites et questions de "
+"reproductibilite"
+msgstr ""
+
+#: ../../README_FR.md:238 7bacb160481f4b9dbc018b373a78403c
+msgid "Production de traces de revue plus faciles a relire qu'un chat libre"
+msgstr ""
+
+#: ../../README_FR.md:239 176c4152a59a4f42943c4548e61571e6
+msgid "Utilisation du texte complet pour une analyse plus profonde"
+msgstr ""
+
+#: ../../README_FR.md:241 0f3bb40e2caf4ee4b1c01bd62db3645e
+msgid "🧪 Espace d'execution de recherche"
+msgstr ""
+
+#: ../../README_FR.md:243 c12b754dfe16485aa802214561935389
+msgid ""
+"Passez de l'inspection du code a la soumission de jobs et a l'analyse des"
+" resultats dans un workflow guide."
+msgstr ""
+
+#: ../../README_FR.md:245 6470af56a0084bd2be01d102b6aa9d7b
+msgid "Revue de depots et proposition de patches avec l'aide d'Agent"
+msgstr ""
+
+#: ../../README_FR.md:246 666cce65c34b4ceb8cd4e1a0e0c8a935
+msgid "Checkpoints d'approbation explicites pour les etapes a risque"
+msgstr ""
+
+#: ../../README_FR.md:247 4a7c619599b046d19744c81576d6fcb3
+msgid "Soumission de jobs via Shell, Slurm ou `rjob`"
+msgstr ""
+
+#: ../../README_FR.md:248 565d2800705445228bdb6b16896fc7e8
+msgid ""
+"Supervision des statuts, collecte des artefacts et recommandations pour "
+"la suite"
+msgstr ""
+
+#: ../../README_FR.md:250 7be159045b7644b5aa3fcad38f9f286d
+msgid "📦 Apercu des fonctionnalites"
+msgstr ""
+
+#: ../../README_FR.md 8cbaecff6af749fe83940e326049edf6
+msgid "Fonction"
+msgstr ""
+
+#: ../../README_FR.md 73db3eccf601475e951afb2d62bbce61
+msgid "Ce qu'elle permet"
+msgstr ""
+
+#: ../../README_FR.md cd42214903124f61866b4a74b232f6a4
+msgid "Gestion des workspaces"
+msgstr ""
+
+#: ../../README_FR.md a89fa7bdc85b48ea975d32cdb1dfde31
+msgid "Mapper des dossiers serveur en workspaces IA persistants"
+msgstr ""
+
+#: ../../README_FR.md 4f388dd68f404f9196ab6bb7d81e6d39
+msgid "Navigateur de fichiers"
+msgstr ""
+
+#: ../../README_FR.md 272218767eb04595923800fb811b5e6a
+msgid ""
+"Parcourir, uploader, creer, modifier, previsualiser et synchroniser des "
+"fichiers"
+msgstr ""
+
+#: ../../README_FR.md a35f91306557477aa92591cd76d89608
+msgid "Chat RAG"
+msgstr ""
+
+#: ../../README_FR.md c4986bcd102a47cca8761c32cafb82e7
+msgid "Poser des questions ancrees sur les fichiers indexes avec citations"
+msgstr ""
+
+#: ../../README_FR.md ed063255f451430288044ac893eca379
+msgid "Etude d'articles"
+msgstr ""
+
+#: ../../README_FR.md 664a62c2ea1e48379ea7873bc655e294
+msgid "Rechercher, resumer et inspecter des articles au meme endroit"
+msgstr ""
+
+#: ../../README_FR.md f275f071d480440f9e46b05771e2e297
+msgid "Mode discussion"
+msgstr ""
+
+#: ../../README_FR.md be4a343fea4d409588ffd1b5e9bc9ff2
+msgid "Executer des discussions d'articles structurees a plusieurs roles"
+msgstr ""
+
+#: ../../README_FR.md 8370708a20f447d4a86761e7a496e46a
+msgid "Ideation de recherche"
+msgstr ""
+
+#: ../../README_FR.md 5da29d14072e440f865519b79f8c41c0
+msgid "Generer de nouvelles directions et des idees transdisciplinaires"
+msgstr ""
+
+#: ../../README_FR.md 33eedae0fa5e4a458d30efa40e188e02
+msgid "Systeme de skills"
+msgstr ""
+
+#: ../../README_FR.md d9c3bc79b35046c28de4f2ca151a95f7
+msgid "Importer des competences scientifiques et workflows reutilisables"
+msgstr ""
+
+#: ../../README_FR.md aa8c2166db124d7cb690c0c28e476cc1
+msgid "Execution de recherche"
+msgstr ""
+
+#: ../../README_FR.md 5d97d2d01c0449c797840da485ae3aa1
+msgid ""
+"Orchestrer des boucles experimentales distantes avec supervision et "
+"approbations"
+msgstr ""
+
+#: ../../README_FR.md f25cb789aecb4bea8ddfe69d331d9761
+msgid "Sessions multi-agent"
+msgstr ""
+
+#: ../../README_FR.md 6e5ce81fd55d47c7879ba80d22e17e90
+msgid "Garder des contextes d'execution distincts selon les onglets et projets"
+msgstr ""
+
+#: ../../README_FR.md 2085e10c60454d8e8f30b48d7a524ddc
+msgid "Support multi-LLM"
+msgstr ""
+
+#: ../../README_FR.md a92abc8081e34d1ca20131052d828ea4
+msgid "Utiliser OpenAI, Anthropic, Gemini et des endpoints compatibles"
+msgstr ""
+
+#: ../../README_FR.md:265 5470bd22bbcf477a988265dabdf40c4d
+msgid "📚 Documentation"
+msgstr ""
+
+#: ../../README_FR.md:267 bac671ebdbf34cbe9bb20c84f1467feb
+msgid ""
+"**Commencer ici** - [Overview](getting-started/overview.md), "
+"[Installation](getting-started/installation.md)"
+msgstr ""
+
+#: ../../README_FR.md:268 9e859c565a874962bf6309a1c961fe52
+msgid ""
+"**Configurer et deployer** - [Deployment](getting-started/deployment.md),"
+" [Environment Variables](getting-started/environment-variables.md), "
+"[Configuration](usage/configuration.md)"
+msgstr ""
+
+#: ../../README_FR.md:269 5f6af36f733d4e65b0b60408e0c6e5da
+msgid ""
+"**Utiliser le produit** - [Features](usage/features.md), [API "
+"Reference](usage/api-reference.md)"
+msgstr ""
+
+#: ../../README_FR.md:270 16d2ad6a346b443f935b26172437a317
+msgid ""
+"**Depanner et contribuer** - [Troubleshooting](troubleshooting/faq.md), "
+"[Development Guide](development/contributing.md)"
+msgstr ""
+
+#: ../../README_FR.md:272 18ebe117b5c24d19855923ce01a19282
+msgid "<a id=\"fr-community-support\"></a>"
+msgstr ""
+
+#: ../../README_FR.md:274 3ea5c9466b904405bb609f37abec28d9
+msgid "💬 Communaute et support"
+msgstr ""
+
+#: ../../README_FR.md:276 9bb426d0d7b74a9faf8db06ea9e39c2f
+msgid ""
+"**Besoin d'aide pour l'installation ou l'usage ?** Commencez par la "
+"documentation : https://SpectrAI-Initiative.github.io/InnoClaw/"
+msgstr ""
+
+#: ../../README_FR.md:277 13d64e3bb5b64144883ad2014f16cfc7
+msgid ""
+"**Vous avez trouve un bug ou voulez proposer une fonctionnalite ?** "
+"Ouvrez une issue : https://github.com/SpectrAI-Initiative/InnoClaw/issues"
+msgstr ""
+
+#: ../../README_FR.md:278 55dfed72c7ed4c1ba0897f24bad434f6
+msgid ""
+"**Vous voulez echanger directement ?** Rejoignez la communaute Feishu "
+"depuis `README_CN.md`"
+msgstr ""
+
+#: ../../README_FR.md:280 04be5c2913aa45589e4771e8d24dad0f
+msgid "ℹ️ Infos projet"
+msgstr ""
+
+#: ../../README_FR.md:282 fc499fc18e3f4d7baa2f487a190151df
+msgid "**Licence** - Apache-2.0, voir `../LICENSE`"
+msgstr ""
+
+#: ../../README_FR.md:283 5d77ddea40af4b2983ca79893f68486d
+msgid "**Depot** - https://github.com/SpectrAI-Initiative/InnoClaw"
+msgstr ""
+
+#: ../../README_FR.md:284 921ff25d30cb42f99b125e95476f7df8
+msgid "**Documentation** - https://SpectrAI-Initiative.github.io/InnoClaw/"
+msgstr ""
+
+#: ../../README_FR.md:286 10bf777c1dc24bd3bc36aa59ad387a73
+msgid "⭐ Historique des etoiles"
+msgstr ""
+
+#: ../../README_FR.md:288 319a00db3dfe4f3ba36975a4fbc700c0
+msgid ""
+"[![Star History Chart](https://api.star-history.com/svg?repos=SpectrAI-"
+"Initiative/InnoClaw&type=Date)](https://star-history.com/#SpectrAI-"
+"Initiative/InnoClaw&Date)"
+msgstr ""
+
+#: ../../README_FR.md:288 f2aaed9c12cd4b249e2b7089b402e0d7
+msgid "Star History Chart"
+msgstr ""

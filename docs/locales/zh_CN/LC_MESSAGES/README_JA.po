@@ -1,0 +1,683 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: InnoClaw \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../README_JA.md:5 4bf1058c34564c44b3d08a19267613f7
+msgid "InnoClaw"
+msgstr ""
+
+#: ../../README_JA.md:36 e5dabae06c604d8ea24af04150c212e5
+msgid ""
+"この翻訳ページは英語版ホームページ `../README.md` より更新が遅れる場合があります。最新の `What's New` "
+"は英語版と中国語版が最も確実です。"
+msgstr ""
+
+#: ../../README_JA.md:38 8bf392a298f04298bd26a94881e40bd3
+msgid ""
+"InnoClaw はサーバー上のフォルダを、文書に根ざした対話、論文読解、科学ワークフロー、研究実行のための AI "
+"ネイティブなワークスペースに変えます。"
+msgstr ""
+
+#: ../../README_JA.md:40 8cca13f388f7456ea046393288ebc691
+msgid ""
+"研究者、開発者、研究室チーム、セルフホスト派のために設計されており、単なるチャット UI "
+"ではなく、実ファイルに基づく回答、再利用可能なスキル、そして読解から実行までつながる流れを提供します。"
+msgstr ""
+
+#: ../../README_JA.md:42 77fc49b06c1a4342b2713e4c82ab7923
+msgid ""
+"ワークフロー：ワークスペースを開く -> ファイルを RAG に同期 -> 根拠付きで質問する -> 論文を読む -> "
+"マルチエージェント討論を行う -> ノートとアイデアを生成する -> リモート研究タスクを実行する"
+msgstr ""
+
+#: ../../README_JA.md:46 7a53e187a5fd4cf39cfb937a6997d29b
+msgid "🔥 新着情報"
+msgstr ""
+
+#: ../../README_JA.md:48 05fd7981a0ad4c81b83542bc2f4fcea4
+msgid "最新アップデート"
+msgstr ""
+
+#: ../../README_JA.md:50 db565c3a3ac3433e8b8d7603d3c65c5c
+msgid "*この欄は軽量な翻訳要約として自動同期されます。最速の更新は `../README.md` と `README_CN.md` を参照してください。*"
+msgstr ""
+
+#: ../../README_JA.md:54 9ba2142ccf38472fa6d06079b221fdc9
+msgid "2026-06-26"
+msgstr ""
+
+#: ../../README_JA.md:55 c6d30bd0c0324e64830241bb4b52b9e6
+msgid ""
+"**CLIランタイムサポート**: "
+"REPL、バッチ操作、エージェント統合に対応した対話型コマンドラインインターフェース（ターミナルベースのワークフロー用）"
+msgstr ""
+
+#: ../../README_JA.md:58 19c1c6f8a9c84052b94cc3aa358abc1f
+msgid "2026-06-12"
+msgstr ""
+
+#: ../../README_JA.md:59 5a45b114c1fe40448816b3fb6e627319
+msgid "**認証無効モード**: シングルユーザーまたは開発デプロイメント用に認証なしでアプリケーションを実行できます"
+msgstr ""
+
+#: ../../README_JA.md:66 1e5be9a7bef845599000d6d4cad1fd4d
+msgid "2026-05-12"
+msgstr ""
+
+#: ../../README_JA.md:67 60590bc0816b4488888bdf77a13df395
+msgid "**ローカルユーザー認証**: 内蔵のアカウント登録、サインイン、サインアウト、永続セッション対応を追加。"
+msgstr ""
+
+#: ../../README_JA.md:68 02af8112d52f40d0a155df6dbf2ac923
+msgid "**管理者ユーザー管理**: 管理者向けユーザーページを追加し、アカウント作成と役割、アクセス、パスワード、所有権の管理に対応。"
+msgstr ""
+
+#: ../../README_JA.md:73 ddd532abbe014cc8bae4cb31ed9800f3
+msgid "2026-04-17"
+msgstr ""
+
+#: ../../README_JA.md:74 31f87bd6042a4ace8bc619e364f3c5f6
+msgid ""
+"**InnoClaw コマンドラインツール**: ターミナルからアプリの実行、ワークスペース管理、Deep Research "
+"セッションの作成・実行・エクスポートが可能"
+msgstr ""
+
+#: ../../README_JA.md:75 fcfee689a98c46a0a2c225e2a79bdbd9
+msgid "**Deep Research チェックポイント**: 研究は確認ポイントで一時停止し、継続、修正、分岐、却下、停止が可能"
+msgstr ""
+
+#: ../../README_JA.md:76 7e7f81fa34784653b054fe1f22091285
+msgid "**ロールスタジオ**: 新しい Deep Research タブで専門ロールを確認し、Researcher や各ワーカーへ個別指示を送信可能"
+msgstr ""
+
+#: ../../README_JA.md:82 1555bdfa964e48e28073f989de342b2f
+msgid "2026-04-12"
+msgstr ""
+
+#: ../../README_JA.md:83 395f0e17bdc84af1ad1754905bc8a917
+msgid ""
+"**Docker デプロイ対応**: Docker と docker-compose で InnoClaw "
+"をセルフホスト可能。セットアップ、ボリューム、アップグレード手順を提供"
+msgstr ""
+
+#: ../../README_JA.md:84 eefe937e8c8841f69101a4d3e27fc55c
+msgid "**200+ 内蔵スキル**: すぐ使える科学向けスキルを大幅拡充。生物情報学、化学、ゲノム科学、物理学を広くカバー"
+msgstr ""
+
+#: ../../README_JA.md:85 9f42d6f5a363436fb1fb05b8cdef5f90
+msgid "**スキル作成フレームワーク**: カスタムスキルの作成、自動評価、ベンチマーク、検証を行える新しいメタスキル"
+msgstr ""
+
+#: ../../README_JA.md:92 df0ddc7c003e4c18a76d0da794a591f4
+msgid "2026-04-02"
+msgstr ""
+
+#: ../../README_JA.md:93 d79d36732cae4eef9434a41b199d8594
+msgid ""
+"**Dockerデプロイメントサポート**: Dockerfile、docker-"
+"compose.yml、および完全なDockerデプロイメントガイドを追加し、セルフホスト型本番環境に対応"
+msgstr ""
+
+#: ../../README_JA.md:94 35631bf3c7764ed785827c08dceec372
+msgid ""
+"**200以上の新しい組み込みスキル**: "
+"バイオインフォマティクス、ケモインフォマティクス、ゲノミクス、物理学、創薬パイプラインを含むスキルライブラリを拡充"
+msgstr ""
+
+#: ../../README_JA.md:95 f5db97b85e4f4d8c988dd5912ba6cb01
+msgid "**スキルクリエーターフレームワーク**: カスタムスキルの構築・テスト向けに、評価・ベンチマーク・検証ツールを備えた新メタスキルを追加"
+msgstr ""
+
+#: ../../README_JA.md:103 ddeb8096d6294ff3814e24ce9926279f
+msgid "2026-04-01"
+msgstr ""
+
+#: ../../README_JA.md:104 725c6099d8dd451da15f9cd43ac5744a
+msgid ""
+"**テキスト→CADスキル**: 自然言語の説明をCadQueryで3D "
+"CADモデル（STL/STEP）に変換する新しいエージェントスキル。環境のセットアップも自動で行われます"
+msgstr ""
+
+#: ../../README_JA.md:105 d034ad77e1584b09b1d3ffdecae387b2
+msgid "**ワークスペース画像ピッカー**: エージェントパネルに新たに追加されたダイアログUIで、ワークスペース内の画像を閲覧・選択して会話に添付できます"
+msgstr ""
+
+#: ../../README_JA.md:114 d529ea5259a941febbd47b37e5ec0f2b
+msgid "2026-03-31"
+msgstr ""
+
+#: ../../README_JA.md:115 b149f10a5b2643868d78585d142ffc06
+msgid "**画像貼り付けサポート**: チャット入力欄に画像を直接貼り付けて、マルチモーダルAI会話が可能になりました"
+msgstr ""
+
+#: ../../README_JA.md:116 9271c26b47074003822c5095cf06a4ce
+msgid "**ディープリサーチ・ロールスタジオ**: 新しいロールスタジオパネルで、深度研究ワークフローのカスタム研究者ロールを設定・管理できます"
+msgstr ""
+
+#: ../../README_JA.md:117 6a8f6a0e50ae4c3182f76c8c4aa18cc3
+msgid "**論文検索ソースの拡張**: Paper StudyにBioRxiv、PubMed、PubChemが検索可能な論文ソースとして追加されました"
+msgstr ""
+
+#: ../../README_JA.md:127 5509992615684a26adcaa154cf7dbefd
+msgid "2026-03-26"
+msgstr ""
+
+#: ../../README_JA.md:128 d11b16df344c407081989cba970f5f68
+msgid "**動的モデル検出**: エージェントパネルが各AIプロバイダーから利用可能なモデルを自動取得し、組み込みリストとマージして表示"
+msgstr ""
+
+#: ../../README_JA.md:129 bc3b7ab1d73f489b94fc215b9ed0cddc
+msgid ""
+"**モデル別 Base URL ルーティング**: "
+"中国系AIプロバイダー（shlab、qwen、moonshot、deepseek、minimax、zhipu）で "
+"`<PROVIDER>_<MODEL>_BASE_URL` 環境変数によるモデル単位のエンドポイント設定が可能に"
+msgstr ""
+
+#: ../../README_JA.md:130 df657b210c944c83beb883898d997219
+msgid ""
+"**実行時ツール呼び出し切り替え**: `<PROVIDER>_TOOLS_ENABLED=true/false` "
+"環境変数でプロバイダーごとのツール呼び出しをコード変更なしに動的に切り替え可能"
+msgstr ""
+
+#: ../../README_JA.md:141 670ae0d48a1242fabbbba7cda893231b
+msgid "2026-03-24"
+msgstr ""
+
+#: ../../README_JA.md:142 fefce190cf424133b923af0006990181
+msgid ""
+"**マルチモーダルLLMサポート**: "
+"論文研究とエージェントワークフローで、標準LLMとマルチモーダルLLM（mLLM）の両方をサポート。設定およびモデルセレクターでコンテキストごとに切り替え可能。"
+msgstr ""
+
+#: ../../README_JA.md:161 9b5109134074444889d00b30e2a74b54
+msgid "🧭 InnoClaw とは？"
+msgstr ""
+
+#: ../../README_JA.md:163 d49e58a5789149a4baf226fbfd8c53b3
+msgid ""
+"InnoClaw は研究中心の知識作業向けセルフホスト型 Web アプリです。ワークスペース管理、RAG "
+"チャット、論文検索とレビュー、再利用可能な科学スキル、Agent ベースの実行機能を 1 つにまとめています。"
+msgstr ""
+
+#: ../../README_JA.md:165 118dc08ae5054181a96b29501332bd68
+msgid ""
+"ファイルブラウザ、ノートツール、論文リーダー、自動化コンソールを行き来する代わりに、1 "
+"つのワークスペースでフォルダを開き、内容を同期し、根拠付きで質問し、論文を読み、多段階の研究タスクを進められます。"
+msgstr ""
+
+#: ../../README_JA.md:167 10cbed38b05f4628990caccbc7484053
+msgid "✨ なぜ InnoClaw か"
+msgstr ""
+
+#: ../../README_JA.md:169 e08a402b6983416182e8aee7a9ebd017
+msgid "**ワークスペース中心** - サーバーフォルダを、ファイル、ノート、会話履歴、実行コンテキストを持つ持続的な研究ワークスペースとして扱えます"
+msgstr ""
+
+#: ../../README_JA.md:170 7c29d61a04ad4b4380cc14ad3aad55db
+msgid "**根拠のある AI 回答** - 自分の文書やコードに対して、引用付きの RAG ベース回答を得られます"
+msgstr ""
+
+#: ../../README_JA.md:171 a292d50e9bc44c18832ddf83da17fa3b
+msgid "**研究向けワークフロー** - 論文読解、構造化されたマルチエージェント討論、文献からの新方向生成を行えます"
+msgstr ""
+
+#: ../../README_JA.md:172 3c9702b1fae84f9c95f6b692745ca941
+msgid "**科学スキルを内蔵** - 創薬、ゲノミクス、タンパク質科学などにまたがる 206 個の SCP 科学スキルを導入・活用できます"
+msgstr ""
+
+#: ../../README_JA.md:173 df2e49e0ec5a488cba6bc927cf859455
+msgid "**会話だけで終わらない** - 読解や計画から、ジョブ送信、監視、結果収集、次の提案へ進めます"
+msgstr ""
+
+#: ../../README_JA.md:174 53a585f4156542199e89fd64bfbfb7fa
+msgid "**セルフホストと多モデルに対応** - OpenAI、Anthropic、Gemini、および互換エンドポイントで動作します"
+msgstr ""
+
+#: ../../README_JA.md:176 845bfb0f34a04ace94bf1c9d800cd3b7
+msgid "<a id=\"ja-quick-start\"></a>"
+msgstr ""
+
+#: ../../README_JA.md:178 a259f1ee577349ae890edddbf76e75b7
+msgid "🚀 クイックスタート"
+msgstr ""
+
+#: ../../README_JA.md:187 1fa3dd2c66d541a0841acf6b727ea0a4
+msgid "`http://localhost:3000` を開く"
+msgstr ""
+
+#: ../../README_JA.md:188 6d71e2492ccc40edadefbb573cf7d542
+msgid "Settings ページで AI プロバイダーを 1 つ設定する"
+msgstr ""
+
+#: ../../README_JA.md:189 a3770a53fe64449daf28ff121f483144
+msgid "ワークスペースを開くか clone したら `Sync` を押して RAG インデックスを作成する"
+msgstr ""
+
+#: ../../README_JA.md:190 00948f6ce70d44d4a46a27c4e3dccd99
+msgid "OS ごとの前提条件や本番デプロイは `getting-started/installation.md` を参照"
+msgstr ""
+
+#: ../../README_JA.md:192 18ff350d95344a77ac38f58f511a8027
+msgid "🛠️ できること"
+msgstr ""
+
+#: ../../README_JA.md:194 fe09193fa0e44ff7b60186b0aac1df02
+msgid "ローカルのファイルやコードに対して、引用付きで質問できる"
+msgstr ""
+
+#: ../../README_JA.md:195 79a19a52b6e04547ad1c3db362624967
+msgid "1 つのワークスペースで論文を検索、要約、レビューできる"
+msgstr ""
+
+#: ../../README_JA.md:196 0a6eb923219b423b8b8d045360589039
+msgid "批判的検討や再現性の視点を含む 5 役の構造化討論を実行できる"
+msgstr ""
+
+#: ../../README_JA.md:197 7d49defb6fa64496840d15d1ee126304
+msgid "要約、FAQ、ブリーフ、タイムライン、研究アイデアを生成できる"
+msgstr ""
+
+#: ../../README_JA.md:198 eccdf6a816294eeaa4c657368c33ba74
+msgid "科学スキルを読み込み、再利用可能なドメインワークフローを起動できる"
+msgstr ""
+
+#: ../../README_JA.md:199 1c944cd9e5414c17b77330d8c4cef427
+msgid "承認ゲート、監視、結果分析付きで研究タスクを管理できる"
+msgstr ""
+
+#: ../../README_JA.md:201 da4783ae24514d5083df8a5bdce9fef3
+msgid "🗺️ 始め方を選ぶ"
+msgstr ""
+
+#: ../../README_JA.md e157160d56dc454ea9a26aa0830f9b6b
+msgid "やりたいこと"
+msgstr ""
+
+#: ../../README_JA.md 4efccdfc61dd4ababb22372e0522b006
+msgid "入口"
+msgstr ""
+
+#: ../../README_JA.md 16294acb9c5b4b039608393bccb353d0
+msgid "その後の流れ"
+msgstr ""
+
+#: ../../README_JA.md 368a530727424a909ff7b1ab616e10a8
+msgid "自分のファイルと対話したい"
+msgstr ""
+
+#: ../../README_JA.md ea2d2093c03c4939a12197d507584bc6
+msgid "**ワークスペース + RAG チャット**"
+msgstr ""
+
+#: ../../README_JA.md ec1e70297cca4bdc9b8082a89eafec87
+msgid "フォルダを開いて `Sync` を押し、引用付きで質問する"
+msgstr ""
+
+#: ../../README_JA.md 10bc4ba29e7b4a678c580433dad9dd27
+msgid "論文を読み解きたい"
+msgstr ""
+
+#: ../../README_JA.md 0056c39132ea4a7ab832f1720fbbc278
+msgid "**論文読解**"
+msgstr ""
+
+#: ../../README_JA.md b5a67315d5994eb199111def2e2b07a4
+msgid "論文を検索して要約し、そのまま討論やノートに進む"
+msgstr ""
+
+#: ../../README_JA.md 21e3092bcb2b4c2187f716b72f925b39
+msgid "多角的にアイデアを検証したい"
+msgstr ""
+
+#: ../../README_JA.md 90bf73b29e68495882f01347f807e38c
+msgid "**マルチエージェント討論**"
+msgstr ""
+
+#: ../../README_JA.md 530e4b72bc754fdebce84c1d193ae209
+msgid "役割ベースのレビューで批判、根拠収集、再現性検討を行う"
+msgstr ""
+
+#: ../../README_JA.md ad24a8d8e3284e1fb37540f37579d747
+msgid "読解から新しい方向を作りたい"
+msgstr ""
+
+#: ../../README_JA.md 178fa2144fca429591b6f11cf9fa6c19
+msgid "**研究アイデア生成**"
+msgstr ""
+
+#: ../../README_JA.md 848f436a7539425eb075370ad85300b6
+msgid "方向性を生成し、選択肢を比較してノートへ保存する"
+msgstr ""
+
+#: ../../README_JA.md 25fe270984144ffc81e000453f483f87
+msgid "リモート環境で研究作業を実行したい"
+msgstr ""
+
+#: ../../README_JA.md b025c92e9e2f4839a1024a4bd352eaff
+msgid "**研究実行ワークスペース**"
+msgstr ""
+
+#: ../../README_JA.md cd505043893d451c9b079cc76645404f
+msgid "コード確認、変更承認、ジョブ送信、監視、結果回収まで進める"
+msgstr ""
+
+#: ../../README_JA.md:211 a9d77903ccb4453bb9c065ce2673c528
+msgid "🧩 全体のつながり"
+msgstr ""
+
+#: ../../README_JA.md e5473b0948c148ada1610d03be94e773
+msgid "層"
+msgstr ""
+
+#: ../../README_JA.md 67139b9d7a3743a081e4a75a828cb7bf
+msgid "ワークフローでの役割"
+msgstr ""
+
+#: ../../README_JA.md 67dffe8d72864293841b88dc59f1c600
+msgid "**ワークスペース**"
+msgstr ""
+
+#: ../../README_JA.md ba6371a3bee64cf98e4c5e706cd28ca8
+msgid "ファイル、ノート、会話コンテキスト、プロジェクト状態を保持"
+msgstr ""
+
+#: ../../README_JA.md 4928821943204b66a4065a9051ac4035
+msgid "**ナレッジ**"
+msgstr ""
+
+#: ../../README_JA.md 9550a2468dba4eecbf5a53b8d41f7726
+msgid "ファイルを RAG インデックスへ同期し、回答を根拠付きにする"
+msgstr ""
+
+#: ../../README_JA.md 286b89a426ca440ea0921aa0ed10de10
+msgid "**論文ワークベンチ**"
+msgstr ""
+
+#: ../../README_JA.md 63ee659e850245db8ccd858e654759ff
+msgid "文献検索、要約、討論、アイデア生成を担当"
+msgstr ""
+
+#: ../../README_JA.md f3e9300e4ba8456e9c4c56e7f989bae1
+msgid "**スキル**"
+msgstr ""
+
+#: ../../README_JA.md 53cf234440344d78b56cb0a70082506f
+msgid "再利用可能なドメインワークフローとツール指向の能力を追加"
+msgstr ""
+
+#: ../../README_JA.md b69a224325b441949481cfc4a7aa2ede
+msgid "**実行**"
+msgstr ""
+
+#: ../../README_JA.md aa78cce934914d9abb4d476cc3924280
+msgid "ワークフローをリモートジョブや実験ループへ拡張"
+msgstr ""
+
+#: ../../README_JA.md:221 fd7817e3e57d4fd2a640f85ee12652dd
+msgid "🔄 主要ワークフロー"
+msgstr ""
+
+#: ../../README_JA.md:223 68fd523905d5442bbc1320f47bfbf69c
+msgid "📄 論文読解"
+msgstr ""
+
+#: ../../README_JA.md:225 a64db606f9f449f19d5560167ec48036
+msgid "文献を検索し、論文をプレビューし、要約したあと、そのまま討論やアイデア生成へ進めます。"
+msgstr ""
+
+#: ../../README_JA.md:227 d3e6eecfc5b144d2b92e208ee0ec0971
+msgid "1 つの UI から複数ソースを検索"
+msgstr ""
+
+#: ../../README_JA.md:228 5eba9b9965974bef9693f1c093f2859a
+msgid "AI によるクエリ拡張で探索範囲を広げる"
+msgstr ""
+
+#: ../../README_JA.md:229 f2b5dd117e314b748716192f5ea6ccf6
+msgid "ワークスペースを離れずに論文プレビューを開く"
+msgstr ""
+
+#: ../../README_JA.md:230 8c4107e127934154acb5538ee26a1c5b
+msgid "出力をノートへ保存して再利用"
+msgstr ""
+
+#: ../../README_JA.md:232 816fa4a5ca66411b8722e96ad20513c2
+msgid "🧠 マルチエージェント討論"
+msgstr ""
+
+#: ../../README_JA.md:234 7ef5538351f64e90952c907f75d7f3cf
+msgid "モデレーター、リテラチャー担当、懐疑派、再現担当、記録担当などの役割で構造化レビューを行います。"
+msgstr ""
+
+#: ../../README_JA.md:236 6ddd5fc014f14da1b606f80b1ddf5751
+msgid "決められた段階的フローで討論"
+msgstr ""
+
+#: ../../README_JA.md:237 0223ace3f3ab4836b726bd3a3a2eb238
+msgid "根拠、手法、限界、再現性の懸念を比較"
+msgstr ""
+
+#: ../../README_JA.md:238 2183cedcf80c4e75ad0c94696eeb6b2c
+msgid "自由形式のチャットより追いやすいレビュー記録を生成"
+msgstr ""
+
+#: ../../README_JA.md:239 c7837209086442e891c9b2613cbfc1af
+msgid "論文全文コンテキストでより深い分析を実施"
+msgstr ""
+
+#: ../../README_JA.md:241 5cfd445bfd8c4e76abf115915f30eab1
+msgid "🧪 研究実行ワークスペース"
+msgstr ""
+
+#: ../../README_JA.md:243 d9d6c3c021124f0fb317bd5f9e8f9daa
+msgid "コード確認からジョブ送信、結果分析までをガイド付きの流れで進めます。"
+msgstr ""
+
+#: ../../README_JA.md:245 07ac3d408a124ee5bb43b5f5e2c22b04
+msgid "Agent 支援でリポジトリを確認し、パッチを提案"
+msgstr ""
+
+#: ../../README_JA.md:246 29d6e1ba78994f388357741abec5bfbb
+msgid "高リスクな手順には明示的な承認チェックポイントを設置"
+msgstr ""
+
+#: ../../README_JA.md:247 a8801d76db7e44059e0a6a3646c0e244
+msgid "Shell、Slurm、`rjob` バックエンドでジョブを送信"
+msgstr ""
+
+#: ../../README_JA.md:248 176b901433274e12ae3e2b005a36b803
+msgid "状態監視、成果物回収、次の提案を実施"
+msgstr ""
+
+#: ../../README_JA.md:250 cceb2357c6d84c809c3c1b04ca101779
+msgid "📦 機能概要"
+msgstr ""
+
+#: ../../README_JA.md f8c7d92a24564ebbb46992a9c5b376e4
+msgid "機能"
+msgstr ""
+
+#: ../../README_JA.md 01688b05084a4f1496365b32972091d0
+msgid "できること"
+msgstr ""
+
+#: ../../README_JA.md faebda93fb6d46198b5406026451c0bc
+msgid "ワークスペース管理"
+msgstr ""
+
+#: ../../README_JA.md 94911dc9170f4908bc52190128545d93
+msgid "サーバーフォルダを持続的な AI ワークスペースとして扱う"
+msgstr ""
+
+#: ../../README_JA.md 51a3339de5f543cba8ee9a4c1b2ae998
+msgid "ファイルブラウザ"
+msgstr ""
+
+#: ../../README_JA.md b099a9a63f1e45e7923b3c8d8db5dfd3
+msgid "閲覧、アップロード、作成、編集、プレビュー、同期"
+msgstr ""
+
+#: ../../README_JA.md 8b8f40dda69c4524880b30fa6f1d2312
+msgid "RAG チャット"
+msgstr ""
+
+#: ../../README_JA.md 26ef5dc7da284768b317a554256b462a
+msgid "インデックス済みファイルに対する引用付き質問応答"
+msgstr ""
+
+#: ../../README_JA.md 95686b849ec24507a3ca7e5f41b04c5c
+msgid "論文読解"
+msgstr ""
+
+#: ../../README_JA.md 18d35c0c8319401098367f30cf6ea771
+msgid "論文の検索、要約、確認を 1 か所で実施"
+msgstr ""
+
+#: ../../README_JA.md 68e483f9b3174c7bac8281f2dbf735a8
+msgid "討論モード"
+msgstr ""
+
+#: ../../README_JA.md f417b1cb1495486d8737205dd7f31a51
+msgid "構造化された多役割の論文討論を実行"
+msgstr ""
+
+#: ../../README_JA.md 8e0ff376bb744b40af07e1d5dd77d666
+msgid "研究アイデア生成"
+msgstr ""
+
+#: ../../README_JA.md 25915140ddb9486cb807558fbffda783
+msgid "新方向や分野横断のアイデアを生成"
+msgstr ""
+
+#: ../../README_JA.md 4fd10b68b2d3499782d20ddbe743d07a
+msgid "スキルシステム"
+msgstr ""
+
+#: ../../README_JA.md 60ca3cd2456349b189d5cc72245362e1
+msgid "再利用可能な科学スキルとワークフローを導入"
+msgstr ""
+
+#: ../../README_JA.md a39a79fda4c44014a330630a06e346f2
+msgid "研究実行"
+msgstr ""
+
+#: ../../README_JA.md 12ab73e11caa4a238b44f60acc57e6dc
+msgid "承認ゲートと監視付きで実験ループを実行"
+msgstr ""
+
+#: ../../README_JA.md 5daeda1879de49e2b74e887f1a56ef0a
+msgid "マルチエージェントセッション"
+msgstr ""
+
+#: ../../README_JA.md 291372f8498e4218ada2f6c9928c4482
+msgid "タブやプロジェクトごとに独立した実行コンテキストを保持"
+msgstr ""
+
+#: ../../README_JA.md eec0ebbf02b54f659469668fbdfa81ab
+msgid "マルチ LLM 対応"
+msgstr ""
+
+#: ../../README_JA.md 326da23a815c4d26af6779dfc8ee44c8
+msgid "OpenAI、Anthropic、Gemini、互換エンドポイントを利用"
+msgstr ""
+
+#: ../../README_JA.md:265 950935110e0946e584a73ce732effb39
+msgid "📚 ドキュメント"
+msgstr ""
+
+#: ../../README_JA.md:267 066b8b9f9c9e45aa8220864e3a3ea159
+msgid ""
+"**ここから始める** - [Overview](getting-started/overview.md), [Installation"
+"](getting-started/installation.md)"
+msgstr ""
+
+#: ../../README_JA.md:268 85eec8838c6f45e7b7c5eac4ae187ded
+msgid ""
+"**設定とデプロイ** - [Deployment](getting-started/deployment.md), [Environment "
+"Variables](getting-started/environment-variables.md), "
+"[Configuration](usage/configuration.md)"
+msgstr ""
+
+#: ../../README_JA.md:269 75425449e0c64a8cbae7c30a734011e2
+msgid ""
+"**使い方** - [Features](usage/features.md), [API Reference](usage/api-"
+"reference.md)"
+msgstr ""
+
+#: ../../README_JA.md:270 af3fd6f520bb4f158b27f6bdb0638a47
+msgid ""
+"**トラブル対応と開発** - [Troubleshooting](troubleshooting/faq.md), [Development "
+"Guide](development/contributing.md)"
+msgstr ""
+
+#: ../../README_JA.md:272 6ba4f2f6551545ca8476e3c8b1e6a463
+msgid "<a id=\"ja-community-support\"></a>"
+msgstr ""
+
+#: ../../README_JA.md:274 47b6702e93f8404d9265ba3a9eb2808d
+msgid "💬 コミュニティとサポート"
+msgstr ""
+
+#: ../../README_JA.md:276 33e1e881feae4dffb64eb4d2fc187c77
+msgid ""
+"**セットアップや使い方で困ったら？** まずは https://SpectrAI-Initiative.github.io/InnoClaw/ "
+"のドキュメントを確認"
+msgstr ""
+
+#: ../../README_JA.md:277 099ba7a1277c4f60a84a20b324d06bdb
+msgid ""
+"**バグ報告や機能提案をしたい？** https://github.com/SpectrAI-Initiative/InnoClaw/issues"
+" を利用"
+msgstr ""
+
+#: ../../README_JA.md:278 afe125187df24ec1a108e04e49fa909d
+msgid "**直接話したい？** 中国語版ページ `README_CN.md` の Feishu コミュニティを参照"
+msgstr ""
+
+#: ../../README_JA.md:280 f406f82b6c9f4c49b93a9dbbdb3c7ced
+msgid "ℹ️ プロジェクト情報"
+msgstr ""
+
+#: ../../README_JA.md:282 3603d1816f654fdea74d136991b1ac95
+msgid "**ライセンス** - Apache-2.0、詳しくは `../LICENSE` を参照"
+msgstr ""
+
+#: ../../README_JA.md:283 cc0417246f3342d8941dcca340b4553a
+msgid "**リポジトリ** - https://github.com/SpectrAI-Initiative/InnoClaw"
+msgstr ""
+
+#: ../../README_JA.md:284 eb0ce34d89624eb2a273a48128b958b5
+msgid "**ドキュメント** - https://SpectrAI-Initiative.github.io/InnoClaw/"
+msgstr ""
+
+#: ../../README_JA.md:286 34671198558c4f25a9a753e4e03bf7db
+msgid "⭐ スター履歴"
+msgstr ""
+
+#: ../../README_JA.md:288 ff7a1ab26c5245939fcaa2284b5ce244
+msgid ""
+"[![Star History Chart](https://api.star-history.com/svg?repos=SpectrAI-"
+"Initiative/InnoClaw&type=Date)](https://star-history.com/#SpectrAI-"
+"Initiative/InnoClaw&Date)"
+msgstr ""
+
+#: ../../README_JA.md:288 d2df3ec7ccea4b2c83929b0a6ee408a9
+msgid "Star History Chart"
+msgstr ""

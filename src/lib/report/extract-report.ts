@@ -15,6 +15,11 @@ const TOOL_LABEL_MAP: Record<string, string> = {
   kubectl: "Ran kubectl",
   submitK8sJob: "Submitted job",
   collectJobResults: "Collected job results",
+  prepareK8sJob: "Prepared K8s job",
+  runK8sJob: "Submitted K8s job",
+  waitForK8sJob: "Waited for K8s job",
+  collectK8sJobLogs: "Collected K8s job logs",
+  cleanupK8sJob: "Cleaned up K8s job",
 };
 
 function getToolLabel(toolName: string, args: Record<string, unknown>): string {

@@ -1,0 +1,31 @@
+{
+  "clusters": [
+    {
+      "id": "default",
+      "kubeconfigPath": "/path/to/kubeconfig",
+      "context": "local-context",
+      "defaultNamespace": "default",
+      "allowedNamespaces": ["default"]
+    }
+  ],
+  "profiles": [
+    {
+      "id": "cpu-smoke",
+      "clusterId": "default",
+      "namespace": "default",
+      "defaultImage": "python:3.12",
+      "resources": {
+        "requests": {
+          "cpu": "1",
+          "memory": "256Mi"
+        },
+        "limits": {
+          "cpu": "1",
+          "memory": "256Mi"
+        }
+      },
+      "ttlSecondsAfterFinished": 3600,
+      "backoffLimit": 0
+    }
+  ]
+}

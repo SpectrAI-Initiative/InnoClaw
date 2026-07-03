@@ -1,0 +1,114 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: InnoClaw \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../development/generic-k8s-job-scheduler.md:1
+#: cf8ff7d8fa2d4dccb17f6082505a8e92
+msgid "Generic Kubernetes Job Scheduler"
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:3
+#: 7d5b11e3e727466cb006009892f670dd
+msgid ""
+"The generic scheduler lets agents create standard Kubernetes `batch/v1 "
+"Job` resources from structured inputs. It does not assume a GPU vendor, "
+"custom scheduler, PVC layout, registry, namespace, or CRD."
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:5
+#: c739929077dc41bd8c89e87d2ccd2174
+msgid "Configuration"
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:7
+#: 318449551ef8488aa9518707d5ceab9b
+msgid "Use environment variables for a simple single-profile setup:"
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:17
+#: 7682f57d3b4849f2acd0ef0a8d1ecd86
+msgid ""
+"Use `config/k8s-job-profiles.local.json` for private local profiles. Do "
+"not commit that file."
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:19
+#: 53b16451fe65454eb8de6fc608068de7
+msgid ""
+"For shareable examples, use `config/k8s-job-profiles.example.json`. Keep "
+"private kubeconfig paths, contexts, image registries, namespaces, secret "
+"names, and storage names in the ignored local file only."
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:21
+#: 6b54b6a177474d25b21c1fe17bc19435
+msgid "Agent Flow"
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:23
+#: 4412293ac5694f1bb574a1c686fce86f
+msgid "`prepareK8sJob` builds and dry-runs the Job."
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:24
+#: 518b708b4306446589f8166bad8cf933
+msgid ""
+"The user reviews profile, namespace, image, command, resources, and "
+"`jobSpecHash`."
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:25
+#: d9aa1f64520d45809c9b507586be3ba3
+msgid "`runK8sJob` submits only when the hash matches and the user confirms."
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:26
+#: 1e6abac948b948e9b9b7c6f8991d97a9
+msgid "`waitForK8sJob` waits for a terminal state."
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:27
+#: 6af66b2ef949494cb79e4a7c6f91b2d7
+msgid "`collectK8sJobLogs` collects bounded logs."
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:28
+#: 77a0d936e77b4d60872002ecf038f3e0
+msgid "`cleanupK8sJob` deletes only InnoClaw-managed Jobs after confirmation."
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:30
+#: 69c1b45958d140038dbe5f8db5c8b374
+msgid "Local Smoke Test"
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:32
+#: a8eb66925d4846e28403812b424090bd
+msgid "Use a private profile and run a minimal command such as:"
+msgstr ""
+
+#: ../../development/generic-k8s-job-scheduler.md:43
+#: 000f5d1e9583478b9d2409c6c2f41783
+msgid ""
+"The smoke report may include profile id, job name, namespace, terminal "
+"status, log tail, and cleanup result. It must not include kubeconfig "
+"contents, tokens, secret values, internal node names, private topology, "
+"or unredacted private image paths."
+msgstr ""

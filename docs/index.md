@@ -44,6 +44,7 @@ development/project-structure
 development/local-development
 development/testing
 development/agent-development
+development/generic-k8s-job-scheduler
 development/documentation
 ```
 

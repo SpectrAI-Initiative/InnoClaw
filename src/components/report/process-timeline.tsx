@@ -26,6 +26,11 @@ const TOOL_ICONS: Record<string, React.ElementType> = {
   kubectl: Server,
   submitK8sJob: Container,
   collectJobResults: Container,
+  prepareK8sJob: Container,
+  runK8sJob: Container,
+  waitForK8sJob: Server,
+  collectK8sJobLogs: Server,
+  cleanupK8sJob: Container,
 };
 
 function StepStatusIcon({ status }: { status: ReportProcessStep["status"] }) {

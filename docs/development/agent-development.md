@@ -80,6 +80,7 @@ When you touch one of these agent-facing contracts, review the matching surfaces
 - Add new tool implementations under `src/lib/ai/tools/`.
 - Use shared tool context and validation helpers instead of introducing ad hoc filesystem or shell access.
 - Default new tools to least privilege. If a capability can mutate infrastructure or trigger remote execution, gate it like the existing high-privilege tool sets.
+- Generic Kubernetes Job scheduling must use the structured `prepareK8sJob` -> `runK8sJob` -> `waitForK8sJob` flow. Do not add raw manifest submission or cluster-specific scheduler defaults without explicit policy gates, tests, and docs.
 - Keep tool names stable unless you are intentionally performing a contract migration. Renames require tests, docs, and any UI selector surfaces to be updated together.
 - Do not let prompt text become the only guardrail for risky capabilities. Hard privilege boundaries belong in typed runtime checks and tool registration.
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,41 +19,46 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../index.md:7
+#: ../../index.md:9
 msgid "Getting Started"
 msgstr "快速入门"
 
-#: ../../index.md:17
+#: ../../index.md:20
 msgid "Usage & Features"
 msgstr "使用与功能"
 
-#: ../../index.md:26
+#: ../../index.md:29
 msgid "Notifications"
 msgstr "通知"
 
-#: ../../index.md:33
+#: ../../index.md:36
 msgid "Development Guide"
 msgstr "开发指南"
 
-#: ../../index.md:44
+#: ../../index.md:51
 msgid "Troubleshooting"
 msgstr "故障排除"
 
-#: ../../index.md:1 cca7508f1c2749b4a40d62755f0a0e72
+#: ../../index.md:1 4568aae8b4074f14b76113f2c5a6eb6c
 msgid "InnoClaw Documentation"
 msgstr "InnoClaw 文档"
 
-#: ../../index.md:3 d66d453028114d289663c2c6542ce305
+#: ../../index.md:3 65f23baaf5944022abc6807cd3c93870
 msgid ""
 "Welcome to the **InnoClaw** documentation — an AI-powered research "
 "assistant web application similar to Google NotebookLM."
-msgstr ""
-"欢迎阅读 **InnoClaw** 文档 —— 一个类似于 Google NotebookLM 的 AI 驱动的研究助手 Web "
-"应用程序。"
+msgstr "欢迎阅读 **InnoClaw** 文档 —— 一个类似于 Google NotebookLM 的 AI 驱动的研究助手 Web 应用程序。"
 
-#: ../../index.md:5 46be3e8b729d4f89919c5e1fb08fd3cc
+#: ../../index.md:5 64c31062c9c046f78ceaed9412011b65
 msgid ""
 "Users open server-side folders as workspaces, browse and manage files, "
 "and chat with AI grounded in workspace files via RAG (Retrieval-Augmented"
 " Generation)."
 msgstr "用户可以将服务器端文件夹作为工作空间打开，浏览和管理文件，并通过 RAG（检索增强生成）与基于工作空间文件的 AI 进行对话。"
+
+#: ../../index.md:7 e5631ead778947ae8f11e21a2698ef5b
+msgid ""
+"For contributor workflow inside a repository clone, start with the "
+"repository root `AGENTS.md`, then use the development pages below for "
+"detailed setup, testing, and documentation procedures."
+msgstr ""

@@ -57,7 +57,12 @@ next-env.d.ts
 .env.local
 
 # cluster config
-config/
+config/*
+!config/d_k8s_job.yaml
+!config/skills/
+!config/skills/**
+!config/k8s-job-profiles.example.json
+config/k8s-job-profiles.local.json
 
 # docs build artifacts
 docs/_build/

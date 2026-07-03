@@ -1,0 +1,788 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: InnoClaw \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../README_CN.md:5 bed2789ed6974d9d9f674a4c290cd788
+msgid "InnoClaw"
+msgstr ""
+
+#: ../../README_CN.md:36 a7f8a80cfae544e8b615ed96f2e03674
+msgid "此翻译页可能会略晚于英文主页 `README.md` 更新。"
+msgstr ""
+
+#: ../../README_CN.md:38 d4b856144f804f07980ef87629eaba7b
+msgid "InnoClaw 将服务器文件夹变成 AI 原生工作空间，用于基于文档的问答、论文研读、科学工作流和研究执行。"
+msgstr ""
+
+#: ../../README_CN.md:40 4971ac1d3bfb48b38e2a155357b17a6d
+msgid "它面向研究人员、开发者、实验室团队和自托管用户：不只是提供聊天界面，而是提供基于真实文件的引用回答、可复用技能，以及从阅读走向执行的完整路径。"
+msgstr ""
+
+#: ../../README_CN.md:42 a4390eed7ad647b9a0a50bdbec243a0c
+msgid ""
+"工作流：打开工作空间 -> 同步文件进入 RAG -> 基于文档提问 -> 研读论文 -> 运行多智能体讨论 -> 生成笔记和灵感 -> "
+"执行远程研究任务"
+msgstr ""
+
+#: ../../README_CN.md:46 8f80b0c0d40e4491ad40d76fb2064651
+msgid "🔥 新增特性"
+msgstr ""
+
+#: ../../README_CN.md:48 8955317ddb534c838d1aae50f4e23a0c
+msgid "最近更新"
+msgstr ""
+
+#: ../../README_CN.md:52 9f68c1e5dc4743d2b7ec4ab94571d956
+msgid "2026-06-26"
+msgstr ""
+
+#: ../../README_CN.md:53 d464296422234054b8babd43c95c02c9
+msgid "**CLI运行时支持**: 支持REPL、批量操作和代理集成的交互式命令行界面，用于基于终端的工作流"
+msgstr ""
+
+#: ../../README_CN.md:56 33f9da2bf4144b13a6d82da7df2e3d92
+msgid "2026-06-12"
+msgstr ""
+
+#: ../../README_CN.md:57 8a7adee3a70a408fbc7cb87e2925eda4
+msgid "**禁用认证模式**: 在无身份验证的情况下运行应用程序，适用于单用户或开发部署场景"
+msgstr ""
+
+#: ../../README_CN.md:64 b7987d96b11f4ef2a0de488da0876ce8
+msgid "2026-05-12"
+msgstr ""
+
+#: ../../README_CN.md:65 780cdcae6df54599ab9b8dd0605b336c
+msgid "**本地用户认证**: 新增内置账号注册、登录、退出登录，以及持久会话支持。"
+msgstr ""
+
+#: ../../README_CN.md:66 60f9fbca445b46499959435a484bb1c5
+msgid "**管理员用户管理**: 新增管理员用户页面，可创建账号并管理角色、启用状态、密码和数据归属。"
+msgstr ""
+
+#: ../../README_CN.md:71 b38a3110bca14180b7892c7188df5c37
+msgid "2026-04-17"
+msgstr ""
+
+#: ../../README_CN.md:72 6320d2d359cb425d9820135c4719aa7a
+msgid "**InnoClaw 命令行工具**: 可在终端运行应用、管理工作区，并创建/运行/导出 Deep Research 会话"
+msgstr ""
+
+#: ../../README_CN.md:73 c05360d94fcc42aa8032dfef80ee68ab
+msgid "**Deep Research 检查点**: 研究流程现可在关键节点暂停，支持继续、修订、分支、拒绝或停止"
+msgstr ""
+
+#: ../../README_CN.md:74 7276dbd0b75e4db98eeb8d3759dfa2a5
+msgid "**角色工作室**: 新增 Deep Research 角色页，可查看专家角色并向 Researcher 或各工作角色定向下达指令"
+msgstr ""
+
+#: ../../README_CN.md:80 37f185a50a734e96978206f3d7f5fa63
+msgid "2026-04-12"
+msgstr ""
+
+#: ../../README_CN.md:81 ddb78f99f8854f78a53cb9e6aadb8703
+msgid "**Docker 部署支持**: 现在可通过 Docker 和 docker-compose 自托管 InnoClaw，并提供部署、挂载与升级指南"
+msgstr ""
+
+#: ../../README_CN.md:82 09b3d03c49704a14b954681082602aaf
+msgid "**200+ 内置技能**: 大幅扩展可直接使用的科研技能，覆盖生物信息、化学、基因组学与物理等领域"
+msgstr ""
+
+#: ../../README_CN.md:83 82e94e6af95846cd9f1313de3e42ce3f
+msgid "**技能创建框架**: 新增元技能，可用于创建、自测、基准评估和校验自定义技能"
+msgstr ""
+
+#: ../../README_CN.md:90 0606ff5eb3734ecaa211aefd00db18e1
+msgid "2026-04-02"
+msgstr ""
+
+#: ../../README_CN.md:91 0ff9df0c8892414cb79bc55428030ee2
+msgid ""
+"**Docker 部署支持**: 新增 Dockerfile、docker-compose.yml 及完整 Docker "
+"部署指南，支持自托管生产环境部署"
+msgstr ""
+
+#: ../../README_CN.md:92 949162ed4fac4851a009a25292b80312
+msgid "**200+ 内置技能扩充**: 大幅扩展技能库，涵盖生物信息学、化学信息学、基因组学、物理学及药物发现流程"
+msgstr ""
+
+#: ../../README_CN.md:93 91f1e7a05ec74d929778aa7ca09ca008
+msgid "**技能创建框架**: 新增元技能，提供评估、基准测试与验证工具，用于构建和测试自定义技能"
+msgstr ""
+
+#: ../../README_CN.md:101 5c40dbb1794d41b9bcf93086cc7da5ff
+msgid "2026-04-01"
+msgstr ""
+
+#: ../../README_CN.md:102 d45ffa8007a24352aa6f95bf09527050
+msgid ""
+"**自然语言转 CAD 技能**: 新增 Agent 技能，通过 CadQuery 将自然语言描述转换为 3D CAD "
+"模型（STL/STEP），并自动配置运行环境"
+msgstr ""
+
+#: ../../README_CN.md:103 3ba4c4f3bd164e0fa31d987671c2741d
+msgid "**工作区图片选择器**: Agent 面板新增对话框 UI，支持浏览并选取工作区中的图片附加到对话"
+msgstr ""
+
+#: ../../README_CN.md:112 e29d8bdb73b84a958c812e21e50f9708
+msgid "2026-03-31"
+msgstr ""
+
+#: ../../README_CN.md:113 eff47fa6877e4eee96a8fcc18a79fd88
+msgid "**粘贴图片支持**: 用户现在可以直接将图片粘贴到聊天输入框中，进行多模态 AI 对话"
+msgstr ""
+
+#: ../../README_CN.md:114 34a3a7eb2e8648d6a5544a714e3bc38a
+msgid "**深度研究角色工作室**: 新增角色工作室面板，支持在深度研究工作流中配置和管理自定义研究员角色"
+msgstr ""
+
+#: ../../README_CN.md:115 c20897b0d4124fceb522045e5734679e
+msgid "**论文搜索源扩展**: Paper Study 新增支持 BioRxiv、PubMed 和 PubChem 作为可检索的论文来源"
+msgstr ""
+
+#: ../../README_CN.md:125 ../../README_CN.md:139
+#: 0e20d708ad194908a5bb6d15131767cd 6cf02a8869e745b58089fccd70b77953
+msgid "2026-03-26"
+msgstr ""
+
+#: ../../README_CN.md:126 8c0fa67766904afb916b3dc99e628378
+msgid "**动态模型发现**: Agent 面板现可自动从每个已配置的 AI 提供商获取可用模型列表，并与内置模型合并展示"
+msgstr ""
+
+#: ../../README_CN.md:127 b509eb61a0bd4182bb0710784d3bb7db
+msgid ""
+"**单模型 Base URL 路由**: 国内 AI "
+"提供商（shlab、qwen、moonshot、deepseek、minimax、zhipu）支持通过 "
+"`<PROVIDER>_<MODEL>_BASE_URL` 环境变量为单个模型配置独立接入地址"
+msgstr ""
+
+#: ../../README_CN.md:128 c88fcb4b3ee24bd882c7f5a97ebb9bdf
+msgid ""
+"**运行时工具调用开关**: 可通过 `<PROVIDER>_TOOLS_ENABLED=true/false` "
+"环境变量按提供商动态开关工具调用能力，无需修改代码"
+msgstr ""
+
+#: ../../README_CN.md:140 3c9196f32db84e1186f36a3a9278dfd0
+msgid ""
+"**Node.js 运行时更新**: InnoClaw 现以 Node.js 24+ 为目标运行时，并已验证兼容 Node.js 24 LTS "
+"与最新的 Node.js 25 Current 版本。CI 与本地版本提示也已同步更新。"
+msgstr ""
+
+#: ../../README_CN.md:159 a50292fa269940b4b4d00f646146c39f
+msgid "🧭 InnoClaw 是什么？"
+msgstr ""
+
+#: ../../README_CN.md:161 9e1f0cd0dc2b4dda9e28712a661ee4bf
+msgid ""
+"InnoClaw 是一个面向研究工作的可自托管 Web 应用，把工作空间管理、RAG 对话、论文搜索与评审、可复用科学技能，以及 Agent "
+"执行能力整合到同一个产品中。"
+msgstr ""
+
+#: ../../README_CN.md:163 946cd6b72f1a4dd6a2aa946cdc3f7e1d
+msgid "你不需要在文件浏览器、笔记工具、论文阅读器和自动化终端之间来回切换。打开一个工作空间后，就可以在同一上下文里同步内容、提问、研读论文，并推进多步研究任务。"
+msgstr ""
+
+#: ../../README_CN.md:165 215feeac63bd42918e3e1807160f27b8
+msgid "✨ 为什么用 InnoClaw"
+msgstr ""
+
+#: ../../README_CN.md:167 5ee2b30ce2854f9abcb0744f994dd848
+msgid "**工作空间优先** - 把服务器目录变成长期可用的研究工作区，承载文件、笔记、会话和执行上下文"
+msgstr ""
+
+#: ../../README_CN.md:168 2ea601dddb6e4ade811c35c6a740dbaa
+msgid "**有依据的 AI 回答** - 基于 RAG 和来源引用，让回答建立在你的文档和代码之上"
+msgstr ""
+
+#: ../../README_CN.md:169 a37507ace79642fbbd37963c6e39b6f7
+msgid "**研究原生工作流** - 论文研读、多智能体结构化讨论、研究灵感生成都内建在产品里"
+msgstr ""
+
+#: ../../README_CN.md:170 bd349fea72df400780f86d4cd92e82f7
+msgid "**科学技能可复用** - 可导入并使用 206 个 SCP 科学技能，覆盖药物发现、基因组学、蛋白质工程等领域"
+msgstr ""
+
+#: ../../README_CN.md:171 abbd4d08198442c38998fb445b1a9446
+msgid "**不仅能聊，还能执行** - 从阅读和规划走向任务提交、监控、结果收集与下一步建议"
+msgstr ""
+
+#: ../../README_CN.md:172 30af4ca9be314055b124de0b3488cd5f
+msgid "**自托管且多模型友好** - 支持 OpenAI、Anthropic、Gemini 及兼容接口"
+msgstr ""
+
+#: ../../README_CN.md:174 0d5b352376d94a5e83eb36b6a4b726fb
+msgid "<a id=\"cn-quick-start\"></a>"
+msgstr ""
+
+#: ../../README_CN.md:176 cf8ad075ceab4113b4194e3cc87e1267
+msgid "🚀 快速开始"
+msgstr ""
+
+#: ../../README_CN.md:178 87c86d91ccce4585acef59b1f8570c5b
+msgid "如果你是自托管或线上部署，建议优先使用 Git tag/release，而不是直接跟随持续变化的 `main` 分支： 运行时要求："
+msgstr ""
+
+#: ../../README_CN.md:180 1e761b85450d4031bda868a7793d6ef2
+msgid "需要 Node.js `24+`"
+msgstr ""
+
+#: ../../README_CN.md:181 d5924135341a414a8cc41711c0a7f479
+msgid "稳定部署推荐使用 Node.js `24 LTS`"
+msgstr ""
+
+#: ../../README_CN.md:182 f50c6b86f7274e908823e8223e64ae21
+msgid "也支持 Node.js `25 Current`"
+msgstr ""
+
+#: ../../README_CN.md:184 ec533b96602748778282d7101eb7d47b
+msgid "如果你使用 `nvm`，可以直接跟随仓库默认版本："
+msgstr ""
+
+#: ../../README_CN.md:199 bd896ce29c6b40fd90fba23fcafde3bb
+msgid "InnoClaw 需要 Node.js 24+，以 `package.json` 中的要求为准。"
+msgstr ""
+
+#: ../../README_CN.md:201 9a693a9496a2407fac0b5852b28e41ff
+msgid "1. 安装"
+msgstr ""
+
+#: ../../README_CN.md:210 b53c5be1ab654c48b4ff4de6d8649fd5
+msgid "在 `.env.local` 中至少配置工作空间路径和一个模型提供商，例如："
+msgstr ""
+
+#: ../../README_CN.md:217 3d752d86c6ca4487bfb17975acb65a6f
+msgid "注意："
+msgstr ""
+
+#: ../../README_CN.md:219 0e9b0e07289f42568ce810d1520688da
+msgid "`WORKSPACE_ROOTS` 中的目录需要提前创建，应用不会自动创建"
+msgstr ""
+
+#: ../../README_CN.md:220 0af0653b1dc84a0e805f82a1c4935816
+msgid "`npx drizzle-kit migrate` 会初始化或升级默认位于 `./data/innoclaw.db` 的 SQLite 数据库"
+msgstr ""
+
+#: ../../README_CN.md:221 7ec90d65124242dd92821e7cf01728aa
+msgid ""
+"如果项目放在 NFS/CIFS 或其他禁用了本地文件锁的挂载上，InnoClaw 现在会自动关闭 Next 的 dist-dir 锁，让 `npm"
+" run dev` 能启动；但 SQLite 仍然建议把 `DATABASE_URL` 指到本地磁盘。`NEXT_BUILD_DIR` "
+"如果要设置，必须仍然位于仓库内，例如 `.next-local`。"
+msgstr ""
+
+#: ../../README_CN.md:223 0a2d5b2ac0ce49e8a0b888c52ed9398c
+msgid "2. 启动"
+msgstr ""
+
+#: ../../README_CN.md:229 f3ccc84cdcc9403a9e7f5165f984ef21
+msgid "浏览器打开 `http://localhost:3000`。"
+msgstr ""
+
+#: ../../README_CN.md:231 28fd1cc52bb346e7843f5d0ffb5b1198
+msgid "3. 首次使用"
+msgstr ""
+
+#: ../../README_CN.md:233 03376fb6cba74d1b9374252ec7a51b2e
+msgid "进入界面后，建议按这个顺序操作："
+msgstr ""
+
+#: ../../README_CN.md:235 89813f4d55e640b9985cbe2f31e23b19
+msgid "在 `Settings` 中配置至少一个 AI 提供商"
+msgstr ""
+
+#: ../../README_CN.md:236 3c9ef35fef674ee096e47b6a20cfb566
+msgid "从 `WORKSPACE_ROOTS` 下打开已有目录，或创建一个新的 workspace"
+msgstr ""
+
+#: ../../README_CN.md:237 da313c7b941e4a1dbf25194dcb0951ab
+msgid "点击 `Sync`，让 InnoClaw 为当前工作空间建立 RAG 索引"
+msgstr ""
+
+#: ../../README_CN.md:238 c78bcb67e2004ee880e03996d3221b6a
+msgid "先从基于文件的问答开始，再进入论文研读、笔记、技能或研究执行流程"
+msgstr ""
+
+#: ../../README_CN.md:240 7da9b4e28e434241a75b87868fb881c3
+msgid "4. 常见使用路径"
+msgstr ""
+
+#: ../../README_CN.md:242 1f147179bf284004819b891756dbbe8a
+msgid "**基于文件的对话**：对本地文件和代码提问，回答会附带引用"
+msgstr ""
+
+#: ../../README_CN.md:243 417fd89fbc7b4e73bfbde1a3e66596d6
+msgid "**论文研读**：搜索论文、生成摘要，并进一步运行多智能体讨论"
+msgstr ""
+
+#: ../../README_CN.md:244 582db99a821f4bff99650d965a7c91b4
+msgid "**技能导入与调用**：导入可复用科学技能，在 Agent 面板中触发"
+msgstr ""
+
+#: ../../README_CN.md:245 cb59529195364ae184416b90d6b3332e
+msgid "**研究执行**：审查代码、准备任务、提交到 Shell/Slurm/`rjob`，并跟踪产物"
+msgstr ""
+
+#: ../../README_CN.md:247 04ebdcf7c6c64291ba39d4e6ac23a361
+msgid "5. 版本更新与升级"
+msgstr ""
+
+#: ../../README_CN.md:249 0f39a9de4b0b401bb406482606be02bb
+msgid "版本升级不只是拉代码，还可能涉及依赖变化、环境变量新增和数据库迁移。"
+msgstr ""
+
+#: ../../README_CN.md:251 482a7829e2434b3782db12af17886a8a
+msgid "生产环境建议固定 release tag，不建议直接长期跟 `main`"
+msgstr ""
+
+#: ../../README_CN.md:252 5b11201a80aa429c8a8c11b3f316c481
+msgid "每次升级前先看 `CHANGELOG.md`"
+msgstr ""
+
+#: ../../README_CN.md:253 36e6f6d1afd24f53a0038dd92176c84a
+msgid "拉取新版本后，用 `.env.example` 对照检查 `.env.local` 是否需要补新变量"
+msgstr ""
+
+#: ../../README_CN.md:254 74d5dc6561304a848ed950ae394c3278
+msgid "每次版本升级后，都重新执行 `npm install` 和 `npx drizzle-kit migrate`"
+msgstr ""
+
+#: ../../README_CN.md:256 6c3377cef41c49eaaa38cd636dfadc31
+msgid "推荐升级流程："
+msgstr ""
+
+#: ../../README_CN.md:266 a086c214953e412687368900fe496995
+msgid "如果你明确选择跟随 `main`，升级流程至少应为："
+msgstr ""
+
+#: ../../README_CN.md:274 695fe92d59e940bf91b92ec4f7db01d3
+msgid "如果新版本提高了 Node.js 主版本要求，请先切换到对应 Node 版本，再重新安装依赖后启动。"
+msgstr ""
+
+#: ../../README_CN.md:276 abdc22cf3d68461eb96a618a8e4d7ea3
+msgid ""
+"需要更完整的系统依赖、部署或配置说明，可继续看 `getting-started/installation.md`、`getting-"
+"started/deployment.md` 和 `../CHANGELOG.md`。"
+msgstr ""
+
+#: ../../README_CN.md:278 7c8c3355dc2f4f19b93fb0752b4ac628
+msgid "🛠️ 你可以用它做什么"
+msgstr ""
+
+#: ../../README_CN.md:280 19941ad2651f49a590d3db33e85bb24e
+msgid "基于本地文件和代码进行带引用的 AI 对话"
+msgstr ""
+
+#: ../../README_CN.md:281 446bc173fd3841ef829188bcd6f2a36e
+msgid "在同一工作区中搜索、摘要和研读论文"
+msgstr ""
+
+#: ../../README_CN.md:282 414d1e87c05740e2a7187a69df2a404d
+msgid "运行 5 角色结构化论文讨论，做批判和复现思考"
+msgstr ""
+
+#: ../../README_CN.md:283 474d6b78dc79442f805725ef8a825f9b
+msgid "从工作空间内容中生成摘要、FAQ、简报、时间线和研究灵感"
+msgstr ""
+
+#: ../../README_CN.md:284 842d318cd9884eb2bc36bfeb84734317
+msgid "导入科学技能，在 Agent 面板中触发可复用的领域工作流"
+msgstr ""
+
+#: ../../README_CN.md:285 5aa8d39c22e44152a14d509cc8d3199a
+msgid "通过审批门控、任务监控和结果分析来管理研究执行"
+msgstr ""
+
+#: ../../README_CN.md:287 32bbca882657406d910bed983267d10c
+msgid "🗺️ 选择你的入口"
+msgstr ""
+
+#: ../../README_CN.md 09a301b2e5b248698ca9341d3362d44b
+msgid "如果你想..."
+msgstr ""
+
+#: ../../README_CN.md 7350be7591464c22a2e024e450be52ba
+msgid "从这里开始"
+msgstr ""
+
+#: ../../README_CN.md b4784004587241e497228fee49ebafa8
+msgid "接下来会发生什么"
+msgstr ""
+
+#: ../../README_CN.md f011d582e27a463b92dc59324f2658a9
+msgid "和自己的文件对话"
+msgstr ""
+
+#: ../../README_CN.md ff2a0a7103184ce98c919daa3e392999
+msgid "**工作空间 + RAG 对话**"
+msgstr ""
+
+#: ../../README_CN.md 02a56031408747e0b648a1bcfe5b4dde
+msgid "打开文件夹、点击 `Sync`，然后基于引用提问"
+msgstr ""
+
+#: ../../README_CN.md ddba43f0444d4b7587db49d8ef408143
+msgid "阅读并拆解论文"
+msgstr ""
+
+#: ../../README_CN.md e10e330afba942deb5285b01a4aa597e
+msgid "**论文研读**"
+msgstr ""
+
+#: ../../README_CN.md 0ceb5fa272974600b3d876c82c53311d
+msgid "搜索论文、生成摘要，再进入讨论或笔记"
+msgstr ""
+
+#: ../../README_CN.md f4e899afc89a44f7a7159c927ed570f9
+msgid "用多视角审视想法"
+msgstr ""
+
+#: ../../README_CN.md d3b2fe1233054828b9419023d05c55a8
+msgid "**多智能体讨论**"
+msgstr ""
+
+#: ../../README_CN.md 60e2df912857437a9b45b25c5bc3de49
+msgid "运行基于角色的评审流程，做批判、证据梳理和复现思考"
+msgstr ""
+
+#: ../../README_CN.md 4c78611d3616424fb9ac0ff4d69af645
+msgid "把阅读转成新方向"
+msgstr ""
+
+#: ../../README_CN.md bc97d68e99014ddeb5c38cda449de142
+msgid "**研究灵感生成**"
+msgstr ""
+
+#: ../../README_CN.md c386506f52eb47e08b44e48cb473a6fa
+msgid "生成方向、比较方案，并把结果保存到笔记"
+msgstr ""
+
+#: ../../README_CN.md 020cb851729741dca8751eefe9c4e6ef
+msgid "在远程基础设施上执行研究任务"
+msgstr ""
+
+#: ../../README_CN.md d5bc011c8ba0438687282be0fda42d9d
+msgid "**研究执行工作区**"
+msgstr ""
+
+#: ../../README_CN.md 571cb910996641858eb58bffa86247b5
+msgid "审查代码、审批修改、提交任务、监控运行并收集结果"
+msgstr ""
+
+#: ../../README_CN.md:297 49f9c1dd75a74633b18123700676c471
+msgid "🧩 它们如何协同工作"
+msgstr ""
+
+#: ../../README_CN.md 7d2858c9e40342ad9191ee297a5d15ee
+msgid "层级"
+msgstr ""
+
+#: ../../README_CN.md 131c7560179749d2ae212e777268d19a
+msgid "在工作流中的作用"
+msgstr ""
+
+#: ../../README_CN.md 0b53c07c06d84dc19195f85d9ab93e2e
+msgid "**Workspace**"
+msgstr ""
+
+#: ../../README_CN.md b50979087e404e78b58656e2f60d6105
+msgid "承载文件、笔记、会话上下文和项目状态"
+msgstr ""
+
+#: ../../README_CN.md f523faee6fbf4342a68e5597ac5f62bc
+msgid "**Knowledge**"
+msgstr ""
+
+#: ../../README_CN.md aa4398b6ffbb44ddb3126bbeb6cfa7cc
+msgid "将文件同步到 RAG 索引，让回答更有依据"
+msgstr ""
+
+#: ../../README_CN.md 9a18ff77c7a244c98403eb918dc73409
+msgid "**Paper Workbench**"
+msgstr ""
+
+#: ../../README_CN.md c148f02f8a3a4bd8bf4fd6528e080283
+msgid "负责文献搜索、摘要、讨论和灵感生成"
+msgstr ""
+
+#: ../../README_CN.md 85f0bef499ea462a9bf68edc4172c99f
+msgid "**Skills**"
+msgstr ""
+
+#: ../../README_CN.md a1e72f8a7c5e45b2a3f3d688dd532043
+msgid "提供可复用的领域工作流和工具引导能力"
+msgstr ""
+
+#: ../../README_CN.md 3da5f922b02b4b108122da63f7b84661
+msgid "**Execution**"
+msgstr ""
+
+#: ../../README_CN.md e8ce56749f0447688f4a7153bbef775f
+msgid "把流程延伸到远程任务和实验循环"
+msgstr ""
+
+#: ../../README_CN.md:307 802c6e74054a4daeb789624dd2ca5820
+msgid "🔄 核心工作流"
+msgstr ""
+
+#: ../../README_CN.md:309 fdcce69d7e9a4f3b8bce7dcbc55d95a9
+msgid "📄 论文研读"
+msgstr ""
+
+#: ../../README_CN.md:311 e87a8cecb3e54638ad55f23b3ffb7e5b
+msgid "搜索文献、预览论文、生成摘要，并直接切换到讨论或灵感生成。"
+msgstr ""
+
+#: ../../README_CN.md:313 f5bcfb4943ce4ca59a8841c070169ab0
+msgid "在一个界面里跨源搜索论文"
+msgstr ""
+
+#: ../../README_CN.md:314 9eb152bcbca143dbb83bc6cf349f963e
+msgid "使用 AI 扩展查询，覆盖更广的相关文献"
+msgstr ""
+
+#: ../../README_CN.md:315 56032e98ad494438b45ee02c12ee5c33
+msgid "在工作空间上下文中直接打开论文预览"
+msgstr ""
+
+#: ../../README_CN.md:316 271ffeeee46d4455bbc63a316a2f1b1e
+msgid "将输出保存到笔记，便于复用"
+msgstr ""
+
+#: ../../README_CN.md:318 8b5409f0de29415bbb6b07c9954c7687
+msgid "🧠 多智能体论文讨论"
+msgstr ""
+
+#: ../../README_CN.md:320 648eeab49d8a4b21a8460a6a5ca92efb
+msgid "通过主持人、文献专家、质疑者、复现者、记录员等角色开展结构化论文讨论。"
+msgstr ""
+
+#: ../../README_CN.md:322 55a8f71bd90f457884ebd2c00fa9b562
+msgid "使用确定性的阶段式讨论流程"
+msgstr ""
+
+#: ../../README_CN.md:323 168c775fb6504b948de9c72762343b05
+msgid "对比证据、方法、局限性和可复现性问题"
+msgstr ""
+
+#: ../../README_CN.md:324 366e86b4f5e5407c8e51efa20057e0d4
+msgid "生成比普通聊天更易扫描的评审记录"
+msgstr ""
+
+#: ../../README_CN.md:325 fcf8f7cb631f4a5b8471006d8653a032
+msgid "利用全文上下文做更深入的分析"
+msgstr ""
+
+#: ../../README_CN.md:327 acef77d756ae4682a345d8a98b97985a
+msgid "🧪 研究执行工作区"
+msgstr ""
+
+#: ../../README_CN.md:329 a26ea3327d8245b196dc49cdd111a7d9
+msgid "从代码检查到任务提交与结果分析，在一个引导式执行流程中完成。"
+msgstr ""
+
+#: ../../README_CN.md:331 31a12068e3ea4a5a93d8ad3a4cc62bbe
+msgid "借助 Agent 审查仓库并提出补丁建议"
+msgstr ""
+
+#: ../../README_CN.md:332 dca5de1b1327499396804d1a1bf8945f
+msgid "对高风险步骤设置明确的人工审批点"
+msgstr ""
+
+#: ../../README_CN.md:333 e24aa1fc92c44dbb874a9d0279bb61db
+msgid "通过 Shell、Slurm 或 `rjob` 后端提交任务"
+msgstr ""
+
+#: ../../README_CN.md:334 98f09f0418f04272b77e88f235c789cb
+msgid "监控状态、收集结果，并生成下一步建议"
+msgstr ""
+
+#: ../../README_CN.md:336 2fc3375040f84ff09eb85b0e9afb9fed
+msgid "📦 功能速览"
+msgstr ""
+
+#: ../../README_CN.md f4239f7578c54805a68caca24659d626
+msgid "功能"
+msgstr ""
+
+#: ../../README_CN.md 7f1d5d830d314a7b9305fb9751e0adad
+msgid "能力说明"
+msgstr ""
+
+#: ../../README_CN.md 0f654a4631ab4d5dace1b968876434a1
+msgid "工作空间管理"
+msgstr ""
+
+#: ../../README_CN.md 2284a85003534315b6011f090922a014
+msgid "将服务器文件夹映射为持久化 AI 工作区"
+msgstr ""
+
+#: ../../README_CN.md 11d333e107af4acfa1a3a29c530a5cd8
+msgid "文件浏览器"
+msgstr ""
+
+#: ../../README_CN.md 52463bf2465a46dfb6d985c6930d651b
+msgid "浏览、上传、创建、编辑、预览和同步文件"
+msgstr ""
+
+#: ../../README_CN.md a65d33a08cdd48a886e961300de14317
+msgid "RAG 对话"
+msgstr ""
+
+#: ../../README_CN.md eebfcabd3da843cabdbaffdb944e6d0e
+msgid "基于已索引文件进行带引用的问答"
+msgstr ""
+
+#: ../../README_CN.md ccd311a079124b809e7e2b0e179abe21
+msgid "论文研读"
+msgstr ""
+
+#: ../../README_CN.md fdf40799127240c79bdc35a08be851d0
+msgid "在一个界面中搜索、摘要和检查论文"
+msgstr ""
+
+#: ../../README_CN.md 36f464e195cc44d89d7e1bcd88da6a58
+msgid "讨论模式"
+msgstr ""
+
+#: ../../README_CN.md 6280506ecebf48a597dc6480dfb5bee7
+msgid "运行结构化多角色论文讨论"
+msgstr ""
+
+#: ../../README_CN.md b3224f85ece44be081069aedf4b02d50
+msgid "研究灵感生成"
+msgstr ""
+
+#: ../../README_CN.md 9e93c85b7b1341ffbfcccafcce7632dc
+msgid "生成新方向和跨学科想法"
+msgstr ""
+
+#: ../../README_CN.md 3760ae07bd4c400f933570ed9591ccc6
+msgid "Skills 系统"
+msgstr ""
+
+#: ../../README_CN.md 5b328853d012467889ec40a5ea56d7c5
+msgid "导入可复用的科学技能和工作流"
+msgstr ""
+
+#: ../../README_CN.md d4ace8cd9bd843cfa1199f276b42d7f9
+msgid "研究执行"
+msgstr ""
+
+#: ../../README_CN.md de6a98bab11c4148b78d929e1aa45ca8
+msgid "带审批门控、监控和结果收集的实验编排"
+msgstr ""
+
+#: ../../README_CN.md 042b3a58024f44f6bc07520dff0890c9
+msgid "多 Agent 会话"
+msgstr ""
+
+#: ../../README_CN.md 0970b604f6cc42bb86d31f621e41e0fd
+msgid "在不同项目和标签中维护独立上下文"
+msgstr ""
+
+#: ../../README_CN.md a0c233ec9d074030959b66638bffbaa1
+msgid "多模型支持"
+msgstr ""
+
+#: ../../README_CN.md 916be5bef0d04989afbe5134b39a5a5b
+msgid "使用 OpenAI、Anthropic、Gemini 及兼容接口"
+msgstr ""
+
+#: ../../README_CN.md:351 2bbfd7b5388c4830996c2f079f892aae
+msgid "📚 文档入口"
+msgstr ""
+
+#: ../../README_CN.md:353 25c8d001e83e4eaa88ae54a37b4d56ee
+msgid ""
+"**先从这里开始** - [概览](getting-started/overview.md), [安装指南](getting-"
+"started/installation.md)"
+msgstr ""
+
+#: ../../README_CN.md:354 32358768225f4558a2e361a79c7a09ee
+msgid ""
+"**配置与部署** - [部署说明](getting-started/deployment.md), [环境变量](getting-started"
+"/environment-variables.md), [配置说明](usage/configuration.md)"
+msgstr ""
+
+#: ../../README_CN.md:355 898111e948ef4998a6e85c6c18507702
+msgid "**使用产品** - [功能说明](usage/features.md), [API 参考](usage/api-reference.md)"
+msgstr ""
+
+#: ../../README_CN.md:356 af792cce57bb46b3b9e3d1221e5424d1
+msgid ""
+"**排查与贡献** - [故障排查](troubleshooting/faq.md), "
+"[开发指南](development/contributing.md)"
+msgstr ""
+
+#: ../../README_CN.md:358 7374ea8b1ac0417c9be50345aa8e1852
+msgid "<a id=\"cn-community-support\"></a>"
+msgstr ""
+
+#: ../../README_CN.md:360 99d4fbb7372948a5b230a355b3b81b25
+msgid "💬 社区与支持"
+msgstr ""
+
+#: ../../README_CN.md:362 8b0140d1288045ba8791d8e7a50d611c
+msgid "**想查看安装、使用和部署说明？** 先看完整文档：https://SpectrAI-Initiative.github.io/InnoClaw/"
+msgstr ""
+
+#: ../../README_CN.md:363 8b14ef4854fb47228a5b44f0d9790e0d
+msgid ""
+"**想反馈 Bug 或提出功能建议？** 访问 GitHub Issues：https://github.com/SpectrAI-"
+"Initiative/InnoClaw/issues"
+msgstr ""
+
+#: ../../README_CN.md:364 aaf7ac50834d4bbe95df4a7096fda351
+msgid "**想直接交流？** 可加入下方飞书体验群"
+msgstr ""
+
+#: ../../README_CN.md:368 6bb545d0929a4d5da509b6b185662326
+msgid "扫码加入飞书体验群，与开发者和其他用户直接交流。欢迎反馈 Bug、提出功能建议或分享使用经验。"
+msgstr ""
+
+#: ../../README_CN.md:370 4b28d450b6234fa1ba8faaeb4eca3832
+msgid "ℹ️ 项目信息"
+msgstr ""
+
+#: ../../README_CN.md:372 583d258e42db49b9b0906f4f55aa93a6
+msgid "**许可证** - Apache-2.0，详见 `../LICENSE`"
+msgstr ""
+
+#: ../../README_CN.md:373 40add6e9de82425bba565667e54b26dd
+msgid "**仓库地址** - https://github.com/SpectrAI-Initiative/InnoClaw"
+msgstr ""
+
+#: ../../README_CN.md:374 704e3d2673914554802917f3ae0b53cb
+msgid "**文档站点** - https://SpectrAI-Initiative.github.io/InnoClaw/"
+msgstr ""
+
+#: ../../README_CN.md:376 aef8ea153a474175af8b633528beb5e7
+msgid "⭐ Star History"
+msgstr ""
+
+#: ../../README_CN.md:378 cf53f7ce93b04985ae101ba3e9548d64
+msgid ""
+"[![Star History Chart](https://api.star-history.com/svg?repos=SpectrAI-"
+"Initiative/InnoClaw&type=Date)](https://star-history.com/#SpectrAI-"
+"Initiative/InnoClaw&Date)"
+msgstr ""
+
+#: ../../README_CN.md:378 f38774902ba340769d399de3cea763b1
+msgid "Star History Chart"
+msgstr ""

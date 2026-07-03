@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,241 +19,462 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../notifications/index.md:1 e655bbadc03e4013b6a5939e466ee84b
+#: ../../notifications/index.md:1 d7553fbbae884a90adb64ac22779f8d4
 msgid "Notifications & Bot Integrations"
 msgstr "通知与机器人集成"
 
-#: ../../notifications/index.md:3 d810a647b5b842599c63da676c4f0723
+#: ../../notifications/index.md:3 d33cefe3c79947089e4e79b9a18c2b64
 msgid ""
 "InnoClaw supports integration with messaging platforms through bot "
 "adapters. This allows users to interact with their workspaces directly "
 "from chat applications."
 msgstr "InnoClaw 通过机器人适配器支持与消息平台的集成。这使用户可以直接从聊天应用程序与其工作空间进行交互。"
 
-#: ../../notifications/index.md:5 0c45d8f95e1c404eb1a3e9c04818f333
+#: ../../notifications/index.md:5 7708855c9dc745ecb428dbbb0f528e95
 msgid "Supported Channels"
 msgstr "支持的渠道"
 
-#: ../../notifications/index.md 61e7c0cc253248f8b8999fe41fc0a693
+#: ../../notifications/index.md c2b9ca0701cd4d958e5d27b8c5acd202
 msgid "Platform"
 msgstr "平台"
 
-#: ../../notifications/index.md e95db5fecce84c92a86805e99980082b
+#: ../../notifications/index.md d1bd714d7f8e42bdb75ff28fb7ef89e2
 msgid "Status"
 msgstr "状态码"
 
-#: ../../notifications/index.md 90585dbad0914648a90d25b5d534c342
+#: ../../notifications/index.md 2e8d9494c95342acaf2474f01667e635
 msgid "Webhook Endpoint"
 msgstr "Webhook 端点"
 
-#: ../../notifications/index.md d44abf627fd343bb875c1f0e8c555d81
+#: ../../notifications/index.md 1bc016c2ce074d28b01b7f45619b4931
 msgid "**Feishu (Lark)**"
 msgstr "**飞书**"
 
-#: ../../notifications/index.md a10d5ce7861f4bcf8845a175d84bc3f8
-#: b156892d69c4484f9c946159fd310bc5
+#: ../../notifications/index.md a16ed358e2614606921959a99f9d6361
+#: e5165e57e301423188778c678cebc4c0
 msgid "Supported"
 msgstr "已支持"
 
-#: ../../notifications/index.md 3cdc810c6a744ff0ababf949f15a9316
+#: ../../notifications/index.md f4674c4c7a8544cf9d1222fdd7bfb225
 msgid "`/api/bot/feishu`"
 msgstr "`/api/bot/feishu`"
 
-#: ../../notifications/index.md a4fe33913e054e46b0fbcb29c115933e
+#: ../../notifications/index.md c6d03d3edeb3410aa75345caf578098c
 msgid "**WeChat Enterprise**"
 msgstr "**企业微信**"
 
-#: ../../notifications/index.md e1c728e7457a43aaa9750b3c874cac6a
+#: ../../notifications/index.md b59461b94acf4185948bb8087e9cf24d
 msgid "`/api/bot/wechat`"
 msgstr "`/api/bot/wechat`"
 
-#: ../../notifications/index.md:12 9e29280fa0ee4701a779a2a0463f3dbb
+#: ../../notifications/index.md:12 ec0bfe2fa1b241bfafd418dff93faddf
 msgid "Architecture"
 msgstr "架构"
 
-#: ../../notifications/index.md:31 0b5d2a2f9f5049ea92b05ecf93bc5d18
+#: ../../notifications/index.md:31 6240c83b9dc44e11a655972720127a59
 msgid "Feishu (Lark) Bot"
 msgstr "飞书机器人"
 
-#: ../../notifications/index.md:33 ../../notifications/index.md:69
-#: 09e8048b9a5047c6a024bddd795adae4 b6b128d0d982468db3607eedf15dfe6a
+#: ../../notifications/index.md:33 ../../notifications/index.md:133
+#: 045fb07e123446bab0ecbd1ec77a39ee 85af37f2ac2848acb82a18f4f1ada507
 msgid "Setup"
 msgstr "设置"
 
-#: ../../notifications/index.md:35 e11c768217074b13aff7ec1f948ce941
+#: ../../notifications/index.md:35 f733205804064e6982389922007bf1b2
 msgid ""
 "Create a Feishu application at the [Feishu Open "
 "Platform](https://open.feishu.cn/)"
 msgstr "在[飞书开放平台](https://open.feishu.cn/)创建飞书应用"
 
-#: ../../notifications/index.md:36 ../../notifications/index.md:72
-#: 1d1d367ca2bc479193ce783b940ed25a 656badad93fb4ef390b1b79dfca94d11
+#: ../../notifications/index.md:36 ../../notifications/index.md:136
+#: 0a52c11afd1640b1b6f0cb28fe222df5 713051bd6f9049d68eed449602e88e33
 msgid "Configure the following environment variables:"
 msgstr "配置以下环境变量："
 
-#: ../../notifications/index.md:46 a2720a367da34b4783f4496511b5e852
+#: ../../notifications/index.md:47 b7e15b3d219f47298f00575fee0d4b39
 msgid "Set the webhook URL in your Feishu app configuration:"
 msgstr "在飞书应用配置中设置 Webhook URL："
 
-#: ../../notifications/index.md:51 ../../notifications/index.md:88
-#: 2b6fe5c61fea4f688ed97e2fb2493504 715b5a0159844676b2292581671b3f1d
-msgid "Features"
-msgstr "功能特性"
+#: ../../notifications/index.md:52 5e6e2a70905d4cef8d98fba9051c46d7
+#, fuzzy
+msgid "Connection Modes"
+msgstr "验证模式"
 
-#: ../../notifications/index.md:53 ../../notifications/index.md:90
-#: 4bdb147f33d84a8d81dea1c1ffdcb350 f08c56afb94d48e78ffe0902d1edc5b6
-msgid "Receive and respond to text messages"
-msgstr "接收并回复文本消息"
+#: ../../notifications/index.md:54 93ac92ccfc2c4dae9e4fd1832f2c4c66
+#, fuzzy
+msgid "Feishu supports two connection modes:"
+msgstr "企业微信支持两种 Webhook 验证模式："
 
-#: ../../notifications/index.md:54 785333731f954cb28c479fad9634bc7b
-msgid "Download and process file attachments"
-msgstr "下载和处理文件附件"
+#: ../../notifications/index.md:14 769f73bb245442ada3ac0c985d546dd5
+#: 976bfb5c880d4004a9868108e80633e3 ba6af877a9f64743b5ad670b72855473
+msgid "Mode"
+msgstr "模式"
 
-#: ../../notifications/index.md:55 78b4158dbd024ce0a50ce8e85de8d309
-msgid "Support for encrypted event payloads"
-msgstr "支持加密事件负载"
-
-#: ../../notifications/index.md:56 ff834382f1f04efa88e16edd3beceb40
-msgid "Automatic webhook verification"
-msgstr "自动 Webhook 验证"
-
-#: ../../notifications/index.md:58 12c7f0c56bb14f2eb17fa1c1219d76ed
-msgid "Event Handling"
-msgstr "事件处理"
-
-#: ../../notifications/index.md:60 13e4f314e12e435fa67be83296ecc739
-msgid "The Feishu bot handles the following event types:"
-msgstr "飞书机器人处理以下事件类型："
-
-#: ../../notifications/index.md:14 e7ae6256f2054136baa74e1036fad7bd
-msgid "Event"
-msgstr "事件"
-
-#: ../../notifications/index.md:14 3b1e1f3f44284e34a48d248fecedf707
+#: ../../notifications/index.md:14 1982058f46ca4c3cbcd307f9cc574573
+#: 2e77a35ec56a4ca2908ce0a466060793 c22c77c2ac7b43449441bd89765650f3
+#: c2a0a6b9e76c43dcb5f428db7315071f
 msgid "Description"
 msgstr "描述"
 
-#: ../../notifications/index.md:14 4fc9797db60647fa87a09f07e6ba3aae
+#: ../../notifications/index.md:14 9ef944d5997c48598766a08359f2d963
+msgid "**HTTP Webhook**"
+msgstr ""
+
+#: ../../notifications/index.md:14 bf718ef64f5e4feb896c5a005880d047
+msgid "Feishu sends HTTP POST events to your webhook URL. Requires public URL."
+msgstr ""
+
+#: ../../notifications/index.md:14 773f0a9ca43e49388ccf428a3e5d9863
+msgid "**WebSocket**"
+msgstr ""
+
+#: ../../notifications/index.md:14 5e019bfd2daf4259bd0ff872d3f50271
+msgid ""
+"Long-lived connection using `@larksuiteoapi/node-sdk` WSClient. Started "
+"automatically in `instrumentation.ts`. No public URL needed."
+msgstr ""
+
+#: ../../notifications/index.md:61 ../../notifications/index.md:152
+#: 393fd3d7fa2c4267b3c94e0e439d7d36 45ecf7bbb1374d95b09ced35359663a0
+msgid "Features"
+msgstr "功能特性"
+
+#: ../../notifications/index.md:63 ../../notifications/index.md:154
+#: 7b87b9ce340d4691885d605010ed4578 f8200c93b36f4d8b86a4ee358ddd6e6e
+msgid "Receive and respond to text messages"
+msgstr "接收并回复文本消息"
+
+#: ../../notifications/index.md:64 1baa14a7a4fb462baf52013185fe233b
+#, fuzzy
+msgid "Download and process file attachments (text files < 100 KB)"
+msgstr "下载和处理文件附件"
+
+#: ../../notifications/index.md:65 a2a6ffec997547f5b00dc4b4f0853d7f
+msgid "Audio message transcription"
+msgstr ""
+
+#: ../../notifications/index.md:66 862dd7fb11924680a273427640e784ef
+msgid "Interactive card responses with real-time agent progress tracking"
+msgstr ""
+
+#: ../../notifications/index.md:67 246e64e95b8b4622958de2724eeec8fb
+msgid "Agent mode integration (full tool access)"
+msgstr ""
+
+#: ../../notifications/index.md:68 a64dac40e43144eebebf0b78a1c7f37b
+msgid "Support for encrypted event payloads"
+msgstr "支持加密事件负载"
+
+#: ../../notifications/index.md:69 b1b9a236f130473997255e91b5218b9c
+msgid "Automatic webhook verification"
+msgstr "自动 Webhook 验证"
+
+#: ../../notifications/index.md:71 27fa6347a5d44c71882ad82f690f458a
+msgid "Bot Commands"
+msgstr ""
+
+#: ../../notifications/index.md:73 730c659ee0d5472199213450de7c8f74
+msgid "Users can interact with the bot using slash commands:"
+msgstr ""
+
+#: ../../notifications/index.md:14 f09f335cc387485288dcc46ce5efce58
+msgid "Command"
+msgstr ""
+
+#: ../../notifications/index.md:14 9114a42639bf4d2091747625e47593e7
+#, fuzzy
+msgid "Parameters"
+msgstr "使用的参数"
+
+#: ../../notifications/index.md:14 ea761ddb47094224a9c5903c5a4970e3
+#, fuzzy
+msgid "`/workspace`"
+msgstr "工作空间绑定"
+
+#: ../../notifications/index.md:14 d0f43c47018945af838995e1ac14c90d
+msgid "`<path>` (optional)"
+msgstr ""
+
+#: ../../notifications/index.md:14 d7e16cfaa8794b98a79c8dcc447ae4c4
+msgid "Bind a workspace directory, or show the current binding"
+msgstr ""
+
+#: ../../notifications/index.md:14 a4e8c4057f1441c598bf7d39df082a0a
+#, fuzzy
+msgid "`/mode`"
+msgstr "模式"
+
+#: ../../notifications/index.md:14 a3eba60a05e048f39d487aae9506e56a
+msgid "`<agent|plan|ask>`"
+msgstr ""
+
+#: ../../notifications/index.md:14 cfaf08c0473b44ce99fdbd11c7cd37f9
+msgid "Switch the agent mode for this chat"
+msgstr ""
+
+#: ../../notifications/index.md:14 ed1ee20e6dd847c486427045145d2d1a
+#, fuzzy
+msgid "`/status`"
+msgstr "状态码"
+
+#: ../../notifications/index.md:14 c3266b9bc3094966a128bd7d939370ec
+#: c68c9bc8db554245bacdba41c8616e7b f13c8e80a6164b178729fc6fa634c390
+msgid "—"
+msgstr ""
+
+#: ../../notifications/index.md:14 73933ec9e09c456eab77d5f5c27da1ab
+msgid "Show chat state (workspace, mode, history count, chat ID)"
+msgstr ""
+
+#: ../../notifications/index.md:14 eeb0a4f10a62434da08cea72b39b0825
+msgid "`/clear`"
+msgstr ""
+
+#: ../../notifications/index.md:14 263782f23a0d4927ab7048befa1e172f
+msgid "Clear conversation history (preserves workspace and mode)"
+msgstr ""
+
+#: ../../notifications/index.md:14 26f4fa672e7b4226b74bc75bc609ad3c
+msgid "`/help`"
+msgstr ""
+
+#: ../../notifications/index.md:14 29822de28b5545d0b1435f8449e8a25f
+msgid "Show available commands and modes"
+msgstr ""
+
+#: ../../notifications/index.md:83 1b116865e6e64e0a9828ef80fb3aa5ce
+msgid "Agent Modes in Feishu"
+msgstr ""
+
+#: ../../notifications/index.md:14 06b053d946b34634ae2feb8189c27128
+msgid "Tools Available"
+msgstr ""
+
+#: ../../notifications/index.md:14 77fb6df497e5489086502eb39164ac13
+#, fuzzy
+msgid "**agent**"
+msgstr "**明文**"
+
+#: ../../notifications/index.md:14 de4315ec20224058b37c1ac45e6d2053
+msgid "All tools (bash, readFile, writeFile, grep, kubectl, etc.)"
+msgstr ""
+
+#: ../../notifications/index.md:14 fd4c8b4648244dceb15ae2a5b00c7a61
+msgid "Full autonomous execution"
+msgstr ""
+
+#: ../../notifications/index.md:14 43866af4780c4aaa94fa2e2cadbc4320
+#, fuzzy
+msgid "**plan**"
+msgstr "**明文**"
+
+#: ../../notifications/index.md:14 ebb0f813e3e644efa685e1699b0a5ba3
+#: f6904f3478e446e196bff5b360d2783b
+msgid "readFile, listDirectory, grep"
+msgstr ""
+
+#: ../../notifications/index.md:14 66d481ff175a4f2abc2456a912cc90d0
+msgid "Read-only analysis and planning"
+msgstr ""
+
+#: ../../notifications/index.md:14 b1aad5a4d63d41ea8186cd960e5a4dcb
+msgid "**ask**"
+msgstr ""
+
+#: ../../notifications/index.md:14 909c7286ca3d427fa7734d0520b03f57
+msgid "Simple question answering"
+msgstr ""
+
+#: ../../notifications/index.md:91 65e90d7f743647e292380144564765c8
+msgid "Interactive Cards"
+msgstr ""
+
+#: ../../notifications/index.md:93 948316636ffe491b8c47cd5fda6772b6
+msgid "The Feishu bot uses interactive cards for rich progress display:"
+msgstr ""
+
+#: ../../notifications/index.md:95 d406ccdec9a14e7a8379b625ec609bdb
+msgid ""
+"**Progress Card** — Shows real-time agent execution progress with tool "
+"call status"
+msgstr ""
+
+#: ../../notifications/index.md:96 35729700e8624ddb8ced892194b4a11a
+msgid ""
+"**Final Card** — Displays completed execution with tool call summary and "
+"response text"
+msgstr ""
+
+#: ../../notifications/index.md:97 cf0914b180724873a5612db9295038db
+msgid "**Error Card** — Shows agent execution error with details"
+msgstr ""
+
+#: ../../notifications/index.md:98 9a499ce950ff4c72bcaa5e3e8b16eee9
+msgid "**Command Response Card** — Used for slash command responses"
+msgstr ""
+
+#: ../../notifications/index.md:100 2138769860fa42ecb14688f344af2e46
+msgid "Push API"
+msgstr ""
+
+#: ../../notifications/index.md:102 498882012024437b9a3540c2fe141113
+msgid ""
+"The Push API enables sending messages from the web application to Feishu "
+"chats:"
+msgstr ""
+
+#: ../../notifications/index.md:109 cc65cfb70c8c4032aa37d4b3736fffad
+msgid "**Request Body:**"
+msgstr ""
+
+#: ../../notifications/index.md:120 709e5fa20f614e5abdc4b88de574fab1
+msgid ""
+"This enables bidirectional communication between the web UI and Feishu. "
+"The `chatId` can be obtained via the `/status` command."
+msgstr ""
+
+#: ../../notifications/index.md:122 61560a0c48ea45b79f975e9cab8c59ad
+msgid "Event Handling"
+msgstr "事件处理"
+
+#: ../../notifications/index.md:124 31c5184486f14569b7f4579a8652342c
+msgid "The Feishu bot handles the following event types:"
+msgstr "飞书机器人处理以下事件类型："
+
+#: ../../notifications/index.md:14 9dd310a003024387acd2ab7364114d6a
+msgid "Event"
+msgstr "事件"
+
+#: ../../notifications/index.md:14 eaf81dacc7e64a02b1d6ce24007eed9e
 msgid "`url_verification`"
 msgstr "`url_verification`"
 
-#: ../../notifications/index.md:14 335817f47ace4ac7887c1705d812e0b8
+#: ../../notifications/index.md:14 2269c4723bf24454980d234cd39e3a83
 msgid "Initial webhook URL verification"
 msgstr "初始 Webhook URL 验证"
 
-#: ../../notifications/index.md:14 970d21b6df464e43a0a2159095c07df5
+#: ../../notifications/index.md:14 2de05eae29bf4f2dbeac0b6df68ecca3
 msgid "`im.message.receive_v1`"
 msgstr "`im.message.receive_v1`"
 
-#: ../../notifications/index.md:14 fb4a399a36dd4427b9c8552b8f2a8d75
+#: ../../notifications/index.md:14 b0430e8713c9470a92aba24462d6c32a
 msgid "Incoming message from a user"
 msgstr "来自用户的传入消息"
 
-#: ../../notifications/index.md:67 6fdc2e3ecd824190bec4b57f1e98d467
+#: ../../notifications/index.md:131 1de248835be9413689d3cc476392d97a
 msgid "WeChat Enterprise Bot"
 msgstr "企业微信机器人"
 
-#: ../../notifications/index.md:71 9e4db4728d3b47bdb7934c692a4eab36
+#: ../../notifications/index.md:135 788ac2bd606c4fc4b163b51872cbaeb6
 msgid ""
 "Create an application in the [WeChat Enterprise Admin "
 "Console](https://work.weixin.qq.com/)"
 msgstr "在[企业微信管理后台](https://work.weixin.qq.com/)创建应用"
 
-#: ../../notifications/index.md:83 ae1d45ce32ef4fe3b0919b14d5183473
+#: ../../notifications/index.md:147 46f3b96039ab40e8bc1b8ed0157ffc2c
 msgid "Set the webhook URL in your WeChat Enterprise app configuration:"
 msgstr "在企业微信应用配置中设置 Webhook URL："
 
-#: ../../notifications/index.md:91 b417ed0f71a4431589b67a87f35abc80
+#: ../../notifications/index.md:155 06a2cd804f8445f599e84d5da41562dc
 msgid "Support for both plaintext and encrypted message modes"
 msgstr "支持明文和加密两种消息模式"
 
-#: ../../notifications/index.md:92 d155558768d944d2869ad7c2545e0126
+#: ../../notifications/index.md:156 fb48cbfdfdc24652873d5bb378c82569
 msgid "Webhook signature verification"
 msgstr "Webhook 签名验证"
 
-#: ../../notifications/index.md:93 78031f172f144c47aa719f2bd6651d31
+#: ../../notifications/index.md:157 dcd26d2ff10d4d10b66a90f499632f5e
 msgid "Automatic access token management"
 msgstr "自动访问令牌管理"
 
-#: ../../notifications/index.md:95 afe4bdf1512440418fbb99c8fb9352c1
+#: ../../notifications/index.md:159 344c58e4b8aa4f1eb7a3dce36ef046ab
 msgid "Verification Modes"
 msgstr "验证模式"
 
-#: ../../notifications/index.md:97 06067f640fd34fe18f06b95c1e957f2e
+#: ../../notifications/index.md:161 ecdf68f9f7f947479a43bf93945cc80d
 msgid "WeChat Enterprise supports two webhook verification modes:"
 msgstr "企业微信支持两种 Webhook 验证模式："
 
-#: ../../notifications/index.md:14 ec2c7352e921481b9f978a60ba31cdb5
-msgid "Mode"
-msgstr "模式"
-
-#: ../../notifications/index.md:14 90e0eb6681824054b1ac1fdd2e67d9a3
+#: ../../notifications/index.md:14 18018f90dc6d4b46a5ca8ba2012e8c74
 msgid "Parameters Used"
 msgstr "使用的参数"
 
-#: ../../notifications/index.md:14 46193d1726904230b548b3f71f54cded
+#: ../../notifications/index.md:14 9a9563863d694b50a56a07e24583f74a
 msgid "**Plaintext**"
 msgstr "**明文**"
 
-#: ../../notifications/index.md:14 45194d936f1648b2820f19904912d97a
+#: ../../notifications/index.md:14 e0f6560497e94fc19b28bdf91ccb95f1
 msgid "`msg_signature`, `timestamp`, `nonce` with SHA-1 signature"
 msgstr "`msg_signature`、`timestamp`、`nonce` 配合 SHA-1 签名"
 
-#: ../../notifications/index.md:14 516b3ead40954e94b868aceb067e4ace
+#: ../../notifications/index.md:14 db16e4566725451db5f37b03495e6b14
 msgid "**Encrypted**"
 msgstr "**加密**"
 
-#: ../../notifications/index.md:14 15c5e241905549f59dba2d0b08efe159
+#: ../../notifications/index.md:14 01c44251c6304f1eaedfd0d0bd766482
 msgid "AES-256-CBC encrypted message body"
 msgstr "AES-256-CBC 加密消息体"
 
-#: ../../notifications/index.md:104 aa49288f0506409b9cd7f34c27924868
+#: ../../notifications/index.md:168 97e063deaa714175b1e10b345ebe1ba6
 msgid "Common Configuration"
 msgstr "通用配置"
 
-#: ../../notifications/index.md:106 9f202f2f8584473ab8f9fcca338e35e7
+#: ../../notifications/index.md:170 aa37eca3a10640d4b1a99b4b5a68ca4b
 msgid "Workspace Binding"
 msgstr "工作空间绑定"
 
-#: ../../notifications/index.md:108 8f7835dd040e444db9dda6257c6bb245
+#: ../../notifications/index.md:172 c6a5e436a5394ca7b987befcbbea8e91
 msgid ""
 "Bot integrations process messages using the RAG pipeline from a "
 "configured workspace. The bot processor routes incoming messages to the "
 "appropriate workspace and AI provider."
 msgstr "机器人集成使用已配置工作空间的 RAG 流水线处理消息。机器人处理器将传入消息路由到相应的工作空间和 AI 提供商。"
 
-#: ../../notifications/index.md:110 1e0eab49601e42c58a40000f327bf8df
+#: ../../notifications/index.md:174 53776117ab0243b58f9e93575f23f609
+msgid ""
+"For Feishu, use the `/workspace <path>` command to bind a workspace. New "
+"chats are automatically bound to the first directory in "
+"`WORKSPACE_ROOTS`."
+msgstr ""
+
+#: ../../notifications/index.md:176 61549520fd2b4790bf7ac08c4f15e105
 msgid "Security"
 msgstr "安全性"
 
-#: ../../notifications/index.md:112 1fc00a89c88f447cb060e7260f0253ad
+#: ../../notifications/index.md:178 f1febc186bc14169b6b2c88085c4b156
 msgid ""
 "All webhook requests are verified using platform-specific signature/token"
 " validation"
 msgstr "所有 Webhook 请求都通过平台特定的签名/令牌验证进行校验"
 
-#: ../../notifications/index.md:113 cb7692fefa894e21b6c395e4bd2ca2dd
+#: ../../notifications/index.md:179 32b5151c49b644eebb9fb9b1e5c9c2a2
 msgid "Encrypted message modes are supported for both platforms"
 msgstr "两个平台均支持加密消息模式"
 
-#: ../../notifications/index.md:114 3bed22f08c8b4ba1ae2a44652012f909
+#: ../../notifications/index.md:180 1417bd3ac43c4919943bc8d15593dc35
 msgid ""
 "API keys and secrets are stored server-side only and never exposed to "
 "clients"
 msgstr "API 密钥和密钥仅存储在服务器端，永远不会暴露给客户端"
 
-#: ../../notifications/index.md:116 55909e9de8b448f48dac64af7dc0a5ab
+#: ../../notifications/index.md:182 44f045f822d24974bcf1abda727305ac
 msgid "Notification Payload Format"
 msgstr "通知负载格式"
 
-#: ../../notifications/index.md:118 efeca138f9fe462d9d544aeb3b440af0
+#: ../../notifications/index.md:184 8415cb2fe1e7400da0b9f24f75a93b29
 msgid "Bot responses follow each platform's native message format:"
 msgstr "机器人响应遵循各平台的原生消息格式："
 
-#: ../../notifications/index.md:120 97a637672ace43efbaa02df4cb348d7c
-msgid "**Feishu:**"
+#: ../../notifications/index.md:186 bc90cc902a214ebeaecc26788f6a19a1
+#, fuzzy
+msgid "**Feishu (Interactive Card):**"
+msgstr "**飞书**"
+
+#: ../../notifications/index.md:197 e095a4c75078426291590ae24967943b
+#, fuzzy
+msgid "**Feishu (Text):**"
 msgstr "**飞书：**"
 
-#: ../../notifications/index.md:130 c1313b48f1f24721b3f538bbec1e5f3d
+#: ../../notifications/index.md:207 b76c6631a186432f93c900eae0c762db
 msgid "**WeChat Enterprise:**"
 msgstr "**企业微信：**"

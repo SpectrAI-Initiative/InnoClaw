@@ -661,7 +661,7 @@ Timeout: 30 seconds. Max output: 1MB.
 GET /api/cluster/status
 ```
 
-Returns Kubernetes cluster overview (nodes, jobs, pods). Returns `{ configured: false }` if `KUBECONFIG_PATH` is not set.
+Returns Kubernetes cluster overview (nodes, jobs, pods). Returns `{ configured: false }` if `KUBECONFIG_PATH` is not set. Generic K8s Job tools also require either the generic `K8S_CONTEXT`/namespace/image fallback variables or a private `K8S_JOB_PROFILES_FILE`.
 
 **Response:**
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,229 +19,1010 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../usage/api-reference.md:1 d9d0dc045101456486f6d77064da9ff7
+#: ../../usage/api-reference.md:1 8ca7b893972f47dc832b1e52055b83c0
 msgid "API Reference"
 msgstr "API 参考"
 
-#: ../../usage/api-reference.md:3 5b12af823c8c45b7934bd53f0c0eaec8
+#: ../../usage/api-reference.md:3 29e8e678168b4ddd827e9bbcf96bb0de
 msgid ""
 "InnoClaw provides a set of REST API endpoints served by Next.js API "
 "routes. All endpoints are under the `/api/` path."
 msgstr "InnoClaw 提供了一组由 Next.js API 路由提供的 REST API 端点。所有端点都位于 `/api/` 路径下。"
 
-#: ../../usage/api-reference.md:5 8febfac0ea56495ba89007bba2d36da7
-msgid "Workspaces"
-msgstr "工作空间"
+#: ../../usage/api-reference.md:5 b3dbb858f6884fbca848639e8a687678
+msgid "Auth"
+msgstr ""
 
-#: ../../usage/api-reference.md:7 0db738cba10f491a96cf327338833548
-msgid "List Workspaces"
-msgstr "获取工作空间列表"
+#: ../../usage/api-reference.md:7 2771467fd66d445a9bf6ecfbaeff0afb
+msgid "Login"
+msgstr ""
 
-#: ../../usage/api-reference.md:13 746551dc84a74720865fea0aead99140
-msgid "Returns all workspaces."
-msgstr "返回所有工作空间。"
+#: ../../usage/api-reference.md:13 2bdd6360746d4dc8a237aa7e6cbc7177
+msgid "Creates a browser session for a local user account."
+msgstr ""
 
-#: ../../usage/api-reference.md:15 8c417d357f03463a9cbcc0bffb8a439b
-msgid "**Response:**"
-msgstr "**响应：**"
+#: ../../usage/api-reference.md:15 1c8a6468465647aaac1476f719d871a7
+msgid "Register"
+msgstr ""
 
-#: ../../usage/api-reference.md:28 ca4f54c876674cd2b574c543abb879e4
-msgid "Create Workspace"
-msgstr "创建工作空间"
+#: ../../usage/api-reference.md:21 4648999860c148ca8042a715be637faa
+msgid "Creates a local user account and signs the user in."
+msgstr ""
 
-#: ../../usage/api-reference.md:34 ../../usage/api-reference.md:74
-#: ../../usage/api-reference.md:98 ../../usage/api-reference.md:113
-#: ../../usage/api-reference.md:129 ../../usage/api-reference.md:148
-#: ../../usage/api-reference.md:175 ../../usage/api-reference.md:205
-#: ../../usage/api-reference.md:224 ../../usage/api-reference.md:239
-#: 10642337117c4ebb919edaa7608f9d30 3bb22b6eef1c479098bc95a4b60d9659
-#: 52aaf47f59794c91a8ec8761c4209546 60f1188e120643fa86631204106886f1
-#: 644913ba518145028d4ba2f28a7c08f3 75d6460400364bd99c5a5a6fafe50e3f
-#: 8459b072dba34bc09dc75454f3748070 b961d557d52849659394392c95e73e89
-#: dc4cdb21749f4e4388c8ec015a208c5a e17be2644a054f8488f98c5e745e6d8f
+#: ../../usage/api-reference.md:23 022be6b2bed246ea89d504dc8a85c026
+msgid "Current Session"
+msgstr ""
+
+#: ../../usage/api-reference.md:29 9caef237f8fb4d8d9d589303b374c456
+msgid ""
+"Returns the signed-in user and session expiry, or `401` if the request is"
+" unauthenticated."
+msgstr ""
+
+#: ../../usage/api-reference.md:31 f755833996fb495b855713626588c825
+msgid "CLI Session Handoff"
+msgstr ""
+
+#: ../../usage/api-reference.md:37 4b9dfd4357e34cbc824d53cbf126d71b
+msgid ""
+"Requires an authenticated browser session. Mints a fresh CLI session for "
+"the same user and returns the cookie triple needed by the terminal "
+"client."
+msgstr ""
+
+#: ../../usage/api-reference.md:39 ../../usage/api-reference.md:102
+#: ../../usage/api-reference.md:143 ../../usage/api-reference.md:167
+#: ../../usage/api-reference.md:182 ../../usage/api-reference.md:198
+#: ../../usage/api-reference.md:217 ../../usage/api-reference.md:240
+#: ../../usage/api-reference.md:272 ../../usage/api-reference.md:306
+#: ../../usage/api-reference.md:336 ../../usage/api-reference.md:357
+#: ../../usage/api-reference.md:385 ../../usage/api-reference.md:414
+#: ../../usage/api-reference.md:527 ../../usage/api-reference.md:556
+#: ../../usage/api-reference.md:590 ../../usage/api-reference.md:629
+#: ../../usage/api-reference.md:736 ../../usage/api-reference.md:762
+#: ../../usage/api-reference.md:777 079093cb3d4e4a6d9c171797422dc982
+#: 17da335f96f641cc863d16c546339acc 366d0df27251414f9d221950c2092dd4
+#: 4b807cd302b04517824e6e59e2dc0803 52fea12f11a149f6b677774f537f6fb8
+#: 56e57a8dc6e143dea69edd6d8ee30539 65e80fc0aecc4d879b6ee2b69056c58e
+#: 76ab13948a354d9aa83656007275df95 99882bc7a74a4ad49980cbad9c590569
+#: 9cfee360dfd14fdf9bbb8e7cf1a4f0bb 9e3b10dc85c84b4f88c1ee0efbbfd05d
+#: a1013651bd66436186b239c5cfa712cd a98e59d6b59045cebfcade941f5c5fdc
+#: c685c8cde58e44b889dbd0b6587b627f cae0d403f1314615bc4fbb052dc9b907
+#: cf172bb4c468480b95a9782f09ec03d1 da9239f6df7e4a67bfa56ecc8a0f54e0
+#: f3124984c46e4d359e245e90ab310738 f34cec147c2346cd98dd9f0b57aa0049
+#: f4125e54dc854dbeb70be6795c0162c1 f8071da685294ad8b4c734480f7a8d4d
 msgid "**Request Body:**"
 msgstr "**请求体：**"
 
-#: ../../usage/api-reference.md:42 729e75b7a1a24aba9718a9028f773244
+#: ../../usage/api-reference.md:47 ../../usage/api-reference.md:83
+#: ../../usage/api-reference.md:462 ../../usage/api-reference.md:643
+#: ../../usage/api-reference.md:666 ../../usage/api-reference.md:700
+#: 02e76e0dd17a407fba3ab10f157cade2 3f164c2548f14603ad51fab5e1fd22e8
+#: 5f02acbdf27847dc9a7ec4d9b1dc56c3 6061a9c2a2b74e0a86b7931724b9bdfb
+#: d9e39554b4a4401a88bbfc518103a546 efe25bb82c1641578d0b2f97698018f4
+msgid "**Response:**"
+msgstr "**响应：**"
+
+#: ../../usage/api-reference.md:71 18c2007e5645471293542666beda5836
+msgid "Workspaces"
+msgstr "工作空间"
+
+#: ../../usage/api-reference.md:73 ea4c0f5e41b9413dbb2d7d00b4aff017
+msgid "List Workspaces"
+msgstr "获取工作空间列表"
+
+#: ../../usage/api-reference.md:79 9d556e2098494501bd5a8979db18fef4
+msgid "Returns all workspaces."
+msgstr "返回所有工作空间。"
+
+#: ../../usage/api-reference.md:81 a5262f997542450eb531ebe3df22da04
+msgid ""
+"When auth is enabled, this endpoint requires a valid browser or CLI "
+"session cookie set. With `AUTH_MODE=disabled`, the trusted no-auth path "
+"returns the anonymous admin context."
+msgstr ""
+
+#: ../../usage/api-reference.md:96 abeccb7fbb5043798ce6b57d9cd50149
+msgid "Create Workspace"
+msgstr "创建工作空间"
+
+#: ../../usage/api-reference.md:111 fcf5f7b00a3e450e86c26f884934d99f
 msgid "Delete Workspace"
 msgstr "删除工作空间"
 
-#: ../../usage/api-reference.md:48 b3e8d9a200d242239c2303538a6acc14
+#: ../../usage/api-reference.md:117 4847491458f842e6b96a814c0a154452
 msgid ""
 "Removes the workspace record from the database. Files on disk are **not**"
 " deleted."
 msgstr "从数据库中删除工作空间记录。磁盘上的文件**不会**被删除。"
 
-#: ../../usage/api-reference.md:50 090e979a8125472eb89a93a9f4874c06
+#: ../../usage/api-reference.md:119 33be6e72542e4c67b7ddea56355ed0f8
 msgid "Files"
 msgstr "文件"
 
-#: ../../usage/api-reference.md:52 42654d322abd41d9b1ddd1eab0a75689
+#: ../../usage/api-reference.md:121 941cbfa80dcf40fcbee0753a94b5c87e
 msgid "Browse Directory"
 msgstr "浏览目录"
 
-#: ../../usage/api-reference.md:58 ced1713159b1414a854491a0628de48b
+#: ../../usage/api-reference.md:127 d0b668e91803456bbe06666809ab81b0
 msgid "Returns the file listing for a directory within a workspace."
 msgstr "返回工作空间内目录的文件列表。"
 
-#: ../../usage/api-reference.md:60 e3ffad07e4b145e0b4fad077b44697f4
+#: ../../usage/api-reference.md:129 357729d4e8d94d48b51b3ac731fecb27
 msgid "Read File"
 msgstr "读取文件"
 
-#: ../../usage/api-reference.md:66 ffacb20c32e048bba1e93114c7c5010b
+#: ../../usage/api-reference.md:135 b4d56f6723c14e199082e86cbebd74a5
 msgid "Returns the content of a file."
 msgstr "返回文件的内容。"
 
-#: ../../usage/api-reference.md:68 9a57674e7eed4aefa1bf1dbca9ddc42a
+#: ../../usage/api-reference.md:137 fa730345f1be4f0e8a349a28e3ae4e0c
 msgid "Write File"
 msgstr "写入文件"
 
-#: ../../usage/api-reference.md:84 2cdff69dfa464504a662a333a52892f0
+#: ../../usage/api-reference.md:153 cff8008ea60a4387bf06b9f862b95a38
 msgid "Upload File"
 msgstr "上传文件"
 
-#: ../../usage/api-reference.md:90 3bea99463e08403ca6f9c8e7df1d5c98
+#: ../../usage/api-reference.md:159 35ac03198a34481e9b7f1ff7ac10c2f5
 msgid ""
 "Accepts `multipart/form-data` with `file`, `workspaceId`, and `path` "
 "fields."
 msgstr "接受包含 `file`、`workspaceId` 和 `path` 字段的 `multipart/form-data`。"
 
-#: ../../usage/api-reference.md:92 0f997a6f72364dd79658d9c4fafb8a58
+#: ../../usage/api-reference.md:161 7b5d9de795a24ef18b0b0a7d64393302
 msgid "Delete File"
 msgstr "删除文件"
 
-#: ../../usage/api-reference.md:107 0ec1375bd4c14fed94f3193547d55611
+#: ../../usage/api-reference.md:176 5f2f8e92a11e42618552cabdcf508cb1
 msgid "Rename File"
 msgstr "重命名文件"
 
-#: ../../usage/api-reference.md:123 45a93cb3b07941d88990e9d231ec55ee
+#: ../../usage/api-reference.md:192 5a0016267bf241fd8167d46eec4939ae
 msgid "Create Directory"
 msgstr "创建目录"
 
-#: ../../usage/api-reference.md:138 2b85d2f97a5d4bab8cff7c44ccd1de01
+#: ../../usage/api-reference.md:207 a3b6d51fc79846ccae3fbd444e300c5e
 msgid "Chat"
 msgstr "对话"
 
-#: ../../usage/api-reference.md:140 01df8325da604bbf926974c6e7d8ff3c
+#: ../../usage/api-reference.md:209 22ffb0de33df4e688148ffdd697f5be3
 msgid "Send Message (Streaming)"
 msgstr "发送消息（流式）"
 
-#: ../../usage/api-reference.md:146 a4ec6f9fb2944210af34f3fc174c5a11
-msgid "Sends a message and receives a streaming AI response."
+#: ../../usage/api-reference.md:215 638f6548ca294c66b9181d4cf2980366
+#, fuzzy
+msgid "Sends a message and receives a streaming AI response via RAG."
 msgstr "发送消息并接收流式 AI 响应。"
 
-#: ../../usage/api-reference.md:159 cdac77757fba4e07b1e3fe3b4bfa8c35
+#: ../../usage/api-reference.md:228 abc4975514844155a73da9ac2a9eaaae
 msgid "**Response:** Server-Sent Events (SSE) stream with AI response tokens."
 msgstr "**响应：** 包含 AI 响应令牌的 Server-Sent Events (SSE) 流。"
 
-#: ../../usage/api-reference.md:161 a17c3ed3ff0942ca8fc823fefcfb23a5
-msgid "Notes"
-msgstr "备注"
-
-#: ../../usage/api-reference.md:163 b587262515224d93833bade94a0f3e39
-msgid "List Notes"
-msgstr "获取笔记列表"
-
-#: ../../usage/api-reference.md:169 dbf5b63d47a143d999017f7d9361b453
-msgid "Create Note"
-msgstr "创建笔记"
-
-#: ../../usage/api-reference.md:185 aa110ea7a4484f2881092920f5264c1a
-msgid "Update Note"
-msgstr "更新笔记"
-
-#: ../../usage/api-reference.md:191 41f129b144904aec96e72a6a8508ab4e
-msgid "Delete Note"
-msgstr "删除笔记"
-
-#: ../../usage/api-reference.md:197 ee6c2e3d7a91456d8de76de3c3b0fbdf
-msgid "Generate"
+#: ../../usage/api-reference.md:230 c946b597d67c4c789465dcc8111eab73
+#, fuzzy
+msgid "Agent"
 msgstr "生成"
 
-#: ../../usage/api-reference.md:199 15797d9fe7144d9daf801552c8aa2a66
-msgid "Generate Note Content"
-msgstr "生成笔记内容"
+#: ../../usage/api-reference.md:232 22f6dad265ad46c6adf7d8d760dd8678
+#, fuzzy
+msgid "Agent Chat (Streaming)"
+msgstr "发送消息（流式）"
 
-#: ../../usage/api-reference.md:214 cca0999a07fe4ac38c31da3eca5be682
-msgid "Supported types: `summary`, `faq`, `brief`, `timeline`."
-msgstr "支持的类型：`summary`、`faq`、`brief`、`timeline`。"
+#: ../../usage/api-reference.md:238 4f7a95eb37354a88a7b03cee80b0b56b
+msgid "Sends a message to the autonomous AI agent with tool-calling capability."
+msgstr ""
 
-#: ../../usage/api-reference.md:216 8edf1ddcd17143c3bcaf6b79ecbfb6db
-msgid "Git"
-msgstr "Git"
+#: ../../usage/api-reference.md 16da1d1762944837b3e0122dc033736a
+#: 1e68a1fb2a0c46d2829d0f847e737eb1 49e135a36fcb4e44b57f97547ecccb69
+#: 4fee8cb999a9434699cdd6138be9a65f 6f6206d50d3f4da08ce6a6972c4992c4
+#: 7ac207df48fd46ca9634a081a623f0b3 91fc8cc4f1f34b4db3dc5ea226d1480b
+#: afd37ffc94a14b2bb0adf68956098310
+#, fuzzy
+msgid "Field"
+msgstr "文件"
 
-#: ../../usage/api-reference.md:218 5beb0ef7995b46a18f4e8c3bcc043026
-msgid "Clone Repository"
-msgstr "克隆仓库"
+#: ../../usage/api-reference.md 29bbb5010b7042769fa9d6987ceaaaf1
+#: 36a8a940d7994575a4ad278a12cc5c74 5096d52a6a2a426b8061c0ec8befded3
+#: 87da63141ce54a36bdc7f13c76f8a812 88bd0c7c9bfc45a5949607e5e9a7de3a
+#: 9552e0843d2f4d8eb7e020e4c1ea81ad bdecf288ef5e41f784d40f2680077885
+#: c092f7bedd2f4b728d4c5a7ab0ec5e18 cc2a5e591f8a4020be3a7c0191f213fd
+msgid "Type"
+msgstr ""
 
-#: ../../usage/api-reference.md:233 32cba1d5d6ab40f9984889bcde1bd9b3
-msgid "Pull Repository"
-msgstr "拉取仓库"
+#: ../../usage/api-reference.md 0fade9d110e843bca8288bbe43ae02f1
+#: 13b6c5751d7745ab8a6e150a1d2f4aa9 32ffe26bf29747cdb0e1f9e2362836d1
+#: 3a0a1526c6e14e868c644e96fe1453e4 6f32b871a904413a8e062dc4ecb687b1
+#: 824ea324b55847a7b9b9b6742fe8aa0d ab1f2ec1129447f2aea0200ea376d8de
+#: ab1f8eb120834069ba3ae3dfd6f9fea8 da9055807e234d1bb45a88c9ebc4d804
+msgid "Required"
+msgstr ""
 
-#: ../../usage/api-reference.md:247 fdaabad237a34438b9e1bdf41a69e830
-msgid "Get Git Status"
-msgstr "获取 Git 状态"
-
-#: ../../usage/api-reference.md:253 090b89c3f72043479779522bb907e3b2
-msgid "Settings"
-msgstr "设置"
-
-#: ../../usage/api-reference.md:255 368dc05b7f06473fa95abd4e5c866a2d
-msgid "Get Settings"
-msgstr "获取设置"
-
-#: ../../usage/api-reference.md:261 95f7caf34cc04b859366c78da223e007
-msgid "Update Settings"
-msgstr "更新设置"
-
-#: ../../usage/api-reference.md:267 0777734cb31947a0a0de887dccd16a72
-msgid "Error Handling"
-msgstr "错误处理"
-
-#: ../../usage/api-reference.md:269 519b190f189f4f4e86cc5ac332f282e3
-msgid "All API endpoints return standard HTTP status codes:"
-msgstr "所有 API 端点返回标准 HTTP 状态码："
-
-#: ../../usage/api-reference.md abf88ee43f2841de90c1c9093f3dee34
-msgid "Status"
-msgstr "状态码"
-
-#: ../../usage/api-reference.md f315d3a764034e6889cbe5f248b0dc9e
+#: ../../usage/api-reference.md 1d356affb396473e94eb2c19273b7ce0
+#: 2250471dd74346cda43e0ff2068300bb 37b130da0a484d58bc75670d959ae8f3
+#: 62f73ff3f33442cfabf2db627452ab8a 8207a8543d6445bb806dcf29d583f714
+#: 9ae290b259d84534b113ef866c998a3c d5b8e583b5524f7b9b2a3f67c6289e49
+#: e4457ff2843048d7aa32cffa65016c54 e9634e66f6754627a46797490130e82e
+#: f0a22295557343d7bbaac6743c2f91ff
 msgid "Description"
 msgstr "描述"
 
-#: ../../usage/api-reference.md b41e9b2c9b2f4fa68387f167062b10b5
+#: ../../usage/api-reference.md 394a966253f641c899d53e2faf955729
+#: 512efcae476a477cb8ef783b2a06c4de
+msgid "`messages`"
+msgstr ""
+
+#: ../../usage/api-reference.md 51edd18cf349415f8f60ab5805e6c3f5
+msgid "`UIMessage[]`"
+msgstr ""
+
+#: ../../usage/api-reference.md 0053d1eb890643a4b06657bf5006961b
+#: 1bf33faf80634c3e9a8e33a42fc7af10 285f47b70ad24822a2651055f6e41653
+#: 39a37d9f1f2945f1a287a42522b85d0a 473bb568f7c64a6fb097ace532b30811
+#: 50099608a0eb452d8529bf676e78a8ce 5880a1695a104b73bc1a7c14a0131c8a
+#: 6953e59da00a47459576e0836cb6b599 7c75c26396344a04b480373d717cdd45
+#: 9a27f8a4899f4e3d8b7446b7a5760382 9ebc2c8111e848e7a747cebab9bdcd05
+#: b7c1a0e98ef242098d603afdaac6505e c1dbd31a87ea4f14849d52f34f725f1a
+#: e58200291ed14ef98ac69e1e6eea655e fd6f818956374f3d9efd93a1029f4543
+msgid "Yes"
+msgstr ""
+
+#: ../../usage/api-reference.md 567211f31fb14289a19967ddbcefdc54
+msgid "Chat message history"
+msgstr ""
+
+#: ../../usage/api-reference.md 1a1f93dd40914d2383fd00c7d367f277
+#: 5bc54def4c184b468183ac7d005bb8a5 71e34a826dd6456e97c8e8490636f746
+#: ec77c15f5576420b8369d43bcbd91ceb
+#, fuzzy
+msgid "`workspaceId`"
+msgstr "工作空间"
+
+#: ../../usage/api-reference.md 0ab20c883f1b4711af352fa17bb77dac
+#: 1f5796addb7342caa2ec229cd210268e 453e0eb7c72d448bb32d0b6041162788
+#: 4ab28bca17924442b67074a8fc3b3919 4e5cbb492ecd41f8a1c1cd58b22ae79c
+#: 4ff07684723f4209b6db6ec542845479 56d2a656164b414283b89b8148a0c4af
+#: 59da57f99d5443829a26567e806447c3 685ff5cf5b274ceda856a984b3e67728
+#: 73fc8a04fa5448bcb4125a61697ec78c 7b406ed88bb94634a763be180fc33b07
+#: 7b95eaede3e24a98bfd7c3aa65c605ae 88ae7c842175468fb5ceacbd88401c71
+#: 8dc15953b124434d841cbe4ce68f6a31 8e9024a89b5f4f469fb6275e1906f644
+#: 95c5bb39430940e4b690e11c86db0f57 9cf3bbe719684bc4b2164419c2983699
+#: a882501bc47a4e67967e6f70f315d0b9 ab21161d9c1e47548f29ae12b5a4ca85
+#: bd11ad9258dd42409424adc4569f3744 bd9c518ce9144622883f05ebab1b4cdf
+#: bfd7885f668f499c94b322606b69fe8f bfe9a29016f641a0b343f70a3cecbf27
+#: cbca978440cf4ce8a13e1efaafd6bc99 d15de41ddb964a69bedbdd3e6e5e031d
+#: d50a738439444b50bcf9914be15d0fa1 f1055e0512d043098bc0dfc5651394da
+#: fd08e750cd64439ea65835f6e883b0c0
+#, fuzzy
+msgid "`string`"
+msgstr "设置"
+
+#: ../../usage/api-reference.md 2a460461ecfd439fb994d2036fc0ed2b
+#: 75cf2bb72e6f43679d1e0d2237b18919 f1cd6d4451944648922598b73624320e
+#, fuzzy
+msgid "Workspace identifier"
+msgstr "工作空间"
+
+#: ../../usage/api-reference.md 508bef6b7aed41c99675bea86a9dee1d
+#: 977a6ad5471b456ea7bc18fa079566f4
+msgid "`cwd`"
+msgstr ""
+
+#: ../../usage/api-reference.md 8927945eb67643498c1351e4bee26c2e
+msgid "Current working directory for tool execution"
+msgstr ""
+
+#: ../../usage/api-reference.md 36238264fa93465b9b49f44a3a70e165
+msgid "`skillId`"
+msgstr ""
+
+#: ../../usage/api-reference.md 0d2f530439d94bb794f232878cf52463
+#: 18ebf4783eab4792819278f42f13c9a2 21dc74db544a4e2eb556cf27cf9a89b6
+#: 23bc1d2fc149492297421dd4b728fc21 27e96a103b4b4a82830fcf48a31e8563
+#: 377aea8c319948fa9f38f026e4c9201f 63b4912de26e4d27801f23377435243a
+#: 652abedc4aba40ca938f8bda83b29562 6fe03677322f4c14946da332be814001
+#: 78d2e9641409420383dadec78750f9db 7c32e7fb0e6c40c294a4e4b1c89bf502
+#: 8187f218c560410c988a37ddfdfb93cc 8fad928aa905455f9d69f887bc6dc50e
+#: 9092e0278e704d3687dc4e6178d9e3f1 bc19e1937c51453b90e61d6976f796dd
+#: c881ec1808c646eeb7b7926435a99957 c899f94eb20f4fd8bb37c88a50d7298f
+#: cc1783d3927d4865a5b4906c3262e3ab d28c43dd1a764272991e64432693cad5
+#: d8e8a87fddc549b787e98f9691356a27 ea07372ee05b443b90b12509e20773be
+#: f1d2075103314a6cb80c04ae6328f833 fa26f710e28e417883d0cd68b050fe25
+#: fe4890a77dd843e6aaca8bfbe0d9f642
+msgid "No"
+msgstr ""
+
+#: ../../usage/api-reference.md a6d3382c085b4a95b519f9a94753f0ea
+msgid "Skill ID to use for this request"
+msgstr ""
+
+#: ../../usage/api-reference.md 83dc1bd4ebc34bb6aa997f0d15d62ce6
+msgid "`paramValues`"
+msgstr ""
+
+#: ../../usage/api-reference.md 31bcfeb918d942899d49c15c1f974e20
+#: 4df95f6dd7a84c7cb3039c25f8b99efb
+msgid "`object`"
+msgstr ""
+
+#: ../../usage/api-reference.md 6eaccf5924ba4cba93acd6d3813686d6
+msgid "Skill parameter values"
+msgstr ""
+
+#: ../../usage/api-reference.md f25a734b9cf44138958b97c42eb5105f
+msgid "`mode`"
+msgstr ""
+
+#: ../../usage/api-reference.md a44605d7a6fb4b7fbdfcb7d818944a40
+msgid "`\"agent\"`, `\"plan\"`, or `\"ask\"` (default: `\"agent\"`)"
+msgstr ""
+
+#: ../../usage/api-reference.md:262 548478f112c347a280d94a724182404d
+msgid "**Response:** Streaming response with tool calls and text."
+msgstr ""
+
+#: ../../usage/api-reference.md:264 df957de588534cc782f42ca788ac88e6
+msgid "Summarize Agent Conversation"
+msgstr ""
+
+#: ../../usage/api-reference.md:270 7731c031633141ac990ed9c3f216c69c
+msgid "Summarizes agent conversation history and optionally saves as a note."
+msgstr ""
+
+#: ../../usage/api-reference.md 78b73cd332af4c27927626865b0a3e48
+msgid "`array`"
+msgstr ""
+
+#: ../../usage/api-reference.md 4d3526434ae04dafbc04585df7b25e0a
+msgid "Message array with parts and roles"
+msgstr ""
+
+#: ../../usage/api-reference.md 4d6c093770194cceb6eac76ea6eac37f
+msgid "`trigger`"
+msgstr ""
+
+#: ../../usage/api-reference.md 8ebec26f6b1247b9bb0a4080595264fc
+msgid "`\"clear\"` or `\"overflow\"`"
+msgstr ""
+
+#: ../../usage/api-reference.md 67993e0f1f724f1d990050cf021632f0
+msgid "`preview`"
+msgstr ""
+
+#: ../../usage/api-reference.md 44224655be6d4109818f2f1bc5e0b5a8
+#: ab2f97c69d9043fdaaf547d3266934b6
+msgid "`boolean`"
+msgstr ""
+
+#: ../../usage/api-reference.md 95a295578f6e4741a9c783f310c714a6
+msgid "If `true`, returns summary without saving"
+msgstr ""
+
+#: ../../usage/api-reference.md 5f47fe55fe9146e3bed974cacd95f680
+#: d623b991a29c4cfeb877796fd1d96df4
+msgid "`locale`"
+msgstr ""
+
+#: ../../usage/api-reference.md 88cbd64f576f4e0ea5b0d13365993f09
+#: ba0999446ed8400c8e213d9111d1f2e3
+msgid "`\"en\"` or `\"zh\"` (default: `\"en\"`)"
+msgstr ""
+
+#: ../../usage/api-reference.md:292 0a5839b5acd044e7a8d06e76a762dac4
+msgid "Notes"
+msgstr "备注"
+
+#: ../../usage/api-reference.md:294 2936fbf3da8d450b900d4af571db583e
+msgid "List Notes"
+msgstr "获取笔记列表"
+
+#: ../../usage/api-reference.md:300 e9beb52551284f7488c2cacc91b758b6
+msgid "Create Note"
+msgstr "创建笔记"
+
+#: ../../usage/api-reference.md:316 2761b0349d644b0d9450ab79ef4791bf
+msgid "Update Note"
+msgstr "更新笔记"
+
+#: ../../usage/api-reference.md:322 94e8b4e919434d6bbf33829e26452111
+msgid "Delete Note"
+msgstr "删除笔记"
+
+#: ../../usage/api-reference.md:328 186a073f39004b24a15f0b692b8d8768
+msgid "Generate"
+msgstr "生成"
+
+#: ../../usage/api-reference.md:330 54b463f520714267ac069ddfeff36b55
+msgid "Generate Note Content"
+msgstr "生成笔记内容"
+
+#: ../../usage/api-reference.md:345 30a21a3b535046f2a1299973e03eedbf
+#, fuzzy
+msgid ""
+"Supported types: `summary`, `faq`, `brief`, `timeline`, `memory`, "
+"`daily_report`, `weekly_report`."
+msgstr "支持的类型：`summary`、`faq`、`brief`、`timeline`。"
+
+#: ../../usage/api-reference.md:347 ccf5e02da5e741b8925f6bde7140627f
+msgid "Daily Report"
+msgstr ""
+
+#: ../../usage/api-reference.md:349 83ba92944966483f9418188e7b5dfa88
+msgid "Generate Daily Report"
+msgstr ""
+
+#: ../../usage/api-reference.md:355 912585e715e1403f9fa5b3604a561404
+msgid "Generates a daily activity report for a workspace."
+msgstr ""
+
+#: ../../usage/api-reference.md a88e4ac80253455887750440dd8bac67
+msgid "`date`"
+msgstr ""
+
+#: ../../usage/api-reference.md a5d2b5ee4a3e4866a747fb12e7da05ac
+msgid "YYYY-MM-DD format (defaults to today)"
+msgstr ""
+
+#: ../../usage/api-reference.md:373 ../../usage/api-reference.md:394
+#: 01075b60964b4940b991392c091faea6 208d2ebe2d8c4ae689258177d34950ec
+#, python-brace-format
+msgid ""
+"**Response:** Returns note object (201) or `{ skipped: true, reason: "
+"\"...\" }` (200) if no activities found."
+msgstr ""
+
+#: ../../usage/api-reference.md:375 b00cd9d33c904b0ba57c63b91dec1d96
+msgid "Weekly Report"
+msgstr ""
+
+#: ../../usage/api-reference.md:377 eb36b30c348f4a9e88e85fe643d6c65b
+msgid "Generate Weekly Report"
+msgstr ""
+
+#: ../../usage/api-reference.md:383 be4d0abcff7a4c32b2782dc622e6c9d8
+msgid "Generates a weekly activity report for a workspace."
+msgstr ""
+
+#: ../../usage/api-reference.md:396 c61489d9c19d44e08653af9a299b8eb6
+#, fuzzy
+msgid "Datasets"
+msgstr "更新设置"
+
+#: ../../usage/api-reference.md:398 7a52032f87f14eea8af69102046f82bb
+#, fuzzy
+msgid "List Datasets"
+msgstr "获取笔记列表"
+
+#: ../../usage/api-reference.md:404 a1f780eab4b24f54b050b3a718996d74
+msgid "Returns all datasets ordered by creation date (newest first)."
+msgstr ""
+
+#: ../../usage/api-reference.md:406 684fd4e165e8436c903ffb206aa72d82
+msgid "Create Dataset (Start Download)"
+msgstr ""
+
+#: ../../usage/api-reference.md:412 750b7bd004a14d95bd4d4c27e42570f9
+msgid "Creates a dataset record and initiates background download."
+msgstr ""
+
+#: ../../usage/api-reference.md 199b7fa85cb5443eab01da783fb08a3c
+msgid "`repoId`"
+msgstr ""
+
+#: ../../usage/api-reference.md 5160e596c6e0487a8a681cf4842e5e97
+msgid "HuggingFace or ModelScope repository ID"
+msgstr ""
+
+#: ../../usage/api-reference.md 770cdf8e3e614d9c8df0e8d6f7662b61
+msgid "`repoType`"
+msgstr ""
+
+#: ../../usage/api-reference.md a2d7d4afe01a419f96fe0270aa9294e1
+msgid "`\"dataset\"`, `\"model\"`, or `\"space\"` (default: `\"dataset\"`)"
+msgstr ""
+
+#: ../../usage/api-reference.md bbe68228f73246b4b31e75e413e5e022
+msgid "`revision`"
+msgstr ""
+
+#: ../../usage/api-reference.md 01ca3c796cc043c7beef7832361e8a04
+msgid "Specific branch or tag"
+msgstr ""
+
+#: ../../usage/api-reference.md 27e36153ae6740d3b54c1e36282feca1
+#: c24ed99e7af44b56b70a54c4960299da
+msgid "`name`"
+msgstr ""
+
+#: ../../usage/api-reference.md e317b00f7e9e4f79a8bc50768d40c765
+msgid "Display name"
+msgstr ""
+
+#: ../../usage/api-reference.md 5f091a70f6f64f5889ba9e70109565f0
+msgid "`allowPatterns`"
+msgstr ""
+
+#: ../../usage/api-reference.md 4cbfc283b2ae48b78b56f897631cd0fb
+#: 6a5bd1047833435e9f4ca25dbc54a351 a491fa81800747f99245bd4679ad30e1
+#: babf673cff65446b9481753d202086e6
+msgid "`string[]`"
+msgstr ""
+
+#: ../../usage/api-reference.md 9f08a1ba57464907985c2b100d4d4400
+msgid "File glob patterns to include"
+msgstr ""
+
+#: ../../usage/api-reference.md 2c7f06839ed04c009deda9c764291ca8
+msgid "`ignorePatterns`"
+msgstr ""
+
+#: ../../usage/api-reference.md 82797bf29a2f43878124e4db9ed2bd3e
+msgid "File glob patterns to exclude"
+msgstr ""
+
+#: ../../usage/api-reference.md 538c2845d03c447195788da46ecc4c81
+msgid "`source`"
+msgstr ""
+
+#: ../../usage/api-reference.md 7fc3f738c46c4fed8ab793207c390190
+msgid "`\"huggingface\"` or `\"modelscope\"` (default: `\"huggingface\"`)"
+msgstr ""
+
+#: ../../usage/api-reference.md:438 0532ffaf10b140738d813e2079db2d60
+#, fuzzy
+msgid "Get Dataset"
+msgstr "获取设置"
+
+#: ../../usage/api-reference.md:444 39399307ac064c759de8ebbaf2c224fe
+msgid "Returns complete dataset information including parsed manifest and stats."
+msgstr ""
+
+#: ../../usage/api-reference.md:446 f15f550397974e55acc289560d9c5c64
+#, fuzzy
+msgid "Delete Dataset"
+msgstr "删除笔记"
+
+#: ../../usage/api-reference.md:452 deb2f16cc265457a824c50b1718ca8f0
+msgid ""
+"Removes dataset from database. Set `deleteFiles=true` to also delete "
+"local files."
+msgstr ""
+
+#: ../../usage/api-reference.md:454 b3a4d895aa154b018f3bea081c5f2d7d
+#, fuzzy
+msgid "Get Download Status"
+msgstr "获取 Git 状态"
+
+#: ../../usage/api-reference.md:460 b2147b6734434cdfa503cb28dddb40b7
+msgid "Returns live download progress."
+msgstr ""
+
+#: ../../usage/api-reference.md:477 37c7781007284bd8af15130155fabd87
+msgid "Pause Download"
+msgstr ""
+
+#: ../../usage/api-reference.md:483 a9fdcfbfde15402299e1060d2212fbf2
+msgid "Resume / Retry Download"
+msgstr ""
+
+#: ../../usage/api-reference.md:489 28d6a24e19be414599fdc8e95f34df4b
+msgid "Cancel Download"
+msgstr ""
+
+#: ../../usage/api-reference.md:495 cd81f78ece654389b809123a4a08883a
+msgid "Refresh Manifest"
+msgstr ""
+
+#: ../../usage/api-reference.md:501 e91d1829e1a8443fa8452bdfe8e2f34a
+msgid "Recalculates manifest and stats from disk for ready datasets."
+msgstr ""
+
+#: ../../usage/api-reference.md:503 57ebaa00b51b4fc78a71b0fe82fa398f
+msgid "Preview Dataset"
+msgstr ""
+
+#: ../../usage/api-reference.md:509 531652abb7dc4bd3b8430c2489496912
+msgid "Returns sample data from ready datasets. `n` is capped at 1000."
+msgstr ""
+
+#: ../../usage/api-reference.md:511 0f57214f1804431f9fab005b99f613e4
+#, fuzzy
+msgid "Manage Workspace Links"
+msgstr "创建工作空间"
+
+#: ../../usage/api-reference.md:519 6be79664c5754cbf8da463b6c7e5659c
+msgid "Link/unlink datasets to workspaces (many-to-many relationship)."
+msgstr ""
+
+#: ../../usage/api-reference.md:521 b21c92372b774449a3ec360266f8b635
+msgid "Import Local Dataset"
+msgstr ""
+
+#: ../../usage/api-reference.md:536 508e3ff1b7ef45d6a266722fd96c869b
+msgid "Get HuggingFace Repo Info"
+msgstr ""
+
+#: ../../usage/api-reference.md:542 99f1625f194f46c4b891000e57edb247
+msgid "Get ModelScope Repo Info"
+msgstr ""
+
+#: ../../usage/api-reference.md:548 7eeb1092c27046ce9f5b673bac9391c1
+msgid "Paper Study"
+msgstr ""
+
+#: ../../usage/api-reference.md:550 5bbc6f3e01d8440883c0b7a598da2a88
+msgid "Search Papers"
+msgstr ""
+
+#: ../../usage/api-reference.md 417bf5b4868e4932aeca350384365d45
+msgid "`keywords`"
+msgstr ""
+
+#: ../../usage/api-reference.md 9c48a1337a9749c3bb9f3c26026c4cae
+msgid "At least one keyword required"
+msgstr ""
+
+#: ../../usage/api-reference.md aecff52fac7a45f48d6fd3301f585576
+msgid "`maxResults`"
+msgstr ""
+
+#: ../../usage/api-reference.md 873c2c5c049c4144be84bee859413b50
+msgid "`number`"
+msgstr ""
+
+#: ../../usage/api-reference.md 00c1486469f047dfafefe69c0b12ad7f
+msgid "Max 30 (default: 10)"
+msgstr ""
+
+#: ../../usage/api-reference.md c9cbeeb2a6374f05b77df54bf80a7e94
+msgid "`dateFrom`"
+msgstr ""
+
+#: ../../usage/api-reference.md 22061acf06f4420785816d2eb1664490
+msgid "Start date filter"
+msgstr ""
+
+#: ../../usage/api-reference.md 1b350b4b3b6d4cc6a1ed01febc523403
+msgid "`dateTo`"
+msgstr ""
+
+#: ../../usage/api-reference.md 4f870b16ad644d1f93df5945292f2883
+#, fuzzy
+msgid "End date filter"
+msgstr "重命名文件"
+
+#: ../../usage/api-reference.md 19b539774018475f99cac25943d4b756
+#, fuzzy
+msgid "`sources`"
+msgstr "成功"
+
+#: ../../usage/api-reference.md f0234a4be5304e2786724f4e597aaa32
+msgid "`\"arxiv\"` and/or `\"huggingface\"` (default: both)"
+msgstr ""
+
+#: ../../usage/api-reference.md:576 4c01c0703e8541b482025391dc7bb521
+msgid "Scheduled Tasks"
+msgstr ""
+
+#: ../../usage/api-reference.md:578 01f064ca608d462badb3811bd05f85c5
+msgid "List Scheduled Tasks"
+msgstr ""
+
+#: ../../usage/api-reference.md:584 609370e2c1e94ebaa2445da04af50dc1
+msgid "Create Scheduled Task"
+msgstr ""
+
+#: ../../usage/api-reference.md 6b1451d04cf04e36bb1f742813951998
+msgid "Task display name"
+msgstr ""
+
+#: ../../usage/api-reference.md 66f39017000e44f78c852d16a9893562
+msgid "`taskType`"
+msgstr ""
+
+#: ../../usage/api-reference.md f35962baf25d4de2b182d328b32de07c
+msgid ""
+"`\"daily_report\"`, `\"weekly_report\"`, `\"git_sync\"`, "
+"`\"source_sync\"`, or `\"custom\"`"
+msgstr ""
+
+#: ../../usage/api-reference.md 07a2099839e14f71b6077edcb476a1c9
+msgid "`schedule`"
+msgstr ""
+
+#: ../../usage/api-reference.md 7fbf27d9f9d64574a7dd245947d51971
+msgid "Valid cron expression (e.g. `\"0 0 * * *\"`)"
+msgstr ""
+
+#: ../../usage/api-reference.md 4b53975c1b4f4b6284c373a0e191e0ca
+msgid "Workspace to bind (null = global)"
+msgstr ""
+
+#: ../../usage/api-reference.md 10856b2a371d46d594a3953d13863daf
+msgid "`config`"
+msgstr ""
+
+#: ../../usage/api-reference.md 186ef9246c2b471aa15943c0bfb013dd
+msgid "Task-specific JSON configuration"
+msgstr ""
+
+#: ../../usage/api-reference.md ebed72b27ca64263ab3ff0fa3fbc8775
+msgid "`isEnabled`"
+msgstr ""
+
+#: ../../usage/api-reference.md c6084c8c271040b3b3f1b45899681d90
+msgid "Default: `true`"
+msgstr ""
+
+#: ../../usage/api-reference.md:611 c0540a2d5336455daa53161404bc08e2
+msgid "Get / Update / Delete Scheduled Task"
+msgstr ""
+
+#: ../../usage/api-reference.md:619 46b7b9c73dba40178b297725524e6496
+msgid "Terminal"
+msgstr ""
+
+#: ../../usage/api-reference.md:621 36b67ebe14e740bea58488de9a398b6c
+msgid "Execute Command"
+msgstr ""
+
+#: ../../usage/api-reference.md:627 f9600ab982af4fd88df609fe332bca46
+msgid "Executes a shell command in the workspace directory."
+msgstr ""
+
+#: ../../usage/api-reference.md 222b20669e9247fdb78e3e146c72e400
+msgid "`command`"
+msgstr ""
+
+#: ../../usage/api-reference.md d604e1adc4c94e0a9e2ba63309b7456e
+msgid "Shell command (max 4096 chars)"
+msgstr ""
+
+#: ../../usage/api-reference.md 2a8640789b3d4c27bc91b81c6b660e8c
+msgid "Working directory (validated against allowed roots)"
+msgstr ""
+
+#: ../../usage/api-reference.md:654 13e225e45a054dfa8b507795c08d4e34
+msgid "Timeout: 30 seconds. Max output: 1MB."
+msgstr ""
+
+#: ../../usage/api-reference.md:656 57e8660bd6cf4912a1f07a38ecdedce2
+msgid "Cluster"
+msgstr ""
+
+#: ../../usage/api-reference.md:658 eb209f8e00ff49779a6699387343a821
+#, fuzzy
+msgid "Get Cluster Status"
+msgstr "获取 Git 状态"
+
+#: ../../usage/api-reference.md:664 a4bb428878dc458fb9258b3cf0e7636e
+#, python-brace-format
+msgid ""
+"Returns Kubernetes cluster overview (nodes, jobs, pods). Returns `{ "
+"configured: false }` if `KUBECONFIG_PATH` is not set. Generic K8s Job "
+"tools also require either the generic `K8S_CONTEXT`/namespace/image "
+"fallback variables or a private `K8S_JOB_PROFILES_FILE`."
+msgstr ""
+
+#: ../../usage/api-reference.md:678 cfc41fcf881342959936c29e95abcefe
+msgid "Get Cluster Operations"
+msgstr ""
+
+#: ../../usage/api-reference.md:684 6ef95be315384e80ababb5fec133fa90
+msgid "Returns paginated cluster operation audit log. `limit` max: 200."
+msgstr ""
+
+#: ../../usage/api-reference.md:686 44daa53dee674493a8d1c932cb19555b
+msgid "Models"
+msgstr ""
+
+#: ../../usage/api-reference.md:688 9fa79f91cad74e7ebc1cf25ab8a4e8e7
+msgid "List Available Models"
+msgstr ""
+
+#: ../../usage/api-reference.md:694 1e035a124e1e42ca9486a9862a35d32e
+msgid "Fetches available models from the configured provider's API."
+msgstr ""
+
+#: ../../usage/api-reference.md 3c4f1a0f11c84ed585262220a6368e71
+msgid "Parameter"
+msgstr ""
+
+#: ../../usage/api-reference.md df74c23d4f1a4c09b9be7aa01a050377
+msgid "`provider`"
+msgstr ""
+
+#: ../../usage/api-reference.md b331260719274c338b61c986c77ab37a
+msgid "`\"openai\"` or `\"anthropic\"` (default: `\"openai\"`)"
+msgstr ""
+
+#: ../../usage/api-reference.md:710 3840ed04159f4ae48a463da0c1c0be76
+msgid "System"
+msgstr ""
+
+#: ../../usage/api-reference.md:712 730c69147dbd479bb40f00b206017987
+#, fuzzy
+msgid "Network Speed"
+msgstr "删除工作空间"
+
+#: ../../usage/api-reference.md:718 ea79128d59ed45cfb2b7170466fc4215
+msgid "Returns current network speed measurement."
+msgstr ""
+
+#: ../../usage/api-reference.md:720 177e9fabcf9e49a0addd0f47f5978ffb
+msgid "Feishu Push"
+msgstr ""
+
+#: ../../usage/api-reference.md:722 ede66b1ab6e841e4aff374cfff76cb4b
+msgid "Push Message to Feishu"
+msgstr ""
+
+#: ../../usage/api-reference.md:728 01206392890a447db2b85c078cbbf6a1
+msgid "Pushes a message or interactive card to a Feishu chat."
+msgstr ""
+
+#: ../../usage/api-reference.md:730 9033a26fdca843dcb90931fa54023853
+msgid "**Headers:**"
+msgstr ""
+
+#: ../../usage/api-reference.md 09f8fca252964290809bdf75b8e0e1e6
+#, fuzzy
+msgid "`chatId`"
+msgstr "对话"
+
+#: ../../usage/api-reference.md 0dcf81cca9d74a33ae430230fe3f1cb6
+msgid "Feishu chat/group ID"
+msgstr ""
+
+#: ../../usage/api-reference.md bb1adf9351464630887f14d2f5d3a467
+msgid "`title`"
+msgstr ""
+
+#: ../../usage/api-reference.md d541885a6d60473b82e284f5436b13d4
+msgid "Card title (default: `\"Agent Message\"`)"
+msgstr ""
+
+#: ../../usage/api-reference.md 0e2ab20e4a0347049b893198c5f3e6db
+msgid "`content`"
+msgstr ""
+
+#: ../../usage/api-reference.md c04edffeb74e4247881bc1d0b8ff151f
+msgid "Message content"
+msgstr ""
+
+#: ../../usage/api-reference.md cc8d13fd19cc403ea103af71ae1f16dc
+msgid "`type`"
+msgstr ""
+
+#: ../../usage/api-reference.md 00b134c0af354f4f83c1266427208f21
+msgid "`\"text\"` or `\"card\"` (default: `\"card\"`)"
+msgstr ""
+
+#: ../../usage/api-reference.md:754 4f61d83365904761b4770957fa664e97
+msgid "Git"
+msgstr "Git"
+
+#: ../../usage/api-reference.md:756 69cc168aa31b4a12a7fdb7294a3751fe
+msgid "Clone Repository"
+msgstr "克隆仓库"
+
+#: ../../usage/api-reference.md:771 811aa966069f4aa193346538a5c2faac
+msgid "Pull Repository"
+msgstr "拉取仓库"
+
+#: ../../usage/api-reference.md:785 1fcc159820554e088eae60097a8aa9db
+msgid "Get Git Status"
+msgstr "获取 Git 状态"
+
+#: ../../usage/api-reference.md:791 a61086b149ea4a6281df4901c4e6bfe2
+msgid "Settings"
+msgstr "设置"
+
+#: ../../usage/api-reference.md:793 044dcb2aee184a61aebacd92d08c3220
+msgid "Get Settings"
+msgstr "获取设置"
+
+#: ../../usage/api-reference.md:799 e82b6777c5194a178e61271aef556dc6
+msgid "Update Settings"
+msgstr "更新设置"
+
+#: ../../usage/api-reference.md:805 0ad2564cc1f142a9975a5e7cf26c4d1d
+msgid "Skills"
+msgstr ""
+
+#: ../../usage/api-reference.md:807 7c665c19b08c4f6cb9afacb34141535b
+msgid "List Skills"
+msgstr ""
+
+#: ../../usage/api-reference.md:813 2d311946f8dd4af19438caa883597d29
+#, fuzzy
+msgid "Create Skill"
+msgstr "重命名文件"
+
+#: ../../usage/api-reference.md:819 704ad54ebf0b410db6ee71d8677c36c7
+msgid "Import Skill"
+msgstr ""
+
+#: ../../usage/api-reference.md:825 e0c495fe953c473d9cc3545de3d92106
+msgid "Export Skill"
+msgstr ""
+
+#: ../../usage/api-reference.md:831 14881b1c8c13419e8347752bfdba2075
+msgid "Update / Delete Skill"
+msgstr ""
+
+#: ../../usage/api-reference.md:838 3f0b90c8ce8b4b588953dbcba571c0fd
+msgid "Error Handling"
+msgstr "错误处理"
+
+#: ../../usage/api-reference.md:840 e354234d28ff4a339dc5a48382572e2b
+msgid "All API endpoints return standard HTTP status codes:"
+msgstr "所有 API 端点返回标准 HTTP 状态码："
+
+#: ../../usage/api-reference.md b307e9fa47f84a9b8f15a8bf2b82049d
+msgid "Status"
+msgstr "状态码"
+
+#: ../../usage/api-reference.md 828462891d84434694b5ef4054205c9e
 msgid "`200`"
 msgstr "`200`"
 
-#: ../../usage/api-reference.md 6b744b2083dc444aa79758497b64b009
+#: ../../usage/api-reference.md 1520133c67fa4f869deeb33f36fa3672
 msgid "Success"
 msgstr "成功"
 
-#: ../../usage/api-reference.md 5a76b1e3980a45b5a0ab730f07b02ea7
+#: ../../usage/api-reference.md 263027a82d1d46128d14616253ce78dd
+#, fuzzy
+msgid "`201`"
+msgstr "`200`"
+
+#: ../../usage/api-reference.md fa9dc4ce9e66430ebb6645145cfbfcfa
+#, fuzzy
+msgid "Created (new resource)"
+msgstr "创建工作空间"
+
+#: ../../usage/api-reference.md 70ef530b948840e6947b1e7110cd3f1b
 msgid "`400`"
 msgstr "`400`"
 
-#: ../../usage/api-reference.md 32a07266dc754146b3adcffbda27df25
+#: ../../usage/api-reference.md 24a6ba73f608414fad1ef4f2732f74ed
 msgid "Bad request (missing or invalid parameters)"
 msgstr "请求错误（缺少或无效的参数）"
 
-#: ../../usage/api-reference.md f8a8900706ef4904b56abc98e4a08e45
+#: ../../usage/api-reference.md 062f8460d2f949899a9513c0c9130df4
+#, fuzzy
+msgid "`401`"
+msgstr "`404`"
+
+#: ../../usage/api-reference.md e3590053542c4a2a832224d092336cf3
+msgid "Unauthorized (invalid authentication)"
+msgstr ""
+
+#: ../../usage/api-reference.md f56bbff9aa434ae9a73aba68f80fe0ef
 msgid "`404`"
 msgstr "`404`"
 
-#: ../../usage/api-reference.md a7f02ef2e1e945e5ba62fc576da282c5
+#: ../../usage/api-reference.md 110f4611ed584d96927fe956dec973cb
 msgid "Resource not found"
 msgstr "资源未找到"
 
-#: ../../usage/api-reference.md d78fc37155724a5e87130e41689559dd
+#: ../../usage/api-reference.md 94aa87e21bb14903bedcba82a7fe2516
 msgid "`500`"
 msgstr "`500`"
 
-#: ../../usage/api-reference.md 8ac87e9157d044dd9e5345758cfff302
+#: ../../usage/api-reference.md faedbf6037444156adc1c35e4eb8f31c
 msgid "Internal server error"
 msgstr "服务器内部错误"
 
-#: ../../usage/api-reference.md:278 bb3f153db3ff4d049ca46daf93e695e5
+#: ../../usage/api-reference.md bf212eb1899e4f7fadbef81a523f7a66
+#, fuzzy
+msgid "`503`"
+msgstr "`500`"
+
+#: ../../usage/api-reference.md 7fdeb16e9d45438f9a3367fafda5fb75
+msgid "Service unavailable (AI not configured)"
+msgstr ""
+
+#: ../../usage/api-reference.md:852 d1fefeec5a394d0193416a8651984c9e
 msgid "Error responses include a JSON body:"
 msgstr "错误响应包含 JSON 正文："

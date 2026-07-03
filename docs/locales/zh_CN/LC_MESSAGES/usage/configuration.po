@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,133 +19,210 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../usage/configuration.md:1 9b32e10ec58941238c23b6f17e6284b7
+#: ../../usage/configuration.md:1 245f5ce83c29449799b4056002518149
 msgid "Configuration"
 msgstr "配置"
 
-#: ../../usage/configuration.md:3 89cb0612a7ff423fa7649b14cc61cc18
+#: ../../usage/configuration.md:3 f3dc55a4f140485d82c3d0965c12b973
 msgid ""
 "This page describes how to customize InnoClaw's behavior through "
 "configuration options."
 msgstr "本页介绍如何通过配置选项自定义 InnoClaw 的行为。"
 
-#: ../../usage/configuration.md:5 ddce840b5e624b878b8b1e2ecfefa5ac
+#: ../../usage/configuration.md:5 320b2eb0c42d45f7bb1c46897eaa7e7c
 msgid "Environment-Based Configuration"
 msgstr "基于环境变量的配置"
 
-#: ../../usage/configuration.md:7 e61cd2f93ad84860bc603c8be0322960
+#: ../../usage/configuration.md:7 7380e86dbf924728a53f48205ced6569
 msgid ""
 "All configuration is done through environment variables in your "
 "`.env.local` file. See [Environment Variables](../getting-started"
 "/environment-variables.md) for a complete reference."
 msgstr ""
-"所有配置都通过 `.env.local` "
-"文件中的环境变量完成。请参阅[环境变量](../getting-started/environment-variables.md)获取完整参考。"
+"所有配置都通过 `.env.local` 文件中的环境变量完成。请参阅[环境变量](../getting-started/environment-"
+"variables.md)获取完整参考。"
 
-#: ../../usage/configuration.md:9 b8b6bf7e776c4d92b2ab8e9e54dc53fd
+#: ../../usage/configuration.md:9 784abdb8f8fa4c6293d44e39ac53a8e4
 msgid "AI Provider Settings"
 msgstr "AI 提供商设置"
 
-#: ../../usage/configuration.md:11 b6d6044671fb44ee965a65d1b9613b32
+#: ../../usage/configuration.md:11 564a04b20552489d8840efdbd123f086
 msgid "Selecting a Provider"
 msgstr "选择提供商"
 
-#: ../../usage/configuration.md:13 8c34f1c1d465412694c3bff057e9d4e8
+#: ../../usage/configuration.md:13 f8c6b8adadfa40fbafb67eb7a9a93419
 msgid ""
 "InnoClaw supports multiple AI providers. Configure your preferred "
 "provider by setting the appropriate API key:"
 msgstr "InnoClaw 支持多个 AI 提供商。通过设置相应的 API 密钥来配置您偏好的提供商："
 
-#: ../../usage/configuration.md:25 e527eb820d1e4c889be8d867c8d57bbd
+#: ../../usage/configuration.md:28 dda47092eb9d45b8bbca19784474e4e0
+msgid "Default Provider and Model"
+msgstr ""
+
+#: ../../usage/configuration.md:30 b931ec84468441ecb36bd2c046f8fbc4
+msgid "Set the default LLM provider and model used when the application starts:"
+msgstr ""
+
+#: ../../usage/configuration.md:37 8596a942c74245ac9de478dce18ac52d
+msgid "These defaults can be overridden at any time via the Settings UI."
+msgstr ""
+
+#: ../../usage/configuration.md:39 6d24d4c6e1de434da06da2e669592ea9
 msgid "Using Custom Endpoints"
 msgstr "使用自定义端点"
 
-#: ../../usage/configuration.md:27 9fc6cb8ff9df4b4682707243f933800f
+#: ../../usage/configuration.md:41 7def221c0e6a48599d8d679943442b30
 msgid "For third-party compatible services, proxies, or self-hosted models:"
 msgstr "用于第三方兼容服务、代理或自托管模型："
 
-#: ../../usage/configuration.md:37 eb3813edae764ccbbfd3a7efd8241d4e
+#: ../../usage/configuration.md:54 b62451fc600949f3a1087c8961f37d4c
 msgid "Separate Embedding Configuration"
 msgstr "独立的 Embedding 配置"
 
-#: ../../usage/configuration.md:39 3dc962bcaa8e48e5b0ce920df2f2ebd4
+#: ../../usage/configuration.md:56 a5c8f3c397b04a06a44be6235c44171e
 msgid ""
 "If your chat model provider doesn't support the embedding endpoint, "
 "configure a separate service:"
 msgstr "如果您的对话模型提供商不支持 Embedding 端点，请配置单独的服务："
 
-#: ../../usage/configuration.md:47 c33c35ff0b614d659cfeba4270180e6e
+#: ../../usage/configuration.md:64 a3186221f87e448abc0b79e05f23fe9b
+#, fuzzy
+msgid "Agent Configuration"
+msgstr "配置"
+
+#: ../../usage/configuration.md:66 ed1666107cbf4ccca1fa5257c46c873e
+msgid "Max Tool Steps"
+msgstr ""
+
+#: ../../usage/configuration.md:68 991d2dc30b644b338a5532192a279287
+msgid "Control how many tool-call steps the agent can take per request:"
+msgstr ""
+
+#: ../../usage/configuration.md:74 a00897e51e574f2da4538594165670de
+msgid "Higher values allow more complex multi-step tasks but consume more tokens."
+msgstr ""
+
+#: ../../usage/configuration.md:76 c21c4a624a3944e488d3e7d266c67de8
 msgid "In-App Settings"
 msgstr "应用内设置"
 
-#: ../../usage/configuration.md:49 09a93695f47041ab9b25862a2ebfd59e
+#: ../../usage/configuration.md:78 1cff8d37370041bbb8da165d23000278
 msgid "Access the settings page at `/settings` to:"
 msgstr "访问 `/settings` 设置页面以："
 
-#: ../../usage/configuration.md:51 98e03b71e973464497d1900aaa4e0a59
-msgid "**Switch AI Provider** — Toggle between OpenAI and Anthropic"
+#: ../../usage/configuration.md:80 0e9c2c95e21544edad532b0f583b7447
+#, fuzzy
+msgid "**Switch AI Provider** — Toggle between OpenAI, Anthropic, and Gemini"
 msgstr "**切换 AI 提供商** —— 在 OpenAI 和 Anthropic 之间切换"
 
-#: ../../usage/configuration.md:52 cc57026342ce46ae9eabf2f57a72219e
+#: ../../usage/configuration.md:81 373f04b419df4b82a50285f7982d0742
 msgid "**Select Model** — Choose the specific model to use for chat"
 msgstr "**选择模型** —— 选择用于对话的特定模型"
 
-#: ../../usage/configuration.md:53 a55d0c5d225b4263bbe80e84cc0bc3aa
+#: ../../usage/configuration.md:82 f2ed39f8ba684e9f915f2c74f0a0b28b
 msgid "**View API Status** — Check which API keys are configured"
 msgstr "**查看 API 状态** —— 检查已配置的 API 密钥"
 
-#: ../../usage/configuration.md:54 1f521897ad384737a7bd7ec8c549ac20
+#: ../../usage/configuration.md:83 7f21010c4c03454693dfbcb1633451fd
 msgid "**View Workspace Roots** — See the configured workspace root directories"
 msgstr "**查看工作空间根目录** —— 查看已配置的工作空间根目录"
 
-#: ../../usage/configuration.md:56 6ced9cdcc58c4f6087d1beaa5a261008
+#: ../../usage/configuration.md:84 42e1781a1cc9484b8f2f3b253366bf42
+msgid "**Configure HuggingFace Token** — Set `HF_TOKEN` for dataset downloads"
+msgstr ""
+
+#: ../../usage/configuration.md:86 32cdd09a750545238f4b9532eebba27a
 msgid "Workspace Configuration"
 msgstr "工作空间配置"
 
-#: ../../usage/configuration.md:58 6634d9e4929b4403a86141058bd04f3d
+#: ../../usage/configuration.md:88 ee888cb35d8c465f8b50a0a1db249ae4
 msgid "Root Directories"
 msgstr "根目录"
 
-#: ../../usage/configuration.md:60 bb463e04ba5a492cb10d3f9154c927e7
+#: ../../usage/configuration.md:90 184f632f013c4a0e928551819559ee2d
 msgid ""
 "The `WORKSPACE_ROOTS` variable controls which server directories users "
 "can create workspaces in:"
 msgstr "`WORKSPACE_ROOTS` 变量控制用户可以在哪些服务器目录中创建工作空间："
 
-#: ../../usage/configuration.md:71 82fbc2f358194b548dff07403432637e
+#: ../../usage/configuration.md:101 6c282f9c0d6848e7a454c7f53dd2a33b
 msgid "All specified directories must already exist on the server"
 msgstr "所有指定的目录必须已在服务器上存在"
 
-#: ../../usage/configuration.md:72 64bfdb81f5f64cd0bfe4292e334c69d1
+#: ../../usage/configuration.md:102 c854824c74f34ccd98cd96ccfec9d313
 msgid "Users can only create workspaces within these root directories"
 msgstr "用户只能在这些根目录内创建工作空间"
 
-#: ../../usage/configuration.md:73 a1611d6b933e4aa08da0c374ba5f659f
+#: ../../usage/configuration.md:103 ecbbf405c19f46d4bdf236d8e7eb5a39
 msgid "Path traversal outside these roots is prevented by security checks"
 msgstr "安全检查会阻止路径遍历到这些根目录之外"
 
-#: ../../usage/configuration.md:76 556a6042f967443a89c72f9c588fc13b
+#: ../../usage/configuration.md:106 6da8f05794ce4955ad782a06dd0fced7
 msgid "Database Configuration"
 msgstr "数据库配置"
 
-#: ../../usage/configuration.md:78 4229a1c2278f484783e9db113abe94ab
+#: ../../usage/configuration.md:108 8e1db1ddcc2a4b25902884c13d4f1c51
+#, fuzzy
 msgid ""
-"InnoClaw uses SQLite with the database stored at "
-"`./data/innoclaw.db`. This location is set in `drizzle.config.ts` and "
-"is not currently configurable via environment variables."
+"InnoClaw uses SQLite with the database stored at `./data/innoclaw.db` by "
+"default. You can override this path via the `DATABASE_URL` environment "
+"variable:"
 msgstr ""
-"InnoClaw 使用 SQLite，数据库存储在 `./data/innoclaw.db`。该位置在 "
-"`drizzle.config.ts` 中设置，目前不支持通过环境变量配置。"
+"InnoClaw 使用 SQLite，数据库存储在 `./data/innoclaw.db`。该位置在 `drizzle.config.ts` "
+"中设置，目前不支持通过环境变量配置。"
 
-#: ../../usage/configuration.md:80 0ed19419eacf40be83dbeab410888411
+#: ../../usage/configuration.md:116 20acc0933c084e41a7d072db02a712c8
+msgid ""
+"Only plain filesystem paths are accepted (e.g. `/data/innoclaw.db`). "
+"SQLite connection strings like `file:./data/innoclaw.db?mode=rwc` are "
+"**not** supported — the `file:` prefix will be stripped automatically."
+msgstr ""
+
+#: ../../usage/configuration.md:119 838288f802f94e1f8724e2539fd9f3a3
 msgid "To use a fresh database:"
 msgstr "要使用全新数据库："
 
-#: ../../usage/configuration.md:90 82281fff9fd44154ac74e79adf1786d2
+#: ../../usage/configuration.md:129 b1b8a371f81c456980611d7e6dc574c7
+#, fuzzy
+msgid "Build Configuration"
+msgstr "配置"
+
+#: ../../usage/configuration.md:131 d86fe6cccb854f1695e3342b08205eca
+msgid ""
+"If the project resides on a network filesystem (NFS, CIFS, etc.) or "
+"another mount without local file locking, InnoClaw automatically disables"
+" Next's dist-dir lock so `npm run dev` can start. `NEXT_BUILD_DIR` is "
+"still available if you want an alternate build directory inside the repo:"
+msgstr ""
+
+#: ../../usage/configuration.md:137 279e3f2e50e348eebe96cf93a0a168dc
+msgid ""
+"`NEXT_BUILD_DIR` must stay within the project root on Next.js 16 / "
+"Turbopack. Absolute paths such as `/tmp/innoclaw-next` are not valid "
+"here."
+msgstr ""
+
+#: ../../usage/configuration.md:139 7ca52aa9f54a40a79ac9e7cc6157b6a9
+#, fuzzy
+msgid "Proxy Configuration"
+msgstr "配置"
+
+#: ../../usage/configuration.md:141 2bfff25379594ba7b350f5f16ec002f7
+msgid "For environments that require an HTTP proxy to reach external APIs:"
+msgstr ""
+
+#: ../../usage/configuration.md:149 d6c2b6bc9efd413cbaf54ba65ad2b2ee
+msgid ""
+"All outbound `fetch()` calls (AI API, GitHub, HuggingFace, etc.) will go "
+"through the proxy. Hosts listed in `NO_PROXY` bypass it."
+msgstr ""
+
+#: ../../usage/configuration.md:151 cd0dbccc384e4b768cb7b5c62e336e73
 msgid "Bot Integration Configuration"
 msgstr "机器人集成配置"
 
-#: ../../usage/configuration.md:92 ea617f8333c94f1fb58cc620396d37ac
+#: ../../usage/configuration.md:153 359f645b16194ecfa3dacd63937d98b0
 msgid ""
 "See [Notifications](../notifications/index.md) for configuring Feishu and"
 " WeChat bot integrations."
