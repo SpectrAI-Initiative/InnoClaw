@@ -53,7 +53,10 @@ describe("ensureOwnedK8sJob", () => {
           metadata: {
             labels: {
               "app.kubernetes.io/managed-by": "innoclaw",
-              "innoclaw.ai/job-hash": "hash-1",
+              "innoclaw.ai/job-hash": "hash-1".slice(0, 63),
+            },
+            annotations: {
+              "innoclaw.ai/job-spec-hash": "hash-1",
             },
           },
         },
@@ -66,6 +69,25 @@ describe("ensureOwnedK8sJob", () => {
     expect(() =>
       ensureOwnedK8sJob({ metadata: { labels: {} } }, "hash-1"),
     ).toThrow(/not owned by InnoClaw/);
+  });
+
+  it("rejects resources without a matching full hash annotation", () => {
+    expect(() =>
+      ensureOwnedK8sJob(
+        {
+          metadata: {
+            labels: {
+              "app.kubernetes.io/managed-by": "innoclaw",
+              "innoclaw.ai/job-hash": "a".repeat(63),
+            },
+            annotations: {
+              "innoclaw.ai/job-spec-hash": "b".repeat(64),
+            },
+          },
+        },
+        "a".repeat(64),
+      ),
+    ).toThrow(/hash does not match/);
   });
 });
 

@@ -21,6 +21,8 @@ export interface K8sJobToolInput {
 export const INNOCLAW_MANAGED_BY_LABEL = "app.kubernetes.io/managed-by";
 export const INNOCLAW_WORKSPACE_LABEL = "innoclaw.ai/workspace-id";
 export const INNOCLAW_JOB_HASH_LABEL = "innoclaw.ai/job-hash";
+export const INNOCLAW_JOB_HASH_ANNOTATION = "innoclaw.ai/job-spec-hash";
+export const K8S_LABEL_VALUE_MAX_LENGTH = 63;
 
 export function validateK8sJobInput(input: K8sJobToolInput): void {
   if (!input.profileId) {
@@ -65,6 +67,10 @@ export function computeK8sJobSpecHash(value: unknown): string {
   return crypto.createHash("sha256").update(stableStringify(value)).digest("hex");
 }
 
+export function toK8sLabelValue(value: string): string {
+  return value.slice(0, K8S_LABEL_VALUE_MAX_LENGTH);
+}
+
 export function ensureOwnedK8sJob(
   resource: unknown,
   expectedHash?: string,
@@ -77,12 +83,22 @@ export function ensureOwnedK8sJob(
       ? ((resource as { metadata?: { labels?: Record<string, string> } })
           .metadata?.labels ?? {})
       : {};
+  const annotations =
+    resource &&
+    typeof resource === "object" &&
+    "metadata" in resource &&
+    typeof (resource as { metadata?: unknown }).metadata === "object"
+      ? ((resource as { metadata?: { annotations?: Record<string, string> } })
+          .metadata?.annotations ?? {})
+      : {};
 
   if (labels[INNOCLAW_MANAGED_BY_LABEL] !== "innoclaw") {
     throw new Error("Kubernetes Job is not owned by InnoClaw");
   }
 
-  if (expectedHash && labels[INNOCLAW_JOB_HASH_LABEL] !== expectedHash) {
+  const actualHash =
+    annotations[INNOCLAW_JOB_HASH_ANNOTATION] ?? labels[INNOCLAW_JOB_HASH_LABEL];
+  if (expectedHash && actualHash !== expectedHash) {
     throw new Error("Kubernetes Job hash does not match the requested operation");
   }
 }

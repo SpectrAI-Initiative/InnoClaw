@@ -91,4 +91,30 @@ describe("buildK8sJobManifest", () => {
     expect(serialized).not.toContain("nodeSelector");
     expect(serialized).not.toContain("affinity");
   });
+
+  it("keeps the full job hash in annotations and a label-safe prefix in labels", () => {
+    const fullHash = "a".repeat(64);
+    const manifest = buildK8sJobManifest({
+      workspaceId: null,
+      jobSpecHash: fullHash,
+      namespace: "default",
+      profile: {
+        id: "cpu-smoke",
+        clusterId: "default",
+        defaultImage: "python:3.12",
+      },
+      input: {
+        profileId: "cpu-smoke",
+        jobName: "smoke-test",
+      },
+    });
+
+    expect(manifest.metadata.labels["innoclaw.ai/job-hash"]).toHaveLength(63);
+    expect(manifest.metadata.annotations).toMatchObject({
+      "innoclaw.ai/job-spec-hash": fullHash,
+    });
+    expect(manifest.spec.template.metadata.annotations).toMatchObject({
+      "innoclaw.ai/job-spec-hash": fullHash,
+    });
+  });
 });
