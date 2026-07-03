@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-13 23:29+0800\n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -18,255 +18,235 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../development/agent-development.md:1 e3fe5e23b31947b5bcb640fc817aa635
+#: ../../development/agent-development.md:1 5ba187b9f003429ab795edc5b6524616
 msgid "Agent Development"
 msgstr "智能体开发"
 
-#: ../../development/agent-development.md:3 33cdfb09881d4ef59ec73901867c662e
+#: ../../development/agent-development.md:3 a527e88d503d43d5beaab53fbd60eaa6
 msgid ""
 "This page covers contributor expectations for agent-related features, "
 "tool-calling flows, and deep-research orchestration inside InnoClaw."
-msgstr ""
-"本页说明了 InnoClaw 中与智能体相关功能、工具调用流程以及 deep-research 编排有关的贡献"
-"者要求。"
+msgstr "本页说明了 InnoClaw 中与智能体相关功能、工具调用流程以及 deep-research 编排有关的贡献者要求。"
 
-#: ../../development/agent-development.md:5 679ec279afdc42a0a58db519b6ad7710
+#: ../../development/agent-development.md:5 9849fcc33f474fcba39cd5146f7dbcf5
 msgid "Main Code Areas"
 msgstr "主要代码区域"
 
-#: ../../development/agent-development.md:7 611c34af22384525a1b124be506a89bd
+#: ../../development/agent-development.md:7 c7add0748a1d4bc19c08359c66a84596
 msgid "Agent and research-execution behavior is spread across a few core areas:"
 msgstr "智能体与研究执行相关的行为分布在几个核心区域中："
 
-#: ../../development/agent-development.md:9 3ac81a89325948469d6b4d752d9ef26e
+#: ../../development/agent-development.md:9 b0e2782d03cd456f8a2494b0e569df1a
 msgid ""
 "`src/app/api/agent/` and `src/app/api/deep-research/` for HTTP entry "
 "points"
-msgstr ""
-"`src/app/api/agent/` 与 `src/app/api/deep-research/` 负责 HTTP 入口"
+msgstr "`src/app/api/agent/` 与 `src/app/api/deep-research/` 负责 HTTP 入口"
 
-#: ../../development/agent-development.md:10 f92ff8d2aad749bba09cc1756e03ffef
+#: ../../development/agent-development.md:10 0495c036ec414505bbbc7c2f8950c3e9
 msgid ""
 "`src/lib/ai/` for provider selection, prompts, runtime capability checks,"
 " and tool registration"
-msgstr ""
-"`src/lib/ai/` 负责 provider 选择、prompts、运行时能力检查以及工具注册"
+msgstr "`src/lib/ai/` 负责 provider 选择、prompts、运行时能力检查以及工具注册"
 
-#: ../../development/agent-development.md:11 9486199bf6954d6cb25f1c8d32a301fc
+#: ../../development/agent-development.md:11 b168c2b37fe64cc7be90aae74f2018cc
 msgid ""
 "`src/lib/ai/tools/` for individual tool implementations and shared tool "
 "types"
-msgstr ""
-"`src/lib/ai/tools/` 负责具体工具实现与共享工具类型"
+msgstr "`src/lib/ai/tools/` 负责具体工具实现与共享工具类型"
 
-#: ../../development/agent-development.md:12 f9bcf7e187124ff087d87d7dd80f5075
+#: ../../development/agent-development.md:12 e43bd3fd6070458f961e780c129893b4
 msgid "`src/lib/agent/` for stream lifecycle and persistence behavior"
 msgstr "`src/lib/agent/` 负责流式生命周期与持久化行为"
 
-#: ../../development/agent-development.md:13 0967f4bef95c4651813a7673edba1fe3
+#: ../../development/agent-development.md:13 54c1c56f3a0440ebae50bb41c0a41b78
 msgid ""
 "`src/lib/deep-research/` for doctrine loading, roles, orchestration, "
 "workflow policy, and execution helpers"
-msgstr ""
-"`src/lib/deep-research/` 负责 doctrine 加载、角色定义、编排、工作流策略与执行辅助逻"
-"辑"
+msgstr "`src/lib/deep-research/` 负责 doctrine 加载、角色定义、编排、工作流策略与执行辅助逻辑"
 
-#: ../../development/agent-development.md:14 35fbfa12d45a4ca19fd1a56b2d52dc7b
+#: ../../development/agent-development.md:14 bcde25b04f954fd48bdb81b49c58cdde
 msgid "`src/lib/skills/` for skill import and repository-backed skill workflows"
 msgstr "`src/lib/skills/` 负责技能导入以及以仓库为后端的技能工作流"
 
-#: ../../development/agent-development.md:15 ec6c5a4081524e99bc2110b5604b908f
+#: ../../development/agent-development.md:15 f96894e60a5a405abd298332b3cd7537
 msgid ""
 "`src/components/agent/` and `src/components/deep-research/` for UI "
 "surfaces that expose agent state and workflow progress"
 msgstr ""
-"`src/components/agent/` 与 `src/components/deep-research/` 负责暴露智能体状态与工作"
-"流进度的 UI 界面"
+"`src/components/agent/` 与 `src/components/deep-research/` "
+"负责暴露智能体状态与工作流进度的 UI 界面"
 
-#: ../../development/agent-development.md:17 0a863a66eb5e480fa2e38ed042776dbf
+#: ../../development/agent-development.md:17 e2384a34a03249939be0f01cd2dcffd7
 msgid "Architectural Rules"
 msgstr "架构规则"
 
-#: ../../development/agent-development.md:19 05be12eebd5045ceb9457b5540037b49
+#: ../../development/agent-development.md:19 9c72039971434ce1acdf175969ac6e45
 msgid ""
 "Keep route handlers thin. Parse input, validate context, select the right"
 " orchestration path, and hand off non-trivial logic to `src/lib/`."
-msgstr ""
-"保持 route handler 足够轻薄。它们只负责解析输入、校验上下文、选择正确的编排路径，并将"
-"非简单逻辑下放到 `src/lib/`。"
+msgstr "保持 route handler 足够轻薄。它们只负责解析输入、校验上下文、选择正确的编排路径，并将非简单逻辑下放到 `src/lib/`。"
 
-#: ../../development/agent-development.md:20 71a94702e96448959d4ac635dd5c2513
+#: ../../development/agent-development.md:20 58583fd9ab774074800ea6e1351b2525
 msgid ""
 "Keep prompts in prompt modules or doctrine/role files instead of "
 "embedding long prompt text inside route handlers or React components."
 msgstr ""
-"将 prompts 放在 prompt 模块或 doctrine/role 文件中，不要把大段 prompt 文本直接嵌入 "
-"route handler 或 React 组件里。"
+"将 prompts 放在 prompt 模块或 doctrine/role 文件中，不要把大段 prompt 文本直接嵌入 route "
+"handler 或 React 组件里。"
 
-#: ../../development/agent-development.md:21 38422d0cc2f040039928c8b9bd6c86ba
+#: ../../development/agent-development.md:21 2473eb96a8ea4f04a0fe98b6e53165a4
 msgid ""
 "Keep provider, model, and runtime-capability logic centralized in "
 "`src/lib/ai/` so behavior stays consistent across agent entry points."
-msgstr ""
-"将 provider、model 与运行时能力逻辑集中在 `src/lib/ai/` 中，以保证各个智能体入口行为"
-"一致。"
+msgstr "将 provider、model 与运行时能力逻辑集中在 `src/lib/ai/` 中，以保证各个智能体入口行为一致。"
 
-#: ../../development/agent-development.md:22 6803894ecccf482fb588f4d25ae80873
+#: ../../development/agent-development.md:22 32d276f39bc44da0b9a7e8f1d30b22ac
 msgid ""
 "Treat `src/lib/ai/tool-names.ts` as the public contract for tool identity"
 " and privilege tiering."
-msgstr ""
-"将 `src/lib/ai/tool-names.ts` 视为工具标识与权限分层的公开契约。"
+msgstr "将 `src/lib/ai/tool-names.ts` 视为工具标识与权限分层的公开契约。"
 
-#: ../../development/agent-development.md:24 864583050d3f46f281f1fd3dfb9eeaef
+#: ../../development/agent-development.md:24 a4ed21feff4c4c4694b8aa4ecef1c2ee
 msgid "Agent Change Workflow"
 msgstr "智能体变更流程"
 
-#: ../../development/agent-development.md:43 4f8ecf3a31ef4c39be1d94c91645ded7
+#: ../../development/agent-development.md:66 8d965ee6152249eb81c117ab3e205c6d
 msgid ""
 "Use this workflow before you open a PR for agent-related changes. It is a"
 " quick way to catch the most common cross-layer regressions."
-msgstr ""
-"在为智能体相关变更提交 PR 之前，请先使用这套流程。它能快速帮您识别最常见的跨层回归。"
+msgstr "在为智能体相关变更提交 PR 之前，请先使用这套流程。它能快速帮您识别最常见的跨层回归。"
 
-#: ../../development/agent-development.md:45 62410e68cbdf4c56af4e8564f7d9df74
+#: ../../development/agent-development.md:68 42e71737e873435e9540b9604144f203
 msgid "Change Matrix"
 msgstr "变更矩阵"
 
-#: ../../development/agent-development.md:47 321fc573639140cc8b3475b31c46a50e
+#: ../../development/agent-development.md:70 da69a77e9f304b728a499eebb9e60096
 msgid ""
 "When you touch one of these agent-facing contracts, review the matching "
 "surfaces together:"
-msgstr ""
-"当您修改以下任一面向智能体的契约时，请一并检查对应的联动面："
+msgstr "当您修改以下任一面向智能体的契约时，请一并检查对应的联动面："
 
-#: ../../development/agent-development.md:49 989f439eece14ba0865f2e54c5fee958
+#: ../../development/agent-development.md:72 ad4a297d20d14bdc89239c2997247019
 msgid ""
 "Prompt, doctrine, or role-text change: prompt modules, doctrine files, "
 "role registries, dependent parsers, and UI copy or status labels that "
 "assume those names or instructions."
 msgstr ""
-"Prompt、doctrine 或角色文本变更：同时检查 prompt 模块、doctrine 文件、角色注册表、依"
-"赖它们的解析器，以及依赖这些名称或指令的 UI 文案与状态标签。"
+"Prompt、doctrine 或角色文本变更：同时检查 prompt 模块、doctrine "
+"文件、角色注册表、依赖它们的解析器，以及依赖这些名称或指令的 UI 文案与状态标签。"
 
-#: ../../development/agent-development.md:50 d7a53b8bd7bb470798ac8d0a7757408e
+#: ../../development/agent-development.md:73 aab2b66460d442e39bb0f7ff4c667168
 msgid ""
 "New tool or tool rename: `src/lib/ai/tool-names.ts`, the tool "
 "implementation, allow/deny logic, any selector UI, and contributor docs "
 "that describe the capability."
 msgstr ""
-"新增工具或工具重命名：同时检查 `src/lib/ai/tool-names.ts`、工具实现、allow/deny 逻"
-"辑、相关选择器 UI，以及描述该能力的贡献者文档。"
+"新增工具或工具重命名：同时检查 `src/lib/ai/tool-names.ts`、工具实现、allow/deny 逻辑、相关选择器 "
+"UI，以及描述该能力的贡献者文档。"
 
-#: ../../development/agent-development.md:51 0e69caba7e014c568746a9b53985e211
+#: ../../development/agent-development.md:74 a2f7c311b0794375a609b31fb93702f5
 msgid ""
 "Privilege-tier or approval-flow change: tool gating, runtime capability "
 "checks, UI affordances, and tests for both allowed and denied paths."
-msgstr ""
-"权限层级或审批流程变更：同时检查工具门控、运行时能力检查、UI 交互提示，以及允许/拒绝两"
-"条路径的测试。"
+msgstr "权限层级或审批流程变更：同时检查工具门控、运行时能力检查、UI 交互提示，以及允许/拒绝两条路径的测试。"
 
-#: ../../development/agent-development.md:52 9b55b21bf2a44df5a75e54d53a7afedc
+#: ../../development/agent-development.md:75 f61cd9bba75748bd83d5637ff7830233
 msgid ""
 "Streaming or session-persistence change: the route entry point, "
 "`src/lib/agent/agent-stream-manager.ts`, persistence helpers, and UI "
 "components that resume or display in-flight state."
 msgstr ""
-"流式输出或会话持久化变更：同时检查 route 入口、`src/lib/agent/agent-stream-manager."
-"ts`、持久化辅助逻辑，以及负责恢复或展示进行中状态的 UI 组件。"
+"流式输出或会话持久化变更：同时检查 route 入口、`src/lib/agent/agent-stream-"
+"manager.ts`、持久化辅助逻辑，以及负责恢复或展示进行中状态的 UI 组件。"
 
-#: ../../development/agent-development.md:53 3d09a8652b0743f4b4e2d49fafd21cba
+#: ../../development/agent-development.md:76 6647aafc64554b1388b41ed77196a9c1
 msgid ""
 "Deep-research workflow change: doctrine loading, role registry, workflow "
 "policy, artifact/status types, API routes, and the UI components that "
 "assume those steps or states exist."
 msgstr ""
-"Deep-research 工作流变更：同时检查 doctrine 加载、角色注册表、工作流策略、artifact/"
-"status 类型、API 路由，以及依赖这些步骤或状态存在的 UI 组件。"
+"Deep-research 工作流变更：同时检查 doctrine 加载、角色注册表、工作流策略、artifact/status 类型、API "
+"路由，以及依赖这些步骤或状态存在的 UI 组件。"
 
-#: ../../development/agent-development.md:55 9e4fabc9acbf4635a7ba2b7e71b1da0c
+#: ../../development/agent-development.md:78 393474db0174451bb0b9be3101aa2aeb
 msgid "Tooling And Privilege Boundaries"
 msgstr "工具与权限边界"
 
-#: ../../development/agent-development.md:57 3467480e44474024b9864234d340f885
+#: ../../development/agent-development.md:80 a96e0bc52f2a4d4981740921ec3122e7
 msgid "Add new tool implementations under `src/lib/ai/tools/`."
 msgstr "将新工具实现添加到 `src/lib/ai/tools/` 下。"
 
-#: ../../development/agent-development.md:58 19c8fbd9aa154cc68ed2c15ccee2685f
+#: ../../development/agent-development.md:81 e5b857b918fd48e086ede636ef5a0e1f
 msgid ""
 "Use shared tool context and validation helpers instead of introducing ad "
 "hoc filesystem or shell access."
-msgstr ""
-"优先复用共享的工具上下文与校验辅助逻辑，不要临时引入零散的文件系统或 shell 访问。"
+msgstr "优先复用共享的工具上下文与校验辅助逻辑，不要临时引入零散的文件系统或 shell 访问。"
 
-#: ../../development/agent-development.md:59 940d936a2b124ec78c9922450be6af05
+#: ../../development/agent-development.md:82 4276295fdf8840498d94dcd86f3a6c0f
 msgid ""
 "Default new tools to least privilege. If a capability can mutate "
 "infrastructure or trigger remote execution, gate it like the existing "
 "high-privilege tool sets."
-msgstr ""
-"新工具默认遵循最小权限原则。如果某项能力可能修改基础设施或触发远程执行，就应像现有高权"
-"限工具集一样进行门控。"
+msgstr "新工具默认遵循最小权限原则。如果某项能力可能修改基础设施或触发远程执行，就应像现有高权限工具集一样进行门控。"
 
-#: ../../development/agent-development.md:60 11ad83175e8940fa9255e7d96e6552fc
+#: ../../development/agent-development.md:83 5e0b6ad907044ec98622bf4ab9cd9b0e
+msgid ""
+"Generic Kubernetes Job scheduling must use the structured `prepareK8sJob`"
+" -> `runK8sJob` -> `waitForK8sJob` flow. Do not add raw manifest "
+"submission or cluster-specific scheduler defaults without explicit policy"
+" gates, tests, and docs."
+msgstr ""
+
+#: ../../development/agent-development.md:84 c1e4cb56cd6d46e9a5891a2c450effe1
 msgid ""
 "Keep tool names stable unless you are intentionally performing a contract"
 " migration. Renames require tests, docs, and any UI selector surfaces to "
 "be updated together."
-msgstr ""
-"除非您明确在做契约迁移，否则应保持工具名称稳定。重命名需要同步更新测试、文档以及所有相"
-"关的 UI 选择器界面。"
+msgstr "除非您明确在做契约迁移，否则应保持工具名称稳定。重命名需要同步更新测试、文档以及所有相关的 UI 选择器界面。"
 
-#: ../../development/agent-development.md:61 6c4430390d4c401ea49d687872fb8546
+#: ../../development/agent-development.md:85 edec5a16c14a4b3aa2b7fa9315fd74c6
 msgid ""
 "Do not let prompt text become the only guardrail for risky capabilities. "
 "Hard privilege boundaries belong in typed runtime checks and tool "
 "registration."
-msgstr ""
-"不要让 prompt 文本成为高风险能力的唯一防线。真正的权限边界应体现在带类型的运行时检查与"
-"工具注册中。"
+msgstr "不要让 prompt 文本成为高风险能力的唯一防线。真正的权限边界应体现在带类型的运行时检查与工具注册中。"
 
-#: ../../development/agent-development.md:63 8cc9cc94199d4cc09bee5d39d35f96b8
+#: ../../development/agent-development.md:87 16fb014650cf4e4a99dc7b6adbbb88c8
 msgid "Streaming, Sessions, And UI State"
 msgstr "流式输出、会话与 UI 状态"
 
-#: ../../development/agent-development.md:65 21325a4f30fe40e4be7259a6aa14e9d0
+#: ../../development/agent-development.md:89 914893beb1bc4cf29f8fb4c12db7f6ea
 msgid ""
 "If you change how agent streams are produced or consumed, review "
 "`src/lib/agent/agent-stream-manager.ts` and mounted UI behavior together."
 msgstr ""
-"如果您修改了智能体流式输出的生成或消费方式，请一并检查 `src/lib/agent/agent-stream-"
-"manager.ts` 以及已挂载 UI 的行为。"
+"如果您修改了智能体流式输出的生成或消费方式，请一并检查 `src/lib/agent/agent-stream-manager.ts` 以及已挂载"
+" UI 的行为。"
 
-#: ../../development/agent-development.md:66 a1fa6fad2eaa4619b264d17bfebd5694
+#: ../../development/agent-development.md:90 986c6724f2d54a2c8fe094acee3453b6
 msgid ""
 "Preserve resume and persistence semantics when the panel unmounts, tabs "
 "switch, or background work continues."
-msgstr ""
-"当面板卸载、标签切换或后台任务继续运行时，必须保持恢复与持久化语义不变。"
+msgstr "当面板卸载、标签切换或后台任务继续运行时，必须保持恢复与持久化语义不变。"
 
-#: ../../development/agent-development.md:67 d19464fd948946e28f45cd474c573ea8
+#: ../../development/agent-development.md:91 277b1a6ec8624a908f4363ccd12ae8a8
 msgid ""
 "Be careful with localStorage-backed keys and session identifiers. Treat "
 "them as shared contracts between route, runtime, and UI layers."
-msgstr ""
-"谨慎处理由 localStorage 支撑的键与会话标识符。应将它们视为 route、runtime 与 UI 各层"
-"之间的共享契约。"
+msgstr "谨慎处理由 localStorage 支撑的键与会话标识符。应将它们视为 route、runtime 与 UI 各层之间的共享契约。"
 
-#: ../../development/agent-development.md:68 d25662030a484e7f8556846217d1a8a0
+#: ../../development/agent-development.md:92 44b960dcd1f344058f2ec2fbdf6213db
 msgid ""
 "Prefer explicit transition states and surfaced errors over silent "
 "fallback behavior that hides dropped events, unsupported tools, or resume"
 " failures."
-msgstr ""
-"优先使用显式的状态迁移与可见错误，而不是静默 fallback；静默 fallback 容易掩盖事件丢"
-"失、工具不受支持或恢复失败。"
+msgstr "优先使用显式的状态迁移与可见错误，而不是静默 fallback；静默 fallback 容易掩盖事件丢失、工具不受支持或恢复失败。"
 
-#: ../../development/agent-development.md:70 8341f6f047604143b58527217803995b
+#: ../../development/agent-development.md:94 db720a1f183a421685680d2d7e196d58
 msgid "Deep-Research And Multi-Role Flows"
 msgstr "Deep-Research 与多角色流程"
 
-#: ../../development/agent-development.md:72 f5c7b9656323437386027f753778f138
+#: ../../development/agent-development.md:96 826b022c36574ac2bb837dcdd74ba883
 msgid ""
 "Keep doctrine loading, role definitions, and workflow policy aligned "
 "across `researcher-doctrine.ts`, `role-registry.ts`, and `workflow-"
@@ -275,178 +255,162 @@ msgstr ""
 "让 `researcher-doctrine.ts`、`role-registry.ts` 与 `workflow-policy.ts` 之间的 "
 "doctrine 加载、角色定义与工作流策略保持一致。"
 
-#: ../../development/agent-development.md:73 3d09a8652b0743f4b4e2d49fafd21cba
+#: ../../development/agent-development.md:97 d4991b4ced4242a6b68b1f5fbc8d479c
 msgid ""
 "When changing role prompts or collaboration behavior, review the "
 "corresponding API routes and UI components that assume those artifacts, "
 "steps, or statuses exist."
-msgstr ""
-"当修改角色 prompts 或协作行为时，请检查依赖这些 artifact、步骤或状态存在的 API 路由与"
-" UI 组件。"
+msgstr "当修改角色 prompts 或协作行为时，请检查依赖这些 artifact、步骤或状态存在的 API 路由与 UI 组件。"
 
-#: ../../development/agent-development.md:74 c137d484b4af490b9bb13b300c8d4e40
+#: ../../development/agent-development.md:98 920a28ea39ce46f3b98f6cdc109ab09f
 msgid "High-risk execution paths should remain approval-driven and auditable."
 msgstr "高风险执行路径必须继续保持审批驱动，并且可审计。"
 
-#: ../../development/agent-development.md:75 fcfd38033bda4b5e87af165352481080
+#: ../../development/agent-development.md:99 576e96cca2054178b155ce8428ba13aa
 msgid ""
 "When adding a new role, artifact type, or workflow status, verify how it "
 "appears in persistence, export/reporting paths, and the operator-facing "
 "review surfaces."
-msgstr ""
-"当新增角色、artifact 类型或工作流状态时，请验证它在持久化、导出/报告路径以及面向操作"
-"者的评审界面中是如何呈现的。"
+msgstr "当新增角色、artifact 类型或工作流状态时，请验证它在持久化、导出/报告路径以及面向操作者的评审界面中是如何呈现的。"
 
-#: ../../development/agent-development.md:77 dc2f538e91964ff893fbb92edbc65569
+#: ../../development/agent-development.md:101 e086079ad10a40e38c0f90ecfb52d3d2
 msgid "Failure Handling And Observability"
 msgstr "失败处理与可观测性"
 
-#: ../../development/agent-development.md:79 050e1dadf3dc490794049a7f2dd00a42
+#: ../../development/agent-development.md:103 3a803de626b643a399ceaa8b2161f783
 msgid ""
 "Return explicit, typed failure states where the client or operator needs "
 "to react differently."
-msgstr ""
-"在客户端或操作员需要做出不同处理时，应返回显式、带类型的失败状态。"
+msgstr "在客户端或操作员需要做出不同处理时，应返回显式、带类型的失败状态。"
 
-#: ../../development/agent-development.md:80 189dda81745a458cad8ad0e9939c2935
+#: ../../development/agent-development.md:104 2b07f02902f247d592c373753e23a7a7
 msgid ""
 "Log enough request, session, provider, or tool context to debug "
 "orchestration failures without reproducing everything from scratch."
-msgstr ""
-"记录足够的 request、session、provider 或 tool 上下文，以便在无需从头复现的情况下定位"
-"编排失败。"
+msgstr "记录足够的 request、session、provider 或 tool 上下文，以便在无需从头复现的情况下定位编排失败。"
 
-#: ../../development/agent-development.md:81 f17174d6fdc64579b4c720a3f5026325
+#: ../../development/agent-development.md:105 c41f6a0d0c8649218d2ea2dfe2646ca8
 msgid ""
 "Avoid silent provider fallback or tool suppression unless the user "
 "experience clearly communicates what capability was skipped."
-msgstr ""
-"除非用户体验明确告知了被跳过的能力，否则应避免静默 provider fallback 或静默抑制工"
-"具。"
+msgstr "除非用户体验明确告知了被跳过的能力，否则应避免静默 provider fallback 或静默抑制工具。"
 
-#: ../../development/agent-development.md:82 df5ed62b145944cea8ea6635682e715e
+#: ../../development/agent-development.md:106 962772f929604b94b34b71e95af40569
 msgid ""
 "Keep approval checkpoints and audit trails intact when changing remote "
 "execution, cluster operations, or other high-risk flows."
-msgstr ""
-"在修改远程执行、集群操作或其他高风险流程时，必须保持审批检查点与审计链路完整。"
+msgstr "在修改远程执行、集群操作或其他高风险流程时，必须保持审批检查点与审计链路完整。"
 
-#: ../../development/agent-development.md:84 c76a8c2bf92243cc97af73d9ae4ca1ec
+#: ../../development/agent-development.md:108 ef084664173b4b3a844e2f2628ecf914
 msgid "Testing Expectations"
 msgstr "测试要求"
 
-#: ../../development/agent-development.md:86 49a1d2326082422796fe7da3dc73d99c
+#: ../../development/agent-development.md:110 648f77b4de1c4ac897c76c6dc04fe02f
 msgid "Choose tests based on the layer you changed:"
 msgstr "请根据您修改的层级选择测试："
 
-#: ../../development/agent-development.md:88 5dee6f4c24b34e79848e59448b4b4937
+#: ../../development/agent-development.md:112 9d8af3914c6b4f43b43c1b65817e3b83
 msgid "Route behavior: `src/app/api/**/route.test.ts`"
 msgstr "路由行为：`src/app/api/**/route.test.ts`"
 
-#: ../../development/agent-development.md:89 f6631753962f426e8b07772c5162436e
+#: ../../development/agent-development.md:113 ef59caf3f3be46998c5bde955cdad6e3
 msgid "Provider or model-selection behavior: tests under `src/lib/ai/`"
 msgstr "Provider 或模型选择行为：`src/lib/ai/` 下的测试"
 
-#: ../../development/agent-development.md:90 aa12eb28647e4c3584a4fa627978c17b
+#: ../../development/agent-development.md:114 07275d4b99d84356abdc32b6141da9bc
 msgid ""
 "Tool contract or parsing behavior: tests under `src/lib/ai/` or "
 "`src/lib/skills/`"
-msgstr ""
-"工具契约或解析行为：`src/lib/ai/` 或 `src/lib/skills/` 下的测试"
+msgstr "工具契约或解析行为：`src/lib/ai/` 或 `src/lib/skills/` 下的测试"
 
-#: ../../development/agent-development.md:91 8c703842bb354ac59c8acfcfb4642b91
+#: ../../development/agent-development.md:115 4ac9f8f52ff34ee2b45c7f3ef0399ec5
 msgid ""
 "Stream/session persistence behavior: tests near `src/lib/agent/` or "
 "affected UI helpers"
-msgstr ""
-"流式/会话持久化行为：`src/lib/agent/` 附近或受影响 UI 辅助逻辑附近的测试"
+msgstr "流式/会话持久化行为：`src/lib/agent/` 附近或受影响 UI 辅助逻辑附近的测试"
 
-#: ../../development/agent-development.md:92 2b4e7dfd8e6c40c883a3979aaf046e04
+#: ../../development/agent-development.md:116 1b7bcec087204efca49a831dc26105d1
 msgid "Deep-research workflow logic: tests under `src/lib/deep-research/`"
 msgstr "Deep-research 工作流逻辑：`src/lib/deep-research/` 下的测试"
 
-#: ../../development/agent-development.md:94 a389774c1e764fbb990345aabb912566
+#: ../../development/agent-development.md:118 7c4a4d69356c44f2a72a1d329b436627
 msgid "At minimum, new agent-facing behavior should include coverage for:"
 msgstr "至少，新引入的面向智能体行为应覆盖以下方面："
 
-#: ../../development/agent-development.md:96 a9a87c18ea374c7588446df93fdcad17
+#: ../../development/agent-development.md:120 7488062a5ada4941bb17378a27a2f2ae
 msgid "validation and error paths"
 msgstr "校验与错误路径"
 
-#: ../../development/agent-development.md:97 624d5c14c72f45fcb4e607c6dceda9d7
+#: ../../development/agent-development.md:121 77f83919d8b444cdaf2fadad58162271
 msgid "privilege or tool-access boundaries"
 msgstr "权限或工具访问边界"
 
-#: ../../development/agent-development.md:98 64b16cb96b5147b08f84d7a14cc05a78
+#: ../../development/agent-development.md:122 c24b5d5a863c4b199cfd8f0ebbae916c
 msgid "provider/runtime branching where behavior differs"
 msgstr "在行为不同处的 provider/runtime 分支"
 
-#: ../../development/agent-development.md:99 9fa54560a65144d1a810442bef2114ce
+#: ../../development/agent-development.md:123 edcd4da4c5894197bcb8cdb2df23996e
 msgid "any persisted session or workflow state changes"
 msgstr "任何持久化的会话或工作流状态变化"
 
-#: ../../development/agent-development.md:101 864583050d3f46f281f1fd3dfb9eeaef
+#: ../../development/agent-development.md:125 4a7aec65860746c68b5c8450474be91a
 msgid "Agent Contributor Checklist"
 msgstr "智能体贡献者检查清单"
 
-#: ../../development/agent-development.md:103 53e0ac086e134fb3aee7a407aad0fdf1
+#: ../../development/agent-development.md:127 46780511c68440d39ab74fef685291bb
 msgid "Before requesting review for agent-related work, confirm:"
 msgstr "在为智能体相关工作请求评审前，请确认："
 
-#: ../../development/agent-development.md:105 effc94a1a4574411999829e18ab7519f
+#: ../../development/agent-development.md:129 ef2b7562a49748cda03c4d29d8f12ed7
 msgid ""
 "the relevant contract surfaces from the change matrix were reviewed "
 "together"
-msgstr ""
-"变更矩阵中相关的契约联动面已被一并检查"
+msgstr "变更矩阵中相关的契约联动面已被一并检查"
 
-#: ../../development/agent-development.md:106 7d7c322c24894fe6b6e9dbf191bdad3e
+#: ../../development/agent-development.md:130 99b7b4b182ce497986a5538f8e95eedc
 msgid "tests cover both success and failure or deny paths"
 msgstr "测试同时覆盖成功路径与失败/拒绝路径"
 
-#: ../../development/agent-development.md:107 8cbf99d594014f8bbb37912ef792161f
+#: ../../development/agent-development.md:131 6aea81732efb4c0783d7540b85eeeb10
 msgid ""
 "docs were updated if another contributor or operator needs to understand "
 "the new capability"
-msgstr ""
-"如果其他贡献者或操作员需要理解这项新能力，文档已经同步更新"
+msgstr "如果其他贡献者或操作员需要理解这项新能力，文档已经同步更新"
 
-#: ../../development/agent-development.md:108 ee7cc4f40aaa437a8d6b3beaf926382b
+#: ../../development/agent-development.md:132 4a4bb1b590fa49c6b8799c14098cbc88
 msgid ""
 "handoff notes call out changed tool names, approval boundaries, persisted"
 " keys, workflow statuses, or environment requirements"
-msgstr ""
-"交接说明已经明确指出变化的工具名称、审批边界、持久化键、工作流状态或环境要求"
+msgstr "交接说明已经明确指出变化的工具名称、审批边界、持久化键、工作流状态或环境要求"
 
-#: ../../development/agent-development.md:110 6e33c9d84c824b22bb14f8af398aa73e
+#: ../../development/agent-development.md:134 9d56064d644c43e2a87d76d40ec6d680
 msgid "Documentation Expectations"
 msgstr "文档要求"
 
-#: ../../development/agent-development.md:112 d47daf776b0f474aafa4d82e0f814ec6
+#: ../../development/agent-development.md:136 82c3c5acf05640b792611a2a73fec42d
 msgid "Update contributor docs when agent-related changes affect:"
 msgstr "当智能体相关变更影响以下内容时，请更新贡献者文档："
 
-#: ../../development/agent-development.md:114 dc19d6734e3b4f238eb261a1b97c8b16
+#: ../../development/agent-development.md:138 a59c70a6a7a14482aac65d1ba7550283
 msgid "setup or required environment variables"
 msgstr "安装配置或必需环境变量"
 
-#: ../../development/agent-development.md:115 7be72691c94d4007b58970c3bf705cd2
+#: ../../development/agent-development.md:139 b45c036242204e6bac320cdfccb24642
 msgid "available tools, privilege boundaries, or execution gates"
 msgstr "可用工具、权限边界或执行门控"
 
-#: ../../development/agent-development.md:116 e8bb76d650064c58946a9c70493168b6
+#: ../../development/agent-development.md:140 26a83699ee7c4e5e8090052aa5d7ee89
 msgid "contributor workflow for testing, debugging, or local development"
 msgstr "贡献者在测试、调试或本地开发中的工作流"
 
-#: ../../development/agent-development.md:117 be64763fda6c421cb091d448f5e899bb
+#: ../../development/agent-development.md:141 70a3de7f52ff4d30bfffb07558982205
 msgid "route or workflow contracts that another developer is likely to extend"
 msgstr "其他开发者很可能会继续扩展的路由或工作流契约"
 
-#: ../../development/agent-development.md:119 2c493000b9e24242965c24cf7eec2ed0
+#: ../../development/agent-development.md:143 f324225d1f6d4eed914327aac7e5c6c4
 msgid ""
 "If a change is primarily internal but creates a new developer extension "
 "point, document that extension point here or in the most relevant "
 "development page."
-msgstr ""
-"如果某项变更主要是内部实现，但引入了新的开发者扩展点，请在这里或最相关的开发文档页中记"
-"录该扩展点。"
+msgstr "如果某项变更主要是内部实现，但引入了新的开发者扩展点，请在这里或最相关的开发文档页中记录该扩展点。"
+

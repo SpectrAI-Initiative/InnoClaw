@@ -1,0 +1,1062 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, InnoClaw Contributors
+# This file is distributed under the same license as the InnoClaw package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: InnoClaw \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../development/readme-homepage-redesign.md:5
+#: e695c8bd010e4aa89fca4a265aaad680
+msgid "README Homepage Redesign Plan"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:7
+#: 997051ab1c9e4deda1c827157f4543c1
+msgid "Goal"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:9
+#: 8b750c35e87c40cfa21c548850b5ab3a
+msgid ""
+"Turn the repository homepage into a concise English landing page that "
+"explains InnoClaw quickly, highlights its strongest workflows, and routes"
+" detailed setup and reference material into the existing documentation."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:11
+#: 922a0bcb585a41d2b54ea62294a9ef7e
+msgid ""
+"This redesign treats `README.md` as the canonical English homepage and "
+"moves translated README files into `docs/README_*.md`."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:13
+#: 95ee171ea2c74cdc8fe057624c40f737
+msgid "Design Principles"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:15
+#: 39f5874251bd4c87b8755a48eefc81f2
+msgid "Lead with value before setup details."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:16
+#: e6d638f4db3f450490ccdb8e53a7ac19
+msgid "Keep the GitHub homepage skimmable in 2 to 4 minutes."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:17
+#: e907364173734bef80a3d90b2621c81d
+msgid ""
+"Use the docs site for long installation, configuration, troubleshooting, "
+"and development content."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:18
+#: 6dc32fb1d65540df9a05da6d8c34c371
+msgid ""
+"Keep all translated README files structurally aligned with the English "
+"homepage."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:19
+#: 81097511f88d44bcb9dc2b5497b3ddce
+msgid "Prefer product outcomes and workflows over long internal feature dumps."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:20
+#: 00bcf64ecef541359570489a39f1d020
+msgid ""
+"Prefer stable diagrams or workflow visuals over product screenshots when "
+"the UI changes quickly."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:21
+#: 5a7bfb8a960a4b8ba2a7e7cb1b00c64c
+msgid ""
+"Use a consistent emoji system for major headings so sections are easier "
+"to scan on GitHub."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:23
+#: 43c3efda4c544784997210649db9f086
+msgid "Proposed File Layout"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:35
+#: f7372d8d225e419eb320325569271324
+msgid ""
+"If a future translation is not ready yet, use a polished placeholder page"
+" with links back to the canonical English homepage and docs portal."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:37
+#: 820e127bba1b4402af2c3d3b95b3309d
+msgid "Proposed Homepage Structure"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:39
+#: ff2cf57141004d76ae34c421061bad7e
+msgid "1. Hero"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:41
+#: 731ab8294d8340a5b2f24d316e565318
+msgid "Purpose: tell visitors what InnoClaw is in under 10 seconds."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:43
+#: ../../development/readme-homepage-redesign.md:189
+#: 68da345c543f4b969c7114b9675cb23f d30320dece8d484eba6058aad4a68ea2
+msgid "Recommended contents:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:45
+#: 4fa375ea791642c39b5b5a3a3226a2da
+msgid "Project name"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:46
+#: 31a80f4d8e584a39a80407c9fcc95cd9
+msgid "Logo plus a stable workflow diagram or product visual"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:47
+#: 528aa5bc7d1343338e625de86fdd2270
+msgid "One-line positioning statement"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:48
+#: 260f6955cf6f491bb36b390e34cf85f4
+msgid "Primary badges"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:49
+#: dfb75472eac24c3fbe34197f2a328bcd
+msgid "Language links"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:50
+#: afeb69efdd3a413185c32d54abfe00f9
+msgid "Quick links: Docs, Quick Start, Community"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:52
+#: 3540cb0c7b8a40178bae5b6dcfd1a77f
+msgid "Suggested positioning statement:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:54
+#: fcfade3869714bd9bb8cf082e3825df2
+msgid ""
+"`A self-hostable AI research workspace for grounded chat, paper study, "
+"scientific skills, and research execution.`"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:56
+#: 077aa4a8abcf4d2ab22ddb66b1e61950
+msgid "Recommended badges:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:58
+#: ../../development/readme-homepage-redesign.md:247
+#: ../../development/readme-homepage-redesign.md:348
+#: 2feb1fdf5a7e40e8b4bb1426ea607582 4210ff371eb64b63829fffa4208c8260
+#: 6d660358c9514e4baf101397a8dcf375
+msgid "License"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:59
+#: 5a945b637d57480280313a35bd3f085b
+msgid "Node.js version"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:60
+#: b726992632f14044b35c60510e543bbc
+msgid "Docs"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:61
+#: b0fec15ef18e481db7e2142b182df07c
+msgid "GitHub stars or repo link"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:62
+#: 8f5c7a996e234b0e86f6a8c2e1727d3c
+msgid "Optional: build status"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:64
+#: 53bab4d5372248298f9b9113976440c1
+msgid "2. What Is InnoClaw?"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:66
+#: 3eb2eee80b024d4097b8114abed126d1
+msgid "Purpose: give a compact product definition."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:68
+#: 9c462baf57444d109f091984fc0bd715
+msgid "Keep this section to 2 or 3 short paragraphs covering:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:70
+#: 21f8c6f48ea14405b77ca366b4b96d0c
+msgid "Server folders become workspaces"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:71
+#: c983e86f75704714a873e58d7f14e8f8
+msgid "RAG-grounded chat over local content"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:72
+#: d58830beabbd48ebb4a37b98cfa8282c
+msgid "Research-oriented workflows beyond generic chat"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:73
+#: 0206fede28b242129d6887465a285081
+msgid "Self-hosted and multi-model friendly deployment"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:75
+#: 8147f9c5d32b43fdbcfe5c4fe2acfe2b
+msgid "3. Why InnoClaw"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:77
+#: c017a60dc8d24bb09147bc67f7c6a200
+msgid "Purpose: explain why this is not just another general AI chat UI."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:79
+#: 700f300b047a49be8e99fa8170f86dbc
+msgid "Recommended format: 4 to 6 bullets or a compact table."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:81
+#: 33db0d4a225549ada7379963cfa50bf5
+msgid "Suggested pillars:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:83
+#: 2055fedb23d3420db00ccc1da22783c2
+msgid "Workspace-first research workflow"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:84
+#: 901c7d43c1124143bcc1c8ef8418a576
+msgid "Grounded answers with citations"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:85
+#: 7f8500b2432044a4973b10b0db911cf1
+msgid "Paper study, structured discussion, and ideation"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:86
+#: 30573291902a4a79a4f7fb1b374440ff
+msgid "Built-in scientific skills"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:87
+#: 1ae8465791ae4891950d13121ff01d01
+msgid "Research execution workspace for remote jobs and experiment loops"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:88
+#: e09842de57194bd3961d512b2c892c06
+msgid "Self-hosted deployment with multi-provider support"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:90
+#: 897536b15017461cb6c57dd46d6ff9f0
+msgid "4. Quick Start"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:92
+#: 3d3e8f6855cc4efb96a138f7b06101a0
+msgid "Purpose: give the shortest working path."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:94
+#: 03d75faa5b494ac2ac563ce058b6a825
+msgid ""
+"This should be much shorter than the current README install section. Keep"
+" it to:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:103
+#: dd43c0bcd6154916a0024d3faaf1c14a
+msgid "Then add 2 to 4 bullets:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:105
+#: ../../development/readme-homepage-redesign.md:300
+#: 0bf331e52efe44b6895fc6d6ccad0916 521f1dc3bda2461a829b575fcbfb75b8
+msgid "Open `http://localhost:3000`"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:106
+#: 0d8a8120e21b4fae8ef7566723d2036a
+msgid "Configure one AI provider in Settings"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:107
+#: ../../development/readme-homepage-redesign.md:302
+#: a1efc08c2c5846a6bbe72ca76c3af9e3 d3a4d90ca083459aa1dd3e0880e9f916
+msgid "Open a workspace and click Sync"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:108
+#: adf93bf805824c5dba37553fd2ec8e6f
+msgid "Read the full installation guide in docs"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:110
+#: a6f23848148a4bebbe875ea32a84d016
+msgid ""
+"Detailed OS-specific prerequisites should move out of the homepage and "
+"remain in `docs/getting-started/installation.md`."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:112
+#: 83bb8ce982df4e05a62fab19bc689709
+msgid "5. What You Can Do"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:114
+#: a245325c98584d189d569178b9195ba5
+msgid "Purpose: show practical outcomes instead of implementation details."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:116
+#: 070ca61ec4d94c5c813de917275acb61
+msgid "Recommended format: short scenario list."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:118
+#: f6a8316786174cfba179c21cbfaec89a
+msgid "Example scenarios:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:120
+#: 39ad2b7c980442f680f360a5504aa8ae
+msgid "Chat with your research files using RAG-backed citations"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:121
+#: 4091cd218bc142c1ae0da51c6c5216f8
+msgid "Read and discuss papers with structured multi-agent roles"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:122
+#: 1dc436afce04478d9d0406c8ce806277
+msgid "Generate summaries, FAQs, briefs, and timelines"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:123
+#: e16a1867b94945beb59ad3005f613d53
+msgid "Import scientific skills for domain workflows"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:124
+#: 04f907fc8249451c9ccccad84ead6759
+msgid "Run remote research jobs with approval gates and monitoring"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:125
+#: e2ecb74bf03c44b994703555c14b8371
+msgid "Manage multiple agent sessions across projects"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:127
+#: b848d02aca5444f09200665cd2d87dd7
+msgid "6. Core Workflows"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:129
+#: e986acd23a2d4601a642b2433bf5a3bd
+msgid "Purpose: spotlight the product's most differentiated paths."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:131
+#: 8110f803b09c4229b8a137fb3f3e9163
+msgid "Recommended subsections:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:133
+#: 240213ad70d44c0a80e47072dddf56c0
+msgid "Choose Your Path"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:134
+#: 37195d5de02c4675945807588d460a39
+msgid "How It Fits Together"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: ../../development/readme-homepage-redesign.md:135
+#: ../../development/readme-homepage-redesign.md:314
+#: 5f6de88d54cd44c782b31b096b87f663 8cc79cf8cc1f454db348781d3314fbd8
+#: 9ddc1160df8c41178d33fe8cb3f24a96
+msgid "Paper Study"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:136
+#: ../../development/readme-homepage-redesign.md:318
+#: 393bda882a984e13ac35456f431eab77 5576aa8a97064315b476842f558ff3d4
+msgid "Multi-Agent Discussion"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:137
+#: ../../development/readme-homepage-redesign.md:322
+#: 3d4389bbf9b44feb928c4adfc80a9934 c9e691bc80f745adb92c21a04e046492
+msgid "Research Execution Workspace"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:139
+#: 1399e941e57e4e0ba1c9b5e479c18371
+msgid "Each subsection should contain:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:141
+#: 3d07cea1d1ee46a1a7adf2524dc536e5
+msgid "1 sentence on what it does"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:142
+#: 5fa8269c7dfb408a92b42ed84b2f664d
+msgid "3 to 4 concise bullets on how the workflow feels to users"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:144
+#: 95d90dd984be4d1eb80382094749899e
+msgid ""
+"This is also the best place to include one lightweight diagram or "
+"sequence block."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:146
+#: 31e0ad29d5864ee983f4ef7bd9c58eb7
+msgid "Suggested additions:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:148
+#: 0afb12d7fcef4abba1cee692bdac32d2
+msgid ""
+"`Choose Your Path` should help first-time visitors map their intent to a "
+"starting feature."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:149
+#: f7b9a8d3ba574e25b5d42a7136b55d77
+msgid ""
+"`How It Fits Together` should explain the stable product layers without "
+"relying on UI screenshots."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:150
+#: da250816c23c474db009b8ad4a8e9e64
+msgid ""
+"Key workflow subsections can also use stable emoji markers, for example "
+"paper study, discussion, and execution."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:152
+#: 42ac0cf598de4873a55273373fc6bbfa
+msgid "7. Feature Snapshot"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:154
+#: 5ee5d9109d4f47b2a6f42fb576709d0f
+msgid ""
+"Purpose: provide a compact capability inventory without becoming a full "
+"manual."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:156
+#: 67fad844acb643318f408af1cd7c8675
+msgid "Recommended format: table with 8 to 10 rows max."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:158
+#: 4b05f769024c43c5bde4fad62b3511ac
+msgid "Example columns:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 1407187eacad450f815523f7b34eee8b c8e816895e7c4e3ab6b8b08fea2f011e
+msgid "Feature"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 59f4f83ce478411db07bd36c9b742d4c c026b551753846588c1952111e1e5fe1
+msgid "What it enables"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 7c69710e7d6c4bb59ae6ffb0416dac0b
+msgid "Workspace Management"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: cec69ba44dd64b43a3b452947a20be31
+msgid "Map server folders into persistent AI workspaces"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: d819b73249704a3c83613e2f5d7902d2
+msgid "RAG Chat"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 8d840fc845494a79b27968f1204441ae
+msgid "Grounded answers over indexed files with citations"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 0507696d016f40238ca0f4b4ba01fded
+msgid "Search, summarize, and explore papers in one place"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: c1688b8348864beb84742df65376d9b3
+msgid "Discussion Mode"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: edc02cf332d649f1bd5ddc85ce12a541
+msgid "Multi-role paper review with structured stages"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 54e1734e0f8c46b393eb1a94557a9f74
+msgid "Research Ideation"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 3dd6c799f14340a58b3fad0581e2dfc4
+msgid "Generate new directions from existing papers"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 06588b13894a4b4eb6cbc4cc1636001e
+msgid "Skills System"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 7292f8c9608c47209e04b6ec8ad9e959
+msgid "Import reusable workflows and domain capabilities"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: bb93012002674d9f82ee9eee8e43c87c
+msgid "Research Execution"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 609680ab0cb14ce49981f5ecb7c8a826
+msgid "Orchestrate remote experiment loops with approvals"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 49e5ec57cad64dd8987dc1cf729d9889
+msgid "Multi-LLM"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: ac56e14dfd5c4c61b383fd31cb79c5ab
+msgid "OpenAI, Anthropic, Gemini, and compatible endpoints"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 8f45f5951c6e4371a737b5f2d7c4d572
+msgid "Bot Integration"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: a1eb91dd874944b7874abdc0f72ab09c
+msgid "Feishu and other notification or bot workflows"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:172
+#: 374d899e3df7407fb22ece2b9ccb3923
+msgid "8. Documentation"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:174
+#: 8f286db48b8f4a07b8bd55e6e49751a9
+msgid "Purpose: route users to the right depth quickly."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:176
+#: cbaa6fd7e2694e41973c82fb8e4cf5d9
+msgid "Recommended grouping:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:178
+#: fde2c2d7380e4c24a09e0b569af549e1
+msgid "Start here: Overview, Installation"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:179
+#: 0d204a9d8b0d49159c182c9aed90dde9
+msgid "Configure and deploy: Deployment, Environment Variables, Configuration"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:180
+#: 8d62cb5e92764230a44c975fa9e27d43
+msgid "Use the product: Features, API Reference"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:181
+#: 219fb0c0b33447158fc926e5acd80c9f
+msgid "Troubleshoot and contribute: Troubleshooting, Development Guide"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:183
+#: 61bf92fdb9314ceb96e964c08bbd4361
+msgid ""
+"Link these to the existing documentation tree instead of duplicating the "
+"content in the homepage."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:185
+#: 72c2775cd3444df3a9cde4e14e06dfa3
+msgid "9. Community"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:187
+#: 54b4b37634c8454b94dfde935aabc45f
+msgid "Purpose: create trust and a feedback path."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:191
+#: f03a3e362ccd4a6ebd382a245b0746ff
+msgid "Docs site link for setup and usage help"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:192
+#: d3d2cf3c8ceb48dbba868254b59091c8
+msgid "GitHub Issues link for bugs and feature requests"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:193
+#: 6a02c4af765c4736a7ffefcf7a89f84f
+msgid "Feishu group or community channel for direct discussion"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:195
+#: e8fa1eb6746f48b9a2feddeda77b5f87
+msgid "10. Footer Sections"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:197
+#: 896093628b6348c798f2da2b0f619e2f
+msgid "Keep these short:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:199
+#: b2c36666513f41eba77867463a16ee23
+msgid "Project info block with license, repository, and docs links"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:200
+#: 0ca68bd8c89448e78a37373dd2182075
+msgid "Citation if needed"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:201
+#: ../../development/readme-homepage-redesign.md:352
+#: b1bc79eaf859450f9424428f28188145 f976b34c20f340bba1b52cda1eaeeb0b
+msgid "Star History"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:203
+#: 37f73578a58344b9b344c5142617e6a2
+msgid "What Should Move Out of the Homepage"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:205
+#: c4d8ab39250b4cc8ad70ec1f8e450bcc
+msgid ""
+"The following content is valuable, but better suited to docs pages or "
+"translated readmes:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:207
+#: a71b44480c164c8488b72cd98fbd88f1
+msgid "Long OS-by-OS dependency setup from the current Quick Start section"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:208
+#: 4403a7f4cd5e4510890330b00e70b6f1
+msgid "Full Skills import walkthrough"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:209
+#: 932362237ac74b9ab4b5a2b7a9c78e14
+msgid "Full Feishu bot setup walkthrough"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:210
+#: 7e819697e92f4e1394ac5713d28d361d
+msgid "Full Kubernetes setup walkthrough"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:211
+#: 5373781ec0d24813aa2a55013fe352e3
+msgid "Long environment variable reference"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:212
+#: 22f957dc0a1b4797995a2d2bea44053c
+msgid "Long troubleshooting list"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:213
+#: a4b66e5498564709929f03008ab4782e
+msgid "Detailed project structure and development commands"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:215
+#: 9f1413e170f343c18f02b1d344015f2d
+msgid "Current-to-New Content Mapping"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:217
+#: f981857e9c35441a924b578cfd7a5064
+msgid "Current English README Material"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:219
+#: 087e7424da6d4847892f04615bda3f5b
+msgid "Keep and rewrite the top-level description from `README_en.md`"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:220
+#: dc46340c59b84d4391cb1329abd7cb61
+msgid "Shorten `What's New` to the latest 2 or 3 items, or move it below the hero"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:221
+#: ce3b105828f1420e9f5356fcd3665273
+msgid "Compress the long `Overview` list into `Why InnoClaw`"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:222
+#: 0bb2457d37eb4a97a0b2ecea23c4e165
+msgid "Replace the current long `Quick Start` with a short path plus docs link"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:223
+#: d93d5bd189264fc69a3576cd19fa73f5
+msgid "Move most of `Setup Advanced Features via Skills` into docs links"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:224
+#: df57f5e03b624ec0a556abeef6b2680d
+msgid "Compress `Features` into `Feature Snapshot`"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:225
+#: b9049576b5e24bdf8eb411f663aa16c6
+msgid "Replace long `Usage Guide` with docs links"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:226
+#: 26f990c6b3ef4f1393c6d8b35a76c0de
+msgid "Keep `Star History` at the bottom"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:228
+#: 8194dbfe3b26453289bb2f3a23f55cb0
+msgid "Current Chinese README Material"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:230
+#: 051ff4e5a558425e9131b23d707e423a
+msgid ""
+"Move the current Chinese homepage content from `README.md` into "
+"`docs/README_CN.md`"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:231
+#: 5895a406f49843b389fc009f028e26c0
+msgid "Keep the same section order as the English homepage"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:232
+#: b914f71fa9e5479d9a15a5c13ddc9221
+msgid ""
+"Add a note that the English homepage in `README.md` is the canonical "
+"version"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:234
+#: cab21003bb4c465baf66cbcd15b9920a
+msgid "Translation Strategy"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:236
+#: 642a7884c5874f02833fd9ef1273856c
+msgid "Use one structure for all README translations:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:238
+#: c6fc7aa06e274bfe9b9186ec24f6aea7
+msgid "Hero"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:239
+#: 3935673fd2644c49a97e90d96ac93872
+msgid "What Is InnoClaw?"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:240
+#: 0d52abce53c9428cac5e5a1a835f887d
+msgid "Why InnoClaw"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:241
+#: 1dea4980f48647d0ac5851a703728676
+msgid "Quick Start"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:242
+#: ../../development/readme-homepage-redesign.md:305
+#: 3f37e5b7b8034b44a9914bd872d4c2ce 6c53885da3d54969bbcbfeb19038c3a9
+msgid "What You Can Do"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:243
+#: ../../development/readme-homepage-redesign.md:312
+#: 416b06ee126c4369b9f9075a72c6ed35 b4610715bd4848a5b154e119de0b2569
+msgid "Core Workflows"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:244
+#: ../../development/readme-homepage-redesign.md:326
+#: 2596b8ba8a2144e1a7627254803657cc 935cb282ec774993b01a11160c3a79e8
+msgid "Feature Snapshot"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:245
+#: ../../development/readme-homepage-redesign.md:332
+#: 0de58a8785bc45f1b1fc62e3a69040ba ca44bd7a143349548de3aa6c400da50c
+msgid "Documentation"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:246
+#: ../../development/readme-homepage-redesign.md:344
+#: bd2f130ac6a341d49d3e18ddd147fbb6 f57fd27b190c44c2a5a66824057904c1
+msgid "Community"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:249
+#: b459839a48594bea812c096faa31692f
+msgid "Recommended note near the top of translated files:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:251
+#: b4ef0b0342214bc6a96b06deb8aaa724
+msgid "`This translation may lag behind the English homepage in README.md.`"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:253
+#: f81ded380195456b841b029371141b2e
+msgid "Suggested Migration Steps"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:255
+#: 5455bbca5f9848319327548b6c438d6b
+msgid "Rewrite `README.md` into the new English homepage."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:256
+#: d7b223c3c4584de9933bf1ad4f0ba48e
+msgid "Move the current Chinese homepage into `docs/README_CN.md`."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:257
+#: ff9e79cf6ed2422faddcb8a1a9066b51
+msgid "Add or migrate other translations into `docs/README_*.md`."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:258
+#: 8f77f0435fda4ce6bdd7591d292ad753
+msgid "Convert `README_en.md` into a short compatibility stub or remove it later."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:259
+#: 269f66825b574d5fb32f12f2eef166d8
+msgid "Replace long setup and reference sections in the homepage with docs links."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:260
+#: 5afd32de283b4a30a542410455140b63
+msgid "Add one stable workflow diagram or low-maintenance visual near the top."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:261
+#: 489a54eed03e46dc8805fe55b5f2b997
+msgid "Verify all language links and docs links resolve correctly."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:263
+#: b5c661acd30640b49dc46cf4198caa16
+msgid "Suggested README Skeleton"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:301
+#: 02eb494a9b9948b69965b360891aaead
+msgid "Configure one provider in Settings"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:303
+#: 50f88fc55d75411f8605a212c8d86884
+msgid "See the full install guide in docs"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:307
+#: af4d722d9cf444ea8fe4962a1fbabfcb
+msgid "Outcome 1"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:308
+#: 3327a8ef2f8d47a392c97b781f436aae
+msgid "Outcome 2"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:309
+#: f86f6dab305e461ba4250d634abd7790
+msgid "Outcome 3"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:310
+#: d3bdb4a9fca74033a0f40cb536e43626
+msgid "Outcome 4"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:316
+#: ../../development/readme-homepage-redesign.md:320
+#: ../../development/readme-homepage-redesign.md:324
+#: 63aa050e07384946bdbc9c57a8580244 d395ecdc57bd413dbb44c52c9d18ff9e
+#: df3fc02f39b442f19011b2777b39efef
+msgid "Short description."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md
+#: 7f5034eea00b4d95bd63530d4bb239d6 d9078368498a4c8ba23678c46ceaf905
+msgid "..."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:334
+#: 7ab39dd08bdf40fda6723b916f329164
+msgid "[Overview](../getting-started/overview.md)"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:335
+#: f80807af8c1f48d99854681e0dc9f48b
+msgid "[Installation](../getting-started/installation.md)"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:336
+#: 2fb8bc94921a4268a5c1b555d3a5e645
+msgid "[Deployment](../getting-started/deployment.md)"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:337
+#: 93aa0743a91c41bb914633b7cc812581
+msgid "[Environment Variables](../getting-started/environment-variables.md)"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:338
+#: 93140dc5c92141e89ba7443da13aa31d
+msgid "[Features](../usage/features.md)"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:339
+#: a14b908c31a345bc934a51aac078e027
+msgid "[Configuration](../usage/configuration.md)"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:340
+#: b03c82d3a4484113ae8296928ec89dad
+msgid "[API Reference](../usage/api-reference.md)"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:341
+#: b116834809ec4225aabf689bec58114e
+msgid "[Troubleshooting](../troubleshooting/faq.md)"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:342
+#: b11ae1689a6d404d8bdf5db0c6af65d2
+msgid "[Development Guide](../development/contributing.md)"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:346
+#: 4d66794a1da043a0943146af1e914d8d
+msgid "Community and support links."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:350
+#: 063ae287f2ed4f2eb31d56052e6d85cf
+msgid "MIT"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:357
+#: fd008aebadde4c1da7d6f763036e73e3
+msgid "Success Criteria"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:359
+#: a1784fa369b84004975049e0735c9f3d
+msgid "The redesign is successful if:"
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:361
+#: e7ebf96eac3849fd87a2fe7552627361
+msgid "A new visitor understands the product within 15 to 20 seconds."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:362
+#: fc4211f26e1d4295951e88d152f09e4a
+msgid "Quick Start appears before any long setup details."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:363
+#: 1176788af9ab46cd9c99ba32ba2ec01a
+msgid "The homepage highlights research workflows, not just a feature dump."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:364
+#: bd259ed58dfe4ee8859663f1ea6cfd81
+msgid ""
+"The docs site becomes the place for long-form setup and reference "
+"material."
+msgstr ""
+
+#: ../../development/readme-homepage-redesign.md:365
+#: 9b5ed10d43294a6aac171bd0fe8c1f69
+msgid "All translations follow the same structure and are easy to maintain."
+msgstr ""
+

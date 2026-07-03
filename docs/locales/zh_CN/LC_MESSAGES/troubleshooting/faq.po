@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,91 +19,139 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../troubleshooting/faq.md:1 f2801b22b10c417f97834f49514ab679
+#: ../../troubleshooting/faq.md:1 e4d4008b4a6a4ef8967b3b66d318efda
 msgid "Troubleshooting & FAQ"
 msgstr "故障排除与常见问题"
 
-#: ../../troubleshooting/faq.md:3 5a075cab6bcf4949a0cff18c9a2eb2f0
+#: ../../troubleshooting/faq.md:3 79dc4d54e884434582f10a4bf0ec7c65
 msgid "Frequently Asked Questions"
 msgstr "常见问题"
 
-#: ../../troubleshooting/faq.md:5 94dd00828b0d485781203b844148ba3f
+#: ../../troubleshooting/faq.md:5 fd01a554f4124f16bc5c95933dcf1182
 msgid "Can I use InnoClaw without an API key?"
 msgstr "我可以在没有 API 密钥的情况下使用 InnoClaw 吗？"
 
-#: ../../troubleshooting/faq.md:7 86d26dceca7742cdbe3ca02bc638c330
+#: ../../troubleshooting/faq.md:7 722ba2c56a9d447a91463c3040f7105a
 msgid ""
 "**Yes.** Workspace management, file browsing, uploading, editing, and "
 "GitHub cloning features work without any API key. Only AI chat and note "
 "generation features require an API key. The UI will display a prompt "
 "indicating that AI features are unavailable."
 msgstr ""
-"**可以。** 工作空间管理、文件浏览、上传、编辑和 GitHub 克隆功能无需 API 密钥即可使用。只有 AI 对话和笔记生成功能需要 "
-"API 密钥。界面会显示提示，说明 AI 功能不可用。"
+"**可以。** 工作空间管理、文件浏览、上传、编辑和 GitHub 克隆功能无需 API 密钥即可使用。只有 AI 对话和笔记生成功能需要 API"
+" 密钥。界面会显示提示，说明 AI 功能不可用。"
 
-#: ../../troubleshooting/faq.md:9 4fcdeca514cb4ee1ad435a7891e2a0d1
+#: ../../troubleshooting/faq.md:9 79b1a3cacfff475f8eb6b5efbcf49f25
 msgid ""
 "How do I use third-party compatible services (proxies, self-hosted "
 "models)?"
 msgstr "如何使用第三方兼容服务（代理、自托管模型）？"
 
-#: ../../troubleshooting/faq.md:11 b3b2ed80e39a4488ab6bd3c4716c853c
+#: ../../troubleshooting/faq.md:11 74cd1615f10046ad9e567631b7bfcac5
+#, fuzzy
 msgid ""
-"Set `OPENAI_BASE_URL` or `ANTHROPIC_BASE_URL` in your `.env.local` file "
-"to point to any API-compatible endpoint:"
+"Set `OPENAI_BASE_URL`, `ANTHROPIC_BASE_URL`, or `GEMINI_BASE_URL` in your"
+" `.env.local` file to point to any API-compatible endpoint:"
 msgstr ""
 "在 `.env.local` 文件中将 `OPENAI_BASE_URL` 或 `ANTHROPIC_BASE_URL` 设置为任何 API "
 "兼容的端点："
 
-#: ../../troubleshooting/faq.md:18 49d24181a9274edb9fa4f47aa3188f1f
+#: ../../troubleshooting/faq.md:18 5e544817e9f14890b6b7f67a6c3e9d1e
 msgid ""
 "If your proxy doesn't support the embedding endpoint, configure a "
 "separate embedding service:"
 msgstr "如果您的代理不支持 Embedding 端点，请配置单独的 Embedding 服务："
 
-#: ../../troubleshooting/faq.md:26 de372da5bdb04a2da295fb65e0531015
+#: ../../troubleshooting/faq.md:26 ce75195420184bb882daf7be56ccf723
+msgid "How do I configure Google Gemini?"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:28 0268eded7c7f4a2796c1a699439deb0f
+msgid ""
+"Set `GEMINI_API_KEY` in your `.env.local` file. Optionally set "
+"`GEMINI_BASE_URL` if using a custom proxy:"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:35 2df5dcac9c9f44fc82669b4487880624
+msgid ""
+"Then select \"Gemini\" as the provider in the Settings UI, or set the "
+"default:"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:42 40bebc42b5f349c88a9c85320eeff764
+msgid "What is Agent mode and how does it differ from RAG Chat?"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:44 4ba8bbc3ea9f4ad8af77b809dab43f6a
+msgid ""
+"**RAG Chat** answers questions grounded in your workspace files using "
+"retrieval-augmented generation. It searches indexed files for relevant "
+"context and generates answers with source citations."
+msgstr ""
+
+#: ../../troubleshooting/faq.md:46 926cdd3e19844906b61edfcbc4899416
+msgid ""
+"**Agent mode** provides an autonomous AI with tool access (bash, file "
+"operations, kubectl, article search, etc.). It can execute multi-step "
+"tasks, run commands, edit files, search papers, and submit K8s jobs. "
+"Agent mode supports three sub-modes:"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:48 684cd20340c04c2aa3460a3b2b6d0de9
+msgid "**Agent** — Full tool access for autonomous execution"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:49 7434471ac1424710ae8fff19d4af848f
+msgid "**Plan** — Read-only tools for analysis and planning"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:50 c3526d4dc161431cbd86ed1d47530efa
+msgid "**Ask** — Read-only tools for simple Q&A"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:52 d39d78fd6ef241d0a58d66e1c8e862ea
 msgid "What file formats are supported for RAG indexing?"
 msgstr "RAG 索引支持哪些文件格式？"
 
-#: ../../troubleshooting/faq.md 33a4aa66a93c49228bab0ea86adf058f
+#: ../../troubleshooting/faq.md 9de248b5124c48889869e2116423b9eb
 msgid "Category"
 msgstr "分类"
 
-#: ../../troubleshooting/faq.md fdfbe9a96d844a56880ac03c54c9d17e
+#: ../../troubleshooting/faq.md 0133863a42d64392bf0b1191f55c8e0e
 msgid "Extensions"
 msgstr "扩展名"
 
-#: ../../troubleshooting/faq.md 4268b2171a36450ba87f50a44ccdd7f2
+#: ../../troubleshooting/faq.md 0a5b64aa059241c3ac3ec54c4c6fcc9b
 msgid "Documents"
 msgstr "文档"
 
-#: ../../troubleshooting/faq.md 78bc66a73be74a8b92e5fea42bb88625
+#: ../../troubleshooting/faq.md c997cd400571427f9da39bea8c05b131
 msgid "`.pdf`, `.txt`, `.md`, `.html`"
 msgstr "`.pdf`、`.txt`、`.md`、`.html`"
 
-#: ../../troubleshooting/faq.md 7300124ad7a245cc914db2222d15511c
+#: ../../troubleshooting/faq.md cdd6002b3c00431e8ff5b4900148b051
 msgid "Data"
 msgstr "数据"
 
-#: ../../troubleshooting/faq.md 9d212acbb38e4b228843e999dd4fc3fe
+#: ../../troubleshooting/faq.md 67c6caf1e46e4eebb0b8c87e6a4c435b
 msgid "`.json`, `.csv`"
 msgstr "`.json`、`.csv`"
 
-#: ../../troubleshooting/faq.md eddade1b3fe546c38290d9e3a964b36a
+#: ../../troubleshooting/faq.md 020b496140b44b70a232b8124561f9b2
 msgid "Code"
 msgstr "代码"
 
-#: ../../troubleshooting/faq.md 4dbc7344b2314b1caef99c4c590cdda5
+#: ../../troubleshooting/faq.md f23b07dcc3b445168a62f4d704ad4af7
 msgid ""
 "`.js`, `.ts`, `.py`, `.java`, `.go`, `.rs`, `.cpp`, `.c`, `.rb`, `.php`, "
 "and more"
 msgstr "`.js`、`.ts`、`.py`、`.java`、`.go`、`.rs`、`.cpp`、`.c`、`.rb`、`.php` 等"
 
-#: ../../troubleshooting/faq.md:34 6e36c2226f274bfd82a96c298825407c
+#: ../../troubleshooting/faq.md:60 2e595bea47b9490ea843a9f577b29b47
 msgid "Is indexing slow for large workspaces?"
 msgstr "大型工作空间的索引速度慢吗？"
 
-#: ../../troubleshooting/faq.md:36 08f4c2589cf74ea99119b6962c96b5ac
+#: ../../troubleshooting/faq.md:62 98f99bf95c4a49df9574d7e9e72fed2e
 msgid ""
 "The first sync processes all files (extract text → chunk → generate "
 "embeddings), which depends on the number and size of files. Subsequent "
@@ -113,113 +161,278 @@ msgstr ""
 "首次同步会处理所有文件（提取文本 → 分块 → "
 "生成嵌入），速度取决于文件的数量和大小。后续同步仅处理新增或修改的文件（基于文件哈希比较），因此速度会显著加快。"
 
-#: ../../troubleshooting/faq.md:38 88fb965914a746139c22d89cc93ead01
+#: ../../troubleshooting/faq.md:64 1c0536565ba54933974ff99298886687
 msgid "Can I run InnoClaw on Linux?"
 msgstr "我可以在 Linux 上运行 InnoClaw 吗？"
 
-#: ../../troubleshooting/faq.md:40 2b04e709e199455e9dce5fbd1bf9af35
+#: ../../troubleshooting/faq.md:66 556bdda610b24023a351fffde8d1b053
 msgid "**Yes.** Set `WORKSPACE_ROOTS` to Linux paths:"
 msgstr "**可以。** 将 `WORKSPACE_ROOTS` 设置为 Linux 路径："
 
-#: ../../troubleshooting/faq.md:46 427f5a44e1dc4f02bd9f09f94d3da129
+#: ../../troubleshooting/faq.md:72 112990a503494f2585b5bee8ebc592b6
+#, fuzzy
+msgid "How do Scheduled Tasks work?"
+msgstr "如何更改端口？"
+
+#: ../../troubleshooting/faq.md:74 657fce79d6f34bb1965a41f37dbf99e6
+msgid ""
+"Scheduled tasks use cron expressions to automate recurring operations. "
+"The scheduler polls every 60 seconds and runs due tasks. Available task "
+"types:"
+msgstr ""
+
+#: ../../troubleshooting/faq.md 747947be131d4c68861adb7bf8d64f80
+msgid "Type"
+msgstr ""
+
+#: ../../troubleshooting/faq.md 520e167eaa50479c9ba6782a1bd40521
+msgid "Description"
+msgstr ""
+
+#: ../../troubleshooting/faq.md e7a304e4f21b4c16869c04d1f30b96d5
+msgid "`daily_report`"
+msgstr ""
+
+#: ../../troubleshooting/faq.md 11532174e4094a47a413af03b17bd4fa
+msgid "Generate daily workspace activity report"
+msgstr ""
+
+#: ../../troubleshooting/faq.md c1ad780398ba4a7595d1e50298b30bac
+msgid "`weekly_report`"
+msgstr ""
+
+#: ../../troubleshooting/faq.md 8c451c4d9acd4b0ba53a02da09411f7a
+msgid "Generate weekly workspace activity report"
+msgstr ""
+
+#: ../../troubleshooting/faq.md f3d22cdc75754631bf359841f3b42038
+msgid "`git_sync`"
+msgstr ""
+
+#: ../../troubleshooting/faq.md 2a306ac1512848989d6049bb93b4023a
+msgid "Automatically pull Git repositories"
+msgstr ""
+
+#: ../../troubleshooting/faq.md d302a1f01f9c46ad8dd96b73b83a79be
+msgid "`source_sync`"
+msgstr ""
+
+#: ../../troubleshooting/faq.md 73a6f5ff66674e789e6fdeddd86a7a43
+#, fuzzy
+msgid "Re-index workspace files"
+msgstr "工作空间文件"
+
+#: ../../troubleshooting/faq.md 178870f6a7be4fff8c5dd5b51d522074
+msgid "`custom`"
+msgstr ""
+
+#: ../../troubleshooting/faq.md e340260f94174f95bd05d1a1c6619c01
+msgid "User-defined workflows"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:84 0b8327a4d97c4f28a78ebc0e9f31a424
+msgid ""
+"Create tasks via the UI or the `POST /api/scheduled-tasks` endpoint with "
+"a cron expression (e.g., `\"0 0 * * *\"` for daily at midnight)."
+msgstr ""
+
+#: ../../troubleshooting/faq.md:86 e47339e6ea6843a3949e207bab29028c
+msgid "How do I download a dataset from HuggingFace or ModelScope?"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:88 1dd82798af5c4f43a9fb47ff5c208d59
+msgid "Use the **Datasets** page or the `POST /api/datasets` endpoint:"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:90 7fcba45bebeb4c20ac4b1a611597a9cf
+msgid "Navigate to the Datasets page"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:91 95b3c419a472468facaf5085748b3201
+msgid "Enter the repository ID (e.g., `username/dataset-name`)"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:92 3269ac2456804983aa8142a5e5caa9a5
+msgid "Select the source (HuggingFace or ModelScope)"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:93 4cd760f0fc1b4619829a6186a766cfc9
+msgid "Optionally set file patterns to include/exclude"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:94 3d581aabd36b46d28b493d286637ec28
+msgid "Start the download"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:96 5563ff202d6144cf8c33cb2aaf629fa8
+msgid ""
+"For private HuggingFace repos, set `HF_TOKEN` in `.env.local` or via the "
+"Settings UI."
+msgstr ""
+
+#: ../../troubleshooting/faq.md:98 75fdf9ba64724c8db789ed710830aaa4
+msgid "How do I configure a proxy for outbound API calls?"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:100 ca523c424a1c4804822f2c5fd89a0bc0
+msgid "Set `HTTP_PROXY` and `HTTPS_PROXY` in your `.env.local` file:"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:108 b12c4c392eaa4d6783109c34dbe08231
+msgid ""
+"All outbound `fetch()` calls (AI API, GitHub, HuggingFace, etc.) will "
+"route through the proxy. Hosts in `NO_PROXY` bypass it."
+msgstr ""
+
+#: ../../troubleshooting/faq.md:110 0d6f20a6aa964d0ba2e3b110c730fe4c
+msgid "Database errors on NFS or network filesystems"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:112 e82fdc273fa741b1b24862ce6d8e39ef
+msgid ""
+"SQLite requires a local filesystem for reliable locking. If the project "
+"is on NFS/CIFS, set `DATABASE_URL` to a local path:"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:118 a4e334d4c6f64c6581f0ae4a9f949828
+msgid ""
+"InnoClaw now disables Next's dist-dir lock automatically on lockless "
+"network filesystems, so this startup error no longer requires a special "
+"`NEXT_BUILD_DIR`. If you still want a different build directory, keep it "
+"inside the repo:"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:124 176599aa03da42d0ae774523c984d308
+msgid "How do I submit K8s / GPU jobs?"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:126 5e4a14b8d9254d5cbacfd226eb7d2e30
+msgid "Configure Kubernetes access in `.env.local`:"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:132 96feadcd9d8c457a80cc2092f8b732da
+msgid ""
+"Use Agent mode and ask the AI to submit a job, or use the `submitK8sJob` "
+"tool directly"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:133 bb3d7d9d834d439d8bea0e02aec59636
+msgid ""
+"Jobs require explicit user confirmation before submission (the agent will"
+" ask)"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:134 8f471a3d5257447aa9394b66efe9933c
+msgid "Use `collectJobResults` to retrieve logs and status after completion"
+msgstr ""
+
+#: ../../troubleshooting/faq.md:136 74152ffa5430414e9b5cd5b5ea4cb441
+msgid ""
+"See [Environment Variables](../getting-started/environment-variables.md) "
+"for all `K8S_*` configuration options."
+msgstr ""
+
+#: ../../troubleshooting/faq.md:138 bd9bf1df5508405f87f968415134cce0
 msgid "GitHub clone fails — what should I check?"
 msgstr "GitHub 克隆失败 —— 我应该检查什么？"
 
-#: ../../troubleshooting/faq.md:48 92862828d1fb4bfbb4b05fb40eaae7e0
+#: ../../troubleshooting/faq.md:140 af034bf526ab4871973c7c4d13dcfbce
 msgid "Verify that `git` is installed: `git --version`"
 msgstr "验证 `git` 已安装：`git --version`"
 
-#: ../../troubleshooting/faq.md:49 2c17b0385d9f4736a207d8e4e449de48
+#: ../../troubleshooting/faq.md:141 81faaf87a94f4b839dea8aebd8228d6a
 msgid "Check that `GITHUB_TOKEN` is set correctly in `.env.local`"
 msgstr "检查 `.env.local` 中的 `GITHUB_TOKEN` 是否设置正确"
 
-#: ../../troubleshooting/faq.md:50 0b29757a99e946d39bff88cc0d53c1e5
+#: ../../troubleshooting/faq.md:142 b8467e870d234018a4cf5abbf35b4742
 msgid "Ensure the token has the `repo` scope for private repositories"
 msgstr "确保令牌具有用于私有仓库的 `repo` 权限范围"
 
-#: ../../troubleshooting/faq.md:51 91372707fc9440f79ecd3f1244b81712
+#: ../../troubleshooting/faq.md:143 837bfef941bc45148b47833ce22988b4
 msgid "Check network connectivity to `github.com`"
 msgstr "检查到 `github.com` 的网络连通性"
 
-#: ../../troubleshooting/faq.md:53 328c31dfc1b643a58bd6e289f6bc884f
+#: ../../troubleshooting/faq.md:145 5505a2565b794d039fa2f1840a0da4b0
 msgid "How do I reset the database?"
 msgstr "如何重置数据库？"
 
-#: ../../troubleshooting/faq.md:63 5e897836275045fdb51e3c6015602731
+#: ../../troubleshooting/faq.md:155 67ac409974c84dea944db89f2b359a8d
 msgid ""
 "This creates a fresh database. All workspaces, chat history, notes, and "
 "settings will be lost, but workspace files on disk are not affected."
 msgstr "这将创建一个全新的数据库。所有工作空间、对话历史、笔记和设置都将丢失，但磁盘上的工作空间文件不受影响。"
 
-#: ../../troubleshooting/faq.md:65 cd97ec2d0b4a417bac5caf48f0d4b6df
+#: ../../troubleshooting/faq.md:157 babf4303a18d4faeb45f7aefc34d8c31
 msgid "How do I back up my data?"
 msgstr "如何备份我的数据？"
 
-#: ../../troubleshooting/faq.md:67 83561d0d9ce14f50b3a27c92b14a7c99
+#: ../../troubleshooting/faq.md:159 b98589a852a3429b8d8db7338e92ea8a
 msgid "Back up the following:"
 msgstr "备份以下内容："
 
-#: ../../troubleshooting/faq.md 96804f072ad24bc0a488340213770c8d
+#: ../../troubleshooting/faq.md 81722392039146ca92476c70d4579c6d
 msgid "Item"
 msgstr "项目"
 
-#: ../../troubleshooting/faq.md ba62467c9ef94b3499777e9d3a5b4369
+#: ../../troubleshooting/faq.md ad50261e3e8543dc80b51f4c6641fff5
 msgid "Location"
 msgstr "位置"
 
-#: ../../troubleshooting/faq.md d627177b689641cdbf4d88de417519ed
+#: ../../troubleshooting/faq.md b62f84e4eccc4e1fb5e86364a07a2204
 msgid "Database"
 msgstr "数据库"
 
-#: ../../troubleshooting/faq.md ed0a5b751b2c4dd09a3b749cc7828339
+#: ../../troubleshooting/faq.md 030ba42e614e4357a133c38e0e736304
 msgid "`./data/innoclaw.db`"
 msgstr "`./data/innoclaw.db`"
 
-#: ../../troubleshooting/faq.md 334b174c74da42899690381a3ef0169c
+#: ../../troubleshooting/faq.md ee7a91e7956c405996658f2748a7a37f
 msgid "Configuration"
 msgstr "配置"
 
-#: ../../troubleshooting/faq.md d8fb35ceb05844f49e78d690de8831cb
+#: ../../troubleshooting/faq.md 013785fe79ff4be4ac69f76078fba10e
 msgid "`.env.local`"
 msgstr "`.env.local`"
 
-#: ../../troubleshooting/faq.md d1c5b82a754e49d18f194ca94d958e4d
+#: ../../troubleshooting/faq.md 6217553d3ec843818469cbafced9c050
 msgid "Workspace files"
 msgstr "工作空间文件"
 
-#: ../../troubleshooting/faq.md 215229aa8e9c444b9858402baeb9baaa
+#: ../../troubleshooting/faq.md f3651f8b2b3148b286c160741bbc1188
 msgid "Directories listed in `WORKSPACE_ROOTS`"
 msgstr "`WORKSPACE_ROOTS` 中列出的目录"
 
-#: ../../troubleshooting/faq.md:75 41c8e21f90054598aeb5fb44b0d95f0d
+#: ../../troubleshooting/faq.md:167 ffd7a5f9d2c9457cae8d95fde3f27c90
 msgid "The development server won't start"
 msgstr "开发服务器无法启动"
 
-#: ../../troubleshooting/faq.md:77 f10279b7075e415ca232c7f880c59e7b
-msgid "Ensure Node.js 24+ is installed (Node.js 25 is also supported): `node --version`"
+#: ../../troubleshooting/faq.md:169 c9c9cab37441479a961fe5b8eefd426d
+msgid ""
+"Ensure Node.js 24+ is installed (Node.js 25 is also supported): `node "
+"--version`"
 msgstr "确保已安装 Node.js 24+（也支持 Node.js 25）：`node --version`"
 
-#: ../../troubleshooting/faq.md:78 272be70528fb41aba0a0a3a5fd0362ea
+#: ../../troubleshooting/faq.md:170 6e26a447eb044c97a5ecfacd80ecd389
 msgid "Ensure dependencies are installed: `npm install`"
 msgstr "确保已安装依赖：`npm install`"
 
-#: ../../troubleshooting/faq.md:79 6f1df2436e99454d9b109ac424d40242
+#: ../../troubleshooting/faq.md:171 45df7ead03c1419cb646a82b949947ae
 msgid "Ensure the database is initialized: `npx drizzle-kit migrate`"
 msgstr "确保数据库已初始化：`npx drizzle-kit migrate`"
 
-#: ../../troubleshooting/faq.md:80 1130182754ff4ffba4b70063068a76dc
+#: ../../troubleshooting/faq.md:172 8590fad3f17c4cd99714da8b1781f29a
 msgid "Ensure `WORKSPACE_ROOTS` directories exist on disk"
 msgstr "确保 `WORKSPACE_ROOTS` 目录在磁盘上存在"
 
-#: ../../troubleshooting/faq.md:81 67ecbb7805c4497a921b6bc5fd9c4dac
+#: ../../troubleshooting/faq.md:173 b777e50a66d04407ae0e0f2898a57e37
 msgid "Check for port conflicts on port 3000"
 msgstr "检查端口 3000 是否有冲突"
 
-#: ../../troubleshooting/faq.md:83 f5519f3f7b0c4a9da33ce7d5b20cc70c
+#: ../../troubleshooting/faq.md:175 297fb8f0ca504e64a0d6d8ccba228adc
 msgid "Build fails with font-related errors"
 msgstr "构建因字体相关错误而失败"
 
-#: ../../troubleshooting/faq.md:85 536fbe0f22c04b6caafe958aab801c63
+#: ../../troubleshooting/faq.md:177 3fe3d2d817af4f36a05835afb742c00c
 msgid ""
 "If `npm run build` fails with errors about fetching Google Fonts, this is"
 " a network issue. Ensure your build environment has internet access, or "
@@ -228,31 +441,32 @@ msgstr ""
 "如果 `npm run build` 因获取 Google Fonts 的错误而失败，这是网络问题。请确保构建环境可以访问互联网，或者配置 "
 "Next.js 使用本地字体。"
 
-#: ../../troubleshooting/faq.md:87 89db2b1b4afb4050ae0d0d0850730241
+#: ../../troubleshooting/faq.md:179 9e8d677c92c54f6686406aac1d168edf
 msgid "How do I change the port?"
 msgstr "如何更改端口？"
 
-#: ../../troubleshooting/faq.md:97 62112a28d8c04c918c4c3ae4c749a5c6
+#: ../../troubleshooting/faq.md:189 012d730e7ef44f3fad7d7d742b572822
 msgid "Getting Help"
 msgstr "获取帮助"
 
-#: ../../troubleshooting/faq.md:99 d1cc4475b44740329751efcd394accbe
+#: ../../troubleshooting/faq.md:191 84e13e6dd79f4630bb06a39366a42232
+#, fuzzy
 msgid ""
-"**GitHub Issues** — [Report bugs or request "
-"features](https://github.com/zjowowen/InnoClaw/issues) (when enabled)"
+"**GitHub Issues** — [Report bugs or request features](https://github.com"
+"/SpectrAI-Initiative/InnoClaw/issues)"
 msgstr ""
 "**GitHub Issues** —— "
 "[报告错误或请求功能](https://github.com/zjowowen/InnoClaw/issues)（启用后可用）"
 
-#: ../../troubleshooting/faq.md:100 7098e82b6fb44e92b38e5cbdbe1bcf21
+#: ../../troubleshooting/faq.md:192 70a49a53a9804cf9ae334eceb58d5980
 msgid ""
 "**Documentation** — You're reading it! Check other sections for specific "
 "topics"
 msgstr "**文档** —— 您正在阅读！查看其他章节了解具体主题"
 
-#: ../../troubleshooting/faq.md:101 d5f51ea695454073bde9b8e4b83e3800
+#: ../../troubleshooting/faq.md:193 552b5934b8ec4c5f971cc0d53364bb3b
 msgid ""
 "**Source Code** — The code is well-structured and documented; see "
 "[Project Structure](../development/project-structure.md)"
-msgstr ""
-"**源代码** —— 代码结构良好且有文档记录；请参阅[项目结构](../development/project-structure.md)"
+msgstr "**源代码** —— 代码结构良好且有文档记录；请参阅[项目结构](../development/project-structure.md)"
+

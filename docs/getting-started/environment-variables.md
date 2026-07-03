@@ -124,13 +124,14 @@ EMBEDDING_MODEL=google/gemini-embedding-001
 
 | Variable | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
-| `KUBECONFIG_PATH` | `string` | No | — | Path to your kubeconfig file for Kubernetes cluster access. |
-| `K8S_SUBMITTER` | `string` | No | — | AD account name used as the job submitter identity. |
-| `K8S_IMAGE_PULL_SECRET` | `string` | No | — | Kubernetes secret name for pulling container images. |
-| `K8S_PVC_AI4S` | `string` | No | — | PersistentVolumeClaim name for AI4S shared storage. |
-| `K8S_PVC_USER` | `string` | No | — | PersistentVolumeClaim name for user storage. |
-| `K8S_PVC_AI4S_A2` | `string` | No | — | PersistentVolumeClaim name for AI4S A2 partition storage. |
-| `K8S_MOUNT_USER` | `string` | No | — | Username for PVC mount path resolution. |
+| `KUBECONFIG_PATH` | `string` | No | — | Path to the kubeconfig file used by generic Kubernetes Job tools. |
+| `K8S_CONTEXT` | `string` | No | — | Kubeconfig context used by the generic Job profile fallback. |
+| `K8S_DEFAULT_NAMESPACE` | `string` | No | `default` | Default namespace for the generic Job profile fallback. |
+| `K8S_ALLOWED_NAMESPACES` | `string` | No | `K8S_DEFAULT_NAMESPACE` | Comma-separated namespace allow-list for generic Job tools. |
+| `K8S_JOB_DEFAULT_IMAGE` | `string` | No | — | Default image for the generic Job profile fallback. |
+| `K8S_JOB_PROFILE_ID` | `string` | No | `default` | Profile id used when env vars create the fallback profile. |
+| `K8S_JOB_PROFILES_FILE` | `string` | No | — | Path to a private local JSON file containing generic clusters and Job profiles. |
+| `K8S_JOB_PROFILES_JSON` | `string` | No | — | Inline JSON config for generic clusters and Job profiles. Use a file for private local values. |
 
 ## Security Notes
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"POT-Creation-Date: 2026-07-03 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,150 +19,203 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../development/local-development.md:1 95333fbda5f04f1c8ac954b27f33296f
+#: ../../development/local-development.md:1 19ccf1bff4d846edaba101e0720d9c51
 msgid "Local Development"
 msgstr "本地开发"
 
-#: ../../development/local-development.md:3 4c40bd020cbf4d96a7805b0a270f728f
+#: ../../development/local-development.md:3 27f79adb74cf489a95b67d2263b6c6e7
 msgid "This guide covers running, debugging, and iterating on InnoClaw locally."
 msgstr "本指南介绍如何在本地运行、调试和迭代 InnoClaw。"
 
-#: ../../development/local-development.md:5 6c20a6efbad24cb4b78eded1310095a3
+#: ../../development/local-development.md:5 55120fd16b2144219bb2dc1e6eea8209
 msgid "Starting the Development Server"
 msgstr "启动开发服务器"
 
-#: ../../development/local-development.md:11 8be3dfd529714402a115aa2a4f23776f
+#: ../../development/local-development.md:11 2a140f5403d44c3d8403ff5f2c80bd08
 msgid ""
 "This starts the Next.js development server with hot module replacement "
 "(HMR). The application is available at **http://localhost:3000**."
 msgstr "这将启动带有热模块替换（HMR）的 Next.js 开发服务器。应用程序可通过 **http://localhost:3000** 访问。"
 
-#: ../../development/local-development.md:13 e5dcca6fa5d841d09def16e4c0710b8b
+#: ../../development/local-development.md:13 dda8fe2537ef4372b4b65e5ef69ba579
+msgid "For trusted single-user/local development without registration or login:"
+msgstr ""
+
+#: ../../development/local-development.md:19 6ced60d7c7214d7c99dc86379bf2a9b8
+msgid ""
+"Disabled auth gives anyone who can reach the service admin-level access. "
+"Do not use it on an untrusted network unless another access-control layer"
+" protects the service."
+msgstr ""
+
+#: ../../development/local-development.md:21 46dd2e65c7ed4484b96b4cb6f600d4ea
 msgid "Development Features"
 msgstr "开发特性"
 
-#: ../../development/local-development.md:15 0b7583ff3dff41b38d51c21d69ef5277
+#: ../../development/local-development.md:23 4c212b2a3b3142a7991f3ded90193998
 msgid "**Hot Reload** — Changes to components and pages are reflected immediately"
 msgstr "**热重载** —— 组件和页面的更改会立即生效"
 
-#: ../../development/local-development.md:16 3067693371ff4d25bd9941016f4571f3
+#: ../../development/local-development.md:24 79b6ee47187c48aba1e157ef523ea025
 msgid ""
 "**API Route Reload** — Server-side API changes take effect on the next "
 "request"
 msgstr "**API 路由重载** —— 服务端 API 更改在下次请求时生效"
 
-#: ../../development/local-development.md:17 62159d07fe8c4af2a8d9b2d41be9167f
+#: ../../development/local-development.md:25 40584a42c87f4336b74599f2f20df4ad
 msgid ""
 "**Error Overlay** — Build errors and runtime errors are displayed in the "
 "browser"
 msgstr "**错误覆盖层** —— 构建错误和运行时错误会在浏览器中显示"
 
-#: ../../development/local-development.md:19 4016cae4ca8249118d800236fef56da1
+#: ../../development/local-development.md:27 a0a048e1295f483aa71db152b8d5bccf
+msgid "Dev Helper Scripts"
+msgstr ""
+
+#: ../../development/local-development.md:29 ac2f1b4e29794462917f2b384a49771f
+msgid ""
+"Three shell scripts are provided for managing the development server in "
+"the background:"
+msgstr ""
+
+#: ../../development/local-development.md:31 268670e71e424746bdbeb30542bb30c7
+#, fuzzy
+msgid "Start the Dev Server"
+msgstr "启动开发服务器"
+
+#: ../../development/local-development.md:37 9de90a4c709b4052a5e1788cd2bfedca
+msgid ""
+"This script checks for port conflicts, installs dependencies if needed, "
+"runs database migrations, and starts the dev server in the background. "
+"Logs are written to `logs/dev.log` and the server PID is tracked for "
+"later use."
+msgstr ""
+
+#: ../../development/local-development.md:39 3aec42cba8134cc790d8f3a2848d9c1b
+msgid "Check Server Status"
+msgstr ""
+
+#: ../../development/local-development.md:45 c6a7b3100ce04add83625f4f2df0dbac
+msgid "Reports whether the dev server is currently running."
+msgstr ""
+
+#: ../../development/local-development.md:47 286978a591e6430dba61a51a103b4ebd
+#, fuzzy
+msgid "Stop the Dev Server"
+msgstr "启动开发服务器"
+
+#: ../../development/local-development.md:53 fd36c049b36a42aca2ce46a6506b57ed
+#, fuzzy
+msgid "Stops the dev server using the stored PID."
+msgstr "使用 Node.js 调试器启动开发服务器："
+
+#: ../../development/local-development.md:55 348a2fd92fec460098492fadd01df9d3
 msgid "Common Development Tasks"
 msgstr "常见开发任务"
 
-#: ../../development/local-development.md:21 61dc2640cc274f60a1b3c36511e0e15f
+#: ../../development/local-development.md:57 a836ae46f1d944b89e7d9660a8c91bba
 msgid "Running Type Checks"
 msgstr "运行类型检查"
 
-#: ../../development/local-development.md:27 739b3d160cd640508a2015273339fb82
+#: ../../development/local-development.md:63 ba2ce96bc3254ba190b09199e4b72092
 msgid "Running Lint"
 msgstr "运行 Lint"
 
-#: ../../development/local-development.md:33 2683d2c65d854896a376a19e03e734af
+#: ../../development/local-development.md:69 9de360bc85864c4cbf3fd3507f641e4c
 msgid "Uses ESLint with the project's configured rules."
 msgstr "使用 ESLint 及项目配置的规则。"
 
-#: ../../development/local-development.md:35 3457a30d3bef43379742f095ca2415b0
+#: ../../development/local-development.md:71 7c090f2c3aa846eb9bb3d8704b9a99f0
 msgid "Building for Production"
 msgstr "生产环境构建"
 
-#: ../../development/local-development.md:41 92830f99a8a64b329c4eb2b0ebea775c
+#: ../../development/local-development.md:77 d67a4e45d6d94d16afd7272b47890dd3
 msgid "Creates an optimized production build. This also performs type checking."
 msgstr "创建优化的生产环境构建。这也会执行类型检查。"
 
-#: ../../development/local-development.md:43 dc47f572878847b68431fda3c400fa13
+#: ../../development/local-development.md:79 7a386b0f161a42f9856c304936cc0869
 msgid "Database Operations"
 msgstr "数据库操作"
 
-#: ../../development/local-development.md:56 b8511019e7b948658cc305005207533f
+#: ../../development/local-development.md:92 137de0818a9448ffbddd96546752eb49
 msgid "Debugging"
 msgstr "调试"
 
-#: ../../development/local-development.md:58 f3d0a118f7894a2b9680b5e53ef7038a
+#: ../../development/local-development.md:94 354ba1a58b5a4e1f9181505906437c5f
 msgid "Server-Side Debugging"
 msgstr "服务端调试"
 
-#: ../../development/local-development.md:60 467794f6ef624f04883c5aec0b094194
+#: ../../development/local-development.md:96 09cc388c6bc04c24bec4ca9211d46596
 msgid "Start the dev server with the Node.js inspector:"
 msgstr "使用 Node.js 调试器启动开发服务器："
 
-#: ../../development/local-development.md:64 c985bf293a2241c9b0e84aa3e2933b32
+#: ../../development/local-development.md:100 ba21c17a3cac4543bd95dc4d6ede0c94
 msgid "Open `chrome://inspect` in Chrome and connect to the Node.js process"
 msgstr "在 Chrome 中打开 `chrome://inspect` 并连接到 Node.js 进程"
 
-#: ../../development/local-development.md:65 a0bf81c0e78143d09cac9281bc8beeba
+#: ../../development/local-development.md:101 eb9fdd82aaef443da38494e01a2346ec
 msgid "Set breakpoints in API routes and server-side code"
 msgstr "在 API 路由和服务端代码中设置断点"
 
-#: ../../development/local-development.md:67 8b757f26dbda4e4f8e864a3631834f47
+#: ../../development/local-development.md:103 9e759b4c60574e8d94d43135bd6cabbf
 msgid "Client-Side Debugging"
 msgstr "客户端调试"
 
-#: ../../development/local-development.md:69 ce69c01f63dd4672a83118bc3c3f6480
+#: ../../development/local-development.md:105 02e2742ce0de48fcbf23cdce96c5e123
 msgid "Use the browser's built-in developer tools:"
 msgstr "使用浏览器内置的开发者工具："
 
-#: ../../development/local-development.md:70 90125b609d6243619e0abdd83ba00594
+#: ../../development/local-development.md:106 6c8f843e02244408b6fccbc803639e72
 msgid "**React DevTools** — Inspect component hierarchy and state"
 msgstr "**React DevTools** —— 检查组件层级和状态"
 
-#: ../../development/local-development.md:71 6601201e5ed048fbb364a06ab1c94503
+#: ../../development/local-development.md:107 560f8e2a3cc04e3eafb8728a35eb07e6
 msgid "**Network Tab** — Monitor API requests and responses"
 msgstr "**网络选项卡** —— 监控 API 请求和响应"
 
-#: ../../development/local-development.md:72 5f2031a2867d4c63b6e6db8d61a2bc19
+#: ../../development/local-development.md:108 b027cc77bc26422fa1404cada6c75454
 msgid "**Console** — View logs and errors"
 msgstr "**控制台** —— 查看日志和错误"
 
-#: ../../development/local-development.md:74 5936fbe84f2d43d8a9ddb3395b52bb67
+#: ../../development/local-development.md:110 6ab3749449f144d5873bb93360ee665a
 msgid "Environment Setup Tips"
 msgstr "环境设置技巧"
 
-#: ../../development/local-development.md:76 198fbca2df5f4323bb03b5ee1535967d
+#: ../../development/local-development.md:112 bee5f9d9394748aabaa497a3a38b6086
 msgid "Without AI API Keys"
 msgstr "无 AI API 密钥"
 
-#: ../../development/local-development.md:78 26409111c8ed4274bc7934d6e918d5e3
+#: ../../development/local-development.md:114 82f9f0910dda494fae5ed8988f2d130b
 msgid "You can develop most features without configuring AI API keys:"
 msgstr "大部分功能无需配置 AI API 密钥即可开发："
 
-#: ../../development/local-development.md:79 d74ed6821e0d4ba2bfac834a72cd7e0b
+#: ../../development/local-development.md:115 54122f6425284f528593435f8e81bc71
 msgid ""
 "Workspace management, file browser, and UI components work without any "
 "API key"
 msgstr "工作空间管理、文件浏览器和 UI 组件无需任何 API 密钥即可运行"
 
-#: ../../development/local-development.md:80 dbf9606c9f34425ea9faadbf3608c19a
+#: ../../development/local-development.md:116 a345490ee61a444f802cca50cc5def32
 msgid ""
 "AI chat and note generation features will show a \"not configured\" "
 "message"
 msgstr "AI 对话和笔记生成功能将显示\"未配置\"消息"
 
-#: ../../development/local-development.md:82 d82bd6fe626b4b1dab80e95049cb6100
+#: ../../development/local-development.md:118 05a5481b024541ef8f0a32b57e019265
 msgid "Multiple Root Directories"
 msgstr "多个根目录"
 
-#: ../../development/local-development.md:84 99a5c94020ef4407bd409961ddc37aea
+#: ../../development/local-development.md:120 c44de0f01cdf44419d756b0cd8d550ef
 msgid "For testing workspace management with multiple roots:"
 msgstr "用于测试多根目录的工作空间管理："
 
-#: ../../development/local-development.md:90 e744ef1f7b3e42fbb008e40887d38ab3
+#: ../../development/local-development.md:126 b6a52af0a5034774b63372a883c2d38a
 msgid "Using a Local AI Proxy"
 msgstr "使用本地 AI 代理"
 
-#: ../../development/local-development.md:92 5aa896c9faad45488307a86b6b72d5ca
+#: ../../development/local-development.md:128 66c89d22cc1f405d841ce45bb94ed3cb
 msgid ""
 "If you run a local LLM (e.g., via Ollama or LM Studio) with an OpenAI-"
 "compatible API:"
 msgstr "如果您运行本地 LLM（例如通过 Ollama 或 LM Studio）并提供 OpenAI 兼容 API："
+
