@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { BUFFER, TRUNCATE } from "@/lib/constants";
+import { TRUNCATE } from "@/lib/constants";
 
 export interface KubectlRunnerResult {
   stdout: string;
@@ -95,14 +95,10 @@ const defaultRunner: KubectlRunner = async (args, options) =>
     }, options.timeoutMs);
 
     child.stdout.on("data", (chunk: Buffer) => {
-      if (stdout.length < BUFFER.LARGE) {
-        stdout += chunk.toString();
-      }
+      stdout += chunk.toString();
     });
     child.stderr.on("data", (chunk: Buffer) => {
-      if (stderr.length < BUFFER.DEFAULT) {
-        stderr += chunk.toString();
-      }
+      stderr += chunk.toString();
     });
     child.on("error", (error) => {
       if (settled) return;
@@ -158,7 +154,7 @@ export function createKubectlExecutor(options?: {
       throw new Error(stderr || `kubectl exited with code ${result.exitCode}`);
     }
 
-    const data = parseJson ? JSON.parse(stdout) : stdout;
+    const data = parseJson ? JSON.parse(result.stdout) : stdout;
     return {
       command,
       stdout,

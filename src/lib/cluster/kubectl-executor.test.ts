@@ -98,4 +98,31 @@ describe("createKubectlExecutor", () => {
       exitCode: 0,
     });
   });
+
+  it("parses JSON from full stdout before returning a truncated preview", async () => {
+    const items = Array.from({ length: 50 }, (_item, index) => ({
+      metadata: { name: `pod-${index}` },
+      payload: "x".repeat(100),
+    }));
+    const stdout = JSON.stringify({ items });
+    const runner = vi.fn(async () => ({
+      stdout,
+      stderr: "",
+      exitCode: 0,
+    }));
+    const executor = createKubectlExecutor({
+      runner,
+      defaultTimeoutMs: 30_000,
+      truncate: { stdout: 80, stderr: 50 },
+    });
+
+    const result = await executor.runJson<{ items: unknown[] }>({
+      kubeconfigPath: "/tmp/kubeconfig",
+      context: "kind-local",
+      args: ["get", "pods", "-o", "json"],
+    });
+
+    expect(result.data.items).toHaveLength(50);
+    expect(result.stdout).toHaveLength(80);
+  });
 });

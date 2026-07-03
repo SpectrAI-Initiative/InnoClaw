@@ -105,6 +105,7 @@ export function buildK8sJobManifest(options: BuildK8sJobManifestInput) {
         },
         spec: {
           restartPolicy: "Never",
+          automountServiceAccountToken: false,
           ...(options.profile.imagePullSecrets?.length
             ? {
                 imagePullSecrets: options.profile.imagePullSecrets.map((name) => ({
@@ -140,12 +141,10 @@ export function summarizeK8sJobManifest(
     name: manifest.metadata.name ?? null,
     generateName: manifest.metadata.generateName ?? null,
     namespace: manifest.metadata.namespace,
-    image: container.image,
     command: container.command ?? [],
     args: container.args ?? [],
     resources: container.resources ?? {},
-    imagePullSecrets:
-      manifest.spec.template.spec.imagePullSecrets?.map((item) => item.name) ??
-      [],
+    ttlSecondsAfterFinished: manifest.spec.ttlSecondsAfterFinished ?? null,
+    backoffLimit: manifest.spec.backoffLimit ?? null,
   };
 }

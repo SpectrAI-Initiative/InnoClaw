@@ -257,8 +257,8 @@ function renderToolResult(
           ) : null}
           {review ? (
             <div className="text-agent-muted text-xs">
-              Image: {String(review.image ?? "")}
-              {review.command ? ` | Command: ${String(review.command)}` : ""}
+              {review.command ? `Command: ${String(review.command)}` : "Review ready"}
+              {review.resources ? " | Resources configured" : ""}
             </div>
           ) : null}
           {result.jobSpecHash ? (

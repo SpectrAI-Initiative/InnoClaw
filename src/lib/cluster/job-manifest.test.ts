@@ -45,6 +45,7 @@ describe("buildK8sJobManifest", () => {
         template: {
           spec: {
             restartPolicy: "Never",
+            automountServiceAccountToken: false,
             imagePullSecrets: [{ name: "pull-secret" }],
             containers: [
               {
@@ -90,6 +91,25 @@ describe("buildK8sJobManifest", () => {
     expect(serialized).not.toContain("schedulerName");
     expect(serialized).not.toContain("nodeSelector");
     expect(serialized).not.toContain("affinity");
+  });
+
+  it("disables service account token automount by default", () => {
+    const manifest = buildK8sJobManifest({
+      workspaceId: null,
+      jobSpecHash: "hash-1",
+      namespace: "default",
+      profile: {
+        id: "cpu-smoke",
+        clusterId: "default",
+        defaultImage: "python:3.12",
+      },
+      input: {
+        profileId: "cpu-smoke",
+        jobName: "smoke-test",
+      },
+    });
+
+    expect(manifest.spec.template.spec.automountServiceAccountToken).toBe(false);
   });
 
   it("keeps the full job hash in annotations and a label-safe prefix in labels", () => {

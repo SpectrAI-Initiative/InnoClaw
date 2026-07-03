@@ -102,6 +102,22 @@ export function createK8sJobTools(
     recordClusterOp(op).catch(logAndIgnore("recordClusterOp"));
   }
 
+  function validateFollowUpJobInput(input: {
+    profileId: string;
+    namespace?: string;
+    jobName: string;
+  }) {
+    validateK8sJobInput({
+      profileId: input.profileId,
+      namespace: input.namespace,
+      jobName: input.jobName,
+    });
+  }
+
+  function errorMessage(error: unknown, fallback: string): string {
+    return error instanceof Error ? error.message : fallback;
+  }
+
   return {
     prepareK8sJob: tool({
       description:
@@ -124,7 +140,6 @@ export function createK8sJobTools(
             namespace: review.namespace,
             jobSpecHash: prepared.jobSpecHash,
             review,
-            manifest: prepared.manifest,
           };
           recordSafe({
             workspaceId: ctx.workspaceId,
@@ -134,7 +149,7 @@ export function createK8sJobTools(
             status: "success",
             summary: `Prepared generic K8s Job ${review.name ?? review.generateName ?? "generated"}`,
             input: { profileId: input.profileId, namespace: review.namespace },
-            output: { jobSpecHash: prepared.jobSpecHash, image: review.image },
+            output: { jobSpecHash: prepared.jobSpecHash },
           });
           return result;
         } catch (error) {
@@ -253,29 +268,47 @@ export function createK8sJobTools(
         pollIntervalSeconds: z.number().int().positive().optional(),
       }),
       execute: async (input) => {
-        const resolved = resolveK8sJobProfile(
-          ctx.k8sJobConfig,
-          input.profileId,
-          input.namespace,
-        );
-        const result = await waitForJob({
-          executor,
-          scope: scopeFor(resolved),
-          jobName: input.jobName,
-          timeoutSeconds: input.timeoutSeconds ?? 600,
-          pollIntervalSeconds: input.pollIntervalSeconds ?? 5,
-        });
-        recordSafe({
-          workspaceId: ctx.workspaceId,
-          toolName: "waitForK8sJob",
-          jobName: input.jobName,
-          namespace: resolved.namespace,
-          status: result.status === "failed" ? "error" : "success",
-          summary: `Waited for generic K8s Job ${input.jobName}: ${result.status}`,
-          input: { profileId: input.profileId, namespace: resolved.namespace },
-          output: { status: result.status, polls: result.polls },
-        });
-        return result;
+        try {
+          validateFollowUpJobInput(input);
+          const resolved = resolveK8sJobProfile(
+            ctx.k8sJobConfig,
+            input.profileId,
+            input.namespace,
+          );
+          const result = await waitForJob({
+            executor,
+            scope: scopeFor(resolved),
+            jobName: input.jobName,
+            timeoutSeconds: input.timeoutSeconds ?? 600,
+            pollIntervalSeconds: input.pollIntervalSeconds ?? 5,
+          });
+          recordSafe({
+            workspaceId: ctx.workspaceId,
+            toolName: "waitForK8sJob",
+            jobName: input.jobName,
+            namespace: resolved.namespace,
+            status: result.status === "complete" ? "success" : "error",
+            summary: `Waited for generic K8s Job ${input.jobName}: ${result.status}`,
+            input: { profileId: input.profileId, namespace: resolved.namespace },
+            output: { status: result.status, polls: result.polls },
+          });
+          return result;
+        } catch (error) {
+          recordSafe({
+            workspaceId: ctx.workspaceId,
+            toolName: "waitForK8sJob",
+            jobName: input.jobName,
+            namespace: input.namespace,
+            status: "error",
+            summary: "Failed to wait for generic K8s Job",
+            input: { profileId: input.profileId, namespace: input.namespace },
+            output: { error: errorMessage(error, "Failed to wait for K8s job") },
+          });
+          return {
+            success: false,
+            error: errorMessage(error, "Failed to wait for K8s job"),
+          };
+        }
       },
     }),
 
@@ -289,32 +322,50 @@ export function createK8sJobTools(
         tailLines: z.number().int().positive().optional(),
       }),
       execute: async (input) => {
-        const resolved = resolveK8sJobProfile(
-          ctx.k8sJobConfig,
-          input.profileId,
-          input.namespace,
-        );
-        const result = await collectLogsForJob({
-          executor,
-          scope: scopeFor(resolved),
-          jobName: input.jobName,
-          tailLines: Math.min(input.tailLines ?? 200, 2000),
-        });
-        recordSafe({
-          workspaceId: ctx.workspaceId,
-          toolName: "collectK8sJobLogs",
-          jobName: input.jobName,
-          namespace: resolved.namespace,
-          status: result.logsError ? "error" : "success",
-          summary: `Collected logs for generic K8s Job ${input.jobName}`,
-          input: { profileId: input.profileId, namespace: resolved.namespace },
-          output: {
-            podName: result.podName,
-            logsLength: result.logs.length,
-            logsError: result.logsError,
-          },
-        });
-        return result;
+        try {
+          validateFollowUpJobInput(input);
+          const resolved = resolveK8sJobProfile(
+            ctx.k8sJobConfig,
+            input.profileId,
+            input.namespace,
+          );
+          const result = await collectLogsForJob({
+            executor,
+            scope: scopeFor(resolved),
+            jobName: input.jobName,
+            tailLines: Math.min(input.tailLines ?? 200, 2000),
+          });
+          recordSafe({
+            workspaceId: ctx.workspaceId,
+            toolName: "collectK8sJobLogs",
+            jobName: input.jobName,
+            namespace: resolved.namespace,
+            status: result.logsError ? "error" : "success",
+            summary: `Collected logs for generic K8s Job ${input.jobName}`,
+            input: { profileId: input.profileId, namespace: resolved.namespace },
+            output: {
+              podName: result.podName,
+              logsLength: result.logs.length,
+              logsError: result.logsError,
+            },
+          });
+          return result;
+        } catch (error) {
+          recordSafe({
+            workspaceId: ctx.workspaceId,
+            toolName: "collectK8sJobLogs",
+            jobName: input.jobName,
+            namespace: input.namespace,
+            status: "error",
+            summary: "Failed to collect logs for generic K8s Job",
+            input: { profileId: input.profileId, namespace: input.namespace },
+            output: { error: errorMessage(error, "Failed to collect K8s job logs") },
+          });
+          return {
+            success: false,
+            error: errorMessage(error, "Failed to collect K8s job logs"),
+          };
+        }
       },
     }),
 
@@ -341,31 +392,49 @@ export function createK8sJobTools(
           });
           return { success: false, error: "confirmDelete=true is required" };
         }
-        const resolved = resolveK8sJobProfile(
-          ctx.k8sJobConfig,
-          input.profileId,
-          input.namespace,
-        );
-        const job = await executor.runJson<unknown>({
-          ...scopeFor(resolved),
-          args: ["get", "job", input.jobName, "-o", "json"],
-        });
-        ensureOwnedK8sJob(job.data, input.jobSpecHash);
-        const deleted = await executor.runText({
-          ...scopeFor(resolved),
-          args: ["delete", "job", input.jobName],
-        });
-        recordSafe({
-          workspaceId: ctx.workspaceId,
-          toolName: "cleanupK8sJob",
-          jobName: input.jobName,
-          namespace: resolved.namespace,
-          status: "success",
-          summary: `Cleaned up generic K8s Job ${input.jobName}`,
-          input: { profileId: input.profileId, namespace: resolved.namespace },
-          output: { outputLength: deleted.data.length },
-        });
-        return { success: true, jobName: input.jobName, output: deleted.data };
+        try {
+          validateFollowUpJobInput(input);
+          const resolved = resolveK8sJobProfile(
+            ctx.k8sJobConfig,
+            input.profileId,
+            input.namespace,
+          );
+          const job = await executor.runJson<unknown>({
+            ...scopeFor(resolved),
+            args: ["get", "job", input.jobName, "-o", "json"],
+          });
+          ensureOwnedK8sJob(job.data, input.jobSpecHash);
+          const deleted = await executor.runText({
+            ...scopeFor(resolved),
+            args: ["delete", "job", input.jobName],
+          });
+          recordSafe({
+            workspaceId: ctx.workspaceId,
+            toolName: "cleanupK8sJob",
+            jobName: input.jobName,
+            namespace: resolved.namespace,
+            status: "success",
+            summary: `Cleaned up generic K8s Job ${input.jobName}`,
+            input: { profileId: input.profileId, namespace: resolved.namespace },
+            output: { outputLength: deleted.data.length },
+          });
+          return { success: true, jobName: input.jobName, output: deleted.data };
+        } catch (error) {
+          recordSafe({
+            workspaceId: ctx.workspaceId,
+            toolName: "cleanupK8sJob",
+            jobName: input.jobName,
+            namespace: input.namespace,
+            status: "error",
+            summary: "Failed to clean up generic K8s Job",
+            input: { profileId: input.profileId, namespace: input.namespace },
+            output: { error: errorMessage(error, "Failed to clean up K8s job") },
+          });
+          return {
+            success: false,
+            error: errorMessage(error, "Failed to clean up K8s job"),
+          };
+        }
       },
     }),
   };
