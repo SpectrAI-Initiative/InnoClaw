@@ -150,22 +150,29 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 <!-- whats-new-start -->
 
+#### 2026-07-03
+- **Generic Kubernetes Job Scheduler**: Enable AI agents to define, validate, and execute containerized workloads on Kubernetes clusters with configurable job profiles
+
+
 #### 2026-06-26
 - **CLI Runtime Support**: Interactive command-line interface with REPL, batch operations, and agent integration for terminal-based workflows
-
-
-#### 2026-06-12
-- **Disabled Auth Mode**: Run the application without authentication for single-user or development deployments
 
 
 
 <details>
 <summary>Show earlier updates</summary>
 
+#### 2026-06-12
+- **Disabled Auth Mode**: Run the application without authentication for single-user or development deployments
+
+
+
+
 #### 2026-05-12
 - **Local User Authentication**: Added built-in account registration, sign-in, sign-out, and persistent session support.
 - **Admin User Management**: Added an admin users page to create accounts and manage roles, access, passwords, and ownership.
 - **CLI Login Handoff**: `innoclaw` now supports interactive terminal mode, one-shot `run`, JSON `batch`, and browser-to-CLI session handoff.
+
 
 
 
@@ -179,10 +186,12 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
 #### 2026-04-12
 - **Docker Deployment Support**: Self-host InnoClaw with Docker and docker-compose, with guides for setup, volumes, and upgrades
 - **200+ Built-in Skills**: Massive expansion of ready-to-use scientific skills across bioinformatics, chemistry, genomics, and physics
 - **Skill Creator Framework**: New meta-skill for creating, evaluating, benchmarking, and validating custom skills
+
 
 
 
@@ -200,9 +209,11 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
 #### 2026-04-01
 - **Text-to-CAD Skill**: New agent skill that converts natural language descriptions into 3D CAD models (STL/STEP) using CadQuery, with automatic environment setup
 - **Workspace Image Picker**: New dialog UI in the agent panel for browsing and selecting images from the workspace to attach to conversations
+
 
 
 
@@ -224,22 +235,11 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 
 
+
 #### 2026-03-26
 - **Dynamic Model Discovery**: Agent panel now auto-fetches available models from each configured AI provider, merging live results with built-in model lists
 - **Per-Model Base URL Routing**: Chinese AI providers (shlab, qwen, moonshot, deepseek, minimax, zhipu) now support per-model `<PROVIDER>_<MODEL>_BASE_URL` env vars for flexible endpoint routing
 - **Runtime Tool-Calling Override**: Tool support can now be toggled per provider via `<PROVIDER>_TOOLS_ENABLED=true/false` without code changes
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-26
-- **Node.js Runtime Update**: InnoClaw now targets Node.js 24+ and is verified against both Node.js 24 LTS and the latest Node.js 25 current release. CI and local version hints have been updated accordingly.
 
 
 
