@@ -1028,4 +1028,3 @@ msgid ""
 "The `.gitignore` file already excludes `.env*` files (except "
 "`.env.example`)."
 msgstr "`.gitignore` 文件已排除 `.env*` 文件（`.env.example` 除外）。"
-

@@ -469,4 +469,3 @@ msgid ""
 "**Source Code** — The code is well-structured and documented; see "
 "[Project Structure](../development/project-structure.md)"
 msgstr "**源代码** —— 代码结构良好且有文档记录；请参阅[项目结构](../development/project-structure.md)"
-

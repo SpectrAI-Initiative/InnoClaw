@@ -143,4 +143,3 @@ msgstr "环境变量和 API 密钥"
 #: ../../getting-started/deployment.md:202 86c137013f12498298c1ff57f5e5c6d7
 msgid "To back up, save the `./data/` directory and `.env.local` file."
 msgstr "备份时，请保存 `./data/` 目录和 `.env.local` 文件。"
-

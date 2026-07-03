@@ -681,4 +681,3 @@ msgstr ""
 #: ../../README_JA.md:288 d2df3ec7ccea4b2c83929b0a6ee408a9
 msgid "Star History Chart"
 msgstr ""
-

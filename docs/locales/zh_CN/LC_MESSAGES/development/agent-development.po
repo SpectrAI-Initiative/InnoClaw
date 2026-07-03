@@ -413,4 +413,3 @@ msgid ""
 "point, document that extension point here or in the most relevant "
 "development page."
 msgstr "如果某项变更主要是内部实现，但引入了新的开发者扩展点，请在这里或最相关的开发文档页中记录该扩展点。"
-

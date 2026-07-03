@@ -164,4 +164,3 @@ msgid ""
 "handlers for each task type (daily_report, weekly_report, git_sync, "
 "source_sync, custom)."
 msgstr ""
-

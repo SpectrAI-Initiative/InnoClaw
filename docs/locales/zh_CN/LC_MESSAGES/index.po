@@ -62,4 +62,3 @@ msgid ""
 "repository root `AGENTS.md`, then use the development pages below for "
 "detailed setup, testing, and documentation procedures."
 msgstr ""
-

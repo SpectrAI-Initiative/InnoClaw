@@ -1059,4 +1059,3 @@ msgstr ""
 #: 9b5ed10d43294a6aac171bd0fe8c1f69
 msgid "All translations follow the same structure and are easy to maintain."
 msgstr ""
-

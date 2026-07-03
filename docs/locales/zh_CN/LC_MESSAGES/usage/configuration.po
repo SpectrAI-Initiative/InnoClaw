@@ -227,4 +227,3 @@ msgid ""
 "See [Notifications](../notifications/index.md) for configuring Feishu and"
 " WeChat bot integrations."
 msgstr "请参阅[通知](../notifications/index.md)了解飞书和企业微信机器人集成的配置。"
-

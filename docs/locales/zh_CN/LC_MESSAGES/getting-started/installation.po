@@ -214,4 +214,3 @@ msgid ""
 " uploading, editing, and GitHub cloning features will still work. Only AI"
 " chat and note generation will be disabled."
 msgstr "如果您未配置任何 API 密钥，工作空间管理、文件浏览、上传、编辑和 GitHub 克隆功能仍然可用。只有 AI 对话和笔记生成功能会被禁用。"
-

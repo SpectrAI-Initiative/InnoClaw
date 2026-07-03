@@ -112,4 +112,3 @@ msgid ""
 "contents, tokens, secret values, internal node names, private topology, "
 "or unredacted private image paths."
 msgstr ""
-

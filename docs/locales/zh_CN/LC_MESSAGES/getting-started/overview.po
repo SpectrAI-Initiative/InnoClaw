@@ -231,4 +231,3 @@ msgstr "**生成** —— 将相关文本块和用户的问题发送给 LLM，�
 
 #~ msgid "**Skills** — Reusable prompt templates for common tasks"
 #~ msgstr "**技能** —— 用于常见任务的可复用提示词模板"
-

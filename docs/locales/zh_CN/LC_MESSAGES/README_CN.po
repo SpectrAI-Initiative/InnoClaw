@@ -786,4 +786,3 @@ msgstr ""
 #: ../../README_CN.md:378 f38774902ba340769d399de3cea763b1
 msgid "Star History Chart"
 msgstr ""
-
