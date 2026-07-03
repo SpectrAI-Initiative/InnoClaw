@@ -46,6 +46,11 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   grep: <Search className="h-3.5 w-3.5" />,
   kubectl: <Terminal className="h-3.5 w-3.5" />,
   submitK8sJob: <Terminal className="h-3.5 w-3.5" />,
+  prepareK8sJob: <Terminal className="h-3.5 w-3.5" />,
+  runK8sJob: <Terminal className="h-3.5 w-3.5" />,
+  waitForK8sJob: <Terminal className="h-3.5 w-3.5" />,
+  collectK8sJobLogs: <Terminal className="h-3.5 w-3.5" />,
+  cleanupK8sJob: <Terminal className="h-3.5 w-3.5" />,
 };
 
 function getToolSummary(toolName: string, args?: Record<string, unknown>): string {
@@ -65,6 +70,16 @@ function getToolSummary(toolName: string, args?: Record<string, unknown>): strin
       return String(args.subcommand || "");
     case "submitK8sJob":
       return `${args.jobName || ""}${args.gpuCount ? ` (${args.gpuCount} GPUs)` : ""}`;
+    case "prepareK8sJob":
+      return `prepare ${args.jobName || args.generateName || args.profileId || ""}`;
+    case "runK8sJob":
+      return `run ${args.jobName || args.generateName || args.profileId || ""}`;
+    case "waitForK8sJob":
+      return `wait ${args.jobName || ""}`;
+    case "collectK8sJobLogs":
+      return `logs ${args.jobName || ""}`;
+    case "cleanupK8sJob":
+      return `cleanup ${args.jobName || ""}`;
     default:
       return JSON.stringify(args);
   }
@@ -226,6 +241,116 @@ function renderToolResult(
         </div>
       );
     }
+    case "prepareK8sJob": {
+      const success = Boolean(result.success);
+      const review = result.review as Record<string, unknown> | undefined;
+      return (
+        <div className="space-y-1">
+          <div className={success ? "text-agent-success" : "text-agent-error"}>
+            {success ? "Job prepared" : "Job preparation failed"}
+            {result.jobName ? ` — ${String(result.jobName)}` : ""}
+          </div>
+          {result.namespace ? (
+            <div className="text-agent-muted text-xs">
+              Namespace: {String(result.namespace)}
+            </div>
+          ) : null}
+          {review ? (
+            <div className="text-agent-muted text-xs">
+              Image: {String(review.image ?? "")}
+              {review.command ? ` | Command: ${String(review.command)}` : ""}
+            </div>
+          ) : null}
+          {result.jobSpecHash ? (
+            <div className="text-agent-muted text-xs">
+              Hash: <span className="font-mono">{String(result.jobSpecHash)}</span>
+            </div>
+          ) : null}
+          {result.error != null && (
+            <div className="text-agent-error">{String(result.error)}</div>
+          )}
+        </div>
+      );
+    }
+    case "runK8sJob": {
+      const success = Boolean(result.success);
+      return (
+        <div className="space-y-1">
+          <div className={success ? "text-agent-success" : "text-agent-error"}>
+            {success ? "Job submitted" : "Job submission blocked or failed"}
+            {result.jobName ? ` — ${String(result.jobName)}` : ""}
+          </div>
+          {result.namespace ? (
+            <div className="text-agent-muted text-xs">
+              Namespace: {String(result.namespace)}
+            </div>
+          ) : null}
+          {result.error != null && (
+            <div className="text-agent-error">{String(result.error)}</div>
+          )}
+        </div>
+      );
+    }
+    case "waitForK8sJob": {
+      return (
+        <div className="space-y-1">
+          <div className={result.status === "failed" ? "text-agent-error" : "text-agent-success"}>
+            Status: {String(result.status || "unknown")}
+          </div>
+          {result.reason ? (
+            <div className="text-agent-muted text-xs">
+              Reason: {String(result.reason)}
+            </div>
+          ) : null}
+          {result.message ? (
+            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed">
+              {String(result.message)}
+            </pre>
+          ) : null}
+        </div>
+      );
+    }
+    case "collectK8sJobLogs": {
+      const logs = String(result.logs || "");
+      return (
+        <div className="space-y-1">
+          {result.podName ? (
+            <div className="text-agent-muted text-xs">
+              Pod: {String(result.podName)}
+            </div>
+          ) : null}
+          {logs ? (
+            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed max-h-[400px] overflow-y-auto overflow-x-hidden">
+              {logs}
+            </pre>
+          ) : null}
+          {result.logsError ? (
+            <pre className="whitespace-pre-wrap text-agent-error leading-relaxed">
+              {String(result.logsError)}
+            </pre>
+          ) : null}
+        </div>
+      );
+    }
+    case "cleanupK8sJob": {
+      const success = Boolean(result.success);
+      return (
+        <div className="space-y-1">
+          <div className={success ? "text-agent-success" : "text-agent-error"}>
+            {success ? "Job deleted" : "Job cleanup blocked or failed"}
+            {result.jobName ? ` — ${String(result.jobName)}` : ""}
+          </div>
+          {result.output ? (
+            <pre className="whitespace-pre-wrap text-agent-foreground leading-relaxed">
+              {String(result.output)}
+            </pre>
+          ) : null}
+          {result.error != null && (
+            <div className="text-agent-error">{String(result.error)}</div>
+          )}
+        </div>
+      );
+    }
     default:
       return (
         <pre className="whitespace-pre-wrap text-agent-foreground">
@@ -328,6 +453,27 @@ export function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
             <div className="text-agent-muted space-y-0.5">
               <div>📋 Collecting results for: <span className="text-agent-accent">{String(args.jobName)}</span></div>
               {args.namespace ? <div>Namespace: <span className="text-agent-foreground">{String(args.namespace)}</span></div> : null}
+            </div>
+          )}
+          {[
+            "prepareK8sJob",
+            "runK8sJob",
+            "waitForK8sJob",
+            "collectK8sJobLogs",
+            "cleanupK8sJob",
+          ].includes(toolName) && args && (
+            <div className="text-agent-muted space-y-0.5">
+              {args.profileId ? <div>Profile: <span className="text-agent-accent">{String(args.profileId)}</span></div> : null}
+              {args.jobName ? <div>Job: <span className="text-agent-accent">{String(args.jobName)}</span></div> : null}
+              {args.namespace ? <div>Namespace: <span className="text-agent-foreground">{String(args.namespace)}</span></div> : null}
+              {args.image ? <div>Image: <span className="text-agent-foreground">{String(args.image)}</span></div> : null}
+              {args.command ? (
+                <div className="text-agent-success">
+                  $ {Array.isArray(args.command)
+                    ? args.command.map(String).join(" ")
+                    : String(args.command)}
+                </div>
+              ) : null}
             </div>
           )}
 

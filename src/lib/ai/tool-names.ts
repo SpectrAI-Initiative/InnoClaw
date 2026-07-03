@@ -19,6 +19,11 @@ export const ALL_TOOLS = [
 export const K8S_TOOLS = [
   "kubectl",
   "submitK8sJob",
+  "prepareK8sJob",
+  "runK8sJob",
+  "waitForK8sJob",
+  "collectK8sJobLogs",
+  "cleanupK8sJob",
 ] as const;
 
 /**

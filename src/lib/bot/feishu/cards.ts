@@ -84,6 +84,25 @@ export function summarizeToolResult(
     }
     case "submitK8sJob":
       return result.success ? "Job submitted" : `Failed: ${result.error || "unknown"}`;
+    case "prepareK8sJob":
+      return result.success
+        ? `Job prepared: ${result.jobName || result.generateName || ""}`
+        : `Failed: ${result.error || "unknown"}`;
+    case "runK8sJob":
+      return result.success
+        ? `Job submitted: ${result.jobName || ""}`
+        : `Failed: ${result.error || "unknown"}`;
+    case "waitForK8sJob":
+      return `Status: ${result.status || "unknown"}`;
+    case "collectK8sJobLogs": {
+      const logs = String(result.logs || "");
+      const prefix = result.podName ? `Pod ${result.podName}` : "Logs";
+      return `${prefix}: ${logs.length} chars${result.logsError ? `, error: ${truncate(String(result.logsError), 160)}` : ""}`;
+    }
+    case "cleanupK8sJob":
+      return result.success
+        ? `Job deleted: ${result.jobName || ""}`
+        : `Failed: ${result.error || "unknown"}`;
     case "collectJobResults": {
       const jr = result.jobStatus as Record<string, unknown> | undefined;
       if (!result.success) {
@@ -132,6 +151,21 @@ function formatToolCallMd(tc: ToolCallEvent): string {
       break;
     case "submitK8sJob":
       header = `**🚀 submitK8sJob** \`${String(args.jobName || "")}\` (${args.gpuCount || 4} GPUs)`;
+      break;
+    case "prepareK8sJob":
+      header = `**prepareK8sJob** \`${String(args.jobName || args.generateName || args.profileId || "")}\``;
+      break;
+    case "runK8sJob":
+      header = `**runK8sJob** \`${String(args.jobName || args.generateName || args.profileId || "")}\``;
+      break;
+    case "waitForK8sJob":
+      header = `**waitForK8sJob** \`${String(args.jobName || "")}\``;
+      break;
+    case "collectK8sJobLogs":
+      header = `**collectK8sJobLogs** \`${String(args.jobName || "")}\``;
+      break;
+    case "cleanupK8sJob":
+      header = `**cleanupK8sJob** \`${String(args.jobName || "")}\``;
       break;
     case "collectJobResults":
       header = `**📋 collectJobResults** \`${String(args.jobName || "")}\``;
