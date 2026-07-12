@@ -67,6 +67,7 @@ config/k8s-job-profiles.local.json
 
 # docs build artifacts
 docs/_build/
+.venv-docs/
 docs/locales/*/LC_MESSAGES/*.mo
 docs/locales/*/LC_MESSAGES/**/*.mo
 reference/

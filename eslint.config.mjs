@@ -28,6 +28,10 @@ const eslintConfig = defineConfig([
     "public/**",
     // Sphinx documentation build artifacts
     "docs/_build/**",
+    // Generated administrator CLI output
+    ".admin-cli/**",
+    // Local Sphinx virtual environment
+    ".venv-docs/**",
   ]),
 ]);
 
