@@ -26,6 +26,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 RUN npm run build
+RUN npm run build:admin-cli
 
 # ── Stage 3: Production runner ────────────────────────────────────
 FROM node:24-slim AS runner
@@ -47,6 +48,7 @@ RUN addgroup --system nodejs && adduser --system --ingroup nodejs nextjs
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/.admin-cli ./admin-cli
 
 # Copy Drizzle migrations + config so the entrypoint can auto-migrate
 COPY --from=builder /app/drizzle ./drizzle

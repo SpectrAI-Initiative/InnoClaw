@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+/.admin-cli/
 /out/
 
 # production

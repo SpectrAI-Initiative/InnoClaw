@@ -34,6 +34,8 @@
     "dev:no-auth": "cross-env AUTH_MODE=disabled next dev",
     "prebuild": "node scripts/check-deps.js",
     "build": "next build",
+    "build:admin-cli": "tsc -p tsconfig.admin-cli.json",
+    "auth:bootstrap-admin": "node .admin-cli/scripts/bootstrap-admin.js",
     "start": "next start",
     "start:no-auth": "cross-env AUTH_MODE=disabled next start",
     "lint": "eslint",
