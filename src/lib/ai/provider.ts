@@ -7,6 +7,7 @@ import { inArray } from "drizzle-orm";
 import { DEFAULT_PROVIDER, DEFAULT_MODEL, PROVIDERS } from "./models";
 import type { ProviderId } from "./models";
 import type { LanguageModel } from "ai";
+import { applyOpenAIReasoningEffort } from "./openai-reasoning";
 import {
   getApiKeyEnvKey,
   getCurrentEnv,
@@ -98,11 +99,15 @@ function getPerModelProvider(
  * Shared by both DB-based and per-request model resolution.
  */
 function buildLanguageModel(provider: string, modelId: string): LanguageModel {
+  const env = getCurrentEnv();
   switch (provider) {
     case "openai":
       // Use Chat Completions API (not Responses API) for maximum compatibility
       // with third-party proxies and OpenAI-compatible services.
-      return openai.chat(modelId);
+      return applyOpenAIReasoningEffort(
+        openai.chat(modelId),
+        env.OPENAI_REASONING_EFFORT,
+      );
     case "gemini":
       // Gemini models served via a separate OpenAI-compatible proxy
       return gemini.chat(modelId);
@@ -118,7 +123,10 @@ function buildLanguageModel(provider: string, modelId: string): LanguageModel {
     default:
       // Use the configured modelId even for unknown providers – the user may be
       // pointing OPENAI_BASE_URL at a third-party OpenAI-compatible service.
-      return openai.chat(modelId);
+      return applyOpenAIReasoningEffort(
+        openai.chat(modelId),
+        env.OPENAI_REASONING_EFFORT,
+      );
   }
 }
 

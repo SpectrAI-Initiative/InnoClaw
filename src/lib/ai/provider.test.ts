@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import type { LanguageModel } from "ai";
 
 /**
  * Unit tests for getPerModelProvider base-URL resolution in provider.ts.
@@ -10,8 +11,25 @@ import path from "path";
  * API keys or network access—only the env-var lookup logic is exercised.
  */
 
-// Fake chat model returned by the mocked provider
-const fakeChatModel = { modelId: "test" };
+const openAIDoGenerate = vi.fn(async () => ({
+  content: [],
+  finishReason: { unified: "stop", raw: "stop" },
+  usage: {
+    inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },
+    outputTokens: { total: 0, text: 0, reasoning: 0 },
+  },
+  warnings: [],
+}));
+
+// Fake v3 chat model returned by the mocked providers.
+const fakeChatModel = {
+  specificationVersion: "v3" as const,
+  provider: "test-provider",
+  modelId: "test",
+  supportedUrls: {},
+  doGenerate: openAIDoGenerate,
+  doStream: vi.fn(async () => ({ stream: new ReadableStream() })),
+};
 
 // Track calls to createOpenAI so we can assert baseURL / apiKey
 const createOpenAISpy = vi.fn((config: unknown) => {
@@ -43,6 +61,7 @@ describe("getPerModelProvider – base URL resolution", () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "innoclaw-provider-test-"));
     vi.spyOn(process, "cwd").mockReturnValue(tmpDir);
     createOpenAISpy.mockClear();
+    openAIDoGenerate.mockClear();
   });
 
   afterEach(() => {
@@ -106,6 +125,13 @@ describe("getPerModelProvider – base URL resolution", () => {
     }));
 
     return import("./provider");
+  }
+
+  async function invokeGenerate(model: LanguageModel) {
+    if (typeof model === "string") {
+      throw new Error("Expected a resolved language model");
+    }
+    await model.doGenerate({ prompt: [] });
   }
 
   it("uses per-model base URL when set", async () => {
@@ -240,5 +266,77 @@ describe("getPerModelProvider – base URL resolution", () => {
       providerId: "openai",
       modelId: "gpt-5.4",
     });
+  });
+
+  it("applies ultra as xhigh to the OpenAI provider", async () => {
+    process.env.OPENAI_REASONING_EFFORT = "ultra";
+    const result = await callGetModelFromOverride("openai", "gpt-5.6-sol");
+
+    await invokeGenerate(result.model);
+
+    expect(openAIDoGenerate).toHaveBeenCalledWith(expect.objectContaining({
+      providerOptions: { openai: { reasoningEffort: "xhigh" } },
+    }));
+  });
+
+  it("applies reasoning effort to the unknown-provider OpenAI fallback", async () => {
+    process.env.OPENAI_REASONING_EFFORT = "high";
+    const result = await callGetModelFromOverride(
+      "custom-openai-compatible",
+      "gpt-5.6-sol",
+    );
+
+    await invokeGenerate(result.model);
+
+    expect(openAIDoGenerate).toHaveBeenCalledWith(expect.objectContaining({
+      providerOptions: { openai: { reasoningEffort: "high" } },
+    }));
+  });
+
+  it.each([
+    ["anthropic", "claude-test", undefined],
+    ["gemini", "gemini-test", undefined],
+    ["qwen", "qwen-test", "QWEN"],
+    ["moonshot", "moonshot-test", "MOONSHOT"],
+    ["deepseek", "deepseek-test", "DEEPSEEK"],
+    ["minimax", "minimax-test", "MINIMAX"],
+    ["zhipu", "zhipu-test", "ZHIPU"],
+    ["shlab", "shlab-test", "SHLAB"],
+  ])("does not apply OpenAI reasoning settings to %s", async (
+    provider,
+    modelId,
+    envPrefix,
+  ) => {
+    process.env.OPENAI_REASONING_EFFORT = "ultra";
+    if (envPrefix) {
+      process.env[`${envPrefix}_API_KEY`] = "sk-test";
+      process.env[`${envPrefix}_BASE_URL`] = `https://${provider}.example.com/v1`;
+    }
+    const result = await callGetModelFromOverride(provider, modelId);
+    openAIDoGenerate.mockClear();
+
+    await invokeGenerate(result.model);
+
+    expect(openAIDoGenerate).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        providerOptions: expect.objectContaining({ openai: expect.anything() }),
+      }),
+    );
+  });
+
+  it("reads the latest reasoning effort from .env.local", async () => {
+    process.env.OPENAI_REASONING_EFFORT = "low";
+    fs.writeFileSync(
+      path.join(tmpDir, ".env.local"),
+      "OPENAI_REASONING_EFFORT=high\n",
+    );
+    const mod = await importProviderModule();
+    const result = mod.getModelFromOverride("openai", "gpt-5.6-sol");
+
+    await invokeGenerate(result.model);
+
+    expect(openAIDoGenerate).toHaveBeenCalledWith(expect.objectContaining({
+      providerOptions: { openai: { reasoningEffort: "high" } },
+    }));
   });
 });
