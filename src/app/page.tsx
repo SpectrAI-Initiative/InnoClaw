@@ -20,6 +20,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageBackground } from "@/components/ui/page-background";
 import { useWorkspaces } from "@/lib/hooks/use-workspaces";
 import { useMounted } from "@/lib/hooks/use-mounted";
+import { fetcher } from "@/lib/fetcher";
+import {
+  normalizeWorkspaceBrowseSettings,
+  type WorkspaceBrowseSettingsResponse,
+} from "@/lib/workspace-settings";
 import { toast } from "sonner";
 
 export default function HomePage() {
@@ -33,17 +38,15 @@ export default function HomePage() {
 
   useEffect(() => {
     // Fetch workspace roots from settings API
-    fetch("/api/settings")
-      .then((res) => res.json())
+    fetcher<WorkspaceBrowseSettingsResponse>("/api/settings")
       .then((data) => {
-        if (data.workspaceRoots) {
-          setWorkspaceRoots(data.workspaceRoots);
-        }
-        if (data.defaultBrowsePath) {
-          setDefaultBrowsePath(data.defaultBrowsePath);
-        }
+        const browseSettings = normalizeWorkspaceBrowseSettings(data);
+        setWorkspaceRoots(browseSettings.workspaceRoots);
+        setDefaultBrowsePath(browseSettings.defaultBrowsePath);
       })
-      .catch(() => {});
+      .catch(() => {
+        toast.error("Failed to load workspace settings");
+      });
   }, []);
 
   const handleDelete = async (id: string) => {

@@ -2,14 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import os from "os";
-import path from "path";
-import { getWorkspaceRoots } from "@/lib/files/filesystem";
 import { updateEnvLocal } from "@/lib/env-file";
 import { PROVIDERS } from "@/lib/ai/models";
 import { getCurrentEnv } from "@/lib/ai/provider-env";
 import { getK8sConfig, SETTINGS_TO_ENV, invalidateK8sConfigCache } from "@/lib/cluster/config";
-import { requireAdmin } from "@/lib/auth/server";
+import { requireAdmin, requireAuth } from "@/lib/auth/server";
+import { ensureEffectiveWorkspaceRoots } from "@/lib/auth/workspace-roots";
 
 /**
  * Derive the base-URL env var name for a provider (e.g. "openai" → "OPENAI_BASE_URL").
@@ -36,7 +34,7 @@ function getProviderEnvInfo() {
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAdmin(request);
+    const auth = await requireAuth(request);
     if (auth instanceof NextResponse) {
       return auth;
     }
@@ -54,24 +52,32 @@ export async function GET(request: NextRequest) {
     const llmModel = env.LLM_MODEL || settingsMap["llm_model"] || "gpt-4o-mini";
     const hasHfToken = !!settingsMap["hf_token"] || !!env.HF_TOKEN;
     const { providerKeys, providerBaseUrls } = getProviderEnvInfo();
-
-    return NextResponse.json({
+    const workspaceRoots = ensureEffectiveWorkspaceRoots(auth);
+    const common = {
       llmProvider,
       llmModel,
       contextMode: settingsMap["context_mode"] || "normal",
       maxMode: settingsMap["max_mode"] !== "false",
-      workspaceRoots: getWorkspaceRoots(),
-      defaultBrowsePath: path.join(os.homedir(), "Desktop"),
+      workspaceRoots,
+      defaultBrowsePath: workspaceRoots[0] || "",
+      hasAIKey: Object.values(providerKeys).some(Boolean),
+      configuredProviders: Object.entries(providerKeys)
+        .filter(([, configured]) => configured)
+        .map(([id]) => id),
+    };
+
+    if (auth.user.role !== "admin") {
+      return NextResponse.json(common);
+    }
+
+    return NextResponse.json({
+      ...common,
       hasOpenAIKey: providerKeys["openai"] ?? false,
       hasAnthropicKey: providerKeys["anthropic"] ?? false,
       hasGeminiKey: providerKeys["gemini"] ?? false,
       hasGithubToken: !!env.GITHUB_TOKEN,
       hasHfToken,
       hfTokenSource: settingsMap["hf_token"] ? "db" : (env.HF_TOKEN ? "env" : null),
-      hasAIKey: Object.values(providerKeys).some(Boolean),
-      configuredProviders: Object.entries(providerKeys)
-        .filter(([, has]) => has)
-        .map(([id]) => id),
       providerKeys,
       providerBaseUrls,
       feishuBotEnabled:

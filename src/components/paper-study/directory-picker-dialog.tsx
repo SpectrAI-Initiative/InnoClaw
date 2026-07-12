@@ -20,6 +20,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { fetcher } from "@/lib/fetcher";
+import {
+  normalizeWorkspaceBrowseSettings,
+  type WorkspaceBrowseSettingsResponse,
+} from "@/lib/workspace-settings";
 import { toast } from "sonner";
 
 interface FileEntry {
@@ -54,19 +59,16 @@ export function DirectoryPickerDialog({
   // Fetch workspace roots on open
   useEffect(() => {
     if (!open) return;
-    fetch("/api/settings")
-      .then((res) => res.json())
+    fetcher<WorkspaceBrowseSettingsResponse>("/api/settings")
       .then((data) => {
-        const r: string[] = data.workspaceRoots || [];
-        setRoots(r);
-        if (r.length === 1) {
-          setCurrentPath(r[0]);
-        } else {
-          setCurrentPath("");
-        }
+        const browseSettings = normalizeWorkspaceBrowseSettings(data);
+        setRoots(browseSettings.workspaceRoots);
+        setCurrentPath(browseSettings.defaultBrowsePath);
       })
-      .catch(() => {});
-  }, [open]);
+      .catch(() => {
+        toast.error(tCommon("error"));
+      });
+  }, [open, tCommon]);
 
   // Fetch directory contents
   const fetchDirs = useCallback(async (dir: string) => {
