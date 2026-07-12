@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listDirectory, addWorkspaceRoot } from "@/lib/files/filesystem";
-import { requirePathAccess } from "@/lib/auth/ownership";
+import { listDirectory } from "@/lib/files/filesystem";
+import { requireWorkspaceProvisioningPathsAccess } from "@/lib/auth/ownership";
 import { jsonException, requiredSearchParam } from "@/lib/api-errors";
 
 export async function GET(request: NextRequest) {
@@ -10,15 +10,14 @@ export async function GET(request: NextRequest) {
       return dirPath;
     }
 
-    const access = await requirePathAccess(request, dirPath);
+    const access = await requireWorkspaceProvisioningPathsAccess(request, [
+      dirPath,
+    ]);
     if (access instanceof NextResponse) {
       return access;
     }
 
-    // Auto-register as workspace root if not already covered
-    addWorkspaceRoot(dirPath);
-
-    const entries = await listDirectory(dirPath);
+    const entries = await listDirectory(access.canonicalPaths[0]);
     return NextResponse.json(entries);
   } catch (error) {
     return jsonException(error, "Failed to browse directory");

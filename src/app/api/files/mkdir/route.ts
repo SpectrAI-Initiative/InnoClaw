@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createDirectory } from "@/lib/files/filesystem";
-import { requirePathAccess } from "@/lib/auth/ownership";
+import { requireWorkspaceProvisioningPathsAccess } from "@/lib/auth/ownership";
 import { jsonError, jsonException } from "@/lib/api-errors";
 
 export async function POST(request: NextRequest) {
@@ -11,12 +11,14 @@ export async function POST(request: NextRequest) {
       return jsonError("Missing path", 400);
     }
 
-    const access = await requirePathAccess(request, dirPath);
+    const access = await requireWorkspaceProvisioningPathsAccess(request, [
+      dirPath,
+    ]);
     if (access instanceof NextResponse) {
       return access;
     }
 
-    await createDirectory(dirPath);
+    await createDirectory(access.canonicalPaths[0]);
     return NextResponse.json({ success: true });
   } catch (error) {
     return jsonException(error, "Failed to create directory");

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import type { AuthContext } from "@/lib/auth/server";
 
 const mocks = vi.hoisted(() => ({
@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   pathExists: vi.fn(),
   insertValues: vi.fn(),
   requireAuth: vi.fn(),
+  requireWorkspaceProvisioningPathsAccess: vi.fn(),
   selectLimit: vi.fn(),
   updateSet: vi.fn(),
   updateWhere: vi.fn(),
@@ -22,6 +23,12 @@ vi.mock("@/lib/files/filesystem", () => ({
   addWorkspaceRoot: mocks.addWorkspaceRoot,
   isDirectory: mocks.isDirectory,
   pathExists: mocks.pathExists,
+}));
+
+vi.mock("@/lib/auth/ownership", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/auth/ownership")>(),
+  requireWorkspaceProvisioningPathsAccess:
+    mocks.requireWorkspaceProvisioningPathsAccess,
 }));
 
 vi.mock("@/lib/db", () => ({
@@ -52,13 +59,16 @@ function request(body: unknown) {
   });
 }
 
-function authContext(): AuthContext {
+function authContext(
+  role: "admin" | "user" = "admin",
+  id = role === "admin" ? "admin-user" : "user-a",
+): AuthContext {
   return {
     user: {
-      id: "admin-user",
-      email: "admin@example.com",
-      name: "Admin User",
-      role: "admin",
+      id,
+      email: `${id}@example.com`,
+      name: id,
+      role,
       isActive: true,
       lastLoginAt: null,
       createdAt: "2026-01-01T00:00:00.000Z",
@@ -82,6 +92,12 @@ beforeEach(() => {
   mocks.updateSet.mockReturnValue({ where: mocks.updateWhere });
   mocks.updateWhere.mockResolvedValue(undefined);
   mocks.requireAuth.mockResolvedValue(authContext());
+  mocks.requireWorkspaceProvisioningPathsAccess.mockImplementation(
+    async (_request: NextRequest, paths: string[]) => ({
+      auth: authContext(),
+      canonicalPaths: paths,
+    }),
+  );
 });
 
 afterEach(() => {
@@ -93,6 +109,106 @@ afterEach(() => {
 });
 
 describe("/api/workspaces", () => {
+  it("creates an ordinary user's first workspace from provisioning access", async () => {
+    const user = authContext("user", "user-a");
+    const canonicalPath = "/research/users/user-a/first-workspace";
+    const created = {
+      id: "workspace-new",
+      ownerUserId: "user-a",
+      name: "First Workspace",
+      folderPath: canonicalPath,
+    };
+    mocks.requireWorkspaceProvisioningPathsAccess.mockResolvedValue({
+      auth: user,
+      canonicalPaths: [canonicalPath],
+    });
+    mocks.selectLimit.mockResolvedValueOnce([]).mockResolvedValueOnce([created]);
+
+    const { POST } = await import("./route");
+    const response = await POST(request({
+      name: "First Workspace",
+      folderPath: "/research/users/user-a/alias/../first-workspace",
+    }));
+
+    expect(response.status).toBe(201);
+    expect(mocks.pathExists).toHaveBeenCalledWith(canonicalPath);
+    expect(mocks.isDirectory).toHaveBeenCalledWith(canonicalPath);
+    expect(mocks.insertValues).toHaveBeenCalledWith(expect.objectContaining({
+      ownerUserId: "user-a",
+      folderPath: canonicalPath,
+    }));
+    expect(mocks.addWorkspaceRoot).not.toHaveBeenCalled();
+  });
+
+  it("returns provisioning denial before filesystem or database mutation", async () => {
+    mocks.requireWorkspaceProvisioningPathsAccess.mockResolvedValue(
+      NextResponse.json({ error: "Path access denied" }, { status: 403 }),
+    );
+
+    const { POST } = await import("./route");
+    const response = await POST(request({
+      name: "Other User Workspace",
+      folderPath: "/research/users/user-b/workspace",
+    }));
+
+    expect(response.status).toBe(403);
+    expect(mocks.pathExists).not.toHaveBeenCalled();
+    expect(mocks.isDirectory).not.toHaveBeenCalled();
+    expect(mocks.insertValues).not.toHaveBeenCalled();
+    expect(mocks.addWorkspaceRoot).not.toHaveBeenCalled();
+  });
+
+  it("maps a concurrent canonical-path uniqueness race to 409", async () => {
+    mocks.requireWorkspaceProvisioningPathsAccess.mockResolvedValue({
+      auth: authContext("user", "user-a"),
+      canonicalPaths: ["/research/users/user-a/workspace"],
+    });
+    mocks.selectLimit.mockResolvedValueOnce([]);
+    mocks.insertValues.mockRejectedValue(
+      Object.assign(new Error("UNIQUE constraint failed: workspaces.folder_path"), {
+        code: "SQLITE_CONSTRAINT_UNIQUE",
+      }),
+    );
+
+    const { POST } = await import("./route");
+    const response = await POST(request({
+      name: "Workspace",
+      folderPath: "/research/users/user-a/workspace",
+    }));
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({
+      error: "This folder is already registered",
+    });
+  });
+
+  it("allows an administrator to register a canonical path under an operator root", async () => {
+    const canonicalPath = "/research/admin-workspace";
+    mocks.requireWorkspaceProvisioningPathsAccess.mockResolvedValue({
+      auth: authContext("admin"),
+      canonicalPaths: [canonicalPath],
+    });
+    mocks.selectLimit
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{
+        id: "workspace-admin",
+        ownerUserId: "admin-user",
+        folderPath: canonicalPath,
+      }]);
+
+    const { POST } = await import("./route");
+    const response = await POST(request({
+      name: "Admin Workspace",
+      folderPath: canonicalPath,
+    }));
+
+    expect(response.status).toBe(201);
+    expect(mocks.insertValues).toHaveBeenCalledWith(expect.objectContaining({
+      ownerUserId: "admin-user",
+      folderPath: canonicalPath,
+    }));
+  });
+
   it("claims an existing unowned workspace for the current local admin", async () => {
     const workspace = {
       id: "workspace-1",

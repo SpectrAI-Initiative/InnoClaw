@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { isSqliteUniqueConstraint } from "@/lib/db/errors";
 import { workspaces } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { pathExists, isDirectory, addWorkspaceRoot } from "@/lib/files/filesystem";
+import { pathExists, isDirectory } from "@/lib/files/filesystem";
 import { requireAuth } from "@/lib/auth/server";
-import { canAccessOwner, getOwnerUserIdForWrite, ownedWorkspaceFilter } from "@/lib/auth/ownership";
+import {
+  canAccessOwner,
+  getOwnerUserIdForWrite,
+  ownedWorkspaceFilter,
+  requireWorkspaceProvisioningPathsAccess,
+} from "@/lib/auth/ownership";
 import { jsonError, jsonException } from "@/lib/api-errors";
 
 export async function GET(request: NextRequest) {
@@ -29,11 +35,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
-    if (auth instanceof NextResponse) {
-      return auth;
-    }
-
     const body = await request.json();
     const { name, folderPath, isGitRepo, gitRemoteUrl } = body;
 
@@ -41,11 +42,20 @@ export async function POST(request: NextRequest) {
       return jsonError("Missing name or folderPath", 400);
     }
 
-    // Register as workspace root so subsequent file-system calls are allowed
-    addWorkspaceRoot(folderPath);
+    const access = await requireWorkspaceProvisioningPathsAccess(request, [
+      folderPath,
+    ]);
+    if (access instanceof NextResponse) {
+      return access;
+    }
+    const auth = access.auth;
+    const canonicalFolderPath = access.canonicalPaths[0];
 
     // Check that the folder exists
-    if (!(await pathExists(folderPath)) || !(await isDirectory(folderPath))) {
+    if (
+      !(await pathExists(canonicalFolderPath)) ||
+      !(await isDirectory(canonicalFolderPath))
+    ) {
       return jsonError("Folder does not exist or is not a directory", 400);
     }
 
@@ -53,7 +63,7 @@ export async function POST(request: NextRequest) {
     const existing = await db
       .select()
       .from(workspaces)
-      .where(eq(workspaces.folderPath, folderPath))
+      .where(eq(workspaces.folderPath, canonicalFolderPath))
       .limit(1);
 
     const ownerUserId = getOwnerUserIdForWrite(auth);
@@ -93,7 +103,7 @@ export async function POST(request: NextRequest) {
       id,
       ownerUserId,
       name,
-      folderPath,
+      folderPath: canonicalFolderPath,
       isGitRepo: isGitRepo || false,
       gitRemoteUrl: gitRemoteUrl || null,
       lastOpenedAt: now,
@@ -109,6 +119,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(workspace[0], { status: 201 });
   } catch (error) {
+    if (isSqliteUniqueConstraint(error)) {
+      return jsonError("This folder is already registered", 409);
+    }
     return jsonException(error, "Failed to create workspace");
   }
 }
