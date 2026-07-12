@@ -20,6 +20,7 @@ import {
   AUTH_SESSION_SIGNATURE_COOKIE,
 } from "./constants";
 import { ANONYMOUS_AUTH_CONTEXT, isAuthDisabled } from "./mode";
+import { shouldUseSecureAuthCookies } from "./policy";
 import type { PublicUser } from "@/types/auth";
 
 export type AuthRole = "admin" | "user";
@@ -93,15 +94,18 @@ export function getSessionExpiresAt(): string {
   return new Date(Date.now() + sessionDurationMs()).toISOString();
 }
 
-function setCookiePair(response: NextResponse, token: string, expiresAt: string): void {
-  const expires = new Date(expiresAt);
-  const common = {
+function authCookieOptions(expires: Date) {
+  return {
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureAuthCookies(),
     path: "/",
     expires,
   };
+}
+
+function setCookiePair(response: NextResponse, token: string, expiresAt: string): void {
+  const common = authCookieOptions(new Date(expiresAt));
 
   response.cookies.set(AUTH_SESSION_COOKIE, token, common);
   response.cookies.set(AUTH_SESSION_EXPIRES_COOKIE, expiresAt, common);
@@ -112,27 +116,10 @@ function setCookiePair(response: NextResponse, token: string, expiresAt: string)
 }
 
 export function clearAuthCookies(response: NextResponse): void {
-  response.cookies.set(AUTH_SESSION_COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    expires: new Date(0),
-  });
-  response.cookies.set(AUTH_SESSION_EXPIRES_COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    expires: new Date(0),
-  });
-  response.cookies.set(AUTH_SESSION_SIGNATURE_COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    expires: new Date(0),
-  });
+  const expired = authCookieOptions(new Date(0));
+  response.cookies.set(AUTH_SESSION_COOKIE, "", expired);
+  response.cookies.set(AUTH_SESSION_EXPIRES_COOKIE, "", expired);
+  response.cookies.set(AUTH_SESSION_SIGNATURE_COOKIE, "", expired);
 }
 
 export async function getUserCount(): Promise<number> {

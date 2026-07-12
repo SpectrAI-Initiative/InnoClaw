@@ -1,8 +1,16 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthContext, requireAdmin, requireAuth } from "./server";
+import {
+  attachAuthCookies,
+  clearAuthCookies,
+  getAuthContext,
+  requireAdmin,
+  requireAuth,
+} from "./server";
 
 const originalAuthMode = process.env.AUTH_MODE;
+const originalAuthCookieSecure = process.env.AUTH_COOKIE_SECURE;
+const originalNodeEnv = process.env.NODE_ENV;
 
 function requestFor(path: string) {
   return new NextRequest(new URL(path, "http://localhost"));
@@ -14,6 +22,66 @@ afterEach(() => {
   } else {
     process.env.AUTH_MODE = originalAuthMode;
   }
+  if (originalAuthCookieSecure === undefined) {
+    delete process.env.AUTH_COOKIE_SECURE;
+  } else {
+    process.env.AUTH_COOKIE_SECURE = originalAuthCookieSecure;
+  }
+  if (originalNodeEnv === undefined) {
+    delete process.env.NODE_ENV;
+  } else {
+    process.env.NODE_ENV = originalNodeEnv;
+  }
+});
+
+function setCookieHeaders(response: NextResponse): string[] {
+  return response.headers.getSetCookie();
+}
+
+describe("server auth cookie policy", () => {
+  it("omits Secure from every session cookie for the explicit HTTP override", () => {
+    process.env.NODE_ENV = "production";
+    process.env.AUTH_COOKIE_SECURE = "false";
+    const expiresAt = "2030-01-01T00:00:00.000Z";
+
+    const attached = attachAuthCookies(NextResponse.json({ ok: true }), {
+      token: "session-token",
+      expiresAt,
+    });
+    const cleared = NextResponse.json({ ok: true });
+    clearAuthCookies(cleared);
+
+    expect(setCookieHeaders(attached)).toHaveLength(3);
+    expect(setCookieHeaders(cleared)).toHaveLength(3);
+    for (const header of [
+      ...setCookieHeaders(attached),
+      ...setCookieHeaders(cleared),
+    ]) {
+      expect(header).toContain("HttpOnly");
+      expect(header).not.toMatch(/;\s*Secure(?:;|$)/i);
+    }
+  });
+
+  it("marks every session cookie Secure when explicitly enabled", () => {
+    process.env.NODE_ENV = "development";
+    process.env.AUTH_COOKIE_SECURE = "true";
+    const expiresAt = "2030-01-01T00:00:00.000Z";
+
+    const attached = attachAuthCookies(NextResponse.json({ ok: true }), {
+      token: "session-token",
+      expiresAt,
+    });
+    const cleared = NextResponse.json({ ok: true });
+    clearAuthCookies(cleared);
+
+    for (const header of [
+      ...setCookieHeaders(attached),
+      ...setCookieHeaders(cleared),
+    ]) {
+      expect(header).toContain("HttpOnly");
+      expect(header).toMatch(/;\s*Secure(?:;|$)/i);
+    }
+  });
 });
 
 describe("server auth disabled mode", () => {
