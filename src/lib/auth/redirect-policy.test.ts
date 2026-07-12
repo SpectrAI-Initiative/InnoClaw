@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest";
 import { resolveRoleAwareRedirectPath } from "./redirect-policy";
 
 describe("resolveRoleAwareRedirectPath", () => {
-  it.each(["/admin", "/admin/users", "/admin/users?tab=active", "/admin%2Fusers"])(
+  it.each([
+    "/admin",
+    "/admin/users",
+    "/admin/users?tab=active",
+    "/admin%2Fusers",
+    "/workspace/../admin/users",
+    "/workspace/%2e%2e/admin/users",
+  ])(
     "redirects an ordinary user away from %s",
     (next) => {
       expect(resolveRoleAwareRedirectPath(next, "user", "/")).toBe("/");

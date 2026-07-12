@@ -8,7 +8,8 @@ function isAdministratorPath(path: string): boolean {
 
   try {
     const decoded = decodeURIComponent(pathname);
-    return decoded === "/admin" || decoded.startsWith("/admin/");
+    const normalized = new URL(decoded, "http://innoclaw.local").pathname;
+    return normalized === "/admin" || normalized.startsWith("/admin/");
   } catch {
     return false;
   }
