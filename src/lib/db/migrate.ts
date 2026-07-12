@@ -3,8 +3,11 @@ import { sqlite } from "./index";
 import path from "path";
 import crypto from "crypto";
 import fs from "fs";
+import { preflightWorkspacePaths } from "./workspace-path-preflight";
 
 const MIGRATIONS_TABLE = "__drizzle_migrations";
+const WORKSPACE_PATH_INDEX_MIGRATION = "0017_workspace_folder_path_unique";
+const WORKSPACE_PATH_INDEX = "workspaces_folder_path_unique_idx";
 const MIGRATION_RETRY_ATTEMPTS = 10;
 const MIGRATION_RETRY_DELAY_MS = 500;
 
@@ -40,6 +43,15 @@ function seedExistingMigrations(migrationsFolder: string) {
   if (entries.length === 0) return;
 
   for (const entry of entries) {
+    if (entry.tag === WORKSPACE_PATH_INDEX_MIGRATION) {
+      const indexExists = sqlite
+        .prepare(
+          "SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = ? LIMIT 1",
+        )
+        .get(WORKSPACE_PATH_INDEX);
+      if (!indexExists) continue;
+    }
+
     const sqlFile = path.join(migrationsFolder, `${entry.tag}.sql`);
     if (!fs.existsSync(sqlFile)) continue;
     const content = fs.readFileSync(sqlFile, "utf-8");
@@ -110,6 +122,7 @@ function isSqliteBusy(error: unknown): boolean {
 
 function runMigrationsOnce() {
   const migrationsFolder = path.join(process.cwd(), "drizzle");
+  preflightWorkspacePaths(sqlite);
   try {
     runSqliteMigrations(migrationsFolder);
   } catch (error: unknown) {

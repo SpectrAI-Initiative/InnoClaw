@@ -57,7 +57,9 @@ export const workspaces = sqliteTable("workspaces", {
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(datetime('now'))`),
-});
+}, (table) => [
+  uniqueIndex("workspaces_folder_path_unique_idx").on(table.folderPath),
+]);
 
 // ============================================================
 // SOURCES (tracked files in workspace)

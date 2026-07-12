@@ -127,6 +127,13 @@
       "when": 1774086400000,
       "tag": "0016_auth_users",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1783854632195,
+      "tag": "0017_workspace_folder_path_unique",
+      "breakpoints": true
     }
   ]
 }
