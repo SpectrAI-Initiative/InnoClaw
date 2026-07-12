@@ -6,6 +6,7 @@ const replaceMock = vi.hoisted(() => vi.fn());
 const refreshMock = vi.hoisted(() => vi.fn());
 const completeCliBrowserHandoffMock = vi.hoisted(() => vi.fn().mockResolvedValue(true));
 const capturedButtonClicks = vi.hoisted(() => new Map<string, () => unknown>());
+const navigationState = vi.hoisted(() => ({ next: "/workspace" }));
 
 vi.mock("react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react")>();
@@ -24,7 +25,7 @@ vi.mock("next/navigation", () => ({
     new URLSearchParams({
       cliCallback: "http://127.0.0.1:43123/callback",
       cliNonce: "nonce-123",
-      next: "/workspace",
+      next: navigationState.next,
     }),
 }));
 
@@ -97,6 +98,7 @@ afterEach(() => {
   refreshMock.mockClear();
   completeCliBrowserHandoffMock.mockClear();
   capturedButtonClicks.clear();
+  navigationState.next = "/workspace";
 });
 
 describe("LoginPage", () => {
@@ -113,6 +115,19 @@ describe("LoginPage", () => {
 
     expect(completeCliBrowserHandoffMock).toHaveBeenCalledTimes(1);
     expect(replaceMock).toHaveBeenCalledWith("/workspace");
+    expect(refreshMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("redirects an ordinary user home instead of following an administrator destination", async () => {
+    navigationState.next = "/admin/users";
+    renderToString(<LoginPage />);
+
+    const click = [...capturedButtonClicks.values()][0];
+    expect(click).toBeDefined();
+    await click();
+
+    expect(completeCliBrowserHandoffMock).toHaveBeenCalledTimes(1);
+    expect(replaceMock).toHaveBeenCalledWith("/");
     expect(refreshMock).toHaveBeenCalledTimes(1);
   });
 });

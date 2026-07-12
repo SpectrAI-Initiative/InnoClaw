@@ -12,9 +12,21 @@ import {
   buildAuthPageHref,
   completeCliBrowserHandoff,
   parseCliHandoffParams,
-  resolveSafeRedirectPath,
 } from "@/lib/auth/cli-handoff";
+import { resolveRoleAwareRedirectPath } from "@/lib/auth/redirect-policy";
 import { useAuthUser } from "@/lib/hooks/use-auth";
+
+function resolvePostRegisterPath(
+  next: string | null,
+  role: "admin" | "user",
+  requiresSetup = false,
+): string {
+  return resolveRoleAwareRedirectPath(
+    next,
+    role,
+    requiresSetup ? "/settings" : "/",
+  );
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -56,7 +68,12 @@ export default function RegisterPage() {
 
       await completeCliBrowserHandoff(searchParams);
 
-      router.replace(resolvePostRegisterPath(data.requiresSetup));
+      const role = data.user?.role === "admin" ? "admin" : "user";
+      router.replace(resolvePostRegisterPath(
+        searchParams.get("next"),
+        role,
+        data.requiresSetup,
+      ));
       router.refresh();
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Registration failed");
@@ -65,17 +82,14 @@ export default function RegisterPage() {
     }
   }
 
-  function resolvePostRegisterPath(requiresSetup = false): string {
-    return resolveSafeRedirectPath(searchParams.get("next"), requiresSetup ? "/settings" : "/");
-  }
-
   async function handleCliHandoffClick() {
     setCliHandoffLoading(true);
     setError("");
 
     try {
       await completeCliBrowserHandoff(searchParams);
-      router.replace(resolvePostRegisterPath());
+      const role = user?.role === "admin" ? "admin" : "user";
+      router.replace(resolvePostRegisterPath(searchParams.get("next"), role));
       router.refresh();
     } catch (handoffError) {
       setError(handoffError instanceof Error ? handoffError.message : "CLI sign-in failed");

@@ -12,9 +12,17 @@ import {
   buildAuthPageHref,
   completeCliBrowserHandoff,
   parseCliHandoffParams,
-  resolveSafeRedirectPath,
 } from "@/lib/auth/cli-handoff";
+import { resolveRoleAwareRedirectPath } from "@/lib/auth/redirect-policy";
 import { useAuthUser } from "@/lib/hooks/use-auth";
+
+function resolvePostLoginPath(
+  next: string | null,
+  role: "admin" | "user",
+): string {
+  const fallback = role === "admin" ? "/admin/users" : "/";
+  return resolveRoleAwareRedirectPath(next, role, fallback);
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,15 +51,9 @@ export default function LoginPage() {
       return;
     }
 
-    const fallback = user.role === "admin" ? "/admin/users" : "/";
-    router.replace(resolveSafeRedirectPath(searchParams.get("next"), fallback));
+    router.replace(resolvePostLoginPath(searchParams.get("next"), user.role));
     router.refresh();
   }, [cliHandoff, isAuthDisabled, isLoading, router, searchParams, user]);
-
-  function resolvePostLoginPath(role: "admin" | "user"): string {
-    const fallback = role === "admin" ? "/admin/users" : "/";
-    return resolveSafeRedirectPath(searchParams.get("next"), fallback);
-  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,7 +74,10 @@ export default function LoginPage() {
       }
 
       await completeCliBrowserHandoff(searchParams);
-      router.replace(resolvePostLoginPath(data.user?.role === "admin" ? "admin" : "user"));
+      router.replace(resolvePostLoginPath(
+        searchParams.get("next"),
+        data.user?.role === "admin" ? "admin" : "user",
+      ));
       router.refresh();
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Login failed");
@@ -87,7 +92,10 @@ export default function LoginPage() {
 
     try {
       await completeCliBrowserHandoff(searchParams);
-      router.replace(resolvePostLoginPath(user?.role === "admin" ? "admin" : "user"));
+      router.replace(resolvePostLoginPath(
+        searchParams.get("next"),
+        user?.role === "admin" ? "admin" : "user",
+      ));
       router.refresh();
     } catch (handoffError) {
       setError(handoffError instanceof Error ? handoffError.message : "CLI sign-in failed");
