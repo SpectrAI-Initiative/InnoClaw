@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 16:29+0800\n"
+"POT-Creation-Date: 2026-07-12 20:34+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,128 +19,170 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../docker.md:1 6c4029c3086c4fa7b5ffeb4b05d1d0f5
+#: ../../docker.md:1 bab096d07b6c41c58e206c4608c0c34b
 msgid "Docker Deployment"
 msgstr ""
 
-#: ../../docker.md:3 074e6ac4e49243fcb9e3f9140558a182
+#: ../../docker.md:3 7ecc33bb41ed4e76af569133c3ec8ebb
 msgid "Deploy InnoClaw with Docker in under 2 minutes."
 msgstr ""
 
-#: ../../docker.md:5 aa5fbe59f2c549e8a3ce79916344ca98
+#: ../../docker.md:5 6da774ac94664e7ca7653fe5bfce7467
 msgid "Prerequisites"
 msgstr ""
 
-#: ../../docker.md:7 d330e6acc4da4bc59a46b910b0208bbd
+#: ../../docker.md:7 9fd85130dc6d4a3cbf245b8abb347ec6
 msgid "Docker Engine 24+ and Docker Compose v2"
 msgstr ""
 
-#: ../../docker.md:8 6ea65f5082ba497783b09b65cceee7ae
+#: ../../docker.md:8 2168d0451c764bd48f64efa3295c0068
 msgid "At least one AI API key (OpenAI, Anthropic, etc.)"
 msgstr ""
 
-#: ../../docker.md:10 339ede6a934c42afbe10ebe5fa677a94
+#: ../../docker.md:10 dddf03d5e68d402bb0a8989410a68207
 msgid "Quick Start"
 msgstr ""
 
-#: ../../docker.md:20 e191a82d28c6450bbb297c5a03f88540
+#: ../../docker.md:20 c9228701d5cb472fa68a1d16e9eff845
 msgid "Open [http://localhost:3000](http://localhost:3000)."
 msgstr ""
 
-#: ../../docker.md:22 ed3b8dee076b45b492b32ce0906bfae5
+#: ../../docker.md:22 cf29569e91214861a79dbe4a34f62fcc
 msgid "Configuration"
 msgstr ""
 
-#: ../../docker.md:24 e1ee21c55b4c4562b4de68882cd193f7
+#: ../../docker.md:24 1224ae45013240f58e4bc1348d6eed5f
 msgid "Environment Variables"
 msgstr ""
 
-#: ../../docker.md:26 2da5fd548a66447e8ee431297e70ab07
+#: ../../docker.md:26 7d0365fe186c420cb6d89386b6e361ab
 msgid "Edit `.env.production.local` before starting. Key variables:"
 msgstr ""
 
-#: ../../docker.md f2ee4b9e3f824f3697aad2f23f7dd5d2
+#: ../../docker.md 1ef24392a92a4917aefa376d7ca73b29
 msgid "Variable"
 msgstr ""
 
-#: ../../docker.md e504f4d159e7463dae23b291ede34a3b
+#: ../../docker.md e2683ad020c24fffa53446eb228ccbf7
 msgid "Required"
 msgstr ""
 
-#: ../../docker.md be7bc5927e9a4475a715e5fb80d2ed44
+#: ../../docker.md 6a12c868f8534f589502f8a4c6845da6
 msgid "Description"
 msgstr ""
 
-#: ../../docker.md 21cf8525c2434a9e95a57d50dfe1bea8
+#: ../../docker.md 2779b9c7487f40fa9437987d47dffb3c
 msgid "`WORKSPACE_ROOTS`"
 msgstr ""
 
-#: ../../docker.md 49c0683cba4d4da18b634fe152d415e6
+#: ../../docker.md 25e022d2bdf74890946eeaa465e3e859
 msgid "Yes"
 msgstr ""
 
-#: ../../docker.md feea6abe52cb455d9665589aac321e9a
+#: ../../docker.md 4403d1ebbaab4107a4455740b0f60777
 msgid "Comma-separated paths **inside the container** (e.g., `/research`)"
 msgstr ""
 
-#: ../../docker.md d2eef8e8df1d4e939e33395f870a6b48
+#: ../../docker.md 223007c4a7d24992af5ff7b4fc6264c2
 msgid "`OPENAI_API_KEY`"
 msgstr ""
 
-#: ../../docker.md 1f19c548620d4b45b2416c84fddef137
+#: ../../docker.md 31abfa3901cf4c0aa6a19f9a7338da69
 msgid "At least one AI key"
 msgstr ""
 
-#: ../../docker.md 7434b46d8d3449aaa0c30ecd763df778
+#: ../../docker.md b0f8bf007ef447379ae4166d871892c4
 msgid "OpenAI API key"
 msgstr ""
 
-#: ../../docker.md f5c6c092ffaa4756bc34e38b3d8d972c
+#: ../../docker.md 381293ae04bf4fca8ea05729195491d8
 msgid "`ANTHROPIC_API_KEY`"
 msgstr ""
 
-#: ../../docker.md 1bebc0440e654acca5a1799e6f611d97
+#: ../../docker.md a0914bf77d1c4958be9c11589fe56782
 msgid "Anthropic API key"
 msgstr ""
 
-#: ../../docker.md dc919213330d4f56aba451e4808ce7fc
+#: ../../docker.md 974bb88917594c50bfdba252979e6351
 msgid "`DATABASE_URL`"
 msgstr ""
 
-#: ../../docker.md 12fa36838a364549afce170a44be3879
-#: aabb330b817942ed9570846006dd70c0 fd16c50a0df643d0abcad5b02395bfd2
+#: ../../docker.md 3aede75a752b461b97195f05af69f8e3
+#: 62e5f3c51f6b4eef83948cd90d932bbb 72f667ccdcd44e4abf650c96e149e984
+#: 88f87dd5cace4cb0a83c6c264a03b877 a2bbbcf4db0247cc89ad6904bb2b93bd
+#: c43a4644e0c34db29a44cd7f71493fce
 msgid "No"
 msgstr ""
 
-#: ../../docker.md cfd87757ea9444bb9cab5194adc0db9e
+#: ../../docker.md a5422793e2c844c5b01dfc27e4f39033
 msgid "SQLite path (default: `./data/innoclaw.db`)"
 msgstr ""
 
-#: ../../docker.md 020c60c933794caebfe314a88696714c
+#: ../../docker.md be360f89490d46c7b195926ed8593521
 msgid "`AUTH_MODE`"
 msgstr ""
 
-#: ../../docker.md 025042c34a3e4ff6a2e7f4dc0e0e3664
+#: ../../docker.md 3c57d4ced4e148669570a3b50f4613cc
 msgid ""
 "Set to `disabled` only for trusted deployments that should bypass "
 "registration/login"
 msgstr ""
 
-#: ../../docker.md 5206b6728a704fcaaba2683ebde453c6
+#: ../../docker.md 85e3f047f9ac429f869470ab2ed3d745
+msgid "`AUTH_SINGLE_ADMIN`"
+msgstr ""
+
+#: ../../docker.md 5851d6a729d943658e99d99b3cdc009d
+msgid ""
+"Set to `true` to enforce one bootstrapped administrator and ordinary-user"
+" registration"
+msgstr ""
+
+#: ../../docker.md 2f80c874d57f47b0a7a649701943fdfe
+msgid "`AUTH_COOKIE_SECURE`"
+msgstr ""
+
+#: ../../docker.md 85a95659dbcd4f00b7b3d20fe4650b07
+msgid ""
+"Defaults to `true` in production; use `false` only for a temporary plain-"
+"HTTP rollout"
+msgstr ""
+
+#: ../../docker.md 222d9a5d2510423bb2e694f41a44ac94
+msgid "`AUTH_SECRET`"
+msgstr ""
+
+#: ../../docker.md 52aeafa46c1f42f9a3fa33968611451e
+msgid "Production"
+msgstr ""
+
+#: ../../docker.md 5205c4fbe5bf452282bef9b422e620d1
+msgid "Long random value used to sign session cookies"
+msgstr ""
+
+#: ../../docker.md b62c2759e69b431ca84847f9841a3660
 msgid "`LLM_PROVIDER`"
 msgstr ""
 
-#: ../../docker.md 176d3d108bd249a8874bc78d248c19ec
+#: ../../docker.md 0ee2b2e356ab4fa4b0794e23172281c0
 msgid "Default provider (`openai`, `anthropic`, etc.)"
 msgstr ""
 
-#: ../../docker.md:37 880e239d2a4c47cfaed303c5bddce423
+#: ../../docker.md 370bbdc8d0a9481b9de25c5b2b047a9b
+msgid "`OPENAI_REASONING_EFFORT`"
+msgstr ""
+
+#: ../../docker.md 6ec19fa3eb0e4000ace1055d06a6e9de
+msgid "OpenAI reasoning effort; `ultra` is normalized to `xhigh`"
+msgstr ""
+
+#: ../../docker.md:41 983f5878cfda4f30a282b0eb1f0b7dc5
 msgid ""
 "See [.env.production.example](../.env.production.example) for the full "
 "list."
 msgstr ""
 
-#: ../../docker.md:39 714890ee2c9a401990d6f9b6be9f4ce5
+#: ../../docker.md:43 bd77822160e745a0b7a0ba3c70c4538e
 msgid ""
 "To run without application-level registration or login, set "
 "`AUTH_MODE=disabled` in `.env.production.local` before starting the "
@@ -149,166 +191,241 @@ msgid ""
 "layer."
 msgstr ""
 
-#: ../../docker.md:41 596dd27289484470be994e0237332d8f
+#: ../../docker.md:45 b24d04a6f1704c99a10dcf261432e1fe
+msgid "Bootstrap a Single Administrator"
+msgstr ""
+
+#: ../../docker.md:47 681a20f34b894fd1b6690d3b0a0e5e98
+msgid "For a public multi-user deployment, configure at least:"
+msgstr ""
+
+#: ../../docker.md:57 92391479a453426eb9fbef5050375be1
+msgid ""
+"Start the container so migrations complete, then create the sole "
+"administrator with a password supplied only through standard input:"
+msgstr ""
+
+#: ../../docker.md:68 f172ceec4f3a45abb652d5f409f704e4
+msgid ""
+"Store the generated password in your password manager and securely remove"
+" the temporary file after delivery. Re-running the same command is "
+"idempotent and does not rotate an existing administrator password. "
+"Bootstrap must finish before public registration becomes available. "
+"Registered users are always ordinary users and cannot promote themselves "
+"or another account."
+msgstr ""
+
+#: ../../docker.md:74 4b2d083667c3457785dffb93beebcda8
+msgid ""
+"For a temporary plain-HTTP rollout, set `AUTH_COOKIE_SECURE=false` so "
+"browsers can send the session cookie. This does **not** encrypt "
+"credentials or traffic. Move to HTTPS and restore "
+"`AUTH_COOKIE_SECURE=true` as soon as possible."
+msgstr ""
+
+#: ../../docker.md:78 43858ec36d7142baab7ee2ea76466148
+msgid "OpenAI-Compatible Reasoning"
+msgstr ""
+
+#: ../../docker.md:80 f21ad4c92ebd44cb91aeeb2c8aa3a641
+msgid ""
+"`OPENAI_REASONING_EFFORT` accepts `none`, `minimal`, `low`, `medium`, "
+"`high`, and `xhigh`. The operator-friendly value `ultra` is normalized to"
+" `xhigh` before OpenAI language-model calls. Omit the variable to retain "
+"the provider default. The setting does not affect embeddings or non-"
+"OpenAI providers; verify that a custom OpenAI-compatible endpoint "
+"supports the normalized value."
+msgstr ""
+
+#: ../../docker.md:86 117d0378e54d4a2aa6b3548c1370c7fc
 msgid "Volumes"
 msgstr ""
 
-#: ../../docker.md 7bf2e3e4829b49c4934da036562faeca
+#: ../../docker.md 708300a9ea3940e0806d6adf879db81f
 msgid "Container Path"
 msgstr ""
 
-#: ../../docker.md 17582e64d826480ea63bd71a3e36a1b2
+#: ../../docker.md 189cf471036a4e319bee8999bf86501e
 msgid "Purpose"
 msgstr ""
 
-#: ../../docker.md 9546754890934dac94accdb1c9f2236d
+#: ../../docker.md 8a89e94fb04e456788e6939e9140f23f
 msgid "Compose Default"
 msgstr ""
 
-#: ../../docker.md 202a083b7e19483d9cbf866510e5dd76
+#: ../../docker.md 0fa0129dca92430abec507c55d983c98
 msgid "`/app/data`"
 msgstr ""
 
-#: ../../docker.md b8b4b8c0abfe4b58a4046e0c8dcc8a14
+#: ../../docker.md 53bba73e80974a3883b90a299c98499d
 msgid "SQLite database, HF datasets, embeddings"
 msgstr ""
 
-#: ../../docker.md c7c4d66de85e445abc87a9fe04a3dc04
+#: ../../docker.md 4b4334023a34447a90c57c9eccfe566b
 msgid "Named volume `innoclaw-data`"
 msgstr ""
 
-#: ../../docker.md b515897cc55c44d7b98d547bf713aa4c
+#: ../../docker.md 9b9123f9e7c345d2af3bbe2eabbf5f52
 msgid "`/research`"
 msgstr ""
 
-#: ../../docker.md d11521a4fe6c4e3a8578531cad314992
+#: ../../docker.md acde94f3b94a49c0914269c332a552cd
 msgid "Your workspace files"
 msgstr ""
 
-#: ../../docker.md 69296748b773439fbb7ee0cf980e6f8f
+#: ../../docker.md a9901419f713420f8c5ecb59c3c008a9
 msgid "`HOST_WORKSPACE_PATH` env var or `./workspace`"
 msgstr ""
 
-#: ../../docker.md:48 c9be12697933499cb4dcd5102137511f
+#: ../../docker.md:93 c30b956f14414bcc91930b01b3af80ca
+msgid ""
+"In single-administrator mode, an ordinary user's effective root is "
+"provisioned lazily at `/research/users/<immutable-user-id>` with private "
+"permissions. Users can create and operate only their own workspaces. The "
+"administrator can view and manage workspace records across the full "
+"`/research` operator root."
+msgstr ""
+
+#: ../../docker.md:98 83f6e7bc2440496a8785eda9a63c91b9
 msgid ""
 "To expose multiple workspace directories, add more volume mounts in "
 "`docker-compose.yml` and update `WORKSPACE_ROOTS` accordingly:"
 msgstr ""
 
-#: ../../docker.md:60 c644121ea6e9451fae3e0c8ee5308bb2
+#: ../../docker.md:110 d4a7d7ddcc6a4bdca50817acec5233bf
 msgid "Port"
 msgstr ""
 
-#: ../../docker.md:62 215a252998eb4802af228d56a23a657d
+#: ../../docker.md:112 36f709a57fcd45e19f5117e9b6dc193f
 msgid "Default: `3000`. Change in `docker-compose.yml`:"
 msgstr ""
 
-#: ../../docker.md:69 1f22e333f7b9440894e6a47cc1f1ea1c
+#: ../../docker.md:119 69892c2ec5e040d3bdda518656b36a51
 msgid "Reverse Proxy"
 msgstr ""
 
-#: ../../docker.md:71 aae7ef0f508844ba9f73bab1e1e502fb
+#: ../../docker.md:121 e54e06e8dc0d447b92dc7def48641507
 msgid "InnoClaw works behind any reverse proxy. Examples:"
 msgstr ""
 
-#: ../../docker.md:73 72297dd174274daba03a5576dec8a4c2
+#: ../../docker.md:123 557b684c70ea440d96d18f6951285f8e
 msgid "Nginx"
 msgstr ""
 
-#: ../../docker.md:96 4846d2c8eb2e4d5ea0fb1a07be6c8d8e
+#: ../../docker.md:169 deab23e9932a4f1d8d9565fe4ac6a2c0
 msgid "Caddy"
 msgstr ""
 
-#: ../../docker.md:104 1312583606b442d59a7219e1e9e15588
+#: ../../docker.md:177 bcf51f76a3e44eeca34f2fd94d9f9445
 msgid "Caddy handles TLS automatically."
 msgstr ""
 
-#: ../../docker.md:106 8db3f2a75a384d17ba47593b67c58297
+#: ../../docker.md:179 4dc11026cab94636baac4b08faffcf4f
 msgid "Persistent Data & Backups"
 msgstr ""
 
-#: ../../docker.md:108 a0e20fe6a9864b0a9506da1ee85dd7a8
+#: ../../docker.md:181 02deba05aad6472aa93260b9ee5e18d8
 msgid "All persistent state lives in the `innoclaw-data` volume:"
 msgstr ""
 
-#: ../../docker.md:110 ae960e05b0be40ec8f9513f90a5ea640
+#: ../../docker.md:183 ee54d122df774f74854468bd6967e79f
 msgid "`innoclaw.db` — SQLite database (notebooks, chat history, settings)"
 msgstr ""
 
-#: ../../docker.md:111 11af8842e1864142b6b96cb16ef0b82f
+#: ../../docker.md:184 c834a660cab34aeda1cc47293a5c76d9
 msgid "`hf-datasets/` — cached HuggingFace datasets"
 msgstr ""
 
-#: ../../docker.md:113 dcd4e9e2d1bf429994a1793e0ab784b2
-msgid "**Backup the database:**"
+#: ../../docker.md:186 7a8440fe630e4401b19000a760cd86f0
+msgid "**Back up the database while the service is running:**"
 msgstr ""
 
-#: ../../docker.md:121 7201cb1a27874cf5ba573fe4b8a90cc4
+#: ../../docker.md:194 941ee96c88b74cd89ece7fd7fa0286b5
+msgid ""
+"The online backup API includes committed WAL state. Also back up the "
+"root-readable environment file and reverse-proxy configuration, and "
+"retain the previous image until login, workspace isolation, and model "
+"inference smoke tests pass."
+msgstr ""
+
+#: ../../docker.md:198 fe8e424d6c2442809249f5e40e11bc01
 msgid "Upgrading"
 msgstr ""
 
-#: ../../docker.md:129 3bcf6b338a8e49a997f2a2038fe31d30
+#: ../../docker.md:206 43d294ba3c59496895b765aeaa11d706
 msgid ""
 "Database migrations run automatically on container startup — no manual "
-"steps needed."
+"steps needed. The canonical workspace-path preflight runs before the "
+"unique path index. If two legacy rows resolve to the same filesystem "
+"path, startup stops and reports the colliding workspace IDs instead of "
+"deleting or reassigning data."
 msgstr ""
 
-#: ../../docker.md:131 b158240680944ffabb2813c44527dc66
+#: ../../docker.md:211 d742b47119f24109a1b9fc158b18b766
 msgid "Build from Scratch"
 msgstr ""
 
-#: ../../docker.md:144 f713de96e5014ee7bde6f1ee64740677
+#: ../../docker.md:224 3b7448ee0543437990b8000495322039
 msgid "Troubleshooting"
 msgstr ""
 
-#: ../../docker.md 2a679ede0bf3431caa5ff953fdfdf249
+#: ../../docker.md 30258e64bc474a27afa4e4e4bc121d7e
 msgid "Issue"
 msgstr ""
 
-#: ../../docker.md 9eaa9ddefeeb495387f3bec3baaeafa0
+#: ../../docker.md a6b2e1b501634c799d86b14cf4e3805a
 msgid "Fix"
 msgstr ""
 
-#: ../../docker.md abfe4f641d8b48e7ae3f3d82839d96fe
+#: ../../docker.md aa4f18dfbdbf41fab43c7c02f8935050
 msgid "`/app/data is not writable`"
 msgstr ""
 
-#: ../../docker.md 0b1cd98cfe29405a89ae1efc8b20c985
+#: ../../docker.md 306a597c87da49688faa54f97330cf46
 msgid ""
 "Ensure the Docker volume is mounted and the container user has write "
 "access"
 msgstr ""
 
-#: ../../docker.md 80de9278bc994eee9d056962fbcaac24
+#: ../../docker.md b97c95777485410eaa04dce3069919a8
 msgid "`workspace root missing`"
 msgstr ""
 
-#: ../../docker.md ef3852e2902c4e488d54d6f85f7df202
+#: ../../docker.md 8aced2877a174386b242c87fd675a509
 msgid ""
 "Mount your host directory in `docker-compose.yml` and match "
 "`WORKSPACE_ROOTS`"
 msgstr ""
 
-#: ../../docker.md 35d81291769e417bbab961d031ff4fe6
+#: ../../docker.md 5f461d0d7c6f4249bfd2cf96a34162ad
 msgid "`no AI API key detected`"
 msgstr ""
 
-#: ../../docker.md 95aef67aeb5342c2b34da9b16681242a
+#: ../../docker.md cfe83ced72fb4cb8a698ed9339daeb9b
 msgid "Edit `.env.production.local` and set at least one valid API key"
 msgstr ""
 
-#: ../../docker.md 3fb380aa76664c37a5874dc960f5cf6a
+#: ../../docker.md 5985567b498a4e1baf05127a7d09030f
 msgid "`drizzle-kit migrate failed`"
 msgstr ""
 
-#: ../../docker.md c05590f246e34e84a03eb146522d547f
+#: ../../docker.md 87f5740fa34e42a89c5260b1b12aa609
 msgid "Usually harmless on first run; check that `/app/data` is writable"
 msgstr ""
 
-#: ../../docker.md c4d05a8946f849a78a9f6dbc41869af2
+#: ../../docker.md 316290725f23496cb43fb8765665d287
 msgid "Container exits immediately"
 msgstr ""
 
-#: ../../docker.md 521e441fa2ef41539c91fef6a313aca9
+#: ../../docker.md ec8bb32d7b5442ceafd11877a02fbf89
 msgid "Run `docker compose logs innoclaw` to see the startup error"
 msgstr ""
+
+#~ msgid "**Backup the database:**"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Database migrations run automatically on "
+#~ "container startup — no manual steps "
+#~ "needed."
+#~ msgstr ""

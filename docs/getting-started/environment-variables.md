@@ -10,7 +10,14 @@ A complete reference of all environment variables used by InnoClaw.
 | `DATABASE_URL` | `string` | No | `./data/innoclaw.db` | SQLite database filesystem path. Set to a local path when the project resides on NFS or another network filesystem. |
 | `AUTH_SECRET` | `string` | Recommended | Development fallback | Long random secret used to sign local authentication session cookies. Set this in production. |
 | `AUTH_MODE` | `string` | No | `local` | Authentication mode. Set to `disabled` only for trusted local or single-user deployments to bypass registration/login and grant every request admin-level access. |
+| `AUTH_SINGLE_ADMIN` | `boolean` | No | `false` | When `true`, requires exactly one bootstrapped active administrator. Public registration can create ordinary users only, and administrator role mutation is disabled. Values are strictly `true` or `false`. |
+| `AUTH_COOKIE_SECURE` | `boolean` | No | `true` in production | Overrides the `Secure` attribute on authentication cookies. Set to `false` only during a temporary plain-HTTP rollout. Values are strictly `true` or `false`. |
 | `NEXT_BUILD_DIR` | `string` | No | `.next` | Next.js build output directory inside the project root (for example `.next-local`). On Next.js 16 / Turbopack this cannot point outside the repo. |
+
+With `AUTH_SINGLE_ADMIN=true`, run the administrator bootstrap command before
+opening public registration. Ordinary users receive private roots at
+`<WORKSPACE_ROOTS entry>/users/<immutable-user-id>`; the administrator retains
+visibility across the configured operator roots.
 
 ## AI Provider Configuration
 
@@ -36,10 +43,17 @@ A complete reference of all environment variables used by InnoClaw.
 | `ZHIPU_BASE_URL` | `string` | No | — | Vendor-level base URL for all Zhipu models. Per-model URLs (e.g. `ZHIPU_GLM_5_BASE_URL`) take priority. |
 | `LLM_PROVIDER` | `string` | No | `openai` | Default LLM provider: `openai`, `anthropic`, or `gemini`. Overridable in Settings UI. |
 | `LLM_MODEL` | `string` | No | `gpt-4o-mini` | Default model ID. Overridable in Settings UI. |
+| `OPENAI_REASONING_EFFORT` | `string` | No | Provider default | Default reasoning effort for OpenAI language-model calls: `none`, `minimal`, `low`, `medium`, `high`, or `xhigh`. Input is trimmed and case-normalized; `ultra` is accepted as an alias for `xhigh`. Invalid values fail explicitly. |
 
 :::{note}
 At least one AI API key (OpenAI, Anthropic, or Gemini) is needed for AI chat and note generation features. Without any API key, workspace management, file browsing, and other non-AI features still work.
 :::
+
+`OPENAI_REASONING_EFFORT` applies only to OpenAI language-model calls and the
+unknown-provider OpenAI-compatible fallback. It does not alter embeddings or
+named Anthropic, Gemini, Qwen, Moonshot, DeepSeek, MiniMax, Zhipu, or SH-Lab
+providers. Omit it to preserve the upstream provider default. Confirm that a
+custom OpenAI-compatible endpoint supports the normalized value before rollout.
 
 ## Agent Configuration
 
@@ -137,5 +151,7 @@ EMBEDDING_MODEL=google/gemini-embedding-001
 
 - All API keys and tokens are used **server-side only** and are never exposed to the browser client.
 - `AUTH_MODE=disabled` removes application-level authentication. Anyone who can reach the service gets admin-level access, so use it only behind trusted local access or another access-control layer.
+- `AUTH_SINGLE_ADMIN=true` fails closed until the administrator bootstrap has completed. Do not expose registration before that step.
+- `AUTH_COOKIE_SECURE=false` only permits cookies over plain HTTP. It does not encrypt login credentials, session cookies, or application traffic; use HTTPS and restore the secure-cookie default as soon as possible.
 - Store your `.env.local` file securely and do not commit it to version control.
 - The `.gitignore` file already excludes `.env*` files (except `.env.example`).

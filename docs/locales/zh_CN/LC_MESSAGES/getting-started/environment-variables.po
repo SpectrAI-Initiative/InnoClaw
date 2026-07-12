@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 16:29+0800\n"
+"POT-Creation-Date: 2026-07-12 20:34+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -20,234 +20,236 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #: ../../getting-started/environment-variables.md:1
-#: 36768b5230ac4814878ecda93d3e62a6
+#: 2437c1ddd713405c9a234a3f39b1fd50
 msgid "Environment Variables"
 msgstr "环境变量"
 
 #: ../../getting-started/environment-variables.md:3
-#: e496592fd02d4492b7eb277e617594db
+#: d52b33af3576461fabcb73b535b14278
 msgid "A complete reference of all environment variables used by InnoClaw."
 msgstr "InnoClaw 使用的所有环境变量的完整参考。"
 
 #: ../../getting-started/environment-variables.md:5
-#: ec386f9dcae94ad19947f59e1f705d07
+#: 9f67a818d4ef442e8d5e005333a6e4e0
 msgid "Core Configuration"
 msgstr "核心配置"
 
 #: ../../getting-started/environment-variables.md
-#: ../../getting-started/environment-variables.md:40
-#: 23b45abb4ecf4a6b870d6f0d1d4f6ad9 2c8ad1047e1047c5b4a347438a60eb11
-#: 457b348cd4964668a3de1ab6a614d57e 4ec0f983d7dc4b3d8d4339834c7d2dc1
-#: 7c37df0ff8cf4022a099bf0af7757df5 9cae83bb3bbc475ea39e06912bec863b
-#: a96c71bddda840b1b5c55bacacdbec5f ab497aefa9b0472bb9790c735d7f5889
-#: ae9b1247156642c08084655e221f00eb f6041269922d4fd58381f38e7432674b
-#: f998cfaa2fc24565a7a01a8a9203eb49
+#: ../../getting-started/environment-variables.md:48
+#: 17c8bc557a1047ba833d17679946c7b0 3b136ec0faed4d8bb4d0c5d76d39fbd9
+#: 4255f1a6c30f45b6a85b6291e77ec09c 4414c0fbdbe74a48b0f94e40fae868f4
+#: 894198fb6b3e4994b416384ebf5eddba 8e0441704f46488faa3150fb722eac28
+#: 91339a9fb3994816ba520c47e20c72dd d780f641892843c79655c179cfda068c
+#: dd1c4e2a27144e72a4435882c3613563 f5b89ba0ae644e7ea93d3a7c720b7f07
+#: fa5053247b024022acd6172a1ffe3f2e
 msgid "Variable"
 msgstr "变量"
 
 #: ../../getting-started/environment-variables.md
-#: ../../getting-started/environment-variables.md:40
-#: 05c33f9fe4a042e0ab836b95beecbe25 1058926a920946dbbf76271120bdb15f
-#: 1d5698a05b49415389566436e9308321 23eb74143c2e44be9bc0c0f637131b81
-#: 50523f919b8b4811817db4953d692d4d a71b05c322e840b086475687968a082a
-#: bb31e19008414de8ad943b3dda676b14 c61c3e88201540138479519eec6e5096
-#: dd5af58990ad43f8abf16d6d4675b57f fae96703a18b4d458519f3dc44aa046f
-#: fe9c95ad39354e3bad2819a9356be5ab
+#: ../../getting-started/environment-variables.md:48
+#: 0925a6efc3a742ec8065c5b9527b90be 0930af85d997431bbc18259e7ed079f3
+#: 115d16433bdf4671a9d7df9a2f0c834b 25717962ffb84893a3ddcbb62ecb4485
+#: 439bc55284b4472ab708777bca8f1fd8 5ea244a321934daf8eb03c34935c2977
+#: 6daee016380847e5b0edd1ad877d714a a3f609b0799d4b29bb3c3dc3fd7ee854
+#: a68214f9d59140acaef254c933f1707b aefbe5a41d094f4bb1ad9fa5cbd6c9ca
+#: bd37f51594cf49489de2b68a71127e76
 msgid "Type"
 msgstr "类型"
 
 #: ../../getting-started/environment-variables.md
-#: ../../getting-started/environment-variables.md:40
-#: 1445c1062de542049d080bd9052a28d0 36a47a5b1dd54862a3785f78e2eb92a9
-#: 6dbb9e7d5ea94764beb155f86a4c6f86 780727be9d2a44f4ab314a8eccb84fd1
-#: 80f91c97f748471cad8365b75f9fb23a 883965029e8d47edba3c1b9333f1a4f2
-#: a84ee5b0c42d4a40a48667fb6aece009 ba764038e3ba4b9190835b14d27f4870
-#: d3c1b2c496aa412ab5b7c1aab230efe6 d7dc4065bf0e4016a2467a8707d77185
-#: d9efa0730e7e4a608e27aedd59bcb64f
+#: ../../getting-started/environment-variables.md:48
+#: 1c1686858d804e2a898a009803aa5243 417e2a08568444a9a37f96877805b5ca
+#: 5ae0c99d5ac043a89a7928fbe17c8894 5e1b87f2736a4af8ba6764a064fcbde9
+#: 6c9b48967cb940e59a551820c2c462e1 7f79aacac2154319bcdb7884b304a05a
+#: 964ea45fe6464e2ab3fa297abf9ddf72 ab4670c0bc724fadaaae4b377531759f
+#: e8d566180b044d3797cfbbd994924a32 ee8b72b132fb41f88c3055b96b4f5f49
+#: fc32f06d2bb04e2c87068653116752d3
 msgid "Required"
 msgstr "必需"
 
 #: ../../getting-started/environment-variables.md
-#: ../../getting-started/environment-variables.md:40
-#: 0f7090b288d0476eb58babebc953d794 0f74948f7d9f4dd3902e0f0beab3df63
-#: 0fc4ddc63ab44393be576997ac107d1c 2ad78480128f43e48c61b4178adb9465
-#: 7e0946d9e84e4544a03e2a62d1daab65 9ff0a1d477f14603b610e1f170824872
-#: aba55c47fd3f4eabbfc01746d2e2fe71 baf5e185b68e4098b6d32a56abf89af6
-#: cf856870cd904e87a64a8c5f908f5d10 cff8b965946c4838b06940c948fcf295
-#: d7d6a92f12774710b84a6fe4135001f9
+#: ../../getting-started/environment-variables.md:48
+#: 209a2ef37c19452fbdf56f7f281526bd 32b0cfebf87f4f78b5c7a2c3114867d4
+#: 3f40d22cacbb4be19a106ece6e30f43e 75e542c069664f8cbdda71ae28a2a072
+#: a36d6982c4b24693b25a42d99481dbb7 a831b0d5f6f443ccb48e5a93c30199df
+#: cc6151021a264ade9703e4d9b653e605 ce13a833c46446269ff63e2a04361200
+#: e743f3b79d2a495e96c729a4d1f73a95 f5ac2167b3c54683a9f2eb0d6bd46b5e
+#: ffbdc40211a9410ab5fda6aea6f07ab4
 msgid "Default"
 msgstr "默认值"
 
 #: ../../getting-started/environment-variables.md
-#: ../../getting-started/environment-variables.md:40
-#: 317af58d78af470db90e11d06eb6ef3f 324f1373b78b48469801a1aa748b5da7
-#: 66171325f9be4c2da26cf460356e7fe2 661e2ce7f97341a5a8771af70da06ff5
-#: 69092d89172f4dc78acf26c2a5722297 78735176ebb8404396ea63431260a7b1
-#: 8785f1a117f343dc845f8bcade7d802e 9ecd1e27de24406e8df4ed48576f050a
-#: aec031214c7a4b66b637f2fb82e9df1a d29769b5d7894a03b0c811deec40c73d
-#: e1ac5413c11b4f0bb7c7c48ca9ec2fe8
+#: ../../getting-started/environment-variables.md:48
+#: 027c2295e1b645db879280d5852c633f 0e702f3700d24d7985b199bbcf1b904e
+#: 418e1016dc5b4df0a9c607e1fb2a70e7 465c7096039d4a0f9decca9e53aae44f
+#: 474d4edffdb346d8a1f40a1100254575 ad481379b1cb40c499820728e21159fe
+#: b8ea8b92e13245a6947992efaebbfdd2 bc3f508729e74dec88994cb5998c8472
+#: c91f3a6a9654438bb8051d354df9d7c5 f778439c55464801b48065f53a23cb7e
+#: ff91289e32b14eec9ef95b37597d2ddd
 msgid "Description"
 msgstr "描述"
 
 #: ../../getting-started/environment-variables.md
-#: 916193a72b3c43679ea9bcff0a838d05
+#: 05ef89fe190f44f38056fffb2288729d
 msgid "`WORKSPACE_ROOTS`"
 msgstr "`WORKSPACE_ROOTS`"
 
 #: ../../getting-started/environment-variables.md
-#: ../../getting-started/environment-variables.md:40
-#: 013c1fd1f2544abcbd25ee7107f3be63 11c24b23660245aa8f4898944bd07bd9
-#: 162cbd052bfe49248e02fc3051701af5 16368e15c2b54b15b20b8eecfcc97c34
-#: 1b2add74eec84a62a65b642e7a35c63c 2257d3ad54d248bb81221b434887bb24
-#: 25cecf5075d240adb279ea8fd3aee1b4 27aca7f6f40c48aba70fa545fae8e8e9
-#: 2a96706970b94b5987125293f4949bb0 2df878612d7d4407bbfc4acdd6c48cf5
-#: 3134687e72fa4ee3a065ba0f33d3db30 350ecb889cc54be3a44bb3a9ac3797a4
-#: 362fb564178b4cc0946a3464b5692aca 3d2a2fa63c3b40cb9fc542db065fd9e6
-#: 3f0372ea5d9143c0b60fcde7b8128b61 4a56c7c47c4642f399d1fdf2e559da00
-#: 4a62fd0b90f5408db9db9098eb315e38 4d97bcb06461414d83a98c9b2fca7156
-#: 55991647550e48e38de1507bd6ff2c01 56cca0e76fa1401eaa23f4455875dcb8
-#: 5c56799ccf17491f8717005a9400a614 5f18867c4e084d97b67c5ec5961d0d73
-#: 6232521250cd4e19a0982634d9c3da1d 6841c0f86dbe42dcbea8873fb89fa275
-#: 760ffa1ca0cd407a9b002e4d39122bf9 77d43f7c69bb4474bcc17bf4e1c3cf41
-#: 78c74e412397475a856d78d0461f16a7 7c74b9bd607247a8a4ccba8a8f372c72
-#: 86fef25a13364b4aa364be7b103a0682 8bc562f4c7aa47ff8d5858c714b3bea3
-#: 909fb1f713ce401a99b30ee063115c84 924ed8f81bee40bc9ba55bd242f1de92
-#: 938ec5ec59b04177953883ab584a415d 93bc609c39d54d328bf2e4e7833a365e
-#: 995d3b3de4a34bcd96358580ee2bcfe2 9a61dc3346184eb2af287ce102585b69
-#: af76e2038fb94891a09f91a1df1efb98 ba9a7265f940431ab3427e22e768d306
-#: bc10fa9a88a943ebada3f18d532ec0f6 c1753615a5a147b494572ed52f318239
-#: c558c6907f574697be347b54b5f21907 c81eb91781e647ae8b6bdce2c15afe76
-#: c90430a6447e470c8cdc03e9ddecf64a cee2294bcab24682b5e9fb511d9f1eb3
-#: d31e44401c9f4dd788efe1af01bc1d13 dd508694d0584a6b8be5decac106d516
-#: e8e64e6242a24870a18b44722e68aa00 ea098d31834e4d6c9cc60b2dbc3a0d92
-#: eb805b11889444d0afaccff394bb453a ed04447892dd403b815ba2a899af2fdb
-#: ee9e4012f30549848622e34af00f2661 f1a27d4601d24339b8c3a7cdd154d14b
-#: f47e143584c64e96a45ad0b26f567d6f f819263d66274a04b7c5b2b86e77eb5a
+#: ../../getting-started/environment-variables.md:48
+#: 03a0245534db4d1796d308ad4c1c2e21 12abcfc606314d588405d8d9ad64dfa4
+#: 140435df88e34e3494080326a1a9fedd 1c986f6f68934da98c31d9f787330937
+#: 1d74c3686d9a42869167a9862ad74de8 272702caf0da49279511eb87c0dab9b6
+#: 28fb38a3313c47beab9a2cc264efe344 2a179bf0fe16411fbb658b8e22cad017
+#: 2e648376e05d4c018444583a82b56c0d 34cdd4f0ad124496beb39a71f7c691c1
+#: 3bbe039a2af54e13b8e6dadf714fb23d 3d36a166b0db4d259c53d256775fce1e
+#: 460f2703a1254fcf9b5fb641436f3c29 47de5ad833994aef9ee1cc1d9bbbf358
+#: 4b5b58c602a54ee5bdab07539e2f5d46 4dd21f0ea9f04df5b030ebf119074750
+#: 4f07f1f1711e47889f3a4e2ca6dd88a4 58628bb72b8f4333b5ea57199cebccc0
+#: 60bd6901642c4bf795f935a283b47454 6126037b28a049eab33e3c0d7627a461
+#: 639abaa40ed04796aee7fbd8f4a9e3f8 682fdbacae084f278f91414aa3670033
+#: 696308c06d4945709fb3345e858d5d63 6f049afad41f4750ac3903690b527ab4
+#: 7148bbf5580e47a2be6d399155ae3c99 74b58d2954e24aa5a10c169f78c799d8
+#: 799a22e7649043e49e171736ffb68845 844f64588b364dd499558ede9b19ccd1
+#: 87e124164de349b3abdb64ce99b09615 8ba6e87bab9e44b9929420ebc6ccc494
+#: 8bbbf757241741e1b2c26ddf0c5c30a2 8dde41f7a0ae428f95c20923c62cb9bf
+#: 9945a63c1e2e49858c881e16a748f3aa 9bb5e0d1e4a94702be889afd88ab10e4
+#: a05d0d4d9c684a78b229c6869a1aca4c a8c4270f7dcc45feac7d60c97961c2ae
+#: ad42132b595f420d8ff57e1fd46b34be b27454efab1f4d6e917f49aadca88075
+#: b5ee71053bf94918a83146b52c9fdc66 b83249c45ad4410caf70a8f6cfc9359e
+#: b87fe8f1ba46425dacf18177fa18e3e7 b9d6a3602a0845b8b969ca39cd284a70
+#: bb8eb803905e44e4874d513e620ec59b bbedb5d1d03c41b4989f62c36b4dd502
+#: c1089c207f4846529e013d60240643f8 cb5e2c72a7f748289f6ab3f2d23eb5d1
+#: d18605b26d6e4712abde165f5f757872 da23cccac4dd4b8d836f530ddf10409c
+#: de16404cefd24349a4b2898486657165 df6829f7e03f4553aeb7d550498fb5a5
+#: e6be84eb1bd54d488f6d3a6ba1ddf5c1 ea54f0e2158a47eba92b7176b1128b09
+#: eb335d54b41e4d218285d92298d37b7f ec7fb40fc1d746bbad0d99466a9e8963
+#: f4ff65b799974c479e75ff9dd0acee3b
 msgid "`string`"
 msgstr "`string`"
 
 #: ../../getting-started/environment-variables.md
-#: 4c596b3cd1aa4facaef9706aee0a9b92
+#: 5e4f8a2e46dc468c9722729bfdf22ee7
 msgid "**Yes**"
 msgstr "**是**"
 
 #: ../../getting-started/environment-variables.md
-#: ../../getting-started/environment-variables.md:40
-#: 06beab0f4cf94081bd45f114657e9775 08858a2315f244319ce9be2a13e2c639
-#: 0a24c4591dfe4fc68d525cbc40b8623e 1b3d8e8ec2a44b3eb54db5d56d4edddf
-#: 22d420c3c1244c31919c8b53ab102ac9 2eecd8c6c13f48bb9dd9553ca27f416b
-#: 3ca9b87f66b849d3ad702639850929f8 3f08dbbf13f04b2fabace35109fdead3
-#: 49d79ea13a52435594c0e98144f1473c 4ec6a9a3485444d38c9651cbf0efc6c3
-#: 54f9dcf9efbd46949e20a756fa2a05ac 58a67697a00f47fca6d8e4b11e55200a
-#: 661d4742f6e2471aaed909210292f5e0 6634756f7ddc4ffaa7a072a826cc4216
-#: 6d81c0455c6047eab1dbc80c44b10f8b 6f7003c49aef4a60b288575e899aba96
-#: 74e1db86e343430e8ceb7fe989a0d751 7744b000bfe24c728c85688e9efad5d7
-#: 7b5b9af7ac814c199eaf706b4b3d0beb 7d974f45d19d4b8582bbc22c64490105
-#: 7eaa1f8fe9c04ea6b1b99d340da5d56f 8ba841eb2812403e948c9fe26db35415
-#: 90aa18c79f324ae6851e7fe1027b1b7d 931eb7c2122d42eca3e5155be769d152
-#: 9a23997cd723496b99722fdf756bc853 a02575e0181740f5a777e3ef20a4f5d5
-#: a61a08fdd9c24b8fbd8ecadc2080cf6b b3722dda252a4284a0aa1728d6e45cc0
-#: c1e4e68395ca4805b54e9f6dbd090f91 d1680119fc12434fb890ff47f260b19a
-#: d21fc7efc5194675a872ced026c390c3 d7a783d8607b42538a4035b6ad3f0b93
-#: d8be5fa225b249a9bafb64882b6fbb09 e4f71ba806904298bbd92c9594780d05
-#: f981b72ac43b42099a885ff5a5585c2c fbd3e0b2d372401ca324d33a2fcfeef5
-#: fc15ddb8eea94569b41fa8694931d988 feb0e300ecea4183bbd2b4983574b164
+#: ../../getting-started/environment-variables.md:48
+#: 02c61e69561342ef9b9eb7d552869eed 0e524f91a1ae40d385cdbc291d6af433
+#: 2c97f9629a6048a883baf2418fcfe092 2e59c34181ba4265b3a31542aaa689e6
+#: 2fbc4a9a5f564b4fb39978505afb7841 3390a27d075b42c6a8d9d5a838a77851
+#: 36775d44b2244a76a4caeaaa65ff3f11 4784f18185d84d7b95c2eb8cf8614a18
+#: 4d51ad974828445ba621d966e078c55d 5fe56240e3834189aebb9143fd8d26c1
+#: 6a85729bdaa049d2abece29d92cdfa08 730afe60d5d44895b97144475535c276
+#: 7655eb37150e418e8bcd710a283a8faa 87b612db58ef4251bafab3d231c129e7
+#: 8faea7ef948547569e8602c379592839 9213764fd389472e974b27df08e49b53
+#: 9328ac283b934b12b0f1b7f49ad37755 95c1617623a642cb9f6dc71c5731768d
+#: 98bdc67daecc4a41872ccd40cd7431a1 9e6f7710d6444aa1a3c28ca8963ef039
+#: ad721663a25a4567a2894d86ced6a95b ad7cb7b4d73d416aa13ea784eecae974
+#: ada5e43cd1064f7d9175ba3137f3e2cd aeb39e76eb57474aa01c138e61f9bfcb
+#: b64c260c5a604f81a05a4bdec8e832bf c4b553726ccb4d31b01b4405250e69a8
+#: ca4ff4e3448d4fb291841399726088aa caeb1b595130436dafd9e34c4e5308bf
+#: d31a8ddffdd54be4bfc90de2b433f99f d7a088f510f943e4a1e1d3c7c53fe316
+#: da2ead5cd42f42198d0865c75319e097 db5fcbd733ff4aa19fd1a72215c8e09b
+#: dcc1aa7902fd42959b3cd97b3b8250e2 eba20f6627f444a29a3b19c7d67dde4b
+#: ee2fd466ce3b43ec942ed33db354f85e f2cfc340bdd74e838984e9179ba5fef5
+#: f3ec95326c2745c89df0eb4c01905dbe fed7414f019a4195aae9bb0ccccf0de4
 msgid "—"
 msgstr "—"
 
 #: ../../getting-started/environment-variables.md
-#: 55a51acb29f74aa78051dc8356d39402
+#: ea8053b9175445de911ca8cdc83d584e
 msgid ""
 "Comma-separated absolute paths where workspaces can be created. "
 "Directories must exist on the server."
 msgstr "以逗号分隔的绝对路径，用于创建工作空间。目录必须在服务器上已存在。"
 
 #: ../../getting-started/environment-variables.md
-#: a401f30f0e3a4bd7b24499bd117f7163
+#: 98cc1a1a2da04fa3b81a006e466d6a61
 #, fuzzy
 msgid "`DATABASE_URL`"
 msgstr "`OPENAI_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: ../../getting-started/environment-variables.md:40
-#: 0560560946ad4a3682c13abb0bc4b80a 0e281c49e4d441a39b155857c4af86e2
-#: 0fa68f38e966409c84973672d288941e 184fbcf2d4e6452380ecdc9550a46003
-#: 1d55a0e9b7ec4c62aa907021fb58fb01 1f308634d7da430e90fd8ce235f3797b
-#: 2666c409cc7641079765167afad9041d 2c2b964ee59c4f7fa0df7ebdf39682bb
-#: 2df9a72585224898b0ed611ff63a5aa0 3c0c296a927849a2b73e99e4ad154db7
-#: 433ac629820a4483be3f5ea8af02a739 4bec4a86cf66453894ee97d1eacb563c
-#: 4e0ccff5206d4699911630bab1a60eb2 5395f8087dee404c876918002102be7c
-#: 55b798d4bcc247909c5c9d38f8cdbeca 5602eedc6ba24f72a68eb96e5f3d6d1c
-#: 5c46bf876ec34cd9ab144748c9487ad7 5d130a31da124344a73c9e6d1e03f302
-#: 6668f13d2b22458cb24e2fd3d81fbbed 6d8cc74686444d7f87e9e31b0ba6e4cb
-#: 71955c8e1b0146789df3a1c8100746de 754de97c338940cab32b28ffd2971ae3
-#: 7b24a0b7e63f41fc98570ad8c12f05a4 7d51be2d41be43c29b769d7f38c24a63
-#: 899c4e5b3a2a463298971d4e5ac32b6c 8b857d3cc9474fe899eb5133793694cc
-#: 8d230f44695242fc99c39e617ece7f72 945d221e9598431188b962d1a08053d7
-#: 975a7352a03c4c4dbf31ee8a44da3dd8 a10712ffb9a24e00b36dd69ada988c4d
-#: ad5ff279f68d40359a684395bbc8c455 b060fcf14b6f4cbfbb4a5de091b1d5d5
-#: b22da0c66d594e1ebc98fd7df722c11b ba74b966c5fe473499c35c84c5e59504
-#: c02f93a62def453ea98fb15326764cee c05b0c7ce35542a298ac01de550f5fbb
-#: c0cd971d723b44bb904fcee4fe3de0f7 c4d655e08d6e4a038a0a46ea5e52d228
-#: c566eadd4cf8471da8d7ad3066b4227d c6ff316496bb4bebb5a60b2d06687f78
-#: cb1d95019d114414856aa8b6eaa71c20 cd81c8de9993468b84f18cc1413a33a8
-#: d1feddcef24540f38709545386e81d63 d27d541e1b06496e8945afcfd878b696
-#: d4f9775da554463091bfcf8dffb3e864 d66d2b58ace244ea87e8da426787d100
-#: dcb221ff24e24fb1be632100fb4a5a85 def1f1024a0540bfa0c6ff2464ea5139
-#: e2b02c2614634d81b775775094321770 e3e8d7acb30947d3b4e82a2c913707be
-#: e5b27135b8b340ffb53865ce787587b4 e689a8453a264c6f84fb98d1a3bc0d21
-#: ec30774e3e30446382623b198afcad0d f2e4facdb516442cabd13cb9fa870a7d
-#: f8ad2e38a13749cf8dc0df4b3c8e98b9
+#: ../../getting-started/environment-variables.md:48
+#: 00ad12c9c18d49f097fbaad989c18443 02d4061559384037944d9fa4d01b412e
+#: 05331db34a7a4fe2b545a0545ac8bc73 11ed7780f8644d53a815d2a85f88cb0a
+#: 136b85df446c4abfab648a27490f8573 1a0e5d135c0c4375ad4c1bf5d172d120
+#: 1fc356cd6dcb415d8e1468571cbcb3cd 1fe40da685c44823ab0cffcbb098d77b
+#: 218d31e356c44da89ff5f97e8fd42c93 297d06c5f434468bab01823b1035d478
+#: 2adcf47d3e9349cd8fe8fbc32fd34650 320c901277704aac9b6f0431ad55daed
+#: 36449da356b94804b9fc7cfb3826f62f 387fe7339264499cad87e3a342253f7e
+#: 39f11aa56a6e4fd1b7d9c8bddb089898 40d893b4debc4aa193f485c7c732c5bb
+#: 5064adb33a134a0f845a5be063760fdb 5700f4cda039413dacac218dde8f463a
+#: 5c39f49f5e274a09b6573a40be1cc06e 6250674c909c4840910a9448a0859d33
+#: 64150daa01c7416fa51e493a3c492d61 648cc225ca1a45d382fe1ffe743ac6d6
+#: 66bc0fbbe5af4584a1c9ec7a6013ee27 66d8ddaa583a499b83f7887464813d6e
+#: 685de859c843483a8a80cd6f5da037f1 6b5c5d1d6eff481392995e4279ba709c
+#: 6f2c6d669332431a8e4d456613e82e71 7112ab5f3b6e44b0a4b802a202a10d3f
+#: 789cf4a8b51a4b408a790f5ab7b3b8b1 8238a112d235496e83f7eccbb8ba3913
+#: 85d2981813c34206b688301b91ae0416 880e1a0083dd49978433dcaef46e0001
+#: 8a2842015ae44acb90fe052c993544c5 90da860c8841425fa7a1be1db8716bf0
+#: 93a3606b1f5749cdadf658592f0fb18f 97a239e2b017447fb18c13bbf954a17f
+#: 9f9cf5e75f9b46cc8233a45f9a0b0a74 9ff2a26b7c134c44842a78c1154088bb
+#: a5af1f6ee03f498dad414829841b2e32 b0906907d0a3490e9ce25e493df0664f
+#: c23bc658cd5a4a7eab9cf65372bc9591 c9672f544c8843048b2fb9286eed2ad7
+#: cb97a7b639e747cd899d99830c234f51 cc4b0d26c1354234baa6b4399e05ea72
+#: d14602df542240d98c6f83ec048056df d43e6583ebc6420c87e49e3eeb6870f6
+#: d4d4d27a2fb3471d93f46bcf6e29235e e58bebb7475d4e12a55842199e773bb6
+#: ea03c48891f84120aa827f1c645ae004 ec2efd6268d94a3daa2b3c4cf81e3a4a
+#: eda62d7698c046d68148044f70ca129b f221dc333a884f02b2856f8d6e123bd7
+#: f24e6e24bc954750bbdf308cba205d0a f3c8cbdc7f98410ea2d7b5afd0bb475b
+#: f745e05933374230909173a1d7bee1e1 fb1bd4a779ff48528331bdf2e31290d3
+#: fc20f3b723a94f769ed6f2644c147f15 fe6c27755b0c41619340449f8215528c
 msgid "No"
 msgstr "否"
 
 #: ../../getting-started/environment-variables.md
-#: b47feec8ce4944078ab77e923859bb03
+#: 4f6e852a3c004c56aac9fa9c99da7d26
 msgid "`./data/innoclaw.db`"
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 46e0fedf72cd4ef0953647b61ecaf4d0
+#: 97aca742378c4e92b29f52d00d12e929
 msgid ""
 "SQLite database filesystem path. Set to a local path when the project "
 "resides on NFS or another network filesystem."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 06e73271b8104104a43edeb4a6ceb7d7
+#: fdbdde17236848478bf8774bf616e0fd
 #, fuzzy
 msgid "`AUTH_SECRET`"
 msgstr "`FEISHU_APP_SECRET`"
 
 #: ../../getting-started/environment-variables.md
-#: d48ec48ab86f422f9f4bb2184b7ab0bd
+#: 86a5896601694fc390bd4ce26cc00fc2
 msgid "Recommended"
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 6c083d6de5914c3fa89038a4321ebd55
+#: 847b81862cc54993b30e9efb2c291211
 msgid "Development fallback"
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 844d65fd0e004bcabc8423b859b21bd9
+#: 54676cac94bd421f8c1900c28cfd29e6
 msgid ""
 "Long random secret used to sign local authentication session cookies. Set"
 " this in production."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 6bf7cf8683224b4d8b8a529683162922
+#: acc784533095433d81dc2f8be8cf1a61
 msgid "`AUTH_MODE`"
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: e7096f4804ca4b11b5f6805f3c088061
+#: aaec432581f046e58ec985ed464d54f1
 msgid "`local`"
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 64c1f82d1e5747a2949868168bd8f029
+#: 69e53da7ee564e5caaf397d289b04937
 msgid ""
 "Authentication mode. Set to `disabled` only for trusted local or single-"
 "user deployments to bypass registration/login and grant every request "
@@ -255,287 +257,363 @@ msgid ""
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 886da7e0c81e4803be47a7665f2e1db6
+#: 730cfd9080d0453aa96531f77622d5af
+msgid "`AUTH_SINGLE_ADMIN`"
+msgstr ""
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:48
+#: 15a0517b8b7a45b2a4124656d5547c2a 6e95e480fd4942d98b047c610dbc2944
+#: 9e3c61beb8f74a8b8ee27c4798fc279b ae5d116aff454392a9c929db57853d2f
+msgid "`boolean`"
+msgstr "`boolean`"
+
+#: ../../getting-started/environment-variables.md
+#: ../../getting-started/environment-variables.md:48
+#: 5a995d38f94d424da105d09ac89bb7c1 5eed699dea384a7c903ed75fc576736e
+#: d7b8fc0295ac4d558a9c9899cdfce710
+msgid "`false`"
+msgstr "`false`"
+
+#: ../../getting-started/environment-variables.md
+#: e775a9bae4184172b08ed267f1d892bc
+msgid ""
+"When `true`, requires exactly one bootstrapped active administrator. "
+"Public registration can create ordinary users only, and administrator "
+"role mutation is disabled. Values are strictly `true` or `false`."
+msgstr ""
+
+#: ../../getting-started/environment-variables.md
+#: 41a28bd63dbd4a9f85c8ec607873f52f
+#, fuzzy
+msgid "`AUTH_COOKIE_SECURE`"
+msgstr "`FEISHU_APP_SECRET`"
+
+#: ../../getting-started/environment-variables.md
+#: 8673234af8934dfe9b0e4f50d99c3a55
+msgid "`true` in production"
+msgstr ""
+
+#: ../../getting-started/environment-variables.md
+#: 3dd2d5b2a0674469813b8724cc50faaa
+msgid ""
+"Overrides the `Secure` attribute on authentication cookies. Set to "
+"`false` only during a temporary plain-HTTP rollout. Values are strictly "
+"`true` or `false`."
+msgstr ""
+
+#: ../../getting-started/environment-variables.md
+#: f2f1c15bca014ad1b3e95fd438535cf5
 msgid "`NEXT_BUILD_DIR`"
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 51c518e32e3a4baf87edbce0f3e4754e
+#: f8bb8ea47f7943c8bbe54410345fab46
 msgid "`.next`"
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 2f90c58ffe16456eb7cd61fd41166312
+#: 686585a15ff244739ad19eaec1f07b7c
 msgid ""
 "Next.js build output directory inside the project root (for example "
 "`.next-local`). On Next.js 16 / Turbopack this cannot point outside the "
 "repo."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:15
-#: 3841d5f3201246e49de8b20d0534168f
+#: ../../getting-started/environment-variables.md:17
+#: c8a0bb4cbe21400580ac2031f6ca827d
+msgid ""
+"With `AUTH_SINGLE_ADMIN=true`, run the administrator bootstrap command "
+"before opening public registration. Ordinary users receive private roots "
+"at `<WORKSPACE_ROOTS entry>/users/<immutable-user-id>`; the administrator"
+" retains visibility across the configured operator roots."
+msgstr ""
+
+#: ../../getting-started/environment-variables.md:22
+#: 7158fd0e224b474b8c9b9845a25a9232
 msgid "AI Provider Configuration"
 msgstr "AI 提供商配置"
 
 #: ../../getting-started/environment-variables.md
-#: 48c97d432a2e416b81d3517eb410c62a
+#: b6215b49ed63440b91e1a174107f97f9
 msgid "`OPENAI_API_KEY`"
 msgstr "`OPENAI_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: 4c360856bc5e47fd9dd72ce8c593e134
+#: 34fd9bd16d0a4c40b858cdd975ef2cf4
 msgid "OpenAI API key for chat and embedding."
 msgstr "用于对话和嵌入的 OpenAI API 密钥。"
 
 #: ../../getting-started/environment-variables.md
-#: 7ff5deed54d2451f8220b9a21a38d2ec
+#: 215ce2e941ce414d84c24fff73775a72
 msgid "`ANTHROPIC_API_KEY`"
 msgstr "`ANTHROPIC_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: c7afc63280ad4280966025d11c6f59f4
+#: 1eb7a33f4223477ab4a5d9a810b8a0ba
 msgid "Anthropic API key for Claude models."
 msgstr "用于 Claude 模型的 Anthropic API 密钥。"
 
 #: ../../getting-started/environment-variables.md
-#: f7c2fe3992b64e81a9d211a366799fe3
+#: 31725aa9c9e34b45a6eca3546f86e3a1
 #, fuzzy
 msgid "`GEMINI_API_KEY`"
 msgstr "`OPENAI_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: 5b53651df9f847bcac07ea2488959542
+#: 17a87ab0d6e64d05a1afe2d7d00b4053
 #, fuzzy
 msgid "Google Gemini API key for Gemini models."
 msgstr "用于 Claude 模型的 Anthropic API 密钥。"
 
 #: ../../getting-started/environment-variables.md
-#: a3851f64dc9744e2a78007f55a04c236
+#: 188c1c7017ce42b0ad3dc26b5da7778b
 #, fuzzy
 msgid "`SHLAB_API_KEY`"
 msgstr "`OPENAI_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: 523305114b5b444ab9ec364002284d9a
+#: 8c50b3404bf94a0a80293488fff7c653
 #, fuzzy
 msgid "SH-Lab API key for Intern models."
 msgstr "用于 Claude 模型的 Anthropic API 密钥。"
 
 #: ../../getting-started/environment-variables.md
-#: 629bb7c1e36d4f5186fc3727c59c0624
+#: 74d7c9e6478c429784c9bcf1c6158523
 #, fuzzy
 msgid "`QWEN_API_KEY`"
 msgstr "`OPENAI_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: 6d44df01a5214350ac4d90ac69fa87bb
+#: 3978945753e94aaea1e5818911076757
 msgid "Qwen API key."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 6ccef85a3c4a4d4c9244ff337fe19609
+#: f9d684fc8f0f4b7bbf6f1c037e494bcb
 #, fuzzy
 msgid "`MOONSHOT_API_KEY`"
 msgstr "`OPENAI_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: 10050a5510674a099d7f3004b787964f
+#: 1e5bf6fc1be3459abf675d65b7c4d546
 #, fuzzy
 msgid "Moonshot API key for Kimi models."
 msgstr "用于 Claude 模型的 Anthropic API 密钥。"
 
 #: ../../getting-started/environment-variables.md
-#: a902b2e360144d4baa90f890afd8ef9f
+#: 665219cc2bbe453b809560bd00772ac3
 #, fuzzy
 msgid "`DEEPSEEK_API_KEY`"
 msgstr "`OPENAI_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: 5b1755dd754b4bae89e32056c0ed027d
+#: 1f66a52221ed4eea9b1cb148d298641e
 msgid "DeepSeek API key."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 2e8f41eee9884cb59970e8816f50994d
+#: 4ca6eb9045094e639447df11ac05320e
 #, fuzzy
 msgid "`MINIMAX_API_KEY`"
 msgstr "`OPENAI_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: 1c6ae6662f4542fcbb5ab689136d76c0
+#: 331ebef3111047fc8050add32160e1e7
 msgid "MiniMax API key."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: e0ba53c074ac4726a663b659c6ec8ee4
+#: d8115560bd4b4c19a923d01831fdf57d
 #, fuzzy
 msgid "`ZHIPU_API_KEY`"
 msgstr "`OPENAI_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: 828fd4d23ce54903a70e09cd3a8a5ceb
+#: bef9fff4fae04175a5c1a1ccef24185d
 #, fuzzy
 msgid "Zhipu API key for GLM models."
 msgstr "用于 Claude 模型的 Anthropic API 密钥。"
 
 #: ../../getting-started/environment-variables.md
-#: aa335cf5a5b44ecfa7a63a5908469476
+#: 5ed92ceec0684676ac6fa46f7377e052
 msgid "`OPENAI_BASE_URL`"
 msgstr "`OPENAI_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: 8869b2b0885a45aab9cdcca2a54714c9
+#: b310d2137473466ea8030394eac1b292
 msgid "`https://api.openai.com/v1`"
 msgstr "`https://api.openai.com/v1`"
 
 #: ../../getting-started/environment-variables.md
-#: 90d9c6e575c34239a012edc681283435
+#: 9e50e149738f4a38bbcc0581e9f4944e
 msgid ""
 "Custom OpenAI-compatible API endpoint (for proxies or third-party "
 "providers)."
 msgstr "自定义 OpenAI 兼容 API 端点（用于代理或第三方提供商）。"
 
 #: ../../getting-started/environment-variables.md
-#: c36808dc5a91401692f118f97bb6034d
+#: 54266647eb914e5d8f07f9ebab559e4c
 msgid "`ANTHROPIC_BASE_URL`"
 msgstr "`ANTHROPIC_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: 0d83fe305aaa4a2399c74f1f54ccdc14
+#: bea2f4308fbb43c8b71f2e546128ef78
 msgid "`https://api.anthropic.com`"
 msgstr "`https://api.anthropic.com`"
 
 #: ../../getting-started/environment-variables.md
-#: cca7949523e24274a350113a3f9dbb8f
+#: 5b1b61f9194f43abb12dde28cbd93c8a
 msgid "Custom Anthropic API endpoint."
 msgstr "自定义 Anthropic API 端点。"
 
 #: ../../getting-started/environment-variables.md
-#: bf568a8a48ac4782bdc084ab5bf2c193
+#: bf01aaf08bee4cc1af7ea7c2a0f4626a
 #, fuzzy
 msgid "`GEMINI_BASE_URL`"
 msgstr "`OPENAI_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: 502b028269b04024930a6e49c453d5a0
+#: 308f8d9e432942bf90b9b208af43d215
 #, fuzzy
 msgid "Custom Gemini-compatible API endpoint (OpenAI-compatible proxy)."
 msgstr "自定义 OpenAI 兼容 API 端点（用于代理或第三方提供商）。"
 
 #: ../../getting-started/environment-variables.md
-#: 6c3f0b26e4d8450381d987c7d5cd7a3c
+#: ae9b54bcc6e4468faa82baad40c5e0a1
 #, fuzzy
 msgid "`SHLAB_BASE_URL`"
 msgstr "`OPENAI_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: b7ae821f9abe4301be9db5f161a990ef
+#: 1e310f831cf84be3b7c1f1ceedcf495d
 msgid ""
 "Vendor-level base URL for all SH-Lab models. Per-model URLs (e.g. "
 "`SHLAB_INTERN_S1_PRO_BASE_URL`) take priority."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: c585bb93c01342b3923d44f39125ea15
+#: 4ad52f44fbd541f299d7b1de9ba08ca1
 #, fuzzy
 msgid "`QWEN_BASE_URL`"
 msgstr "`OPENAI_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: d6f30d46fc964a15affc09a4159d178b
+#: 0984ffb750514c35a1f6f84a84b27313
 msgid ""
 "Vendor-level base URL for all Qwen models. Per-model URLs (e.g. "
 "`QWEN_QWEN3_235B_BASE_URL`) take priority."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 7560ac8c332c44a2b8a6eb61bb2d7336
+#: fc313d8a13334261bd6b80e377cbc9dc
 #, fuzzy
 msgid "`MOONSHOT_BASE_URL`"
 msgstr "`OPENAI_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: 8ce64f1a9c71447a8089993fc6ad7e4f
+#: 2443ec271e994fa28dbcaca4aead3528
 msgid ""
 "Vendor-level base URL for all Moonshot models. Per-model URLs (e.g. "
 "`MOONSHOT_KIMI_K2_5_BASE_URL`) take priority."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 33a83b6ae9d2418e9b3ad8ba69b601bd
+#: 2e0adfe3a1e140119fcf3d6ac153d062
 #, fuzzy
 msgid "`DEEPSEEK_BASE_URL`"
 msgstr "`OPENAI_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: 0a1b0cbf1a614072be296ccb2a8f585c
+#: ea267542e0ad43008be55ad228f9584b
 msgid ""
 "Vendor-level base URL for all DeepSeek models. Per-model URLs (e.g. "
 "`DEEPSEEK_DEEPSEEK_V3_2_BASE_URL`) take priority."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 1b2df0e824ba4af7a2c787c40deb5f40
+#: bf46eb77fc034575938178dd73e2de3a
 #, fuzzy
 msgid "`MINIMAX_BASE_URL`"
 msgstr "`OPENAI_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: 961370e05400471da93bbfbfe8892603
+#: cac19e9a13434fa48c50bb175a4afbb2
 msgid ""
 "Vendor-level base URL for all MiniMax models. Per-model URLs (e.g. "
 "`MINIMAX_MINIMAX2_5_BASE_URL`) take priority."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: aabb57c13e0f40d9995cf0dccb2d709c
+#: 68a07b426dd04964a46b40e6170120fc
 #, fuzzy
 msgid "`ZHIPU_BASE_URL`"
 msgstr "`OPENAI_BASE_URL`"
 
 #: ../../getting-started/environment-variables.md
-#: cb2b5953b282411384a2cc5c50c9045d
+#: 08fcd3dba5d0434cbd2c2f90a7cd1664
 msgid ""
 "Vendor-level base URL for all Zhipu models. Per-model URLs (e.g. "
 "`ZHIPU_GLM_5_BASE_URL`) take priority."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: b37d2039b2d147edbca0230e00c1deee
+#: c74d26c9730e48e2839c4b3b44d20843
 msgid "`LLM_PROVIDER`"
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 2d22bcb73ace4fff97d2236f14bbf2f4
+#: f3d3c0521a334ae39863bf2f8ec5d540
 #, fuzzy
 msgid "`openai`"
 msgstr "`OPENAI_API_KEY`"
 
 #: ../../getting-started/environment-variables.md
-#: a6c1a6bd657545f5a69efc898e1a55b7
+#: a2e7481a6be2490b8341d3b465390ac3
 msgid ""
 "Default LLM provider: `openai`, `anthropic`, or `gemini`. Overridable in "
 "Settings UI."
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 9491b996804a44f1b3d895aa6e023f40
+#: b6bdb8397c424976bc963da3a06d3e39
 #, fuzzy
 msgid "`LLM_MODEL`"
 msgstr "`EMBEDDING_MODEL`"
 
 #: ../../getting-started/environment-variables.md
-#: 388add7768b541299f233710aeed97f5
+#: 998cb15a08e040dcbe5b97e3084c625c
 msgid "`gpt-4o-mini`"
 msgstr ""
 
 #: ../../getting-started/environment-variables.md
-#: 44dca0cf38dd44a587b4d05948b10ff7
+#: c681479482144d09a3e4b3cdb2942813
 msgid "Default model ID. Overridable in Settings UI."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:41
-#: bc5c051356bc4577b67e25ebe1092a39
+#: ../../getting-started/environment-variables.md
+#: 76e9032c941b4de0bb616b0b76047dd6
+#, fuzzy
+msgid "`OPENAI_REASONING_EFFORT`"
+msgstr "`OPENAI_API_KEY`"
+
+#: ../../getting-started/environment-variables.md
+#: 9a4f1b5ad76c423f9ad9a635241eb53d
+#, fuzzy
+msgid "Provider default"
+msgstr "默认值"
+
+#: ../../getting-started/environment-variables.md
+#: 9044bf5f1da34df09ee31a9c55f86e21
+msgid ""
+"Default reasoning effort for OpenAI language-model calls: `none`, "
+"`minimal`, `low`, `medium`, `high`, or `xhigh`. Input is trimmed and "
+"case-normalized; `ultra` is accepted as an alias for `xhigh`. Invalid "
+"values fail explicitly."
+msgstr ""
+
+#: ../../getting-started/environment-variables.md:49
+#: 8fd29f39dc344731b878e5900e5a21a5
 #, fuzzy
 msgid ""
 "At least one AI API key (OpenAI, Anthropic, or Gemini) is needed for AI "
@@ -545,485 +623,501 @@ msgstr ""
 "AI 对话和笔记生成功能至少需要一个 AI API 密钥（OpenAI 或 Anthropic）。没有任何 API "
 "密钥时，工作空间管理、文件浏览和其他非 AI 功能仍然可用。"
 
-#: ../../getting-started/environment-variables.md:44
-#: 5a73fce36cfb40089dc142f4f23b101d
+#: ../../getting-started/environment-variables.md:52
+#: 21060d0c72c845a8ab61539688a4e2a7
+msgid ""
+"`OPENAI_REASONING_EFFORT` applies only to OpenAI language-model calls and"
+" the unknown-provider OpenAI-compatible fallback. It does not alter "
+"embeddings or named Anthropic, Gemini, Qwen, Moonshot, DeepSeek, MiniMax,"
+" Zhipu, or SH-Lab providers. Omit it to preserve the upstream provider "
+"default. Confirm that a custom OpenAI-compatible endpoint supports the "
+"normalized value before rollout."
+msgstr ""
+
+#: ../../getting-started/environment-variables.md:58
+#: b2536b4156d4460fa84148f7fb01e0f0
 #, fuzzy
 msgid "Agent Configuration"
 msgstr "核心配置"
 
-#: ../../getting-started/environment-variables.md:40
-#: 768befef74044afcb61872fdafc13217
+#: ../../getting-started/environment-variables.md:48
+#: d00cf23762ef4581afa920d95d5841d8
 msgid "`AGENT_MAX_STEPS`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: fc913a18904e469485a1e80fcd18a981
+#: ../../getting-started/environment-variables.md:48
+#: 66bc92146a9248248c5410f757a0d0e2
 msgid "`number`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 2c473b6e3215452e98d0f5dabfb947a2
+#: ../../getting-started/environment-variables.md:48
+#: 165828f54ca74978aa1c7763019170b0
 msgid "`10`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 86a3a7f916414515a5fb1e83175f8515
+#: ../../getting-started/environment-variables.md:48
+#: 900fde4d9505466e844737b016d7bafb
 msgid ""
 "Maximum agent tool-call steps per request (1–100). Higher values allow "
 "complex multi-step tasks but cost more tokens."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:50
-#: fc20a25a1ede46fa9afca0a1eebdb321
+#: ../../getting-started/environment-variables.md:64
+#: de12708d580546d0a9d06b7efc368feb
 msgid "Embedding API Configuration"
 msgstr "Embedding API 配置"
 
-#: ../../getting-started/environment-variables.md:52
-#: ede1a69276534cec8377bfae074fcec1
+#: ../../getting-started/environment-variables.md:66
+#: fdfb93e185304d1a93c9de260ced81e2
 msgid ""
 "These allow using a separate service for vector embeddings, independent "
 "of the chat model provider."
 msgstr "这些配置允许使用独立于对话模型提供商的单独服务来生成向量嵌入。"
 
-#: ../../getting-started/environment-variables.md:40
-#: 0b89da21b0a1478eaa4eb6fb6bba1b1c
+#: ../../getting-started/environment-variables.md:48
+#: 4fb686a7b90740189c5349cddd7f5e6c
 msgid "`EMBEDDING_API_KEY`"
 msgstr "`EMBEDDING_API_KEY`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 17ea39bc85584b58976cd71db118dabc
+#: ../../getting-started/environment-variables.md:48
+#: d1305db48e4949659e9d6aec41e4b553
 msgid "Falls back to `OPENAI_API_KEY`"
 msgstr "回退到 `OPENAI_API_KEY`"
 
-#: ../../getting-started/environment-variables.md:40
-#: ccea0a207c7c44febf31464bb0eac9eb
+#: ../../getting-started/environment-variables.md:48
+#: 14d2634de6f14a609005c430c8399acb
 msgid "API key for the embedding service."
 msgstr "Embedding 服务的 API 密钥。"
 
-#: ../../getting-started/environment-variables.md:40
-#: 8e7b82cde5f84b7ba5f6b144e02ee53b
+#: ../../getting-started/environment-variables.md:48
+#: 84fc3a4d98714863b43fa2119b75d048
 msgid "`EMBEDDING_BASE_URL`"
 msgstr "`EMBEDDING_BASE_URL`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 5ab5e4b8053c4ea28185f44a43995227
+#: ../../getting-started/environment-variables.md:48
+#: fb590e83550d404da0dae7f82b581911
 msgid "Falls back to `OPENAI_BASE_URL`"
 msgstr "回退到 `OPENAI_BASE_URL`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 5566d51779e4417291740a637ac31e4e
+#: ../../getting-started/environment-variables.md:48
+#: 9a4a40694ae24ae8ac2ebd6859fed2b8
 msgid "Endpoint for the embedding service."
 msgstr "Embedding 服务的端点。"
 
-#: ../../getting-started/environment-variables.md:40
-#: 8bd907c2a61c4314b44f5c3f89d86e2b
+#: ../../getting-started/environment-variables.md:48
+#: 9ab525c6e20a4762a6a1c29299025ad1
 msgid "`EMBEDDING_MODEL`"
 msgstr "`EMBEDDING_MODEL`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 95254163a5604e979ec5c662427cc864
+#: ../../getting-started/environment-variables.md:48
+#: 86685b9165194b4fa48cefbce6a0c3df
 msgid "`text-embedding-3-small`"
 msgstr "`text-embedding-3-small`"
 
-#: ../../getting-started/environment-variables.md:40
-#: d15262b094564728a0577ba12c026cc1
+#: ../../getting-started/environment-variables.md:48
+#: 0cb11b6e144741c48e004f65310e3b9e
 msgid "Name of the embedding model to use."
 msgstr "要使用的 Embedding 模型名称。"
 
-#: ../../getting-started/environment-variables.md:60
-#: 8c183ec1a0a8452db0c49362714270d9
+#: ../../getting-started/environment-variables.md:74
+#: 2cc0255c909343e8949e7266367f071f
 msgid "**Example** — Using a dedicated embedding service:"
 msgstr "**示例** —— 使用专用的 Embedding 服务："
 
-#: ../../getting-started/environment-variables.md:73
-#: 989382b280c842dd9f2574fe381dea8c
+#: ../../getting-started/environment-variables.md:87
+#: 384fb32fa2ad428ca1083049dbdbccd5
 msgid "GitHub Integration"
 msgstr "GitHub 集成"
 
-#: ../../getting-started/environment-variables.md:40
-#: ed34da31bb794aa9adc40f3ee1c925c6
+#: ../../getting-started/environment-variables.md:48
+#: 0553ee863c2e4f82b8aa3ee66de16fc9
 msgid "`GITHUB_TOKEN`"
 msgstr "`GITHUB_TOKEN`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 6b64b0af0ac647198caf4af6d6c65da3
+#: ../../getting-started/environment-variables.md:48
+#: 802f1df4faa34df4ac90a732efd52c1b
 msgid ""
 "GitHub Personal Access Token for cloning/pulling private repositories. "
 "Requires `repo` scope."
 msgstr "用于克隆/拉取私有仓库的 GitHub 个人访问令牌。需要 `repo` 权限范围。"
 
-#: ../../getting-started/environment-variables.md:79
-#: 7af3c905eaea43beb057d15f2a1efc8f
+#: ../../getting-started/environment-variables.md:93
+#: 52f6b4d43aa947c7a8ff14cf46e6e17c
 msgid "HuggingFace / ModelScope Datasets"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: b2db65446d974e9a81e93630332286c4
+#: ../../getting-started/environment-variables.md:48
+#: f4a66d6c03214368ac7fb02ec511f024
 #, fuzzy
 msgid "`HF_TOKEN`"
 msgstr "`WECHAT_TOKEN`"
 
-#: ../../getting-started/environment-variables.md:40
-#: dce93cb1213a421db6cfb2c464ae80bc
+#: ../../getting-started/environment-variables.md:48
+#: 73623385acf34d149468a4cd29b1f1ca
 msgid ""
 "HuggingFace access token. Avoids rate limits when downloading datasets. "
 "Also settable via the Settings UI."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 83b649b5080341a88b59a798fa84af9b
+#: ../../getting-started/environment-variables.md:48
+#: 01fc0e62054146e2b89f302201a3565b
 msgid "`HF_DATASETS_PATH`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: ae98c92752bb4b579addce04bf9061a8
+#: ../../getting-started/environment-variables.md:48
+#: 9eebd83b3ade40a4bf10e0e0e9570ec5
 msgid "`./data/hf-datasets`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 1d5d6c68bcc24d39a9e343d6db189b34
+#: ../../getting-started/environment-variables.md:48
+#: 32fb7122a7e24b8f88d1f24fd887ad9c
 msgid "Local directory for downloaded HuggingFace/ModelScope datasets."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:86
-#: 7fcf1a841c4942cb9359cc32283bfd47
+#: ../../getting-started/environment-variables.md:100
+#: e710bb52cc1f4864aae7106fe93b7f15
 msgid "SCP Hub (Scientific Skills)"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 2b62676312c346f48793b3408f24bdfe
+#: ../../getting-started/environment-variables.md:48
+#: 1470498e18484ba7a920762ffd6a1222
 #, fuzzy
 msgid "`SCP_HUB_API_KEY`"
 msgstr "`OPENAI_API_KEY`"
 
-#: ../../getting-started/environment-variables.md:40
-#: ac8df5f58458429abc1a99d2398a5fef
+#: ../../getting-started/environment-variables.md:48
+#: 1f7afc3961f248e79b299ac796116619
 msgid ""
 "API key for the Intern-Discovery Platform, enabling 206 built-in SCP "
 "scientific skills (drug discovery, protein analysis, genomics, chemistry,"
 " etc.)."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:92
-#: 7fed4de8db66445facfa7baf306bd04f
+#: ../../getting-started/environment-variables.md:106
+#: 5af1ec3f752c46369f343b2af524bfe9
 msgid "HTTP Proxy"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: c53af7466fb54a4489e100c8211530e5
+#: ../../getting-started/environment-variables.md:48
+#: 0719f6332f1944fb832043a0662f1b95
 msgid "`HTTP_PROXY`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: db9140101e2f4187a731dcb54c9a2a1e
+#: ../../getting-started/environment-variables.md:48
+#: 8c9b7246ecb341ebba5197afe7388c34
 msgid "HTTP proxy for all outbound `fetch()` calls (AI API, GitHub, etc.)."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 29ebcee5ba1d492c8fa8edc82a27b88d
+#: ../../getting-started/environment-variables.md:48
+#: 30355710203e40aa90baa07d9bde05d7
 msgid "`HTTPS_PROXY`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 852b3d39d73e4c8a8431b8df6d8b90a5
+#: ../../getting-started/environment-variables.md:48
+#: bd977e89aea7479b8a6795c09cea560e
 msgid "HTTPS proxy. Typically the same value as `HTTP_PROXY`."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 47059e3f58e24e518540f92c090357e4
+#: ../../getting-started/environment-variables.md:48
+#: f4b779658493492eb580bd808add2b7a
 msgid "`NO_PROXY`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 7fe276eca95d4292b25a52e7fe29b397
+#: ../../getting-started/environment-variables.md:48
+#: a936cb596bad435c95994c63aa45ee24
 msgid ""
 "Comma-separated hosts/CIDRs that bypass the proxy, e.g. "
 "`localhost,127.0.0.1,10.0.0.0/8`."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:100
-#: 5a0dfa2b131345ba867c723f3a25b17b
+#: ../../getting-started/environment-variables.md:114
+#: cd6a643d1daf4e748bc38ef02a33401c
 msgid "Feishu (Lark) Bot Configuration"
 msgstr "飞书机器人配置"
 
-#: ../../getting-started/environment-variables.md:40
-#: 164bdc194c5248d1ade7b5e4dd837a23
+#: ../../getting-started/environment-variables.md:48
+#: ef7da7c684494a1ca8a4574166965967
 msgid "`FEISHU_BOT_ENABLED`"
 msgstr "`FEISHU_BOT_ENABLED`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 4dc964ff49d241259fb84e86a2153260 55766a73caa74062bbacf72137f2f754
-msgid "`boolean`"
-msgstr "`boolean`"
-
-#: ../../getting-started/environment-variables.md:40
-#: 00bcd3a8af754252bea692a2f0123df3 db97a07bccdd4cfc938ede5c2fb2afee
-msgid "`false`"
-msgstr "`false`"
-
-#: ../../getting-started/environment-variables.md:40
-#: 79a07f3d700447e79f236e3216efc9b7
+#: ../../getting-started/environment-variables.md:48
+#: ef31328fb62b4c6095433e0bc24eb0dd
 msgid "Enable Feishu bot integration."
 msgstr "启用飞书机器人集成。"
 
-#: ../../getting-started/environment-variables.md:40
-#: d59e9559ad1541aa801a59229794a6a8
+#: ../../getting-started/environment-variables.md:48
+#: 453d003c2d9a417b9853bd600574e6ac
 msgid "`FEISHU_APP_ID`"
 msgstr "`FEISHU_APP_ID`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 84bea60b2c034a37be950d06227b0532
+#: ../../getting-started/environment-variables.md:48
+#: a80e344244bb4b83a180a8ac96884329
 msgid "Feishu application ID."
 msgstr "飞书应用 ID。"
 
-#: ../../getting-started/environment-variables.md:40
-#: c33c0020726d4f6eb6dbe088a3d9cfcd
+#: ../../getting-started/environment-variables.md:48
+#: cb1d06e1f84d4baa8ff62f0706235cb6
 msgid "`FEISHU_APP_SECRET`"
 msgstr "`FEISHU_APP_SECRET`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 4b74f47c70c14bc0b2c0af8448897df4
+#: ../../getting-started/environment-variables.md:48
+#: 7204f54b233442d182fc9348f16f2729
 msgid "Feishu application secret."
 msgstr "飞书应用密钥。"
 
-#: ../../getting-started/environment-variables.md:40
-#: 6ff9163570dd432b861067de0472736e
+#: ../../getting-started/environment-variables.md:48
+#: 3db54d1cedcc462e84cc4f21733b209f
 msgid "`FEISHU_VERIFICATION_TOKEN`"
 msgstr "`FEISHU_VERIFICATION_TOKEN`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 0fad2362078243b3834484287d6b0cb3
+#: ../../getting-started/environment-variables.md:48
+#: 37ab61fbc87d4d579634f4a372d797d5
 msgid "Token for verifying Feishu webhook requests."
 msgstr "用于验证飞书 Webhook 请求的令牌。"
 
-#: ../../getting-started/environment-variables.md:40
-#: 63f2daba19af41a696c95ce065981efe
+#: ../../getting-started/environment-variables.md:48
+#: 58f4921fcde6462d8859b3ec651abb8b
 msgid "`FEISHU_ENCRYPT_KEY`"
 msgstr "`FEISHU_ENCRYPT_KEY`"
 
-#: ../../getting-started/environment-variables.md:40
-#: d0133df4457e461182e387f7a74f2128
+#: ../../getting-started/environment-variables.md:48
+#: cdf8d8ad429c40359cf2e06c08cf8666
 msgid "Encryption key for Feishu event payloads."
 msgstr "飞书事件负载的加密密钥。"
 
-#: ../../getting-started/environment-variables.md:40
-#: 5d2f5a8aa7264759b5360058fd30d7c1
+#: ../../getting-started/environment-variables.md:48
+#: 4ceeac2457c34b0b8a5b1f674c98e262
 #, fuzzy
 msgid "`FEISHU_PUSH_SECRET`"
 msgstr "`FEISHU_APP_SECRET`"
 
-#: ../../getting-started/environment-variables.md:40
-#: b9d6e66f849d4d1fb8f5f6ac5134b608
+#: ../../getting-started/environment-variables.md:48
+#: fad445f5a28b4e59947123f00ae25c0a
 msgid ""
 "Shared secret for authenticating the push API (`/api/bot/feishu/push`). "
 "Required for web-to-Feishu message forwarding."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: e37dca92703d4435a95800f7cea359f4
+#: ../../getting-started/environment-variables.md:48
+#: 8041e899d32446ad94f73ac375ef4be8
 #, fuzzy
 msgid "`FEISHU_LOG_LEVEL`"
 msgstr "`FEISHU_BOT_ENABLED`"
 
-#: ../../getting-started/environment-variables.md:40
-#: a1290970e1064c74ab33d065c810eab9
+#: ../../getting-started/environment-variables.md:48
+#: 4a4fe52731764c1fad36fc3da47fde2a
 msgid "`info`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: c5c25ad9b18d4cb488b692ad565013f3
+#: ../../getting-started/environment-variables.md:48
+#: 283bcdd42e2242dcbf42f64bc1513747
 msgid "SDK log verbosity: `error`, `warn`, `info`, `debug`, `trace`."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:112
-#: 11026f794269413dada06662fc9ae5a6
+#: ../../getting-started/environment-variables.md:126
+#: 8aefad6390d14a59ace865d84b532969
 msgid "WeChat Enterprise Bot Configuration"
 msgstr "企业微信机器人配置"
 
-#: ../../getting-started/environment-variables.md:40
-#: 9a4adde21328402da163a5bcbf6d64e1
+#: ../../getting-started/environment-variables.md:48
+#: 3a52055ccf98401787f3ed7ab637fc51
 msgid "`WECHAT_BOT_ENABLED`"
 msgstr "`WECHAT_BOT_ENABLED`"
 
-#: ../../getting-started/environment-variables.md:40
-#: fb1da9e23c9147ad9eaed5dff26f97e1
+#: ../../getting-started/environment-variables.md:48
+#: 48c9e2b2390245b3bfe8411d12285980
 msgid "Enable WeChat Enterprise bot integration."
 msgstr "启用企业微信机器人集成。"
 
-#: ../../getting-started/environment-variables.md:40
-#: e1fcdd674178472b8bcca28f4d99c23e
+#: ../../getting-started/environment-variables.md:48
+#: a947b768e0f84d53988db435231713b9
 msgid "`WECHAT_CORP_ID`"
 msgstr "`WECHAT_CORP_ID`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 4cb56a11f5df4bce8559992e8bc6dd77
+#: ../../getting-started/environment-variables.md:48
+#: b00ac5764d5a4761ab0f69f8d14775fe
 msgid "WeChat Enterprise corporation ID."
 msgstr "企业微信企业 ID。"
 
-#: ../../getting-started/environment-variables.md:40
-#: 2c2e72c508514f1e8b4a4292c20dfcf0
+#: ../../getting-started/environment-variables.md:48
+#: 0a14c249d98f414e9a21e2b95ee81e8a
 msgid "`WECHAT_CORP_SECRET`"
 msgstr "`WECHAT_CORP_SECRET`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 0916ac38337248f3a8f5b7c3e7d2eedc
+#: ../../getting-started/environment-variables.md:48
+#: bd0b791401bc4e2a86621bde10adc6aa
 msgid "WeChat Enterprise application secret."
 msgstr "企业微信应用密钥。"
 
-#: ../../getting-started/environment-variables.md:40
-#: b3ab2d0b842c4181be6b968a4e50980f
+#: ../../getting-started/environment-variables.md:48
+#: a0d8150f842a4c479a8d6860284a5038
 msgid "`WECHAT_TOKEN`"
 msgstr "`WECHAT_TOKEN`"
 
-#: ../../getting-started/environment-variables.md:40
-#: f694e6251c3249eabd857e2dbc83528f
+#: ../../getting-started/environment-variables.md:48
+#: d063fb388a22472994be123b8fed257e
 msgid "Token for verifying WeChat webhook requests."
 msgstr "用于验证企业微信 Webhook 请求的令牌。"
 
-#: ../../getting-started/environment-variables.md:40
-#: bf7ae0a0fae0422bb33ffd33d0bd6176
+#: ../../getting-started/environment-variables.md:48
+#: ca16b25abb3c46138fed2eb4768e1591
 msgid "`WECHAT_ENCODING_AES_KEY`"
 msgstr "`WECHAT_ENCODING_AES_KEY`"
 
-#: ../../getting-started/environment-variables.md:40
-#: b9161bc78a854c0a8b4ae026e556510b
+#: ../../getting-started/environment-variables.md:48
+#: 3ff9ca480d914ed39d4b333886e721e2
 msgid "AES key for encrypting/decrypting WeChat messages."
 msgstr "用于加密/解密企业微信消息的 AES 密钥。"
 
-#: ../../getting-started/environment-variables.md:40
-#: b544f27d97ea49d4b474eae9ccc94537
+#: ../../getting-started/environment-variables.md:48
+#: 804f2e45624c431aa8ab5bffe3e08ef2
 msgid "`WECHAT_AGENT_ID`"
 msgstr "`WECHAT_AGENT_ID`"
 
-#: ../../getting-started/environment-variables.md:40
-#: 7fab2c906ebc41c6adba1130365321f3
+#: ../../getting-started/environment-variables.md:48
+#: 47292c1a2bc44c01b41447c77b00cbb9
 msgid "WeChat Enterprise agent (application) ID."
 msgstr "企业微信应用（代理）ID。"
 
-#: ../../getting-started/environment-variables.md:123
-#: 32fdb37a10ac44cca70b8cd6f79e3598
+#: ../../getting-started/environment-variables.md:137
+#: 4d334a1f05ec4971a6ec461e8b29698d
 msgid "Kubernetes / Cluster Integration"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 7fb7fe7e8886408d810a45e9437270c5
+#: ../../getting-started/environment-variables.md:48
+#: a277358bfcd84ab1985d03e5c04ea1d5
 msgid "`KUBECONFIG_PATH`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: c2a0027c8e284fbeb7d25ac26eb3e9ac
+#: ../../getting-started/environment-variables.md:48
+#: 4f3687ed502b43db819a81d378f35c6b
 msgid "Path to the kubeconfig file used by generic Kubernetes Job tools."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 9af9728250044808b7a1de6be859f139
+#: ../../getting-started/environment-variables.md:48
+#: f3d58a3ac386406ca4eb294ff7ca2b99
 msgid "`K8S_CONTEXT`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 97ed26b626f94b4aa1fca5d7b84a8ea7
+#: ../../getting-started/environment-variables.md:48
+#: db41c0948d6b4a6abbf7666296db785d
 msgid "Kubeconfig context used by the generic Job profile fallback."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 02afb1b36599428ebad7e050ab6199a2 39169c95752a4c64b0b93d89942cb874
+#: ../../getting-started/environment-variables.md:48
+#: 76572412c823431baebcbf89cda3c37c ddfa068f729d4bceaf1fa2e116aa6d9a
 msgid "`K8S_DEFAULT_NAMESPACE`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: ce021e6950114d4dbf566fcf41a1e16e e22840e4ebaa4609907e25fb9264a723
+#: ../../getting-started/environment-variables.md:48
+#: 073d9f15db3b4bd5ac4bd0e6b56037b3 3c63899b9acb4e63b3e64aef137abf39
 #, fuzzy
 msgid "`default`"
 msgstr "默认值"
 
-#: ../../getting-started/environment-variables.md:40
-#: d1976949f1d545058201e1b152aab9a9
+#: ../../getting-started/environment-variables.md:48
+#: 3c42b52661f64da38f34b0508e275333
 msgid "Default namespace for the generic Job profile fallback."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 2285f00d0d2445399c7ef17e4edf374f
+#: ../../getting-started/environment-variables.md:48
+#: 2a8452018d9249be8c53bb31e0e55aa5
 msgid "`K8S_ALLOWED_NAMESPACES`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: db9a9515a939476a973f0e0e65bf63a2
+#: ../../getting-started/environment-variables.md:48
+#: a729dfb5b03c4f8fb674511610a0ffc5
 msgid "Comma-separated namespace allow-list for generic Job tools."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 5ad8a3c92c3c4558a371edb79d9c517a
+#: ../../getting-started/environment-variables.md:48
+#: f88657c9c36a462ca0b1cc876745c5a6
 msgid "`K8S_JOB_DEFAULT_IMAGE`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 492f3b738bef497698fab11bfa9c5353
+#: ../../getting-started/environment-variables.md:48
+#: 5af5947d701944b98f5d9fb161262dcf
 msgid "Default image for the generic Job profile fallback."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 7610b20aab194be5bcd93470fd72d279
+#: ../../getting-started/environment-variables.md:48
+#: d2e2fed3df214a10a7f6e330db16213f
 msgid "`K8S_JOB_PROFILE_ID`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: af1376837dc945659ed97d899ec7011c
+#: ../../getting-started/environment-variables.md:48
+#: e044b524f1fc429b9245916b7596c959
 msgid "Profile id used when env vars create the fallback profile."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: c59e042821074a51948d49ae2f7debd7
+#: ../../getting-started/environment-variables.md:48
+#: 8811a57709684849abb042c2d3c1818d
 msgid "`K8S_JOB_PROFILES_FILE`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 9dc7cafe6cf24d27adbf4c5b1c0a2540
+#: ../../getting-started/environment-variables.md:48
+#: 9000deb8d67349c8b1a361431879e6cd
 msgid ""
 "Path to a private local JSON file containing generic clusters and Job "
 "profiles."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: 3c9b165731634e90b3ba8e9633b5dd68
+#: ../../getting-started/environment-variables.md:48
+#: ed265b200c1e4c848d82f1bb58116220
 msgid "`K8S_JOB_PROFILES_JSON`"
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:40
-#: b9ae2152b7724204b8db5c22e87f2137
+#: ../../getting-started/environment-variables.md:48
+#: bf0505b0b55b4ca1a002505aa8fe121e
 msgid ""
 "Inline JSON config for generic clusters and Job profiles. Use a file for "
 "private local values."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:136
-#: 228947223bef4e85ba296cf0d67b5155
+#: ../../getting-started/environment-variables.md:150
+#: 10c748a4712647c4a2daea967c10b43e
 msgid "Security Notes"
 msgstr "安全说明"
 
-#: ../../getting-started/environment-variables.md:138
-#: c72cfa9cbd4141dc8ccdfd0486360624
+#: ../../getting-started/environment-variables.md:152
+#: 7378d3ef000b405182f095060c93c1c1
 msgid ""
 "All API keys and tokens are used **server-side only** and are never "
 "exposed to the browser client."
 msgstr "所有 API 密钥和令牌仅在**服务器端**使用，永远不会暴露给浏览器客户端。"
 
-#: ../../getting-started/environment-variables.md:139
-#: 9c41263f60124992a642f0e8bdb50729
+#: ../../getting-started/environment-variables.md:153
+#: fa4aedce417a4be78ff5075941b8524c
 msgid ""
 "`AUTH_MODE=disabled` removes application-level authentication. Anyone who"
 " can reach the service gets admin-level access, so use it only behind "
 "trusted local access or another access-control layer."
 msgstr ""
 
-#: ../../getting-started/environment-variables.md:140
-#: d6342290d659462c8e1b50d0e9b06a8b
+#: ../../getting-started/environment-variables.md:154
+#: db34d827851a4dde8f14008b86c4e6a2
+msgid ""
+"`AUTH_SINGLE_ADMIN=true` fails closed until the administrator bootstrap "
+"has completed. Do not expose registration before that step."
+msgstr ""
+
+#: ../../getting-started/environment-variables.md:155
+#: 149d73fa1afc411ba1f8b699ed00cb59
+msgid ""
+"`AUTH_COOKIE_SECURE=false` only permits cookies over plain HTTP. It does "
+"not encrypt login credentials, session cookies, or application traffic; "
+"use HTTPS and restore the secure-cookie default as soon as possible."
+msgstr ""
+
+#: ../../getting-started/environment-variables.md:156
+#: bfe912040a144a3c8ef392fc2eec6176
 msgid ""
 "Store your `.env.local` file securely and do not commit it to version "
 "control."
 msgstr "请安全地存储您的 `.env.local` 文件，不要将其提交到版本控制系统。"
 
-#: ../../getting-started/environment-variables.md:141
-#: 8145ee3fddb74b7aaea78f6c9118fcc0
+#: ../../getting-started/environment-variables.md:157
+#: 89a207b02b7340529b71046511850c61
 msgid ""
 "The `.gitignore` file already excludes `.env*` files (except "
 "`.env.example`)."

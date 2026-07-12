@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 16:29+0800\n"
+"POT-Creation-Date: 2026-07-12 20:34+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,127 +19,173 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../getting-started/deployment.md:1 6c86607ae0374970b6dac317b686a4d7
+#: ../../getting-started/deployment.md:1 33c8f887d33740e2be28c64b1e5d6e5b
 msgid "Deployment"
 msgstr "部署"
 
-#: ../../getting-started/deployment.md:3 6b1aa714640643a083ca823755ac98c3
+#: ../../getting-started/deployment.md:3 5b6e3a4789a44c3bac03a89c2953ed35
 msgid "This guide covers deploying InnoClaw in production environments."
 msgstr "本指南介绍如何在生产环境中部署 InnoClaw。"
 
-#: ../../getting-started/deployment.md:5 fd748d37dc12430a89f30c203125666a
+#: ../../getting-started/deployment.md:5 8967dd6c98fb40428cbe51799321fb67
 msgid "Deployment Architecture"
 msgstr "部署架构"
 
-#: ../../getting-started/deployment.md:43 9fdac7f8005546a4b064edee0b6b485b
+#: ../../getting-started/deployment.md:43 b4ae452ebdac45929da2c23b86c45cbf
 msgid "Option 1: Direct Deployment (Recommended for Self-Hosting)"
 msgstr "方案 1：直接部署（推荐用于自托管）"
 
-#: ../../getting-started/deployment.md:69 db8b3fdb45d04281bffc11c462132f2d
+#: ../../getting-started/deployment.md:69 0afcc48a857f44248ae2550ab758d358
 msgid ""
 "`npm run start:no-auth` sets `AUTH_MODE=disabled`. Anyone who can reach "
 "the service gets admin-level access, so use it only behind trusted "
 "network access or another access-control layer."
 msgstr ""
 
-#: ../../getting-started/deployment.md:71 e796f4e9ba6b4581acbd85fa8d5664b8
+#: ../../getting-started/deployment.md:71 4c282561cf574f4d9bd30e2e85d710ef
 msgid "Option 2: PM2 Process Manager"
 msgstr "方案 2：PM2 进程管理器"
 
-#: ../../getting-started/deployment.md:73 5138932f06794aa9938148ceddf70ffb
+#: ../../getting-started/deployment.md:73 c266400680e34edabb73d1e9f20fbaee
 msgid ""
 "[PM2](https://pm2.keymetrics.io/) keeps your application running in the "
 "background and auto-restarts on crashes."
 msgstr "[PM2](https://pm2.keymetrics.io/) 可以让您的应用程序在后台运行，并在崩溃时自动重启。"
 
-#: ../../getting-started/deployment.md:97 164e9b8703d24223a9a4d5f235c14ea9
+#: ../../getting-started/deployment.md:97 19abea0f30ca4135b40b6639c742abdf
 msgid "Option 3: Docker Deployment"
 msgstr "方案 3：Docker 部署"
 
-#: ../../getting-started/deployment.md:99 08052070199a4ff6ab9d059b7a874850
+#: ../../getting-started/deployment.md:99 a46c7088cde54d16865bd6956a64e906
 msgid "Dockerfile"
 msgstr "Dockerfile"
 
-#: ../../getting-started/deployment.md:101 0643c0125e774e5f96fe92e78172801d
+#: ../../getting-started/deployment.md:101 7cfe15f643614d22a2f56f0fdda49732
 msgid "Create a `Dockerfile` in the project root:"
 msgstr "在项目根目录创建 `Dockerfile`："
 
-#: ../../getting-started/deployment.md:125 317d92468af144c0939d9e2219d2f96f
+#: ../../getting-started/deployment.md:125 96d7dd8156314028a23a7ecbcc4306e2
 msgid "Docker Compose"
 msgstr "Docker Compose"
 
-#: ../../getting-started/deployment.md:127 f56d17be24444125800e84e4bfb19110
+#: ../../getting-started/deployment.md:127 188bd196ce5b47e1b131a4edc8621a98
 msgid "Create a `docker-compose.yml`:"
 msgstr "创建 `docker-compose.yml`："
 
-#: ../../getting-started/deployment.md:158 eded50ee5d084b97912be684577f9ecb
+#: ../../getting-started/deployment.md:162 199f7383a73648f6a42b0ce424e023bb
 msgid "Start the container:"
 msgstr "启动容器："
 
-#: ../../getting-started/deployment.md:164 54c5bd1dbc394249b98c41df97e52111
+#: ../../getting-started/deployment.md:168 5997c0e3a8464858b7a807d366b59bf2
+msgid "Single-Administrator Rollout"
+msgstr ""
+
+#: ../../getting-started/deployment.md:170 53ddcf5c5c5e4d069ed89288deb32247
+msgid ""
+"With `AUTH_SINGLE_ADMIN=true`, application startup remains fail-closed "
+"for public registration until the sole administrator has been "
+"bootstrapped. For the repository Docker image, generate a password and "
+"pass it only through standard input:"
+msgstr ""
+
+#: ../../getting-started/deployment.md:183 faf0cf2fef7448709f654b15f86b6c49
+msgid ""
+"Deliver the password through a secure channel, then remove the temporary "
+"file. Public registration creates ordinary users only. Each user receives"
+" private workspace roots below `<configured-root>/users/<immutable-user-"
+"id>`; only the administrator can list and manage all workspace records."
+msgstr ""
+
+#: ../../getting-started/deployment.md:188 874ef22251ef41b5b62da3ab291c748d
+msgid ""
+"Before upgrading an existing installation, create an online SQLite backup"
+" and back up the environment and reverse-proxy configuration. The "
+"migration preflight canonicalizes existing workspace paths and stops if "
+"two rows collide; it never deletes or silently reassigns a workspace."
+msgstr ""
+
+#: ../../getting-started/deployment.md:193 a8a22cd923004d9ab85b8e0bf171f809
+msgid ""
+"If the first rollout must use plain HTTP, explicitly set "
+"`AUTH_COOKIE_SECURE=false`. This only makes the cookie usable over HTTP "
+"and does not protect credentials or session traffic. Keep any existing "
+"outer access gate until administrator login, ordinary-user registration, "
+"two-user workspace isolation, and model inference have passed. Then move "
+"to HTTPS and restore `AUTH_COOKIE_SECURE=true`."
+msgstr ""
+
+#: ../../getting-started/deployment.md:200 8da3d35290da457cb4f86064d329dfc7
 msgid "Reverse Proxy Configuration"
 msgstr "反向代理配置"
 
-#: ../../getting-started/deployment.md:166 2cd29bcf50b54e9f96583c43f1ba05fa
+#: ../../getting-started/deployment.md:202 94856e7c72a345eebd4260aa36da8b93
 msgid "Nginx"
 msgstr "Nginx"
 
-#: ../../getting-started/deployment.md:186 e8d4a869d9864b37a05da71c95691acd
+#: ../../getting-started/deployment.md:246 cd0482c5d23f48ec8923f70f3e2be335
 msgid "Caddy"
 msgstr "Caddy"
 
-#: ../../getting-started/deployment.md:194 b344fcbdeaa544499d47b1879f3c5e43
+#: ../../getting-started/deployment.md:254 a1f438199c754f67b9c602d6838f455a
 msgid "Data Backup"
 msgstr "数据备份"
 
-#: ../../getting-started/deployment.md:7 bba6d0173c9d4b7f8cb6b51a634b3526
+#: ../../getting-started/deployment.md:7 b4fdaa8deae34eaa934cd3a784b9cf61
 msgid "Data"
 msgstr "数据"
 
-#: ../../getting-started/deployment.md:7 93cb425a9e6e4398b87b06a0600ccfb3
+#: ../../getting-started/deployment.md:7 fdd64df4d7e64a579ce0501bc1d04260
 msgid "Location"
 msgstr "位置"
 
-#: ../../getting-started/deployment.md:7 4760c680b4914d43a84dd2408a88d569
+#: ../../getting-started/deployment.md:7 d54d09419bc14efb8334752c47b3ba01
 msgid "Description"
 msgstr "描述"
 
-#: ../../getting-started/deployment.md:7 316281a08bca43ac9440d4043340e38e
+#: ../../getting-started/deployment.md:7 05b5c9b29c4045d1a4469bea3a78da16
 msgid "SQLite Database"
 msgstr "SQLite 数据库"
 
-#: ../../getting-started/deployment.md:7 e392bfdfa09844b3b82badf50c4daf6a
+#: ../../getting-started/deployment.md:7 6928d133ac944c3b8e1cb21f401782b1
 msgid "`./data/innoclaw.db`"
 msgstr "`./data/innoclaw.db`"
 
-#: ../../getting-started/deployment.md:7 4665508aa0414cb28788b91cff234733
+#: ../../getting-started/deployment.md:7 edb547d0378841e5976999a26fba468d
 msgid "Workspaces, source index, chat history, notes, settings"
 msgstr "工作空间、源索引、对话历史、笔记、设置"
 
-#: ../../getting-started/deployment.md:7 d8234e094fab483380c2edd0cbe8ccf7
+#: ../../getting-started/deployment.md:7 22a33b54d4834f659a0c769b3d4e7bf0
 msgid "Workspace Files"
 msgstr "工作空间文件"
 
-#: ../../getting-started/deployment.md:7 bd1467fdbd7647929d8147727938820a
+#: ../../getting-started/deployment.md:7 ec4bfc0571c84ed28659c8adae0ac7d6
 msgid "`WORKSPACE_ROOTS` directories"
 msgstr "`WORKSPACE_ROOTS` 目录"
 
-#: ../../getting-started/deployment.md:7 b50e03b186a54b17a7bf484305964c08
+#: ../../getting-started/deployment.md:7 2a65b25c473644ec9bdd592a3e15a7da
 msgid "User's actual files (outside the project directory)"
 msgstr "用户的实际文件（项目目录之外）"
 
-#: ../../getting-started/deployment.md:7 ba8b4350d7604841a57b0db03cfbe993
+#: ../../getting-started/deployment.md:7 0b8cda1911b34242acedcb965da212fa
 msgid "Configuration"
 msgstr "配置"
 
-#: ../../getting-started/deployment.md:7 23a345821baa464ab18d7279e2547799
+#: ../../getting-started/deployment.md:7 20f7f73a3f68413e90bc80b68fb78e5d
 msgid "`.env.local`"
 msgstr "`.env.local`"
 
-#: ../../getting-started/deployment.md:7 93e1300c5dc24e35bf51a1d248dfbc0b
+#: ../../getting-started/deployment.md:7 6a88c1f4a8c741b39b7fc9d8e376e672
 msgid "Environment variables and API keys"
 msgstr "环境变量和 API 密钥"
 
-#: ../../getting-started/deployment.md:202 86c137013f12498298c1ff57f5e5c6d7
+#: ../../getting-started/deployment.md:262 a34dfeea61cb4620b8f46122c3385d75
 msgid "To back up, save the `./data/` directory and `.env.local` file."
 msgstr "备份时，请保存 `./data/` 目录和 `.env.local` 文件。"
+
+#: ../../getting-started/deployment.md:264 67454c340be748d19ab5490d2ee7ef91
+msgid ""
+"Do not copy a live SQLite database file directly while it may be using "
+"WAL. Use SQLite's online backup API (the Docker guide includes a "
+"command), verify the backup with `PRAGMA integrity_check`, and retain the"
+" previous application image until the post-deployment checks pass."
+msgstr ""
