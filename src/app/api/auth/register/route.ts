@@ -12,7 +12,9 @@ import {
   normalizeUserEmail,
 } from "@/lib/auth/server";
 import { isAuthDisabled } from "@/lib/auth/mode";
+import { getSingleAdminState } from "@/lib/auth/admin-policy";
 import { hashPassword } from "@/lib/auth/password";
+import { isSingleAdminMode } from "@/lib/auth/policy";
 import { jsonError } from "@/lib/api-errors";
 
 export async function POST(request: NextRequest) {
@@ -25,6 +27,11 @@ export async function POST(request: NextRequest) {
     const email = typeof body.email === "string" ? body.email.trim() : "";
     const password = typeof body.password === "string" ? body.password : "";
     const name = typeof body.name === "string" ? body.name.trim() : "";
+    const singleAdmin = isSingleAdminMode();
+
+    if (singleAdmin && Object.prototype.hasOwnProperty.call(body, "role")) {
+      return jsonError("Role cannot be selected during registration", 400);
+    }
 
     if (!email || !password) {
       return jsonError("Missing email or password", 400);
@@ -32,6 +39,13 @@ export async function POST(request: NextRequest) {
 
     if (password.length < 8) {
       return jsonError("Password must be at least 8 characters", 400);
+    }
+
+    if (singleAdmin) {
+      const state = await getSingleAdminState();
+      if (state.status !== "ready") {
+        return jsonError("Administrator setup is incomplete", 503);
+      }
     }
 
     const existing = await findUserByEmail(email);
@@ -44,11 +58,11 @@ export async function POST(request: NextRequest) {
       email: normalizeUserEmail(email),
       name: name || undefined,
       passwordHash: hashPassword(password),
-      role: userCount === 0 ? "admin" : "user",
+      role: singleAdmin ? "user" : userCount === 0 ? "admin" : "user",
       isActive: true,
     });
 
-    if (userCount === 0) {
+    if (!singleAdmin && userCount === 0) {
       await claimExistingDataForFirstUser(created.id);
     }
 
