@@ -11,8 +11,10 @@ import {
   workspaces,
 } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/server";
+import { getSingleAdminState } from "@/lib/auth/admin-policy";
 import { isAuthDisabled } from "@/lib/auth/mode";
 import { hashPassword } from "@/lib/auth/password";
+import { isSingleAdminMode } from "@/lib/auth/policy";
 import { jsonError } from "@/lib/api-errors";
 
 const AUTH_DISABLED_USER_MANAGEMENT_ERROR = "User management is disabled when authentication is disabled";
@@ -60,6 +62,21 @@ async function assertNotLastActiveAdmin(targetUserId: string): Promise<NextRespo
   return null;
 }
 
+async function assertReadySingleAdministrator(
+  actorUserId: string,
+): Promise<NextResponse | null> {
+  if (!isSingleAdminMode()) {
+    return null;
+  }
+
+  const state = await getSingleAdminState();
+  if (state.status !== "ready" || state.adminId !== actorUserId) {
+    return jsonError("Single-administrator policy is not ready", 503);
+  }
+
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   const authDisabledResponse = rejectUserManagementWhenAuthDisabled();
   if (authDisabledResponse) {
@@ -71,8 +88,16 @@ export async function GET(request: NextRequest) {
     return auth;
   }
 
+  const policyError = await assertReadySingleAdministrator(auth.user.id);
+  if (policyError) {
+    return policyError;
+  }
+
   const rows = await db.select().from(users);
-  return NextResponse.json({ users: rows.map(publicUserRow) });
+  return NextResponse.json({
+    users: rows.map(publicUserRow),
+    singleAdmin: isSingleAdminMode(),
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -86,12 +111,25 @@ export async function POST(request: NextRequest) {
     return auth;
   }
 
+  const policyError = await assertReadySingleAdministrator(auth.user.id);
+  if (policyError) {
+    return policyError;
+  }
+
   try {
     const body = await request.json();
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const name = typeof body.name === "string" ? body.name.trim() : "";
     const password = typeof body.password === "string" ? body.password : "";
-    const role = body.role === "admin" ? "admin" : "user";
+    const singleAdmin = isSingleAdminMode();
+    if (singleAdmin && body.role !== undefined && body.role !== "user") {
+      return jsonError("Single-administrator mode only permits user accounts", 400);
+    }
+    const role = singleAdmin
+      ? "user"
+      : body.role === "admin"
+        ? "admin"
+        : "user";
 
     if (!email || !password) {
       return jsonError("Missing email or password", 400);
@@ -131,13 +169,26 @@ export async function PATCH(request: NextRequest) {
     return auth;
   }
 
+  const policyError = await assertReadySingleAdministrator(auth.user.id);
+  if (policyError) {
+    return policyError;
+  }
+
   const body = await request.json();
   const userId = typeof body.userId === "string" ? body.userId : "";
   if (!userId) {
     return jsonError("Missing userId", 400);
   }
 
-  if ((body.role && body.role !== "admin") || body.isActive === false) {
+  const singleAdmin = isSingleAdminMode();
+  if (singleAdmin && Object.prototype.hasOwnProperty.call(body, "role")) {
+    return jsonError("Roles cannot be changed in single-administrator mode", 400);
+  }
+  if (singleAdmin && userId === auth.user.id && body.isActive === false) {
+    return jsonError("Cannot disable the sole administrator", 400);
+  }
+
+  if (!singleAdmin && ((body.role && body.role !== "admin") || body.isActive === false)) {
     const lastAdminError = await assertNotLastActiveAdmin(userId);
     if (lastAdminError) {
       return lastAdminError;
@@ -151,7 +202,7 @@ export async function PATCH(request: NextRequest) {
   if (typeof body.name === "string") {
     updates.name = body.name.trim() || "User";
   }
-  if (body.role === "admin" || body.role === "user") {
+  if (!singleAdmin && (body.role === "admin" || body.role === "user")) {
     updates.role = body.role;
   }
   if (typeof body.isActive === "boolean") {
@@ -187,6 +238,11 @@ export async function DELETE(request: NextRequest) {
     return auth;
   }
 
+  const policyError = await assertReadySingleAdministrator(auth.user.id);
+  if (policyError) {
+    return policyError;
+  }
+
   const body = await request.json();
   const userId = typeof body.userId === "string" ? body.userId : "";
   if (!userId) {
@@ -196,9 +252,11 @@ export async function DELETE(request: NextRequest) {
     return jsonError("Administrators cannot delete their own account", 400);
   }
 
-  const lastAdminError = await assertNotLastActiveAdmin(userId);
-  if (lastAdminError) {
-    return lastAdminError;
+  if (!isSingleAdminMode()) {
+    const lastAdminError = await assertNotLastActiveAdmin(userId);
+    if (lastAdminError) {
+      return lastAdminError;
+    }
   }
 
   const transferToUserId =

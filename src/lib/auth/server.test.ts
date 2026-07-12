@@ -28,9 +28,9 @@ afterEach(() => {
     process.env.AUTH_COOKIE_SECURE = originalAuthCookieSecure;
   }
   if (originalNodeEnv === undefined) {
-    delete process.env.NODE_ENV;
+    Reflect.deleteProperty(process.env, "NODE_ENV");
   } else {
-    process.env.NODE_ENV = originalNodeEnv;
+    Reflect.set(process.env, "NODE_ENV", originalNodeEnv);
   }
 });
 
@@ -40,7 +40,7 @@ function setCookieHeaders(response: NextResponse): string[] {
 
 describe("server auth cookie policy", () => {
   it("omits Secure from every session cookie for the explicit HTTP override", () => {
-    process.env.NODE_ENV = "production";
+    Reflect.set(process.env, "NODE_ENV", "production");
     process.env.AUTH_COOKIE_SECURE = "false";
     const expiresAt = "2030-01-01T00:00:00.000Z";
 
@@ -63,7 +63,7 @@ describe("server auth cookie policy", () => {
   });
 
   it("marks every session cookie Secure when explicitly enabled", () => {
-    process.env.NODE_ENV = "development";
+    Reflect.set(process.env, "NODE_ENV", "development");
     process.env.AUTH_COOKIE_SECURE = "true";
     const expiresAt = "2030-01-01T00:00:00.000Z";
 

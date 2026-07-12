@@ -46,28 +46,28 @@ describe("auth policy environment", () => {
   });
 
   it("defaults production cookies to secure", () => {
-    process.env.NODE_ENV = "production";
+    Reflect.set(process.env, "NODE_ENV", "production");
     delete process.env.AUTH_COOKIE_SECURE;
 
     expect(shouldUseSecureAuthCookies()).toBe(true);
   });
 
   it("defaults development cookies to insecure", () => {
-    process.env.NODE_ENV = "development";
+    Reflect.set(process.env, "NODE_ENV", "development");
     delete process.env.AUTH_COOKIE_SECURE;
 
     expect(shouldUseSecureAuthCookies()).toBe(false);
   });
 
   it("allows the explicit temporary HTTP override", () => {
-    process.env.NODE_ENV = "production";
+    Reflect.set(process.env, "NODE_ENV", "production");
     process.env.AUTH_COOKIE_SECURE = "false";
 
     expect(shouldUseSecureAuthCookies()).toBe(false);
   });
 
   it("allows an explicit secure cookie in development", () => {
-    process.env.NODE_ENV = "development";
+    Reflect.set(process.env, "NODE_ENV", "development");
     process.env.AUTH_COOKIE_SECURE = " TRUE ";
 
     expect(shouldUseSecureAuthCookies()).toBe(true);

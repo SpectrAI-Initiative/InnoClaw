@@ -14,7 +14,10 @@ import { fetcher } from "@/lib/fetcher";
 import type { PublicUser } from "@/types/auth";
 
 export function UserManagementClient() {
-  const { data, mutate, isLoading } = useSWR<{ users: PublicUser[] }>(
+  const { data, mutate, isLoading } = useSWR<{
+    users: PublicUser[];
+    singleAdmin: boolean;
+  }>(
     "/api/admin/users",
     fetcher,
   );
@@ -23,6 +26,7 @@ export function UserManagementClient() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"admin" | "user">("user");
   const [error, setError] = useState("");
+  const singleAdmin = data?.singleAdmin ?? false;
 
   async function request(path: string, init: RequestInit) {
     const res = await fetch(path, {
@@ -46,7 +50,11 @@ export function UserManagementClient() {
     try {
       await request("/api/admin/users", {
         method: "POST",
-        body: JSON.stringify({ email, name, password, role }),
+        body: JSON.stringify(
+          singleAdmin
+            ? { email, name, password }
+            : { email, name, password, role },
+        ),
       });
       setEmail("");
       setName("");
@@ -109,10 +117,19 @@ export function UserManagementClient() {
         <Card>
           <CardHeader>
             <CardTitle>Create user</CardTitle>
-            <CardDescription>Admins can create accounts in addition to open registration.</CardDescription>
+            <CardDescription>
+              {singleAdmin
+                ? "Create an ordinary user account. The administrator role is fixed."
+                : "Admins can create accounts in addition to open registration."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="grid gap-4 md:grid-cols-[1fr_1fr_1fr_140px_auto]" onSubmit={createUser}>
+            <form
+              className={singleAdmin
+                ? "grid gap-4 md:grid-cols-[1fr_1fr_1fr_auto]"
+                : "grid gap-4 md:grid-cols-[1fr_1fr_1fr_140px_auto]"}
+              onSubmit={createUser}
+            >
               <div className="space-y-2">
                 <Label htmlFor="new-email">Email</Label>
                 <Input id="new-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
@@ -125,18 +142,20 @@ export function UserManagementClient() {
                 <Label htmlFor="new-password">Password</Label>
                 <Input id="new-password" type="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
-              <div className="space-y-2">
-                <Label>Role</Label>
-                <Select value={role} onValueChange={(value) => setRole(value as "admin" | "user")}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {!singleAdmin && (
+                <div className="space-y-2">
+                  <Label>Role</Label>
+                  <Select value={role} onValueChange={(value) => setRole(value as "admin" | "user")}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="flex items-end">
                 <Button type="submit">Create</Button>
               </div>
@@ -171,19 +190,29 @@ export function UserManagementClient() {
                         <div className="text-muted-foreground">{user.email}</div>
                       </td>
                       <td className="py-3 pr-4">
-                        <Select value={user.role} onValueChange={(value) => updateUser(user.id, { role: value })}>
-                          <SelectTrigger className="w-28">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="user">User</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        {singleAdmin ? (
+                          <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                            {user.role === "admin" ? "Admin" : "User"}
+                          </Badge>
+                        ) : (
+                          <Select value={user.role} onValueChange={(value) => updateUser(user.id, { role: value })}>
+                            <SelectTrigger className="w-28">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
                       </td>
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-2">
-                          <Switch checked={user.isActive} onCheckedChange={(checked) => updateUser(user.id, { isActive: checked })} />
+                          <Switch
+                            checked={user.isActive}
+                            disabled={singleAdmin && user.role === "admin"}
+                            onCheckedChange={(checked) => updateUser(user.id, { isActive: checked })}
+                          />
                           <Badge variant={user.isActive ? "secondary" : "outline"}>
                             {user.isActive ? "Active" : "Disabled"}
                           </Badge>
@@ -197,7 +226,12 @@ export function UserManagementClient() {
                           <Button variant="outline" size="sm" onClick={() => resetPassword(user.id)}>
                             Reset password
                           </Button>
-                          <Button variant="destructive" size="sm" onClick={() => deleteUser(user.id)}>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={singleAdmin && user.role === "admin"}
+                            onClick={() => deleteUser(user.id)}
+                          >
                             Delete
                           </Button>
                         </div>
