@@ -1,7 +1,13 @@
 import fsp from "fs/promises";
 import path from "path";
 import type { FileEntry } from "@/types";
+import { isAuthDisabled } from "@/lib/auth/mode";
 import { updateEnvLocal } from "@/lib/env-file";
+import {
+  canonicalizePath,
+  isPathWithinRoot,
+  resolvePathWithinRoots,
+} from "./canonical-path";
 
 function normalizePath(p: string): string {
   return p.replace(/\\/g, "/").toLowerCase();
@@ -36,28 +42,20 @@ export function getWorkspaceRoots(): string[] {
  */
 export function validatePath(targetPath: string): string {
   const roots = getWorkspaceRoots();
-  const resolved = path.resolve(targetPath);
 
-  // Reject null bytes
-  if (resolved.includes("\0")) {
-    throw new Error("Invalid path: contains null bytes");
-  }
-
-  // When no roots are configured, allow any valid path
+  // Preserve unrestricted paths only for the explicitly trusted no-auth mode.
   if (roots.length === 0) {
+    if (!isAuthDisabled()) {
+      throw new Error("No workspace roots configured");
+    }
+    const resolved = path.resolve(targetPath);
+    if (resolved.includes("\0")) {
+      throw new Error("Invalid path: contains null bytes");
+    }
     return resolved;
   }
 
-  // Check the path is under one of the allowed roots
-  const isAllowed = roots.some((root) => isPathUnderRoot(resolved, root));
-
-  if (!isAllowed) {
-    throw new Error(
-      `Access denied: path "${resolved}" is not within allowed workspace roots`
-    );
-  }
-
-  return resolved;
+  return resolvePathWithinRoots(targetPath, roots);
 }
 
 /**
@@ -98,7 +96,14 @@ export function isWithinWorkspace(
   filePath: string,
   workspacePath: string
 ): boolean {
-  return isPathUnderRoot(path.resolve(filePath), path.resolve(workspacePath));
+  try {
+    return isPathWithinRoot(
+      canonicalizePath(path.resolve(filePath)),
+      canonicalizePath(path.resolve(workspacePath)),
+    );
+  } catch {
+    return false;
+  }
 }
 
 /**
