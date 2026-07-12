@@ -51,21 +51,28 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 <!-- whats-new-start -->
 
+#### 2026-07-03
+- **Generischer Kubernetes Job Scheduler**: Ermoeglichen Sie KI-Agenten, containerisierte Workloads auf Kubernetes-Clustern mit konfigurierbaren Jobprofilen zu definieren, zu validieren und auszufuehren
+
+
 #### 2026-06-26
 - **CLI-Laufzeitunterstuetzung**: Interaktive Kommandozeilenschnittstelle mit REPL, Batch-Operationen und Agentintegration fuer terminalbasierte Workflows
-
-
-#### 2026-06-12
-- **Deaktivierter Authentifizierungsmodus**: Fuehren Sie die Anwendung ohne Authentifizierung fuer Einzelnutzer- oder Entwicklungsbereitstellungen aus
 
 
 
 <details>
 <summary>Aeltere Updates anzeigen</summary>
 
+#### 2026-06-12
+- **Deaktivierter Authentifizierungsmodus**: Fuehren Sie die Anwendung ohne Authentifizierung fuer Einzelnutzer- oder Entwicklungsbereitstellungen aus
+
+
+
+
 #### 2026-05-12
 - **Lokale Benutzerauthentifizierung**: Integrierte Kontoregistrierung, Anmelden, Abmelden und persistente Sitzungen hinzugefuegt.
 - **Admin-Benutzerverwaltung**: Eine Admin-Benutzerseite hinzugefuegt, um Konten zu erstellen und Rollen, Zugriffe, Passwoerter und Eigentum zu verwalten.
+
 
 
 
@@ -79,10 +86,12 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-04-12
 - **Docker-Deployment-Support**: InnoClaw mit Docker und docker-compose selbst hosten, mit Anleitungen fuer Setup, Volumes und Upgrades
 - **200+ integrierte Skills**: Deutliche Erweiterung sofort nutzbarer wissenschaftlicher Skills fuer Bioinformatik, Chemie, Genomik und Physik
 - **Skill-Erstellungsframework**: Neues Meta-Skill zum Erstellen, Bewerten, Benchmarken und Validieren eigener Skills
+
 
 
 
@@ -100,9 +109,11 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-04-01
 - **Text-zu-CAD-Faehigkeit**: Neue Agenten-Faehigkeit, die natuerlichsprachige Beschreibungen mit CadQuery in 3D-CAD-Modelle (STL/STEP) umwandelt, mit automatischer Einrichtung der Umgebung
 - **Arbeitsbereich-Bildauswahl**: Neues Dialog-UI im Agenten-Panel zum Durchsuchen und Auswaehlen von Bildern aus dem Arbeitsbereich zum Anhaengen an Konversationen
+
 
 
 
@@ -124,22 +135,11 @@ Es richtet sich an Forschende, Entwickler, Labore und Self-Hoster, die mehr als 
 
 
 
+
 #### 2026-03-26
 - **Dynamische Modellerkennung**: Das Agenten-Panel ruft verfuegbare Modelle automatisch von jedem konfigurierten KI-Anbieter ab und fuegt sie mit der eingebauten Liste zusammen
 - **Modellspezifisches Base-URL-Routing**: Chinesische KI-Anbieter (shlab, qwen, moonshot, deepseek, minimax, zhipu) unterstuetzen `<PROVIDER>_<MODEL>_BASE_URL`-Umgebungsvariablen fuer flexibles Endpunkt-Routing
 - **Laufzeit-Umschalter fuer Tool-Aufruf**: Tool-Unterstuetzung kann per Anbieter ueber `<PROVIDER>_TOOLS_ENABLED=true/false` ohne Codeaenderungen aktiviert oder deaktiviert werden
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-24
-- **Multimodaler LLM-Support**: Papierrecherche und Agenten-Workflows unterstuetzen jetzt Standard-LLMs und multimodale LLMs (mLLM), kontextbezogen auswaehlbar in den Einstellungen und der Modellauswahl.
 
 
 

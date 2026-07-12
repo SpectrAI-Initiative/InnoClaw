@@ -51,21 +51,28 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 <!-- whats-new-start -->
 
+#### 2026-07-03
+- **Planificateur generique de taches Kubernetes**: Permettre aux agents IA de definir, valider et executer des charges de travail conteneurisees sur des clusters Kubernetes avec des profils de taches configurables
+
+
 #### 2026-06-26
 - **Support CLI Runtime**: Interface de ligne de commande interactive avec REPL, operations par lot et integration d'agent pour les workflows bases sur terminal
-
-
-#### 2026-06-12
-- **Mode d'authentification desactive**: Executez l'application sans authentification pour les deploiements mono-utilisateur ou de developpement
 
 
 
 <details>
 <summary>Afficher les mises a jour precedentes</summary>
 
+#### 2026-06-12
+- **Mode d'authentification desactive**: Executez l'application sans authentification pour les deploiements mono-utilisateur ou de developpement
+
+
+
+
 #### 2026-05-12
 - **Authentification utilisateur locale**: Ajout de l'inscription integree, de la connexion, de la deconnexion et de la prise en charge des sessions persistantes.
 - **Gestion des utilisateurs admin**: Ajout d'une page admin pour creer des comptes et gerer les roles, les acces, les mots de passe et la propriete.
+
 
 
 
@@ -79,10 +86,12 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-04-12
 - **Prise en charge du deploiement Docker**: Hebergez InnoClaw vous-meme avec Docker et docker-compose, avec des guides pour l installation, les volumes et les mises a niveau
 - **200+ competences integrees**: Forte extension des competences scientifiques pretes a l emploi en bioinformatique, chimie, genomique et physique
 - **Cadre de creation de competences**: Nouvelle meta-competence pour creer, evaluer, benchmarker et valider des competences personnalisees
+
 
 
 
@@ -100,9 +109,11 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-04-01
 - **Competence Text-to-CAD**: Nouvelle competence d'agent qui convertit des descriptions en langage naturel en modeles CAD 3D (STL/STEP) via CadQuery, avec configuration automatique de l'environnement
 - **Selecteur d'images de l'espace de travail**: Nouvelle interface de dialogue dans le panneau agent pour parcourir et selectionner des images de l'espace de travail a joindre aux conversations
+
 
 
 
@@ -124,22 +135,11 @@ Il s'adresse aux chercheurs, developpeurs, laboratoires et adeptes du self-hosti
 
 
 
+
 #### 2026-03-26
 - **Decouverte dynamique des modeles**: Le panneau agent recupere automatiquement les modeles disponibles de chaque fournisseur IA configure et les fusionne avec la liste integree
 - **Routage Base URL par modele**: Les fournisseurs IA chinois (shlab, qwen, moonshot, deepseek, minimax, zhipu) supportent des variables d'environnement `<PROVIDER>_<MODEL>_BASE_URL` par modele pour un routage flexible
 - **Activation des outils a la volee**: Le support des outils peut etre active ou desactive par fournisseur via `<PROVIDER>_TOOLS_ENABLED=true/false` sans modification du code
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-24
-- **Support LLM multimodal**: Les flux de recherche de documents et d'agents prennent desormais en charge les LLM standard et multimodaux (mLLM), selectionnables par contexte dans les parametres et le selecteur de modele.
 
 
 
