@@ -23,7 +23,7 @@ server_responding() {
     status=$(printf '%s\n' "$meta" | sed -n '1p')
     content_type=$(printf '%s\n' "$meta" | sed -n '2p')
 
-    case "${content_type,,}" in
+    case "$(printf '%s' "$content_type" | tr '[:upper:]' '[:lower:]')" in
         *application/json*) ;;
         *)
             rm -f "$body_file"
