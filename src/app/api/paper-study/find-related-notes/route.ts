@@ -4,6 +4,9 @@ import { getConfiguredModel, getModelFromOverride, isAIAvailable } from "@/lib/a
 import { buildFindRelatedNotesPrompt } from "@/lib/ai/prompts";
 import { listDirectory, readFile } from "@/lib/files/filesystem";
 import path from "path";
+import { requireWorkspaceProvisioningPathsAccess } from "@/lib/auth/ownership";
+import { resolveProvisioningPath } from "@/lib/auth/workspace-roots";
+import type { AuthContext } from "@/lib/auth/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,6 +26,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const access = await requireWorkspaceProvisioningPathsAccess(req, [
+      notesDir,
+    ]);
+    if (access instanceof NextResponse) {
+      return access;
+    }
+    const canonicalNotesDir = access.canonicalPaths[0];
+
     if (!isAIAvailable()) {
       return NextResponse.json(
         { error: "AI is not configured." },
@@ -31,7 +42,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Recursively collect all .md files from notesDir
-    const allFiles = await collectMdFiles(notesDir, notesDir);
+    const allFiles = await collectMdFiles(
+      canonicalNotesDir,
+      canonicalNotesDir,
+      access.auth,
+    );
 
     if (allFiles.length === 0) {
       return NextResponse.json({ related: [] });
@@ -111,15 +126,21 @@ export async function POST(req: NextRequest) {
 
 async function collectMdFiles(
   dir: string,
-  rootDir: string
+  rootDir: string,
+  auth: AuthContext,
 ): Promise<Array<{ fullPath: string; relativeName: string }>> {
   const results: Array<{ fullPath: string; relativeName: string }> = [];
   try {
     const entries = await listDirectory(dir);
     for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
+      let fullPath: string;
+      try {
+        fullPath = resolveProvisioningPath(auth, path.join(dir, entry.name));
+      } catch {
+        continue;
+      }
       if (entry.type === "directory") {
-        const subFiles = await collectMdFiles(fullPath, rootDir);
+        const subFiles = await collectMdFiles(fullPath, rootDir, auth);
         results.push(...subFiles);
       } else if (entry.type === "file" && entry.name.endsWith(".md")) {
         const relativeName = path.relative(rootDir, fullPath);

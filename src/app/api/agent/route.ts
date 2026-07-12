@@ -11,6 +11,7 @@ import { and, eq, or, isNull } from "drizzle-orm";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 import { ensureProjectDefaultSkills } from "@/lib/db/default-skills";
 import { requirePathAccess, requireSkillAccess, requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { canUseHighRiskExecution } from "@/lib/auth/privileges";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,6 +31,10 @@ export async function POST(req: NextRequest) {
     if (pathAccess instanceof Response) {
       return pathAccess;
     }
+    const toolAccess = {
+      workspaceRoot: workspaceAccess.workspace.folderPath,
+      allowHighRisk: canUseHighRiskExecution(workspaceAccess.auth),
+    };
 
     // Validate request-level model override fields before use
     if (llmProvider !== undefined && llmModel !== undefined) {
@@ -97,15 +102,36 @@ export async function POST(req: NextRequest) {
       }
 
       systemPrompt = buildSkillSystemPrompt(skill, cwd, paramValues || {});
-      tools = await createAgentTools(cwd, skill.allowedTools, workspaceId, sessionCreatedAt);
+      tools = await createAgentTools(
+        cwd,
+        skill.allowedTools,
+        workspaceId,
+        sessionCreatedAt,
+        false,
+        toolAccess,
+      );
     } else if (mode === "plan") {
       // Plan mode: read-only tools, focus on analysis and planning
       systemPrompt = buildPlanSystemPrompt(cwd);
-      tools = await createAgentTools(cwd, ["readFile", "listDirectory", "grep"], workspaceId, sessionCreatedAt);
+      tools = await createAgentTools(
+        cwd,
+        ["readFile", "listDirectory", "grep"],
+        workspaceId,
+        sessionCreatedAt,
+        false,
+        toolAccess,
+      );
     } else if (mode === "ask") {
       // Ask mode: read-only tools, can read files but never write or execute
       systemPrompt = buildAskSystemPrompt(cwd);
-      tools = await createAgentTools(cwd, ["readFile", "listDirectory", "grep"], workspaceId, sessionCreatedAt);
+      tools = await createAgentTools(
+        cwd,
+        ["readFile", "listDirectory", "grep"],
+        workspaceId,
+        sessionCreatedAt,
+        false,
+        toolAccess,
+      );
     } else {
       // Agent modes ("agent" (default), "long-agent", or legacy "agent"): load skill catalog
       let skillCatalog: { slug: string; name: string; description: string | null }[] | undefined;
@@ -142,7 +168,14 @@ export async function POST(req: NextRequest) {
         // Agent (default): standard agent mode
         systemPrompt = buildAgentSystemPrompt(cwd, skillCatalog, { noTools: !useTools });
       }
-      tools = await createAgentTools(cwd, undefined, workspaceId, sessionCreatedAt, mode === "long-agent");
+      tools = await createAgentTools(
+        cwd,
+        undefined,
+        workspaceId,
+        sessionCreatedAt,
+        mode === "long-agent",
+        toolAccess,
+      );
     }
 
     // Sanitize UI messages: remove tool invocation parts with missing input

@@ -1,6 +1,13 @@
 import type { K8sConfig } from "@/lib/cluster/config";
 import type { K8sJobConfig } from "@/lib/cluster/job-profiles";
 
+export interface AgentToolAccess {
+  /** Canonical database workspace root that all file tools must remain inside. */
+  workspaceRoot?: string;
+  /** Whether shell, cluster, MCP, and remote-execution tools may be registered. */
+  allowHighRisk?: boolean;
+}
+
 /** Shared context passed to each tool factory. */
 export interface ToolContext {
   /** Validated absolute path to the workspace root. */

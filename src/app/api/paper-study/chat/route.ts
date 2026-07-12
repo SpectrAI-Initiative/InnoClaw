@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { streamText, convertToModelMessages, UIMessage } from "ai";
 import { getConfiguredModelWithProvider, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { modelSupportsVision } from "@/lib/ai/models";
@@ -6,6 +6,7 @@ import { runtimeProviderSupportsTools } from "@/lib/ai/runtime-capabilities";
 import { buildPaperChatPrompt, buildPaperChatWithNotesPrompt } from "@/lib/ai/prompts";
 import { createPaperChatTools } from "@/lib/ai/tools/paper-chat-tools";
 import { buildPaperChatContextMessage, buildPaperModelContext } from "../paper-model-context";
+import { requireLocalReferenceAccess } from "@/lib/auth/local-reference";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,6 +15,18 @@ export async function POST(req: NextRequest) {
     if (!article || !article.title) {
       return new Response("Missing article data", { status: 400 });
     }
+
+    const referenceAccess = await requireLocalReferenceAccess(
+      req,
+      typeof article.url === "string" ? article.url : "",
+    );
+    if (referenceAccess instanceof NextResponse) {
+      return referenceAccess;
+    }
+    const authorizedArticle = {
+      ...article,
+      url: referenceAccess.canonicalReference,
+    };
 
     if (!isAIAvailable()) {
       return new Response(
@@ -39,11 +52,11 @@ export async function POST(req: NextRequest) {
 
     const supportsVision = modelSupportsVision(providerId, modelId);
     const articleData = {
-      title: article.title,
-      authors: Array.isArray(article.authors) ? article.authors : [],
-      publishedDate: article.publishedDate || "",
-      source: article.source || "",
-      abstract: article.abstract || "",
+      title: authorizedArticle.title,
+      authors: Array.isArray(authorizedArticle.authors) ? authorizedArticle.authors : [],
+      publishedDate: authorizedArticle.publishedDate || "",
+      source: authorizedArticle.source || "",
+      abstract: authorizedArticle.abstract || "",
     };
 
     // Use enhanced prompt if related notes are available
@@ -56,9 +69,9 @@ export async function POST(req: NextRequest) {
       uiMessages as UIMessage[]
     );
 
-    const paperContext = await buildPaperModelContext(article, supportsVision);
+    const paperContext = await buildPaperModelContext(authorizedArticle, supportsVision);
     const paperContextMessage = buildPaperChatContextMessage(
-      { title: article.title },
+      { title: authorizedArticle.title },
       paperContext,
       supportsVision,
     );
@@ -69,10 +82,10 @@ export async function POST(req: NextRequest) {
 
     // Create paper tools for fetching full text and figures
     const paperTools = createPaperChatTools({
-      id: article.id || "",
-      url: article.url || "",
-      pdfUrl: article.pdfUrl,
-      source: article.source || "",
+      id: authorizedArticle.id || "",
+      url: authorizedArticle.url || "",
+      pdfUrl: authorizedArticle.pdfUrl,
+      source: authorizedArticle.source || "",
     });
 
     const useTools = runtimeProviderSupportsTools(providerId);

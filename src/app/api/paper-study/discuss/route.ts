@@ -1,9 +1,10 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getConfiguredModelWithProvider, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { modelSupportsVision } from "@/lib/ai/models";
 import { runFullPaperDiscussion } from "@/lib/paper-discussion/orchestrator";
 import { buildPaperModelContext } from "../paper-model-context";
 import type { PaperDiscussionSharedContext, DiscussionTurn } from "@/lib/paper-discussion/types";
+import { requireLocalReferenceAccess } from "@/lib/auth/local-reference";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,6 +17,18 @@ export async function POST(req: NextRequest) {
     if (mode !== "quick" && mode !== "full") {
       return new Response("Invalid mode, must be 'quick' or 'full'", { status: 400 });
     }
+
+    const referenceAccess = await requireLocalReferenceAccess(
+      req,
+      typeof article.url === "string" ? article.url : "",
+    );
+    if (referenceAccess instanceof NextResponse) {
+      return referenceAccess;
+    }
+    const authorizedArticle = {
+      ...article,
+      url: referenceAccess.canonicalReference,
+    };
 
     if (!isAIAvailable()) {
       return new Response(
@@ -42,19 +55,19 @@ export async function POST(req: NextRequest) {
 
     const context: PaperDiscussionSharedContext = {
       article: {
-        id: article.id || "",
-        title: article.title,
-        authors: Array.isArray(article.authors) ? article.authors : [],
-        publishedDate: article.publishedDate || "",
-        source: article.source || "",
-        abstract: article.abstract || "",
+        id: authorizedArticle.id || "",
+        title: authorizedArticle.title,
+        authors: Array.isArray(authorizedArticle.authors) ? authorizedArticle.authors : [],
+        publishedDate: authorizedArticle.publishedDate || "",
+        source: authorizedArticle.source || "",
+        abstract: authorizedArticle.abstract || "",
       },
       supportsVision: visionCapable,
       locale,
       mode,
     };
 
-    const paperContext = await buildPaperModelContext(article, visionCapable);
+    const paperContext = await buildPaperModelContext(authorizedArticle, visionCapable);
     context.paperContent = paperContext.paperContent;
     context.retrievedEvidence = paperContext.retrievedEvidence;
 

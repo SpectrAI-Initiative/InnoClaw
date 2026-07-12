@@ -9,6 +9,8 @@ import {
   renameFile,
 } from "@/lib/files/filesystem";
 import path from "path";
+import { requireWorkspaceProvisioningPathsAccess } from "@/lib/auth/ownership";
+import { resolveProvisioningPath } from "@/lib/auth/workspace-roots";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,6 +23,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const access = await requireWorkspaceProvisioningPathsAccess(req, [
+      notesDir,
+    ]);
+    if (access instanceof NextResponse) {
+      return access;
+    }
+    const canonicalNotesDir = access.canonicalPaths[0];
+
     if (!isAIAvailable()) {
       return NextResponse.json(
         { error: "AI is not configured. Please set an API key in .env.local." },
@@ -29,7 +39,7 @@ export async function POST(req: NextRequest) {
     }
 
     // List all .md files in the notes directory (top-level only)
-    const entries = await listDirectory(notesDir);
+    const entries = await listDirectory(canonicalNotesDir);
     const mdFiles = entries.filter(
       (e) => e.type === "file" && e.name.endsWith(".md")
     );
@@ -42,7 +52,11 @@ export async function POST(req: NextRequest) {
     const fileData = await Promise.all(
       mdFiles.map(async (f) => {
         try {
-          const content = await readFile(path.join(notesDir, f.name));
+          const filePath = resolveProvisioningPath(
+            access.auth,
+            path.join(canonicalNotesDir, f.name),
+          );
+          const content = await readFile(filePath);
           return {
             name: f.name,
             excerpt: content.slice(0, 500),
@@ -96,17 +110,27 @@ export async function POST(req: NextRequest) {
 
     // Execute: create subdirectories and move files
     for (const cat of categories) {
-      const subDir = path.join(notesDir, cat.name);
+      let subDir: string;
       try {
+        subDir = resolveProvisioningPath(
+          access.auth,
+          path.join(canonicalNotesDir, cat.name),
+        );
         await createDirectory(subDir);
       } catch {
-        // Directory may already exist
+        continue;
       }
 
       for (const fileName of cat.files) {
-        const src = path.join(notesDir, fileName);
-        const dest = path.join(subDir, fileName);
         try {
+          const src = resolveProvisioningPath(
+            access.auth,
+            path.join(canonicalNotesDir, fileName),
+          );
+          const dest = resolveProvisioningPath(
+            access.auth,
+            path.join(subDir, fileName),
+          );
           await renameFile(src, dest);
         } catch (err) {
           console.error(`Failed to move ${fileName} to ${cat.name}:`, err);

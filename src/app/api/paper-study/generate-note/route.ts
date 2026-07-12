@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { streamText } from "ai";
@@ -13,6 +13,9 @@ import {
   assembleNote,
   postProcessNoteImages,
 } from "@/lib/paper-study/note-generator";
+import { requireLocalReferenceAccess } from "@/lib/auth/local-reference";
+import { requireWorkspaceProvisioningPathsAccess } from "@/lib/auth/ownership";
+import { resolveProvisioningPath } from "@/lib/auth/workspace-roots";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,19 +29,49 @@ export async function POST(req: NextRequest) {
       return new Response("Missing notesDir", { status: 400 });
     }
 
-    // Basic path traversal / sandboxing guard for notesDir
     if (typeof notesDir !== "string") {
       return new Response("Invalid notesDir", { status: 400 });
     }
-    // Reject absolute paths to avoid writing outside the intended workspace
-    if (path.isAbsolute(notesDir)) {
-      return new Response("Invalid notesDir", { status: 400 });
+
+    const notesAccess = await requireWorkspaceProvisioningPathsAccess(req, [
+      notesDir,
+    ]);
+    if (notesAccess instanceof NextResponse) {
+      return notesAccess;
     }
-    // Reject any usage of parent directory segments (e.g., "../")
-    const unsafeSegments = notesDir.split(/[/\\]+/).some(segment => segment === "..");
-    if (unsafeSegments) {
-      return new Response("Invalid notesDir", { status: 400 });
+    const canonicalNotesDir = notesAccess.canonicalPaths[0];
+
+    const referenceAccess = await requireLocalReferenceAccess(
+      req,
+      typeof article.url === "string" ? article.url : "",
+    );
+    if (referenceAccess instanceof NextResponse) {
+      return referenceAccess;
     }
+    const authorizedArticle = {
+      ...article,
+      url: referenceAccess.canonicalReference,
+    };
+    const methodName = extractMethodName(authorizedArticle.title);
+    const noteBaseName = methodName
+      .replace(/[/\\:*?"<>|]/g, "")
+      .replace(/\s+/g, "-")
+      .slice(0, 60);
+    const fileName = generateNoteFilename(methodName, authorizedArticle.title);
+    let filePath: string;
+    try {
+      resolveProvisioningPath(
+        notesAccess.auth,
+        path.join(canonicalNotesDir, "assets", noteBaseName),
+      );
+      filePath = resolveProvisioningPath(
+        notesAccess.auth,
+        path.join(canonicalNotesDir, fileName),
+      );
+    } catch {
+      return new Response("Path access denied", { status: 403 });
+    }
+
     if (!isAIAvailable()) {
       return new Response(
         "AI is not configured. Please set one of OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or SHLAB_API_KEY in .env.local.",
@@ -52,14 +85,14 @@ export async function POST(req: NextRequest) {
 
     // Step 1: Extract full paper content and figures
     const articleRef = {
-      id: article.id || "",
-      url: article.url || "",
-      pdfUrl: article.pdfUrl,
-      source: article.source || "",
+      id: authorizedArticle.id || "",
+      url: authorizedArticle.url || "",
+      pdfUrl: authorizedArticle.pdfUrl,
+      source: authorizedArticle.source || "",
     };
     const paperContent = await extractPaperFullContent(articleRef, 30_000);
 
-    const fullText = paperContent.fullText || article.abstract || "";
+    const fullText = paperContent.fullText || authorizedArticle.abstract || "";
     if (!fullText || fullText.length < 100) {
       return new Response(
         JSON.stringify({ error: "no_full_text" }),
@@ -67,17 +100,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 2: Extract method name
-    const methodName = extractMethodName(article.title);
-    const noteBaseName = methodName
-      .replace(/[/\\:*?"<>|]/g, "")
-      .replace(/\s+/g, "-")
-      .slice(0, 60);
-
     // Step 3: Download figures to local assets
     const localFigures = await downloadFiguresToLocal(
       paperContent.figures || [],
-      notesDir,
+      canonicalNotesDir,
       noteBaseName
     );
 
@@ -91,11 +117,11 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = buildStructuredNotePrompt(
       {
-        title: article.title,
-        authors: Array.isArray(article.authors) ? article.authors : [],
-        publishedDate: article.publishedDate || "",
-        source: article.source || "",
-        abstract: article.abstract || "",
+        title: authorizedArticle.title,
+        authors: Array.isArray(authorizedArticle.authors) ? authorizedArticle.authors : [],
+        publishedDate: authorizedArticle.publishedDate || "",
+        source: authorizedArticle.source || "",
+        abstract: authorizedArticle.abstract || "",
       },
       fullText,
       figuresForPrompt,
@@ -105,12 +131,12 @@ export async function POST(req: NextRequest) {
     const hasLocalFigs = localFigures.some((f) => f.localRef);
     const frontmatter = buildNoteFrontmatter(
       {
-        id: article.id || "",
-        title: article.title,
-        authors: Array.isArray(article.authors) ? article.authors : [],
-        publishedDate: article.publishedDate || "",
-        url: article.url || "",
-        source: article.source || "",
+        id: authorizedArticle.id || "",
+        title: authorizedArticle.title,
+        authors: Array.isArray(authorizedArticle.authors) ? authorizedArticle.authors : [],
+        publishedDate: authorizedArticle.publishedDate || "",
+        url: authorizedArticle.url || "",
+        source: authorizedArticle.source || "",
       },
       methodName,
       hasLocalFigs,
@@ -118,8 +144,6 @@ export async function POST(req: NextRequest) {
 
     // Step 6: Stream the note generation
     const encoder = new TextEncoder();
-    const fileName = generateNoteFilename(methodName, article.title);
-    const filePath = path.join(notesDir, fileName);
 
     const result = streamText({
       model,

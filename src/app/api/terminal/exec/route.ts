@@ -5,6 +5,7 @@ import { z } from "zod";
 import { validatePath } from "@/lib/files/filesystem";
 import { buildSafeExecEnv, resolveHome } from "@/lib/env";
 import { requirePathAccess } from "@/lib/auth/ownership";
+import { canUseHighRiskExecution } from "@/lib/auth/privileges";
 
 const EXEC_TIMEOUT = 30_000; // 30 seconds
 const MAX_COMMAND_LENGTH = 4096;
@@ -32,6 +33,12 @@ export async function POST(req: NextRequest) {
     const access = await requirePathAccess(req, cwd);
     if (access instanceof NextResponse) {
       return access;
+    }
+    if (!canUseHighRiskExecution(access.auth)) {
+      return NextResponse.json(
+        { error: "Terminal access requires administrator privileges" },
+        { status: 403 },
+      );
     }
 
     // Validate the working directory is within allowed workspace roots
@@ -63,10 +70,15 @@ export async function POST(req: NextRequest) {
       const newCwd = path.resolve(validatedCwd, target);
 
       try {
-        validatePath(newCwd);
+        const destinationAccess = await requirePathAccess(req, newCwd);
+        if (destinationAccess instanceof NextResponse) {
+          return destinationAccess;
+        }
+        const canonicalNewCwd =
+          destinationAccess.canonicalPaths[0] ?? validatePath(newCwd);
         // Verify the directory exists
         const fs = await import("fs/promises");
-        const stat = await fs.stat(newCwd);
+        const stat = await fs.stat(canonicalNewCwd);
         if (!stat.isDirectory()) {
           return NextResponse.json({
             stdout: "",
@@ -79,7 +91,7 @@ export async function POST(req: NextRequest) {
           stdout: "",
           stderr: "",
           exitCode: 0,
-          cwd: newCwd,
+          cwd: canonicalNewCwd,
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : "No such directory";

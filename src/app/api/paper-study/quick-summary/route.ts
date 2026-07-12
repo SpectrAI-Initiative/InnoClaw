@@ -1,8 +1,9 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { streamText } from "ai";
 import { getConfiguredModel, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { buildPaperQuickSummaryPrompt } from "@/lib/ai/paper-prompts";
 import { extractPaperFullContent } from "../extract-paper-text";
+import { requireLocalReferenceAccess } from "@/lib/auth/local-reference";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +12,18 @@ export async function POST(req: NextRequest) {
     if (!article || !article.title) {
       return new Response("Missing article data", { status: 400 });
     }
+
+    const referenceAccess = await requireLocalReferenceAccess(
+      req,
+      typeof article.url === "string" ? article.url : "",
+    );
+    if (referenceAccess instanceof NextResponse) {
+      return referenceAccess;
+    }
+    const authorizedArticle = {
+      ...article,
+      url: referenceAccess.canonicalReference,
+    };
 
     if (!isAIAvailable()) {
       return new Response(
@@ -25,10 +38,10 @@ export async function POST(req: NextRequest) {
 
     // Extract full paper text and figures
     const articleRef = {
-      id: article.id || "",
-      url: article.url || "",
-      pdfUrl: article.pdfUrl,
-      source: article.source || "",
+      id: authorizedArticle.id || "",
+      url: authorizedArticle.url || "",
+      pdfUrl: authorizedArticle.pdfUrl,
+      source: authorizedArticle.source || "",
     };
     const paperContent = await extractPaperFullContent(articleRef, 30_000);
 
@@ -45,13 +58,13 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = buildPaperQuickSummaryPrompt(
       {
-        title: article.title,
-        authors: Array.isArray(article.authors) ? article.authors : [],
-        publishedDate: article.publishedDate || "",
-        source: article.source || "",
-        abstract: article.abstract || "",
+        title: authorizedArticle.title,
+        authors: Array.isArray(authorizedArticle.authors) ? authorizedArticle.authors : [],
+        publishedDate: authorizedArticle.publishedDate || "",
+        source: authorizedArticle.source || "",
+        abstract: authorizedArticle.abstract || "",
       },
-      paperContent.fullText || article.abstract || "",
+      paperContent.fullText || authorizedArticle.abstract || "",
       figures,
     );
 

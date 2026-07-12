@@ -1,5 +1,6 @@
 import path from "path";
 import { validatePath } from "@/lib/files/filesystem";
+import { resolvePathWithinRoots } from "@/lib/files/canonical-path";
 import { baseExecEnv } from "@/lib/utils/shell";
 import { getK8sConfig } from "@/lib/cluster/config";
 import { getK8sJobConfig } from "@/lib/cluster/job-profiles";
@@ -12,9 +13,9 @@ import { createSkillTools } from "./skill-tools";
 import { createMcpTools } from "./mcp-tools";
 import { createResearchExecTools } from "./research-exec-tools";
 import { formatTimestampForDir } from "./research-history";
-import type { ToolContext } from "./types";
+import type { AgentToolAccess, ToolContext } from "./types";
 
-export type { ToolContext } from "./types";
+export type { AgentToolAccess, ToolContext } from "./types";
 
 export async function createAgentTools(
   workspaceCwd: string,
@@ -22,8 +23,15 @@ export async function createAgentTools(
   workspaceId?: string | null,
   sessionCreatedAt?: string | null,
   isLongAgent?: boolean,
+  access?: AgentToolAccess,
 ) {
-  const validatedCwd = validatePath(workspaceCwd);
+  const globallyValidatedCwd = validatePath(workspaceCwd);
+  const workspaceBoundary = access?.workspaceRoot
+    ? validatePath(access.workspaceRoot)
+    : globallyValidatedCwd;
+  const validatedCwd = resolvePathWithinRoots(globallyValidatedCwd, [
+    workspaceBoundary,
+  ]);
 
   // Load K8s config from DB (primary) with env fallback
   const k8sConfig = await getK8sConfig();
@@ -44,7 +52,7 @@ export async function createAgentTools(
     const resolved = path.isAbsolute(filePath)
       ? filePath
       : path.join(validatedCwd, filePath);
-    return validatePath(resolved);
+    return resolvePathWithinRoots(resolved, [workspaceBoundary]);
   }
 
   // Compute research history directory from session timestamp
@@ -64,15 +72,25 @@ export async function createAgentTools(
     isLongAgent,
   };
 
-  const allTools = {
-    ...createShellTools(ctx),
+  const shellTools = createShellTools(ctx);
+  const safeTools = {
     ...createFileTools(ctx),
-    ...createK8sTools(ctx),
-    ...createK8sJobTools(ctx),
+    grep: shellTools.grep,
     ...createSearchTools(),
     ...createSkillTools(workspaceId),
-    ...createMcpTools(ctx),
-    ...createResearchExecTools(ctx),
+  };
+  const highRiskTools = access?.allowHighRisk === false
+    ? {}
+    : {
+        bash: shellTools.bash,
+        ...createK8sTools(ctx),
+        ...createK8sJobTools(ctx),
+        ...createMcpTools(ctx),
+        ...createResearchExecTools(ctx),
+      };
+  const allTools = {
+    ...safeTools,
+    ...highRiskTools,
   };
 
   // Filter tools if allowedTools is specified
