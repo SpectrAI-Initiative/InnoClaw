@@ -1,16 +1,39 @@
-import { afterEach, describe, expect, it } from "vitest";
+import fs from "fs";
+import os from "os";
+import path from "path";
+import { NextRequest, NextResponse } from "next/server";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const serverMocks = vi.hoisted(() => ({
+  requireAuth: vi.fn(),
+}));
+
+vi.mock("./server", async () => {
+  const actual = await vi.importActual<typeof import("./server")>("./server");
+  return {
+    ...actual,
+    requireAuth: serverMocks.requireAuth,
+  };
+});
+
 import { db } from "@/lib/db";
-import { hfDatasets, workspaces } from "@/lib/db/schema";
+import { hfDatasets, scheduledTasks, skills, workspaces } from "@/lib/db/schema";
 import { ANONYMOUS_AUTH_CONTEXT } from "./mode";
 import {
   canAccessOwner,
   getOwnerUserIdForWrite,
   ownedDatasetFilter,
+  ownedScheduledTaskFilter,
+  ownedSkillFilter,
   ownedWorkspaceFilter,
+  requireWorkspacePathsAccess,
+  requireWorkspaceProvisioningPathsAccess,
 } from "./ownership";
 import type { AuthContext } from "./server";
 
 const originalAuthMode = process.env.AUTH_MODE;
+const originalWorkspaceRoots = process.env.WORKSPACE_ROOTS;
+const temporaryDirectories: string[] = [];
 
 const localAuth: AuthContext = {
   user: {
@@ -30,11 +53,43 @@ const localAuth: AuthContext = {
   token: "session-token",
 };
 
+const adminAuth: AuthContext = {
+  ...localAuth,
+  user: {
+    ...localAuth.user,
+    id: "admin-id",
+    email: "admin@example.com",
+    role: "admin",
+  },
+};
+
+function temporaryRoot(): string {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "innoclaw-ownership-"));
+  temporaryDirectories.push(root);
+  return root;
+}
+
+function mockWorkspaceRows(rows: Array<{ folderPath: string }>): void {
+  const where = vi.fn().mockResolvedValue(rows);
+  const from = vi.fn().mockReturnValue({ where });
+  vi.spyOn(db, "select").mockReturnValue({ from } as never);
+}
+
 afterEach(() => {
+  vi.restoreAllMocks();
+  serverMocks.requireAuth.mockReset();
   if (originalAuthMode === undefined) {
     delete process.env.AUTH_MODE;
   } else {
     process.env.AUTH_MODE = originalAuthMode;
+  }
+  if (originalWorkspaceRoots === undefined) {
+    delete process.env.WORKSPACE_ROOTS;
+  } else {
+    process.env.WORKSPACE_ROOTS = originalWorkspaceRoots;
+  }
+  while (temporaryDirectories.length > 0) {
+    fs.rmSync(temporaryDirectories.pop()!, { recursive: true, force: true });
   }
 });
 
@@ -81,5 +136,103 @@ describe("ownership helpers", () => {
 
     expect(query.sql.toLowerCase()).not.toContain(" where ");
     expect(query.params).not.toContain("anonymous-admin");
+  });
+
+  it("does not filter administrator reads by owner", () => {
+    process.env.AUTH_MODE = "local";
+
+    expect(ownedWorkspaceFilter(adminAuth)).toBeUndefined();
+    expect(ownedDatasetFilter(adminAuth)).toBeUndefined();
+    expect(ownedScheduledTaskFilter(adminAuth)).toBeUndefined();
+    expect(ownedSkillFilter(adminAuth)).toBeUndefined();
+    expect(canAccessOwner(adminAuth, "another-user-id")).toBe(true);
+  });
+
+  it("continues to filter ordinary-user reads by immutable user id", () => {
+    process.env.AUTH_MODE = "local";
+
+    const workspaceQuery = db
+      .select()
+      .from(workspaces)
+      .where(ownedWorkspaceFilter(localAuth))
+      .toSQL();
+    const datasetQuery = db
+      .select()
+      .from(hfDatasets)
+      .where(ownedDatasetFilter(localAuth))
+      .toSQL();
+    const taskQuery = db
+      .select()
+      .from(scheduledTasks)
+      .where(ownedScheduledTaskFilter(localAuth))
+      .toSQL();
+    const skillQuery = db
+      .select()
+      .from(skills)
+      .where(ownedSkillFilter(localAuth))
+      .toSQL();
+
+    expect(workspaceQuery.params).toContain("real-user-id");
+    expect(datasetQuery.params).toContain("real-user-id");
+    expect(taskQuery.params).toContain("real-user-id");
+    expect(skillQuery.params).toContain("real-user-id");
+  });
+
+  it("lets an administrator access another user's registered workspace path", async () => {
+    process.env.AUTH_MODE = "local";
+    const root = temporaryRoot();
+    const userBWorkspace = path.join(root, "users", "user-b", "workspace");
+    fs.mkdirSync(userBWorkspace, { recursive: true });
+    mockWorkspaceRows([{ folderPath: userBWorkspace }]);
+    serverMocks.requireAuth.mockResolvedValue(adminAuth);
+
+    const result = await requireWorkspacePathsAccess(
+      new NextRequest("http://localhost/api/files/read"),
+      [path.join(userBWorkspace, "notes.md")],
+    );
+
+    expect(result).not.toBeInstanceOf(NextResponse);
+    expect(result).toMatchObject({
+      auth: adminAuth,
+      canonicalPaths: [path.join(fs.realpathSync(userBWorkspace), "notes.md")],
+    });
+  });
+
+  it("rejects an ordinary user's access to another registered workspace path", async () => {
+    process.env.AUTH_MODE = "local";
+    const root = temporaryRoot();
+    const userAWorkspace = path.join(root, "users", "real-user-id", "workspace");
+    const userBWorkspace = path.join(root, "users", "user-b", "workspace");
+    fs.mkdirSync(userAWorkspace, { recursive: true });
+    fs.mkdirSync(userBWorkspace, { recursive: true });
+    mockWorkspaceRows([{ folderPath: userAWorkspace }]);
+    serverMocks.requireAuth.mockResolvedValue(localAuth);
+
+    const result = await requireWorkspacePathsAccess(
+      new NextRequest("http://localhost/api/files/read"),
+      [path.join(userBWorkspace, "notes.md")],
+    );
+
+    expect(result).toBeInstanceOf(NextResponse);
+    expect((result as NextResponse).status).toBe(403);
+  });
+
+  it("returns canonical provisioning paths inside the user's effective root", async () => {
+    process.env.AUTH_MODE = "local";
+    const root = temporaryRoot();
+    process.env.WORKSPACE_ROOTS = root;
+    const target = path.join(root, "users", "real-user-id", "first-workspace");
+    serverMocks.requireAuth.mockResolvedValue(localAuth);
+
+    const result = await requireWorkspaceProvisioningPathsAccess(
+      new NextRequest("http://localhost/api/files/mkdir"),
+      [target],
+    );
+
+    expect(result).not.toBeInstanceOf(NextResponse);
+    expect(result).toMatchObject({
+      auth: localAuth,
+      canonicalPaths: [path.join(fs.realpathSync(root), "users", "real-user-id", "first-workspace")],
+    });
   });
 });

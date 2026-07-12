@@ -1,22 +1,18 @@
-import path from "path";
 import { and, eq, isNull, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { deepResearchSessions, hfDatasets, notes, scheduledTasks, skills, workspaces } from "@/lib/db/schema";
-import { isWithinWorkspace } from "@/lib/files/filesystem";
+import { canonicalizePath, isPathWithinRoot } from "@/lib/files/canonical-path";
 import { forbiddenResponse, requireAuth, type AuthContext } from "./server";
 import { isAuthDisabled } from "./mode";
+import { resolveProvisioningPath } from "./workspace-roots";
 
 export function getOwnerUserIdForWrite(auth: AuthContext): string | null {
   return isAuthDisabled() ? null : auth.user.id;
 }
 
 export function canAccessOwner(auth: AuthContext, ownerUserId: string | null): boolean {
-  if (isAuthDisabled()) {
-    return true;
-  }
-
-  if (auth.user.role === "admin" && ownerUserId === null) {
+  if (isAuthDisabled() || auth.user.role === "admin") {
     return true;
   }
 
@@ -24,39 +20,31 @@ export function canAccessOwner(auth: AuthContext, ownerUserId: string | null): b
 }
 
 export function ownedWorkspaceFilter(auth: AuthContext) {
-  if (isAuthDisabled()) {
+  if (isAuthDisabled() || auth.user.role === "admin") {
     return undefined;
-  }
-
-  if (auth.user.role === "admin") {
-    return or(eq(workspaces.ownerUserId, auth.user.id), isNull(workspaces.ownerUserId));
   }
 
   return eq(workspaces.ownerUserId, auth.user.id);
 }
 
 export function ownedDatasetFilter(auth: AuthContext) {
-  if (isAuthDisabled()) {
+  if (isAuthDisabled() || auth.user.role === "admin") {
     return undefined;
   }
 
-  return auth.user.role === "admin"
-    ? or(eq(hfDatasets.ownerUserId, auth.user.id), isNull(hfDatasets.ownerUserId))
-    : eq(hfDatasets.ownerUserId, auth.user.id);
+  return eq(hfDatasets.ownerUserId, auth.user.id);
 }
 
 export function ownedScheduledTaskFilter(auth: AuthContext) {
-  if (isAuthDisabled()) {
+  if (isAuthDisabled() || auth.user.role === "admin") {
     return undefined;
   }
 
-  return auth.user.role === "admin"
-    ? or(eq(scheduledTasks.ownerUserId, auth.user.id), isNull(scheduledTasks.ownerUserId))
-    : eq(scheduledTasks.ownerUserId, auth.user.id);
+  return eq(scheduledTasks.ownerUserId, auth.user.id);
 }
 
 export function ownedSkillFilter(auth: AuthContext) {
-  if (isAuthDisabled()) {
+  if (isAuthDisabled() || auth.user.role === "admin") {
     return undefined;
   }
 
@@ -178,7 +166,7 @@ export async function requireDeepResearchSessionAccess(
 export async function requirePathAccess(
   request: NextRequest,
   targetPath: string,
-): Promise<{ auth: AuthContext } | NextResponse> {
+): Promise<{ auth: AuthContext; canonicalPaths: string[] } | NextResponse> {
   return requireWorkspacePathsAccess(request, [targetPath]);
 }
 
@@ -207,10 +195,17 @@ export async function requireScheduledTaskAccess(
 export async function requireWorkspacePathsAccess(
   request: NextRequest,
   targetPaths: string[],
-): Promise<{ auth: AuthContext } | NextResponse> {
+): Promise<{ auth: AuthContext; canonicalPaths: string[] } | NextResponse> {
   const auth = await requireAuth(request);
   if (auth instanceof NextResponse) {
     return auth;
+  }
+
+  let canonicalPaths: string[];
+  try {
+    canonicalPaths = targetPaths.map(canonicalizePath);
+  } catch {
+    return forbiddenResponse("Path access denied");
   }
 
   const rows = await db
@@ -218,14 +213,40 @@ export async function requireWorkspacePathsAccess(
     .from(workspaces)
     .where(ownedWorkspaceFilter(auth));
 
-  const allowed = targetPaths.every((targetPath) => {
-    const resolved = path.resolve(targetPath);
-    return rows.some((row) => isWithinWorkspace(resolved, row.folderPath));
-  });
+  const allowed = canonicalPaths.every((targetPath) =>
+    rows.some((row) => {
+      try {
+        return isPathWithinRoot(targetPath, canonicalizePath(row.folderPath));
+      } catch {
+        return false;
+      }
+    }),
+  );
 
   if (!allowed) {
     return forbiddenResponse("Path access denied");
   }
 
-  return { auth };
+  return { auth, canonicalPaths };
+}
+
+export async function requireWorkspaceProvisioningPathsAccess(
+  request: NextRequest,
+  targetPaths: string[],
+): Promise<{ auth: AuthContext; canonicalPaths: string[] } | NextResponse> {
+  const auth = await requireAuth(request);
+  if (auth instanceof NextResponse) {
+    return auth;
+  }
+
+  try {
+    return {
+      auth,
+      canonicalPaths: targetPaths.map((target) =>
+        resolveProvisioningPath(auth, target),
+      ),
+    };
+  } catch {
+    return forbiddenResponse("Path access denied");
+  }
 }
