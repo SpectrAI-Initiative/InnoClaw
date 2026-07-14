@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 import { slugify } from "@/lib/utils/slugify";
 import { parseSkillRow } from "@/lib/db/skills-utils";
 import { ensureProjectDefaultSkills } from "@/lib/db/default-skills";
-import { getOwnerUserIdForWrite, requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { getOwnerUserIdForWrite, ownedSkillFilter, requireWorkspaceAccess } from "@/lib/auth/ownership";
 import { requireAuth } from "@/lib/auth/server";
 import { jsonError, jsonException } from "@/lib/api-errors";
 
@@ -24,25 +24,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const workspaceId = searchParams.get("workspaceId");
 
-    let allSkills;
     if (workspaceId) {
-      allSkills = await db
-        .select()
-        .from(skills)
-        .where(
-          or(
-            isNull(skills.workspaceId),
-            eq(skills.workspaceId, workspaceId)
-          )
-        )
-        .orderBy(desc(skills.createdAt));
-    } else {
-      allSkills = await db
-        .select()
-        .from(skills)
-        .where(isNull(skills.workspaceId))
-        .orderBy(desc(skills.createdAt));
+      const access = await requireWorkspaceAccess(request, workspaceId);
+      if (access instanceof NextResponse) {
+        return access;
+      }
     }
+
+    const scope = workspaceId
+      ? or(isNull(skills.workspaceId), eq(skills.workspaceId, workspaceId))
+      : isNull(skills.workspaceId);
+    const allSkills = await db
+      .select()
+      .from(skills)
+      .where(and(scope, ownedSkillFilter(auth)))
+      .orderBy(desc(skills.createdAt));
 
     const parsed = allSkills.map(parseSkillRow);
     return NextResponse.json(parsed);
