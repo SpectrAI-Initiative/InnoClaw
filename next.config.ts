@@ -40,6 +40,16 @@ const serverExternalPackages = [
 const nextConfig: NextConfig = {
   output: "standalone",
   serverExternalPackages,
+  outputFileTracingExcludes: {
+    "/*": [
+      "./.claude/**/*",
+      "./data/**/*",
+      "./src/lib/article-search/paper-content.ts",
+      "./src/lib/files/pdf-image-extractor.ts",
+      "./src/i18n/messages/en.json",
+      "./src/i18n/messages/zh.json",
+    ],
+  },
   // Keep distDir inside the project root so Turbopack accepts it.
   ...(resolvedBuildDir.distDir ? { distDir: resolvedBuildDir.distDir } : {}),
   ...(distDirLocking.disableLock

@@ -4,6 +4,21 @@ node_modules
 # Build output
 .next
 
+# Runtime state and deployment backups
+backups/
+logs/
+outputs/
+workspaces/
+
+# Repository-local scratch and generated artifacts
+.worktrees/
+.superpowers/
+.venv-docs/
+reference/
+batch-test-logs/
+test-results/
+tmp-playwright-review/
+
 # Data (mounted as volumes at runtime)
 data/
 

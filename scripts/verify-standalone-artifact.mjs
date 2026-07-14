@@ -6,6 +6,7 @@ import path from "node:path";
 const root = path.resolve(process.argv[2] ?? ".next/standalone");
 
 const forbiddenTopLevelDirectories = new Map([
+  [".claude", "local agent configuration"],
   [".git", "version-control metadata"],
   [".superpowers", "local planning scratch"],
   [".worktrees", "nested worktrees"],
@@ -121,12 +122,55 @@ function walk(directory, relativeDirectory = "") {
   }
 }
 
+function inspectAuthProxy() {
+  const serverDirectory = path.join(root, ".next", "server");
+  if (!fs.existsSync(serverDirectory)) {
+    return;
+  }
+
+  const proxyBundle = path.join(serverDirectory, "middleware.js");
+  if (!fs.existsSync(proxyBundle)) {
+    addViolation(
+      path.relative(root, proxyBundle),
+      "compiled authentication proxy is missing",
+    );
+  }
+
+  const functionsManifest = path.join(
+    serverDirectory,
+    "functions-config-manifest.json",
+  );
+  if (!fs.existsSync(functionsManifest)) {
+    addViolation(
+      path.relative(root, functionsManifest),
+      "authentication proxy registration is missing",
+    );
+    return;
+  }
+
+  try {
+    const manifest = JSON.parse(fs.readFileSync(functionsManifest, "utf-8"));
+    if (!manifest.functions?.["/_middleware"]) {
+      addViolation(
+        path.relative(root, functionsManifest),
+        "authentication proxy registration is missing",
+      );
+    }
+  } catch {
+    addViolation(
+      path.relative(root, functionsManifest),
+      "authentication proxy manifest is invalid",
+    );
+  }
+}
+
 if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) {
   console.error("Standalone artifact directory not found: " + root);
   process.exit(1);
 }
 
 walk(root);
+inspectAuthProxy();
 
 if (violations.size > 0) {
   console.error("Forbidden standalone artifact paths:");
@@ -139,4 +183,3 @@ if (violations.size > 0) {
 }
 
 console.log("Standalone artifact verified: " + root);
-

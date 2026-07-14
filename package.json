@@ -33,7 +33,7 @@
     "dev": "next dev",
     "dev:no-auth": "cross-env AUTH_MODE=disabled next dev",
     "prebuild": "node scripts/check-deps.js",
-    "build": "next build",
+    "build": "next build --webpack",
     "postbuild": "npm run verify:standalone",
     "verify:standalone": "node scripts/verify-standalone-artifact.mjs",
     "build:admin-cli": "tsc -p tsconfig.admin-cli.json",

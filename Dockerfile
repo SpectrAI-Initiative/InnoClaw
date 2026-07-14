@@ -20,7 +20,16 @@ FROM node:24-slim AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY package.json package-lock.json ./
+COPY next.config.ts tsconfig.json tsconfig.admin-cli.json ./
+COPY postcss.config.mjs components.json drizzle.config.ts ./
+COPY .env.example .env.production.example ./
+COPY src ./src
+COPY public ./public
+COPY scripts ./scripts
+COPY drizzle ./drizzle
+COPY config ./config
+COPY plugins ./plugins
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
