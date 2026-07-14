@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 16:29+0800\n"
+"POT-Creation-Date: 2026-07-14 09:43+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -18,100 +18,100 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../development/contributing.md:1 3603b3ed91da418f807c145edc0402ea
+#: ../../development/contributing.md:1 f2dae5bb789f48da96e3c58d4ed2d0dd
 msgid "Contributing"
 msgstr "贡献指南"
 
-#: ../../development/contributing.md:3 e8da8bd0488e4d3e8860445aa169be79
+#: ../../development/contributing.md:3 c1eaa85ca8cf4d9ab7c3d426c51a1b4a
 msgid ""
 "Thank you for your interest in contributing to InnoClaw! This guide "
 "explains how to get involved."
 msgstr "感谢您有兴趣为 InnoClaw 做出贡献！本指南介绍如何参与。"
 
-#: ../../development/contributing.md:5 20f1708178a14a6081d69a5015722772
+#: ../../development/contributing.md:5 9ff7cef99517461b993e017e8891d2e3
 msgid "Getting Started"
 msgstr "快速入门"
 
-#: ../../development/contributing.md:7 2d593a75eff04dbaa49aef426460dcf6
+#: ../../development/contributing.md:7 29591c45c57e4558b85afd013ce7eb5b
 msgid "**Fork** the repository on GitHub"
 msgstr "在 GitHub 上 **Fork** 仓库"
 
-#: ../../development/contributing.md:8 528ae3bc70f84eb09feaa3ae39b84487
+#: ../../development/contributing.md:8 bd048dcb1b5240ef8227ff43e6ed2ca2
 msgid "**Clone** your fork locally:"
 msgstr "在本地**克隆**您的 Fork："
 
-#: ../../development/contributing.md:13 58aa6c7eb367415b888874d38b08afd5
+#: ../../development/contributing.md:13 eff1651574d64cfd86829b6942da7fe6
 msgid "**Install** dependencies:"
 msgstr "**安装**依赖："
 
-#: ../../development/contributing.md:17 b372cc35a68e40a68b03702782d5d244
+#: ../../development/contributing.md:17 d299674e45e44f83ae4548fcac71f2d4
 msgid ""
 "Read the repository-level guide in [Repository Guidelines](repository-"
 "guidelines.md)"
 msgstr "阅读仓库级指南 [仓库规范](repository-guidelines.md)"
 
-#: ../../development/contributing.md:18 fcd48b785614429db15c1eed5ea445ec
+#: ../../development/contributing.md:18 9537f2890f9f4d38bad50e73da4d07a8
 msgid ""
 "Follow the [Installation Guide](../getting-started/installation.md) to "
 "set up your development environment"
 msgstr "按照[安装指南](../getting-started/installation.md)搭建开发环境"
 
-#: ../../development/contributing.md:20 512f4305f9d34d929daeeb572bd7f93f
+#: ../../development/contributing.md:20 9167ba2a859f41f29e670ebd0ccd4fc3
 msgid "Useful follow-up pages:"
 msgstr "推荐继续阅读："
 
-#: ../../development/contributing.md:22 b520fc29de784d90a9726fd11ac6177e
+#: ../../development/contributing.md:22 22edd0fe1e4340ecb072c56cdf526612
 msgid "[Collaboration](collaboration.md)"
 msgstr "[协作规范](collaboration.md)"
 
-#: ../../development/contributing.md:23 7391a67f0ef147b785b8bc6f60da29f9
+#: ../../development/contributing.md:23 d3bd499864954b85ae347c68d25c7736
 msgid "[Agent Development](agent-development.md)"
 msgstr "[智能体开发](agent-development.md)"
 
-#: ../../development/contributing.md:25 9a27dac5296a46538d0d9dc0cbe22da7
+#: ../../development/contributing.md:25 49f3ab928e6f4f19b3e7c940516c6aa0
 msgid "Local Development Commands"
 msgstr ""
 
-#: ../../development/contributing.md:27 e8427dc7c9554d52bb222e1a29acf8af
+#: ../../development/contributing.md:27 7d379dfa1e2947bfa835bdf65250a6ae
 msgid "Start the app with the default local authentication flow:"
 msgstr ""
 
-#: ../../development/contributing.md:33 aa27112f0c3c49dcbed26538cc220500
+#: ../../development/contributing.md:33 23b17b31cd854b8191e93367acf403ff
 msgid "For trusted single-user/local development without login:"
 msgstr ""
 
-#: ../../development/contributing.md:39 0f8a3831540a41e49d7804f4be9432dc
+#: ../../development/contributing.md:39 6ea032775e1d44c5a7b2d46816eab425
 msgid ""
 "For a production build already created with authentication disabled at "
 "runtime:"
 msgstr ""
 
-#: ../../development/contributing.md:45 25e1ace4b93a4218be4383b9d1fbb0e1
+#: ../../development/contributing.md:45 500d4ecdac7b4cbd904028be7a6378d7
 msgid ""
 "Disabled auth gives anyone who can reach the service admin-level access. "
 "Do not use it on an untrusted network unless another access-control layer"
 " protects the service."
 msgstr ""
 
-#: ../../development/contributing.md:47 cb17e1b412fc488b94db779db1cd4536
+#: ../../development/contributing.md:47 9bbe819d5e1f4968ba1c9b96dfc7eb2b
 msgid "Which Guide To Use"
 msgstr "该看哪份指南"
 
-#: ../../development/contributing.md:49 0287ab845cce439eaf08f7eceb982a99
+#: ../../development/contributing.md:49 bc525ebab71645b4b01db745bf81eb95
 msgid ""
 "Use [Repository Guidelines](repository-guidelines.md) as the repository-"
 "wide source of truth for local workflow, validation, and documentation "
 "follow-through."
 msgstr "将 [仓库规范](repository-guidelines.md) 作为本仓库本地工作流、验证流程与文档联动更新的统一权威来源。"
 
-#: ../../development/contributing.md:50 6392fa1fa7b14c56ac14591194ffe24e
+#: ../../development/contributing.md:50 cb1889983b794e0bb845de21c9774a0f
 msgid ""
 "Use [Collaboration](collaboration.md) when the worktree is already dirty,"
 " when you are coordinating across multiple contributors, or when an "
 "automation tool is helping with edits."
 msgstr "当工作树已经是脏状态、需要与多位贡献者协作，或有自动化工具参与编辑时，请阅读 [协作规范](collaboration.md)。"
 
-#: ../../development/contributing.md:51 c610681eda5241fea4076bce73a8f5cb
+#: ../../development/contributing.md:51 5e8a8a7999c54ae68dd80450a8e088d3
 msgid ""
 "Use [Agent Development](agent-development.md) before changing prompts, "
 "tools, agent streaming, deep-research roles, or other agent-facing "
@@ -120,211 +120,224 @@ msgstr ""
 "在修改 prompts、tools、智能体流式输出、deep-research 角色，或其他面向智能体的契约之前，请阅读 [智能体开发"
 "](agent-development.md)。"
 
-#: ../../development/contributing.md:53 399ff72523bf4b22b03280923315e88e
+#: ../../development/contributing.md:53 f8c0e83b5e8046b2b3fdf9060acfd709
 msgid "Contribution Flow"
 msgstr "贡献流程"
 
-#: ../../development/contributing.md:95 197851a71a8540fa8203981d6ee5d9da
+#: ../../development/contributing.md:95 e2f85659076c4d218f463b85d6e91e26
 msgid "Use this flow as the default path for most changes:"
 msgstr "大多数变更都可以按这个流程推进："
 
-#: ../../development/contributing.md:97 736916f029314353830f3e3addec1748
+#: ../../development/contributing.md:97 270ee395cf044da99eb3561aff51f454
 msgid "Start from a focused branch."
 msgstr "从一个聚焦的分支开始。"
 
-#: ../../development/contributing.md:98 362419a74f9248e499f501758ffb442d
+#: ../../development/contributing.md:98 99d0c09a224d4e48af9e158a6a8daf0f
 msgid ""
 "Detect early whether the change touches contracts such as schema, env "
 "vars, route shapes, or agent capabilities."
 msgstr "尽早识别这次变更是否触及 schema、环境变量、路由返回形状或智能体能力等共享契约。"
 
-#: ../../development/contributing.md:99 8c63c0c595a5430ab853c10cb740cdff
+#: ../../development/contributing.md:99 93cf1e0d58974faaacb90db14132a12f
 msgid ""
 "Update documentation in the same change when contributor-facing behavior "
 "moves."
 msgstr "当面向贡献者的行为发生变化时，在同一个变更中同步更新文档。"
 
-#: ../../development/contributing.md:100 4632b41a47e144369b5dd93c393cfd0c
+#: ../../development/contributing.md:100 dbbf8082982740d3a7eb2b85f035c5aa
 msgid "Only request review after local validation passes."
 msgstr "只有在本地验证通过之后再请求评审。"
 
-#: ../../development/contributing.md:102 a1970607468441da89e0948fb5adb796
+#: ../../development/contributing.md:102 aa588e8073e849ef8cbdb175d66b2c5c
 msgid "Branching Strategy"
 msgstr "分支策略"
 
-#: ../../development/contributing.md:104 ddbcafa6a74b42dda02ce8154afa6761
+#: ../../development/contributing.md:104 e8f56eaa1d5440edbf993b107f12c891
 msgid "`main` — Stable production branch"
 msgstr "`main` —— 稳定的生产分支"
 
-#: ../../development/contributing.md:105 20f8fc8f21b7463999198fbde8830a3b
+#: ../../development/contributing.md:105 4c2e269258d8466db285d340d8600841
 msgid "Feature branches — Created from `main` for new features or bug fixes"
 msgstr "功能分支 —— 从 `main` 创建，用于新功能或错误修复"
 
-#: ../../development/contributing.md:107 ed1fcbc9747d44b49946fe5b8cceddd6
+#: ../../development/contributing.md:107 2d54a412ec474281b52008a82b41b3e9
 msgid "Branch Naming Convention"
 msgstr "分支命名规范"
 
-#: ../../development/contributing.md:115 9fb86c18200a4eac84f700aaaddc7ec0
+#: ../../development/contributing.md:115 4624983d7d5849c3b5f9afdd09233c46
 msgid "Commit Conventions"
 msgstr "提交规范"
 
-#: ../../development/contributing.md:117 3c4f055d3fb242a584f1680378f450db
+#: ../../development/contributing.md:117 e0b929d499c047e485efc2e49bb995b4
 msgid "We follow [Conventional Commits](https://www.conventionalcommits.org/):"
 msgstr "我们遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范："
 
-#: ../../development/contributing.md:125 471fd6970d1a46febc17d5be40bb1b3b
+#: ../../development/contributing.md:125 03b9ee2e37444c2cb8c6ceb41d2e7f58
 msgid "Commit Types"
 msgstr "提交类型"
 
-#: ../../development/contributing.md:77 37f773e79be043b7abefb5e84102453e
+#: ../../development/contributing.md:77 20f56ecd09634e59b78787159fce127e
 msgid "Type"
 msgstr "类型"
 
-#: ../../development/contributing.md:77 e8f64d791df24a8e874db6742d188ec6
+#: ../../development/contributing.md:77 305f06077d5544f0b38b8508bfea22aa
 msgid "Description"
 msgstr "描述"
 
-#: ../../development/contributing.md:77 2179daba3a49456a8bd059ee15098d55
+#: ../../development/contributing.md:77 526daa2069f44dcabf54e33e5446b91e
 msgid "`feat`"
 msgstr "`feat`"
 
-#: ../../development/contributing.md:77 2ed21affcb9c46b099c4a8e7222d1212
+#: ../../development/contributing.md:77 8196213eca7a4c06b6d94483504150ef
 msgid "A new feature"
 msgstr "新功能"
 
-#: ../../development/contributing.md:77 555fbb4e666e402eae3d855441eed408
+#: ../../development/contributing.md:77 213b791abfbb4926877b907d2858a58d
 msgid "`fix`"
 msgstr "`fix`"
 
-#: ../../development/contributing.md:77 1f346f5f7fc44392a46a2ec71da8c7e5
+#: ../../development/contributing.md:77 054e85767fe74c8aa48966a4e435e152
 msgid "A bug fix"
 msgstr "错误修复"
 
-#: ../../development/contributing.md:77 6f4db69ca9b5490a9a4615eff4a24631
+#: ../../development/contributing.md:77 a0126541c6974539b4056964cb62bdce
 msgid "`docs`"
 msgstr "`docs`"
 
-#: ../../development/contributing.md:77 2ad428f9af3c4345a30cfe78ccae984b
+#: ../../development/contributing.md:77 0ccd0b48334642429a872c69f4e7c3b0
 msgid "Documentation changes"
 msgstr "文档变更"
 
-#: ../../development/contributing.md:77 fe4e3579369d410baae9f226a091371e
+#: ../../development/contributing.md:77 a102a5b419af4f9893e82fada0f8a4a0
 msgid "`style`"
 msgstr "`style`"
 
-#: ../../development/contributing.md:77 d9ae589d76f44f58ab2de6540683be94
+#: ../../development/contributing.md:77 52f0f261a2f54f46a73abc3d210bbf90
 msgid "Code style changes (formatting, no logic change)"
 msgstr "代码风格变更（格式化，无逻辑变更）"
 
-#: ../../development/contributing.md:77 530a494ea440432ba71afe444e41b950
+#: ../../development/contributing.md:77 2fafbc6c11a34c1bb2fd09ecc56e67ef
 msgid "`refactor`"
 msgstr "`refactor`"
 
-#: ../../development/contributing.md:77 b727ec4d1f6048568c2da9906865db2c
+#: ../../development/contributing.md:77 7f7c3e7b083a47e2a3b1e9b51ae10c36
 msgid "Code refactoring (no feature or fix)"
 msgstr "代码重构（无新功能或修复）"
 
-#: ../../development/contributing.md:77 23e3a852606149ecb63fd14e31788293
+#: ../../development/contributing.md:77 a8f555cbc81646c99b4187e7d7cff1de
 msgid "`test`"
 msgstr "`test`"
 
-#: ../../development/contributing.md:77 f0995c3372a7480da3645278aa267e08
+#: ../../development/contributing.md:77 7cd18c2172fe4212ae01f8b6d2d7530c
 msgid "Adding or updating tests"
 msgstr "添加或更新测试"
 
-#: ../../development/contributing.md:77 f56f9821ed1d463aac6fbaac73b3fe0e
+#: ../../development/contributing.md:77 cff0a0e90afe4a709293a30870e78b92
 msgid "`chore`"
 msgstr "`chore`"
 
-#: ../../development/contributing.md:77 1a80a967e600419ea5d3dbdf6db358d2
+#: ../../development/contributing.md:77 86305c609bb64287a10ae34e940d672a
 msgid "Build process or auxiliary tool changes"
 msgstr "构建流程或辅助工具变更"
 
-#: ../../development/contributing.md:137 c60a6b67e3fd47c490675fd10faa294a
+#: ../../development/contributing.md:137 1967573c60484d58a8c95a5e9c059c32
 msgid "Examples"
 msgstr "示例"
 
-#: ../../development/contributing.md:145 9cf7e24dd10042f0941f6215b2a40732
+#: ../../development/contributing.md:145 d1a1119c73cf4c798f46cec9ff6f8373
 msgid "Pull Request Process"
 msgstr "Pull Request 流程"
 
-#: ../../development/contributing.md:147 e3928e2b3201450ca37bbf09492981d2
+#: ../../development/contributing.md:147 ac5fffdd799148d7826b74a9bbda6ca8
 msgid "**Create a branch** from `main` with a descriptive name"
 msgstr "从 `main` **创建分支**，使用描述性名称"
 
-#: ../../development/contributing.md:148 9efc4f983c0a408f900ca6646b5bc572
+#: ../../development/contributing.md:148 dff645d338474120bc42e2ec687ef84e
 msgid "**Make your changes** and commit with conventional commit messages"
 msgstr "**进行更改**并使用规范的提交消息进行提交"
 
-#: ../../development/contributing.md:149 76b1ddf63f994afcbbfa8719f10e7ee7
+#: ../../development/contributing.md:149 a01ed2524e1b48c0a6c41d9b9c9450e6
 msgid "**Run checks** before submitting:"
 msgstr "提交之前**运行检查**："
 
-#: ../../development/contributing.md:155 8614bb7766384d359537b43795e4f9ec
+#: ../../development/contributing.md:156 e703d3e44288420480daa2cdbd11ab0b
+msgid ""
+"The production build uses Webpack and automatically runs `npm run "
+"verify:standalone`. This gate requires the compiled authentication proxy "
+"and rejects runtime data, credentials, backups, repository source, tests,"
+" documentation, and local scratch content in the standalone artifact. "
+"Keep new runtime paths outside the Docker build context and change the "
+"verifier only when a runtime asset is intentionally shipped."
+msgstr ""
+"生产构建使用 Webpack，并自动运行 `npm run verify:standalone`。此门禁要求独立产物中包含已编译的认证代理，"
+"并拒绝其中出现运行时数据、凭据、备份、仓库源码、测试、文档和本地临时内容。请将新的运行时路径保留在 "
+"Docker 构建上下文之外；只有在确实需要随生产运行时发布某项资源时，才修改校验器。"
+
+#: ../../development/contributing.md:163 1f10c26f46ee4418a53d335b4cc81290
 msgid "**Push** your branch and open a Pull Request"
 msgstr "**推送**您的分支并打开 Pull Request"
 
-#: ../../development/contributing.md:156 e1fda0336a864d51868f5923c99ff397
+#: ../../development/contributing.md:164 b3aeaf962c004c169a965480ed6a1ca1
 msgid "**Describe** your changes clearly in the PR description"
 msgstr "在 PR 描述中**清楚地描述**您的更改"
 
-#: ../../development/contributing.md:157 b73da80aa28f49448647036f15e4a114
+#: ../../development/contributing.md:165 405c15a70faf4a5e86940310b40b0a94
 msgid "**Wait for review** — maintainers will review your code"
 msgstr "**等待审核** —— 维护者将审查您的代码"
 
-#: ../../development/contributing.md:159 737560d491394d46920cf08c3341cdcb
+#: ../../development/contributing.md:167 6bd7d2c089464bacb9c2a645c4060081
 msgid ""
 "If your change updates contributor workflow, environment setup, or "
 "developer-facing behavior, update the relevant pages under "
 "`docs/development/` in the same PR."
 msgstr "如果您的变更更新了贡献者工作流、环境配置或面向开发者的行为，请在同一个 PR 中同步更新 `docs/development/` 下对应的页面。"
 
-#: ../../development/contributing.md:161 154aef6dd9ab4df19a88b326219b0d39
+#: ../../development/contributing.md:169 da82f8cd6b844f839d7755712c24e5c2
 msgid ""
 "If your change updates agent or deep-research behavior, verify that tool "
 "names, privilege boundaries, session persistence, and contributor docs "
 "stay aligned."
 msgstr "如果您的变更更新了智能体或 deep-research 行为，请确认工具名称、权限边界、会话持久化与贡献者文档保持一致。"
 
-#: ../../development/contributing.md:163 7e5259cfb66147bbac8ada65572d2349
+#: ../../development/contributing.md:171 4b4356f3663a4d74a37beaf346352a49
 msgid "PR Checklist"
 msgstr "PR 检查清单"
 
-#: ../../development/contributing.md:165 89b8a9a9768e459893d5960da32fd079
+#: ../../development/contributing.md:173 55fbd015ff1e47f684adf3a0b893ee6f
 msgid "Code follows the project's coding style"
 msgstr "代码遵循项目的编码风格"
 
-#: ../../development/contributing.md:166 24eed3680174494681995a599402463d
+#: ../../development/contributing.md:174 59cdf4e9f6a64eef952ca75298697cde
 msgid "Tests pass (`npm test`)"
 msgstr "测试通过（`npm test`）"
 
-#: ../../development/contributing.md:167 0b7655afd37c495899b10c9e40bc9ecd
+#: ../../development/contributing.md:175 330b494695864c468c4003be8a26e512
 msgid "Lint passes (`npm run lint`)"
 msgstr "Lint 通过（`npm run lint`）"
 
-#: ../../development/contributing.md:168 77180321f2464d218a2aeb799bac80bf
+#: ../../development/contributing.md:176 b263e65b5c3044f489d03393c215de29
 msgid "Build succeeds (`NEXT_TELEMETRY_DISABLED=1 npm run build`)"
 msgstr "构建成功（`NEXT_TELEMETRY_DISABLED=1 npm run build`）"
 
-#: ../../development/contributing.md:169 33e3d0c5ee1a44a88d40722f413c803d
+#: ../../development/contributing.md:177 ecf752d41333477c94a0da20ee514e27
 msgid "Documentation updated (if applicable)"
 msgstr "文档已更新（如适用）"
 
-#: ../../development/contributing.md:171 1715fdcacb374f8d96656d95543ae664
+#: ../../development/contributing.md:179 296ca2abe419482dbb6717730db1876d
 msgid "Code of Conduct"
 msgstr "行为准则"
 
-#: ../../development/contributing.md:173 e06aa0fc79c14edcbbd96d75b496cac0
+#: ../../development/contributing.md:181 4fa1d3e80b7146f3a7f965a99b8eb441
 msgid ""
 "Please be respectful and constructive in all interactions. We aim to "
 "create a welcoming and inclusive community."
 msgstr "请在所有互动中保持尊重和建设性。我们致力于创建一个友好和包容的社区。"
 
-#: ../../development/contributing.md:175 99e70ad07a024f329f42aa969ff4833e
+#: ../../development/contributing.md:183 f66f6ebab4ed4bdea80b1e5625017080
 msgid "Reporting Issues"
 msgstr "报告问题"
 
-#: ../../development/contributing.md:177 0231e718946a47eb9f7ea2bec6861e44
+#: ../../development/contributing.md:185 06652f4baefd40b6beee1f80a611feb3
 msgid ""
 "Use [GitHub Issues](https://github.com/SpectrAI-"
 "Initiative/InnoClaw/issues) to report bugs or request features"
@@ -332,10 +345,10 @@ msgstr ""
 "使用 [GitHub Issues](https://github.com/SpectrAI-"
 "Initiative/InnoClaw/issues) 报告错误或提出功能请求"
 
-#: ../../development/contributing.md:178 cfa90db4d5f547e49f72c3e80e5783eb
+#: ../../development/contributing.md:186 b7f790502d7040b4b33466aa2ccdee0f
 msgid "Include clear steps to reproduce any bugs"
 msgstr "包含清晰的错误复现步骤"
 
-#: ../../development/contributing.md:179 24f8c97f095b4959a859aeca64eb98cc
+#: ../../development/contributing.md:187 486ec2bc59fa43509aed36f5696fb915
 msgid "Provide environment details (OS, Node.js version, browser)"
 msgstr "提供环境详情（操作系统、Node.js 版本、浏览器）"

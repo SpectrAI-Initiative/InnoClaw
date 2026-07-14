@@ -14,6 +14,15 @@ For detailed contribution guidelines, development setup, and coding conventions,
 
 For trusted local single-user development without login, see the no-auth startup commands in [Local Development](docs/development/local-development.md).
 
+## Production Build Gate
+
+`npm run build` uses the Webpack production tracer and then runs
+`npm run verify:standalone`. The command fails if the standalone artifact is
+missing the compiled authentication proxy or contains runtime data, secrets,
+backups, repository source, tests, documentation, or local scratch content.
+Keep runtime state outside the Docker build context; update the verifier only
+when a runtime asset is intentionally shipped.
+
 ## Reporting Issues
 
 - **Bugs & Features**: [GitHub Issues](https://github.com/SpectrAI-Initiative/InnoClaw/issues)

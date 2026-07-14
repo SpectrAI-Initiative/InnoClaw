@@ -152,6 +152,14 @@ docs(api): update endpoint documentation
    npm test
    NEXT_TELEMETRY_DISABLED=1 npm run build
    ```
+
+   The production build uses Webpack and automatically runs
+   `npm run verify:standalone`. This gate requires the compiled authentication
+   proxy and rejects runtime data, credentials, backups, repository source,
+   tests, documentation, and local scratch content in the standalone artifact.
+   Keep new runtime paths outside the Docker build context and change the
+   verifier only when a runtime asset is intentionally shipped.
+
 4. **Push** your branch and open a Pull Request
 5. **Describe** your changes clearly in the PR description
 6. **Wait for review** — maintainers will review your code

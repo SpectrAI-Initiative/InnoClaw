@@ -515,6 +515,7 @@ Create a Node script that recursively inspects a supplied root or .next/standalo
 
 ~~~javascript
 const forbiddenRoots = new Set([
+  ".claude",
   ".git",
   ".superpowers",
   ".worktrees",
@@ -532,7 +533,7 @@ const forbiddenRoots = new Set([
 ]);
 ~~~
 
-It must also reject active .env files, SQLite files including WAL/SHM, and test/spec source outside node_modules. It prints every violation and exits 1, or prints the verified root and exits 0.
+It must also reject active .env files, SQLite files including WAL/SHM, and test/spec source outside node_modules. For a real Next.js artifact, it must require the compiled authentication proxy and its `/_middleware` function registration. It prints every violation and exits 1, or prints the verified root and exits 0.
 
 - [ ] **Step 2: Build the unmodified app and verify RED**
 
@@ -567,25 +568,37 @@ git commit -m "test(build): reject contaminated standalone artifacts"
 
 Expected: commit succeeds and the verifier remains red against the current artifact.
 
-### Task 7: Stop whole-project tracing and restrict Docker inputs
+### Task 7: Use a clean production trace and restrict Docker inputs
 
 **Files:**
-- Modify: src/lib/dev/project-filesystem.ts
+- Modify: package.json
+- Modify: next.config.ts
+- Rename: middleware.ts to src/proxy.ts
+- Modify: scripts/verify-standalone-artifact.mjs
 - Modify: .dockerignore
 - Modify: Dockerfile
 
-- [ ] **Step 1: Exclude configuration-only dynamic paths from Turbopack tracing**
+- [x] **Step 1: Test tracing hypotheses**
 
-Use the exact annotation recommended by the build warning while retaining runtime behavior:
+Remove the configuration-time filesystem import and try targeted Turbopack
+ignore annotations independently. Record that neither changes the
+whole-project trace. Restore all experimental source edits.
 
-~~~typescript
-path.resolve(/* turbopackIgnore: true */ projectDir, distDir ?? ".next")
-path.resolve(/* turbopackIgnore: true */ projectDir, trimmedValue)
-~~~
+- [x] **Step 2: Select the production tracer and exact exclusions**
 
-If the build still reports the warning, annotate only the remaining project-filesystem path normalization identified by the warning before changing unrelated code.
+Change `build` to `next build --webpack`. Add exact
+`outputFileTracingExcludes` entries for `.claude`, `data`, the two redundant
+dynamically imported TypeScript files, and the two translation JSON files whose
+content is already bundled into server chunks.
 
-- [ ] **Step 2: Expand .dockerignore**
+- [x] **Step 3: Compile the Next.js 16 authentication proxy**
+
+Move the legacy root `middleware.ts` to `src/proxy.ts` and rename the exported
+function to `proxy`. Extend the artifact gate so a build fails without
+`.next/server/middleware.js` or the `/_middleware` entry in
+`functions-config-manifest.json`.
+
+- [x] **Step 4: Expand .dockerignore**
 
 Add:
 
@@ -606,7 +619,7 @@ test-results/
 tmp-playwright-review/
 ~~~
 
-- [ ] **Step 3: Replace COPY . . with an allowlist**
+- [x] **Step 5: Replace COPY . . with an allowlist**
 
 ~~~dockerfile
 COPY package.json package-lock.json ./
@@ -621,7 +634,7 @@ COPY config ./config
 COPY plugins ./plugins
 ~~~
 
-- [ ] **Step 4: Run production build and verify GREEN**
+- [x] **Step 6: Run production build and verify GREEN**
 
 Run:
 
@@ -633,22 +646,29 @@ node scripts/verify-standalone-artifact.mjs
 
 Expected: exit 0 with no whole-project trace warning and no forbidden paths.
 
-- [ ] **Step 5: Build with ignored sentinel files present**
+- [x] **Step 7: Build with ignored sentinel files present**
 
 Run:
 
 ~~~bash
 mkdir -p backups data logs outputs workspaces
-printf 'SENTINEL_ONLY=true\n' > backups/env.production.local
-printf 'sentinel\n' > data/innoclaw.db
-printf 'sentinel\n' > logs/dev.log
+printf 'SENTINEL_ONLY=true\n' > backups/security-packaging-sentinel.env.production.local
+printf 'sentinel\n' > data/security-packaging-sentinel.db
+printf 'sentinel\n' > logs/security-packaging-sentinel.log
+printf 'sentinel\n' > outputs/security-packaging-sentinel.txt
+printf 'sentinel\n' > workspaces/security-packaging-sentinel.txt
 docker build -t innoclaw:security-packaging-test .
-rm -rf backups data logs outputs workspaces
+rm -f backups/security-packaging-sentinel.env.production.local \
+  data/security-packaging-sentinel.db \
+  logs/security-packaging-sentinel.log \
+  outputs/security-packaging-sentinel.txt \
+  workspaces/security-packaging-sentinel.txt
+rmdir backups outputs workspaces 2>/dev/null || true
 ~~~
 
 Expected: Docker build succeeds and ignored sentinels never enter any build stage.
 
-- [ ] **Step 6: Inspect image filesystem**
+- [x] **Step 8: Inspect image filesystem and authentication boundary**
 
 Run:
 
@@ -660,12 +680,16 @@ docker run --rm --entrypoint sh innoclaw:security-packaging-test -c \
 
 Expected: exit 0. The empty /app/data runtime directory is allowed.
 
-- [ ] **Step 7: Commit packaging fixes**
+Start a temporary container with local authentication enabled. Require `/` and
+`/admin/users` to redirect to login, `/login` and `/register` to return 200,
+and `/api/workspaces` to return 401 without a session.
+
+- [x] **Step 9: Commit packaging fixes**
 
 Run:
 
 ~~~bash
-git add src/lib/dev/project-filesystem.ts .dockerignore Dockerfile
+git add package.json next.config.ts scripts/verify-standalone-artifact.mjs .dockerignore Dockerfile
 git commit -m "fix(build): prevent standalone artifact contamination"
 ~~~
 
@@ -684,11 +708,12 @@ Expected: commit succeeds.
 Add this rule to the validation sections:
 
 ~~~markdown
-npm run build automatically runs npm run verify:standalone after Next.js
-finishes. The build fails if the standalone artifact contains runtime data,
-credentials, backups, repository source, tests, documentation, or local scratch
-content. Keep new runtime paths outside the Docker build context and change the
-verifier only when a shipped runtime asset is intentionally required.
+npm run build uses Webpack and automatically runs npm run verify:standalone
+after Next.js finishes. The build fails if the standalone artifact is missing
+the compiled authentication proxy or contains runtime data, credentials,
+backups, repository source, tests, documentation, or local scratch content.
+Keep new runtime paths outside the Docker build context and change the verifier
+only when a shipped runtime asset is intentionally required.
 ~~~
 
 - [ ] **Step 2: Refresh and build documentation**

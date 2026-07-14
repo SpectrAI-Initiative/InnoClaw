@@ -102,6 +102,14 @@ npm test
 NEXT_TELEMETRY_DISABLED=1 npm run build
 ```
 
+`npm run build` uses the Webpack production tracer and automatically runs
+`npm run verify:standalone` after Next.js finishes. The build fails if the
+standalone artifact is missing the compiled authentication proxy or contains
+runtime data, credentials, backups, repository source, tests, documentation,
+or local scratch content. Keep new runtime paths outside the Docker build
+context and change the verifier only when a shipped runtime asset is
+intentionally required.
+
 When documentation changes:
 
 ```bash

@@ -107,6 +107,22 @@ Test interactions between modules (e.g., API routes with database):
 npx vitest run src/app/api/
 ```
 
+## Production Artifact Gate
+
+Run the authoritative production build with:
+
+```bash
+NEXT_TELEMETRY_DISABLED=1 npm run build
+```
+
+The build uses Webpack and automatically invokes
+`npm run verify:standalone`. The verifier requires the compiled authentication
+proxy and fails if `.next/standalone` contains runtime databases, active
+environment files, backups, application source, tests, documentation, or local
+scratch directories. New runtime state must stay outside the Docker build
+context. Only relax the verifier for an asset that the production runtime
+intentionally needs, and verify the resulting Docker image separately.
+
 ## Best Practices
 
 - **Co-locate** test files with source files (e.g., `module.test.ts` next to `module.ts`)

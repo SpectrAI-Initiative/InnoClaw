@@ -125,15 +125,29 @@ metadata.
 
 ## Packaging Design
 
-### Stop whole-project output tracing
+### Use deterministic production output tracing
 
-The `next.config.ts` import of `src/lib/dev/project-filesystem.ts` contains
-dynamic path resolution used only to select and assess the build directory.
-Turbopack reports that this trace causes the whole project to enter the NFT
-file list. Keep the existing validation behavior while marking only the
-configuration-time dynamic path operations as excluded from Turbopack's file
-tracing. A production build must complete without the three
-"whole project was traced unintentionally" warnings.
+Investigation disproved the initial hypothesis that the `next.config.ts`
+import of `src/lib/dev/project-filesystem.ts` caused the contamination:
+removing that import did not change the trace, and Turbopack ignore annotations
+on runtime filesystem calls did not reliably prevent whole-project tracing.
+The production build therefore uses `next build --webpack`.
+
+Webpack reduces the trace to actual route dependencies. Exact
+`outputFileTracingExcludes` entries remove only known redundant copies: local
+`data/` and `.claude/` state, two dynamically imported TypeScript modules whose
+compiled code is already in server chunks, and two bundled translation JSON
+files. The standalone verifier remains the independent guard against any new
+source or runtime path entering the artifact.
+
+### Preserve the authentication request boundary
+
+Because the App Router lives under `src/app`, Next.js 16 requires the request
+boundary at `src/proxy.ts`. The legacy root `middleware.ts` was not compiled,
+so a production container could render protected pages while route handlers
+still returned 401. Move the file to `src/proxy.ts`, rename its exported
+function to `proxy`, and require the standalone artifact to contain both the
+compiled proxy bundle and its `/_middleware` function registration.
 
 ### Restrict Docker build inputs
 
@@ -193,6 +207,11 @@ image from a synthetic context containing sentinel `backups/`, `data/`, and
 environment files, then inspect the image filesystem and confirm none of the
 sentinels or forbidden paths exist.
 
+Start the image with local authentication enabled and verify that `/` and
+`/admin/users` redirect to login, public login and registration pages load,
+and a protected API returns 401. This catches a missing or misplaced Next.js
+request proxy even when the application itself compiles.
+
 Before integration, run:
 
 ```bash
@@ -237,7 +256,8 @@ decision.
 The work is complete only when all of the following are true:
 
 1. All five authorization gaps have failing-before/passing-after regression
-   tests.
+   tests, and the Next.js authentication proxy is compiled and exercised by a
+   container HTTP smoke test.
 2. A fresh standalone artifact and Docker image contain no forbidden runtime,
    secret, database, backup, source, test, or documentation files.
 3. Lint, the full test suite, and a production build pass.

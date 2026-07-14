@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: InnoClaw \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:05+0000\n"
+"POT-Creation-Date: 2026-07-14 09:43+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -19,100 +19,124 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../development/testing.md:1 bbd5167e854c4c62aad00166cf87d887
+#: ../../development/testing.md:1 d6fed2eded584e57a273d89786cec826
 msgid "Testing"
 msgstr "测试"
 
-#: ../../development/testing.md:3 f08e96f7903a4d518ee9cc841a0fba06
+#: ../../development/testing.md:3 1412cd2db0d4477cba4133c9e027f11f
 msgid "This guide covers how to write and run tests for InnoClaw."
 msgstr "本指南介绍如何为 InnoClaw 编写和运行测试。"
 
-#: ../../development/testing.md:5 826440b5f3874f0fb100bfa4b327698a
+#: ../../development/testing.md:5 affa7aacd39a493fae3616cff3533c7d
 msgid "Test Framework"
 msgstr "测试框架"
 
-#: ../../development/testing.md:7 b8d96105ea1845c4b1301c5b387cdfa7
+#: ../../development/testing.md:7 4754e6056de048e18e6d7642a6012b2e
 msgid ""
-"InnoClaw uses [Vitest](https://vitest.dev/) (v4+) as its test "
-"framework, configured in `vitest.config.ts`."
+"InnoClaw uses [Vitest](https://vitest.dev/) (v4+) as its test framework, "
+"configured in `vitest.config.ts`."
 msgstr ""
 "InnoClaw 使用 [Vitest](https://vitest.dev/)（v4+）作为测试框架，配置在 "
 "`vitest.config.ts` 中。"
 
-#: ../../development/testing.md:9 94008c1f9273483abe305cb7b5d84467
+#: ../../development/testing.md:9 b04158b343ab49f7a1825a249c063f0b
 msgid "Configuration"
 msgstr "配置"
 
-#: ../../development/testing.md:29 ae1505f1d64345f49f20f7a11daf83d1
+#: ../../development/testing.md:29 81154d553d8d426c98c9a45a7344561a
 msgid "Running Tests"
 msgstr "运行测试"
 
-#: ../../development/testing.md:48 006243320146457a899c7246141e758c
+#: ../../development/testing.md:48 59956ee529454858b7a1d30d3a6fb041
 msgid "Writing Tests"
 msgstr "编写测试"
 
-#: ../../development/testing.md:50 a54dd68230164103b85866d29673bfd2
+#: ../../development/testing.md:50 1167ee021a6345248f5f7d1a79d8efc1
 msgid "Test File Location"
 msgstr "测试文件位置"
 
-#: ../../development/testing.md:52 904e153ffe504bd884512705502acdea
+#: ../../development/testing.md:52 43befa89380c4f8bab44f925df5fedf0
 msgid "Test files should be co-located with the source files they test:"
 msgstr "测试文件应与它们测试的源文件放在一起："
 
-#: ../../development/testing.md:65 9925d1fbf19243879871f45428f5a2b0
+#: ../../development/testing.md:65 68022e615cb742b49316825aa1d2333c
 msgid "Test Structure"
 msgstr "测试结构"
 
-#: ../../development/testing.md:84 ca74816c15f7457da060fd193773e273
+#: ../../development/testing.md:84 54b286540ef7439dadeddc332649f7f2
 msgid "Path Aliases"
 msgstr "路径别名"
 
-#: ../../development/testing.md:86 8805b9acbfc842c0aa4c2c3a224812d4
+#: ../../development/testing.md:86 f93c66eab2b44dcfaa82c286b17f356d
 msgid "Use the `@/` alias to import from the `src/` directory:"
 msgstr "使用 `@/` 别名从 `src/` 目录导入："
 
-#: ../../development/testing.md:92 715990c4cad543c793bf8f6354fe998e
+#: ../../development/testing.md:92 45ecb4ceae8f404088c6f2467b2f1954
 msgid "Test Categories"
 msgstr "测试分类"
 
-#: ../../development/testing.md:94 e7e81c0d7a2949ad8bdb79453d6a8f22
+#: ../../development/testing.md:94 c4ac3cf59bee4a38a4959bbebf1d169f
 msgid "Unit Tests"
 msgstr "单元测试"
 
-#: ../../development/testing.md:96 5c8838211cf34e3483cc316386175808
+#: ../../development/testing.md:96 433cc56a2ab747358821420b229572c4
 msgid "Test individual functions and modules in isolation:"
 msgstr "独立测试单个函数和模块："
 
-#: ../../development/testing.md:102 cd84b0d65fbc401f897f4b05fec5a315
+#: ../../development/testing.md:102 4388acc388cc4ab9a573bae18b3d77e6
 msgid "Integration Tests"
 msgstr "集成测试"
 
-#: ../../development/testing.md:104 14d7ec7afa204807a81da3b5e988fdd9
+#: ../../development/testing.md:104 30b66044d7514b0aa36ddcd5c439a2fa
 msgid "Test interactions between modules (e.g., API routes with database):"
 msgstr "测试模块之间的交互（例如 API 路由与数据库）："
 
-#: ../../development/testing.md:110 fb21fd04de8245f3bdc8b176fa6fa9a2
+#: ../../development/testing.md:110 26691c16be0a4860942e926f286b1770
+msgid "Production Artifact Gate"
+msgstr "生产产物门禁"
+
+#: ../../development/testing.md:112 aad835f3add4414e9537f7e111a39f66
+msgid "Run the authoritative production build with:"
+msgstr "使用以下命令运行权威生产构建："
+
+#: ../../development/testing.md:118 e3a327055bd84c2289f3d7618be91ad6
+msgid ""
+"The build uses Webpack and automatically invokes `npm run "
+"verify:standalone`. The verifier requires the compiled authentication "
+"proxy and fails if `.next/standalone` contains runtime databases, active "
+"environment files, backups, application source, tests, documentation, or "
+"local scratch directories. New runtime state must stay outside the Docker"
+" build context. Only relax the verifier for an asset that the production "
+"runtime intentionally needs, and verify the resulting Docker image "
+"separately."
+msgstr ""
+"构建使用 Webpack，并自动调用 `npm run verify:standalone`。校验器要求包含已编译的认证代理；如果 "
+"`.next/standalone` 中出现运行时数据库、活动环境文件、备份、应用源码、测试、文档或本地临时目录，构建将失败。"
+"新的运行时状态必须保留在 Docker 构建上下文之外。只有生产运行时确实需要某项资源时才放宽校验器，"
+"并应单独验证生成的 Docker 镜像。"
+
+#: ../../development/testing.md:126 b95ca15847ae4470ad59bf7112498e59
 msgid "Best Practices"
 msgstr "最佳实践"
 
-#: ../../development/testing.md:112 9384c6cb594641d88e8e9e94939f5cb4
+#: ../../development/testing.md:128 7932db8e9eb64fc18af46c586cd47d94
 msgid ""
 "**Co-locate** test files with source files (e.g., `module.test.ts` next "
 "to `module.ts`)"
 msgstr "将测试文件与源文件**放在一起**（例如 `module.test.ts` 与 `module.ts` 相邻）"
 
-#: ../../development/testing.md:113 bb51585771204e70b9bdf97b3b8b0c06
+#: ../../development/testing.md:129 5a716990353f4458a402693f7b4b58b5
 msgid "**Use descriptive names** for test cases that explain expected behavior"
 msgstr "为测试用例**使用描述性名称**，说明预期行为"
 
-#: ../../development/testing.md:114 d044f9bce8ca48a08dd75c933fee30be
+#: ../../development/testing.md:130 0ca8c9917721468aa69e33aa7a43cc5a
 msgid "**Test edge cases** — empty inputs, null values, boundary conditions"
 msgstr "**测试边界情况** —— 空输入、null 值、边界条件"
 
-#: ../../development/testing.md:115 795aeb9a824845aab98148c98ed28031
+#: ../../development/testing.md:131 95cdb1687e9e43d9be79de558e5804cb
 msgid "**Mock external dependencies** — API calls, file system operations"
 msgstr "**模拟外部依赖** —— API 调用、文件系统操作"
 
-#: ../../development/testing.md:116 139fd12ce4574e648028c80297fc4ee6
+#: ../../development/testing.md:132 b0d43d7ec51c411988d62d62d5420745
 msgid "**Keep tests focused** — each test should verify one specific behavior"
 msgstr "**保持测试聚焦** —— 每个测试应验证一个特定行为"
