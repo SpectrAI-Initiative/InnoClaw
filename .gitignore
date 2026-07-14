@@ -49,8 +49,12 @@ yarn-error.log*
 # research history
 history/
 
-# data
+# runtime state
 /data/
+/backups/
+/logs/
+/outputs/
+/workspaces/
 
 # typescript
 *.tsbuildinfo
