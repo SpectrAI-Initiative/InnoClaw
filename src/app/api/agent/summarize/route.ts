@@ -10,6 +10,7 @@ import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import enMessages from "@/i18n/messages/en.json";
 import zhMessages from "@/i18n/messages/zh.json";
+import { requireWorkspaceAccess } from "@/lib/auth/ownership";
 
 /**
  * Convert UIMessage-like objects into a plain-text transcript for summarization.
@@ -75,6 +76,11 @@ export async function POST(req: NextRequest) {
         { error: "Missing required fields" },
         { status: 400 }
       );
+    }
+
+    const access = await requireWorkspaceAccess(req, workspaceId);
+    if (access instanceof NextResponse) {
+      return access;
     }
 
     if (!isAIAvailable()) {
