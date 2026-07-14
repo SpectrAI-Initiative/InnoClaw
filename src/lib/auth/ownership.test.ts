@@ -26,6 +26,7 @@ import {
   ownedScheduledTaskFilter,
   ownedSkillFilter,
   ownedWorkspaceFilter,
+  requireExperimentRunAccess,
   requireWorkspacePathsAccess,
   requireWorkspaceProvisioningPathsAccess,
 } from "./ownership";
@@ -72,6 +73,16 @@ function temporaryRoot(): string {
 function mockWorkspaceRows(rows: Array<{ folderPath: string }>): void {
   const where = vi.fn().mockResolvedValue(rows);
   const from = vi.fn().mockReturnValue({ where });
+  vi.spyOn(db, "select").mockReturnValue({ from } as never);
+}
+
+function mockExperimentRunRow(
+  row: { id: string; workspaceId: string } | undefined,
+): void {
+  const limit = vi.fn().mockResolvedValue(row ? [{ run: row }] : []);
+  const where = vi.fn().mockReturnValue({ limit });
+  const innerJoin = vi.fn().mockReturnValue({ where });
+  const from = vi.fn().mockReturnValue({ innerJoin });
   vi.spyOn(db, "select").mockReturnValue({ from } as never);
 }
 
@@ -234,5 +245,36 @@ describe("ownership helpers", () => {
       auth: localAuth,
       canonicalPaths: [path.join(fs.realpathSync(root), "users", "real-user-id", "first-workspace")],
     });
+  });
+
+  it("returns an accessible experiment run with its auth context", async () => {
+    process.env.AUTH_MODE = "local";
+    serverMocks.requireAuth.mockResolvedValue(localAuth);
+    mockExperimentRunRow({ id: "run-a", workspaceId: "workspace-a" });
+
+    const result = await requireExperimentRunAccess(
+      new NextRequest("http://localhost/api/research-exec/runs/run-a"),
+      "run-a",
+    );
+
+    expect(result).not.toBeInstanceOf(NextResponse);
+    expect(result).toMatchObject({
+      auth: localAuth,
+      run: { id: "run-a", workspaceId: "workspace-a" },
+    });
+  });
+
+  it("returns 403 when an experiment run is outside the caller's workspaces", async () => {
+    process.env.AUTH_MODE = "local";
+    serverMocks.requireAuth.mockResolvedValue(localAuth);
+    mockExperimentRunRow(undefined);
+
+    const result = await requireExperimentRunAccess(
+      new NextRequest("http://localhost/api/research-exec/runs/run-b"),
+      "run-b",
+    );
+
+    expect(result).toBeInstanceOf(NextResponse);
+    expect((result as NextResponse).status).toBe(403);
   });
 });

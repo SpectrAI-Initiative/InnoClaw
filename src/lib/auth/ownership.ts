@@ -1,7 +1,7 @@
 import { and, eq, isNull, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { deepResearchSessions, hfDatasets, notes, scheduledTasks, skills, workspaces } from "@/lib/db/schema";
+import { deepResearchSessions, experimentRuns, hfDatasets, notes, scheduledTasks, skills, workspaces } from "@/lib/db/schema";
 import { canonicalizePath, isPathWithinRoot } from "@/lib/files/canonical-path";
 import { forbiddenResponse, requireAuth, type AuthContext } from "./server";
 import { isAuthDisabled } from "./mode";
@@ -161,6 +161,32 @@ export async function requireDeepResearchSessionAccess(
   }
 
   return { auth, session: session.session };
+}
+
+export async function requireExperimentRunAccess(
+  request: NextRequest,
+  runId: string,
+): Promise<{
+  auth: AuthContext;
+  run: typeof experimentRuns.$inferSelect;
+} | NextResponse> {
+  const auth = await requireAuth(request);
+  if (auth instanceof NextResponse) {
+    return auth;
+  }
+
+  const [row] = await db
+    .select({ run: experimentRuns })
+    .from(experimentRuns)
+    .innerJoin(workspaces, eq(experimentRuns.workspaceId, workspaces.id))
+    .where(and(eq(experimentRuns.id, runId), ownedWorkspaceFilter(auth)))
+    .limit(1);
+
+  if (!row) {
+    return forbiddenResponse("Experiment run access denied");
+  }
+
+  return { auth, run: row.run };
 }
 
 export async function requirePathAccess(

@@ -1,6 +1,20 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { NextRequest, NextResponse } from "next/server";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const serverMocks = vi.hoisted(() => ({
+  requireAuth: vi.fn(),
+}));
+
+vi.mock("./server", async () => {
+  const actual = await vi.importActual<typeof import("./server")>("./server");
+  return {
+    ...actual,
+    requireAuth: serverMocks.requireAuth,
+  };
+});
+
 import { ANONYMOUS_AUTH_CONTEXT } from "./mode";
-import { canUseHighRiskExecution } from "./privileges";
+import { canUseHighRiskExecution, requireHighRiskExecution } from "./privileges";
 import type { AuthContext } from "./server";
 
 const originalAuthMode = process.env.AUTH_MODE;
@@ -28,6 +42,7 @@ function authContext(role: "admin" | "user"): AuthContext {
 }
 
 afterEach(() => {
+  vi.clearAllMocks();
   if (originalAuthMode === undefined) delete process.env.AUTH_MODE;
   else process.env.AUTH_MODE = originalAuthMode;
   if (originalSingleAdmin === undefined) delete process.env.AUTH_SINGLE_ADMIN;
@@ -61,5 +76,45 @@ describe("high-risk execution privileges", () => {
     process.env.AUTH_SINGLE_ADMIN = "true";
 
     expect(canUseHighRiskExecution(ANONYMOUS_AUTH_CONTEXT)).toBe(true);
+  });
+
+  it("returns 403 for an ordinary strict-mode request", async () => {
+    process.env.AUTH_MODE = "local";
+    process.env.AUTH_SINGLE_ADMIN = "true";
+    serverMocks.requireAuth.mockResolvedValue(authContext("user"));
+
+    const result = await requireHighRiskExecution(
+      new NextRequest("http://localhost/api/cluster/status"),
+    );
+
+    expect(result).toBeInstanceOf(NextResponse);
+    expect((result as NextResponse).status).toBe(403);
+  });
+
+  it("returns the administrator context for a privileged request", async () => {
+    process.env.AUTH_MODE = "local";
+    process.env.AUTH_SINGLE_ADMIN = "true";
+    const admin = authContext("admin");
+    serverMocks.requireAuth.mockResolvedValue(admin);
+
+    await expect(
+      requireHighRiskExecution(
+        new NextRequest("http://localhost/api/cluster/status"),
+      ),
+    ).resolves.toEqual(admin);
+  });
+
+  it("passes through an authentication failure", async () => {
+    const unauthorized = NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 },
+    );
+    serverMocks.requireAuth.mockResolvedValue(unauthorized);
+
+    const result = await requireHighRiskExecution(
+      new NextRequest("http://localhost/api/cluster/status"),
+    );
+
+    expect(result).toBe(unauthorized);
   });
 });
