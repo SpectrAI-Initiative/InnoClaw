@@ -56,7 +56,7 @@ async function hasValidSessionMarker(request: NextRequest): Promise<boolean> {
   return (await signToken(token)) === signature;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const authDisabled = isAuthDisabled();
 
