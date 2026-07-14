@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { execFile } from "child_process";
 import { buildSafeExecEnv } from "@/lib/env";
 import { getK8sConfig } from "@/lib/cluster/config";
+import { requireHighRiskExecution } from "@/lib/auth/privileges";
 
 const baseExecEnv = buildSafeExecEnv();
 
@@ -13,6 +14,11 @@ const baseExecEnv = buildSafeExecEnv();
  * The optional `cluster` query parameter selects the target cluster (default: a3).
  */
 export async function GET(request: NextRequest) {
+  const access = await requireHighRiskExecution(request);
+  if (access instanceof NextResponse) {
+    return access;
+  }
+
   // Load config from DB (primary) with env fallback
   const k8sConfig = await getK8sConfig();
   const kubeconfigPath = k8sConfig.kubeconfigPath;

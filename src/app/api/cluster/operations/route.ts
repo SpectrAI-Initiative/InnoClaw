@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listClusterOps } from "@/lib/cluster/operations";
 import { requireWorkspaceAccess } from "@/lib/auth/ownership";
+import { canUseHighRiskExecution } from "@/lib/auth/privileges";
+import { forbiddenResponse, requireAuth } from "@/lib/auth/server";
 
 /**
  * GET /api/cluster/operations?workspaceId=xxx&limit=50&offset=0
@@ -10,6 +12,11 @@ import { requireWorkspaceAccess } from "@/lib/auth/ownership";
  */
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return auth;
+    }
+
     const { searchParams } = new URL(request.url);
     const workspaceId = searchParams.get("workspaceId") ?? undefined;
     const limit = Math.min(
@@ -23,6 +30,8 @@ export async function GET(request: NextRequest) {
       if (access instanceof NextResponse) {
         return access;
       }
+    } else if (!canUseHighRiskExecution(auth)) {
+      return forbiddenResponse("High-risk execution access required");
     }
 
     const ops = await listClusterOps({ workspaceId, limit, offset });
