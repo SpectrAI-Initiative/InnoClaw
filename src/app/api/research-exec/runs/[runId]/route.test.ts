@@ -103,7 +103,6 @@ describe("GET /api/research-exec/runs/[runId]", () => {
     expect(mocks.selectWhere).not.toHaveBeenCalled();
   });
 });
-
 describe("PATCH /api/research-exec/runs/[runId]", () => {
   it("rejects an inaccessible run before mutation", async () => {
     mocks.requireExperimentRunAccess.mockResolvedValue(
@@ -144,4 +143,3 @@ describe("PATCH /api/research-exec/runs/[runId]", () => {
     expect(mocks.update).toHaveBeenCalledOnce();
   });
 });
-

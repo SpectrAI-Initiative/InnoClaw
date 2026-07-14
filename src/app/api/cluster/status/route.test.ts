@@ -30,7 +30,6 @@ beforeEach(() => {
     clusterContextMap: {},
   });
 });
-
 describe("GET /api/cluster/status", () => {
   it("rejects an ordinary strict-mode user before loading cluster config", async () => {
     mocks.requireHighRiskExecution.mockResolvedValue(
@@ -60,4 +59,3 @@ describe("GET /api/cluster/status", () => {
     expect(mocks.getK8sConfig).toHaveBeenCalledOnce();
   });
 });
-

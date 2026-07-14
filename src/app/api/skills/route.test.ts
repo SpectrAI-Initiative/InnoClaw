@@ -117,4 +117,3 @@ describe("GET /api/skills", () => {
     expect(mocks.queryWhere).toHaveBeenCalledOnce();
   });
 });
-
