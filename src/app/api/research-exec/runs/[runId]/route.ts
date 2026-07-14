@@ -2,21 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { experimentRuns } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { requireExperimentRunAccess } from "@/lib/auth/ownership";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ runId: string }> },
 ) {
   const { runId } = await params;
-
-  const [run] = await db
-    .select()
-    .from(experimentRuns)
-    .where(eq(experimentRuns.id, runId));
-
-  if (!run) {
-    return NextResponse.json({ error: "Run not found" }, { status: 404 });
+  const access = await requireExperimentRunAccess(req, runId);
+  if (access instanceof NextResponse) {
+    return access;
   }
+  const run = access.run;
 
   return NextResponse.json({
     ...run,
@@ -36,6 +33,10 @@ export async function PATCH(
 ) {
   try {
     const { runId } = await params;
+    const access = await requireExperimentRunAccess(req, runId);
+    if (access instanceof NextResponse) {
+      return access;
+    }
     const body = await req.json();
 
     const updates: Record<string, unknown> = {
@@ -57,12 +58,12 @@ export async function PATCH(
     await db
       .update(experimentRuns)
       .set(updates)
-      .where(eq(experimentRuns.id, runId));
+      .where(eq(experimentRuns.id, access.run.id));
 
     const [updated] = await db
       .select()
       .from(experimentRuns)
-      .where(eq(experimentRuns.id, runId));
+      .where(eq(experimentRuns.id, access.run.id));
 
     if (!updated) {
       return NextResponse.json({ error: "Run not found" }, { status: 404 });
