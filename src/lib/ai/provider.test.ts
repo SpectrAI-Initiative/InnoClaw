@@ -231,7 +231,7 @@ describe("getPerModelProvider – base URL resolution", () => {
 
     const mod = await importProviderModule([
       { key: "llm_provider", value: "anthropic" },
-      { key: "llm_model", value: "claude-sonnet-4-20250514" },
+      { key: "llm_model", value: "claude-sonnet-5-5" },
     ]);
 
     await expect(mod.getConfiguredModelSelection()).resolves.toEqual({
@@ -243,12 +243,12 @@ describe("getPerModelProvider – base URL resolution", () => {
   it("falls back to stored settings when .env.local does not define the model selection", async () => {
     const mod = await importProviderModule([
       { key: "llm_provider", value: "anthropic" },
-      { key: "llm_model", value: "claude-sonnet-4-20250514" },
+      { key: "llm_model", value: "claude-sonnet-5-5" },
     ]);
 
     await expect(mod.getConfiguredModelSelection()).resolves.toEqual({
       providerId: "anthropic",
-      modelId: "claude-sonnet-4-20250514",
+      modelId: "claude-sonnet-5-5",
     });
   });
 

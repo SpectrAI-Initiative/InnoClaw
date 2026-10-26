@@ -11,7 +11,7 @@ describe("modelSupportsVision", () => {
 
   it("keeps vision enabled for multimodal models", () => {
     expect(modelSupportsVision("openai", "gpt-4o")).toBe(true);
-    expect(modelSupportsVision("anthropic", "claude-sonnet-4-20250514")).toBe(true);
+    expect(modelSupportsVision("anthropic", "claude-sonnet-5-5")).toBe(true);
     expect(modelSupportsVision("moonshot", "kimi-k2.5")).toBe(true);
     expect(modelSupportsVision("qwen", "qwen3.5-397b")).toBe(true);
   });

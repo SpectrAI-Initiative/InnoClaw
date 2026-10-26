@@ -19,10 +19,10 @@ describe("innoclaw-cli model client", () => {
   });
 
   it("parses /model set <provider> <model>", () => {
-    expect(parseModelCommandArgs(["set", "anthropic", "claude-sonnet-4-20250514"], "openai")).toEqual({
+    expect(parseModelCommandArgs(["set", "anthropic", "claude-sonnet-5-5"], "openai")).toEqual({
       action: "set",
       provider: "anthropic",
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-5-5",
     });
   });
 

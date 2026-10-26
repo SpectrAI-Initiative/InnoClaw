@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     // Use a fast/cheap model for buddy interactions
     let model;
     try {
-      const override = getModelFromOverride("anthropic", "claude-3-5-haiku-20241022");
+      const override = getModelFromOverride("anthropic", "claude-haiku-4-5-20251001");
       model = override.model;
     } catch {
       const configured = await getConfiguredModelWithProvider();
