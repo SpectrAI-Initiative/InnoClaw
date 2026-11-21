@@ -37,6 +37,15 @@ interface NotesPanelProps {
   workspaceId: string;
 }
 
+/**
+ * Note editors keep a fixed, viewport-relative height and scroll internally.
+ * The shared Textarea uses `field-sizing-content` (grows with its content), so a
+ * long note would otherwise make the dialog taller than the screen, pushing the
+ * header and Save button out of reach.
+ */
+const NOTE_TEXTAREA_CLASS =
+  "field-sizing-fixed h-[45vh] min-h-40 resize-y overflow-y-auto";
+
 export function NotesPanel({ workspaceId }: NotesPanelProps) {
   const t = useTranslations("notes");
   const tCommon = useTranslations("common");
@@ -322,7 +331,7 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
 
       {/* New Note Dialog */}
       <Dialog open={showNewNote} onOpenChange={setShowNewNote}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t("addNote")}</DialogTitle>
           </DialogHeader>
@@ -340,6 +349,7 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
                 rows={6}
+                className={NOTE_TEXTAREA_CLASS}
               />
             </div>
             <div className="flex justify-end gap-2">
@@ -362,7 +372,7 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
         open={!!viewingNote}
         onOpenChange={() => setViewingNote(null)}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[90vh] sm:max-w-2xl">
           <DialogHeader>
             <div className="flex items-center justify-between pr-6">
               <DialogTitle>{viewingNote?.title}</DialogTitle>
@@ -390,7 +400,7 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
         open={!!editingNote}
         onOpenChange={() => setEditingNote(null)}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{t("editNote")}</DialogTitle>
           </DialogHeader>
@@ -408,7 +418,7 @@ export function NotesPanel({ workspaceId }: NotesPanelProps) {
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
                 rows={12}
-                className="font-mono text-sm"
+                className={`${NOTE_TEXTAREA_CLASS} font-mono text-sm`}
               />
             </div>
             <div className="flex justify-end gap-2">
