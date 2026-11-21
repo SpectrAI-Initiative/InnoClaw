@@ -407,6 +407,7 @@
     "fetching": "查找中...",
     "fetchError": "未找到该论文",
     "fetchErrorMissingInput": "请输入论文名称或 arXiv ID",
+    "fetchErrorUnavailable": "论文检索服务暂时不可用（可能被限流），请稍后重试",
     "directUrl": "直接链接",
     "chatPlaceholder": "关于这篇论文有什么问题...",
     "chatTitle": "论文讨论",

@@ -107,15 +107,15 @@ export function PaperSearchBar({
   const handleTitleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && titleInput.trim()) {
       e.preventDefault();
+      // Keep the title in the box so the user can see and refine what was searched.
       onFetchTitle(titleInput.trim());
-      setTitleInput("");
     }
   };
 
   const handleFetchClick = () => {
     if (titleInput.trim()) {
+      // Keep the title in the box so the user can see and refine what was searched.
       onFetchTitle(titleInput.trim());
-      setTitleInput("");
     }
   };
 
