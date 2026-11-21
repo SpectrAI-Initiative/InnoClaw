@@ -159,7 +159,7 @@ function createManagedSession(baseUrl) {
 }
 
 async function createApiContext(baseUrl, { authenticate = true, interactiveAuth = true } = {}) {
-  await ensureServerReady({ appRoot: APP_ROOT, baseUrl });
+  await ensureServerReady({ baseUrl });
   const sessionManager = createManagedSession(baseUrl);
   await sessionManager.load();
   if (authenticate) {
@@ -298,7 +298,7 @@ async function handleAuth(command, flags) {
 
   if (action === "logout") {
     try {
-      await ensureServerReady({ appRoot: APP_ROOT, baseUrl });
+      await ensureServerReady({ baseUrl });
     } catch {
       // Clear cached CLI state even if the app is offline.
     }
@@ -307,7 +307,7 @@ async function handleAuth(command, flags) {
     return;
   }
 
-  await ensureServerReady({ appRoot: APP_ROOT, baseUrl });
+  await ensureServerReady({ baseUrl });
 
   if (action === "login") {
     await sessionManager.ensureAuthenticated({ interactive: true });

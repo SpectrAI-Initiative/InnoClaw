@@ -4,52 +4,31 @@ This page describes how to customize InnoClaw's behavior through configuration o
 
 ## Environment-Based Configuration
 
-All configuration is done through environment variables in your `.env.local` file. See [Environment Variables](../getting-started/environment-variables.md) for a complete reference.
+All configuration is done through `.env.docker.local` or `.env.docker.online`. See [Environment Variables](../getting-started/environment-variables.md) for the full list.
 
 ## AI Provider Settings
 
 ### Selecting a Provider
 
-InnoClaw supports multiple AI providers. Configure your preferred provider by setting the appropriate API key:
+Chat uses Tencent Cloud TokenHub DeepSeek. The Settings UI can switch between the two catalog models:
 
 ```ini
-# Use OpenAI
-OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
-
-# Use Anthropic Claude
-ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
-
-# Use Google Gemini
-GEMINI_API_KEY=your-gemini-key
-
-# Or configure multiple and switch in the Settings UI
+DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+DEEPSEEK_BASE_URL=https://tokenhub.tencentmaas.com/v1
 ```
 
 ### Default Provider and Model
 
-Set the default LLM provider and model used when the application starts:
-
 ```ini
-LLM_PROVIDER=openai       # openai, anthropic, or gemini
-LLM_MODEL=gpt-4o-mini     # Any model ID from the selected provider
+LLM_PROVIDER=deepseek
+LLM_MODEL=deepseek-v4.1-flash   # or deepseek-v4-pro
 ```
 
-These defaults can be overridden at any time via the Settings UI.
+These defaults can be overridden in the Settings UI. Models outside this catalog are rejected.
 
-### Using Custom Endpoints
+### Using a Custom Endpoint
 
-For third-party compatible services, proxies, or self-hosted models:
-
-```ini
-# Custom OpenAI-compatible endpoint
-OPENAI_BASE_URL=https://api.your-provider.com/v1
-
-# Custom Anthropic endpoint
-ANTHROPIC_BASE_URL=https://api.your-provider.com
-
-# Custom Gemini-compatible endpoint (OpenAI-compatible proxy)
-GEMINI_BASE_URL=https://api.your-provider.com
-```
+`DEEPSEEK_BASE_URL` already points at TokenHub. Set it only when the OpenAI-compatible endpoint changes. A per-model variable such as `DEEPSEEK_DEEPSEEK_V4_PRO_BASE_URL` overrides it for that model.
 
 ### Separate Embedding Configuration
 
@@ -77,7 +56,7 @@ Higher values allow more complex multi-step tasks but consume more tokens.
 
 Access the settings page at `/settings` to:
 
-- **Switch AI Provider** — Toggle between OpenAI, Anthropic, and Gemini
+- **Switch model** — Choose DeepSeek V4.1 Flash or DeepSeek V4 Pro
 - **Select Model** — Choose the specific model to use for chat
 - **View API Status** — Check which API keys are configured
 - **View Workspace Roots** — See the configured workspace root directories
@@ -128,7 +107,7 @@ npx drizzle-kit migrate
 
 ## Build Configuration
 
-If the project resides on a network filesystem (NFS, CIFS, etc.) or another mount without local file locking, InnoClaw automatically disables Next's dist-dir lock so `npm run dev` can start. `NEXT_BUILD_DIR` is still available if you want an alternate build directory inside the repo:
+`NEXT_BUILD_DIR` can point at another build directory inside the repository, for example when the checkout is on a network filesystem:
 
 ```ini
 NEXT_BUILD_DIR=.next-local

@@ -5,11 +5,7 @@ import type { DeepResearchConfig } from "./types";
 export type ModelRoute = { provider: string; modelId: string };
 
 const LONG_FORM_FINAL_REPORT_PREFERENCES: ModelRoute[] = [
-  { provider: "anthropic", modelId: "claude-opus-4-6" },
-  { provider: "gemini", modelId: "gemini-2.5-pro" },
-  { provider: "openai", modelId: "gpt-4.1" },
-  { provider: "moonshot", modelId: "kimi-k2.5" },
-  { provider: "qwen", modelId: "Qwen3-235B" },
+  { provider: "deepseek", modelId: "deepseek-v4-pro" },
 ];
 
 function isConfiguredProvider(providerId: string): boolean {

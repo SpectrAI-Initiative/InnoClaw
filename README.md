@@ -48,19 +48,22 @@ Instead of juggling separate tools for literature, notes, code, and automation, 
 
 ## 3-Minute Quick Start
 
-Requires **Node.js 24+** (`package.json` is the source of truth). If you use `nvm`: `nvm install && nvm use`.
+Only Docker startup is supported. There are two env files and nothing else:
+
+| 环境 | 配置文件 | 启动 |
+|---|---|---|
+| 本地 | `.env.docker.local` | Windows：`.\scripts\docker-up-local.ps1`；Ubuntu：`./scripts/docker-up-local.sh` |
+| 线上 | `.env.docker.online` | `./scripts/docker-up-online.sh` |
 
 ```bash
 git clone https://github.com/SpectrAI-Initiative/InnoClaw.git
 cd InnoClaw
-npm install
-cp .env.example .env.local          # then edit: set WORKSPACE_ROOTS and at least one API key
-mkdir -p ./data
-npx drizzle-kit migrate
-npm run dev                          # open http://localhost:3000
+.\scripts\docker-up-local.ps1
 ```
 
-After the UI opens: **Settings** → configure a model provider → open a workspace → click **Sync** → start chatting.
+Open http://127.0.0.1:3000. Edit `.env.docker.local`, set `DEEPSEEK_API_KEY`, then run the script again.
+
+After the UI opens: register, open a workspace, click **Sync**, then chat. The active models are DeepSeek V4.1 Flash and DeepSeek V4 Pro.
 
 ### Optional CLI
 
@@ -70,55 +73,26 @@ innoclaw
 innoclaw run --prompt "Summarize the current workspace"
 ```
 
-The CLI uses the same local app runtime as the web UI. When auth is enabled, it auto-starts the app, opens the browser login page on `localhost`, and stores a dedicated CLI session after sign-in. For trusted headless automation, start the app with authentication disabled.
-
-Headless local run mode:
-
-```bash
-npm run dev:no-auth
-```
+The CLI talks to the Dockerized app. Start the local container first. For trusted headless automation, set `AUTH_MODE=disabled` in `.env.docker.local` before starting; anyone who can reach the service then has admin access.
 
 > **Security**: InnoClaw includes shell execution and remote job submission capabilities. See [SECURITY.md](SECURITY.md) for deployment hardening and trust boundary documentation.
 
 <details>
 <summary>Environment variables, upgrade flow, and advanced setup</summary>
 
-Set `WORKSPACE_ROOTS` in `.env.local` to one or more absolute paths where your research folders live:
-
-```ini
-WORKSPACE_ROOTS=/absolute/path/to/workspaces
-OPENAI_API_KEY=sk-...
-```
-
-- `WORKSPACE_ROOTS` directories must already exist before startup
-- `npx drizzle-kit migrate` creates or upgrades the SQLite schema at `./data/innoclaw.db`
-- If the repo lives on NFS/CIFS or another mount without local file locking, InnoClaw now disables Next's dist-dir lock automatically so `npm run dev` can start. You should still set `DATABASE_URL` to a local disk path for SQLite. `NEXT_BUILD_DIR`, if used, must stay inside the repo (for example `.next-local`).
+Edit `WORKSPACE_ROOTS` and the API key in `.env.docker.local` (local) or `.env.docker.online` (online). Paths in those files are container paths such as `/research`.
 
 **Upgrading:**
 
 ```bash
-git fetch --tags
-git checkout vX.Y.Z      # or: git pull (if tracking main)
-npm install
-npx drizzle-kit migrate
-npm run build
+git pull
+.\scripts\docker-up-local.ps1
+# Online VM: ./scripts/docker-up-online.sh
 ```
 
-Check `CHANGELOG.md` before every upgrade. Compare `.env.local` against `.env.example` for new variables.
-
-For OS-specific prerequisites and production deployment: see [Installation](docs/getting-started/installation.md) and [Deployment](docs/getting-started/deployment.md).
+Day-to-day start and stop steps are in [startup.md](docs/startup.md). Volumes, backups, and upgrades are in the [Docker guide](docs/docker.md). HTTPS and the administrator account are in [Deployment](docs/getting-started/deployment.md).
 
 </details>
-
-### Docker Deployment
-
-```bash
-git clone https://github.com/SpectrAI-Initiative/InnoClaw.git && cd InnoClaw
-cp .env.production.example .env.production.local   # edit: set API key + WORKSPACE_ROOTS
-docker compose up -d                                # open http://localhost:3000
-```
-
-See the full [Docker Deployment Guide](docs/docker.md) for volumes, reverse proxy, backups, and upgrades.
 
 ---
 
@@ -272,7 +246,7 @@ Go from code inspection to job submission and result analysis. Review repositori
 | Deep Research | AI-driven multi-phase research with workflow graph and role-based execution |
 | Research Execution | Orchestrate remote experiment loops with monitoring and approval gates |
 | Multi-Agent Sessions | Keep separate execution contexts across tabs and projects |
-| Multi-LLM Support | Use OpenAI, Anthropic, Gemini, and compatible endpoints |
+| Models | Tencent Cloud TokenHub DeepSeek: V4.1 Flash and V4 Pro |
 
 ---
 
@@ -290,8 +264,8 @@ Go from code inspection to job submission and result analysis. Review repositori
 
 ## Documentation
 
-- **Start here** — [Overview](docs/getting-started/overview.md), [Installation](docs/getting-started/installation.md)
-- **Configure and deploy** — [Deployment](docs/getting-started/deployment.md), [Environment Variables](docs/getting-started/environment-variables.md), [Configuration](docs/usage/configuration.md)
+- **Start here** — [Startup](docs/startup.md), [Installation](docs/getting-started/installation.md), [Overview](docs/getting-started/overview.md)
+- **Configure and deploy** — [Docker](docs/docker.md), [Deployment](docs/getting-started/deployment.md), [Environment Variables](docs/getting-started/environment-variables.md), [Configuration](docs/usage/configuration.md)
 - **Use the product** — [Features](docs/usage/features.md), [API Reference](docs/usage/api-reference.md)
 - **Troubleshoot and contribute** — [Troubleshooting](docs/troubleshooting/faq.md), [Development Guide](docs/development/contributing.md)
 

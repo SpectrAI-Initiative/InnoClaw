@@ -171,7 +171,7 @@ InnoClaw は研究中心の知識作業向けセルフホスト型 Web アプリ
 - **研究向けワークフロー** - 論文読解、構造化されたマルチエージェント討論、文献からの新方向生成を行えます
 - **科学スキルを内蔵** - 創薬、ゲノミクス、タンパク質科学などにまたがる 206 個の SCP 科学スキルを導入・活用できます
 - **会話だけで終わらない** - 読解や計画から、ジョブ送信、監視、結果収集、次の提案へ進めます
-- **セルフホストと多モデルに対応** - OpenAI、Anthropic、Gemini、および互換エンドポイントで動作します
+- **セルフホスト** - Docker だけで起動します。モデルは Tencent Cloud TokenHub の DeepSeek V4.1 Flash と DeepSeek V4 Pro です
 
 <a id="ja-quick-start"></a>
 
@@ -180,14 +180,12 @@ InnoClaw は研究中心の知識作業向けセルフホスト型 Web アプリ
 ```bash
 git clone https://github.com/SpectrAI-Initiative/InnoClaw.git
 cd InnoClaw
-npm install
-npm run dev
+./scripts/docker-up-local.sh
 ```
 
-- `http://localhost:3000` を開く
-- Settings ページで AI プロバイダーを 1 つ設定する
-- ワークスペースを開くか clone したら `Sync` を押して RAG インデックスを作成する
-- OS ごとの前提条件や本番デプロイは `getting-started/installation.md` を参照
+- 初回実行で `.env.docker.local` が作られます。`DEEPSEEK_API_KEY` を入れて、もう一度起動します
+- http://127.0.0.1:3000 を開く
+- 手順の詳細は `startup.md` と `getting-started/installation.md` を参照
 
 ## 🛠️ できること
 
@@ -260,7 +258,7 @@ npm run dev
 | スキルシステム | 再利用可能な科学スキルとワークフローを導入 |
 | 研究実行 | 承認ゲートと監視付きで実験ループを実行 |
 | マルチエージェントセッション | タブやプロジェクトごとに独立した実行コンテキストを保持 |
-| マルチ LLM 対応 | OpenAI、Anthropic、Gemini、互換エンドポイントを利用 |
+| モデル | Tencent Cloud TokenHub DeepSeek: V4.1 Flash と V4 Pro |
 
 ## 📚 ドキュメント
 

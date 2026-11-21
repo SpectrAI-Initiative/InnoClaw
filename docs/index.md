@@ -1,10 +1,17 @@
 # InnoClaw Documentation
 
-Welcome to the **InnoClaw** documentation — an AI-powered research assistant web application similar to Google NotebookLM.
+InnoClaw is a self-hosted research workspace. It runs only through Docker. Chat uses Tencent Cloud TokenHub DeepSeek.
 
-Users open server-side folders as workspaces, browse and manage files, and chat with AI grounded in workspace files via RAG (Retrieval-Augmented Generation).
+Read the page that matches the job. Do not follow an older page that says `npm run dev`, `.env.local`, or PM2.
 
-For contributor workflow inside a repository clone, start with the repository root `AGENTS.md`, then use the development pages below for detailed setup, testing, and documentation procedures.
+| Job | Page |
+|-----|------|
+| Start the app on this machine or the Ubuntu VM | [Installation](getting-started/installation.md). The in-repo Chinese note is `startup.md` |
+| Volumes, backup, upgrade, container logs | [Docker](docker.md) |
+| HTTPS, login limits, the administrator account | [Deployment](getting-started/deployment.md) |
+| Every environment variable | [Environment Variables](getting-started/environment-variables.md) |
+| What the product does | [Overview](getting-started/overview.md), then [Features](usage/features.md) |
+| Change the code | Repository root `AGENTS.md`, then the development pages below |
 
 ```{toctree}
 :maxdepth: 2

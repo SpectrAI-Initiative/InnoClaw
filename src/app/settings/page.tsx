@@ -24,11 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { modelSupportsVision, PROVIDERS, CONTEXT_MODES } from "@/lib/ai/models";
-import {
-  resolveModelSelection,
-  type ModelCatalogEntry,
-} from "@/lib/ai/model-selection";
+import { modelSupportsVision, PROVIDERS, CONTEXT_MODES, DEFAULT_MODEL, DEFAULT_PROVIDER, isSelectableModel } from "@/lib/ai/models";
+import { resolveModelSelection } from "@/lib/ai/model-selection";
 import { cn } from "@/lib/utils";
 import { ScheduledTasksCard } from "@/components/scheduled-tasks/scheduled-tasks-card";
 import { useStyleTheme } from "@/lib/hooks/use-style-theme";
@@ -57,15 +54,10 @@ export default function SettingsPage() {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
   const [settings, setSettings] = useState<Settings | null>(null);
-  const [provider, setProvider] = useState("openai");
-  const [model, setModel] = useState("gpt-4o-mini");
-  const [customModel, setCustomModel] = useState("");
+  const [provider, setProvider] = useState<string>(DEFAULT_PROVIDER);
+  const [model, setModel] = useState(DEFAULT_MODEL);
   const [hfToken, setHfToken] = useState("");
   const [hfTokenSaving, setHfTokenSaving] = useState(false);
-  const [remoteModels, setRemoteModels] = useState<
-    { id: string; name: string }[]
-  >([]);
-  const [fetchingModels, setFetchingModels] = useState(false);
   const [contextMode, setContextMode] = useState("normal");
   const [maxMode, setMaxMode] = useState(true);
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
@@ -83,87 +75,22 @@ export default function SettingsPage() {
   });
   const [k8sSaving, setK8sSaving] = useState(false);
 
-  const mergeModelOptions = useCallback(
-    (providerId: string, remote: ModelCatalogEntry[] = []) => {
-      const knownModels = PROVIDERS[providerId as keyof typeof PROVIDERS]?.models || [];
-      const knownIds = new Set(knownModels.map((entry) => entry.id));
-      return [...knownModels, ...remote.filter((entry) => !knownIds.has(entry.id))];
+  const applyResolvedSelection = useCallback(
+    (providerId: string, requestedModel: string) => {
+      const catalog = PROVIDERS[providerId as keyof typeof PROVIDERS];
+      if (!catalog || !isSelectableModel(providerId, requestedModel)) {
+        setProvider(DEFAULT_PROVIDER);
+        setModel(DEFAULT_MODEL);
+        return;
+      }
+      const resolved = resolveModelSelection(
+        { provider: providerId, model: requestedModel },
+        [{ id: providerId, name: catalog.name, models: catalog.models }],
+      );
+      setProvider(providerId);
+      setModel(resolved && resolved.matchKind !== "unmatched" ? resolved.resolvedModel : DEFAULT_MODEL);
     },
     [],
-  );
-
-  const applyResolvedSelection = useCallback(
-    (providerId: string, requestedModel: string, remote: ModelCatalogEntry[] = []) => {
-      const trimmedModel = requestedModel.trim();
-      if (!trimmedModel) {
-        setModel("__custom__");
-        setCustomModel("");
-        return;
-      }
-
-      const providerName = PROVIDERS[providerId as keyof typeof PROVIDERS]?.name ?? providerId;
-      const resolved = resolveModelSelection(
-        { provider: providerId, model: trimmedModel },
-        [{
-          id: providerId,
-          name: providerName,
-          models: mergeModelOptions(providerId, remote),
-        }],
-        { unmatchedKind: remote.length > 0 ? "not-found" : "custom" },
-      );
-
-      if (resolved && resolved.matchKind !== "unmatched") {
-        setModel(resolved.resolvedModel);
-        setCustomModel("");
-        return;
-      }
-
-      setModel("__custom__");
-      setCustomModel(trimmedModel);
-    },
-    [mergeModelOptions],
-  );
-
-  const effectiveModel = model === "__custom__" ? customModel : model;
-
-  const fetchRemoteModels = useCallback(
-    async (
-      prov: string,
-      options?: {
-        silent?: boolean;
-        requestedModel?: string;
-      },
-    ) => {
-      setFetchingModels(true);
-      try {
-        const res = await fetch(`/api/models?provider=${prov}`);
-        const data = await res.json();
-        if (res.ok && Array.isArray(data.models)) {
-          setRemoteModels(data.models);
-          applyResolvedSelection(
-            prov,
-            options?.requestedModel ?? "",
-            data.models,
-          );
-          if (!options?.silent) {
-            toast.success(
-              t("fetchModelsSuccess", { count: data.models.length }),
-            );
-          }
-        } else {
-          if (!options?.silent) {
-            toast.error(data.error || tCommon("error"));
-          }
-        }
-      } catch {
-        if (!options?.silent) {
-          toast.error(tCommon("error"));
-        }
-      } finally {
-        setFetchingModels(false);
-      }
-    },
-    [applyResolvedSelection, t, tCommon],
   );
 
   useEffect(() => {
@@ -171,9 +98,8 @@ export default function SettingsPage() {
       .then((res) => res.json())
       .then((data) => {
         setSettings(data);
-        const prov = data.llmProvider || "openai";
-        setProvider(prov);
-        const m = data.llmModel || "gpt-4o-mini";
+        const prov = data.llmProvider || DEFAULT_PROVIDER;
+        const m = data.llmModel || DEFAULT_MODEL;
         applyResolvedSelection(prov, m);
         setContextMode(data.contextMode || "normal");
         setMaxMode(data.maxMode ?? true);
@@ -183,28 +109,30 @@ export default function SettingsPage() {
         if (data.k8sConfig) {
           setK8sConfig(data.k8sConfig);
         }
-        if (data.providerKeys?.[prov]) {
-          void fetchRemoteModels(prov, { silent: true, requestedModel: m });
-        }
       });
-  }, [applyResolvedSelection, fetchRemoteModels]);
+  }, [applyResolvedSelection]);
 
   const handleSave = async () => {
-    if (!effectiveModel.trim()) {
+    if (!model.trim()) {
       toast.error(tCommon("error"));
       return;
     }
     try {
-      await fetch("/api/settings", {
+      const response = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           llm_provider: provider,
-          llm_model: effectiveModel,
+          llm_model: model,
           context_mode: contextMode,
           max_mode: maxMode ? "true" : "false",
         }),
       });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        toast.error(data.error || tCommon("error"));
+        return;
+      }
       toast.success(tCommon("success"));
     } catch {
       toast.error(tCommon("error"));
@@ -328,30 +256,19 @@ export default function SettingsPage() {
 
   const providerModels =
     PROVIDERS[provider as keyof typeof PROVIDERS]?.models || [];
-  const mergedModelOptions = useMemo(
-    () => mergeModelOptions(provider, remoteModels),
-    [mergeModelOptions, provider, remoteModels],
-  );
   const resolvedCurrentSelection = useMemo(() => {
-    const trimmedModel = effectiveModel.trim();
-    if (!trimmedModel) return null;
-    const providerName = PROVIDERS[provider as keyof typeof PROVIDERS]?.name ?? provider;
+    const catalog = PROVIDERS[provider as keyof typeof PROVIDERS];
+    if (!catalog || !model.trim()) return null;
     return resolveModelSelection(
-      { provider, model: trimmedModel },
-      [{ id: provider, name: providerName, models: mergedModelOptions }],
-      { unmatchedKind: remoteModels.length > 0 ? "not-found" : "custom" },
+      { provider, model },
+      [{ id: provider, name: catalog.name, models: catalog.models }],
     );
-  }, [effectiveModel, mergedModelOptions, provider, remoteModels.length]);
+  }, [model, provider]);
   const selectedKnownModelSupportsVision =
     resolvedCurrentSelection?.matchKind !== "unmatched" && resolvedCurrentSelection
       ? modelSupportsVision(provider, resolvedCurrentSelection.resolvedModel)
       : null;
-  const triggerModelLabel = resolvedCurrentSelection?.displayName
-    || effectiveModel.trim()
-    || t("customModel");
-  const extraRemote = mergedModelOptions.filter(
-    (entry) => !providerModels.some((modelEntry) => modelEntry.id === entry.id),
-  );
+  const triggerModelLabel = resolvedCurrentSelection?.displayName || model;
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -474,18 +391,10 @@ export default function SettingsPage() {
                     value={provider}
                     onValueChange={(v) => {
                       setProvider(v);
-                      setRemoteModels([]);
                       const firstModel =
                         PROVIDERS[v as keyof typeof PROVIDERS]?.models[0]?.id;
                       if (firstModel) {
                         setModel(firstModel);
-                        setCustomModel("");
-                        if (settings?.providerKeys?.[v]) {
-                          void fetchRemoteModels(v, {
-                            silent: true,
-                            requestedModel: firstModel,
-                          });
-                        }
                       }
                     }}
                   >
@@ -503,39 +412,11 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>{t("model")}</Label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={fetchingModels}
-                      onClick={() => fetchRemoteModels(provider, { requestedModel: effectiveModel })}
-                    >
-                      {fetchingModels
-                        ? t("fetchingModels")
-                        : t("fetchModels")}
-                    </Button>
-                  </div>
-                  <Select
-                    value={model}
-                    onValueChange={(v) => {
-                      setModel(v);
-                      if (v !== "__custom__") setCustomModel("");
-                    }}
-                  >
+                  <Label>{t("model")}</Label>
+                  <Select value={model} onValueChange={setModel}>
                     <SelectTrigger>
                       <div className="flex min-w-0 flex-1 items-center gap-2">
                         <span className="truncate">{triggerModelLabel}</span>
-                        {resolvedCurrentSelection?.unmatchedKind && (
-                          <Badge
-                            variant="outline"
-                            className="shrink-0 px-1 py-0 text-[10px] leading-4 border-slate-500/40 text-slate-700 dark:text-slate-300"
-                          >
-                            {resolvedCurrentSelection.unmatchedKind === "not-found"
-                              ? tCommon("modelNotFound")
-                              : tCommon("customModel")}
-                          </Badge>
-                        )}
                         {typeof selectedKnownModelSupportsVision === "boolean" && (
                           <Badge
                             variant="outline"
@@ -568,52 +449,12 @@ export default function SettingsPage() {
                           </div>
                         </SelectItem>
                       ))}
-                      {extraRemote.map((m) => (
-                        <SelectItem key={m.id} value={m.id}>
-                          <div className="flex w-full items-center justify-between gap-2">
-                            <span>{m.name}</span>
-                            <Badge
-                              variant="outline"
-                              className={`shrink-0 px-1 py-0 text-[10px] leading-4 ${
-                                modelSupportsVision(provider, m.id)
-                                  ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
-                                  : "border-amber-500/40 text-amber-700 dark:text-amber-300"
-                              }`}
-                            >
-                              {modelSupportsVision(provider, m.id) ? tCommon("multimodal") : tCommon("textOnly")}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="__custom__">
-                        {t("customModel")}
-                      </SelectItem>
                     </SelectContent>
                   </Select>
                   {typeof selectedKnownModelSupportsVision === "boolean" && (
                     <p className="text-xs text-muted-foreground">
                       {selectedKnownModelSupportsVision ? tCommon("multimodal") : tCommon("textOnly")}
                     </p>
-                  )}
-                  {resolvedCurrentSelection?.unmatchedKind && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge
-                        variant="outline"
-                        className="px-1 py-0 text-[10px] leading-4 border-slate-500/40 text-slate-700 dark:text-slate-300"
-                      >
-                        {resolvedCurrentSelection.unmatchedKind === "not-found"
-                          ? tCommon("modelNotFound")
-                          : tCommon("customModel")}
-                      </Badge>
-                      <span className="truncate">{resolvedCurrentSelection.requestedModel}</span>
-                    </div>
-                  )}
-                  {model === "__custom__" && (
-                    <Input
-                      value={customModel}
-                      onChange={(e) => setCustomModel(e.target.value)}
-                      placeholder={t("customModelPlaceholder")}
-                    />
                   )}
                 </div>
 

@@ -100,7 +100,7 @@ async function processSource(sourceId: string, filePath: string) {
     }
 
     // Generate and store embeddings only if an embedding API key is available
-    if (process.env.EMBEDDING_API_KEY || process.env.OPENAI_API_KEY) {
+    if (process.env.EMBEDDING_API_KEY) {
       try {
         const texts = chunkRecords.map((r) => r.content);
         const embeddings = await generateEmbeddings(texts);

@@ -9,19 +9,19 @@ async function importWithEnv(env: Record<string, string>) {
 }
 
 describe("deep research model overrides", () => {
-  it("prefers Claude Opus for final-report packaging when Anthropic is configured", async () => {
+  it("prefers DeepSeek Pro for final-report packaging when DeepSeek is configured", async () => {
     const mod = await importWithEnv({
-      ANTHROPIC_API_KEY: "test-key",
+      DEEPSEEK_API_KEY: "test-key",
     });
 
     const overrides = mod.getDefaultDeepResearchModelOverrides({
-      provider: "openai",
-      modelId: "gpt-4o-mini",
+      provider: "deepseek",
+      modelId: "deepseek-v4.1-flash",
     });
 
     expect(overrides?.research_asset_reuse_specialist).toEqual({
-      provider: "anthropic",
-      modelId: "claude-opus-4-6",
+      provider: "deepseek",
+      modelId: "deepseek-v4-pro",
     });
   });
 

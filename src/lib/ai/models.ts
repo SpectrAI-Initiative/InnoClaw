@@ -5,169 +5,62 @@ type ModelDefinition = {
   supportsVision?: boolean;
 };
 
+/** Tencent Cloud TokenHub OpenAI-compatible endpoint (Guangzhou). */
+export const TOKENHUB_DEFAULT_BASE_URL = "https://tokenhub.tencentmaas.com/v1";
+
+/**
+ * Active model catalog. Only these provider/model pairs can be selected or called.
+ * Previously supported vendors are kept in `archived-providers.ts`.
+ */
 export const PROVIDERS = {
-  openai: {
-    id: "openai",
-    name: "OpenAI",
-    models: [
-      { id: "gpt-5.2-chat-latest", name: "GPT-5.2", contextWindow: 256000, supportsVision: true },
-      { id: "gpt-4.1", name: "GPT-4.1", contextWindow: 1047576, supportsVision: true },
-      { id: "gpt-4.1-mini", name: "GPT-4.1 Mini", contextWindow: 1047576, supportsVision: true },
-      { id: "gpt-4.1-nano", name: "GPT-4.1 Nano", contextWindow: 1047576, supportsVision: true },
-      { id: "gpt-4o", name: "GPT-4o", contextWindow: 128000, supportsVision: true },
-      { id: "gpt-4o-mini", name: "GPT-4o Mini", contextWindow: 128000, supportsVision: true },
-      { id: "o3", name: "o3", contextWindow: 200000, supportsVision: true },
-      { id: "o3-mini", name: "o3 Mini", contextWindow: 200000, supportsVision: false },
-      { id: "o4-mini", name: "o4 Mini", contextWindow: 200000, supportsVision: true },
-    ] satisfies ModelDefinition[],
-    envKey: "OPENAI_API_KEY",
-    supportsVision: true,
-  },
-  anthropic: {
-    id: "anthropic",
-    name: "Anthropic",
-    models: [
-      {
-        id: "claude-opus-4-6",
-        name: "Claude Opus 4.6",
-        contextWindow: 200000,
-        supportsVision: true,
-      },
-      {
-        id: "claude-sonnet-4-20250514",
-        name: "Claude Sonnet 4",
-        contextWindow: 200000,
-        supportsVision: true,
-      },
-      {
-        id: "claude-3-7-sonnet-20250219",
-        name: "Claude 3.7 Sonnet",
-        contextWindow: 200000,
-        supportsVision: true,
-      },
-      {
-        id: "claude-3-5-haiku-20241022",
-        name: "Claude 3.5 Haiku",
-        contextWindow: 200000,
-        supportsVision: true,
-      },
-    ] satisfies ModelDefinition[],
-    envKey: "ANTHROPIC_API_KEY",
-    supportsVision: true,
-  },
-  gemini: {
-    id: "gemini",
-    name: "Gemini",
-    models: [
-      {
-        id: "gemini-2.5-flash",
-        name: "Gemini 2.5 Flash",
-        contextWindow: 1048576,
-        supportsVision: true,
-      },
-      {
-        id: "gemini-2.5-pro",
-        name: "Gemini 2.5 Pro",
-        contextWindow: 1048576,
-        supportsVision: true,
-      },
-      {
-        id: "gemini-3-flash-preview",
-        name: "Gemini 3 Flash",
-        contextWindow: 1048576,
-        supportsVision: true,
-      },
-      {
-        id: "gemini-3-pro-preview",
-        name: "Gemini 3 Pro",
-        contextWindow: 1048576,
-        supportsVision: true,
-      },
-      {
-        id: "gemini-3.1-pro-preview-thinking",
-        name: "Gemini 3.1 Pro (Thinking)",
-        contextWindow: 1048576,
-        supportsVision: true,
-      },
-    ] satisfies ModelDefinition[],
-    envKey: "GEMINI_API_KEY",
-    supportsVision: true,
-  },
-  shlab: {
-    id: "shlab",
-    name: "SH-Lab",
-    models: [
-      { id: "intern-s1-pro", name: "Intern S1 Pro", contextWindow: 200000, supportsVision: true },
-      { id: "intern-s1", name: "Intern S1", contextWindow: 200000, supportsVision: true },
-    ] satisfies ModelDefinition[],
-    envKey: "SHLAB_API_KEY",
-    supportsTools: true,
-    supportsVision: true,
-  },
-  qwen: {
-    id: "qwen",
-    name: "Qwen",
-    models: [
-      { id: "Qwen3-235B", name: "Qwen3 235B", contextWindow: 200000, supportsVision: false },
-      { id: "Qwen3.5-122B", name: "Qwen 3.5 122B", contextWindow: 40000, supportsVision: false },
-      { id: "qwen3.5-397b", name: "Qwen 3.5 397B", contextWindow: 200000, supportsVision: true },
-    ] satisfies ModelDefinition[],
-    envKey: "QWEN_API_KEY",
-    supportsTools: true,
-    supportsVision: true,
-  },
-  moonshot: {
-    id: "moonshot",
-    name: "Moonshot",
-    models: [
-      { id: "kimi-k2.5", name: "Kimi K2.5", contextWindow: 200000, supportsVision: true },
-    ] satisfies ModelDefinition[],
-    envKey: "MOONSHOT_API_KEY",
-    supportsTools: true,
-    supportsVision: true,
-  },
   deepseek: {
     id: "deepseek",
-    name: "DeepSeek",
+    name: "Tencent Cloud DeepSeek",
     models: [
-      { id: "deepseek-v3.2", name: "DeepSeek V3.2", contextWindow: 200000, supportsVision: false },
+      {
+        id: "deepseek-v4.1-flash",
+        name: "DeepSeek V4.1 Flash",
+        contextWindow: 1_000_000,
+        supportsVision: false,
+      },
+      {
+        id: "deepseek-v4-pro",
+        name: "DeepSeek V4 Pro",
+        contextWindow: 1_000_000,
+        supportsVision: false,
+      },
     ] satisfies ModelDefinition[],
     envKey: "DEEPSEEK_API_KEY",
     supportsTools: true,
-    supportsVision: true,
-  },
-  minimax: {
-    id: "minimax",
-    name: "MiniMax",
-    models: [
-      { id: "minimax2.5", name: "MiniMax 2.5", contextWindow: 200000, supportsVision: false },
-    ] satisfies ModelDefinition[],
-    envKey: "MINIMAX_API_KEY",
-    supportsTools: true,
-    supportsVision: true,
-  },
-  zhipu: {
-    id: "zhipu",
-    name: "Zhipu",
-    models: [
-      { id: "glm-5", name: "GLM-5", contextWindow: 200000, supportsVision: false },
-    ] satisfies ModelDefinition[],
-    envKey: "ZHIPU_API_KEY",
-    supportsTools: true,
-    supportsVision: true,
+    supportsVision: false,
   },
 } as const;
 
 export type ProviderId = keyof typeof PROVIDERS;
 
+export function isSelectableModel(providerId: string, modelId: string): boolean {
+  const provider = PROVIDERS[providerId as ProviderId];
+  if (!provider || !modelId) return false;
+  return provider.models.some((model) => model.id === modelId);
+}
+
+export function resolveSelectableModel(
+  providerId?: string | null,
+  modelId?: string | null,
+): { providerId: ProviderId; modelId: string } {
+  if (providerId && modelId && isSelectableModel(providerId, modelId)) {
+    return { providerId: providerId as ProviderId, modelId };
+  }
+  return { providerId: DEFAULT_PROVIDER, modelId: DEFAULT_MODEL };
+}
+
 /**
  * Check whether a provider supports tool calling.
- * Defaults to true for providers without an explicit `supportsTools` field
- * (OpenAI, Anthropic, Gemini).
+ * Unknown providers are treated as unsupported so archived vendors stay off.
  */
 export function providerSupportsTools(providerId: string): boolean {
   const p = PROVIDERS[providerId as ProviderId];
-  if (!p) return true;
+  if (!p) return false;
   return (p as { supportsTools?: boolean }).supportsTools !== false;
 }
 
@@ -208,14 +101,9 @@ export function modelSupportsVision(
   return providerSupportsVision(providerId);
 }
 
-/**
- * Read default provider / model from environment variables.
- * Falls back to hardcoded values when the env vars are not set.
- */
-export const DEFAULT_PROVIDER: ProviderId =
-  (process.env.LLM_PROVIDER as ProviderId) || "openai";
-export const DEFAULT_MODEL =
-  process.env.LLM_MODEL || "gpt-4o-mini";
+/** Active defaults. Stored or environment selections outside the catalog fall back here. */
+export const DEFAULT_PROVIDER: ProviderId = "deepseek";
+export const DEFAULT_MODEL = "deepseek-v4.1-flash";
 
 export const CONTEXT_MODES = {
   conservative: { id: "conservative", ratio: 0.6 },

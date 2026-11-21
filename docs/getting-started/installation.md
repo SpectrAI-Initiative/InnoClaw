@@ -1,109 +1,63 @@
 # Installation
 
-This guide walks you through setting up InnoClaw locally for development or self-hosting.
+InnoClaw starts only through Docker on Ubuntu Server 24.04 LTS amd64.
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
-
-| Requirement | Version | Notes |
-|-------------|---------|-------|
-| **Node.js** | 24+ LTS recommended, 25 Current supported | Runtime environment |
-| **npm** | Included with Node.js | Package manager |
-| **Git** | Any recent version | Required for GitHub clone/pull features |
-
-Optional:
-
 | Requirement | Notes |
 |-------------|-------|
-| **AI API Key** | At least one (OpenAI, Anthropic, or Gemini) for AI chat and note generation |
-| **GitHub Token** | For cloning/pulling private repositories |
+| Docker Engine 24+ | With Compose v2 |
+| Git | Clone the repository |
+| DeepSeek API key | Tencent Cloud TokenHub, required for chat |
 
-## Step 1: Clone the Repository
+## Local setup
 
 ```bash
 git clone https://github.com/SpectrAI-Initiative/InnoClaw.git
 cd InnoClaw
 ```
 
-## Step 2: Install Dependencies
+Windows:
+
+```powershell
+.\scripts\docker-up-local.ps1
+```
+
+Ubuntu:
 
 ```bash
-npm install
+chmod +x scripts/docker-up-local.sh
+./scripts/docker-up-local.sh
 ```
 
-This installs all required Node.js packages including Next.js, the AI SDK, database drivers, and UI components.
+Open **http://127.0.0.1:3000**.
 
-## Step 3: Configure Environment Variables
+Edit only `.env.docker.local`. The script creates it on first run.
 
-Copy the example environment file and edit it:
+## Online setup
+
+On the Ubuntu VM:
 
 ```bash
-cp .env.example .env.local
+chmod +x scripts/docker-up-online.sh
+./scripts/docker-up-online.sh
 ```
 
-Edit `.env.local` with your configuration:
+Open `http://<vm-ip>:3000`.
 
-```ini
-# [Required] Workspace root paths (comma-separated absolute paths)
-WORKSPACE_ROOTS=/data/research,/data/projects
+Edit only `.env.docker.online`.
 
-# [Optional] OpenAI API Key
-OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+## Env files
 
-# [Optional] Anthropic API Key
-ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
+| File | Used by |
+|------|---------|
+| `.env.docker.local` | Local Docker |
+| `.env.docker.online` | Online Docker |
 
-# [Optional] Gemini API Key
-GEMINI_API_KEY=your-gemini-key
-```
+There are no other startup env files. Both stay untracked.
 
-See [Environment Variables](environment-variables.md) for a complete reference of all available options.
+## Verify
 
-## Step 4: Create Workspace Directories
-
-Ensure the directories specified in `WORKSPACE_ROOTS` exist on your system:
-
-```bash
-# Linux / macOS
-mkdir -p /data/research /data/projects
-
-# Windows (PowerShell)
-mkdir D:/Data/research
-mkdir D:/Data/projects
-```
-
-:::{important}
-The application will **not** automatically create these directories. They must exist before starting the server.
-:::
-
-## Step 5: Initialize the Database
-
-Run the database migration to create the SQLite database:
-
-```bash
-npx drizzle-kit migrate
-```
-
-This creates the database file at `./data/innoclaw.db` with all required tables.
-
-## Step 6: Start the Development Server
-
-```bash
-npm run dev
-```
-
-Open your browser and navigate to **http://localhost:3000** to start using InnoClaw.
-
-## Verifying Your Setup
-
-After starting the server, you should be able to:
-
-1. See the workspace list on the home page
-2. Create a new workspace from one of your configured root directories
-3. Browse and manage files in the workspace
-4. If an API key is configured, chat with AI about your files (after clicking "Sync")
-
-:::{tip}
-If you don't configure any API keys, workspace management, file browsing, uploading, editing, and GitHub cloning features will still work. Only AI chat and note generation will be disabled.
-:::
+1. Workspace list opens
+2. You can create a workspace under `/research`
+3. With `DEEPSEEK_API_KEY` set, chat works after Sync

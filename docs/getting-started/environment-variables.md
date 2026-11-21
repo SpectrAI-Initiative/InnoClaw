@@ -1,6 +1,8 @@
 # Environment Variables
 
-A complete reference of all environment variables used by InnoClaw.
+Set these in `.env.docker.local` or `.env.docker.online`. Those are the only startup env files. The container reads them. Do not create `.env.local` for the running app.
+
+Paths such as `WORKSPACE_ROOTS` are inside the container. The host directory is `HOST_WORKSPACE_PATH`, mounted at `/research`.
 
 ## Core Configuration
 
@@ -21,39 +23,20 @@ visibility across the configured operator roots.
 
 ## AI Provider Configuration
 
+Chat and generation use Tencent Cloud TokenHub DeepSeek. The selectable models are `deepseek-v4.1-flash` and `deepseek-v4-pro`. Other vendor catalogs are archived and cannot be selected.
+
 | Variable | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
-| `OPENAI_API_KEY` | `string` | No | — | OpenAI API key for chat and embedding. |
-| `ANTHROPIC_API_KEY` | `string` | No | — | Anthropic API key for Claude models. |
-| `GEMINI_API_KEY` | `string` | No | — | Google Gemini API key for Gemini models. |
-| `SHLAB_API_KEY` | `string` | No | — | SH-Lab API key for Intern models. |
-| `QWEN_API_KEY` | `string` | No | — | Qwen API key. |
-| `MOONSHOT_API_KEY` | `string` | No | — | Moonshot API key for Kimi models. |
-| `DEEPSEEK_API_KEY` | `string` | No | — | DeepSeek API key. |
-| `MINIMAX_API_KEY` | `string` | No | — | MiniMax API key. |
-| `ZHIPU_API_KEY` | `string` | No | — | Zhipu API key for GLM models. |
-| `OPENAI_BASE_URL` | `string` | No | `https://api.openai.com/v1` | Custom OpenAI-compatible API endpoint (for proxies or third-party providers). |
-| `ANTHROPIC_BASE_URL` | `string` | No | `https://api.anthropic.com` | Custom Anthropic API endpoint. |
-| `GEMINI_BASE_URL` | `string` | No | — | Custom Gemini-compatible API endpoint (OpenAI-compatible proxy). |
-| `SHLAB_BASE_URL` | `string` | No | — | Vendor-level base URL for all SH-Lab models. Per-model URLs (e.g. `SHLAB_INTERN_S1_PRO_BASE_URL`) take priority. |
-| `QWEN_BASE_URL` | `string` | No | — | Vendor-level base URL for all Qwen models. Per-model URLs (e.g. `QWEN_QWEN3_235B_BASE_URL`) take priority. |
-| `MOONSHOT_BASE_URL` | `string` | No | — | Vendor-level base URL for all Moonshot models. Per-model URLs (e.g. `MOONSHOT_KIMI_K2_5_BASE_URL`) take priority. |
-| `DEEPSEEK_BASE_URL` | `string` | No | — | Vendor-level base URL for all DeepSeek models. Per-model URLs (e.g. `DEEPSEEK_DEEPSEEK_V3_2_BASE_URL`) take priority. |
-| `MINIMAX_BASE_URL` | `string` | No | — | Vendor-level base URL for all MiniMax models. Per-model URLs (e.g. `MINIMAX_MINIMAX2_5_BASE_URL`) take priority. |
-| `ZHIPU_BASE_URL` | `string` | No | — | Vendor-level base URL for all Zhipu models. Per-model URLs (e.g. `ZHIPU_GLM_5_BASE_URL`) take priority. |
-| `LLM_PROVIDER` | `string` | No | `openai` | Default LLM provider: `openai`, `anthropic`, or `gemini`. Overridable in Settings UI. |
-| `LLM_MODEL` | `string` | No | `gpt-4o-mini` | Default model ID. Overridable in Settings UI. |
-| `OPENAI_REASONING_EFFORT` | `string` | No | Provider default | Default reasoning effort for OpenAI language-model calls: `none`, `minimal`, `low`, `medium`, `high`, or `xhigh`. Input is trimmed and case-normalized; `ultra` is accepted as an alias for `xhigh`. Invalid values fail explicitly. |
+| `DEEPSEEK_API_KEY` | `string` | Yes for AI features | — | TokenHub API key used for DeepSeek Flash and Pro. |
+| `DEEPSEEK_BASE_URL` | `string` | No | `https://tokenhub.tencentmaas.com/v1` | OpenAI-compatible TokenHub base URL. |
+| `DEEPSEEK_DEEPSEEK_V4_1_FLASH_BASE_URL` | `string` | No | Vendor URL | Optional base URL override for Flash. |
+| `DEEPSEEK_DEEPSEEK_V4_PRO_BASE_URL` | `string` | No | Vendor URL | Optional base URL override for Pro. |
+| `LLM_PROVIDER` | `string` | No | `deepseek` | Active provider. Values outside the catalog fall back to `deepseek`. |
+| `LLM_MODEL` | `string` | No | `deepseek-v4.1-flash` | Active model. Must be `deepseek-v4.1-flash` or `deepseek-v4-pro`. |
 
 :::{note}
-At least one AI API key (OpenAI, Anthropic, or Gemini) is needed for AI chat and note generation features. Without any API key, workspace management, file browsing, and other non-AI features still work.
+`DEEPSEEK_API_KEY` is required for AI chat and note generation. Without it, workspace management, file browsing, and other non-AI features still work.
 :::
-
-`OPENAI_REASONING_EFFORT` applies only to OpenAI language-model calls and the
-unknown-provider OpenAI-compatible fallback. It does not alter embeddings or
-named Anthropic, Gemini, Qwen, Moonshot, DeepSeek, MiniMax, Zhipu, or SH-Lab
-providers. Omit it to preserve the upstream provider default. Confirm that a
-custom OpenAI-compatible endpoint supports the normalized value before rollout.
 
 ## Agent Configuration
 
@@ -67,21 +50,19 @@ These allow using a separate service for vector embeddings, independent of the c
 
 | Variable | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
-| `EMBEDDING_API_KEY` | `string` | No | Falls back to `OPENAI_API_KEY` | API key for the embedding service. |
-| `EMBEDDING_BASE_URL` | `string` | No | Falls back to `OPENAI_BASE_URL` | Endpoint for the embedding service. |
+| `EMBEDDING_API_KEY` | `string` | No | — | API key for the embedding service. |
+| `EMBEDDING_BASE_URL` | `string` | No | — | Endpoint for the embedding service. |
 | `EMBEDDING_MODEL` | `string` | No | `text-embedding-3-small` | Name of the embedding model to use. |
 
 **Example** — Using a dedicated embedding service:
 
 ```ini
-# Chat model (via OpenAI-compatible proxy)
-OPENAI_API_KEY=sk-your-chat-key
-OPENAI_BASE_URL=http://your-proxy:3888/v1
+DEEPSEEK_API_KEY=sk-your-tokenhub-key
+DEEPSEEK_BASE_URL=https://tokenhub.tencentmaas.com/v1
 
-# Embedding model (separate configuration)
 EMBEDDING_API_KEY=sk-your-embedding-key
-EMBEDDING_BASE_URL=http://your-proxy:3888/v1
-EMBEDDING_MODEL=google/gemini-embedding-001
+EMBEDDING_BASE_URL=http://your-embedding-provider/v1
+EMBEDDING_MODEL=text-embedding-3-small
 ```
 
 ## GitHub Integration
@@ -153,5 +134,5 @@ EMBEDDING_MODEL=google/gemini-embedding-001
 - `AUTH_MODE=disabled` removes application-level authentication. Anyone who can reach the service gets admin-level access, so use it only behind trusted local access or another access-control layer.
 - `AUTH_SINGLE_ADMIN=true` fails closed until the administrator bootstrap has completed. Do not expose registration before that step.
 - `AUTH_COOKIE_SECURE=false` only permits cookies over plain HTTP. It does not encrypt login credentials, session cookies, or application traffic; use HTTPS and restore the secure-cookie default as soon as possible.
-- Store your `.env.local` file securely and do not commit it to version control.
-- The `.gitignore` file already excludes `.env*` files (except `.env.example`).
+- Startup uses only two untracked files: `.env.docker.local` (local) and `.env.docker.online` (online).
+- Do not commit either file.

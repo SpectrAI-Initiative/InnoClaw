@@ -35,18 +35,13 @@ const forbiddenRootFiles = new Set([
   "CONTRIBUTING.md",
   "Dockerfile",
   "README.md",
-  "README_en.md",
   "SECURITY.md",
-  "SESSION_SUMMARY.md",
   "docker-compose.yml",
   "eslint.config.mjs",
   "vitest.config.ts",
 ]);
 
-const allowedEnvironmentTemplates = new Set([
-  ".env.example",
-  ".env.production.example",
-]);
+const allowedEnvironmentTemplates = new Set();
 
 const violations = new Map();
 

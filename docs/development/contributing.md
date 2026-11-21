@@ -10,43 +10,32 @@ Thank you for your interest in contributing to InnoClaw! This guide explains how
    git clone https://github.com/your-username/InnoClaw.git
    cd InnoClaw
    ```
-3. **Install** dependencies:
+3. **Install** dependencies used by the checks:
    ```bash
    npm install
    ```
-4. Read the repository-level guide in [Repository Guidelines](repository-guidelines.md)
-5. Follow the [Installation Guide](../getting-started/installation.md) to set up your development environment
+4. Read [Repository Guidelines](repository-guidelines.md). The repository root `AGENTS.md` wins when the two differ.
+5. Start the app with the [Installation Guide](../getting-started/installation.md). That is Docker, not `npm run dev`.
 
 Useful follow-up pages:
 
 - [Collaboration](collaboration.md)
 - [Agent Development](agent-development.md)
 
-## Local Development Commands
-
-Start the app with the default local authentication flow:
+## Local checks
 
 ```bash
-npm run dev
+npx tsc --noEmit
+npm run lint
+npm test
+npm run build
 ```
 
-For trusted single-user/local development without login:
-
-```bash
-npm run dev:no-auth
-```
-
-For a production build already created with authentication disabled at runtime:
-
-```bash
-npm run start:no-auth
-```
-
-Disabled auth gives anyone who can reach the service admin-level access. Do not use it on an untrusted network unless another access-control layer protects the service.
+`npm run build` is the production check. It also verifies the standalone artifact. To run the product locally, use `scripts/docker-up-local.ps1` or `scripts/docker-up-local.sh`.
 
 ## Which Guide To Use
 
-- Use [Repository Guidelines](repository-guidelines.md) as the repository-wide source of truth for local workflow, validation, and documentation follow-through.
+- Use the repository root `AGENTS.md` for workflow, validation, and documentation follow-through. [Repository Guidelines](repository-guidelines.md) is the same map on the docs site.
 - Use [Collaboration](collaboration.md) when the worktree is already dirty, when you are coordinating across multiple contributors, or when an automation tool is helping with edits.
 - Use [Agent Development](agent-development.md) before changing prompts, tools, agent streaming, deep-research roles, or other agent-facing contracts.
 

@@ -33,8 +33,8 @@ interface DoctrineContextPolicy {
   finalReportLike: boolean;
 }
 
-const RESEARCHER_DIR = path.join(process.cwd(), ".claude", "researcher");
-const RESEARCHER_SKILLS_DIR = path.join(process.cwd(), ".claude", "skills");
+const RESEARCHER_DIR = path.join(process.cwd(), "skills", "researcher");
+const RESEARCHER_SKILLS_DIR = path.join(process.cwd(), "skills");
 const SOUL_PATH = path.join(RESEARCHER_DIR, "SOUL.md");
 const THINKING_MODES_PATH = path.join(RESEARCHER_DIR, "THINKING_MODES.md");
 const HANDOFF_TEMPLATES_PATH = path.join(RESEARCHER_DIR, "HANDOFF_TEMPLATES.md");

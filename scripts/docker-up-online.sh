@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Online Ubuntu VM. Publishes port 3000 on the VM network interface.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$root"
+
+env_file="$root/.env.docker.online"
+
+if [[ ! -f "$env_file" ]]; then
+  secret="$(openssl rand -base64 32 | tr -d '\n')"
+  cat > "$env_file" <<EOF
+# 线上 Docker。只改这一个文件。
+# 启动：./scripts/docker-up-online.sh
+# 浏览器：http://<虚拟机IP>:3000
+PUBLISH_PORT=3000
+HOST_WORKSPACE_PATH=/data/innoclaw/research
+WORKSPACE_ROOTS=/research
+AUTH_MODE=local
+AUTH_SINGLE_ADMIN=true
+AUTH_COOKIE_SECURE=false
+AUTH_SECRET=${secret}
+DEEPSEEK_API_KEY=none
+DEEPSEEK_BASE_URL=https://tokenhub.tencentmaas.com/v1
+LLM_PROVIDER=deepseek
+LLM_MODEL=deepseek-v4.1-flash
+EOF
+  chmod 600 "$env_file"
+  echo "Created .env.docker.online — set DEEPSEEK_API_KEY before relying on chat."
+fi
+
+host_path="$(awk -F= '$1=="HOST_WORKSPACE_PATH" { value=$2 } END { print value }' "$env_file")"
+host_path="${host_path:-/data/innoclaw/research}"
+mkdir -p "$host_path"
+
+exec docker compose \
+  --env-file "$env_file" \
+  -f docker-compose.yml \
+  -f docker-compose.online.yml \
+  up -d --build "$@"

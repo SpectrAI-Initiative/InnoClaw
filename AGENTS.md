@@ -11,6 +11,8 @@ Use these files in this order when instructions conflict:
 3. `.github/workflows/*.yml`
 4. Supporting narrative docs in `docs/development/`
 
+Operator startup is `docs/startup.md`. The published English install page is `docs/getting-started/installation.md`. Those two describe the same Docker commands.
+
 ## Supported Environment
 
 - Node.js `24+` (`package.json` is authoritative; CI runs on Node 24 and 25)
@@ -42,16 +44,18 @@ Treat these directories as scratch space, references, or local-only artifacts. T
 ## First-Time Setup
 
 ```bash
-npm install
-cp .env.example .env.local
-mkdir -p data
-npx drizzle-kit migrate
+# Windows
+.\scripts\docker-up-local.ps1
+# Ubuntu
+./scripts/docker-up-local.sh
 ```
 
-Then edit `.env.local` and set at least:
+The script creates `.env.docker.local` when it is missing. Edit that file and set at least:
 
 - `WORKSPACE_ROOTS`
 - the API keys required for the provider(s) you plan to test
+
+`npm run dev` is not a supported way to start the app. Use the local Docker script above. On the Ubuntu VM, use `./scripts/docker-up-online.sh` and `.env.docker.online`.
 
 ## Before You Start
 
@@ -62,31 +66,16 @@ Then edit `.env.local` and set at least:
 
 ## Daily Workflow
 
-Start the app with either:
+Start the local app with Docker:
 
 ```bash
-npm run dev
+# Windows
+.\scripts\docker-up-local.ps1
+# Ubuntu
+./scripts/docker-up-local.sh
 ```
 
-or the helper scripts:
-
-```bash
-bash dev-start.sh
-bash dev-status.sh
-bash dev-stop.sh
-```
-
-For trusted single-user/local development without login:
-
-```bash
-npm run dev:no-auth
-```
-
-For a production build already created with authentication disabled at runtime:
-
-```bash
-npm run start:no-auth
-```
+`npm run dev` and `npm run dev:no-auth` are not supported startup paths. For a trusted single-user container without login, set `AUTH_MODE=disabled` in `.env.docker.local` and run the local script again. Do not expose that mode on an untrusted network.
 
 Disabled auth gives anyone who can reach the service admin-level access. Do not use it on an untrusted network unless another access-control layer protects the service.
 
@@ -151,7 +140,7 @@ make update-po
 ## Documentation Change Matrix
 
 - If you change setup steps or local commands, update `AGENTS.md` and the relevant pages under `docs/development/`.
-- If you add, rename, or remove environment variables, update `.env.example`, `docs/getting-started/environment-variables.md`, and any affected setup docs.
+- If you add, rename, or remove environment variables, update `docs/getting-started/environment-variables.md` and the two Docker env files, `.env.docker.local` and `.env.docker.online`.
 - If you change contributor workflow or validation expectations, update `CONTRIBUTING.md`, `docs/development/contributing.md`, and any README links that point contributors there.
 - If you change architecture or directory boundaries, update `docs/development/project-structure.md`.
 - If you change testing workflow, update `docs/development/testing.md`.

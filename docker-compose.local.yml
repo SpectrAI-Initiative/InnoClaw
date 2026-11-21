@@ -1,0 +1,7 @@
+# Local debug. Browser on this machine only: http://127.0.0.1:3000
+services:
+  innoclaw:
+    env_file:
+      - .env.docker.local
+    ports:
+      - "127.0.0.1:3000:3000"

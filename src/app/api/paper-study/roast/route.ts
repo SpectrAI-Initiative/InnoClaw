@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!isAIAvailable()) {
-      return jsonError("AI is not configured. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env.local.", 503);
+      return jsonError("AI is not configured. Please set DEEPSEEK_API_KEY in .env.local.", 503);
     }
 
     const { model } = llmProvider && llmModel

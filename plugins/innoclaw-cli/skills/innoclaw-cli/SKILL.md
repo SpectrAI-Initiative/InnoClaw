@@ -18,9 +18,9 @@ innoclaw auth login
 innoclaw auth logout
 ```
 
-- The CLI auto-starts the local app on `localhost:3000` when needed.
+- Start the local Docker stack first. The CLI talks to `http://127.0.0.1:3000`.
 - When auth is enabled, the CLI opens the browser login page and waits for a dedicated CLI session handoff.
-- For trusted headless and CI-style runs, start the app with `npm run dev:no-auth` or `AUTH_MODE=disabled`.
+- For a trusted headless run, set `AUTH_MODE=disabled` in `.env.docker.local` before starting the container.
 
 ## Non-interactive agent runs
 

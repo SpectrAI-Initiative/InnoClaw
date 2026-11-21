@@ -2,8 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import type { LanguageModel } from "ai";
-
 /**
  * Unit tests for getPerModelProvider base-URL resolution in provider.ts.
  *
@@ -127,216 +125,84 @@ describe("getPerModelProvider – base URL resolution", () => {
     return import("./provider");
   }
 
-  async function invokeGenerate(model: LanguageModel) {
-    if (typeof model === "string") {
-      throw new Error("Expected a resolved language model");
-    }
-    await model.doGenerate({ prompt: [] });
-  }
-
-  it("uses per-model base URL when set", async () => {
-    process.env.MOONSHOT_API_KEY = "sk-test";
-    process.env.MOONSHOT_KIMI_K2_5_BASE_URL = "https://per-model.example.com/v1";
-    process.env.MOONSHOT_BASE_URL = "https://vendor.example.com/v1";
-
-    await callGetModelFromOverride("moonshot", "kimi-k2.5");
-
-    expect(createOpenAISpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseURL: "https://per-model.example.com/v1",
-      }),
-    );
-  });
-
-  it("falls back to vendor-level base URL when per-model URL is not set", async () => {
-    process.env.QWEN_API_KEY = "sk-test";
-    process.env.QWEN_BASE_URL = "https://vendor.example.com/v1";
-
-    await callGetModelFromOverride("qwen", "Qwen3-235B");
-
-    expect(createOpenAISpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseURL: "https://vendor.example.com/v1",
-      }),
-    );
-  });
-
-  it("supports dynamic per-model env keys for models not listed in PROVIDERS", async () => {
-    process.env.QWEN_API_KEY = "sk-test";
-    process.env.QWEN_QWEN3_5_35B_BASE_URL = "https://35b.example.com/v1";
-
-    await callGetModelFromOverride("qwen", "qwen3.5-35b");
-
-    expect(createOpenAISpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseURL: "https://35b.example.com/v1",
-      }),
-    );
-  });
-
-  it("throws when neither per-model nor vendor-level URL is set", async () => {
+  it("uses the TokenHub endpoint when no DeepSeek base URL is configured", async () => {
     process.env.DEEPSEEK_API_KEY = "sk-test";
-    delete process.env.DEEPSEEK_DEEPSEEK_V3_2_BASE_URL;
     delete process.env.DEEPSEEK_BASE_URL;
+    delete process.env.DEEPSEEK_DEEPSEEK_V4_1_FLASH_BASE_URL;
 
+    await callGetModelFromOverride("deepseek", "deepseek-v4.1-flash");
+
+    expect(createOpenAISpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiKey: "sk-test",
+        baseURL: "https://tokenhub.tencentmaas.com/v1",
+      }),
+    );
+  });
+
+  it("prefers a per-model base URL over the vendor URL", async () => {
+    process.env.DEEPSEEK_API_KEY = "sk-test";
+    process.env.DEEPSEEK_DEEPSEEK_V4_PRO_BASE_URL = "https://pro.example.com/v1";
+    process.env.DEEPSEEK_BASE_URL = "https://vendor.example.com/v1";
+
+    await callGetModelFromOverride("deepseek", "deepseek-v4-pro");
+
+    expect(createOpenAISpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseURL: "https://pro.example.com/v1",
+      }),
+    );
+  });
+
+  it("rejects archived providers and models outside the catalog", async () => {
+    await expect(callGetModelFromOverride("openai", "gpt-4o")).rejects.toThrow(/archived/);
     await expect(
       callGetModelFromOverride("deepseek", "deepseek-v3.2"),
-    ).rejects.toThrow(/DEEPSEEK_DEEPSEEK_V3_2_BASE_URL.*DEEPSEEK_BASE_URL/);
+    ).rejects.toThrow(/outside the active catalog/);
   });
 
-  it("error message mentions both env var names", async () => {
-    process.env.ZHIPU_API_KEY = "sk-test";
-    delete process.env.ZHIPU_GLM_5_BASE_URL;
-    delete process.env.ZHIPU_BASE_URL;
-
-    await expect(
-      callGetModelFromOverride("zhipu", "glm-5"),
-    ).rejects.toThrow("Set ZHIPU_GLM_5_BASE_URL or ZHIPU_BASE_URL");
-  });
-
-  it("works for all per-model-URL providers with vendor-level URL", async () => {
-    const cases = [
-      { provider: "shlab", model: "intern-s1-pro", envPrefix: "SHLAB" },
-      { provider: "qwen", model: "Qwen3-235B", envPrefix: "QWEN" },
-      { provider: "moonshot", model: "kimi-k2.5", envPrefix: "MOONSHOT" },
-      { provider: "deepseek", model: "deepseek-v3.2", envPrefix: "DEEPSEEK" },
-      { provider: "minimax", model: "minimax2.5", envPrefix: "MINIMAX" },
-      { provider: "zhipu", model: "glm-5", envPrefix: "ZHIPU" },
-    ];
-
-    for (const { provider, model, envPrefix } of cases) {
-      process.env[`${envPrefix}_API_KEY`] = "sk-test";
-      process.env[`${envPrefix}_BASE_URL`] = `https://${provider}.example.com/v1`;
-      createOpenAISpy.mockClear();
-
-      await callGetModelFromOverride(provider, model);
-
-      expect(createOpenAISpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          baseURL: `https://${provider}.example.com/v1`,
-        }),
-      );
-
-      // Cleanup
-      delete process.env[`${envPrefix}_API_KEY`];
-      delete process.env[`${envPrefix}_BASE_URL`];
-    }
-  });
-
-  it("prefers .env.local over stored settings for the configured model selection", async () => {
+  it("prefers a selectable .env.local model over stored settings", async () => {
     fs.writeFileSync(
       path.join(tmpDir, ".env.local"),
-      "LLM_PROVIDER=openai\nLLM_MODEL=gpt-5.4\n",
+      "LLM_PROVIDER=deepseek\nLLM_MODEL=deepseek-v4-pro\n",
     );
 
     const mod = await importProviderModule([
-      { key: "llm_provider", value: "anthropic" },
-      { key: "llm_model", value: "claude-sonnet-4-20250514" },
+      { key: "llm_provider", value: "deepseek" },
+      { key: "llm_model", value: "deepseek-v4.1-flash" },
     ]);
 
     await expect(mod.getConfiguredModelSelection()).resolves.toEqual({
-      providerId: "openai",
-      modelId: "gpt-5.4",
+      providerId: "deepseek",
+      modelId: "deepseek-v4-pro",
     });
   });
 
-  it("falls back to stored settings when .env.local does not define the model selection", async () => {
+  it("falls back to the active default when stored settings name an archived model", async () => {
     const mod = await importProviderModule([
       { key: "llm_provider", value: "anthropic" },
       { key: "llm_model", value: "claude-sonnet-4-20250514" },
     ]);
 
     await expect(mod.getConfiguredModelSelection()).resolves.toEqual({
-      providerId: "anthropic",
-      modelId: "claude-sonnet-4-20250514",
+      providerId: "deepseek",
+      modelId: "deepseek-v4.1-flash",
     });
   });
 
-  it("reads .env.local in getConfiguredModelSelectionFromEnv", async () => {
+  it("reads a selectable model from .env.local", async () => {
     process.env.LLM_PROVIDER = "openai";
     process.env.LLM_MODEL = "gpt-4o-mini";
     fs.writeFileSync(
       path.join(tmpDir, ".env.local"),
-      "LLM_PROVIDER=openai\nLLM_MODEL=gpt-5.4\n",
+      "LLM_PROVIDER=deepseek\nLLM_MODEL=deepseek-v4-pro\n",
     );
 
     const mod = await importProviderModule();
 
     expect(mod.getConfiguredModelSelectionFromEnv()).toEqual({
-      providerId: "openai",
-      modelId: "gpt-5.4",
+      providerId: "deepseek",
+      modelId: "deepseek-v4-pro",
     });
-  });
-
-  it("applies ultra as xhigh to the OpenAI provider", async () => {
-    process.env.OPENAI_REASONING_EFFORT = "ultra";
-    const result = await callGetModelFromOverride("openai", "gpt-5.6-sol");
-
-    await invokeGenerate(result.model);
-
-    expect(openAIDoGenerate).toHaveBeenCalledWith(expect.objectContaining({
-      providerOptions: { openai: { reasoningEffort: "xhigh" } },
-    }));
-  });
-
-  it("applies reasoning effort to the unknown-provider OpenAI fallback", async () => {
-    process.env.OPENAI_REASONING_EFFORT = "high";
-    const result = await callGetModelFromOverride(
-      "custom-openai-compatible",
-      "gpt-5.6-sol",
-    );
-
-    await invokeGenerate(result.model);
-
-    expect(openAIDoGenerate).toHaveBeenCalledWith(expect.objectContaining({
-      providerOptions: { openai: { reasoningEffort: "high" } },
-    }));
-  });
-
-  it.each([
-    ["anthropic", "claude-test", undefined],
-    ["gemini", "gemini-test", undefined],
-    ["qwen", "qwen-test", "QWEN"],
-    ["moonshot", "moonshot-test", "MOONSHOT"],
-    ["deepseek", "deepseek-test", "DEEPSEEK"],
-    ["minimax", "minimax-test", "MINIMAX"],
-    ["zhipu", "zhipu-test", "ZHIPU"],
-    ["shlab", "shlab-test", "SHLAB"],
-  ])("does not apply OpenAI reasoning settings to %s", async (
-    provider,
-    modelId,
-    envPrefix,
-  ) => {
-    process.env.OPENAI_REASONING_EFFORT = "ultra";
-    if (envPrefix) {
-      process.env[`${envPrefix}_API_KEY`] = "sk-test";
-      process.env[`${envPrefix}_BASE_URL`] = `https://${provider}.example.com/v1`;
-    }
-    const result = await callGetModelFromOverride(provider, modelId);
-    openAIDoGenerate.mockClear();
-
-    await invokeGenerate(result.model);
-
-    expect(openAIDoGenerate).toHaveBeenCalledWith(
-      expect.not.objectContaining({
-        providerOptions: expect.objectContaining({ openai: expect.anything() }),
-      }),
-    );
-  });
-
-  it("reads the latest reasoning effort from .env.local", async () => {
-    process.env.OPENAI_REASONING_EFFORT = "low";
-    fs.writeFileSync(
-      path.join(tmpDir, ".env.local"),
-      "OPENAI_REASONING_EFFORT=high\n",
-    );
-    const mod = await importProviderModule();
-    const result = mod.getModelFromOverride("openai", "gpt-5.6-sol");
-
-    await invokeGenerate(result.model);
-
-    expect(openAIDoGenerate).toHaveBeenCalledWith(expect.objectContaining({
-      providerOptions: { openai: { reasoningEffort: "high" } },
-    }));
   });
 });

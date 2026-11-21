@@ -1,17 +1,24 @@
 services:
   innoclaw:
-    build: .
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env.production.local
+    build:
+      context: .
+      args:
+        # Ubuntu Server 24.04 LTS 64-bit (Noble amd64) via a domestic mirror.
+        UBUNTU_IMAGE: docker.m.daocloud.io/library/ubuntu:24.04
+        NODE_VERSION: "24.22.3"
+        NODE_DIST_URL: https://cdn.npmmirror.com/binaries/node
+        APT_MIRROR: mirrors.aliyun.com
+        NPM_REGISTRY: https://registry.npmmirror.com
+    # Ports and env_file live in the profile override:
+    #   docker-compose.local.yml  -> .env.docker.local
+    #   docker-compose.online.yml -> .env.docker.online
     volumes:
       # Persistent data: SQLite DB, HF datasets, embeddings
       - innoclaw-data:/app/data
       # Mount your research directories here.
       # Must match the paths listed in WORKSPACE_ROOTS.
       # Example: expose ~/research as /research inside the container,
-      #          then set WORKSPACE_ROOTS=/research in .env.production.local
+      #          then set WORKSPACE_ROOTS=/research in the active env file.
       - ${HOST_WORKSPACE_PATH:-./workspace}:/research
     restart: unless-stopped
 

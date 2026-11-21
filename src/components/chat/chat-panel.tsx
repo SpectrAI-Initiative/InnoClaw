@@ -19,6 +19,8 @@ import {
 import useSWR from "swr";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  DEFAULT_MODEL,
+  DEFAULT_PROVIDER,
   getOverflowThresholdChars,
   modelSupportsVision,
 } from "@/lib/ai/models";
@@ -335,14 +337,14 @@ export function ChatPanel({ workspaceId, workspaceName }: ChatPanelProps) {
 
   const isLoading = status === "submitted" || status === "streaming";
   const supportsVision = modelSupportsVision(
-    settings?.llmProvider ?? "openai",
-    settings?.llmModel ?? "gpt-4o-mini",
+    settings?.llmProvider ?? DEFAULT_PROVIDER,
+    settings?.llmModel ?? DEFAULT_MODEL,
   );
 
   // --- Auto-memory: summarize and evict when context overflows ---
   const overflowThreshold = getOverflowThresholdChars(
-    settings?.llmProvider ?? "openai",
-    settings?.llmModel ?? "gpt-4o-mini",
+    settings?.llmProvider ?? DEFAULT_PROVIDER,
+    settings?.llmModel ?? DEFAULT_MODEL,
     settings?.contextMode ?? "normal"
   );
 

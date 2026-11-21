@@ -1,0 +1,7 @@
+# Online VM. Reachable at http://<vm-ip>:${PUBLISH_PORT:-3000}
+services:
+  innoclaw:
+    env_file:
+      - .env.docker.online
+    ports:
+      - "${PUBLISH_PORT:-3000}:3000"

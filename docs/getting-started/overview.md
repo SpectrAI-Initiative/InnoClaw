@@ -2,7 +2,7 @@
 
 ## What is InnoClaw?
 
-InnoClaw is an AI-powered research assistant web application similar to Google NotebookLM. It lets you open server-side folders as **workspaces**, browse and manage files, and chat with AI grounded in your workspace files via **RAG** (Retrieval-Augmented Generation).
+InnoClaw is a self-hosted research workspace. You open server-side folders as **workspaces**, browse files, and chat with AI grounded in those files via **RAG**. The running app is the Docker image. The selectable models are Tencent Cloud TokenHub DeepSeek V4.1 Flash and DeepSeek V4 Pro.
 
 ## Key Features
 
@@ -11,7 +11,7 @@ InnoClaw is an AI-powered research assistant web application similar to Google N
 - **GitHub Integration** — Clone and pull GitHub repositories (including private ones)
 - **RAG Chat** — AI answers questions based on workspace file content with source citations
 - **Note Generation** — Auto-generate summaries, FAQs, briefs, timelines, and daily/weekly reports
-- **Multi-LLM Support** — Switch between OpenAI GPT, Anthropic Claude, and Google Gemini
+- **Models** — Tencent Cloud TokenHub DeepSeek V4.1 Flash and DeepSeek V4 Pro. Older OpenAI, Anthropic, and Gemini catalogs are archived and cannot be selected
 - **Bilingual UI** — Chinese / English toggle
 - **Dark Mode** — Light and dark theme support
 - **Bot Integrations** — Feishu (Lark) and WeChat Enterprise bot support
@@ -43,10 +43,8 @@ graph TB
         Scheduler["Task Scheduler"]
     end
 
-    subgraph AI["AI Providers"]
-        OpenAI["OpenAI API"]
-        Anthropic["Anthropic API"]
-        Gemini["Gemini API"]
+    subgraph AI["AI"]
+        DeepSeek["TokenHub DeepSeek"]
         Embed["Embedding API"]
     end
 
@@ -70,9 +68,7 @@ graph TB
     API --> Scheduler
     RAG --> Embed
     RAG --> DB
-    API --> OpenAI
-    API --> Anthropic
-    API --> Gemini
+    API --> DeepSeek
     API --> HF
     API --> ModelScope
     API --> ArXiv
@@ -86,7 +82,7 @@ graph TB
 |----------|------------|
 | Framework | Next.js 16 (App Router) + TypeScript |
 | UI | Tailwind CSS 4 + shadcn/ui + Radix UI |
-| AI | Vercel AI SDK 6 + OpenAI + Anthropic + Gemini |
+| AI | Vercel AI SDK 6 + Tencent Cloud TokenHub DeepSeek |
 | Database | SQLite (better-sqlite3 + Drizzle ORM) |
 | Vector Search | Pure JS cosine similarity (no extensions needed) |
 | i18n | next-intl (Chinese / English) |
@@ -114,7 +110,7 @@ flowchart LR
 
     subgraph Generate["Generation"]
         TopK --> Prompt["System Prompt + Chunks + Question"]
-        Prompt --> LLM["LLM (GPT / Claude / Gemini)"]
+        Prompt --> LLM["DeepSeek"]
         LLM --> Answer["Streaming Answer with Source Citations"]
     end
 ```

@@ -1,12 +1,11 @@
 import { embed, embedMany } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 
-// Create a dedicated OpenAI-compatible provider for embeddings.
-// This allows using a separate API key / base URL / model for embeddings
-// (e.g. a Gemini embedding model behind an OpenAI-compatible proxy).
+// Dedicated OpenAI-compatible client for embeddings.
+// Chat credentials are not reused.
 const embeddingProvider = createOpenAI({
-  apiKey: process.env.EMBEDDING_API_KEY || process.env.OPENAI_API_KEY,
-  baseURL: process.env.EMBEDDING_BASE_URL || process.env.OPENAI_BASE_URL,
+  apiKey: process.env.EMBEDDING_API_KEY || "",
+  baseURL: process.env.EMBEDDING_BASE_URL,
 });
 
 const embeddingModelId = process.env.EMBEDDING_MODEL || "text-embedding-3-small";

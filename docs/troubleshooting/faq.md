@@ -6,38 +6,18 @@
 
 **Yes.** Workspace management, file browsing, uploading, editing, and GitHub cloning features work without any API key. Only AI chat and note generation features require an API key. The UI will display a prompt indicating that AI features are unavailable.
 
-### How do I use third-party compatible services (proxies, self-hosted models)?
+### How do I configure Tencent Cloud DeepSeek?
 
-Set `OPENAI_BASE_URL`, `ANTHROPIC_BASE_URL`, or `GEMINI_BASE_URL` in your `.env.local` file to point to any API-compatible endpoint:
-
-```ini
-OPENAI_BASE_URL=https://api.your-proxy.com/v1
-OPENAI_API_KEY=sk-your-key
-```
-
-If your proxy doesn't support the embedding endpoint, configure a separate embedding service:
+Set the TokenHub API key in `.env.docker.local` or `.env.docker.online`, then run the start script again. The default endpoint is TokenHub in Guangzhou:
 
 ```ini
-EMBEDDING_API_KEY=sk-your-embedding-key
-EMBEDDING_BASE_URL=https://api.your-embedding-proxy.com/v1
-EMBEDDING_MODEL=text-embedding-3-small
+DEEPSEEK_API_KEY=sk-your-tokenhub-key
+DEEPSEEK_BASE_URL=https://tokenhub.tencentmaas.com/v1
+LLM_PROVIDER=deepseek
+LLM_MODEL=deepseek-v4.1-flash
 ```
 
-### How do I configure Google Gemini?
-
-Set `GEMINI_API_KEY` in your `.env.local` file. Optionally set `GEMINI_BASE_URL` if using a custom proxy:
-
-```ini
-GEMINI_API_KEY=your-gemini-key
-# GEMINI_BASE_URL=https://api.your-provider.com
-```
-
-Then select "Gemini" as the provider in the Settings UI, or set the default:
-
-```ini
-LLM_PROVIDER=gemini
-LLM_MODEL=gemini-2.5-flash
-```
+The Settings page can switch `LLM_MODEL` to `deepseek-v4-pro`. Other providers are archived and are not shown.
 
 ### What is Agent mode and how does it differ from RAG Chat?
 
@@ -93,11 +73,11 @@ Use the **Datasets** page or the `POST /api/datasets` endpoint:
 4. Optionally set file patterns to include/exclude
 5. Start the download
 
-For private HuggingFace repos, set `HF_TOKEN` in `.env.local` or via the Settings UI.
+For private HuggingFace repos, set `HF_TOKEN` in the active Docker env file, or in the Settings UI.
 
 ### How do I configure a proxy for outbound API calls?
 
-Set `HTTP_PROXY` and `HTTPS_PROXY` in your `.env.local` file:
+Set `HTTP_PROXY` and `HTTPS_PROXY` in the active Docker env file:
 
 ```ini
 HTTP_PROXY=http://your-proxy:3128
@@ -107,23 +87,9 @@ NO_PROXY=localhost,127.0.0.1,10.0.0.0/8
 
 All outbound `fetch()` calls (AI API, GitHub, HuggingFace, etc.) will route through the proxy. Hosts in `NO_PROXY` bypass it.
 
-### Database errors on NFS or network filesystems
-
-SQLite requires a local filesystem for reliable locking. If the project is on NFS/CIFS, set `DATABASE_URL` to a local path:
-
-```ini
-DATABASE_URL=/tmp/innoclaw/innoclaw.db
-```
-
-InnoClaw now disables Next's dist-dir lock automatically on lockless network filesystems, so this startup error no longer requires a special `NEXT_BUILD_DIR`. If you still want a different build directory, keep it inside the repo:
-
-```ini
-NEXT_BUILD_DIR=.next-local
-```
-
 ### How do I submit K8s / GPU jobs?
 
-1. Configure Kubernetes access in `.env.local`:
+1. Configure Kubernetes access in the active Docker env file:
    ```ini
    KUBECONFIG_PATH=/path/to/your/kubeconfig
    K8S_SUBMITTER=your-ad-account
@@ -138,39 +104,36 @@ See [Environment Variables](../getting-started/environment-variables.md) for all
 ### GitHub clone fails — what should I check?
 
 1. Verify that `git` is installed: `git --version`
-2. Check that `GITHUB_TOKEN` is set correctly in `.env.local`
+2. Check that `GITHUB_TOKEN` is set in the active Docker env file
 3. Ensure the token has the `repo` scope for private repositories
 4. Check network connectivity to `github.com`
 
 ### How do I reset the database?
 
+Stop the stack, remove the `innoclaw-data` volume, and start again. That deletes chat history, notes, accounts, and the index. Files in the host workspace directory stay.
+
 ```bash
-# Remove the database file
-rm ./data/innoclaw.db
-
-# Re-run migrations
-npx drizzle-kit migrate
+docker compose --env-file .env.docker.local -f docker-compose.yml -f docker-compose.local.yml down -v
+.\scripts\docker-up-local.ps1
 ```
-
-This creates a fresh database. All workspaces, chat history, notes, and settings will be lost, but workspace files on disk are not affected.
 
 ### How do I back up my data?
 
-Back up the following:
-
 | Item | Location |
 |------|----------|
-| Database | `./data/innoclaw.db` |
-| Configuration | `.env.local` |
-| Workspace files | Directories listed in `WORKSPACE_ROOTS` |
+| Database | Docker volume `innoclaw-data` at `/app/data/innoclaw.db` |
+| Configuration | `.env.docker.local` or `.env.docker.online` |
+| Workspace files | The host directory in `HOST_WORKSPACE_PATH` |
 
-### The development server won't start
+Use the backup command in [Docker Operations](../docker.md). Do not copy the live database file while SQLite may be using WAL.
 
-1. Ensure Node.js 24+ is installed (Node.js 25 is also supported): `node --version`
-2. Ensure dependencies are installed: `npm install`
-3. Ensure the database is initialized: `npx drizzle-kit migrate`
-4. Ensure `WORKSPACE_ROOTS` directories exist on disk
-5. Check for port conflicts on port 3000
+### The container will not stay up
+
+1. Docker Engine 24+ and Compose v2 are installed
+2. `HOST_WORKSPACE_PATH` exists on the host
+3. `DEEPSEEK_API_KEY` is set when you need chat
+4. Port 3000 is free locally. Online, change `PUBLISH_PORT`
+5. Read `docker compose logs innoclaw`
 
 ### Build fails with font-related errors
 
@@ -178,13 +141,7 @@ If `npm run build` fails with errors about fetching Google Fonts, this is a netw
 
 ### How do I change the port?
 
-```bash
-# Development
-PORT=8080 npm run dev
-
-# Production
-PORT=8080 npm run start
-```
+Local Docker binds `127.0.0.1:3000`. On the online VM, set `PUBLISH_PORT` in `.env.docker.online` and run `./scripts/docker-up-online.sh` again.
 
 ## Getting Help
 

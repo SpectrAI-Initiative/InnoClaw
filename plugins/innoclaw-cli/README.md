@@ -13,7 +13,7 @@
 - `innoclaw workspace list|add`
 - `innoclaw research list|create|show|run|export`
 
-The CLI keeps the local Next.js app as the runtime. By default it targets `http://localhost:3000`, auto-starts the local app when needed, opens the browser login page, and stores a dedicated CLI session for later reuse. For trusted headless runs, start the app with `npm run dev:no-auth` or set `AUTH_MODE=disabled`.
+The CLI talks to the app at `http://127.0.0.1:3000`. Start the local Docker stack first with `scripts/docker-up-local.ps1` or `scripts/docker-up-local.sh`. For a trusted headless run, set `AUTH_MODE=disabled` in `.env.docker.local` before starting. Anyone who can reach the service then has administrator access.
 
 ## Local usage
 
@@ -62,6 +62,7 @@ The browser and CLI share the same user identity, but they do not reuse the same
 ## Headless run mode
 
 ```bash
-npm run dev:no-auth
+# .env.docker.local contains AUTH_MODE=disabled
+./scripts/docker-up-local.sh
 innoclaw run --prompt "Summarize the current workspace"
 ```

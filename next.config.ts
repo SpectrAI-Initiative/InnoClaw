@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages,
   outputFileTracingExcludes: {
     "/*": [
-      "./.claude/**/*",
+      "./skills/**/*",
       "./data/**/*",
       "./src/lib/article-search/paper-content.ts",
       "./src/lib/files/pdf-image-extractor.ts",

@@ -171,7 +171,7 @@ Anstatt zwischen Dateibrowser, Notiztool, Paper-Reader und Automatisierungskonso
 - **Forschungsnahe Workflows** - Papers studieren, strukturierte Multi-Agent-Diskussionen fuehren und neue Richtungen aus Literatur ableiten
 - **Wissenschaftliche Skills integriert** - 206 SCP-Science-Skills aus Bereichen wie Drug Discovery, Genomics und Protein Science importieren und nutzen
 - **Nicht nur Konversation, sondern Execution** - Von Lesen und Planung zu Job-Einreichung, Monitoring, Ergebnissammlung und naechsten Empfehlungen gelangen
-- **Self-hosted und multi-modellfreundlich** - Mit OpenAI, Anthropic, Gemini und kompatiblen Endpunkten betreibbar
+- **Self-hosted** - Start nur mit Docker. Die Modelle sind DeepSeek V4.1 Flash und DeepSeek V4 Pro ueber Tencent Cloud TokenHub
 
 <a id="de-quick-start"></a>
 
@@ -180,14 +180,12 @@ Anstatt zwischen Dateibrowser, Notiztool, Paper-Reader und Automatisierungskonso
 ```bash
 git clone https://github.com/SpectrAI-Initiative/InnoClaw.git
 cd InnoClaw
-npm install
-npm run dev
+./scripts/docker-up-local.sh
 ```
 
-- `http://localhost:3000` oeffnen
-- Einen KI-Provider auf der Settings-Seite konfigurieren
-- Workspace oeffnen oder clonen und dann `Sync` klicken, um den RAG-Index aufzubauen
-- OS-spezifische Voraussetzungen und Produktions-Deployment finden Sie in `getting-started/installation.md`
+- Der erste Lauf erzeugt `.env.docker.local`. `DEEPSEEK_API_KEY` eintragen und erneut starten
+- http://127.0.0.1:3000 oeffnen
+- Ablauf steht in `startup.md` und `getting-started/installation.md`
 
 ## 🛠️ Was Sie damit tun koennen
 
@@ -260,7 +258,7 @@ Von Code-Inspektion ueber Job-Einreichung bis zur Ergebnisanalyse in einem gefue
 | Skill-System | Wiederverwendbare wissenschaftliche Skills und Workflows importieren |
 | Research Execution | Remote-Experiment-Schleifen mit Monitoring und Freigabegates orchestrieren |
 | Multi-Agent-Sessions | Getrennte Execution-Kontexte ueber Tabs und Projekte hinweg behalten |
-| Multi-LLM-Support | OpenAI, Anthropic, Gemini und kompatible Endpunkte nutzen |
+| Modelle | Tencent Cloud TokenHub DeepSeek: V4.1 Flash und V4 Pro |
 
 ## 📚 Dokumentation
 

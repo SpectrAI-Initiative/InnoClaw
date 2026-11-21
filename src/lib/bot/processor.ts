@@ -39,7 +39,7 @@ export async function processMessage(
   if (!isAIAvailable()) {
     replies.push({
       type: "text",
-      text: "AI is not configured. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY.",
+      text: "AI is not configured. Please set DEEPSEEK_API_KEY.",
     });
     return replies;
   }

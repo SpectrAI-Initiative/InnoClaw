@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
 import { buildMemorySummarizationPrompt, buildCompactSummaryPrompt } from "@/lib/ai/prompts";
-import { getSummarizationLimitChars } from "@/lib/ai/models";
+import { getSummarizationLimitChars, resolveSelectableModel } from "@/lib/ai/models";
 import { db } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
 import { appSettings } from "@/lib/db/schema";
@@ -95,9 +95,13 @@ export async function POST(req: NextRequest) {
     // Compute dynamic transcript limit based on configured model's context window
     const providerSetting = await db.select().from(appSettings).where(eq(appSettings.key, "llm_provider")).limit(1);
     const modelSetting = await db.select().from(appSettings).where(eq(appSettings.key, "llm_model")).limit(1);
+    const selectedModel = resolveSelectableModel(
+      providerSetting[0]?.value,
+      modelSetting[0]?.value,
+    );
     const transcriptLimit = getSummarizationLimitChars(
-      providerSetting[0]?.value || "openai",
-      modelSetting[0]?.value || "gpt-4o-mini"
+      selectedModel.providerId,
+      selectedModel.modelId,
     );
     const truncatedTranscript = transcript.slice(0, transcriptLimit);
 

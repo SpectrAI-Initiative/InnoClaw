@@ -27,24 +27,19 @@
 
 # debug
 npm-debug.log*
+.dev.pid
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
-!.env.example
-!.env.production.example
 
 # vercel
 .vercel
 
-# claude code
-.claude/*
-!.claude/commands/
-!.claude/commands/**
-!.claude/skills/
-!.claude/skills/**
+# Claude Code local config
+.claude/
 
 # research history
 history/
@@ -59,7 +54,6 @@ history/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.env.local
 
 # cluster config
 config/*

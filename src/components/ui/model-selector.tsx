@@ -85,12 +85,12 @@ export function useModelSelection(storageKey: string) {
     );
   }, [availableProviders, settings]);
 
-  const resolvedUserSelection = useMemo(
-    () => resolveModelSelection(userSelection, availableProviders, { unmatchedKind: "custom" }),
-    [availableProviders, userSelection],
-  );
+  const resolvedUserSelection = useMemo(() => {
+    const resolved = resolveModelSelection(userSelection, availableProviders, { unmatchedKind: "custom" });
+    return resolved?.matchKind === "unmatched" ? null : resolved;
+  }, [availableProviders, userSelection]);
 
-  const resolvedSelection = resolvedUserSelection ?? settingsFallback;
+  const resolvedSelection = resolvedUserSelection ?? (settingsFallback?.matchKind === "unmatched" ? null : settingsFallback);
   const canonicalSelection = useMemo(
     () => resolvedSelection
       ? { provider: resolvedSelection.provider, model: resolvedSelection.resolvedModel }

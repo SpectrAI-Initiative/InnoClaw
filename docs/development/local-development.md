@@ -1,56 +1,32 @@
 # Local Development
 
-This guide covers running, debugging, and iterating on InnoClaw locally.
+Run the application with Docker. `npm run dev` and `npm run dev:no-auth` are not supported startup paths.
 
-## Starting the Development Server
-
-```bash
-npm run dev
+```powershell
+.\scripts\docker-up-local.ps1
 ```
 
-This starts the Next.js development server with hot module replacement (HMR). The application is available at **http://localhost:3000**.
-
-For trusted single-user/local development without registration or login:
-
 ```bash
-npm run dev:no-auth
+./scripts/docker-up-local.sh
 ```
 
-Disabled auth gives anyone who can reach the service admin-level access. Do not use it on an untrusted network unless another access-control layer protects the service.
+The app is at **http://127.0.0.1:3000**. Change keys in `.env.docker.local`, then run the script again. For a trusted single-user container without login, set `AUTH_MODE=disabled` in that file. Anyone who can reach the service then has administrator access.
 
-### Development Features
-
-- **Hot Reload** — Changes to components and pages are reflected immediately
-- **API Route Reload** — Server-side API changes take effect on the next request
-- **Error Overlay** — Build errors and runtime errors are displayed in the browser
-
-## Dev Helper Scripts
-
-Three shell scripts are provided for managing the development server in the background:
-
-### Start the Dev Server
+`npm` is for checks, not for serving the app:
 
 ```bash
-bash dev-start.sh
+npm install
+npx tsc --noEmit
+npm run lint
+npm test
+npm run build
 ```
 
-This script checks for port conflicts, installs dependencies if needed, runs database migrations, and starts the dev server in the background. Logs are written to `logs/dev.log` and the server PID is tracked for later use.
-
-### Check Server Status
+Container logs:
 
 ```bash
-bash dev-status.sh
+docker compose --env-file .env.docker.local -f docker-compose.yml -f docker-compose.local.yml logs -f innoclaw
 ```
-
-Reports whether the dev server is currently running.
-
-### Stop the Dev Server
-
-```bash
-bash dev-stop.sh
-```
-
-Stops the dev server using the stored PID.
 
 ## Common Development Tasks
 
@@ -93,12 +69,7 @@ npx drizzle-kit studio
 
 ### Server-Side Debugging
 
-1. Start the dev server with the Node.js inspector:
-   ```bash
-   NODE_OPTIONS='--inspect' npm run dev
-   ```
-2. Open `chrome://inspect` in Chrome and connect to the Node.js process
-3. Set breakpoints in API routes and server-side code
+Read the container log with the compose command above. For a type error, run `npx tsc --noEmit` on the host. API behavior belongs in the colocated `route.test.ts` files.
 
 ### Client-Side Debugging
 
@@ -109,25 +80,10 @@ Use the browser's built-in developer tools:
 
 ## Environment Setup Tips
 
-### Without AI API Keys
+### Without an API key
 
-You can develop most features without configuring AI API keys:
-- Workspace management, file browser, and UI components work without any API key
-- AI chat and note generation features will show a "not configured" message
+Workspace management and the file browser work without `DEEPSEEK_API_KEY`. Chat shows that AI is not configured.
 
-### Multiple Root Directories
+### Workspace path
 
-For testing workspace management with multiple roots:
-
-```ini
-WORKSPACE_ROOTS=/tmp/workspace-a,/tmp/workspace-b
-```
-
-### Using a Local AI Proxy
-
-If you run a local LLM (e.g., via Ollama or LM Studio) with an OpenAI-compatible API:
-
-```ini
-OPENAI_API_KEY=dummy-key
-OPENAI_BASE_URL=http://localhost:11434/v1
-```
+Inside the container, `WORKSPACE_ROOTS` is `/research`. The host directory is `HOST_WORKSPACE_PATH` in `.env.docker.local`.

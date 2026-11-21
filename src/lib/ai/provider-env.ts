@@ -1,14 +1,7 @@
 import { readEnvLocal } from "@/lib/env-file";
 import type { ProviderId } from "./models";
 
-const PER_MODEL_BASE_URL_PROVIDERS = new Set<ProviderId>([
-  "shlab",
-  "qwen",
-  "moonshot",
-  "deepseek",
-  "minimax",
-  "zhipu",
-]);
+const PER_MODEL_BASE_URL_PROVIDERS = new Set<ProviderId>(["deepseek"]);
 
 export function isPerModelBaseUrlProvider(
   providerId: string,

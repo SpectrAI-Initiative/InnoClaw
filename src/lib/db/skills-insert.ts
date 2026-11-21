@@ -1,6 +1,6 @@
 /**
  * Shared utility for inserting skill data into the database.
- * Used by both the /api/skills/import and /api/skills/claude-import endpoints.
+ * Used by the /api/skills/import endpoint.
  */
 
 import { db } from "@/lib/db";

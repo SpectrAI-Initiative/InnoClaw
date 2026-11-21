@@ -6,7 +6,7 @@ import { skills } from "@/lib/db/schema";
 import { insertSkill, parseSkillMd } from "@/lib/db/skills-insert";
 import { slugify } from "@/lib/utils/slugify";
 
-const DEFAULT_SKILLS_DIR = path.join(process.cwd(), ".claude", "skills");
+const DEFAULT_SKILLS_DIR = path.join(process.cwd(), "skills");
 
 let syncPromise: Promise<void> | null = null;
 

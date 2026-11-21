@@ -84,10 +84,10 @@ beforeEach(() => {
     { key: "style_theme", value: "default" },
   ];
   mocks.getCurrentEnv.mockReturnValue({
-    LLM_PROVIDER: "openai",
-    LLM_MODEL: "gpt-5.6-sol",
-    OPENAI_API_KEY: "configured-not-returned",
-    OPENAI_BASE_URL: "http://provider.internal/v1",
+    LLM_PROVIDER: "deepseek",
+    LLM_MODEL: "deepseek-v4-pro",
+    DEEPSEEK_API_KEY: "configured-not-returned",
+    DEEPSEEK_BASE_URL: "https://tokenhub.tencentmaas.com/v1",
     GITHUB_TOKEN: "configured-not-returned",
     HF_TOKEN: "configured-not-returned",
   });
@@ -107,14 +107,14 @@ describe("GET /api/settings", () => {
 
     expect(response.status).toBe(200);
     expect(body).toEqual({
-      llmProvider: "openai",
-      llmModel: "gpt-5.6-sol",
+      llmProvider: "deepseek",
+      llmModel: "deepseek-v4-pro",
       contextMode: "normal",
       maxMode: true,
       workspaceRoots: ["/research/users/user-a"],
       defaultBrowsePath: "/research/users/user-a",
       hasAIKey: true,
-      configuredProviders: ["openai"],
+      configuredProviders: ["deepseek"],
     });
     expect(body).not.toHaveProperty("providerBaseUrls");
     expect(body).not.toHaveProperty("k8sConfig");
@@ -137,7 +137,7 @@ describe("GET /api/settings", () => {
       hasGithubToken: true,
       hasHfToken: true,
       providerBaseUrls: {
-        openai: "http://provider.internal/v1",
+        deepseek: "https://tokenhub.tencentmaas.com/v1",
       },
       k8sConfig: { apiUrl: "https://cluster.internal" },
     });

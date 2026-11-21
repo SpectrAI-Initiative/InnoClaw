@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { updateEnvLocal } from "@/lib/env-file";
-import { PROVIDERS } from "@/lib/ai/models";
+import { DEFAULT_MODEL, DEFAULT_PROVIDER, PROVIDERS, isSelectableModel, resolveSelectableModel } from "@/lib/ai/models";
 import { getCurrentEnv } from "@/lib/ai/provider-env";
 import { getK8sConfig, SETTINGS_TO_ENV, invalidateK8sConfigCache } from "@/lib/cluster/config";
 import { requireAdmin, requireAuth } from "@/lib/auth/server";
@@ -47,9 +47,12 @@ export async function GET(request: NextRequest) {
     }
 
     const env = getCurrentEnv();
-    const llmProvider =
-      env.LLM_PROVIDER || settingsMap["llm_provider"] || "openai";
-    const llmModel = env.LLM_MODEL || settingsMap["llm_model"] || "gpt-4o-mini";
+    const selected = resolveSelectableModel(
+      env.LLM_PROVIDER || settingsMap["llm_provider"] || DEFAULT_PROVIDER,
+      env.LLM_MODEL || settingsMap["llm_model"] || DEFAULT_MODEL,
+    );
+    const llmProvider = selected.providerId;
+    const llmModel = selected.modelId;
     const hasHfToken = !!settingsMap["hf_token"] || !!env.HF_TOKEN;
     const { providerKeys, providerBaseUrls } = getProviderEnvInfo();
     const workspaceRoots = ensureEffectiveWorkspaceRoots(auth);
@@ -110,6 +113,17 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    if (typeof body.llm_provider === "string" || typeof body.llm_model === "string") {
+      const provider = typeof body.llm_provider === "string" ? body.llm_provider : DEFAULT_PROVIDER;
+      const model = typeof body.llm_model === "string" ? body.llm_model : DEFAULT_MODEL;
+      if (!isSelectableModel(provider, model)) {
+        return NextResponse.json(
+          { error: `Model "${provider}/${model}" is outside the active catalog.` },
+          { status: 400 },
+        );
+      }
+    }
 
     for (const [key, value] of Object.entries(body)) {
       if (typeof value !== "string") continue;

@@ -171,7 +171,7 @@ Au lieu de jongler entre un navigateur de fichiers, un outil de notes, un lecteu
 - **Workflows natifs pour la recherche** - Etudiez des articles, lancez des discussions multi-agent structurees et derivez de nouvelles directions depuis la litterature
 - **Competences scientifiques integrees** - Importez et utilisez 206 competences scientifiques SCP couvrant notamment la decouverte de medicaments, la genomique et les proteines
 - **Execution, pas seulement conversation** - Passez de la lecture et de la planification a la soumission de jobs, la supervision, la collecte de resultats et les recommandations suivantes
-- **Auto-heberge et multi-modeles** - Fonctionne avec OpenAI, Anthropic, Gemini et des endpoints compatibles
+- **Auto-heberge** - Demarrage uniquement avec Docker. Les modeles sont DeepSeek V4.1 Flash et DeepSeek V4 Pro via Tencent Cloud TokenHub
 
 <a id="fr-quick-start"></a>
 
@@ -180,14 +180,12 @@ Au lieu de jongler entre un navigateur de fichiers, un outil de notes, un lecteu
 ```bash
 git clone https://github.com/SpectrAI-Initiative/InnoClaw.git
 cd InnoClaw
-npm install
-npm run dev
+./scripts/docker-up-local.sh
 ```
 
-- Ouvrez `http://localhost:3000`
-- Configurez un fournisseur IA dans la page Settings
-- Ouvrez ou clonez un workspace, puis cliquez sur `Sync` pour construire l'index RAG
-- Pour les prerequis par OS et le deploiement en production, voir `getting-started/installation.md`
+- Le premier lancement cree `.env.docker.local`. Renseignez `DEEPSEEK_API_KEY`, puis relancez
+- Ouvrez http://127.0.0.1:3000
+- Le detail est dans `startup.md` et `getting-started/installation.md`
 
 ## 🛠️ Ce que vous pouvez faire
 
@@ -260,7 +258,7 @@ Passez de l'inspection du code a la soumission de jobs et a l'analyse des result
 | Systeme de skills | Importer des competences scientifiques et workflows reutilisables |
 | Execution de recherche | Orchestrer des boucles experimentales distantes avec supervision et approbations |
 | Sessions multi-agent | Garder des contextes d'execution distincts selon les onglets et projets |
-| Support multi-LLM | Utiliser OpenAI, Anthropic, Gemini et des endpoints compatibles |
+| Modeles | Tencent Cloud TokenHub DeepSeek : V4.1 Flash et V4 Pro |
 
 ## 📚 Documentation
 

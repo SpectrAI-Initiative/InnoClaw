@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     if (!isAIAvailable()) {
       return new Response(
-        "AI is not configured. Please set one of OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or SHLAB_API_KEY in .env.local.",
+        "AI is not configured. Please set DEEPSEEK_API_KEY in .env.local.",
         { status: 503 },
       );
     }

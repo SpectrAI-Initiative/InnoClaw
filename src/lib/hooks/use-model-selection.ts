@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import {
   PROVIDERS,
+  isSelectableModel,
   modelSupportsVision,
 } from "@/lib/ai/models";
 import type { ProviderId } from "@/lib/ai/models";
@@ -87,14 +88,10 @@ export function useModelSelection({
     for (const id of configuredProviderIds) {
       const provider = PROVIDERS[id];
       if (!provider) continue;
-      const knownIds = new Set(provider.models.map((m) => m.id));
-      const extraModels = (discoveredModelsByProvider?.[id] ?? []).filter(
-        (m) => !knownIds.has(m.id),
-      );
       providers.push({
         id: provider.id,
         name: provider.name,
-        models: [...provider.models, ...extraModels],
+        models: [...provider.models],
       });
     }
     return providers;
@@ -121,7 +118,7 @@ export function useModelSelection({
   // --- Sync selection during render when provider is removed or canonical drifts ---
   const isProviderValid =
     userSelection &&
-    Boolean(PROVIDERS[userSelection.provider as ProviderId]) &&
+    isSelectableModel(userSelection.provider, userSelection.model) &&
     (configuredProviderIds.length === 0 ||
       configuredProviderIds.includes(userSelection.provider as ProviderId));
 

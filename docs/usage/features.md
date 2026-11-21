@@ -152,17 +152,16 @@ Monitor and manage Kubernetes clusters for workload automation:
 
 Generic Job scheduling requires `KUBECONFIG_PATH` plus either generic `K8S_*` environment variables or a private profile file.
 
-## Multi-LLM Support
+## Models
 
-Switch between different AI providers and models:
+The selectable catalog is Tencent Cloud TokenHub DeepSeek:
 
-| Provider | Models |
-|----------|--------|
-| **OpenAI** | GPT-5.2, GPT-4.1, GPT-4.1 Mini, GPT-4.1 Nano, GPT-4o, GPT-4o Mini, o3, o3 Mini, o4 Mini |
-| **Anthropic** | Claude Opus 4.6, Claude Sonnet 4, Claude 3.7 Sonnet, Claude 3.5 Haiku |
-| **Gemini** | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3 Flash, Gemini 3 Pro, Gemini 3.1 Pro (Thinking) |
+| Model | Id |
+|-------|----|
+| DeepSeek V4.1 Flash | `deepseek-v4.1-flash` |
+| DeepSeek V4 Pro | `deepseek-v4-pro` |
 
-Custom endpoints are supported via `OPENAI_BASE_URL`, `ANTHROPIC_BASE_URL`, and `GEMINI_BASE_URL` for third-party providers or self-hosted models.
+Set `DEEPSEEK_API_KEY` in `.env.docker.local` or `.env.docker.online`. OpenAI, Anthropic, and Gemini catalogs remain in the repository as archived definitions and are not offered in Settings.
 
 ## Bilingual UI
 

@@ -53,7 +53,7 @@ InnoClaw is designed for **trusted, self-hosted environments**. It does not incl
 
 ### Secrets & Environment
 
-- Never commit `.env.local` or API keys to version control. Use `.env.example` as a reference.
+- Never commit `.env.docker.local`, `.env.docker.online`, or API keys. Both env files are gitignored.
 - Rotate API keys regularly; grant only the scopes each provider requires.
 - Set restrictive file permissions on the SQLite database (`chmod 600 data/innoclaw.db`).
 

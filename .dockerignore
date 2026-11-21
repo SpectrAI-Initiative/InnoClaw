@@ -22,9 +22,7 @@ tmp-playwright-review/
 # Data (mounted as volumes at runtime)
 data/
 
-# Local env (secrets)
-.env.local
-.env.production.local
+.env*
 
 # Version control
 .git
@@ -44,3 +42,4 @@ Thumbs.db
 .github
 .claude
 CLAUDE.md
+skills

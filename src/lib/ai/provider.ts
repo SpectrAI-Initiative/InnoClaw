@@ -1,13 +1,18 @@
-import { openai } from "@ai-sdk/openai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { createAnthropic } from "@ai-sdk/anthropic";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
 import { inArray } from "drizzle-orm";
-import { DEFAULT_PROVIDER, DEFAULT_MODEL, PROVIDERS } from "./models";
+import { isArchivedProvider } from "./archived-providers";
+import {
+  DEFAULT_MODEL,
+  DEFAULT_PROVIDER,
+  PROVIDERS,
+  TOKENHUB_DEFAULT_BASE_URL,
+  isSelectableModel,
+  resolveSelectableModel,
+} from "./models";
 import type { ProviderId } from "./models";
 import type { LanguageModel } from "ai";
-import { applyOpenAIReasoningEffort } from "./openai-reasoning";
 import {
   getApiKeyEnvKey,
   getCurrentEnv,
@@ -24,47 +29,11 @@ export function isAIAvailable(): boolean {
   return Object.values(PROVIDERS).some((p) => !!env[p.envKey]);
 }
 
-/**
- * Normalize ANTHROPIC_BASE_URL for @ai-sdk/anthropic.
- *
- * Claude Code's SDK expects the base URL WITHOUT "/v1" (e.g. "http://host:3888")
- * and internally appends "/v1/messages".
- *
- * @ai-sdk/anthropic expects the base URL WITH "/v1" (e.g. "http://host:3888/v1")
- * and internally appends only "/messages".
- *
- * To avoid conflicts when the same ANTHROPIC_BASE_URL env var is shared between
- * Claude Code and this app, auto-append "/v1" if it's missing.
- */
-function getAnthropicBaseURL(): string | undefined {
-  const raw = process.env.ANTHROPIC_BASE_URL;
-  if (!raw) return undefined;
-  const trimmed = raw.replace(/\/+$/, ""); // strip trailing slashes
-  if (trimmed.endsWith("/v1")) return trimmed;
-  return `${trimmed}/v1`;
-}
-
-// Create a custom Anthropic provider with the normalized base URL
-const anthropic = createAnthropic({
-  baseURL: getAnthropicBaseURL(),
-});
-
-// Create a dedicated OpenAI-compatible provider for Gemini models,
-// using separate GEMINI_API_KEY / GEMINI_BASE_URL env vars.
-const gemini = createOpenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
-  baseURL: process.env.GEMINI_BASE_URL,
-});
-
-// Cache per-model OpenAI-compatible providers (shared across all per-model-URL providers).
 const perModelProviderCache = new Map<string, ReturnType<typeof createOpenAI>>();
 
 /**
- * Create (or return cached) OpenAI-compatible provider for providers that use
- * per-model base URLs. Resolution order:
- *   1. Per-model env var:  e.g. MOONSHOT_KIMI_K2_5_BASE_URL
- *   2. Vendor-level env var: e.g. MOONSHOT_BASE_URL
- *   3. Error if neither is set.
+ * OpenAI-compatible TokenHub client.
+ * Resolution order: per-model base URL, vendor base URL, then the TokenHub default.
  */
 function getPerModelProvider(
   providerId: string,
@@ -74,15 +43,9 @@ function getPerModelProvider(
   const providerDef = PROVIDERS[providerId as ProviderId];
   const perModelEnvVar = getPerModelBaseUrlEnvKey(providerId, modelId);
   const vendorEnvVar = getVendorBaseUrlEnvKey(providerId);
-  const baseURL = env[perModelEnvVar] || env[vendorEnvVar];
-  if (!baseURL) {
-    throw new Error(
-      `No base URL configured for ${providerDef?.name ?? providerId} model "${modelId}". ` +
-        `Set ${perModelEnvVar} or ${vendorEnvVar}.`
-    );
-  }
+  const baseURL = env[perModelEnvVar] || env[vendorEnvVar] || TOKENHUB_DEFAULT_BASE_URL;
 
-  const cacheKey = `${providerId}:${modelId}`;
+  const cacheKey = `${providerId}:${modelId}:${baseURL}`;
   let cached = perModelProviderCache.get(cacheKey);
   if (!cached) {
     cached = createOpenAI({
@@ -94,40 +57,26 @@ function getPerModelProvider(
   return cached.chat(modelId);
 }
 
+function assertActiveModel(provider: string, modelId: string): void {
+  if (isSelectableModel(provider, modelId)) return;
+  if (isArchivedProvider(provider)) {
+    throw new Error(
+      `Provider "${provider}" is archived. Select deepseek/deepseek-v4.1-flash or deepseek/deepseek-v4-pro.`,
+    );
+  }
+  throw new Error(
+    `Model "${provider}/${modelId}" is outside the active catalog. ` +
+      `Select deepseek/deepseek-v4.1-flash or deepseek/deepseek-v4-pro.`,
+  );
+}
+
 /**
- * Build a LanguageModel instance from an arbitrary provider/model pair.
- * Shared by both DB-based and per-request model resolution.
+ * Build a LanguageModel for a catalog provider/model pair.
+ * Calls stay on the Vercel AI SDK Chat Completions client.
  */
 function buildLanguageModel(provider: string, modelId: string): LanguageModel {
-  const env = getCurrentEnv();
-  switch (provider) {
-    case "openai":
-      // Use Chat Completions API (not Responses API) for maximum compatibility
-      // with third-party proxies and OpenAI-compatible services.
-      return applyOpenAIReasoningEffort(
-        openai.chat(modelId),
-        env.OPENAI_REASONING_EFFORT,
-      );
-    case "gemini":
-      // Gemini models served via a separate OpenAI-compatible proxy
-      return gemini.chat(modelId);
-    case "anthropic":
-      return anthropic(modelId);
-    case "shlab":
-    case "qwen":
-    case "moonshot":
-    case "deepseek":
-    case "minimax":
-    case "zhipu":
-      return getPerModelProvider(provider, modelId);
-    default:
-      // Use the configured modelId even for unknown providers – the user may be
-      // pointing OPENAI_BASE_URL at a third-party OpenAI-compatible service.
-      return applyOpenAIReasoningEffort(
-        openai.chat(modelId),
-        env.OPENAI_REASONING_EFFORT,
-      );
-  }
+  assertActiveModel(provider, modelId);
+  return getPerModelProvider(provider, modelId);
 }
 
 /**
@@ -160,10 +109,10 @@ export async function getConfiguredModelSelection(): Promise<{
   const providerRow = settings.find((s) => s.key === "llm_provider");
   const modelRow = settings.find((s) => s.key === "llm_model");
 
-  return {
-    providerId: env.LLM_PROVIDER || providerRow?.value || DEFAULT_PROVIDER,
-    modelId: env.LLM_MODEL || modelRow?.value || DEFAULT_MODEL,
-  };
+  return resolveSelectableModel(
+    env.LLM_PROVIDER || providerRow?.value || DEFAULT_PROVIDER,
+    env.LLM_MODEL || modelRow?.value || DEFAULT_MODEL,
+  );
 }
 
 /**
@@ -175,10 +124,10 @@ export function getConfiguredModelSelectionFromEnv(): {
   modelId: string;
 } {
   const env = getCurrentEnv();
-  return {
-    providerId: env.LLM_PROVIDER || DEFAULT_PROVIDER,
-    modelId: env.LLM_MODEL || DEFAULT_MODEL,
-  };
+  return resolveSelectableModel(
+    env.LLM_PROVIDER || DEFAULT_PROVIDER,
+    env.LLM_MODEL || DEFAULT_MODEL,
+  );
 }
 
 /**

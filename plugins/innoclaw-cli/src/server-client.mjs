@@ -1,6 +1,4 @@
-import { spawn } from "node:child_process";
-import { setTimeout as delay } from "node:timers/promises";
-import { getBaseUrlCandidates, isLocalBaseUrl } from "./runtime.mjs";
+import { getBaseUrlCandidates } from "./runtime.mjs";
 
 async function pingServer(baseUrl) {
   for (const candidate of getBaseUrlCandidates(baseUrl)) {
@@ -33,58 +31,12 @@ async function pingServer(baseUrl) {
   return false;
 }
 
-function startLocalServer(appRoot) {
-  return new Promise((resolve, reject) => {
-    const child = spawn("bash", ["dev-start.sh"], {
-      cwd: appRoot,
-      stdio: "inherit",
-      shell: false,
-    });
-    child.on("exit", (code, signal) => {
-      resolve({
-        code: code ?? 0,
-        signal: signal ?? null,
-      });
-    });
-    child.on("error", reject);
-  });
-}
-
-export async function ensureServerReady({
-  appRoot,
-  baseUrl,
-  autoStart = true,
-  waitTimeoutMs = 90_000,
-}) {
+export async function ensureServerReady({ baseUrl }) {
   if (await pingServer(baseUrl)) {
     return;
   }
 
-  if (!autoStart || !isLocalBaseUrl(baseUrl)) {
-    throw new Error(`InnoClaw is not reachable at ${baseUrl}`);
-  }
-
-  const launchResult = await startLocalServer(appRoot);
-
-  const deadline = Date.now() + waitTimeoutMs;
-  while (Date.now() < deadline) {
-    if (await pingServer(baseUrl)) {
-      return;
-    }
-    await delay(1_000);
-  }
-
-  if (launchResult.code !== 0) {
-    throw new Error(
-      `Timed out waiting for InnoClaw to start at ${baseUrl} after dev-start.sh exited with code ${launchResult.code}`,
-    );
-  }
-
-  if (launchResult.signal) {
-    throw new Error(
-      `Timed out waiting for InnoClaw to start at ${baseUrl} after dev-start.sh ended with signal ${launchResult.signal}`,
-    );
-  }
-
-  throw new Error(`Timed out waiting for InnoClaw to start at ${baseUrl}`);
+  throw new Error(
+    `InnoClaw is not reachable at ${baseUrl}. Start the container with scripts/docker-up-local.ps1 or scripts/docker-up-local.sh.`,
+  );
 }

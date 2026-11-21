@@ -48,11 +48,11 @@ Record the following values:
 
 1. On the **Events & Callbacks** → **Event Configuration** page
 2. Select **"Use persistent connection to receive events"** (使用长连接接收事件) — NOT the Webhook URL method
-3. **IMPORTANT**: You must start the NotebookLM service FIRST and confirm the connection before saving this configuration in the Feishu console
+3. **IMPORTANT**: Start the InnoClaw container first and confirm the connection before saving this configuration in the Feishu console
 
 ### Connection Verification
 
-After starting the service (`npm run dev`), watch the terminal logs for the actual connection status:
+After starting the container, watch `docker compose logs` for the connection status:
 
 ```
 [feishu-ws] WSClient starting...
@@ -70,11 +70,11 @@ The `@larksuiteoapi/node-sdk` `WSClient.start()` resolves its promise **before**
 
 Possible causes and fixes:
 1. **Wrong credentials** — Double-check `FEISHU_APP_ID` and `FEISHU_APP_SECRET` match the Developer Console exactly
-2. **Service not started** — Run `npm run dev` and wait for ✅ before saving config
-3. **Bot not enabled** — Ensure `FEISHU_BOT_ENABLED=true` in `.env.local`
+2. **Service not started** — Run the local or online Docker start script and wait for ✅ before saving config
+3. **Bot not enabled** — Ensure `FEISHU_BOT_ENABLED=true` in `.env.docker.local` or `.env.docker.online`
 4. **Network issues** — The service must be able to reach `open.feishu.cn` over HTTPS
 
-For detailed SDK logs, set `FEISHU_LOG_LEVEL=debug` in `.env.local`.
+For detailed SDK logs, set `FEISHU_LOG_LEVEL=debug` in the active Docker env file.
 
 ## Step 5: Enable Bot Capability
 
@@ -100,7 +100,7 @@ Go to app → **Permission Management** (权限管理) and enable these permissi
 
 ## Step 8: Configure Environment Variables
 
-Add the following to `.env.local`:
+Add the following to `.env.docker.local` or `.env.docker.online`, then start the stack again:
 
 ```env
 # Feishu (Lark) Bot configuration
@@ -119,10 +119,11 @@ FEISHU_ENCRYPT_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ## Step 9: Start and Verify
 
 ```bash
-npm run dev
+./scripts/docker-up-local.sh
+docker compose --env-file .env.docker.local -f docker-compose.yml -f docker-compose.local.yml logs -f innoclaw
 ```
 
-Watch for the ✅ connection success indicator in the terminal logs, then open a chat with the bot in Feishu and send a message.
+Watch for the ✅ connection success indicator, then open a chat with the bot in Feishu and send a message.
 
 ## Bot Commands
 

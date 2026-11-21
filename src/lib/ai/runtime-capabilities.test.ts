@@ -19,16 +19,15 @@ describe("runtimeProviderSupportsTools", () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("keeps tools enabled for hosted providers", async () => {
+  it("keeps tools enabled for the active DeepSeek provider", async () => {
     const { runtimeProviderSupportsTools } = await import("./runtime-capabilities");
-    expect(runtimeProviderSupportsTools("openai")).toBe(true);
-    expect(runtimeProviderSupportsTools("anthropic")).toBe(true);
+    expect(runtimeProviderSupportsTools("deepseek")).toBe(true);
   });
 
-  it("disables tools by default for self-hosted openai-compatible providers", async () => {
+  it("keeps archived providers from using tools unless explicitly overridden", async () => {
     const { runtimeProviderSupportsTools } = await import("./runtime-capabilities");
-    expect(runtimeProviderSupportsTools("qwen")).toBe(true);
-    expect(runtimeProviderSupportsTools("moonshot")).toBe(true);
+    expect(runtimeProviderSupportsTools("qwen")).toBe(false);
+    expect(runtimeProviderSupportsTools("openai")).toBe(false);
   });
 
   it("allows explicitly overriding provider-specific tool flags", async () => {

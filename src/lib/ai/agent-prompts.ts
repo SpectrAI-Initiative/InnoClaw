@@ -4,7 +4,7 @@ const CONTEXT_COMPACTION_SECTION = `
 If the conversation begins with a message wrapped in \`<context_summary>\` tags, this is a compacted summary of a prior conversation that exceeded the context window. Treat it as full context of what happened previously — continue working from where it left off. Do not ask the user to repeat information that is already in the summary.`;
 
 /**
- * Build a system prompt for the Claude Code-style agent terminal.
+ * Build a system prompt for the agent terminal.
  * Optionally includes a skill catalog so the AI can auto-detect and invoke skills.
  */
 export function buildAgentSystemPrompt(
@@ -279,7 +279,7 @@ Create a comprehensive memory note from the conversation transcript below. This 
 
 /**
  * Build a system prompt for generating a compact context summary
- * that will be injected back into the conversation (Claude Code-style compaction).
+ * that will be injected back into the conversation.
  * Unlike the memory summarization prompt (optimized for human-readable notes),
  * this prompt produces dense, AI-friendly context for seamless continuation.
  */

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     if (!isAIAvailable()) {
       return NextResponse.json(
-        { error: "AI is not configured. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env.local." },
+        { error: "AI is not configured. Please set DEEPSEEK_API_KEY in .env.local." },
         { status: 503 }
       );
     }

@@ -46,8 +46,12 @@ exclude_patterns = [
     "_build",
     "Thumbs.db",
     ".DS_Store",
-    # Internal planning artifacts are kept in-repo but are not public docs.
+    # GitHub homepage translations and the short ops note are not Sphinx pages.
+    "README_*.md",
+    "startup.md",
+    # Finished implementation plans. They are not part of the published guide.
     "superpowers/**",
+    "development/readme-homepage-redesign.md",
 ]
 
 # -- Options for HTML output -------------------------------------------------

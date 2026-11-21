@@ -1,6 +1,6 @@
 # Project Structure
 
-This page describes the directory layout and module organization of InnoClaw.
+This page is a map of the code. How to run the app is [Installation](../getting-started/installation.md). Contributor workflow is the repository root `AGENTS.md`.
 
 ## High-Level Structure
 
@@ -169,9 +169,6 @@ innoclaw/
 ├── config/                           # Configuration files (skills, etc.)
 ├── docs/                             # Documentation (Sphinx)
 ├── data/                             # SQLite database (runtime)
-├── dev-start.sh                      # Dev server start script
-├── dev-stop.sh                       # Dev server stop script
-├── dev-status.sh                     # Dev server status check
 ├── package.json                      # Node.js dependencies
 ├── tsconfig.json                     # TypeScript configuration
 ├── next.config.ts                    # Next.js configuration

@@ -1,5 +1,45 @@
+# Ubuntu Server 24.04 LTS (Noble) amd64.
+# Default pull goes through a domestic Docker Hub mirror; override UBUNTU_IMAGE if needed.
+ARG UBUNTU_IMAGE=docker.m.daocloud.io/library/ubuntu:24.04
+ARG NODE_VERSION=24.22.3
+ARG NODE_DIST_URL=https://cdn.npmmirror.com/binaries/node
+ARG APT_MIRROR=mirrors.aliyun.com
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+
+FROM ${UBUNTU_IMAGE} AS nodebase
+
+ARG NODE_VERSION
+ARG NODE_DIST_URL
+ARG APT_MIRROR
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Ubuntu Server 24.04 uses deb822 sources. The base image has no CA store yet,
+# so the first apt update must stay on plain HTTP. Domestic mirrors are used
+# before ca-certificates is installed.
+RUN set -eux; \
+    if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
+      sed -i \
+        -e "s|http://archive.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
+        -e "s|http://security.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
+        -e "s|https://archive.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
+        -e "s|https://security.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
+        /etc/apt/sources.list.d/ubuntu.sources; \
+    fi; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl xz-utils; \
+    curl -fsSL "${NODE_DIST_URL}/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" -o /tmp/node.tar.xz; \
+    tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1; \
+    rm -f /tmp/node.tar.xz; \
+    node --version; \
+    npm --version; \
+    rm -rf /var/lib/apt/lists/*
+
 # ── Stage 1: Install dependencies ──────────────────────────────────
-FROM node:24-slim AS deps
+FROM nodebase AS deps
+
+ARG NPM_REGISTRY
+ARG APT_MIRROR
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends python3 make g++ && \
@@ -8,14 +48,12 @@ RUN apt-get update && \
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
-
-# Install drizzle-kit separately so we can copy it to the runner later.
-# This reuses the build-tool environment needed by better-sqlite3.
-RUN npm install --no-save drizzle-kit
+RUN npm config set registry "${NPM_REGISTRY}" && \
+    npm ci && \
+    npm install --no-save drizzle-kit
 
 # ── Stage 2: Build the application ────────────────────────────────
-FROM node:24-slim AS builder
+FROM nodebase AS builder
 
 WORKDIR /app
 
@@ -23,7 +61,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
 COPY next.config.ts tsconfig.json tsconfig.admin-cli.json ./
 COPY postcss.config.mjs components.json drizzle.config.ts ./
-COPY .env.example .env.production.example ./
 COPY src ./src
 COPY public ./public
 COPY scripts ./scripts
@@ -38,7 +75,7 @@ RUN npm run build
 RUN npm run build:admin-cli
 
 # ── Stage 3: Production runner ────────────────────────────────────
-FROM node:24-slim AS runner
+FROM nodebase AS runner
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends tini && \
@@ -51,7 +88,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-RUN addgroup --system nodejs && adduser --system --ingroup nodejs nextjs
+RUN groupadd --system nodejs && \
+    useradd --system --gid nodejs --home-dir /app --shell /usr/sbin/nologin nextjs
 
 # Copy standalone server output (includes traced node_modules with better-sqlite3)
 COPY --from=builder /app/.next/standalone ./
