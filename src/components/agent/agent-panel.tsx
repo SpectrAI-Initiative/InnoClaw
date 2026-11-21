@@ -14,7 +14,7 @@ import {
   ImagePlus,
   Loader2,
   Square,
-  Brain,
+  Eraser,
   SendHorizontal,
 } from "lucide-react";
 import useSWR from "swr";
@@ -27,6 +27,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { useSkills } from "@/lib/hooks/use-skills";
 import { getOverflowThresholdChars, getMessageTextLength, getContextWindowChars, modelSupportsVision, PROVIDERS, DEFAULT_PROVIDER, DEFAULT_MODEL, DEFAULT_CONTEXT_MODE } from "@/lib/ai/models";
@@ -192,6 +193,7 @@ export function AgentPanel({
 
   // Memory preview dialog state
   const [showMessageSelect, setShowMessageSelect] = useState(false);
+  const [messageSelectReason, setMessageSelectReason] = useState<"manual" | "overflow">("manual");
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
   const toggleMessage = useCallback((id: string) => {
     setSelectedMessageIds((prev) => {
@@ -736,6 +738,7 @@ export function AgentPanel({
 
     // Show message selection dialog instead of auto-summarizing
     overflowKeepRef.current = toKeep;
+    setMessageSelectReason("overflow");
     // Only pre-select messages with renderable text content
     setSelectedMessageIds(new Set(getRenderableMessages(toSummarize).map((message) => message.id)));
     setShowMessageSelect(true);
@@ -1045,6 +1048,7 @@ export function AgentPanel({
     if (messages.length > 0 && aiEnabled) {
       // Show message selection dialog first
       overflowKeepRef.current = null; // null = manual clear (not overflow)
+      setMessageSelectReason("manual");
       setSelectedMessageIds(new Set(selectableMessages.map((m) => m.id)));
       setShowMessageSelect(true);
     } else {
@@ -1470,13 +1474,22 @@ export function AgentPanel({
             </button>
           )}
           {!isLoading && !isSummarizing && messages.length > 0 && (
-            <button
-              onClick={handleClear}
-              title={t("clearContext")}
-              className="shrink-0 p-1 rounded hover:bg-agent-card-hover text-agent-muted hover:text-agent-foreground transition-colors"
-            >
-              <Brain className="h-4 w-4" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  aria-label={t("clearContext")}
+                  className="flex shrink-0 items-center gap-1 rounded px-1.5 py-1 text-xs text-agent-muted transition-colors hover:bg-agent-card-hover hover:text-agent-foreground"
+                >
+                  <Eraser className="h-4 w-4" />
+                  <span>{t("clearContext")}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-64 text-xs leading-5">
+                {t("clearContextHint")}
+              </TooltipContent>
+            </Tooltip>
           )}
           {!isLoading && (
             <button
@@ -1549,15 +1562,15 @@ export function AgentPanel({
           setMessages([]);
         }}
         labels={{
-          title: t("selectMessagesTitle"),
-          description: t("selectMessagesDesc"),
+          title: t(messageSelectReason === "overflow" ? "overflowDialogTitle" : "clearDialogTitle"),
+          description: t(messageSelectReason === "overflow" ? "overflowDialogDesc" : "clearDialogDesc"),
           roleUser: t("roleUser"),
           roleAssistant: t("roleAssistant"),
           selectAll: t("selectAll"),
           selectNone: t("selectNone"),
           cancel: tCommon("cancel"),
-          clearAll: t("clearAll"),
-          confirm: t("nextStep"),
+          clearAll: t("clearWithoutSaving"),
+          confirm: t("summarizeToMemory"),
         }}
         selectedCount={selectedMessageIds.size}
         totalCount={selectableMessages.length}
@@ -1583,7 +1596,7 @@ export function AgentPanel({
         confirmDisabled={!memoryPreviewTitle.trim()}
         labels={{
           title: t("memoryPreviewTitle"),
-          description: t("memoryPreviewDesc"),
+          description: t(messageSelectReason === "overflow" ? "overflowMemoryPreviewDesc" : "clearMemoryPreviewDesc"),
           cancel: tCommon("cancel"),
           confirm: tCommon("confirm"),
           memoryTitle: t("memoryNoteTitle"),

@@ -72,11 +72,11 @@ interface MemoryPreviewDialogProps extends BaseDialogProps {
 }
 
 const terminalSelectionClasses = {
-  selected: "border-[#7aa2f7]/50 bg-[#7aa2f7]/5",
-  idle: "border-[#30363d] hover:border-[#484f58]",
-  roleUser: "text-[#bb9af7]",
-  roleAssistant: "text-[#7aa2f7]",
-  text: "text-[#c9d1d9]",
+  selected: "border-primary/50 bg-primary/5",
+  idle: "border-border hover:border-muted-foreground/40",
+  roleUser: "text-purple-600 dark:text-[#bb9af7]",
+  roleAssistant: "text-primary",
+  text: "text-foreground",
 };
 
 const defaultSelectionClasses = {

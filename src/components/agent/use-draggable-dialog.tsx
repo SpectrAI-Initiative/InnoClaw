@@ -104,7 +104,11 @@ export function useDraggableDialog({
     height: dialogSize.height,
     maxWidth: "none",
     maxHeight: "none",
-    transform: `translate(calc(-50% + ${dialogPos.x}px), calc(-50% + ${dialogPos.y}px))`,
+    // Use the `translate` property (not `transform`): DialogContent centers
+    // itself with Tailwind v4 `translate-*` utilities, which set `translate`.
+    // An inline `transform` would stack on top of that and shift the dialog
+    // by an extra -50%, pushing its header off-screen.
+    translate: `calc(-50% + ${dialogPos.x}px) calc(-50% + ${dialogPos.y}px)`,
   };
 
   return { dialogStyle, onDragStart, onEdgeResizeStart };
