@@ -79,6 +79,9 @@ type ModelSelection = { provider: string; model: string };
 
 /** Pixel threshold for considering the user "at the bottom" of the scroll area */
 const BOTTOM_THRESHOLD_PX = 80;
+/** Default / minimum height (px) of the resizable input area: text row + toolbar row. */
+const DEFAULT_INPUT_HEIGHT = 128;
+const MIN_INPUT_HEIGHT = 96;
 
 /** XML tag used to wrap compacted context summaries in messages. */
 const CONTEXT_SUMMARY_OPEN = "<context_summary>";
@@ -141,7 +144,7 @@ export function AgentPanel({
   const [mode, setMode] = useState<AgentMode>("agent");
 
   // Draggable input area height
-  const [inputHeight, setInputHeight] = useState(80);
+  const [inputHeight, setInputHeight] = useState(DEFAULT_INPUT_HEIGHT);
   const dragRef = useRef<{ startY: number; startH: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -153,7 +156,7 @@ export function AgentPanel({
       const containerH = containerRef.current.getBoundingClientRect().height;
       const maxH = containerH * 0.7;
       const delta = dragRef.current.startY - ev.clientY;
-      const newH = Math.max(60, Math.min(maxH, dragRef.current.startH + delta));
+      const newH = Math.max(MIN_INPUT_HEIGHT, Math.min(maxH, dragRef.current.startH + delta));
       setInputHeight(newH);
     };
     const onUp = () => {
@@ -1276,7 +1279,36 @@ export function AgentPanel({
           removeLabel={t("removeImage")}
         />
 
-        <div className="flex min-h-0 flex-1 items-start gap-2 px-3 py-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-1 px-3 py-2">
+          {/* Row 1: full-width message input */}
+          <div className="flex min-h-0 flex-1 items-start gap-2">
+            <span className="text-agent-purple font-bold shrink-0 select-none leading-6">
+              &gt;
+            </span>
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => {
+                handleInputChange(e.target.value);
+              }}
+              onPaste={handleInputPaste}
+              onKeyDown={(e) => {
+                // Enter without Shift sends message, Shift+Enter creates new line
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && !autocompleteCapturesEnter) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              disabled={!aiEnabled || isSummarizing}
+              placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
+              className="min-w-0 flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono resize-none h-full leading-6"
+              rows={1}
+              autoFocus
+            />
+          </div>
+
+          {/* Row 2: toolbar */}
+          <div className="flex shrink-0 items-center gap-2">
           {/* Model selector */}
           <DropdownMenu
             onOpenChange={(open) => {
@@ -1286,7 +1318,7 @@ export function AgentPanel({
             }}
           >
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors mt-1.5 max-w-[220px]">
+              <button className="flex items-center gap-1.5 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors max-w-[220px]">
                 <span className="truncate">{modelDisplayName}</span>
                 {resolvedSelection?.unmatchedKind && (
                   <Badge
@@ -1351,7 +1383,7 @@ export function AgentPanel({
           {/* Mode selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors mt-1.5">
+              <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors">
                 {t(MODE_LABEL_KEYS[mode])}
                 <ChevronDown className="h-3 w-3" />
               </button>
@@ -1387,39 +1419,16 @@ export function AgentPanel({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <span className="text-agent-purple font-bold shrink-0 select-none mt-1.5">
-            &gt;
-          </span>
           <button
             type="button"
             onClick={() => setShowWorkspaceImagePicker(true)}
             title={t("workspaceImagePickerTitle")}
-            className="mt-1 shrink-0 rounded p-1 text-agent-accent transition-colors hover:bg-agent-card-hover"
+            className="shrink-0 rounded p-1 text-agent-accent transition-colors hover:bg-agent-card-hover"
             disabled={!aiEnabled || isSummarizing}
           >
             <ImagePlus className="h-4 w-4" />
           </button>
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => {
-              handleInputChange(e.target.value);
-            }}
-            onPaste={handleInputPaste}
-            onKeyDown={(e) => {
-              // Enter without Shift sends message, Shift+Enter creates new line
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && !autocompleteCapturesEnter) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            disabled={!aiEnabled || isSummarizing}
-            placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
-            className="flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono resize-none h-full leading-6"
-            rows={1}
-            autoFocus
-          />
-          <div className="flex items-center gap-1 shrink-0 mt-1">
+          <div className="ml-auto flex items-center gap-1 shrink-0">
             {/* Buddy avatar */}
             <BuddyAvatar
               key={buddyKey}
@@ -1462,6 +1471,7 @@ export function AgentPanel({
               <Brain className="h-4 w-4" />
             </button>
           )}
+          </div>
           </div>
         </div>
       </div>
