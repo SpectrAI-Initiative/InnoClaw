@@ -321,7 +321,7 @@ export function PaperStudyPanel({
     }
   }, [keywords, dateFrom, dateTo, sources, onArticleSelect]);
 
-  /** AI-powered search: expand keywords via LLM then search all sources. */
+  /** AI-powered search: expand keywords via LLM then search the selected sources. */
   const handleAISearch = useCallback(async (question: string) => {
     if (!question.trim()) return;
 
@@ -355,9 +355,9 @@ export function PaperStudyPanel({
       setKeywords(expandedKeywords);
       setAISearchStage("searching");
 
-      // Step 2: Search all sources with expanded keywords
-      const allSources: ArticleSource[] = [...SEARCHABLE_ARTICLE_SOURCES];
-      setSources(allSources);
+      // Step 2: Search the sources the user selected (same as plain search).
+      // This used to reset the selection to every source, so e.g. a
+      // "Semantic Scholar only" search silently returned arXiv results.
 
       const searchRes = await fetch("/api/paper-study/search", {
         method: "POST",
@@ -366,7 +366,7 @@ export function PaperStudyPanel({
           keywords: expandedKeywords,
           dateFrom: dateFrom || undefined,
           dateTo: dateTo || undefined,
-          sources: allSources,
+          sources,
           maxResults: 10,
         }),
       });
@@ -387,7 +387,7 @@ export function PaperStudyPanel({
       setIsAISearching(false);
       setAISearchStage(null);
     }
-  }, [dateFrom, dateTo, onArticleSelect]);
+  }, [dateFrom, dateTo, sources, onArticleSelect]);
 
   /** Fetch articles by title/URL/ID, show candidates for user to select. */
   const handleFetchTitle = useCallback(async (title: string) => {
