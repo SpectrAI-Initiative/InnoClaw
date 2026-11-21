@@ -374,6 +374,7 @@
     "fetching": "Finding...",
     "fetchError": "Could not find article",
     "fetchErrorMissingInput": "Please enter a paper title or arXiv ID",
+    "fetchErrorUnavailable": "Paper lookup services are temporarily unavailable (possibly rate limited). Please try again shortly.",
     "directUrl": "Direct URL",
     "chatPlaceholder": "Ask about this paper...",
     "chatTitle": "Discuss Paper",

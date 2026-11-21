@@ -404,6 +404,9 @@ export function PaperStudyPanel({
           case "NOT_FOUND":
             msg = t("fetchError");
             break;
+          case "UPSTREAM_UNAVAILABLE":
+            msg = t("fetchErrorUnavailable");
+            break;
           default:
             msg = t("fetchError");
             break;
