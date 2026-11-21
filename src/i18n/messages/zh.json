@@ -789,6 +789,20 @@
     "workspaceOptional": "工作空间（可选）",
     "allWorkspaces": "所有工作空间",
     "invalidCron": "无效的 cron 表达式",
+    "presetLabel": "常用规则",
+    "presets": {
+      "daily9": "每天 9:00",
+      "dailyMidnight": "每天 0:00",
+      "weekdays9": "工作日 9:00",
+      "weeklyMon9": "每周一 9:00",
+      "hourly": "每小时整点",
+      "every30min": "每 30 分钟",
+      "custom": "自定义（直接编辑下方表达式）"
+    },
+    "nextRuns": "下次运行：{times}",
+    "scheduleErrorEmpty": "请填写调度规则，或从上方选择常用规则",
+    "scheduleErrorFieldCount": "格式不对：需要 5 段（分 时 日 月 周），用空格分隔，当前是 {count} 段。例如 0 9 * * * 表示每天 9:00",
+    "scheduleErrorInvalid": "表达式无效：请检查每一段的取值范围（分 0-59、时 0-23、日 1-31、月 1-12、周 0-7）",
     "createSuccess": "定时任务已创建",
     "updateSuccess": "定时任务已更新",
     "deleteSuccess": "定时任务已删除"
