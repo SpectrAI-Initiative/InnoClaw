@@ -1,6 +1,6 @@
 # Environment Variables
 
-Set these in `.env.docker.local` or `.env.docker.online`. Those are the only startup env files. The container reads them. Do not create `.env.local` for the running app.
+The container reads `.env.docker.local` or `.env.docker.online`. Those generated files stay untracked. Commit `config/secrets/docker.local.env` and `config/secrets/docker.online.env` instead. Secret values in those files are SSM references (`ssm:NAME`); `scripts/ssm-env.ps1` and `scripts/ssm-env.sh` load the plaintext from Tencent Cloud SSM in `ap-shanghai` before Docker starts. Do not create `.env.local` for the running app.
 
 Paths such as `WORKSPACE_ROOTS` are inside the container. The host directory is `HOST_WORKSPACE_PATH`, mounted at `/research`.
 

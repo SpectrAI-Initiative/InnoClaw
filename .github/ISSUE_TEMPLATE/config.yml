@@ -1,8 +1,0 @@
-blank_issues_enabled: true
-contact_links:
-  - name: Documentation
-    url: https://SpectrAI-Initiative.github.io/InnoClaw/
-    about: Check our documentation for guides and API reference
-  - name: Discussions
-    url: https://github.com/SpectrAI-Initiative/InnoClaw/discussions
-    about: Ask questions and discuss ideas with the community

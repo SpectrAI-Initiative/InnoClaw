@@ -132,7 +132,7 @@ Use the backup command in [Docker Operations](../docker.md). Do not copy the liv
 1. Docker Engine 24+ and Compose v2 are installed
 2. `HOST_WORKSPACE_PATH` exists on the host
 3. `DEEPSEEK_API_KEY` is set when you need chat
-4. Port 3000 is free locally. Online, change `PUBLISH_PORT`
+4. `PUBLISH_PORT` is free on the host
 5. Read `docker compose logs innoclaw`
 
 ### Build fails with font-related errors
@@ -141,7 +141,7 @@ If `npm run build` fails with errors about fetching Google Fonts, this is a netw
 
 ### How do I change the port?
 
-Local Docker binds `127.0.0.1:3000`. On the online VM, set `PUBLISH_PORT` in `.env.docker.online` and run `./scripts/docker-up-online.sh` again.
+Set `PUBLISH_PORT` in `.env.docker.local` or `.env.docker.online`, then run the matching start script again. Local still binds that port only on `127.0.0.1`. Online publishes it on the VM.
 
 ## Getting Help
 

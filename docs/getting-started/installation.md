@@ -54,7 +54,7 @@ Edit only `.env.docker.online`.
 | `.env.docker.local` | Local Docker |
 | `.env.docker.online` | Online Docker |
 
-There are no other startup env files. Both stay untracked.
+Runtime env files stay untracked. The committable copies are `config/secrets/docker.local.env` and `config/secrets/docker.online.env`; secret values there are SSM references.
 
 ## Verify
 

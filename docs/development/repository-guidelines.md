@@ -10,8 +10,7 @@ When instructions overlap, use this order:
 
 1. `AGENTS.md` at the repository root
 2. `package.json` scripts and `docs/Makefile`
-3. `.github/workflows/*.yml`
-4. Supporting pages under `docs/development/`
+3. Supporting pages under `docs/development/`
 
 ## What This Covers
 

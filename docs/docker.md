@@ -55,6 +55,7 @@ Replace the env file and the second compose file for the online VM.
 | Issue | Fix |
 |-------|-----|
 | `workspace root missing` | `HOST_WORKSPACE_PATH` must exist on the host. `WORKSPACE_ROOTS` must be the container path, usually `/research` |
-| `no AI API key detected` | Set `DEEPSEEK_API_KEY` in the env file that this stack loads, then run the start script again |
+| `no AI API key detected` | The start script should load `DEEPSEEK_API_KEY` from SSM. Check `TENCENTCLOUD_SECRET_ID` and `TENCENTCLOUD_SECRET_KEY`, then run the start script again |
+| SSM materialize failed | `config/secrets/*.env` points at `ap-shanghai`. The caller needs permission to `GetSecretValue` |
 | Container exits immediately | Read `docker compose logs innoclaw` |
-| Port already in use | Local binds `127.0.0.1:3000`. Online uses `PUBLISH_PORT` |
+| Port already in use | Both env files set `PUBLISH_PORT`. Local binds `127.0.0.1`. Online publishes that port on the VM |

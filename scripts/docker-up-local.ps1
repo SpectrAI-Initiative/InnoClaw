@@ -4,8 +4,12 @@ $Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $Root
 
 $EnvFile = Join-Path $Root ".env.docker.local"
+$SealedFile = Join-Path $Root "config\secrets\docker.local.env"
+if (Test-Path $SealedFile) {
+  & (Join-Path $PSScriptRoot "ssm-env.ps1") materialize $SealedFile $EnvFile
+}
 
-if (-not (Test-Path $EnvFile)) {
+if (-not (Test-Path $SealedFile) -and -not (Test-Path $EnvFile)) {
   $bytes = New-Object byte[] 32
   [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
   $secret = [Convert]::ToBase64String($bytes)
@@ -13,6 +17,7 @@ if (-not (Test-Path $EnvFile)) {
 # 本地 Docker。只改这一个文件。
 # 启动：.\scripts\docker-up-local.ps1
 # 浏览器：http://127.0.0.1:3000
+PUBLISH_PORT=3000
 HOST_WORKSPACE_PATH=./workspace
 WORKSPACE_ROOTS=/research
 AUTH_MODE=local

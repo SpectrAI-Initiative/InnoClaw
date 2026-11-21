@@ -6,8 +6,13 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
 env_file="$root/.env.docker.online"
+sealed_file="$root/config/secrets/docker.online.env"
 
-if [[ ! -f "$env_file" ]]; then
+if [[ -f "$sealed_file" ]]; then
+  bash "$root/scripts/ssm-env.sh" materialize "$sealed_file" "$env_file"
+fi
+
+if [[ ! -f "$sealed_file" && ! -f "$env_file" ]]; then
   secret="$(openssl rand -base64 32 | tr -d '\n')"
   cat > "$env_file" <<EOF
 # 线上 Docker。只改这一个文件。

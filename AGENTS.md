@@ -1,6 +1,6 @@
 # InnoClaw Development Guidelines
 
-This file is the repository-level source of truth for day-to-day development workflow. Supporting detail lives in `docs/development/`, while executable command truth lives in `package.json`, `docs/Makefile`, and GitHub Actions workflows.
+This file is the repository-level source of truth for day-to-day development workflow. Supporting detail lives in `docs/development/`, while executable command truth lives in `package.json` and `docs/Makefile`.
 
 ## Source Of Truth
 
@@ -8,14 +8,13 @@ Use these files in this order when instructions conflict:
 
 1. `AGENTS.md`
 2. `package.json` scripts and `docs/Makefile`
-3. `.github/workflows/*.yml`
-4. Supporting narrative docs in `docs/development/`
+3. Supporting narrative docs in `docs/development/`
 
 Operator startup is `docs/startup.md`. The published English install page is `docs/getting-started/installation.md`. Those two describe the same Docker commands.
 
 ## Supported Environment
 
-- Node.js `24+` (`package.json` is authoritative; CI runs on Node 24 and 25)
+- Node.js `24+` (`package.json` `engines` is authoritative)
 - `npm` for dependency management and scripts
 - Python `3.10+` for Sphinx documentation work (`docs/requirements.txt` currently pins `sphinx==8.1.3`)
 - SQLite/Drizzle for local database migrations

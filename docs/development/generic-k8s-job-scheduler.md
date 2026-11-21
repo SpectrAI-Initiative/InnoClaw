@@ -14,9 +14,7 @@ K8S_ALLOWED_NAMESPACES=default
 K8S_JOB_DEFAULT_IMAGE=python:3.12
 ```
 
-Use `config/k8s-job-profiles.local.json` for private local profiles. Do not commit that file.
-
-For shareable examples, use `config/k8s-job-profiles.example.json`. Keep private kubeconfig paths, contexts, image registries, namespaces, secret names, and storage names in the ignored local file only.
+Use `config/k8s-job-profiles.local.json` for private local profiles. Do not commit that file. Keep kubeconfig paths, contexts, image registries, namespaces, secret names, and storage names in that ignored file.
 
 ## Agent Flow
 

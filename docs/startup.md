@@ -1,6 +1,6 @@
 # 启动说明
 
-InnoClaw 只通过 Docker 启动。镜像是 Ubuntu Server 24.04 LTS 64 位。配置只有两个文件，都不要提交。
+InnoClaw 只通过 Docker 启动。镜像是 Ubuntu Server 24.04 LTS 64 位。可提交的是 `config/secrets/` 里的两份配置，其中的秘钥只保存腾讯云 SSM 引用。`.env.docker.local` 和 `.env.docker.online` 由启动脚本生成，不要提交。
 
 | 环境 | 配置文件 | 启动 | 访问 |
 |------|----------|------|------|
@@ -22,9 +22,11 @@ chmod +x scripts/docker-up-local.sh
 ./scripts/docker-up-local.sh
 ```
 
-第一次运行会生成 `.env.docker.local`。把 `DEEPSEEK_API_KEY` 改成真实密钥后，再执行一次启动脚本。浏览器打开 http://127.0.0.1:3000。
+仓库里已有 `config/secrets/docker.local.env` 时，启动脚本会用腾讯云凭据管理把 `AUTH_SECRET` 和 `DEEPSEEK_API_KEY` 取回，写入 `.env.docker.local`。解密凭据来自环境变量 `TENCENTCLOUD_SECRET_ID`、`TENCENTCLOUD_SECRET_KEY`，否则读取桌面上的 `SecretKey.csv`。不要把这组 API 密钥写进仓库。浏览器打开 http://127.0.0.1:3000。
 
-本地端口只绑定 `127.0.0.1`。工作区目录默认是仓库里的 `./workspace`，容器内路径是 `/research`。
+两份环境文件的配置项相同。本地和线上可以填不同的值。
+
+本地端口只绑定 `127.0.0.1`，端口号来自 `PUBLISH_PORT`。工作区目录默认是仓库里的 `./workspace`，容器内路径是 `/research`。线上把同一端口发布到虚拟机网卡。
 
 停止：
 
@@ -41,7 +43,7 @@ chmod +x scripts/docker-up-online.sh
 ./scripts/docker-up-online.sh
 ```
 
-第一次运行会生成 `.env.docker.online`。至少填写：
+仓库里已有 `config/secrets/docker.online.env` 时，启动脚本会从 SSM 凭据 `innoclaw-docker-online` 取回秘钥并写入 `.env.docker.online`。虚拟机上需要能调用 SSM 的腾讯云 API 密钥。没有这份密封配置时，第一次运行会生成 `.env.docker.online`。至少填写：
 
 - `DEEPSEEK_API_KEY`
 - `HOST_WORKSPACE_PATH`：虚拟机上的目录，默认 `/data/innoclaw/research`

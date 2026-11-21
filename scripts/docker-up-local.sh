@@ -6,13 +6,19 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 
 env_file="$root/.env.docker.local"
+sealed_file="$root/config/secrets/docker.local.env"
 
-if [[ ! -f "$env_file" ]]; then
+if [[ -f "$sealed_file" ]]; then
+  bash "$root/scripts/ssm-env.sh" materialize "$sealed_file" "$env_file"
+fi
+
+if [[ ! -f "$sealed_file" && ! -f "$env_file" ]]; then
   secret="$(openssl rand -base64 32 | tr -d '\n')"
   cat > "$env_file" <<EOF
 # 本地 Docker。只改这一个文件。
 # 启动：./scripts/docker-up-local.sh
 # 浏览器：http://127.0.0.1:3000
+PUBLISH_PORT=3000
 HOST_WORKSPACE_PATH=./workspace
 WORKSPACE_ROOTS=/research
 AUTH_MODE=local

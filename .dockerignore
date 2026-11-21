@@ -38,8 +38,7 @@ data/
 .DS_Store
 Thumbs.db
 
-# CI / docs not needed in image
-.github
+# Docs not needed in image
 .claude
 CLAUDE.md
 skills
