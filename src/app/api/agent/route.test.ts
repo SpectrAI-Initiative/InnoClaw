@@ -39,6 +39,7 @@ vi.mock("@/lib/ai/prompts", () => ({
   buildAgentLongSystemPrompt: () => "long prompt",
   buildPlanSystemPrompt: () => "plan prompt",
   buildAskSystemPrompt: () => "ask prompt",
+  buildProgressNarrationSection: (locale?: string) => `\n[narration:${locale ?? "none"}]`,
 }));
 vi.mock("@/lib/ai/skill-prompt", () => ({
   buildSkillSystemPrompt: () => "skill prompt",
@@ -73,6 +74,7 @@ vi.mock("@/lib/auth/privileges", () => ({
   canUseHighRiskExecution: mocks.canUseHighRiskExecution,
 }));
 
+import { streamText } from "ai";
 import { POST } from "./route";
 
 function userAuth(): AuthContext {
@@ -158,4 +160,31 @@ describe("POST /api/agent tool access context", () => {
       );
     },
   );
+});
+
+describe("POST /api/agent progress narration", () => {
+  it.each([
+    ["default", {}, "agent prompt"],
+    ["plan", { mode: "plan" }, "plan prompt"],
+    ["ask", { mode: "ask" }, "ask prompt"],
+    ["skill", { skillId: "skill-a" }, "skill prompt"],
+  ] as Array<[string, Record<string, unknown>, string]>)(
+    "appends the narration section with the UI locale in %s mode",
+    async (_name, body, basePrompt) => {
+      const response = await POST(request({ ...body, uiLocale: "zh" }));
+
+      expect(response.status).toBe(200);
+      expect(vi.mocked(streamText)).toHaveBeenCalledWith(
+        expect.objectContaining({ system: `${basePrompt}\n[narration:zh]` }),
+      );
+    },
+  );
+
+  it("ignores a non-string uiLocale", async () => {
+    await POST(request({ uiLocale: 42 }));
+
+    expect(vi.mocked(streamText)).toHaveBeenCalledWith(
+      expect.objectContaining({ system: "agent prompt\n[narration:none]" }),
+    );
+  });
 });
