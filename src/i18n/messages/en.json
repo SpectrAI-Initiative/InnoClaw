@@ -789,6 +789,20 @@
     "workspaceOptional": "Workspace (optional)",
     "allWorkspaces": "All workspaces",
     "invalidCron": "Invalid cron expression",
+    "presetLabel": "Common schedules",
+    "presets": {
+      "daily9": "Every day at 9:00",
+      "dailyMidnight": "Every day at 0:00",
+      "weekdays9": "Weekdays at 9:00",
+      "weeklyMon9": "Mondays at 9:00",
+      "hourly": "Every hour",
+      "every30min": "Every 30 minutes",
+      "custom": "Custom (edit the expression below)"
+    },
+    "nextRuns": "Next runs: {times}",
+    "scheduleErrorEmpty": "Enter a schedule or pick a common one above",
+    "scheduleErrorFieldCount": "Wrong format: a cron expression has 5 space-separated fields (minute hour day month weekday); this one has {count}. Example: 0 9 * * * = every day at 9:00",
+    "scheduleErrorInvalid": "Invalid expression: check each field's range (minute 0-59, hour 0-23, day 1-31, month 1-12, weekday 0-7)",
     "createSuccess": "Scheduled task created",
     "updateSuccess": "Scheduled task updated",
     "deleteSuccess": "Scheduled task deleted"
