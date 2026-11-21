@@ -240,6 +240,8 @@
     "emptyState": "I can read, write, and execute code in your workspace. Ask me anything!",
     "disabledState": "AI agent requires an API key. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env.local.",
     "stop": "Stop",
+    "send": "Send",
+    "sendHint": "Send (Enter). Shift+Enter for a new line",
     "clearContext": "Clear context",
     "back": "Back",
     "modeLabel": "Select Mode",

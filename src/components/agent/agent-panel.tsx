@@ -15,6 +15,7 @@ import {
   Loader2,
   Square,
   Brain,
+  SendHorizontal,
 } from "lucide-react";
 import useSWR from "swr";
 import {
@@ -1137,6 +1138,12 @@ export function AgentPanel({
     setInput("");
   };
 
+  const canSend =
+    aiEnabled &&
+    !isSummarizing &&
+    !isLoading &&
+    (input.trim().length > 0 || pendingImages.length > 0);
+
   const slashQuery = input.startsWith("/") ? input.slice(1) : "";
   const matchingSlashSkills = useMemo(
     () => getMatchingSkillsForSlashQuery(availableSkills, slashQuery),
@@ -1469,6 +1476,18 @@ export function AgentPanel({
               className="shrink-0 p-1 rounded hover:bg-agent-card-hover text-agent-muted hover:text-agent-foreground transition-colors"
             >
               <Brain className="h-4 w-4" />
+            </button>
+          )}
+          {!isLoading && (
+            <button
+              type="button"
+              onClick={() => void handleSend()}
+              disabled={!canSend}
+              title={t("sendHint")}
+              aria-label={t("send")}
+              className="shrink-0 rounded-md bg-primary p-1.5 text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <SendHorizontal className="h-4 w-4" />
             </button>
           )}
           </div>
