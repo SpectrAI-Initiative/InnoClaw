@@ -36,22 +36,28 @@ export function buildDailyReportPrompt(): string {
  * The LLM receives a natural language question and returns optimized search
  * keywords for academic paper search plus a refined semantic query.
  */
+/** Upper bound on AI-expanded search keywords (also enforced by the route). */
+export const MAX_EXPANDED_KEYWORDS = 4;
+
 export function buildQueryExpansionPrompt(): string {
-  return `You are an academic search query optimizer. The user will provide a natural language question or description of the papers they are looking for. Your job is to extract optimized search terms.
+  return `You are an academic search query optimizer. The user will provide a natural language question or description of the papers they are looking for, possibly in Chinese or another language. Your job is to extract a few precise search terms.
 
 Return a JSON object with exactly two fields:
-- "keywords": an array of 3-6 concise keyword phrases optimized for academic paper search (arXiv-style). Each keyword should be a specific technical term or short phrase (1-3 words). Avoid vague terms.
-- "query": a refined natural language query suitable for semantic search engines like Semantic Scholar.
+- "keywords": an array of 2-${MAX_EXPANDED_KEYWORDS} concise English keyword phrases (1-3 words each) for academic paper search. Fewer, more precise keywords are better than many broad ones.
+- "query": a refined English natural-language query suitable for semantic search engines like Semantic Scholar.
 
 Rules:
-1. Keywords should cover the core technical concepts mentioned or implied.
-2. Include both specific terms and slightly broader related terms to maximize recall.
-3. Keep keywords concise and academic — use terms that would appear in paper titles or abstracts.
-4. The query should be a clear, well-formed sentence that captures the user's search intent.
+1. Always write keywords in English, translating the user's terms into the standard academic terminology (e.g. "锂电池" -> "lithium-ion battery").
+2. The first keyword must be the user's core concept itself. Add at most a couple of close synonyms or the specific sub-topics the user actually mentioned.
+3. Do NOT add broad or tangential terms that were not asked for (e.g. for "lithium battery" do not add "battery materials" or "energy storage" unless the user mentioned them) — they flood results with off-topic papers.
+4. Use terms that would appear in paper titles or abstracts.
 5. Return ONLY the JSON object, no markdown fences, no explanation.
 
 Example input: "I want to find papers about using diffusion models for video generation"
-Example output: {"keywords":["diffusion model","video generation","video synthesis","text-to-video","temporal diffusion"],"query":"diffusion models for video generation and synthesis"}`;
+Example output: {"keywords":["video diffusion model","text-to-video generation","diffusion video synthesis"],"query":"diffusion models for video generation"}
+
+Example input: "锂电池"
+Example output: {"keywords":["lithium-ion battery","lithium battery"],"query":"lithium-ion battery research"}`;
 }
 
 /**

@@ -50,16 +50,39 @@ async function respectRateLimit(): Promise<void> {
  * Combines keywords with AND for the "all" field search.
  * Multi-word keywords are wrapped in quotes for phrase matching.
  */
-function buildQuery(keywords: string[]): string {
-  const terms = keywords.map((kw) => {
-    const trimmed = kw.trim();
-    // Wrap multi-word keywords in double quotes so arXiv treats them as phrases
-    const quoted = trimmed.includes(" ")
-      ? `"${trimmed}"`
-      : trimmed;
-    return `all:${encodeURIComponent(quoted)}`;
-  });
-  return terms.join("+OR+");
+export function buildQuery(keywords: string[], dateFrom?: string, dateTo?: string): string {
+  // Match each keyword in the title or abstract only. `all:` also matches
+  // comments, journal refs and author names, which pulled in unrelated papers.
+  const terms = keywords
+    .map((kw) => kw.trim())
+    .filter(Boolean)
+    .map((trimmed) => {
+      // Wrap multi-word keywords in double quotes so arXiv treats them as phrases
+      const quoted = trimmed.includes(" ") ? `"${trimmed}"` : trimmed;
+      const encoded = encodeURIComponent(quoted);
+      return `ti:${encoded}+OR+abs:${encoded}`;
+    });
+  let query = terms.length > 1 ? `(${terms.join("+OR+")})` : terms[0] ?? "";
+
+  // Apply the date range on arXiv's side so relevance-sorted results are not
+  // truncated before the client-side date filter runs.
+  const range = buildSubmittedDateRange(dateFrom, dateTo);
+  if (query && range) {
+    query = `${terms.length > 1 ? query : `(${query})`}+AND+${range}`;
+  }
+  return query;
+}
+
+/** `submittedDate:[YYYYMMDD0000+TO+YYYYMMDD2359]`, or "" when no valid bound. */
+function buildSubmittedDateRange(dateFrom?: string, dateTo?: string): string {
+  const toStamp = (value: string | undefined, endOfDay: boolean): string | null => {
+    if (!value || !/^\d{4}-\d{2}-\d{2}/.test(value)) return null;
+    return `${value.slice(0, 10).replace(/-/g, "")}${endOfDay ? "2359" : "0000"}`;
+  };
+  const from = toStamp(dateFrom, false);
+  const to = toStamp(dateTo, true);
+  if (!from && !to) return "";
+  return `submittedDate:%5B${from ?? "199101010000"}+TO+${to ?? "999912312359"}%5D`;
 }
 
 /**
@@ -145,11 +168,13 @@ export async function searchArxiv(params: SearchParams): Promise<Article[]> {
 
   await respectRateLimit();
 
-  const query = buildQuery(keywords);
+  const query = buildQuery(keywords, dateFrom, dateTo);
   // Request extra results when date filtering is needed, so we have enough
   // after filtering.
   const fetchCount = dateFrom || dateTo ? Math.min(maxResults * 3, 60) : maxResults;
-  const sortBy = "submittedDate";
+  // Relevance ranking (with the date range applied in the query) gives far
+  // more on-topic results than "newest first" for OR-ed keyword lists.
+  const sortBy = "relevance";
   const sortOrder = "descending";
 
   const url = `${ARXIV_API_URL}?search_query=${query}&start=0&max_results=${fetchCount}&sortBy=${sortBy}&sortOrder=${sortOrder}`;

@@ -42,11 +42,12 @@ interface PaperSearchBarProps {
   onDateToChange: (date: string) => void;
   sources: ArticleSource[];
   onSourcesChange: (sources: ArticleSource[]) => void;
-  onSearch: () => void;
+  onSearch: (pendingKeyword?: string) => void;
   onAISearch: (question: string) => void;
   onFetchTitle: (title: string) => void;
   isSearching: boolean;
   isAISearching: boolean;
+  aiSearchStage?: "expanding" | "searching" | null;
   isFetching: boolean;
 }
 
@@ -64,6 +65,7 @@ export function PaperSearchBar({
   onFetchTitle,
   isSearching,
   isAISearching,
+  aiSearchStage,
   isFetching,
 }: PaperSearchBarProps) {
   const t = useTranslations("paperStudy");
@@ -287,7 +289,11 @@ export function PaperSearchBar({
               ) : (
                 <Sparkles className="h-3.5 w-3.5" />
               )}
-              {isAISearching ? t("aiSearching") : t("aiSearch")}
+              {isAISearching
+                ? aiSearchStage === "searching"
+                  ? t("aiStageSearching")
+                  : t("aiStageExpanding")
+                : t("aiSearch")}
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs max-w-[200px]">
@@ -297,8 +303,12 @@ export function PaperSearchBar({
 
         <Button
           size="sm"
-          onClick={onSearch}
-          disabled={isSearching || isAISearching || keywords.length === 0}
+          onClick={() => {
+            const pending = keywordInput.trim();
+            if (pending) setKeywordInput("");
+            onSearch(pending || undefined);
+          }}
+          disabled={isSearching || isAISearching || (keywords.length === 0 && !keywordInput.trim())}
           className="gap-1"
         >
           {isSearching ? (

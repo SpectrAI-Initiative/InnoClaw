@@ -16,6 +16,9 @@ import {
 } from "@/lib/article-search/types";
 import type { PaperStudyCacheData } from "@/lib/hooks/use-paper-study-cache";
 
+/** Matches CJK ideographs (Chinese/Japanese kanji). */
+const CJK_PATTERN = /[\u3400-\u9fff]/;
+
 /** Composite key for identifying an article across sources. */
 const articleKey = (a: Article) => `${a.source}-${a.id}`;
 
@@ -56,6 +59,8 @@ export function PaperStudyPanel({
   // Loading states
   const [isSearching, setIsSearching] = useState(false);
   const [isAISearching, setIsAISearching] = useState(false);
+  const [aiSearchStage, setAISearchStage] = useState<"expanding" | "searching" | null>(null);
+  const [lastSearchHadCJK, setLastSearchHadCJK] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [hasSearched, setHasSearched] = useState(initialCache?.hasSearched ?? false);
@@ -266,8 +271,13 @@ export function PaperStudyPanel({
   }, [articles, checkedIds, keywords, dateFrom, dateTo, sources]);
 
   /** Keyword-based search across arXiv / HuggingFace. */
-  const handleSearch = useCallback(async () => {
-    if (keywords.length === 0) return;
+  const handleSearch = useCallback(async (pendingKeyword?: string) => {
+    // Text still typed in the keyword box counts as a keyword, so a plain
+    // query works without clicking "Add" first.
+    const pending = pendingKeyword?.trim();
+    const searchKeywords = pending && !keywords.includes(pending) ? [...keywords, pending] : keywords;
+    if (searchKeywords.length === 0) return;
+    if (searchKeywords !== keywords) setKeywords(searchKeywords);
 
     setIsSearching(true);
     setArticles([]);
@@ -284,7 +294,7 @@ export function PaperStudyPanel({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          keywords,
+          keywords: searchKeywords,
           dateFrom: dateFrom || undefined,
           dateTo: dateTo || undefined,
           sources,
@@ -301,6 +311,7 @@ export function PaperStudyPanel({
       const fetchedArticles = result.articles || [];
       setArticles(fetchedArticles);
       setSearchErrors(result.errors);
+      setLastSearchHadCJK(searchKeywords.some((k) => CJK_PATTERN.test(k)));
     } catch (error) {
       setSearchErrors({
         search: error instanceof Error ? error.message : "Search failed",
@@ -315,6 +326,8 @@ export function PaperStudyPanel({
     if (!question.trim()) return;
 
     setIsAISearching(true);
+    setAISearchStage("expanding");
+    setLastSearchHadCJK(false);
     setArticles([]);
     setSummary("");
     setSearchErrors(undefined);
@@ -340,6 +353,7 @@ export function PaperStudyPanel({
 
       // Update keywords in the UI so user can see what the AI produced
       setKeywords(expandedKeywords);
+      setAISearchStage("searching");
 
       // Step 2: Search all sources with expanded keywords
       const allSources: ArticleSource[] = [...SEARCHABLE_ARTICLE_SOURCES];
@@ -371,6 +385,7 @@ export function PaperStudyPanel({
       });
     } finally {
       setIsAISearching(false);
+      setAISearchStage(null);
     }
   }, [dateFrom, dateTo, onArticleSelect]);
 
@@ -460,6 +475,7 @@ export function PaperStudyPanel({
         onFetchTitle={handleFetchTitle}
         isSearching={isSearching}
         isAISearching={isAISearching}
+        aiSearchStage={aiSearchStage}
         isFetching={isFetching}
       />
 
@@ -501,6 +517,13 @@ export function PaperStudyPanel({
             <p className="text-sm text-muted-foreground max-w-xs">
               {t("emptyState")}
             </p>
+          </div>
+        )}
+
+        {/* Paper databases are English-first: hint when a plain search used Chinese keywords */}
+        {lastSearchHadCJK && !isSearching && !isAISearching && (
+          <div className="mx-3 mt-2 rounded border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-700 dark:text-amber-300">
+            {t("cjkKeywordHint")}
           </div>
         )}
 
