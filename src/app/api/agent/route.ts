@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { streamText, convertToModelMessages, UIMessage, stepCountIs } from "ai";
 import { getConfiguredModelWithProvider, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
 import { createAgentTools } from "@/lib/ai/tools";
-import { buildAgentSystemPrompt, buildAgentLongSystemPrompt, buildPlanSystemPrompt, buildAskSystemPrompt } from "@/lib/ai/prompts";
+import { buildAgentSystemPrompt, buildAgentLongSystemPrompt, buildPlanSystemPrompt, buildAskSystemPrompt, buildProgressNarrationSection } from "@/lib/ai/prompts";
 import { buildSkillSystemPrompt } from "@/lib/ai/skill-prompt";
 import { runtimeProviderSupportsTools } from "@/lib/ai/runtime-capabilities";
 import { db } from "@/lib/db";
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     await ensureProjectDefaultSkills();
 
-    const { messages: uiMessages, workspaceId, cwd, skillId, paramValues, mode, llmProvider, llmModel, sessionCreatedAt } =
+    const { messages: uiMessages, workspaceId, cwd, skillId, paramValues, mode, llmProvider, llmModel, sessionCreatedAt, uiLocale } =
       await req.json();
 
     if (!workspaceId || !cwd || typeof cwd !== "string") {
@@ -222,6 +222,10 @@ export async function POST(req: NextRequest) {
       : (envMaxSteps ?? DEFAULT_MAX_STEPS);
 
     // Skip tools for providers that don't support tool calling (e.g. vLLM without --enable-auto-tool-choice)
+
+    systemPrompt += buildProgressNarrationSection(
+      typeof uiLocale === "string" ? uiLocale : undefined
+    );
 
     const result = streamText({
       model,

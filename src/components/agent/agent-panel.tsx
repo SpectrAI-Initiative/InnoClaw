@@ -263,7 +263,8 @@ export function AgentPanel({
     agentBody.workspaceId = workspaceId;
     agentBody.cwd = folderPath;
     agentBody.sessionCreatedAt = sessionCreatedAt;
-  }, [workspaceId, folderPath, sessionCreatedAt, agentBody]);
+    agentBody.uiLocale = locale;
+  }, [workspaceId, folderPath, sessionCreatedAt, locale, agentBody]);
 
   // Stream key for the background stream manager (use refs so the memoized
   // transport always reads the latest values).
