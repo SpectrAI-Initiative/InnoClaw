@@ -92,7 +92,7 @@ export function SkillAutocomplete({
 
   if (items.length === 0) {
     return (
-      <div className="absolute bottom-full left-0 right-0 mb-1 rounded-md border border-[#30363d] bg-[#161b22] p-2 text-xs text-[#565f89] z-50">
+      <div className="absolute bottom-full left-3 right-3 mb-1 rounded-md border border-border bg-popover p-2 text-xs text-muted-foreground shadow-lg z-50">
         {t("noMatchingSkills")}
       </div>
     );
@@ -101,7 +101,7 @@ export function SkillAutocomplete({
   return (
     <div
       ref={listRef}
-      className="absolute bottom-full left-0 right-0 mb-1 rounded-md border border-[#30363d] bg-[#161b22] overflow-hidden z-50 max-h-[200px] overflow-y-auto"
+      className="absolute bottom-full left-3 right-3 mb-1 rounded-md border border-border bg-popover text-popover-foreground shadow-lg z-50 max-h-[240px] overflow-y-auto"
     >
       {items.map((item, index) => {
         const isBuiltin = item.kind === "builtin";
@@ -122,21 +122,21 @@ export function SkillAutocomplete({
             }}
             className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors ${
               index === selectedIndex
-                ? "bg-[#1c2129] text-[#c9d1d9]"
-                : "text-[#8b949e] hover:bg-[#1c2129]"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:bg-muted/60"
             }`}
           >
             {isBuiltin ? (
-              <Terminal className="h-3 w-3 shrink-0 text-[#9ece6a]" />
+              <Terminal className="h-3 w-3 shrink-0 text-emerald-600 dark:text-emerald-400" />
             ) : (
-              <Zap className="h-3 w-3 shrink-0 text-[#7aa2f7]" />
+              <Zap className="h-3 w-3 shrink-0 text-primary" />
             )}
-            <span className={`font-mono ${isBuiltin ? "text-[#9ece6a]" : "text-[#7aa2f7]"}`}>
+            <span className={`shrink-0 whitespace-nowrap font-mono ${isBuiltin ? "text-emerald-600 dark:text-emerald-400" : "text-primary"}`}>
               /{slug}
             </span>
-            <span className="truncate">{name}</span>
+            <span className="max-w-[30%] shrink-0 truncate">{name}</span>
             {description && (
-              <span className="text-[#565f89] truncate ml-auto text-[10px]">
+              <span className="min-w-0 flex-1 truncate text-right text-muted-foreground text-[10px]">
                 {description}
               </span>
             )}

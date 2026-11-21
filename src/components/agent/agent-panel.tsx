@@ -52,6 +52,7 @@ import {
 import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
 import {
   BUILTIN_COMMANDS,
+  getMatchingBuiltinCommands,
   getMatchingSkillsForSlashQuery,
   shouldAutocompleteCaptureEnter,
   type BuiltinCommand,
@@ -1138,9 +1139,14 @@ export function AgentPanel({
     () => getMatchingSkillsForSlashQuery(availableSkills, slashQuery),
     [availableSkills, slashQuery]
   );
+  const matchingSlashBuiltins = useMemo(
+    () => getMatchingBuiltinCommands(slashQuery),
+    [slashQuery]
+  );
   const autocompleteCapturesEnter = shouldAutocompleteCaptureEnter(
     showAutocomplete,
-    matchingSlashSkills
+    matchingSlashSkills,
+    matchingSlashBuiltins
   );
 
   return (
@@ -1245,10 +1251,13 @@ export function AgentPanel({
         <div className="h-0.5 w-8 rounded-full bg-muted-foreground/30 group-hover:bg-primary/50 transition-colors" />
       </div>
 
-      {/* Input area with autocomplete */}
-      <div className="relative z-10 flex shrink-0 flex-col overflow-hidden bg-agent-bg/80 backdrop-blur-sm" style={{ height: inputHeight }}>
+      {/* Input area with autocomplete.
+          The autocomplete popover lives in an un-clipped wrapper: the input
+          container below uses overflow-hidden for its resizable height, which
+          would otherwise clip a popover anchored with bottom-full. */}
+      <div className="relative z-30 shrink-0">
         {/* Slash command autocomplete */}
-        {autocompleteCapturesEnter && (
+        {showAutocomplete && (
           <SkillAutocomplete
             query={slashQuery}
             skills={availableSkills}
@@ -1257,6 +1266,7 @@ export function AgentPanel({
             onClose={() => setShowAutocomplete(false)}
           />
         )}
+      <div className="relative z-10 flex shrink-0 flex-col overflow-hidden bg-agent-bg/80 backdrop-blur-sm" style={{ height: inputHeight }}>
 
         <ImageAttachmentGrid
           attachments={pendingImages}
@@ -1454,6 +1464,7 @@ export function AgentPanel({
           )}
           </div>
         </div>
+      </div>
       </div>
 
       <WorkspaceImagePickerDialog
