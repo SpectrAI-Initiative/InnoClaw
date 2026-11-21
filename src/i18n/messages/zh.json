@@ -273,6 +273,8 @@
     "emptyState": "我可以读写文件、运行命令、搜索代码。问我任何问题！",
     "disabledState": "AI 代理需要配置 API Key。请在 .env.local 中设置 OPENAI_API_KEY 或 ANTHROPIC_API_KEY。",
     "stop": "停止",
+    "send": "发送",
+    "sendHint": "发送（Enter），Shift+Enter 换行",
     "clearContext": "清空上下文",
     "back": "返回",
     "modeLabel": "选择模式",
