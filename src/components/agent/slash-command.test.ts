@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Skill } from "@/types";
 import {
+  getMatchingBuiltinCommands,
   getMatchingSkillsForSlashQuery,
   shouldAutocompleteCaptureEnter,
 } from "./slash-command";
@@ -51,5 +52,34 @@ describe("slash command helpers", () => {
     );
 
     expect(matches).toEqual([]);
+  });
+
+  it("captures Enter for built-in commands even when no skills are loaded", () => {
+    const skills = getMatchingSkillsForSlashQuery([], "");
+    const builtins = getMatchingBuiltinCommands("");
+
+    expect(skills).toEqual([]);
+    expect(builtins.length).toBeGreaterThan(0);
+    expect(shouldAutocompleteCaptureEnter(true, skills, builtins)).toBe(true);
+  });
+
+  it("captures Enter when only a built-in command matches the query", () => {
+    const builtins = getMatchingBuiltinCommands("mem");
+
+    expect(builtins.map((cmd) => cmd.slug)).toContain("memory");
+    expect(shouldAutocompleteCaptureEnter(true, [], builtins)).toBe(true);
+  });
+
+  it("does not capture Enter when neither skills nor built-ins match", () => {
+    const builtins = getMatchingBuiltinCommands("vari");
+
+    expect(builtins).toEqual([]);
+    expect(shouldAutocompleteCaptureEnter(true, [], builtins)).toBe(false);
+  });
+
+  it("does not capture Enter when autocomplete is hidden", () => {
+    expect(
+      shouldAutocompleteCaptureEnter(false, [], getMatchingBuiltinCommands(""))
+    ).toBe(false);
   });
 });
