@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
 import { getConfiguredModel, getModelFromOverride, isAIAvailable } from "@/lib/ai/provider";
-import { buildQueryExpansionPrompt } from "@/lib/ai/prompts";
+import { buildQueryExpansionPrompt, MAX_EXPANDED_KEYWORDS } from "@/lib/ai/prompts";
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,7 +44,10 @@ export async function POST(req: NextRequest) {
 
     const parsed = JSON.parse(jsonMatch[0]);
     const keywords: string[] = Array.isArray(parsed.keywords)
-      ? parsed.keywords.filter((k: unknown) => typeof k === "string" && k.trim())
+      ? parsed.keywords
+          .filter((k: unknown): k is string => typeof k === "string" && k.trim() !== "")
+          .map((k: string) => k.trim())
+          .slice(0, MAX_EXPANDED_KEYWORDS)
       : [];
     const query: string = typeof parsed.query === "string" ? parsed.query.trim() : question.trim();
 

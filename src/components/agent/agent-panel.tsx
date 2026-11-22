@@ -14,7 +14,8 @@ import {
   ImagePlus,
   Loader2,
   Square,
-  Brain,
+  Eraser,
+  SendHorizontal,
 } from "lucide-react";
 import useSWR from "swr";
 import {
@@ -26,6 +27,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { useSkills } from "@/lib/hooks/use-skills";
 import { getOverflowThresholdChars, getMessageTextLength, getContextWindowChars, modelSupportsVision, PROVIDERS, DEFAULT_PROVIDER, DEFAULT_MODEL, DEFAULT_CONTEXT_MODE } from "@/lib/ai/models";
@@ -52,6 +54,7 @@ import {
 import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
 import {
   BUILTIN_COMMANDS,
+  getMatchingBuiltinCommands,
   getMatchingSkillsForSlashQuery,
   shouldAutocompleteCaptureEnter,
   type BuiltinCommand,
@@ -78,6 +81,9 @@ type ModelSelection = { provider: string; model: string };
 
 /** Pixel threshold for considering the user "at the bottom" of the scroll area */
 const BOTTOM_THRESHOLD_PX = 80;
+/** Default / minimum height (px) of the resizable input area: text row + toolbar row. */
+const DEFAULT_INPUT_HEIGHT = 128;
+const MIN_INPUT_HEIGHT = 96;
 
 /** XML tag used to wrap compacted context summaries in messages. */
 const CONTEXT_SUMMARY_OPEN = "<context_summary>";
@@ -140,7 +146,7 @@ export function AgentPanel({
   const [mode, setMode] = useState<AgentMode>("agent");
 
   // Draggable input area height
-  const [inputHeight, setInputHeight] = useState(80);
+  const [inputHeight, setInputHeight] = useState(DEFAULT_INPUT_HEIGHT);
   const dragRef = useRef<{ startY: number; startH: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -152,7 +158,7 @@ export function AgentPanel({
       const containerH = containerRef.current.getBoundingClientRect().height;
       const maxH = containerH * 0.7;
       const delta = dragRef.current.startY - ev.clientY;
-      const newH = Math.max(60, Math.min(maxH, dragRef.current.startH + delta));
+      const newH = Math.max(MIN_INPUT_HEIGHT, Math.min(maxH, dragRef.current.startH + delta));
       setInputHeight(newH);
     };
     const onUp = () => {
@@ -187,6 +193,7 @@ export function AgentPanel({
 
   // Memory preview dialog state
   const [showMessageSelect, setShowMessageSelect] = useState(false);
+  const [messageSelectReason, setMessageSelectReason] = useState<"manual" | "overflow">("manual");
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
   const toggleMessage = useCallback((id: string) => {
     setSelectedMessageIds((prev) => {
@@ -256,7 +263,8 @@ export function AgentPanel({
     agentBody.workspaceId = workspaceId;
     agentBody.cwd = folderPath;
     agentBody.sessionCreatedAt = sessionCreatedAt;
-  }, [workspaceId, folderPath, sessionCreatedAt, agentBody]);
+    agentBody.uiLocale = locale;
+  }, [workspaceId, folderPath, sessionCreatedAt, locale, agentBody]);
 
   // Stream key for the background stream manager (use refs so the memoized
   // transport always reads the latest values).
@@ -731,6 +739,7 @@ export function AgentPanel({
 
     // Show message selection dialog instead of auto-summarizing
     overflowKeepRef.current = toKeep;
+    setMessageSelectReason("overflow");
     // Only pre-select messages with renderable text content
     setSelectedMessageIds(new Set(getRenderableMessages(toSummarize).map((message) => message.id)));
     setShowMessageSelect(true);
@@ -1040,6 +1049,7 @@ export function AgentPanel({
     if (messages.length > 0 && aiEnabled) {
       // Show message selection dialog first
       overflowKeepRef.current = null; // null = manual clear (not overflow)
+      setMessageSelectReason("manual");
       setSelectedMessageIds(new Set(selectableMessages.map((m) => m.id)));
       setShowMessageSelect(true);
     } else {
@@ -1133,14 +1143,25 @@ export function AgentPanel({
     setInput("");
   };
 
+  const canSend =
+    aiEnabled &&
+    !isSummarizing &&
+    !isLoading &&
+    (input.trim().length > 0 || pendingImages.length > 0);
+
   const slashQuery = input.startsWith("/") ? input.slice(1) : "";
   const matchingSlashSkills = useMemo(
     () => getMatchingSkillsForSlashQuery(availableSkills, slashQuery),
     [availableSkills, slashQuery]
   );
+  const matchingSlashBuiltins = useMemo(
+    () => getMatchingBuiltinCommands(slashQuery),
+    [slashQuery]
+  );
   const autocompleteCapturesEnter = shouldAutocompleteCaptureEnter(
     showAutocomplete,
-    matchingSlashSkills
+    matchingSlashSkills,
+    matchingSlashBuiltins
   );
 
   return (
@@ -1245,10 +1266,13 @@ export function AgentPanel({
         <div className="h-0.5 w-8 rounded-full bg-muted-foreground/30 group-hover:bg-primary/50 transition-colors" />
       </div>
 
-      {/* Input area with autocomplete */}
-      <div className="relative z-10 flex shrink-0 flex-col overflow-hidden bg-agent-bg/80 backdrop-blur-sm" style={{ height: inputHeight }}>
+      {/* Input area with autocomplete.
+          The autocomplete popover lives in an un-clipped wrapper: the input
+          container below uses overflow-hidden for its resizable height, which
+          would otherwise clip a popover anchored with bottom-full. */}
+      <div className="relative z-30 shrink-0">
         {/* Slash command autocomplete */}
-        {autocompleteCapturesEnter && (
+        {showAutocomplete && (
           <SkillAutocomplete
             query={slashQuery}
             skills={availableSkills}
@@ -1257,6 +1281,7 @@ export function AgentPanel({
             onClose={() => setShowAutocomplete(false)}
           />
         )}
+      <div className="relative z-10 flex shrink-0 flex-col overflow-hidden bg-agent-bg/80 backdrop-blur-sm" style={{ height: inputHeight }}>
 
         <ImageAttachmentGrid
           attachments={pendingImages}
@@ -1266,7 +1291,36 @@ export function AgentPanel({
           removeLabel={t("removeImage")}
         />
 
-        <div className="flex min-h-0 flex-1 items-start gap-2 px-3 py-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-1 px-3 py-2">
+          {/* Row 1: full-width message input */}
+          <div className="flex min-h-0 flex-1 items-start gap-2">
+            <span className="text-agent-purple font-bold shrink-0 select-none leading-6">
+              &gt;
+            </span>
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => {
+                handleInputChange(e.target.value);
+              }}
+              onPaste={handleInputPaste}
+              onKeyDown={(e) => {
+                // Enter without Shift sends message, Shift+Enter creates new line
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && !autocompleteCapturesEnter) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              disabled={!aiEnabled || isSummarizing}
+              placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
+              className="min-w-0 flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono resize-none h-full leading-6"
+              rows={1}
+              autoFocus
+            />
+          </div>
+
+          {/* Row 2: toolbar */}
+          <div className="flex shrink-0 items-center gap-2">
           {/* Model selector */}
           <DropdownMenu
             onOpenChange={(open) => {
@@ -1276,7 +1330,7 @@ export function AgentPanel({
             }}
           >
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors mt-1.5 max-w-[220px]">
+              <button className="flex items-center gap-1.5 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors max-w-[220px]">
                 <span className="truncate">{modelDisplayName}</span>
                 {resolvedSelection?.unmatchedKind && (
                   <Badge
@@ -1341,7 +1395,7 @@ export function AgentPanel({
           {/* Mode selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors mt-1.5">
+              <button className="flex items-center gap-1 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors">
                 {t(MODE_LABEL_KEYS[mode])}
                 <ChevronDown className="h-3 w-3" />
               </button>
@@ -1377,39 +1431,16 @@ export function AgentPanel({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <span className="text-agent-purple font-bold shrink-0 select-none mt-1.5">
-            &gt;
-          </span>
           <button
             type="button"
             onClick={() => setShowWorkspaceImagePicker(true)}
             title={t("workspaceImagePickerTitle")}
-            className="mt-1 shrink-0 rounded p-1 text-agent-accent transition-colors hover:bg-agent-card-hover"
+            className="shrink-0 rounded p-1 text-agent-accent transition-colors hover:bg-agent-card-hover"
             disabled={!aiEnabled || isSummarizing}
           >
             <ImagePlus className="h-4 w-4" />
           </button>
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => {
-              handleInputChange(e.target.value);
-            }}
-            onPaste={handleInputPaste}
-            onKeyDown={(e) => {
-              // Enter without Shift sends message, Shift+Enter creates new line
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && !autocompleteCapturesEnter) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            disabled={!aiEnabled || isSummarizing}
-            placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
-            className="flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono resize-none h-full leading-6"
-            rows={1}
-            autoFocus
-          />
-          <div className="flex items-center gap-1 shrink-0 mt-1">
+          <div className="ml-auto flex items-center gap-1 shrink-0">
             {/* Buddy avatar */}
             <BuddyAvatar
               key={buddyKey}
@@ -1444,16 +1475,39 @@ export function AgentPanel({
             </button>
           )}
           {!isLoading && !isSummarizing && messages.length > 0 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  aria-label={t("clearContext")}
+                  className="flex shrink-0 items-center gap-1 rounded px-1.5 py-1 text-xs text-agent-muted transition-colors hover:bg-agent-card-hover hover:text-agent-foreground"
+                >
+                  <Eraser className="h-4 w-4" />
+                  <span>{t("clearContext")}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-64 text-xs leading-5">
+                {t("clearContextHint")}
+              </TooltipContent>
+            </Tooltip>
+          )}
+          {!isLoading && (
             <button
-              onClick={handleClear}
-              title={t("clearContext")}
-              className="shrink-0 p-1 rounded hover:bg-agent-card-hover text-agent-muted hover:text-agent-foreground transition-colors"
+              type="button"
+              onClick={() => void handleSend()}
+              disabled={!canSend}
+              title={t("sendHint")}
+              aria-label={t("send")}
+              className="shrink-0 rounded-md bg-primary p-1.5 text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <Brain className="h-4 w-4" />
+              <SendHorizontal className="h-4 w-4" />
             </button>
           )}
           </div>
+          </div>
         </div>
+      </div>
       </div>
 
       <WorkspaceImagePickerDialog
@@ -1509,15 +1563,15 @@ export function AgentPanel({
           setMessages([]);
         }}
         labels={{
-          title: t("selectMessagesTitle"),
-          description: t("selectMessagesDesc"),
+          title: t(messageSelectReason === "overflow" ? "overflowDialogTitle" : "clearDialogTitle"),
+          description: t(messageSelectReason === "overflow" ? "overflowDialogDesc" : "clearDialogDesc"),
           roleUser: t("roleUser"),
           roleAssistant: t("roleAssistant"),
           selectAll: t("selectAll"),
           selectNone: t("selectNone"),
           cancel: tCommon("cancel"),
-          clearAll: t("clearAll"),
-          confirm: t("nextStep"),
+          clearAll: t("clearWithoutSaving"),
+          confirm: t("summarizeToMemory"),
         }}
         selectedCount={selectedMessageIds.size}
         totalCount={selectableMessages.length}
@@ -1543,7 +1597,7 @@ export function AgentPanel({
         confirmDisabled={!memoryPreviewTitle.trim()}
         labels={{
           title: t("memoryPreviewTitle"),
-          description: t("memoryPreviewDesc"),
+          description: t(messageSelectReason === "overflow" ? "overflowMemoryPreviewDesc" : "clearMemoryPreviewDesc"),
           cancel: tCommon("cancel"),
           confirm: tCommon("confirm"),
           memoryTitle: t("memoryNoteTitle"),

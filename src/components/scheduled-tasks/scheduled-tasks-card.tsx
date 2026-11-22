@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  SCHEDULE_PRESETS,
+  defaultScheduleForTaskType,
+  getNextRunTimes,
+  validateSchedule,
+} from "@/lib/scheduled-tasks/schedule";
 import { useScheduledTasks } from "@/lib/hooks/use-scheduled-tasks";
 import { useWorkspaces } from "@/lib/hooks/use-workspaces";
 import {
@@ -42,6 +48,7 @@ const TASK_TYPES = [
 export function ScheduledTasksCard({ className }: { className?: string }) {
   const t = useTranslations("scheduledTasks");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const { tasks, mutate } = useScheduledTasks();
   const { workspaces } = useWorkspaces();
 
@@ -59,7 +66,9 @@ export function ScheduledTasksCard({ className }: { className?: string }) {
     setEditingTask(null);
     setName("");
     setTaskType("daily_report");
-    setSchedule("");
+    // Pre-fill a working schedule; an empty field (with the example only as a
+    // placeholder) was the most common reason task creation failed.
+    setSchedule(defaultScheduleForTaskType("daily_report"));
     setWorkspaceId("__all__");
     setIsEnabled(true);
     setDialogOpen(true);
@@ -75,11 +84,27 @@ export function ScheduledTasksCard({ className }: { className?: string }) {
     setDialogOpen(true);
   }
 
+  const scheduleCheck = validateSchedule(schedule);
+  const nextRuns = scheduleCheck.ok ? getNextRunTimes(scheduleCheck.cron, 3) : [];
+  const presetId = SCHEDULE_PRESETS.find((p) => p.cron === scheduleCheck.cron)?.id ?? "custom";
+  const canSave = name.trim().length > 0 && scheduleCheck.ok;
+  const formatRun = (d: Date) =>
+    d.toLocaleString(locale, { month: "2-digit", day: "2-digit", weekday: "short", hour: "2-digit", minute: "2-digit" });
+
+  function handleTaskTypeChange(next: string) {
+    // Keep the schedule in sync with the task type while it is still a default.
+    if (!editingTask && schedule === defaultScheduleForTaskType(taskType)) {
+      setSchedule(defaultScheduleForTaskType(next));
+    }
+    setTaskType(next);
+  }
+
   async function handleSave() {
+    if (!canSave || !scheduleCheck.ok) return;
     const payload = {
-      name,
+      name: name.trim(),
       taskType,
-      schedule,
+      schedule: scheduleCheck.cron,
       workspaceId: workspaceId === "__all__" ? null : workspaceId,
       isEnabled,
     };
@@ -269,7 +294,7 @@ export function ScheduledTasksCard({ className }: { className?: string }) {
 
             <div className="space-y-2">
               <Label>{t("taskType")}</Label>
-              <Select value={taskType} onValueChange={setTaskType}>
+              <Select value={taskType} onValueChange={handleTaskTypeChange}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -285,12 +310,46 @@ export function ScheduledTasksCard({ className }: { className?: string }) {
 
             <div className="space-y-2">
               <Label>{t("schedule")}</Label>
+              <Select
+                value={presetId}
+                onValueChange={(id) => {
+                  const preset = SCHEDULE_PRESETS.find((p) => p.id === id);
+                  if (preset) setSchedule(preset.cron);
+                }}
+              >
+                <SelectTrigger aria-label={t("presetLabel")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SCHEDULE_PRESETS.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {t(`presets.${p.id}` as Parameters<typeof t>[0])}
+                      <span className="ml-2 font-mono text-xs text-muted-foreground">{p.cron}</span>
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">{t("presets.custom")}</SelectItem>
+                </SelectContent>
+              </Select>
               <Input
                 value={schedule}
                 onChange={(e) => setSchedule(e.target.value)}
                 placeholder={t("schedulePlaceholder")}
-                className="font-mono"
+                aria-invalid={!scheduleCheck.ok}
+                className={`font-mono ${scheduleCheck.ok ? "" : "border-destructive focus-visible:border-destructive"}`}
               />
+              {scheduleCheck.ok ? (
+                <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                  {t("nextRuns", { times: nextRuns.map(formatRun).join("；") })}
+                </p>
+              ) : (
+                <p className="text-xs text-destructive">
+                  {scheduleCheck.reason === "empty"
+                    ? t("scheduleErrorEmpty")
+                    : scheduleCheck.reason === "fieldCount"
+                      ? t("scheduleErrorFieldCount", { count: scheduleCheck.fieldCount ?? 0 })
+                      : t("scheduleErrorInvalid")}
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">{t("cronHelp")}</p>
             </div>
 
@@ -317,7 +376,7 @@ export function ScheduledTasksCard({ className }: { className?: string }) {
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 {tCommon("cancel")}
               </Button>
-              <Button onClick={handleSave}>{tCommon("save")}</Button>
+              <Button onClick={handleSave} disabled={!canSave}>{tCommon("save")}</Button>
             </div>
           </div>
         </DialogContent>

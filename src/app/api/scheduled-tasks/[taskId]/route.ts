@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { scheduledTasks } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { isValidCron } from "@/lib/scheduler";
+import { describeScheduleError, validateSchedule } from "@/lib/scheduled-tasks/schedule";
 import { requireScheduledTaskAccess, requireWorkspaceAccess } from "@/lib/auth/ownership";
 import { jsonError, jsonException } from "@/lib/api-errors";
 
@@ -45,13 +45,14 @@ export async function PATCH(
     }
 
     if (body.schedule !== undefined) {
-      if (typeof body.schedule !== "string" || !body.schedule.trim()) {
+      if (typeof body.schedule !== "string") {
         return jsonError("schedule must be a non-empty string", 400);
       }
-      if (!isValidCron(body.schedule)) {
-        return jsonError("Invalid cron expression", 400);
+      const scheduleCheck = validateSchedule(body.schedule);
+      if (!scheduleCheck.ok) {
+        return jsonError(describeScheduleError(scheduleCheck), 400);
       }
-      updates.schedule = body.schedule.trim();
+      updates.schedule = scheduleCheck.cron;
     }
 
     if (body.workspaceId !== undefined) {

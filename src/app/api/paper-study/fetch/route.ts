@@ -1,58 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Article } from "@/lib/article-search/types";
-import { buildBioRxivPdfUrl } from "@/lib/article-search/url-utils";
-
-const ARXIV_API_URL = "https://export.arxiv.org/api/query";
-const SEMANTIC_SCHOLAR_API = "https://api.semanticscholar.org/graph/v1/paper/search";
-
-/** Request timeout in milliseconds. */
-const TIMEOUT_MS = 15_000;
+import {
+  ARXIV_API_URL,
+  lookupPapersByTitle,
+  parseArxivEntries,
+} from "@/lib/article-search/title-lookup";
 
 // ──────────────────────────────────────────────
 // arXiv helpers (for direct URL / ID lookup)
 // ──────────────────────────────────────────────
-
-function parseArxivEntries(xml: string): Article[] {
-  const articles: Article[] = [];
-  const entries = xml.split("<entry>");
-
-  for (let i = 1; i < entries.length; i++) {
-    const entry = entries[i];
-    const getTag = (tag: string): string => {
-      const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`);
-      const match = entry.match(regex);
-      return match ? match[1].trim() : "";
-    };
-
-    const id = getTag("id");
-    const title = getTag("title").replace(/\s+/g, " ");
-    const abstract = getTag("summary").replace(/\s+/g, " ");
-    const published = getTag("published");
-
-    if (!title || !id) continue;
-
-    const authorMatches = entry.matchAll(/<author>\s*<name>([^<]+)<\/name>/g);
-    const authors = Array.from(authorMatches, (m) => m[1].trim());
-
-    const pdfMatch = entry.match(/<link[^>]*title="pdf"[^>]*href="([^"]+)"/);
-    const pdfUrl = pdfMatch ? pdfMatch[1] : undefined;
-
-    const cleanId = id.replace(/^https?:\/\/(?:www\.)?arxiv\.org\/abs\//, "");
-
-    articles.push({
-      id: cleanId,
-      title,
-      authors,
-      abstract,
-      url: id,
-      pdfUrl,
-      publishedDate: published,
-      source: "arxiv",
-    });
-  }
-
-  return articles;
-}
 
 function extractArxivId(input: string): string | null {
   const trimmed = input.trim();
@@ -77,112 +33,6 @@ async function fetchArxivById(arxivId: string): Promise<Article | null> {
 
   const articles = parseArxivEntries(xml);
   return articles[0] || null;
-}
-
-// ──────────────────────────────────────────────
-// Semantic Scholar search (for title-based lookup)
-// ──────────────────────────────────────────────
-
-interface S2Paper {
-  paperId: string;
-  title: string;
-  abstract: string | null;
-  authors: { name: string }[];
-  year: number | null;
-  publicationDate: string | null;
-  url: string;
-  externalIds: Record<string, string> | null;
-  openAccessPdf: { url: string } | null;
-}
-
-function detectSourceFromPaper(paper: S2Paper): Article["source"] {
-  if (paper.externalIds?.ArXiv) {
-    return "arxiv";
-  }
-
-  const url = paper.url || "";
-  const pdfUrl = paper.openAccessPdf?.url || "";
-
-  if (/biorxiv\.org/i.test(url) || /biorxiv\.org/i.test(pdfUrl)) {
-    return "biorxiv";
-  }
-
-  if (/pubmed\.ncbi\.nlm\.nih\.gov/i.test(url) || paper.externalIds?.PubMed) {
-    return "pubmed";
-  }
-
-  return "semantic-scholar";
-}
-
-/**
- * Search for papers using the Semantic Scholar Academic Graph API.
- * Free, no API key required. Covers arXiv, ACL, IEEE, PubMed, etc.
- */
-async function searchByTitle(title: string): Promise<Article[]> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-  try {
-    const params = new URLSearchParams({
-      query: title,
-      limit: "10",
-      fields: "title,authors,abstract,year,externalIds,url,openAccessPdf,publicationDate",
-    });
-
-    const res = await fetch(`${SEMANTIC_SCHOLAR_API}?${params}`, {
-      headers: {
-        "User-Agent": "notebooklm-paper-study/1.0",
-        Accept: "application/json",
-      },
-      signal: controller.signal,
-    });
-
-    if (!res.ok) {
-      console.error(`Semantic Scholar API error: ${res.status}`);
-      return [];
-    }
-
-    const data = await res.json();
-    const papers: S2Paper[] = data.data || [];
-
-    return papers
-      .filter((p) => p.title)
-      .map((p) => {
-        const arxivId = p.externalIds?.ArXiv;
-        const source = detectSourceFromPaper(p);
-        const articleUrl =
-          arxivId
-            ? `https://arxiv.org/abs/${arxivId}`
-            : p.url || `https://www.semanticscholar.org/paper/${p.paperId}`;
-        const pdfUrl =
-          p.openAccessPdf?.url ||
-          (arxivId
-            ? `https://arxiv.org/pdf/${arxivId}`
-            : source === "biorxiv" && articleUrl
-              ? buildBioRxivPdfUrl(articleUrl)
-              : undefined);
-
-        return {
-          id: arxivId || p.paperId,
-          title: p.title,
-          authors: p.authors?.map((a) => a.name) || [],
-          abstract: p.abstract || "",
-          url: articleUrl,
-          pdfUrl,
-          publishedDate: p.publicationDate || (p.year ? `${p.year}` : ""),
-          source,
-        };
-      });
-  } catch (err) {
-    if (err instanceof DOMException && err.name === "AbortError") {
-      console.error("Semantic Scholar API request timed out");
-    } else {
-      console.error("Semantic Scholar API error:", err);
-    }
-    return [];
-  } finally {
-    clearTimeout(timer);
-  }
 }
 
 // ──────────────────────────────────────────────
@@ -229,16 +79,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Treat as paper title → Semantic Scholar search
-    const articles = await searchByTitle(input);
+    // 3. Treat as paper title → Semantic Scholar + arXiv title search in parallel
+    const { articles, errors, allSourcesFailed } = await lookupPapersByTitle(input);
     if (articles.length === 0) {
       return NextResponse.json(
-        { error: "NOT_FOUND" },
-        { status: 404 }
+        allSourcesFailed
+          ? { error: "UPSTREAM_UNAVAILABLE", errors }
+          : { error: "NOT_FOUND" },
+        { status: allSourcesFailed ? 502 : 404 }
       );
     }
 
-    return NextResponse.json({ articles });
+    return NextResponse.json({ articles, errors });
   } catch (error) {
     console.error("Paper fetch error:", error);
     return NextResponse.json({ error: "INTERNAL_ERROR" }, { status: 500 });

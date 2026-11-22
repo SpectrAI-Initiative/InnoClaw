@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   Lightbulb,
@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronUp,
   FileImage,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -47,6 +48,7 @@ interface ResearchIdeationPanelProps {
 
 export function ResearchIdeationPanel({ article, workspaceId, llmProvider, llmModel }: ResearchIdeationPanelProps) {
   const t = useTranslations("researchIdeation");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
 
   const [turns, setTurns] = useState<IdeationTurn[]>([]);
@@ -56,6 +58,13 @@ export function ResearchIdeationPanel({ article, workspaceId, llmProvider, llmMo
   const [userSeed, setUserSeed] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  // Re-running replaces the finished result, so it needs a second click.
+  const [confirmRestart, setConfirmRestart] = useState(false);
+  useEffect(() => {
+    if (!confirmRestart) return;
+    const timer = setTimeout(() => setConfirmRestart(false), 5000);
+    return () => clearTimeout(timer);
+  }, [confirmRestart]);
   const [paperPages, setPaperPages] = useState<Array<{ pageNumber: number; data: string; mimeType: string }>>([]);
   const [pagesExpanded, setPagesExpanded] = useState(false);
   const [selectedPage, setSelectedPage] = useState<{ pageNumber: number; data: string; mimeType: string } | null>(null);
@@ -419,8 +428,8 @@ export function ResearchIdeationPanel({ article, workspaceId, llmProvider, llmMo
       {/* Action bar */}
       {isComplete && (
         <div className="flex items-center gap-2 px-3 py-2 border-t border-border/50 shrink-0">
-          <span className="text-xs text-muted-foreground">{t("completed")}</span>
-          <div className="ml-auto flex items-center gap-2">
+          <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">{t("completed")}</span>
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -442,14 +451,43 @@ export function ResearchIdeationPanel({ article, workspaceId, llmProvider, llmMo
                 {saved ? t("savedToNotes") : t("saveToNotes")}
               </Button>
             )}
-            <Button
-              size="sm"
-              className="h-7 text-xs gap-1"
-              onClick={startIdeation}
-            >
-              <Play className="h-3 w-3" />
-              {t("startIdeation")}
-            </Button>
+            {confirmRestart ? (
+              <>
+                <span className="text-xs text-destructive">
+                  {saved || !workspaceId ? t("restartConfirmHint") : t("restartConfirmUnsavedHint")}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => setConfirmRestart(false)}
+                >
+                  {tCommon("cancel")}
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  onClick={() => {
+                    setConfirmRestart(false);
+                    void startIdeation();
+                  }}
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  {t("restartConfirm")}
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => setConfirmRestart(true)}
+              >
+                <RotateCcw className="h-3 w-3" />
+                {t("restartIdeation")}
+              </Button>
+            )}
           </div>
         </div>
       )}

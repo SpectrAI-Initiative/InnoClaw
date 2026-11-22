@@ -376,3 +376,27 @@ export function buildAgentLongSystemPrompt(
   if (options?.noTools) return basePrompt;
   return basePrompt + AGENT_LONG_ADDENDUM;
 }
+
+/**
+ * Progress-narration rules appended to agent system prompts so the user can
+ * follow what the agent is doing (which step, why, which skill).
+ *
+ * `uiLocale` is the web UI language. When it is Chinese, narration and answers
+ * are written in Simplified Chinese even if the request itself is in English,
+ * because the UI language is the user's explicit language preference.
+ */
+export function buildProgressNarrationSection(uiLocale?: string): string {
+  const isChinese = typeof uiLocale === "string" && uiLocale.toLowerCase().startsWith("zh");
+  const languageRule = isChinese
+    ? "- The user's interface language is Simplified Chinese. Write all narration, explanations and the final answer in Simplified Chinese, even when the user's message is in English. Keep code, shell commands, file paths, tool names, skill slugs, identifiers, chemical notations (e.g. SMILES) and numbers unchanged."
+    : "- Write narration and the final answer in the same language as the user's message.";
+  return `
+
+## Progress Narration
+The user watches your work live and must be able to follow every step.
+- Before each tool call (or each group of closely related calls), write one short sentence that says what you are about to do and why.
+- When you load or follow a skill, name it explicitly (for example: "Using skill /variant-pathogenicity to ...").
+- After a tool returns, briefly state what you learned from it before moving on; if it failed, say so and what you will try next.
+- End with a short summary of the steps you took and which skills and tools you used, then the result.
+${languageRule}`;
+}

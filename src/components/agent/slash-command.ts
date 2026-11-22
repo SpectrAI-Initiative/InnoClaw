@@ -44,7 +44,11 @@ export function getMatchingBuiltinCommands(query: string): BuiltinCommand[] {
 
 export function shouldAutocompleteCaptureEnter(
   showAutocomplete: boolean,
-  matchingSkills: Skill[]
+  matchingSkills: Skill[],
+  matchingBuiltins: BuiltinCommand[] = []
 ): boolean {
-  return showAutocomplete && matchingSkills.length > 0;
+  return (
+    showAutocomplete &&
+    (matchingSkills.length > 0 || matchingBuiltins.length > 0)
+  );
 }

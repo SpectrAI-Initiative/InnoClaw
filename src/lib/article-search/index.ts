@@ -88,11 +88,67 @@ export async function searchArticles(
     }
   }
 
+  const ranked = rankArticlesByKeywords(allArticles, params.keywords ?? []);
+
   return {
-    articles: allArticles,
-    totalCount: allArticles.length,
+    articles: ranked,
+    totalCount: ranked.length,
     errors: Object.keys(errors).length > 0 ? errors : undefined,
   };
+}
+
+/** Very light English stemming so "batteries" matches "battery". */
+function stemWord(word: string): string {
+  if (word.length > 4 && word.endsWith("ies")) return `${word.slice(0, -3)}y`;
+  if (word.length > 3 && /(?:s|x|ch|sh)es$/.test(word)) return word.slice(0, -2);
+  if (word.length > 3 && word.endsWith("s") && !word.endsWith("ss")) return word.slice(0, -1);
+  return word;
+}
+
+/** Lower-case, split on non-alphanumerics, stem; returned as " w1 w2 … " for phrase lookup. */
+function normalizeForMatch(text: string): string {
+  const words = text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean).map(stemWord);
+  return ` ${words.join(" ")} `;
+}
+
+/**
+ * Relevance score of an article for a keyword list: every keyword phrase found
+ * in the title counts 3, in the abstract 1 (case-insensitive, plural-tolerant,
+ * whole words). Multi-word keywords also earn partial credit per word so
+ * near-matches outrank misses.
+ */
+export function scoreArticleForKeywords(article: Article, keywords: string[]): number {
+  const title = normalizeForMatch(article.title);
+  const abstract = normalizeForMatch(article.abstract || "");
+  let score = 0;
+  for (const raw of keywords) {
+    const phrase = normalizeForMatch(raw);
+    if (!phrase.trim()) continue;
+    if (title.includes(phrase)) score += 3;
+    if (abstract.includes(phrase)) score += 1;
+    const words = phrase.trim().split(" ").filter((w) => w.length > 2);
+    if (words.length > 1) {
+      for (const w of words) {
+        if (title.includes(` ${w} `)) score += 0.5;
+        else if (abstract.includes(` ${w} `)) score += 0.2;
+      }
+    }
+  }
+  return score;
+}
+
+/**
+ * Merge order across sources used to be "all of source A, then all of source
+ * B", so an off-topic paper from the first source could outrank an exact match
+ * from a later one. Sort by keyword relevance instead; ties keep the original
+ * (per-source) order. A no-keyword list (e.g. HF daily papers) is unchanged.
+ */
+export function rankArticlesByKeywords(articles: Article[], keywords: string[]): Article[] {
+  if (keywords.every((k) => !k.trim())) return articles;
+  return articles
+    .map((article, index) => ({ article, index, score: scoreArticleForKeywords(article, keywords) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map((x) => x.article);
 }
 
 /**

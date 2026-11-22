@@ -1,5 +1,6 @@
 "use client";
 
+import { parseRoastPaperHeading, parseRoastPaperHeadingLine } from "@/lib/paper-study/roast-format";
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, Save, Check, Square, MessageSquare, FileText, ExternalLink } from "lucide-react";
@@ -71,7 +72,7 @@ export function PaperRoastSection({
 
   /**
    * Parse roast text to extract per-paper sections.
-   * Sections start with ### 📄 {title}
+   * Sections start with `### 论文：{title}` (legacy: `### 📄 {title}`).
    */
   const paperSections = useMemo(() => {
     if (!roast) return new Map<string, string>();
@@ -81,12 +82,12 @@ export function PaperRoastSection({
     let currentLines: string[] = [];
 
     for (const line of lines) {
-      const match = line.match(/^###\s*📄\s*(.+)/);
-      if (match) {
+      const paperTitle = parseRoastPaperHeadingLine(line);
+      if (paperTitle) {
         if (currentTitle) {
           sections.set(currentTitle.toLowerCase().trim(), currentLines.join("\n"));
         }
-        currentTitle = match[1];
+        currentTitle = paperTitle;
         currentLines = [line];
       } else if (currentTitle) {
         currentLines.push(line);
@@ -114,7 +115,7 @@ export function PaperRoastSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId,
-          title: `🔪 今日锐评 - ${getDateStr()}`,
+          title: `今日锐评 - ${getDateStr()}`,
           content: roast,
           type: "summary",
         }),
@@ -136,7 +137,7 @@ export function PaperRoastSection({
       const dateStr = getDateStr();
       const fileName = `锐评-${dateStr}.md`;
       const filePath = `${notesDir}/${fileName}`;
-      const title = `🔪 今日锐评 - ${dateStr}`;
+      const title = `今日锐评 - ${dateStr}`;
 
       // Build Obsidian-compatible frontmatter
       const uniqueSources = [...new Set(articles.map((a) => a.source))];
@@ -176,7 +177,7 @@ export function PaperRoastSection({
   /** Find matching article by comparing title text. */
   const findArticleByTitle = (titleText: string): Article | undefined => {
     if (!articles.length) return undefined;
-    const clean = titleText.replace(/^📄\s*/, "").trim().toLowerCase();
+    const clean = (parseRoastPaperHeading(titleText) ?? titleText).trim().toLowerCase();
     return articles.find((a) => {
       const aTitle = a.title.toLowerCase().trim();
       return aTitle === clean || clean.includes(aTitle) || aTitle.includes(clean);
@@ -193,7 +194,7 @@ export function PaperRoastSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId,
-          title: `🔪 锐评: ${article.title} - ${getDateStr()}`,
+          title: `锐评: ${article.title} - ${getDateStr()}`,
           content: sectionContent,
           type: "summary",
         }),
@@ -220,7 +221,7 @@ export function PaperRoastSection({
     setSavingFileFor(key);
     try {
       const dateStr = getDateStr();
-      const title = `🔪 锐评: ${article.title}`;
+      const title = `锐评: ${article.title}`;
       const fileName = `锐评-${sanitizeFileName(article.title)}-${dateStr}.md`;
       const filePath = `${notesDir}/${fileName}`;
 
@@ -320,7 +321,7 @@ export function PaperRoastSection({
   const markdownComponents: Components = {
     h3: ({ children, ...props }) => {
       const text = String(children ?? "");
-      if (!text.startsWith("📄")) {
+      if (!parseRoastPaperHeading(text)) {
         return <h3 {...props}>{children}</h3>;
       }
 

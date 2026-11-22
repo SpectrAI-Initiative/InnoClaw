@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import {
   Terminal,
@@ -66,6 +67,8 @@ function getToolSummary(toolName: string, args?: Record<string, unknown>): strin
       return String(args.dirPath || ".");
     case "grep":
       return `${args.pattern || ""}${args.include ? ` (${args.include})` : ""}`;
+    case "getSkillInstructions":
+      return args.slug ? `/${String(args.slug)}` : "";
     case "kubectl":
       return String(args.subcommand || "");
     case "submitK8sJob":
@@ -362,11 +365,14 @@ function renderToolResult(
 
 export function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
   const [expanded, setExpanded] = useState(false);
+  const t = useTranslations("agent");
 
   const toolName = getToolNameFromPart(part);
   const args = part.input as Record<string, unknown> | undefined;
   const icon = TOOL_ICONS[toolName] || <Terminal className="h-3.5 w-3.5" />;
   const summary = getToolSummary(toolName, args);
+  const toolLabelKey = `toolLabels.${toolName}`;
+  const toolLabel = t.has(toolLabelKey) ? t(toolLabelKey) : null;
   const isDone = part.state === "output-available";
   const isError = part.state === "output-error";
   const isRunning = !isDone && !isError;
@@ -391,7 +397,10 @@ export function ToolCallBlock({ part }: { part: ToolInvocationPart }) {
           <ChevronRight className="h-3.5 w-3.5 shrink-0 text-agent-muted" />
         )}
         <span className={`${isRunning ? "text-primary" : "text-agent-accent"}`}>{icon}</span>
-        <span className={`font-semibold ${isRunning ? "text-primary" : "text-agent-accent"}`}>{toolName}</span>
+        {toolLabel && (
+          <span className={`shrink-0 font-sans font-semibold ${isRunning ? "text-primary" : "text-agent-accent"}`}>{toolLabel}</span>
+        )}
+        <span className={`shrink-0 ${toolLabel ? "text-agent-muted" : `font-semibold ${isRunning ? "text-primary" : "text-agent-accent"}`}`}>{toolName}</span>
         <span className="text-agent-muted truncate flex-1">{summary}</span>
         {isRunning && (
           <div className="flex items-center gap-2">

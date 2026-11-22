@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { describeScheduleError, validateSchedule } from "@/lib/scheduled-tasks/schedule";
 import { db } from "@/lib/db";
 import { scheduledTasks } from "@/lib/db/schema";
-import { isValidCron } from "@/lib/scheduler";
 import crypto from "crypto";
 import { requireAuth } from "@/lib/auth/server";
 import { getOwnerUserIdForWrite, ownedScheduledTaskFilter, requireWorkspaceAccess } from "@/lib/auth/ownership";
@@ -59,12 +59,12 @@ export async function POST(request: NextRequest) {
       return jsonError(`taskType must be one of: ${VALID_TASK_TYPES.join(", ")}`, 400);
     }
 
-    if (!schedule || typeof schedule !== "string" || !schedule.trim()) {
+    if (typeof schedule !== "string") {
       return jsonError("schedule is required", 400);
     }
-
-    if (!isValidCron(schedule)) {
-      return jsonError("Invalid cron expression", 400);
+    const scheduleCheck = validateSchedule(schedule);
+    if (!scheduleCheck.ok) {
+      return jsonError(describeScheduleError(scheduleCheck), 400);
     }
 
     // Validate config is valid JSON if provided
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       name: name.trim(),
       ownerUserId: getOwnerUserIdForWrite(auth),
       taskType: taskType as (typeof VALID_TASK_TYPES)[number],
-      schedule: schedule.trim(),
+      schedule: scheduleCheck.cron,
       workspaceId: workspaceId || null,
       config: typeof config === "object" && config !== null
         ? JSON.stringify(config)

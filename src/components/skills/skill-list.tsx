@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Pencil, Trash2, Zap, ZapOff, Download, Languages, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Zap, ZapOff, Download, Languages, Loader2, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  SKILL_CATEGORY_IDS,
+  categorizeSkill,
+  filterSkills,
+  type SkillCategoryId,
+} from "@/lib/skills/skill-categories";
+import {
+  readSkillTranslationCache,
+  skillTranslationKey,
+  writeSkillTranslationCache,
+} from "@/lib/skills/skill-translation-cache";
 import type { Skill } from "@/types";
 
 interface SkillListProps {
@@ -47,6 +59,36 @@ export function SkillList({
   const [translating, setTranslating] = useState(false);
   const [translations, setTranslations] = useState<Record<string, string>>({});
   const [translated, setTranslated] = useState(false);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<SkillCategoryId | "all">("all");
+
+  // Restore cached translations for this locale and show them right away, so
+  // descriptions translated once do not need another (slow, paid) AI call.
+  useEffect(() => {
+    if (locale === "en") return;
+    const cache = readSkillTranslationCache(locale);
+    const map: Record<string, string> = {};
+    for (const skill of skills) {
+      if (!skill.description) continue;
+      const hit = cache[skillTranslationKey(skill.id, skill.description)];
+      if (hit) map[skill.id] = hit;
+    }
+    if (Object.keys(map).length > 0) {
+      setTranslations(map);
+      setTranslated(true);
+    }
+  }, [skills, locale]);
+
+  const categoryCounts = useMemo(() => {
+    const counts = Object.fromEntries(SKILL_CATEGORY_IDS.map((id) => [id, 0])) as Record<SkillCategoryId, number>;
+    for (const skill of skills) counts[categorizeSkill(skill)] += 1;
+    return counts;
+  }, [skills]);
+
+  const visibleSkills = useMemo(
+    () => filterSkills(skills, { query, category, extraText: translations }),
+    [skills, query, category, translations]
+  );
 
   const handleTranslate = useCallback(async () => {
     if (translated) {
@@ -55,10 +97,13 @@ export function SkillList({
     }
 
     const toTranslate = skills
-      .filter((s) => s.description)
+      .filter((s) => s.description && !translations[s.id])
       .map((s) => ({ id: s.id, text: s.description! }));
 
-    if (toTranslate.length === 0) return;
+    if (toTranslate.length === 0) {
+      setTranslated(Object.keys(translations).length > 0);
+      return;
+    }
 
     setTranslating(true);
     try {
@@ -78,10 +123,14 @@ export function SkillList({
       }
 
       const { translations: results } = await res.json();
-      const map: Record<string, string> = {};
+      const map: Record<string, string> = { ...translations };
+      const cacheEntries: Record<string, string> = {};
       toTranslate.forEach((item, idx) => {
-        map[item.id] = results[idx] || item.text;
+        const text = results[idx] || item.text;
+        map[item.id] = text;
+        if (results[idx]) cacheEntries[skillTranslationKey(item.id, item.text)] = results[idx];
       });
+      writeSkillTranslationCache(locale, cacheEntries);
       setTranslations(map);
       setTranslated(true);
     } catch (err) {
@@ -89,7 +138,7 @@ export function SkillList({
     } finally {
       setTranslating(false);
     }
-  }, [skills, locale, translated]);
+  }, [skills, locale, translated, translations]);
 
   if (skills.length === 0) {
     return null;
@@ -97,8 +146,22 @@ export function SkillList({
 
   return (
     <div>
-      {/* Translate button */}
-      <div className="mb-4 flex justify-end">
+      {/* Search + category filter + translate button */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="relative w-full sm:w-72">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
+            className="h-8 pl-8 text-sm"
+          />
+        </div>
+        <span className="text-xs text-muted-foreground">
+          {t("filteredCount", { shown: visibleSkills.length, total: skills.length })}
+        </span>
+        <div className="flex-1" />
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -122,9 +185,35 @@ export function SkillList({
         </TooltipProvider>
       </div>
 
+      <div className="mb-4 flex flex-wrap gap-1.5" role="tablist" aria-label={t("categoryLabel")}>
+        {(["all", ...SKILL_CATEGORY_IDS] as const)
+          .filter((id) => id === "all" || categoryCounts[id] > 0)
+          .map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={category === id}
+              onClick={() => setCategory(id)}
+              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                category === id
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border/60 hover:border-primary/40 hover:bg-muted"
+              }`}
+            >
+              {t(`categories.${id}`)}
+              <span className="ml-1 opacity-70">{id === "all" ? skills.length : categoryCounts[id]}</span>
+            </button>
+          ))}
+      </div>
+
+      {visibleSkills.length === 0 && (
+        <p className="py-12 text-center text-sm text-muted-foreground">{t("noMatchingSkillsFound")}</p>
+      )}
+
       {/* Card grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {skills.map((skill) => (
+        {visibleSkills.map((skill) => (
           <Card
             key={skill.id}
             className={`group relative cursor-pointer overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 ${!skill.isEnabled ? "opacity-60" : ""}`}
