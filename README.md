@@ -5,296 +5,90 @@
 </p>
 
 <p align="center">
-  <b>A self-hostable AI research workspace for grounded chat, paper study, scientific skills, and research execution.</b>
+  <b>A self-hosted research workspace for cited answers, paper study, scientific skills, and research execution.</b>
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache 2.0 License"></a>
-  <a href="package.json"><img src="https://img.shields.io/badge/Node.js-24%2B%20(LTS)%20%7C%2025%20Current-339933?logo=node.js&logoColor=white" alt="Node.js 24+ LTS or 25 Current"></a>
-  <a href="https://github.com/SpectrAI-Initiative/InnoClaw/actions/workflows/ci.yml"><img src="https://github.com/SpectrAI-Initiative/InnoClaw/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
-  <a href="https://SpectrAI-Initiative.github.io/InnoClaw/"><img src="https://img.shields.io/badge/Docs-Online-blue?logo=gitbook&logoColor=white" alt="Online Docs"></a>
   <a href="https://github.com/SpectrAI-Initiative/InnoClaw/stargazers"><img src="https://img.shields.io/github/stars/SpectrAI-Initiative/InnoClaw?style=flat&logo=github" alt="GitHub Stars"></a>
   <a href="https://github.com/SpectrAI-Initiative/InnoClaw/issues"><img src="https://img.shields.io/github/issues/SpectrAI-Initiative/InnoClaw" alt="GitHub Issues"></a>
 </p>
 
 <p align="center">
-  <b>English</b> · <a href="docs/README_CN.md">简体中文</a> · <a href="docs/README_JA.md">日本語</a> · <a href="docs/README_FR.md">Français</a> · <a href="docs/README_DE.md">Deutsch</a>
+  <b>English</b> · <a href="README_CN.md">简体中文</a>
 </p>
 
 <p align="center">
-  <a href="https://SpectrAI-Initiative.github.io/InnoClaw/">Documentation</a> · <a href="#quick-start">Quick Start</a> · <a href="#community-support">Community</a>
+  <a href="#highlights">Highlights</a> · <a href="#using-innoclaw">How to use</a> · <a href="#get-started">Get started</a> · <a href="#community">Community</a>
 </p>
 
-**InnoClaw turns server-side folders into AI-native workspaces where you can chat over your own files, study papers, and run experiments — all in one place.**
+InnoClaw turns a folder on your server into a research workspace. You read papers, ask questions of your own files, and carry selected work through to execution, without moving between a file browser, a note tool, a paper reader, and a job terminal.
 
-Instead of juggling separate tools for literature, notes, code, and automation, you open a folder, sync it, and work: cited answers over real documents, structured paper reviews, reusable scientific skills, and a path from reading to remote execution.
+Answers stay attached to the documents you synced. Discussions follow a fixed set of roles. Skills can be reused across studies. High-risk execution steps stop for a person to approve them.
 
 <p align="center">
   <img src="public/innoclaw-flow.png" alt="InnoClaw Workflow" width="800" />
 </p>
 
----
+## Who it is for
 
-## Who This Is For
+InnoClaw is for researchers who want cited answers from their own materials, for engineers who keep code and data beside the papers they read, and for labs that prefer a workspace they host themselves.
 
-- **Researchers** who read papers, run experiments, and want cited AI answers grounded in their own files
-- **ML / AI engineers** who need a workspace for code, data, and agent-assisted execution on remote clusters
-- **Lab teams** who want a shared, self-hosted research hub instead of scattered SaaS tools
-- **Self-hosters** who want full control over their data, models, and infrastructure
+<a id="highlights"></a>
 
----
+## Highlights
 
-<a id="quick-start"></a>
+- **Cited answers.** After a workspace is synced, questions are answered from the indexed files, with the sources shown.
+- **Paper study in one place.** Search ArXiv, PubMed, bioRxiv, and Semantic Scholar, then summarize a paper, discuss it, or turn the reading into research ideas.
+- **Structured discussion.** A paper review runs through a moderator, a skeptic, a librarian, a reproducer, and a scribe, so the record is easier to scan than a free-form chat.
+- **Reusable scientific skills.** Domain workflows, including drug discovery, genomics, and protein science, can be imported and used again from the agent panel.
+- **From reading to execution.** Deep Research carries a study through review points. Remote jobs can be submitted through Shell, Slurm, or `rjob`, and a high-risk step waits for approval.
+- **Separate sessions.** Different projects and tabs keep their own agent context.
+- **Self-hosted.** The workspace, index, and notes remain on the server you run. Conversation uses Tencent Cloud TokenHub DeepSeek V4.1 Flash and DeepSeek V4 Pro.
 
-## 3-Minute Quick Start
+<a id="using-innoclaw"></a>
 
-Only Docker startup is supported. There are two env files and nothing else:
+## How to use it
 
-| 环境 | 配置文件 | 启动 |
-|---|---|---|
-| 本地 | `.env.docker.local` | Windows：`.\scripts\docker-up-local.ps1`；Ubuntu：`./scripts/docker-up-local.sh` |
-| 线上 | `.env.docker.online` | `./scripts/docker-up-online.sh` |
+### Ask questions of your own files
 
-```bash
-git clone https://github.com/SpectrAI-Initiative/InnoClaw.git
-cd InnoClaw
-.\scripts\docker-up-local.ps1
-```
+Create a workspace from a server folder. Sync it, then ask a question. The reply cites the indexed documents. You can also browse, edit, and upload files in that same workspace.
 
-Open http://127.0.0.1:3000. Edit `.env.docker.local`, set `DEEPSEEK_API_KEY`, then run the script again.
+### Study a paper
 
-After the UI opens: register, open a workspace, click **Sync**, then chat. The active models are DeepSeek V4.1 Flash and DeepSeek V4 Pro.
+Open Paper Study in the workspace. Search the literature, open a paper, and generate a summary. From there, start a multi-role discussion or save research ideas into notes.
 
-### Optional CLI
+### Carry the work into execution
 
-```bash
-npm link
-innoclaw
-innoclaw run --prompt "Summarize the current workspace"
-```
+Open Deep Research when a remote profile is configured. Review the proposed changes, approve the steps that need a person, submit the job, and read the result back in the workspace.
 
-The CLI talks to the Dockerized app. Start the local container first. For trusted headless automation, set `AUTH_MODE=disabled` in `.env.docker.local` before starting; anyone who can reach the service then has admin access.
+<a id="get-started"></a>
 
-> **Security**: InnoClaw includes shell execution and remote job submission capabilities. See [SECURITY.md](SECURITY.md) for deployment hardening and trust boundary documentation.
+## Get started
 
-<details>
-<summary>Environment variables, upgrade flow, and advanced setup</summary>
+When the service is running, open it in a browser, register, create a workspace, and click Sync.
 
-Edit `WORKSPACE_ROOTS` and the API key in `.env.docker.local` (local) or `.env.docker.online` (online). Paths in those files are container paths such as `/research`.
+Installation and deployment are described in [开发说明](docs/开发说明.md). There is no staging environment. The online service is production. Do not deploy a change there until it has been verified locally.
 
-**Upgrading:**
+<a id="community"></a>
 
-```bash
-git pull
-.\scripts\docker-up-local.ps1
-# Online VM: ./scripts/docker-up-online.sh
-```
+## Community
 
-Day-to-day start and stop steps are in [startup.md](docs/startup.md). Volumes, backups, and upgrades are in the [Docker guide](docs/docker.md). HTTPS and the administrator account are in [Deployment](docs/getting-started/deployment.md).
-
-</details>
-
----
-
-## Choose Your Path
-
-InnoClaw supports three primary workflows. Pick the one that matches what you need today — you can always explore the others later.
-
-### 1. Read & Study Papers
-
-Search literature across ArXiv, PubMed, bioRxiv, and Semantic Scholar. Summarize papers, run structured multi-role discussions (moderator, skeptic, librarian, reproducer, scribe), and generate research ideation from what you read.
-
-**Start here:** open Paper Study in any workspace.
-
-### 2. Work in a Research Workspace
-
-Open a server folder as a persistent workspace. Chat over your files with RAG-backed citations. Browse, edit, and sync files. Use the agent panel to run multi-step tasks with tool calling. Import reusable scientific skills across domains like drug discovery, genomics, and protein science.
-
-**Start here:** create a workspace, click Sync, and ask a question.
-
-### 3. Run Remote Experiments
-
-Go from code inspection to job submission and result analysis. Review repositories with agent assistance, gate high-risk steps with approval checkpoints, submit jobs through Shell, Slurm, or `rjob`, and monitor execution across clusters.
-
-**Start here:** open Deep Research in a workspace with remote profiles configured.
-
----
-
-## What's New
-
-<!-- whats-new-start -->
-
-#### 2026-07-03
-- **Generic Kubernetes Job Scheduler**: Enable AI agents to define, validate, and execute containerized workloads on Kubernetes clusters with configurable job profiles
-
-
-#### 2026-06-26
-- **CLI Runtime Support**: Interactive command-line interface with REPL, batch operations, and agent integration for terminal-based workflows
-
-
-
-<details>
-<summary>Show earlier updates</summary>
-
-#### 2026-06-12
-- **Disabled Auth Mode**: Run the application without authentication for single-user or development deployments
-
-
-
-
-#### 2026-05-12
-- **Local User Authentication**: Added built-in account registration, sign-in, sign-out, and persistent session support.
-- **Admin User Management**: Added an admin users page to create accounts and manage roles, access, passwords, and ownership.
-- **CLI Login Handoff**: `innoclaw` now supports interactive terminal mode, one-shot `run`, JSON `batch`, and browser-to-CLI session handoff.
-
-
-
-
-
-#### 2026-04-17
-- **InnoClaw CLI**: Run the app, manage workspaces, and create/run/export Deep Research sessions from the terminal
-- **Deep Research Checkpoints**: Research now pauses at review points so you can continue, revise, branch, reject, or stop runs
-- **Role Studio**: New Deep Research tab to inspect specialist roles and send targeted instructions to the Researcher or workers
-
-
-
-
-
-
-#### 2026-04-12
-- **Docker Deployment Support**: Self-host InnoClaw with Docker and docker-compose, with guides for setup, volumes, and upgrades
-- **200+ Built-in Skills**: Massive expansion of ready-to-use scientific skills across bioinformatics, chemistry, genomics, and physics
-- **Skill Creator Framework**: New meta-skill for creating, evaluating, benchmarking, and validating custom skills
-
-
-
-
-
-
-
-#### 2026-04-02
-- **Docker Deployment Support**: Added Dockerfile, docker-compose.yml, and full Docker deployment guide for self-hosted production setups
-- **200+ New Built-in Skills**: Expanded skill library with bioinformatics, cheminformatics, genomics, physics, and drug discovery pipelines
-- **Skill Creator Framework**: New meta-skill with evaluation, benchmarking, and validation tooling for building and testing custom skills
-
-
-
-
-
-
-
-
-#### 2026-04-01
-- **Text-to-CAD Skill**: New agent skill that converts natural language descriptions into 3D CAD models (STL/STEP) using CadQuery, with automatic environment setup
-- **Workspace Image Picker**: New dialog UI in the agent panel for browsing and selecting images from the workspace to attach to conversations
-
-
-
-
-
-
-
-
-
-#### 2026-03-31
-- **Pasted Image Support**: Users can now paste images directly into the chat input for multimodal AI conversations
-- **Deep Research Role Studio**: New Role Studio panel lets users configure and manage custom researcher roles in the deep research workflow
-- **Expanded Paper Search Sources**: Added BioRxiv, PubMed, and PubChem as searchable paper sources in Paper Study
-
-
-
-
-
-
-
-
-
-
-#### 2026-03-26
-- **Dynamic Model Discovery**: Agent panel now auto-fetches available models from each configured AI provider, merging live results with built-in model lists
-- **Per-Model Base URL Routing**: Chinese AI providers (shlab, qwen, moonshot, deepseek, minimax, zhipu) now support per-model `<PROVIDER>_<MODEL>_BASE_URL` env vars for flexible endpoint routing
-- **Runtime Tool-Calling Override**: Tool support can now be toggled per provider via `<PROVIDER>_TOOLS_ENABLED=true/false` without code changes
-
-
-
-
-
-
-
-
-
-
-
-</details>
-
-
-<!-- whats-new-end -->
-
----
-
-## Feature Snapshot
-
-| Feature | What it enables |
-|---------|------------------|
-| Workspace Management | Map server folders into persistent AI workspaces |
-| File Browser | Browse, upload, create, edit, preview, and sync files |
-| RAG Chat | Ask grounded questions over indexed files with citations |
-| Paper Study | Search, summarize, and inspect papers from ArXiv, PubMed, bioRxiv, and more |
-| Discussion Mode | Run structured multi-role paper discussions |
-| Research Ideation | Generate new directions and cross-disciplinary ideas |
-| Skills System | Import reusable scientific and workflow skills |
-| Deep Research | AI-driven multi-phase research with workflow graph and role-based execution |
-| Research Execution | Orchestrate remote experiment loops with monitoring and approval gates |
-| Multi-Agent Sessions | Keep separate execution contexts across tabs and projects |
-| Models | Tencent Cloud TokenHub DeepSeek: V4.1 Flash and V4 Pro |
-
----
-
-## Architecture
-
-| Layer | Role |
-|-------|-----------------------|
-| **Workspace** | Files, notes, session context, and project state |
-| **Knowledge** | RAG index over synced files for grounded answers |
-| **Paper Workbench** | Literature search, summary, discussion, and ideation |
-| **Skills** | Reusable domain workflows and tool-guided capabilities |
-| **Execution** | Remote jobs, experiment loops, and result collection |
-
----
-
-## Documentation
-
-- **Start here** — [Startup](docs/startup.md), [Installation](docs/getting-started/installation.md), [Overview](docs/getting-started/overview.md)
-- **Configure and deploy** — [Docker](docs/docker.md), [Deployment](docs/getting-started/deployment.md), [Environment Variables](docs/getting-started/environment-variables.md), [Configuration](docs/usage/configuration.md)
-- **Use the product** — [Features](docs/usage/features.md), [API Reference](docs/usage/api-reference.md)
-- **Troubleshoot and contribute** — [Troubleshooting](docs/troubleshooting/faq.md), [Development Guide](docs/development/contributing.md)
-
----
-
-<a id="community-support"></a>
-
-## Community & Support
-
-- **Need setup or usage help?** Start with the [docs](https://SpectrAI-Initiative.github.io/InnoClaw/)
-- **Found a bug or want a feature?** [Open an issue](https://github.com/SpectrAI-Initiative/InnoClaw/issues)
-- **Want direct discussion?** Join the Feishu or WeChat communities below
+Questions about installation and deployment belong in [开发说明](docs/开发说明.md). Bugs and feature requests belong in [GitHub Issues](https://github.com/SpectrAI-Initiative/InnoClaw/issues). For direct conversation, join the Feishu or WeChat group below.
 
 <p align="center">
-  <a href="#community-support">
+  <a href="#community">
     <img src="site/social/飞书体验群.png" alt="Join Feishu Community" width="200" />
   </a>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="#community-support">
+  <a href="#community">
     <img src="site/social/微信体验群.jpg" alt="Join WeChat Community" width="200" />
   </a>
   <br/>
-  <sub>Scan to join our community · 扫码加入飞书/微信体验群</sub>
+  <sub>Scan to join the Feishu or WeChat group</sub>
 </p>
 
----
-
-## Project Info
+## Project information
 
 - **License** — Apache-2.0, see `LICENSE`
 - **Repository** — https://github.com/SpectrAI-Initiative/InnoClaw
-- **Docs** — https://SpectrAI-Initiative.github.io/InnoClaw/

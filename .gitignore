@@ -61,11 +61,8 @@ config/*
 !config/secrets/**
 config/k8s-job-profiles.local.json
 
-# docs build artifacts
-docs/_build/
+# local docs virtualenv leftover
 .venv-docs/
-docs/locales/*/LC_MESSAGES/*.mo
-docs/locales/*/LC_MESSAGES/**/*.mo
 reference/
 batch-test-logs/
 .worktrees/

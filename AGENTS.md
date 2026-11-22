@@ -1,36 +1,29 @@
 # InnoClaw Development Guidelines
 
-This file is the repository-level source of truth for day-to-day development workflow. Supporting detail lives in `docs/development/`, while executable command truth lives in `package.json` and `docs/Makefile`.
+This file is the instruction set for changing the code. Cursor loads it into the coding agent on every turn. How to start the local container and how to deploy is `docs/开发说明.md`. Command names live in `package.json`.
 
-## Source Of Truth
+When those sources conflict, use them in this order:
 
-Use these files in this order when instructions conflict:
+1. `AGENTS.md` for how to change the code
+2. `package.json` scripts
+3. `docs/开发说明.md` for running and deploying
 
-1. `AGENTS.md`
-2. `package.json` scripts and `docs/Makefile`
-3. Supporting narrative docs in `docs/development/`
+There is no staging environment. The online VM is production. Do not run `./scripts/docker-up-online.sh`, edit the online env file, or try migrations against the online container until the change has been verified in the local container. Do not start the app with `npm run dev`, `npm run dev:no-auth`, `npm start`, or PM2.
 
-Operator startup is `docs/startup.md`. The published English install page is `docs/getting-started/installation.md`. Those two describe the same Docker commands.
+Node.js `24+` (`package.json` `engines`). Use `npm`. The database is SQLite through Drizzle.
 
-## Supported Environment
+## Where Code Belongs
 
-- Node.js `24+` (`package.json` `engines` is authoritative)
-- `npm` for dependency management and scripts
-- Python `3.10+` for Sphinx documentation work (`docs/requirements.txt` currently pins `sphinx==8.1.3`)
-- SQLite/Drizzle for local database migrations
-
-## Repository Boundaries
-
-Treat these directories as product code and documentation:
+Product code and the runbook:
 
 - `src/` application code
 - `scripts/` repository scripts
 - `drizzle/` database migrations
-- `docs/` documentation sources
+- `docs/开发说明.md` local and online runbook
 - `public/` shipped static assets
-- `site/` docs homepage assets
+- `site/` homepage images
 
-Treat these directories as scratch space, references, or local-only artifacts. They are not part of routine app validation and must not be imported into shipped code:
+Scratch. Do not import these into shipped code:
 
 - `reference/`
 - `.worktrees/`
@@ -40,188 +33,73 @@ Treat these directories as scratch space, references, or local-only artifacts. T
 - `test-results/`
 - `tmp-playwright-review/`
 
-## First-Time Setup
+Do not commit secrets, `.env.docker.local`, `.env.docker.online`, or build output.
 
-```bash
-# Windows
-.\scripts\docker-up-local.ps1
-# Ubuntu
-./scripts/docker-up-local.sh
-```
+## Before Editing
 
-The script creates `.env.docker.local` when it is missing. Edit that file and set at least:
+- Run `git status --short` before a large edit. A dirty worktree is shared until you confirm otherwise. Do not overwrite or revert changes you did not make.
+- Name the shared contract you might touch: schema, env vars, route response shapes, tool names, persisted session keys, contributor-facing commands.
+- Keep one change to one user-visible problem. Re-read a file before editing it if it may have changed.
+- If setup, deploy, or an operator-facing env var changes, update `docs/开发说明.md` in the same change. If a new env var is read at startup, update the start scripts that generate `.env.docker.local` and `.env.docker.online`.
 
-- `WORKSPACE_ROOTS`
-- the API keys required for the provider(s) you plan to test
+## Validation
 
-`npm run dev` is not a supported way to start the app. Use the local Docker script above. On the Ubuntu VM, use `./scripts/docker-up-online.sh` and `.env.docker.online`.
-
-## Before You Start
-
-- Run `git status --short` before large edits so you know whether you are entering a shared or dirty worktree.
-- Identify the shared contracts your change may touch before coding. Common examples: schema, env vars, route response shapes, tool names, persisted session keys, and contributor-facing commands.
-- Read the nearest source-of-truth files first: the relevant `package.json` script, nearby tests, and the matching page under `docs/development/`.
-- Decide up front which validation commands and documentation updates your change will require. Do not wait until review time to discover missing follow-through.
-
-## Daily Workflow
-
-Start the local app with Docker:
-
-```bash
-# Windows
-.\scripts\docker-up-local.ps1
-# Ubuntu
-./scripts/docker-up-local.sh
-```
-
-`npm run dev` and `npm run dev:no-auth` are not supported startup paths. For a trusted single-user container without login, set `AUTH_MODE=disabled` in `.env.docker.local` and run the local script again. Do not expose that mode on an untrusted network.
-
-Disabled auth gives anyone who can reach the service admin-level access. Do not use it on an untrusted network unless another access-control layer protects the service.
-
-Use `npx tsc --noEmit` for a fast type-only pass when you do not need a full production build. The authoritative production verification remains `npm run build`.
-
-## Validation Matrix
-
-Run these checks before opening or updating a PR:
+Before review:
 
 ```bash
 npm run lint
 npm test
+npx tsc --noEmit
 NEXT_TELEMETRY_DISABLED=1 npm run build
 ```
 
-`npm run build` uses the Webpack production tracer and automatically runs
-`npm run verify:standalone` after Next.js finishes. The build fails if the
-standalone artifact is missing the compiled authentication proxy or contains
-runtime data, credentials, backups, repository source, tests, documentation,
-or local scratch content. Keep new runtime paths outside the Docker build
-context and change the verifier only when a shipped runtime asset is
-intentionally required.
+`npm run build` runs `npm run verify:standalone`. The build fails if the standalone artifact is missing the compiled authentication proxy or contains runtime data, credentials, backups, repository source, tests, documentation, or local scratch. Keep new runtime paths outside the Docker build context. Change the verifier only when a shipped runtime asset is intentionally required.
 
-When documentation changes:
+`npx tsc --noEmit` is the fast type check. `npm run build` is the production check.
 
-```bash
-cd docs
-make html
-make html-zh
-```
+## Database
 
-If your system `python3` is older than 3.10, create a dedicated docs virtualenv first:
+- `src/lib/db/schema.ts` is the schema source of truth.
+- Generate and commit the matching migration under `drizzle/`.
+- Apply it locally with `npx drizzle-kit migrate` before review.
+- Do not edit an already committed migration unless you are fixing unreleased local work and know which databases it will affect.
+- If seed data or migration helpers change, review `src/lib/db/` and the startup path that uses them.
 
-```bash
-python3.12 -m venv .venv-docs
-.venv-docs/bin/python -m pip install -r docs/requirements.txt
-```
+## API Routes
 
-When English docs change, refresh translations:
+- `src/app/api/**/route.ts` handles HTTP only: parsing, auth, validation, status codes, response shape.
+- Put reusable logic in `src/lib/` or `src/core/`.
+- Return `4xx` for caller mistakes. Use `src/lib/api-errors.ts` for non-streaming JSON errors.
+- Cover behavior changes in the colocated `route.test.ts`.
 
-```bash
-cd docs
-make update-po
-```
+## Agent, Tools, And Deep Research
 
-## Database Migration Rules
+- Keep prompts, provider wiring, tool registration, and orchestration out of UI components and route handlers.
+- Tool availability and privilege boundaries live in `src/lib/ai/tool-names.ts` and `src/lib/ai/tools/`.
+- New tools default to least privilege. High-risk tools require an explicit opt-in, the same split as `ALL_TOOLS` and `K8S_TOOLS`.
+- A new tool, mode, provider, or role needs a stable name, allow and deny tests, and a `docs/开发说明.md` note only when an operator must configure it.
+- Validate workspace paths, tool inputs, and execution context through shared helpers. Do not add filesystem or exec access that skips workspace validation.
+- Prompt, doctrine, and role text live in code-backed prompt files or registries, not inline UI strings. Update parsers, status names, and UI copy together.
+- Streaming or resume changes must be reviewed across the API route, `src/lib/agent/agent-stream-manager.ts`, and any localStorage or session-key consumer.
+- Deep-research roles, doctrine, workflow policy, and UI assumptions stay aligned across `src/lib/deep-research/`, `src/app/api/deep-research/`, and `src/components/deep-research/`.
+- Remote execution and cluster operations stay auditable and behind an explicit config or approval gate.
+- Surface failures. Do not add a silent fallback when provider or orchestration branching changes.
 
-- Treat `src/lib/db/schema.ts` as the schema source of truth.
-- When schema changes, generate and commit the matching migration under `drizzle/`.
-- Apply migrations locally with `npx drizzle-kit migrate` before requesting review.
-- Do not edit already-committed historical migrations unless you are intentionally fixing unreleased local work and understand the impact on existing databases.
-- If a change touches seed/default skill data or migration helpers, review the affected files in `src/lib/db/` and verify the startup path that uses them.
+## Layout And Tests
 
-## API Route Rules
+- Features live under `src/components/`. Domain logic lives under `src/lib/`.
+- Tests sit next to the code as `*.test.ts` or `*.test.tsx`.
 
-- Keep `src/app/api/**/route.ts` focused on HTTP concerns: request parsing, auth/context checks, validation, status codes, and response shape.
-- Move reusable or multi-step business logic into `src/lib/` or `src/core/`; avoid burying domain logic inside route handlers.
-- Validate request params early and return explicit `4xx` responses for caller mistakes.
-- For non-streaming JSON errors, prefer the shared helpers in `src/lib/api-errors.ts` when practical instead of duplicating response shapes.
-- Add or update `route.test.ts` coverage when changing route behavior, validation, or error handling.
+## Commits
 
-## Documentation Change Matrix
-
-- If you change setup steps or local commands, update `AGENTS.md` and the relevant pages under `docs/development/`.
-- If you add, rename, or remove environment variables, update `docs/getting-started/environment-variables.md` and the two Docker env files, `.env.docker.local` and `.env.docker.online`.
-- If you change contributor workflow or validation expectations, update `CONTRIBUTING.md`, `docs/development/contributing.md`, and any README links that point contributors there.
-- If you change architecture or directory boundaries, update `docs/development/project-structure.md`.
-- If you change testing workflow, update `docs/development/testing.md`.
-- If you change documentation workflow itself, update `docs/development/documentation.md`.
-
-## Collaboration Rules
-
-- Do not overwrite or revert unrelated local changes you did not make; treat a dirty worktree as shared state until you confirm otherwise.
-- Keep changes scoped to one user-visible problem or one engineering concern. Split unrelated cleanup from behavior or contract changes.
-- Re-read the latest file contents before editing areas that are actively changing or likely to be touched by others.
-- When a change affects a shared contract, call it out explicitly in the PR or handoff summary. Shared contracts include schema, environment variables, route response shapes, tool names, and persisted localStorage/session keys.
-- Include fresh verification evidence in your review or handoff summary instead of claiming success without command output.
-- Prefer additive migration paths over silent rewrites when multiple developers or automation flows may depend on the current behavior.
-- Prefer small, reviewable patches. If you intentionally leave follow-up work out of scope, say so directly instead of hiding it in TODO comments or broad summaries.
-
-## Review And Handoff
-
-When handing work to another developer, reviewer, or automation tool, include:
-
-- what changed and why it matters
-- which shared contracts or risky files need extra attention
-- the exact validation commands you ran and the result you observed
-- any known follow-ups, rollout notes, or unresolved risks
-
-Use this structure when practical:
-
-```text
-Summary:
-Contracts:
-Validation:
-Follow-ups:
-```
-
-## Agent Development Rules
-
-- Keep prompts, provider wiring, tool registration, and orchestration logic out of UI components and route handlers whenever practical.
-- Treat `src/lib/ai/tool-names.ts` and `src/lib/ai/tools/` as the central contract for tool availability and privilege boundaries.
-- Default new agent capabilities to least privilege. High-risk tools should require explicit opt-in, matching the separation between `ALL_TOOLS` and `K8S_TOOLS`.
-- Validate workspace paths, tool inputs, and execution context through shared helpers and typed context objects. Do not add raw filesystem or exec access that bypasses workspace validation.
-- Keep streaming and resume behavior stable. If you change agent response streaming, review `src/lib/agent/agent-stream-manager.ts` and the corresponding UI flows together.
-- Keep deep-research role definitions, doctrine loading, workflow policy, and UI assumptions synchronized across `src/lib/deep-research/`, `src/app/api/deep-research/`, and `src/components/deep-research/`.
-- Any new tool, mode, provider, or role should ship with tests for its contract changes and with documentation updates where contributors need to understand the new behavior.
-- High-risk execution paths, remote execution, and cluster operations must remain auditable and gated behind explicit configuration or approval boundaries.
-- Prompt, doctrine, or role-text changes must live in code-backed prompt files or registries, not inline UI strings. Review dependent parsers, status names, and UI copy together.
-- Tool additions or privilege-tier changes require allow/deny-path tests, stable naming, and docs updates if another contributor or operator needs to understand the capability.
-- Session, streaming, or persistence changes must review the API route, runtime manager, and any localStorage or session-key consumers together so resume behavior does not silently regress.
-- Prefer explicit failure states, logs, and surfaced status over silent fallbacks when changing agent orchestration or provider branching.
-
-## Change Expectations
-
-- Follow the existing feature-first structure in `src/components/` and domain structure in `src/lib/`.
-- Keep route handlers in `src/app/api/` thin; put reusable logic in `src/lib/` or `src/core/`.
-- Keep tests co-located as `*.test.ts` or `*.test.tsx`.
-- Update docs when you change setup, environment variables, routes, workflows, or contributor-facing behavior.
-- Do not commit secrets, `.env.local`, build output, or local-only scratch directories.
-
-## Branches, Commits, And PRs
-
-Preferred branch prefixes:
-
-- `feature/`
-- `fix/`
-- `docs/`
-- `chore/`
-
-Use Conventional Commits:
+Preferred branch prefixes: `feature/`, `fix/`, `docs/`, `chore/`.
 
 ```text
 <type>(<scope>): <summary>
 ```
 
-Examples:
+Examples: `feat(agent): add runtime capability probe`, `fix(workspace): guard invalid root path`.
 
-- `feat(agent): add runtime capability probe`
-- `fix(workspace): guard invalid root path`
-- `docs(dev): refresh contributor workflow`
+## Handoff
 
-## Contributor Checklist
-
-Before requesting review:
-
-- Confirm the relevant validation commands pass locally
-- Confirm docs are updated for developer-facing behavior changes
-- Confirm tests cover new behavior or regressions where practical
-- Confirm changes stay within repository boundaries and do not depend on local scratch content
+State what changed and why, which shared contracts are risky, the validation commands and their results, and any follow-up. Use Summary, Contracts, Validation, Follow-ups when that fits.
