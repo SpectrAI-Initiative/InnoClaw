@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -28,6 +28,7 @@ import { NodeDetailDrawer } from "./node-detail-drawer";
 import { DeleteSessionDialog } from "./delete-session-dialog";
 import { RoleStudioPanel } from "./role-studio-panel";
 import type { ConfirmationOutcome } from "@/lib/deep-research/types";
+import type { ResearchFocus } from "@/lib/shell/surface";
 import {
   canStartSession,
   isAwaitingConfirmationSessionStatus,
@@ -44,6 +45,8 @@ type SessionMessageOptions = {
 
 interface DeepResearchPanelProps {
   workspaceId: string;
+  focus?: ResearchFocus;
+  onFocusChange?: (focus: ResearchFocus) => void;
 }
 
 const TAB_LABELS: Record<TabView, string> = {
@@ -61,6 +64,8 @@ async function readErrorMessage(response: Response, fallback: string): Promise<s
 
 export function DeepResearchPanel({
   workspaceId,
+  focus,
+  onFocusChange,
 }: DeepResearchPanelProps) {
   const [view, setView] = useState<PanelView>("list");
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -127,30 +132,54 @@ export function DeepResearchPanel({
     setActiveSessionId(sessionId);
     setView("session");
     resetSessionChrome();
-  }, [resetSessionChrome]);
+    onFocusChange?.({ sessionId, intake: false });
+  }, [onFocusChange, resetSessionChrome]);
 
   const handleBackToList = useCallback(() => {
     resetToSessionList();
-  }, [resetToSessionList]);
+    onFocusChange?.({ sessionId: null, intake: false });
+  }, [onFocusChange, resetToSessionList]);
 
   // --- Intake ---
 
   const handleStartIntake = useCallback(() => {
     setView("intake");
-  }, []);
+    onFocusChange?.({ sessionId: null, intake: true });
+  }, [onFocusChange]);
 
   const handleIntakeCreated = useCallback(
     (sessionId: string) => {
       mutateSessions();
       setActiveSessionId(sessionId);
       setView("session");
+      onFocusChange?.({ sessionId, intake: false });
     },
-    [mutateSessions]
+    [mutateSessions, onFocusChange]
   );
 
   const handleIntakeCancel = useCallback(() => {
     setView("list");
-  }, []);
+    onFocusChange?.({ sessionId: null, intake: false });
+  }, [onFocusChange]);
+
+  const appliedFocus = useRef("");
+  const focusKey = focus ? `${focus.intake ? "intake" : focus.sessionId ?? "list"}` : "";
+  useEffect(() => {
+    if (!focus || appliedFocus.current === focusKey) return;
+    appliedFocus.current = focusKey;
+    if (focus.intake) {
+      setView("intake");
+      return;
+    }
+    if (focus.sessionId) {
+      setActiveSessionId(focus.sessionId);
+      setView("session");
+      resetSessionChrome();
+      return;
+    }
+    setActiveSessionId(null);
+    setView("list");
+  }, [focus, focusKey, resetSessionChrome]);
 
   // --- Delete ---
 
@@ -159,9 +188,10 @@ export function DeepResearchPanel({
       mutateSessions();
       if (activeSessionId === deletedId) {
         resetToSessionList();
+        onFocusChange?.({ sessionId: null, intake: false });
       }
     },
-    [activeSessionId, mutateSessions, resetToSessionList]
+    [activeSessionId, mutateSessions, onFocusChange, resetToSessionList]
   );
 
   const handleDeleteActiveSession = useCallback(() => {
@@ -172,7 +202,8 @@ export function DeepResearchPanel({
     mutateSessions();
     resetToSessionList();
     setDeleteDialogOpen(false);
-  }, [mutateSessions, resetToSessionList]);
+    onFocusChange?.({ sessionId: null, intake: false });
+  }, [mutateSessions, onFocusChange, resetToSessionList]);
 
   // --- Session actions ---
 

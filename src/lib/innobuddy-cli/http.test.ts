@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-describe("innoclaw-cli http client", () => {
+describe("innobuddy-cli http client", () => {
   beforeEach(() => {
     vi.unstubAllGlobals();
     vi.resetModules();
@@ -15,7 +15,7 @@ describe("innoclaw-cli http client", () => {
       }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const { createApiClient } = await import("../../../plugins/innoclaw-cli/src/http.mjs");
+    const { createApiClient } = await import("../../../plugins/innobuddy-cli/src/http.mjs");
     const client = createApiClient({ baseUrl: "http://localhost:3000" });
     const { payload } = await client.requestJson("/api/workspaces");
 

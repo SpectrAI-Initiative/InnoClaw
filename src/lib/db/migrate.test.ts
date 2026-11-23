@@ -28,8 +28,8 @@ afterEach(async () => {
   restoreEnv("DATABASE_URL", originalDatabaseUrl);
   restoreEnv("NODE_ENV", originalNodeEnv);
   delete (globalThis as typeof globalThis & {
-    __innoclawMigrationPromise?: Promise<void>;
-  }).__innoclawMigrationPromise;
+    __innobuddyMigrationPromise?: Promise<void>;
+  }).__innobuddyMigrationPromise;
   vi.resetModules();
   while (temporaryDirectories.length > 0) {
     fs.rmSync(temporaryDirectories.pop()!, { recursive: true, force: true });
@@ -39,7 +39,7 @@ afterEach(async () => {
 describe("database migration fallback", () => {
   it("does not seed the new workspace-path index before it exists", async () => {
     const directory = fs.mkdtempSync(
-      path.join(os.tmpdir(), "innoclaw-migrate-fallback-"),
+      path.join(os.tmpdir(), "innobuddy-migrate-fallback-"),
     );
     temporaryDirectories.push(directory);
     const databasePath = path.join(directory, "legacy.db");

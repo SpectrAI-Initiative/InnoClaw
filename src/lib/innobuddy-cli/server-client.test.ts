@@ -8,13 +8,13 @@ function jsonResponse(status: number, body: unknown) {
   };
 }
 
-describe("innoclaw-cli ensureServerReady", () => {
+describe("innobuddy-cli ensureServerReady", () => {
   beforeEach(() => {
     vi.unstubAllGlobals();
     vi.resetModules();
   });
 
-  it("does not treat an arbitrary login page as a reachable InnoClaw server", async () => {
+  it("does not treat an arbitrary login page as a reachable Innobuddy server", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       status: 200,
       headers: new Headers({ "content-type": "text/html" }),
@@ -24,11 +24,11 @@ describe("innoclaw-cli ensureServerReady", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
+    const { ensureServerReady } = await import("../../../plugins/innobuddy-cli/src/server-client.mjs");
 
     await expect(ensureServerReady({
       baseUrl: "https://example.com",
-    })).rejects.toThrow("InnoClaw is not reachable at https://example.com");
+    })).rejects.toThrow("Innobuddy is not reachable at https://example.com");
 
     expect(fetchMock).toHaveBeenCalledWith("https://example.com/api/auth/me", expect.any(Object));
   });
@@ -44,14 +44,14 @@ describe("innoclaw-cli ensureServerReady", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
+    const { ensureServerReady } = await import("../../../plugins/innobuddy-cli/src/server-client.mjs");
 
     await expect(ensureServerReady({
       baseUrl: "https://example.com",
-    })).rejects.toThrow("InnoClaw is not reachable at https://example.com");
+    })).rejects.toThrow("Innobuddy is not reachable at https://example.com");
   });
 
-  it("accepts an authenticated InnoClaw auth probe", async () => {
+  it("accepts an authenticated innobuddy auth probe", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(
       200,
       {
@@ -61,7 +61,7 @@ describe("innoclaw-cli ensureServerReady", () => {
     ));
     vi.stubGlobal("fetch", fetchMock);
 
-    const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
+    const { ensureServerReady } = await import("../../../plugins/innobuddy-cli/src/server-client.mjs");
 
     await expect(ensureServerReady({
       baseUrl: "http://localhost:3000",
@@ -70,11 +70,11 @@ describe("innoclaw-cli ensureServerReady", () => {
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:3000/api/auth/me", expect.any(Object));
   });
 
-  it("accepts an unauthenticated InnoClaw auth probe", async () => {
+  it("accepts an unauthenticated innobuddy auth probe", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(401, { error: "Unauthorized" }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
+    const { ensureServerReady } = await import("../../../plugins/innobuddy-cli/src/server-client.mjs");
 
     await expect(ensureServerReady({
       baseUrl: "http://localhost:3000",
@@ -95,7 +95,7 @@ describe("innoclaw-cli ensureServerReady", () => {
       ));
     vi.stubGlobal("fetch", fetchMock);
 
-    const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
+    const { ensureServerReady } = await import("../../../plugins/innobuddy-cli/src/server-client.mjs");
 
     await expect(ensureServerReady({
       baseUrl: "http://localhost:3000",
@@ -109,7 +109,7 @@ describe("innoclaw-cli ensureServerReady", () => {
     const fetchMock = vi.fn().mockRejectedValue(new Error("offline"));
     vi.stubGlobal("fetch", fetchMock);
 
-    const { ensureServerReady } = await import("../../../plugins/innoclaw-cli/src/server-client.mjs");
+    const { ensureServerReady } = await import("../../../plugins/innobuddy-cli/src/server-client.mjs");
 
     await expect(ensureServerReady({
       baseUrl: "http://localhost:3000",

@@ -76,7 +76,7 @@ async with streamablehttp_client(url=url, headers={"SCP-HUB-API-KEY": API_KEY}) 
 - **runK8sJob**: Submit a prepared generic Kubernetes Job only after the user confirms the preview and the jobSpecHash matches.
 - **waitForK8sJob**: Poll a submitted generic Kubernetes Job until complete, failed, or timeout.
 - **collectK8sJobLogs**: Collect bounded logs from the newest Pod associated with a generic Kubernetes Job.
-- **cleanupK8sJob**: Delete only InnoClaw-managed generic Kubernetes Jobs after explicit confirmation.
+- **cleanupK8sJob**: Delete only innobuddy-managed generic Kubernetes Jobs after explicit confirmation.
 - **submitK8sJob**: Legacy cluster-specific job submission for workspaces that explicitly configure and request that path. Prefer prepareK8sJob/runK8sJob for new Kubernetes Job scheduling.
 - **collectJobResults**: Legacy cluster-specific result collection for jobs submitted through the legacy path.
 - **getSkillInstructions**: Load detailed workflow instructions for a skill by its slug. Use when the user's request matches a skill from the catalog.

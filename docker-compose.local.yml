@@ -1,6 +1,6 @@
 # Local debug. Browser on this machine only: http://127.0.0.1:3000
 services:
-  innoclaw:
+  innobuddy:
     env_file:
       - .env.docker.local
     ports:

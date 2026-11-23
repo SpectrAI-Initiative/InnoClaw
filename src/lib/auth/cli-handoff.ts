@@ -87,7 +87,7 @@ export function resolveSafeRedirectPath(value: string | null | undefined, fallba
 }
 
 export function buildAuthPageHref(basePath: string, searchParams: SearchParamSource): string {
-  const url = new URL(basePath, "http://innoclaw.local");
+  const url = new URL(basePath, "http://innobuddy.local");
 
   const next = resolveSafeRedirectPath(searchParams.get("next"), "");
   if (next) {

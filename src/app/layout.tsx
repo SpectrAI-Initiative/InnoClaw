@@ -9,7 +9,7 @@ import { buildFontInitScript } from "@/lib/font-constants";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "InnoClaw",
+  title: "Innobuddy",
   description: "AI-powered research assistant for your workspace files",
 };
 

@@ -10,7 +10,7 @@ function resolveDatabasePath(): string {
   const configured = process.env.DATABASE_URL?.replace(/^file:/, "");
   return configured
     ? path.resolve(configured)
-    : path.join(process.cwd(), "data", "innoclaw.db");
+    : path.join(process.cwd(), "data", "innobuddy.db");
 }
 
 async function main(): Promise<void> {

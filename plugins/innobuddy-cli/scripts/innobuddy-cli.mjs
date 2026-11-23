@@ -19,22 +19,22 @@ import { createSessionManager } from "../src/session-client.mjs";
 import { ensureWorkspace } from "../src/workspace-client.mjs";
 
 function printHelp() {
-  console.log(`InnoClaw CLI
+  console.log(`Innobuddy CLI
 
 Usage:
-  innoclaw
-  innoclaw run --prompt <text>
-  innoclaw batch --input <jobs.json>
-  innoclaw auth <status|login|logout>
-  innoclaw doctor
-  innoclaw app <dev|build|lint|test|start> [-- <extra npm args...>]
-  innoclaw workspace list [--base-url <url>]
-  innoclaw workspace add --name <name> --path <folder> [--git] [--git-remote-url <url>] [--base-url <url>]
-  innoclaw research list --workspace-id <id> [--base-url <url>]
-  innoclaw research create --workspace-id <id> --title <title> [--content <text>] [--interface-only] [--base-url <url>]
-  innoclaw research show --session-id <id> [--base-url <url>]
-  innoclaw research run --session-id <id> [--base-url <url>]
-  innoclaw research export --session-id <id> [--filename <name>] [--base-url <url>]
+  Innobuddy
+  innobuddy run --prompt <text>
+  innobuddy batch --input <jobs.json>
+  innobuddy auth <status|login|logout>
+  innobuddy doctor
+  innobuddy app <dev|build|lint|test|start> [-- <extra npm args...>]
+  innobuddy workspace list [--base-url <url>]
+  innobuddy workspace add --name <name> --path <folder> [--git] [--git-remote-url <url>] [--base-url <url>]
+  innobuddy research list --workspace-id <id> [--base-url <url>]
+  innobuddy research create --workspace-id <id> --title <title> [--content <text>] [--interface-only] [--base-url <url>]
+  innobuddy research show --session-id <id> [--base-url <url>]
+  innobuddy research run --session-id <id> [--base-url <url>]
+  innobuddy research export --session-id <id> [--filename <name>] [--base-url <url>]
 
 Shared flags:
   --base-url <url>         Override the local app URL (default: ${DEFAULT_BASE_URL})
@@ -47,11 +47,11 @@ Shared flags:
                           Agent run mode for interactive/run/batch defaults
 
 Examples:
-  innoclaw
-  innoclaw run --prompt "Summarize this repository"
-  printf 'Plan this workspace' | innoclaw run
-  innoclaw batch --input jobs.json --workers 4
-  innoclaw auth login
+  Innobuddy
+  innobuddy run --prompt "Summarize this repository"
+  printf 'Plan this workspace' | innobuddy run
+  innobuddy batch --input jobs.json --workers 4
+  innobuddy auth login
 `);
 }
 
@@ -303,7 +303,7 @@ async function handleAuth(command, flags) {
       // Clear cached CLI state even if the app is offline.
     }
     await sessionManager.revoke();
-    console.log("[innoclaw] Logged out.");
+    console.log("[Innobuddy] Logged out.");
     return;
   }
 
@@ -312,7 +312,7 @@ async function handleAuth(command, flags) {
   if (action === "login") {
     await sessionManager.ensureAuthenticated({ interactive: true });
   } else if (action !== "status") {
-    throw new Error("Usage: innoclaw auth <status|login|logout>");
+    throw new Error("Usage: innobuddy auth <status|login|logout>");
   }
 
   const status = await sessionManager.getAuthStatus();
@@ -371,7 +371,7 @@ async function handleRun(flags, promptArgs) {
     || await readPromptFromStdin();
 
   if (!prompt) {
-    throw new Error("Usage: innoclaw run --prompt <text>");
+    throw new Error("Usage: innobuddy run --prompt <text>");
   }
 
   const context = await resolveWorkspaceContext(flags, { interactiveAuth: true });
@@ -383,7 +383,7 @@ async function handleRun(flags, promptArgs) {
   const renderer = jsonOutput ? null : createRenderer();
 
   if (!jsonOutput) {
-    console.log(`[innoclaw] workspace=${context.workspace.name} cwd=${context.cwd}`);
+    console.log(`[Innobuddy] workspace=${context.workspace.name} cwd=${context.cwd}`);
   }
 
   const result = await runAgentStream(context.apiClient, {
@@ -420,7 +420,7 @@ async function handleRun(flags, promptArgs) {
   }
 
   if (!assistantText.trim()) {
-    console.log("[innoclaw] Agent completed without assistant text.");
+    console.log("[Innobuddy] Agent completed without assistant text.");
   }
   console.log("");
 }
@@ -428,7 +428,7 @@ async function handleRun(flags, promptArgs) {
 async function handleBatch(flags, positional) {
   const inputPath = resolve(getOptionalFlag(flags, "input") || positional[0] || "");
   if (!inputPath || inputPath === resolve("")) {
-    throw new Error("Usage: innoclaw batch --input <jobs.json>");
+    throw new Error("Usage: innobuddy batch --input <jobs.json>");
   }
 
   const context = await createApiContext(getBaseUrl(flags), { authenticate: true, interactiveAuth: true });
@@ -455,7 +455,7 @@ async function handleBatch(flags, positional) {
     return;
   }
 
-  console.log("[innoclaw] Batch complete.");
+  console.log("[Innobuddy] Batch complete.");
   console.log(`runDir:      ${batchResult.runDir}`);
   console.log(`resultsFile: ${batchResult.resultsFile}`);
   console.log(`summaryFile: ${batchResult.summaryFile}`);
@@ -498,7 +498,7 @@ async function main() {
 
   if (group === "app") {
     if (!command || !["dev", "build", "lint", "test", "start"].includes(command)) {
-      throw new Error("Usage: innoclaw app <dev|build|lint|test|start> [-- <extra npm args...>]");
+      throw new Error("Usage: innobuddy app <dev|build|lint|test|start> [-- <extra npm args...>]");
     }
     await runNpmScript(command, passthrough);
     return;
@@ -506,7 +506,7 @@ async function main() {
 
   if (group === "workspace") {
     if (!command) {
-      throw new Error("Usage: innoclaw workspace <list|add> ...");
+      throw new Error("Usage: innobuddy workspace <list|add> ...");
     }
     await handleWorkspace(command, flags);
     return;
@@ -514,7 +514,7 @@ async function main() {
 
   if (group === "research") {
     if (!command) {
-      throw new Error("Usage: innoclaw research <list|create|show|run|export> ...");
+      throw new Error("Usage: innobuddy research <list|create|show|run|export> ...");
     }
     await handleResearch(command, flags);
     return;
@@ -524,6 +524,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`[innoclaw] ${error instanceof Error ? error.message : String(error)}`);
+  console.error(`[Innobuddy] ${error instanceof Error ? error.message : String(error)}`);
   process.exitCode = 1;
 });

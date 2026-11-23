@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "==> InnoClaw startup checks"
+echo "==> Innobuddy startup checks"
 
 # 1. Writable data directory
 if [ ! -w "/app/data" ]; then
@@ -46,5 +46,5 @@ fi
 echo "==> Database migrations will run during app startup"
 
 # 5. Start the server
-echo "==> Starting InnoClaw on port ${PORT:-3000}"
+echo "==> Starting Innobuddy on port ${PORT:-3000}"
 exec node server.js

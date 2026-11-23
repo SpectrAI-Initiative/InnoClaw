@@ -9,11 +9,11 @@ describe("bootstrap administrator CLI helpers", () => {
   it("parses the required email and optional display name", () => {
     expect(parseBootstrapAdminArgs([
       "--email",
-      "admin@innoclaw.local",
+      "admin@innobuddy.local",
       "--name",
       "Administrator",
     ])).toEqual({
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       name: "Administrator",
     });
   });
@@ -21,9 +21,9 @@ describe("bootstrap administrator CLI helpers", () => {
   it("defaults the display name", () => {
     expect(parseBootstrapAdminArgs([
       "--email",
-      "admin@innoclaw.local",
+      "admin@innobuddy.local",
     ])).toEqual({
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       name: "Administrator",
     });
   });
@@ -35,7 +35,7 @@ describe("bootstrap administrator CLI helpers", () => {
     );
     expect(() => parseBootstrapAdminArgs([
       "--email",
-      "admin@innoclaw.local",
+      "admin@innobuddy.local",
       "--password",
       "secret",
     ])).toThrow("Unknown argument: --password");

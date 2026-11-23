@@ -1,5 +1,5 @@
 {
-  "name": "innoclaw",
+  "name": "innobuddy",
   "version": "0.2.0",
   "private": true,
   "description": "Self-hostable AI research assistant inspired by Google NotebookLM",
@@ -12,10 +12,10 @@
     "nextjs",
     "self-hosted"
   ],
-  "author": "InnoClaw Contributors",
+  "author": "Innobuddy Contributors",
   "license": "Apache-2.0",
   "bin": {
-    "innoclaw": "./plugins/innoclaw-cli/scripts/innoclaw-cli.mjs"
+    "innobuddy": "./plugins/innobuddy-cli/scripts/innobuddy-cli.mjs"
   },
   "repository": {
     "type": "git",

@@ -61,7 +61,7 @@ export function ensureEnvLocal(): void {
   } else {
     fs.writeFileSync(
       target,
-      "# InnoClaw configuration – edit values as needed\n",
+      "# Innobuddy configuration – edit values as needed\n",
       "utf-8",
     );
   }

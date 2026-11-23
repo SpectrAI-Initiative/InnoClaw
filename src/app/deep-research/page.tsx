@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function DeepResearchPage() {
+export default function RetiredPage() {
   redirect("/");
 }

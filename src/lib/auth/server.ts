@@ -71,7 +71,7 @@ function getSessionSigningSecret(): string {
   return (
     process.env.AUTH_SECRET ||
     process.env.NEXTAUTH_SECRET ||
-    "innoclaw-development-secret"
+    "innobuddy-development-secret"
   );
 }
 

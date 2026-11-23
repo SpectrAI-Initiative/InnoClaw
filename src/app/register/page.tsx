@@ -139,7 +139,7 @@ export default function RegisterPage() {
             <UserPlus className="h-5 w-5" />
           </div>
           <div>
-            <CardTitle className="text-2xl">Create account</CardTitle>
+            <CardTitle className="text-2xl">Create an Innobuddy account</CardTitle>
             <CardDescription>Open registration is enabled on this system.</CardDescription>
           </div>
         </CardHeader>

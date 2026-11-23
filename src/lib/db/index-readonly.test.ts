@@ -3,8 +3,8 @@ import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const tempDir = path.join(os.tmpdir(), "innoclaw-db-index-readonly");
-const dbPath = path.join(tempDir, "innoclaw.db");
+const tempDir = path.join(os.tmpdir(), "innobuddy-db-index-readonly");
+const dbPath = path.join(tempDir, "innobuddy.db");
 
 vi.mock("better-sqlite3", () => {
   class FakeDatabase {

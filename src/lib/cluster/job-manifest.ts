@@ -1,9 +1,9 @@
 import type { K8sJobProfile, K8sJobVolume } from "./job-profiles";
 import {
-  INNOCLAW_JOB_HASH_ANNOTATION,
-  INNOCLAW_JOB_HASH_LABEL,
-  INNOCLAW_MANAGED_BY_LABEL,
-  INNOCLAW_WORKSPACE_LABEL,
+  INNOBUDDY_JOB_HASH_ANNOTATION,
+  INNOBUDDY_JOB_HASH_LABEL,
+  INNOBUDDY_MANAGED_BY_LABEL,
+  INNOBUDDY_WORKSPACE_LABEL,
   toK8sLabelValue,
   type K8sJobToolInput,
 } from "./job-policy";
@@ -65,15 +65,15 @@ export function buildK8sJobManifest(options: BuildK8sJobManifestInput) {
 
   const labels = {
     ...(options.profile.labels ?? {}),
-    [INNOCLAW_MANAGED_BY_LABEL]: "innoclaw",
+    [INNOBUDDY_MANAGED_BY_LABEL]: "Innobuddy",
     ...(options.workspaceId
-      ? { [INNOCLAW_WORKSPACE_LABEL]: options.workspaceId }
+      ? { [INNOBUDDY_WORKSPACE_LABEL]: options.workspaceId }
       : {}),
-    [INNOCLAW_JOB_HASH_LABEL]: toK8sLabelValue(options.jobSpecHash),
+    [INNOBUDDY_JOB_HASH_LABEL]: toK8sLabelValue(options.jobSpecHash),
   };
   const annotations = {
     ...(options.profile.annotations ?? {}),
-    [INNOCLAW_JOB_HASH_ANNOTATION]: options.jobSpecHash,
+    [INNOBUDDY_JOB_HASH_ANNOTATION]: options.jobSpecHash,
   };
   const env = [...(options.profile.env ?? []), ...(options.input.env ?? [])];
   const volumes = options.profile.volumes ?? [];
@@ -101,7 +101,7 @@ export function buildK8sJobManifest(options: BuildK8sJobManifestInput) {
       template: {
         metadata: {
           labels,
-          annotations: { [INNOCLAW_JOB_HASH_ANNOTATION]: options.jobSpecHash },
+          annotations: { [INNOBUDDY_JOB_HASH_ANNOTATION]: options.jobSpecHash },
         },
         spec: {
           restartPolicy: "Never",

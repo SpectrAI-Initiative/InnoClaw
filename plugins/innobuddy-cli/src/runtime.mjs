@@ -18,7 +18,7 @@ const __dirname = path.dirname(__filename);
 export const APP_ROOT = path.resolve(__dirname, "../../..");
 export const DEFAULT_WORKSPACE_CWD = process.cwd();
 export const DEFAULT_BASE_URL = normalizeBaseUrl(
-  process.env.INNOCLAW_BASE_URL || "http://localhost:3000",
+  process.env.INNOBUDDY_BASE_URL || "http://localhost:3000",
 );
 
 export function getWorkspaceName(folderPath) {

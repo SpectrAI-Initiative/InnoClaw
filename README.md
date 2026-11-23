@@ -1,7 +1,7 @@
-# InnoClaw
+# Innobuddy
 
 <p align="center">
-  <img src="site/logos/20260316-112548.png" alt="InnoClaw Logo" width="200" />
+  <img src="site/logos/20260316-112548.png" alt="Innobuddy Logo" width="200" />
 </p>
 
 <p align="center">
@@ -19,20 +19,20 @@
 </p>
 
 <p align="center">
-  <a href="#highlights">Highlights</a> · <a href="#using-innoclaw">How to use</a> · <a href="#get-started">Get started</a> · <a href="#community">Community</a>
+  <a href="#highlights">Highlights</a> · <a href="#using-Innobuddy">How to use</a> · <a href="#get-started">Get started</a> · <a href="#community">Community</a>
 </p>
 
-InnoClaw turns a folder on your server into a research workspace. You read papers, ask questions of your own files, and carry selected work through to execution, without moving between a file browser, a note tool, a paper reader, and a job terminal.
+Innobuddy turns a folder on your server into a research workspace. You read papers, ask questions of your own files, and carry selected work through to execution, without moving between a file browser, a note tool, a paper reader, and a job terminal.
 
 Answers stay attached to the documents you synced. Discussions follow a fixed set of roles. Skills can be reused across studies. High-risk execution steps stop for a person to approve them.
 
 <p align="center">
-  <img src="public/innoclaw-flow.png" alt="InnoClaw Workflow" width="800" />
+  <img src="public/innobuddy-flow.png" alt="Innobuddy Workflow" width="800" />
 </p>
 
 ## Who it is for
 
-InnoClaw is for researchers who want cited answers from their own materials, for engineers who keep code and data beside the papers they read, and for labs that prefer a workspace they host themselves.
+Innobuddy is for researchers who want cited answers from their own materials, for engineers who keep code and data beside the papers they read, and for labs that prefer a workspace they host themselves.
 
 <a id="highlights"></a>
 
@@ -46,7 +46,7 @@ InnoClaw is for researchers who want cited answers from their own materials, for
 - **Separate sessions.** Different projects and tabs keep their own agent context.
 - **Self-hosted.** The workspace, index, and notes remain on the server you run. Conversation uses Tencent Cloud TokenHub DeepSeek V4.1 Flash and DeepSeek V4 Pro.
 
-<a id="using-innoclaw"></a>
+<a id="using-Innobuddy"></a>
 
 ## How to use it
 

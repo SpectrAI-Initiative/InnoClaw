@@ -12,7 +12,7 @@ const MIGRATION_RETRY_ATTEMPTS = 10;
 const MIGRATION_RETRY_DELAY_MS = 500;
 
 const globalForMigrations = globalThis as typeof globalThis & {
-  __innoclawMigrationPromise?: Promise<void>;
+  __innobuddyMigrationPromise?: Promise<void>;
 };
 
 function ensureMigrationsTable() {
@@ -170,12 +170,12 @@ async function runMigrationsWithRetry() {
 }
 
 export function runMigrations(): Promise<void> {
-  if (!globalForMigrations.__innoclawMigrationPromise) {
-    globalForMigrations.__innoclawMigrationPromise = runMigrationsWithRetry();
-    globalForMigrations.__innoclawMigrationPromise.catch(() => {
-      globalForMigrations.__innoclawMigrationPromise = undefined;
+  if (!globalForMigrations.__innobuddyMigrationPromise) {
+    globalForMigrations.__innobuddyMigrationPromise = runMigrationsWithRetry();
+    globalForMigrations.__innobuddyMigrationPromise.catch(() => {
+      globalForMigrations.__innobuddyMigrationPromise = undefined;
     });
   }
 
-  return globalForMigrations.__innoclawMigrationPromise;
+  return globalForMigrations.__innobuddyMigrationPromise;
 }

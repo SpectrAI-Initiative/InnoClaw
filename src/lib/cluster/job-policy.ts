@@ -18,10 +18,10 @@ export interface K8sJobToolInput {
   backoffLimit?: number;
 }
 
-export const INNOCLAW_MANAGED_BY_LABEL = "app.kubernetes.io/managed-by";
-export const INNOCLAW_WORKSPACE_LABEL = "innoclaw.ai/workspace-id";
-export const INNOCLAW_JOB_HASH_LABEL = "innoclaw.ai/job-hash";
-export const INNOCLAW_JOB_HASH_ANNOTATION = "innoclaw.ai/job-spec-hash";
+export const INNOBUDDY_MANAGED_BY_LABEL = "app.kubernetes.io/managed-by";
+export const INNOBUDDY_WORKSPACE_LABEL = "innobuddy.ai/workspace-id";
+export const INNOBUDDY_JOB_HASH_LABEL = "innobuddy.ai/job-hash";
+export const INNOBUDDY_JOB_HASH_ANNOTATION = "innobuddy.ai/job-spec-hash";
 export const K8S_LABEL_VALUE_MAX_LENGTH = 63;
 
 export function validateK8sJobInput(input: K8sJobToolInput): void {
@@ -92,12 +92,12 @@ export function ensureOwnedK8sJob(
           .metadata?.annotations ?? {})
       : {};
 
-  if (labels[INNOCLAW_MANAGED_BY_LABEL] !== "innoclaw") {
-    throw new Error("Kubernetes Job is not owned by InnoClaw");
+  if (labels[INNOBUDDY_MANAGED_BY_LABEL] !== "Innobuddy") {
+    throw new Error("Kubernetes Job is not owned by Innobuddy");
   }
 
   const actualHash =
-    annotations[INNOCLAW_JOB_HASH_ANNOTATION] ?? labels[INNOCLAW_JOB_HASH_LABEL];
+    annotations[INNOBUDDY_JOB_HASH_ANNOTATION] ?? labels[INNOBUDDY_JOB_HASH_LABEL];
   if (expectedHash && actualHash !== expectedHash) {
     throw new Error("Kubernetes Job hash does not match the requested operation");
   }

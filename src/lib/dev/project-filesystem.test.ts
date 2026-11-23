@@ -78,7 +78,7 @@ describe("project-filesystem", () => {
 
   it("assesses arbitrary paths on lockless mounts", () => {
     const assessment = assessPathLocking(
-      "/mnt/data/project/data/innoclaw.db",
+      "/mnt/data/project/data/innobuddy.db",
       "202 201 0:50 / /mnt/data rw,relatime - nfs 10.0.0.1:/data rw,vers=3,local_lock=none"
     );
 
@@ -98,7 +98,7 @@ describe("project-filesystem", () => {
   it("rejects NEXT_BUILD_DIR values that escape the project root", () => {
     const resolved = resolveNextBuildDir(
       "/workspace/project",
-      "/tmp/innoclaw-next"
+      "/tmp/innobuddy-next"
     );
 
     expect(resolved.distDir).toBeUndefined();

@@ -165,7 +165,7 @@ export function compileLaTeXPaperToPdf(
     };
   }
 
-  const tmpRoot = mkdtempSync(path.join(tmpdir(), "innoclaw-latex-"));
+  const tmpRoot = mkdtempSync(path.join(tmpdir(), "innobuddy-latex-"));
 
   let currentTex = paper.texContent;
   const passes: LatexCompilePass[] = [];

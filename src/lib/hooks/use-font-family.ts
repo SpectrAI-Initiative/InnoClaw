@@ -15,7 +15,7 @@ export { FONT_OPTIONS } from "@/lib/font-constants";
 function loadWebFont(fontId: FontId) {
   const url = WEB_FONT_URLS[fontId];
   if (!url) return;
-  const linkId = `innoclaw-font-${fontId}`;
+  const linkId = `innobuddy-font-${fontId}`;
   if (document.getElementById(linkId)) return;
   const link = document.createElement("link");
   link.id = linkId;

@@ -15,6 +15,8 @@ import {
 } from "@/lib/markdown/shared-components";
 import { getImageFileParts } from "@/lib/ai/message-attachments";
 import { ImageAttachmentGrid } from "@/components/ui/image-attachment-grid";
+import { toast } from "sonner";
+import { conclusionFilesFromToolInputs } from "@/lib/shell/conclusion-files";
 
 /** XML tag used to identify compacted context summary messages. */
 const CONTEXT_SUMMARY_TAG_PREFIX = "<context_summary>";
@@ -73,8 +75,15 @@ function ContextSummaryBlock({ text }: { text: string }) {
   );
 }
 
-export function AgentMessage({ message }: { message: UIMessage }) {
+export function AgentMessage({
+  message,
+  onOpenFile,
+}: {
+  message: UIMessage;
+  onOpenFile?: (path: string) => void;
+}) {
   const t = useTranslations("agent");
+  const tShell = useTranslations("shell");
   const isUser = message.role === "user";
 
   if (isUser) {
@@ -113,6 +122,13 @@ export function AgentMessage({ message }: { message: UIMessage }) {
   const lastReasoningIndex = message.parts
     ? message.parts.reduce((acc, part, idx) => part.type === "reasoning" ? idx : acc, -1)
     : -1;
+  const conclusionFiles = onOpenFile
+    ? conclusionFilesFromToolInputs(
+        (message.parts ?? [])
+          .filter((part) => part.type.startsWith("tool-") || part.type === "dynamic-tool")
+          .map((part) => (part as { input?: unknown }).input),
+      )
+    : [];
 
   // Assistant message — render parts
   return (
@@ -144,11 +160,17 @@ export function AgentMessage({ message }: { message: UIMessage }) {
           part.type.startsWith("tool-") ||
           part.type === "dynamic-tool"
         ) {
+          const previous = message.parts?.[i - 1];
+          const startsExecution = !previous || !(previous.type.startsWith("tool-") || previous.type === "dynamic-tool");
           return (
-            <ToolCallBlock
-              key={i}
-              part={part as unknown as ToolInvocationPart}
-            />
+            <React.Fragment key={i}>
+              {startsExecution && (
+                <div className="text-[12px] text-[#57574f]">{tShell("execution")}</div>
+              )}
+              <ToolCallBlock
+                part={part as unknown as ToolInvocationPart}
+              />
+            </React.Fragment>
           );
         }
 
@@ -184,6 +206,33 @@ export function AgentMessage({ message }: { message: UIMessage }) {
 
         return null;
       })}
+      {conclusionFiles.map((file) => (
+        <div
+          key={file.path}
+          role="button"
+          tabIndex={0}
+          onClick={() => onOpenFile?.(file.path)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") onOpenFile?.(file.path);
+          }}
+          className="flex w-full max-w-md items-center gap-2 rounded-xl border border-[#ECECEF] bg-[#F7F7F8] px-3 py-2 text-left"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[12.5px] font-semibold">{file.name}</span>
+            <span className="block truncate text-[10.5px] text-[#9A9AA0]">{file.path}</span>
+          </span>
+          <button
+            type="button"
+            className="text-[11px] text-[#57574f]"
+            onClick={(event) => {
+              event.stopPropagation();
+              void navigator.clipboard.writeText(file.name).then(() => toast.success(tShell("copiedName")));
+            }}
+          >
+            {tShell("copyName")}
+          </button>
+        </div>
+      ))}
       </div>
     </div>
   );

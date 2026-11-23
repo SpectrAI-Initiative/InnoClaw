@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Bot, Settings, Zap, FolderOpen, Minimize2, Database } from "lucide-react";
+import { Bot, FolderOpen, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageToggle } from "./language-toggle";
@@ -23,7 +23,6 @@ interface HeaderProps {
 export function Header({ onToggleMinimalMode, showMinimalToggle }: HeaderProps) {
   const t = useTranslations("common");
   const pathname = usePathname();
-  const router = useRouter();
 
   // Extract workspaceId from URL like /workspace/xxx
   const workspaceMatch = pathname.match(/^\/workspace\/([^/]+)/);
@@ -40,7 +39,7 @@ export function Header({ onToggleMinimalMode, showMinimalToggle }: HeaderProps) 
               <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-accent opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-30" />
             </div>
             <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent transition-all duration-300 group-hover:from-primary group-hover:to-accent">
-              InnoClaw
+              Innobuddy
             </span>
           </Link>
 
@@ -89,74 +88,7 @@ export function Header({ onToggleMinimalMode, showMinimalToggle }: HeaderProps) 
             <ThemeToggle />
             <UserMenu />
 
-            <div className="mx-1 h-5 w-px bg-border/50" />
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/datasets">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`h-9 w-9 rounded-lg transition-all duration-200 hover:bg-primary/10 hover:text-primary ${
-                      pathname === "/datasets" ? "bg-primary/10 text-primary" : ""
-                    }`}
-                  >
-                    <Database className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-card border-border/50">
-                {t("datasets")}
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/skills">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`h-9 w-9 rounded-lg transition-all duration-200 hover:bg-accent/10 hover:text-accent ${
-                      pathname === "/skills" ? "bg-accent/10 text-accent" : ""
-                    }`}
-                  >
-                    <Zap className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-card border-border/50">
-                {t("skills")}
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                {pathname === "/settings" ? (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-lg bg-primary/10 text-primary"
-                    onClick={() => router.back()}
-                  >
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Link href="/settings">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 rounded-lg transition-all duration-200 hover:bg-muted hover:text-foreground"
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                )}
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-card border-border/50">
-                {t("settings")}
-              </TooltipContent>
-            </Tooltip>
-          </nav>
+            </nav>
         </div>
       </header>
     </TooltipProvider>

@@ -51,14 +51,14 @@ afterEach(() => {
 describe("bootstrapAdministrator", () => {
   it("creates the sole active administrator with a verifiable password", () => {
     const result = bootstrapAdministrator(sqlite, {
-      email: " Admin@InnoClaw.Local ",
+      email: " Admin@innobuddy.Local ",
       name: "Administrator",
       password: "a-long-test-password",
     });
 
     expect(result).toEqual({
       status: "created",
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
     });
     const row = sqlite.prepare(`
       SELECT email, name, password_hash AS passwordHash, role, is_active AS isActive
@@ -71,7 +71,7 @@ describe("bootstrapAdministrator", () => {
       isActive: number;
     };
     expect(row).toMatchObject({
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       name: "Administrator",
       role: "admin",
       isActive: 1,
@@ -81,7 +81,7 @@ describe("bootstrapAdministrator", () => {
 
   it("is idempotent for the same active administrator without resetting its password", () => {
     bootstrapAdministrator(sqlite, {
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       name: "Administrator",
       password: "original-password",
     });
@@ -90,7 +90,7 @@ describe("bootstrapAdministrator", () => {
     ).get() as { passwordHash: string };
 
     const result = bootstrapAdministrator(sqlite, {
-      email: "ADMIN@INNOCLAW.LOCAL",
+      email: "ADMIN@innobuddy.LOCAL",
       name: "Changed Name",
       password: "different-password",
     });
@@ -100,7 +100,7 @@ describe("bootstrapAdministrator", () => {
 
     expect(result).toEqual({
       status: "existing",
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
     });
     expect(after.passwordHash).toBe(before.passwordHash);
     expect(after.name).toBe("Administrator");
@@ -110,13 +110,13 @@ describe("bootstrapAdministrator", () => {
   it("rejects the same inactive administrator", () => {
     insertUser({
       id: "admin-id",
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       role: "admin",
       isActive: false,
     });
 
     expect(() => bootstrapAdministrator(sqlite, {
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       name: "Administrator",
       password: "a-long-test-password",
     })).toThrow("The existing administrator is inactive");
@@ -130,7 +130,7 @@ describe("bootstrapAdministrator", () => {
     });
 
     expect(() => bootstrapAdministrator(sqlite, {
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       name: "Administrator",
       password: "a-long-test-password",
     })).toThrow("A different administrator already exists");
@@ -141,7 +141,7 @@ describe("bootstrapAdministrator", () => {
     insertUser({ id: "admin-b", email: "b@example.com", role: "admin" });
 
     expect(() => bootstrapAdministrator(sqlite, {
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       name: "Administrator",
       password: "a-long-test-password",
     })).toThrow("Multiple administrators already exist");
@@ -150,12 +150,12 @@ describe("bootstrapAdministrator", () => {
   it("rejects an ordinary-user collision", () => {
     insertUser({
       id: "user-id",
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       role: "user",
     });
 
     expect(() => bootstrapAdministrator(sqlite, {
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       name: "Administrator",
       password: "a-long-test-password",
     })).toThrow("The administrator email already belongs to an ordinary user");
@@ -163,7 +163,7 @@ describe("bootstrapAdministrator", () => {
 
   it("rejects a password shorter than eight characters", () => {
     expect(() => bootstrapAdministrator(sqlite, {
-      email: "admin@innoclaw.local",
+      email: "admin@innobuddy.local",
       name: "Administrator",
       password: "short",
     })).toThrow("Administrator password must be at least 8 characters");

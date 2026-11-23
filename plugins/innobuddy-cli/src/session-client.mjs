@@ -7,12 +7,12 @@ import { chmod, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promi
 import { ApiError } from "./http.mjs";
 
 const COOKIE_NAMES = [
-  "innoclaw_session",
-  "innoclaw_session_expires",
-  "innoclaw_session_sig",
+  "INNOBUDDY_session",
+  "INNOBUDDY_session_expires",
+  "INNOBUDDY_session_sig",
 ];
 
-const SESSION_DIR = path.join(os.homedir(), ".innoclaw");
+const SESSION_DIR = path.join(os.homedir(), ".innobuddy");
 const SESSION_FILE = path.join(SESSION_DIR, "cli-sessions.json");
 
 function emptyStore() {
@@ -105,7 +105,7 @@ function validateCallbackPayload(payload, expectedNonce) {
   return {
     cookies: payload.cookies,
     user: payload.user ?? null,
-    expiresAt: payload.expiresAt ?? payload.cookies.innoclaw_session_expires,
+    expiresAt: payload.expiresAt ?? payload.cookies.INNOBUDDY_session_expires,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -255,10 +255,10 @@ async function waitForBrowserSession({ baseUrl, timeoutMs = 5 * 60_000 }) {
 
   const opened = await openBrowser(loginUrl.toString());
   if (!opened) {
-    console.log(`[innoclaw] Open this URL in your browser to sign in:\n${loginUrl.toString()}`);
+    console.log(`[Innobuddy] Open this URL in your browser to sign in:\n${loginUrl.toString()}`);
   }
 
-  console.log("[innoclaw] Waiting for browser login...");
+  console.log("[Innobuddy] Waiting for browser login...");
 
   const timeout = setTimeout(() => {
     if (!resolved) {
@@ -336,7 +336,7 @@ export function createSessionManager(baseUrl, apiClientFactory) {
     const nextSession = {
       ...(session ?? {}),
       cookies: nextCookies,
-      expiresAt: nextCookies.innoclaw_session_expires ?? session?.expiresAt ?? null,
+      expiresAt: nextCookies.INNOBUDDY_session_expires ?? session?.expiresAt ?? null,
       updatedAt: new Date().toISOString(),
     };
     return persist(nextSession);
@@ -362,7 +362,7 @@ export function createSessionManager(baseUrl, apiClientFactory) {
     }
 
     if (!interactive) {
-      throw new Error("Authentication required. Run `innoclaw auth login` or `innoclaw` to complete browser sign-in.");
+      throw new Error("Authentication required. Run `innobuddy auth login` or `Innobuddy` to complete browser sign-in.");
     }
 
     const browserSession = await waitForBrowserSession({ baseUrl });

@@ -19,7 +19,7 @@ function printDivider() {
 
 function printHeader({ baseUrl, workspace, cwd, session, provider, model, skill, mode }) {
   printDivider();
-  console.log("InnoClaw CLI");
+  console.log("Innobuddy CLI");
   console.log(`workspace: ${workspace.name} (${workspace.id})`);
   console.log(`cwd:       ${cwd}`);
   console.log(`server:    ${baseUrl}`);
@@ -151,12 +151,12 @@ export async function startRepl(apiClient, {
         console.log("  /clear      Clear local conversation history");
         console.log("  /workspace  Show current workspace information");
         console.log("  /logout     Clear CLI session and stop this REPL");
-        console.log("  /exit       Exit InnoClaw CLI");
+        console.log("  /exit       Exit Innobuddy CLI");
         continue;
       }
       if (input === "/clear") {
         messages = [];
-        console.log("[innoclaw] Conversation cleared.");
+        console.log("[Innobuddy] Conversation cleared.");
         continue;
       }
       if (input === "/workspace") {
@@ -186,15 +186,15 @@ export async function startRepl(apiClient, {
           });
           activeProvider = next.provider;
           activeModel = next.model;
-          console.log(`[innoclaw] Model set to ${next.provider} / ${next.model}`);
+          console.log(`[Innobuddy] Model set to ${next.provider} / ${next.model}`);
         } catch (error) {
-          console.log(`[innoclaw] ${error instanceof Error ? error.message : String(error)}`);
+          console.log(`[Innobuddy] ${error instanceof Error ? error.message : String(error)}`);
         }
         continue;
       }
       if (input === "/logout") {
         await onLogout?.();
-        console.log("[innoclaw] Logged out.");
+        console.log("[Innobuddy] Logged out.");
         break;
       }
 
@@ -223,7 +223,7 @@ export async function startRepl(apiClient, {
         .reverse()
         .find((message) => message.role === "assistant");
       if (!lastAssistantMessage || !getMessageText(lastAssistantMessage).trim()) {
-        console.log("[innoclaw] No assistant output. Check the server logs or current model configuration.");
+        console.log("[Innobuddy] No assistant output. Check the server logs or current model configuration.");
       }
       console.log("");
     }

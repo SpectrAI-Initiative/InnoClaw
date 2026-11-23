@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ImagePlus,
   Loader2,
+  Plus,
   Square,
   Eraser,
   SendHorizontal,
@@ -125,6 +126,11 @@ interface AgentPanelProps {
   sessionName?: string;
   sessionCreatedAt?: string;
   onLoadingChange?: (loading: boolean) => void;
+  presentation?: "default" | "shell";
+  seedInput?: string | null;
+  onSeedInputConsumed?: () => void;
+  onOpenFile?: (path: string) => void;
+  onNewSession?: () => void;
 }
 
 export function AgentPanel({
@@ -134,9 +140,16 @@ export function AgentPanel({
   sessionName,
   sessionCreatedAt,
   onLoadingChange,
+  presentation = "default",
+  seedInput,
+  onSeedInputConsumed,
+  onOpenFile,
+  onNewSession,
 }: AgentPanelProps) {
   const t = useTranslations("agent");
+  const tShell = useTranslations("shell");
   const tCommon = useTranslations("common");
+  const shell = presentation === "shell";
   const locale = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);
   const userScrolledUp = useRef(false);
@@ -244,7 +257,7 @@ export function AgentPanel({
     handleModelChange,
     refreshDiscoveredModels,
   } = useModelSelection({
-    storageKey: "innoclaw-agent-model-selection",
+    storageKey: "innobuddy-agent-model-selection",
     configuredProviderIds,
     settingsFallback,
     fallbackDisplayName: t("modelLabel"),
@@ -1149,6 +1162,12 @@ export function AgentPanel({
     !isLoading &&
     (input.trim().length > 0 || pendingImages.length > 0);
 
+  useEffect(() => {
+    if (!seedInput) return;
+    setInput(seedInput);
+    onSeedInputConsumed?.();
+  }, [seedInput, onSeedInputConsumed]);
+
   const slashQuery = input.startsWith("/") ? input.slice(1) : "";
   const matchingSlashSkills = useMemo(
     () => getMatchingSkillsForSlashQuery(availableSkills, slashQuery),
@@ -1165,7 +1184,10 @@ export function AgentPanel({
   );
 
   return (
-    <div ref={containerRef} className="relative flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm overflow-hidden">
+    <div ref={containerRef} className={shell
+      ? "relative flex h-full min-w-0 flex-col bg-white font-sans text-sm text-[#1e1e1c] overflow-hidden"
+      : "relative flex h-full min-w-0 flex-col bg-agent-bg text-agent-foreground font-mono text-sm overflow-hidden"}>
+      {!shell && (
       <div className="relative z-10 flex items-center justify-between gap-3 border-b border-agent-border/70 bg-agent-bg/90 px-3 py-2 backdrop-blur-sm shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <Bot className="h-4 w-4 shrink-0 text-agent-accent" />
@@ -1178,6 +1200,7 @@ export function AgentPanel({
           {resolvedProviderName}
         </Badge>
       </div>
+      )}
 
       {/* Messages */}
       <ScrollArea className="relative z-10 flex-1 [&_[data-slot=scroll-area-viewport]]:!overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:hidden" ref={scrollRef}>
@@ -1190,12 +1213,30 @@ export function AgentPanel({
               </p>
             </div>
           ) : messages.length === 0 ? (
+            shell ? (
+              <div className="mx-auto flex max-w-xl flex-col items-center gap-4 py-16 text-center">
+                <p className="text-sm text-[#57574f]">{tShell("emptyHint")}</p>
+                <div className="grid w-full gap-2">
+                  {[tShell("example1"), tShell("example2"), tShell("example3")].map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => setInput(prompt)}
+                      className="rounded-xl border border-[#e7e7e8] px-3 py-2 text-left text-[13px] hover:bg-[#f6f6f4]"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
             <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
               <Bot className="h-8 w-8 text-agent-muted" />
               <p className="text-xs text-agent-muted max-w-xs">
                 {t("emptyState")}
               </p>
             </div>
+            )
           ) : (
             messages.map((message) => {
               // Filter out auto-continue messages (user messages with only "Continue" / "继续")
@@ -1203,7 +1244,7 @@ export function AgentPanel({
                 const text = getMessageText(message).trim();
                 if (text === "Continue" || text === "继续") return null;
               }
-              return <AgentMessage key={message.id} message={message} />;
+              return <AgentMessage key={message.id} message={message} onOpenFile={onOpenFile} />;
             })
           )}
 
@@ -1222,7 +1263,7 @@ export function AgentPanel({
                   {/* Glow orbs */}
                   <div className="absolute -left-4 -top-4 h-16 w-16 rounded-full bg-primary/20 blur-xl animate-pulse" />
                   <div className="absolute -right-4 -bottom-4 h-12 w-12 rounded-full bg-accent/20 blur-xl animate-pulse [animation-delay:0.5s]" />
-                  <ThinkingIndicator label="InnoClaw thinking" />
+                  <ThinkingIndicator label="Innobuddy thinking" />
                 </div>
               </div>
             )}
@@ -1431,6 +1472,7 @@ export function AgentPanel({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
+          {!shell && (
           <button
             type="button"
             onClick={() => setShowWorkspaceImagePicker(true)}
@@ -1440,30 +1482,23 @@ export function AgentPanel({
           >
             <ImagePlus className="h-4 w-4" />
           </button>
+          )}
           <div className="ml-auto flex items-center gap-1 shrink-0">
-            {/* Buddy avatar */}
+            {shell && onNewSession && (
+              <button type="button" onClick={onNewSession} title={tShell("newSession")} className="rounded p-1 text-[#57574f] hover:bg-[#f4f4f5]">
+                <Plus className="h-4 w-4" />
+              </button>
+            )}
+            {!shell && (
+            <>
             <BuddyAvatar
               key={buddyKey}
               workspaceId={workspaceId}
               lastAssistantMessage={lastAssistantMessage}
               onHatchRequest={() => setShowBuddyHatch(true)}
             />
-            {/* Cost display */}
             {showCostDisplay && <CostDisplay snapshot={costSnapshot} />}
-            {/* Context usage percentage */}
-            {messages.length > 0 && (
-              <span
-                title={t("contextUsage")}
-                className={`text-[10px] font-mono tabular-nums px-1 py-0.5 rounded select-none transition-colors ${
-                  contextPercent >= 80
-                    ? "text-[#f7768e]"
-                    : contextPercent >= 50
-                    ? "text-[#e0af68]"
-                    : "text-agent-muted"
-                }`}
-              >
-                {contextPercent}%
-              </span>
+            </>
             )}
             {isLoading && (
             <button
@@ -1613,10 +1648,12 @@ export function AgentPanel({
       />
 
       {/* Particle effects overlay - renders on top of content but allows click-through */}
+      {!shell && (
       <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
         <FloatingOrbs isActive={isLoading} />
         <ParticleEffect isActive={isLoading} particleCount={25} density={0.0001} colors={["#8b5cf6", "#6366f1", "#3b82f6", "#06b6d4", "#a855f7", "#ec4899"]} />
       </div>
+      )}
     </div>
   );
 }

@@ -49,7 +49,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm config set registry "${NPM_REGISTRY}" && \
-    npm ci && \
+    npm_config_nodedir=/usr/local npm ci && \
     npm install --no-save drizzle-kit
 
 # ── Stage 2: Build the application ────────────────────────────────
@@ -111,6 +111,10 @@ COPY --from=deps /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
 # Copy the full namespace so the platform-specific binary package from the Linux
 # build stage is available in the production runner.
 COPY --from=deps /app/node_modules/@napi-rs ./node_modules/@napi-rs
+
+# Native research skills. Next file tracing excludes this directory, and
+# ensureProjectDefaultSkills reads it from the process working directory.
+COPY skills ./skills
 
 # Copy entrypoint
 COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh

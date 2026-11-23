@@ -6,23 +6,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const runAgentStreamMock = vi.fn();
 const ensureWorkspaceMock = vi.fn();
 
-vi.mock("../../../plugins/innoclaw-cli/src/agent-client.mjs", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../../plugins/innoclaw-cli/src/agent-client.mjs")>();
+vi.mock("../../../plugins/innobuddy-cli/src/agent-client.mjs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../plugins/innobuddy-cli/src/agent-client.mjs")>();
   return {
     ...actual,
     runAgentStream: runAgentStreamMock,
   };
 });
 
-vi.mock("../../../plugins/innoclaw-cli/src/workspace-client.mjs", () => ({
+vi.mock("../../../plugins/innobuddy-cli/src/workspace-client.mjs", () => ({
   ensureWorkspace: ensureWorkspaceMock,
 }));
 
-describe("innoclaw-cli batch client", () => {
+describe("innobuddy-cli batch client", () => {
   let tempDir: string;
 
   beforeEach(async () => {
-    tempDir = await mkdtemp(path.join(os.tmpdir(), "innoclaw-batch-test-"));
+    tempDir = await mkdtemp(path.join(os.tmpdir(), "innobuddy-batch-test-"));
     runAgentStreamMock.mockReset();
     ensureWorkspaceMock.mockReset();
     ensureWorkspaceMock.mockResolvedValue({ id: "workspace-1", name: "Workspace" });
@@ -54,7 +54,7 @@ describe("innoclaw-cli batch client", () => {
       { id: "entry-mode", prompt: "Use the entry", mode: "ask" },
     ]);
 
-    const { runBatch } = await import("../../../plugins/innoclaw-cli/src/batch-client.mjs");
+    const { runBatch } = await import("../../../plugins/innobuddy-cli/src/batch-client.mjs");
     await runBatch({}, {
       inputPath,
       defaultCwd: tempDir,
@@ -76,7 +76,7 @@ describe("innoclaw-cli batch client", () => {
       { id: "bad-mode", prompt: "Nope", mode: "review" },
     ]);
 
-    const { runBatch } = await import("../../../plugins/innoclaw-cli/src/batch-client.mjs");
+    const { runBatch } = await import("../../../plugins/innobuddy-cli/src/batch-client.mjs");
 
     await expect(runBatch({}, {
       inputPath,
@@ -90,7 +90,7 @@ describe("innoclaw-cli batch client", () => {
       { id: "default-mode", prompt: "Use the default" },
     ]);
 
-    const { runBatch } = await import("../../../plugins/innoclaw-cli/src/batch-client.mjs");
+    const { runBatch } = await import("../../../plugins/innobuddy-cli/src/batch-client.mjs");
 
     await expect(runBatch({}, {
       inputPath,
@@ -108,7 +108,7 @@ describe("innoclaw-cli batch client", () => {
       { id: "long", prompt: "Run long", mode: "long-agent" },
     ]);
 
-    const { runBatch } = await import("../../../plugins/innoclaw-cli/src/batch-client.mjs");
+    const { runBatch } = await import("../../../plugins/innobuddy-cli/src/batch-client.mjs");
     const result = await runBatch({}, {
       inputPath,
       defaultCwd: tempDir,

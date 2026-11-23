@@ -37,6 +37,6 @@ export async function ensureServerReady({ baseUrl }) {
   }
 
   throw new Error(
-    `InnoClaw is not reachable at ${baseUrl}. Start the container with scripts/docker-up-local.ps1 or scripts/docker-up-local.sh.`,
+    `Innobuddy is not reachable at ${baseUrl}. Start the container with scripts/docker-up-local.ps1 or scripts/docker-up-local.sh.`,
   );
 }

@@ -1,0 +1,9 @@
+interface:
+  display_name: "Innobuddy CLI"
+  short_description: "Run innobuddy app workflows and Deep Research sessions from the terminal"
+  icon_small: "./assets/innobuddy-cli-small.svg"
+  icon_large: "./assets/innobuddy-cli-logo.svg"
+  default_prompt: "Use Innobuddy CLI to run the local app, create a Deep Research session, and export the resulting report."
+
+dependencies:
+  tools: []

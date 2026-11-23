@@ -1,4 +1,4 @@
-# InnoClaw Development Guidelines
+# Innobuddy Development Guidelines
 
 This file is the instruction set for changing the code. Cursor loads it into the coding agent on every turn. How to start the local container and how to deploy is `docs/开发说明.md`. Command names live in `package.json`.
 

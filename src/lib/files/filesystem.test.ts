@@ -93,7 +93,7 @@ describe("workspace root allowlist", () => {
   });
 
   it("rejects a configured-root escape through a symbolic link", (context) => {
-    const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "innoclaw-filesystem-"));
+    const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "innobuddy-filesystem-"));
     const userA = path.join(sandbox, "user-a");
     const userB = path.join(sandbox, "user-b");
     const escape = path.join(userA, "escape");
@@ -123,7 +123,7 @@ describe("workspace root allowlist", () => {
   });
 
   it("does not treat a symlinked sibling as part of a registered workspace", (context) => {
-    const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "innoclaw-workspace-"));
+    const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "innobuddy-workspace-"));
     const userA = path.join(sandbox, "user-a");
     const userB = path.join(sandbox, "user-b");
     const escape = path.join(userA, "escape");

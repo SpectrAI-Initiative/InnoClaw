@@ -11,7 +11,7 @@ import { assessPathLocking } from "../dev/project-filesystem";
 const rawDbUrl = process.env.DATABASE_URL?.replace(/^file:/, "");
 const DB_PATH = rawDbUrl
   ? path.resolve(rawDbUrl)
-  : path.join(process.cwd(), "data", "innoclaw.db");
+  : path.join(process.cwd(), "data", "innobuddy.db");
 
 // Ensure data directory exists
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -41,7 +41,7 @@ function createReadonlyDatabaseStartupError(
   cause: unknown
 ): Error {
   const message = [
-    "[db] SQLite database is read-only during startup. InnoClaw cannot continue.",
+    "[db] SQLite database is read-only during startup. Innobuddy cannot continue.",
     `Database path: ${DB_PATH}`,
     `Failed action: ${action}.`,
     "",

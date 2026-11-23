@@ -371,7 +371,7 @@ export function createK8sJobTools(
 
     cleanupK8sJob: tool({
       description:
-        "Delete a generic Kubernetes Job only after verifying it is managed by InnoClaw and matches the expected jobSpecHash.",
+        "Delete a generic Kubernetes Job only after verifying it is managed by Innobuddy and matches the expected jobSpecHash.",
       inputSchema: z.object({
         profileId: z.string().min(1),
         namespace: z.string().min(1).optional(),

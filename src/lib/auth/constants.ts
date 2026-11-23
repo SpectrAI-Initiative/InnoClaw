@@ -1,6 +1,6 @@
-export const AUTH_SESSION_COOKIE = "innoclaw_session";
-export const AUTH_SESSION_EXPIRES_COOKIE = "innoclaw_session_expires";
-export const AUTH_SESSION_SIGNATURE_COOKIE = "innoclaw_session_sig";
+export const AUTH_SESSION_COOKIE = "INNOBUDDY_session";
+export const AUTH_SESSION_EXPIRES_COOKIE = "INNOBUDDY_session_expires";
+export const AUTH_SESSION_SIGNATURE_COOKIE = "INNOBUDDY_session_sig";
 
 export const AUTH_SESSION_DAYS = 30;
 export const AUTH_SESSION_REFRESH_DAYS = 7;

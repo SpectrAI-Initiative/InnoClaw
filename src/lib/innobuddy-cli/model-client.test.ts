@@ -3,9 +3,9 @@ import {
   getModelSettings,
   parseModelCommandArgs,
   setModelSettings,
-} from "../../../plugins/innoclaw-cli/src/model-client.mjs";
+} from "../../../plugins/innobuddy-cli/src/model-client.mjs";
 
-describe("innoclaw-cli model client", () => {
+describe("innobuddy-cli model client", () => {
   it("parses /model with no args as a show command", () => {
     expect(parseModelCommandArgs([], "openai")).toEqual({ action: "show" });
   });

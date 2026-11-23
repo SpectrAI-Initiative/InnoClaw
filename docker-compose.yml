@@ -1,5 +1,5 @@
 services:
-  innoclaw:
+  innobuddy:
     build:
       context: .
       args:
@@ -14,7 +14,7 @@ services:
     #   docker-compose.online.yml -> .env.docker.online
     volumes:
       # Persistent data: SQLite DB, HF datasets, embeddings
-      - innoclaw-data:/app/data
+      - innobuddy-data:/app/data
       # Mount your research directories here.
       # Must match the paths listed in WORKSPACE_ROOTS.
       # Example: expose ~/research as /research inside the container,
@@ -23,4 +23,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  innoclaw-data:
+  innobuddy-data:

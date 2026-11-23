@@ -102,7 +102,7 @@ export async function runBatch(apiClient, {
 
   const runDir = outputDir
     ? path.resolve(outputDir)
-    : path.join(path.resolve(defaultCwd), ".innoclaw", "runs", timestampForPath());
+    : path.join(path.resolve(defaultCwd), ".innobuddy", "runs", timestampForPath());
   await mkdir(runDir, { recursive: true });
 
   const resultsFile = path.join(runDir, "results.json");

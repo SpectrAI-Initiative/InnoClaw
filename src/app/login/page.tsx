@@ -153,7 +153,7 @@ export default function LoginPage() {
             <Bot className="h-5 w-5" />
           </div>
           <div>
-            <CardTitle className="text-2xl">Sign in to InnoClaw</CardTitle>
+            <CardTitle className="text-2xl">Sign in to Innobuddy</CardTitle>
             <CardDescription>Use your local account to continue.</CardDescription>
           </div>
         </CardHeader>

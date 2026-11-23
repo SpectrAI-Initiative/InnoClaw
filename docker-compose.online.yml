@@ -1,6 +1,7 @@
 # Online VM. Reachable at http://<vm-ip>:${PUBLISH_PORT:-3000}
 services:
-  innoclaw:
+  innobuddy:
+    container_name: innobuddy
     env_file:
       - .env.docker.online
     ports:

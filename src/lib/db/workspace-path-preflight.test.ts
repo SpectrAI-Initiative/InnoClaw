@@ -10,7 +10,7 @@ const sandboxes: string[] = [];
 
 function temporaryDirectory(): string {
   const directory = fs.mkdtempSync(
-    path.join(os.tmpdir(), "innoclaw-workspace-preflight-"),
+    path.join(os.tmpdir(), "innobuddy-workspace-preflight-"),
   );
   sandboxes.push(directory);
   return directory;

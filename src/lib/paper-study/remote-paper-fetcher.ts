@@ -30,7 +30,7 @@ const MAX_PDF_BYTES = 50 * 1024 * 1024; // 50 MB
 const DEFAULT_MAX_CHARS = 30_000;
 
 const USER_AGENT =
-  "InnoClaw/1.0 (Academic Research Tool; mailto:noreply@example.com)";
+  "innobuddy/1.0 (Academic Research Tool; mailto:noreply@example.com)";
 
 // ---------------------------------------------------------------------
 // arXiv helpers
