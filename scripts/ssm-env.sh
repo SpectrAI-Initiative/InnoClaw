@@ -161,10 +161,10 @@ done < "$input_file"
 json+="}"
 [[ $published -gt 0 ]] || { echo "No secret values to publish." >&2; exit 1; }
 version="v1"
-payload="$(printf '{"SecretName":"%s","VersionId":"%s","Description":"Innobuddy docker secrets","EncryptType":1,"SecretString":%s}' "$secret_name" "$version" "$(printf '%s' "$json" | sed 's/\\/\\\\/g; s/"/\\"/g')")"
+payload="$(printf '{"SecretName":"%s","VersionId":"%s","Description":"Innobuddy docker secrets","EncryptType":1,"SecretString":"%s"}' "$secret_name" "$version" "$(printf '%s' "$json" | sed 's/\\/\\\\/g; s/"/\\"/g')")"
 if ! ssm_call CreateSecret "$payload" >/dev/null; then
   version="v$(date +%s)"
-  payload="$(printf '{"SecretName":"%s","VersionId":"%s","SecretString":%s}' "$secret_name" "$version" "$(printf '%s' "$json" | sed 's/\\/\\\\/g; s/"/\\"/g')")"
+  payload="$(printf '{"SecretName":"%s","VersionId":"%s","SecretString":"%s"}' "$secret_name" "$version" "$(printf '%s' "$json" | sed 's/\\/\\\\/g; s/"/\\"/g')")"
   ssm_call PutSecretValue "$payload" >/dev/null
 fi
 {
