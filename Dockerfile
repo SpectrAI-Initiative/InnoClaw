@@ -5,6 +5,8 @@ ARG NODE_VERSION=24.22.3
 ARG NODE_DIST_URL=https://cdn.npmmirror.com/binaries/node
 ARG APT_MIRROR=mirrors.aliyun.com
 ARG NPM_REGISTRY=https://registry.npmmirror.com
+# Prebuilt binaries for the optional `canvas` package (GitHub releases are unreliable from mainland China).
+ARG CANVAS_BINARY_HOST=https://registry.npmmirror.com/-/binary/canvas
 
 FROM ${UBUNTU_IMAGE} AS nodebase
 
@@ -39,6 +41,7 @@ RUN set -eux; \
 FROM nodebase AS deps
 
 ARG NPM_REGISTRY
+ARG CANVAS_BINARY_HOST
 ARG APT_MIRROR
 
 RUN apt-get update && \
@@ -49,7 +52,8 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm config set registry "${NPM_REGISTRY}" && \
-    npm_config_nodedir=/usr/local npm ci && \
+    npm_config_nodedir=/usr/local npm_config_canvas_binary_host="${CANVAS_BINARY_HOST}" npm ci && \
+    test -f node_modules/canvas/build/Release/canvas.node && \
     npm install --no-save drizzle-kit
 
 # ── Stage 2: Build the application ────────────────────────────────
