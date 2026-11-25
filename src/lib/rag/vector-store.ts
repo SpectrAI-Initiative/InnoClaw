@@ -1,83 +1,89 @@
-import { db, sqlite } from "@/lib/db";
-import { sourceChunks } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { chunkEmbeddings, sourceChunks } from "@/lib/db/schema";
+import { eq, inArray, sql } from "drizzle-orm";
 
 /**
  * Vector store using cosine similarity computed in JavaScript.
- * This is a portable fallback that works everywhere without native extensions.
- * For production with large datasets, consider sqlite-vec or a dedicated vector DB.
+ * Embeddings are stored as Float32 blobs in `chunk_embeddings`.
+ * For large datasets, consider a dedicated vector database.
  */
 
 // In-memory cache of embeddings: chunkId -> number[]
 const embeddingCache = new Map<string, number[]>();
-let vectorTableInitialized = false;
 
-// Initialize the embeddings table
-function ensureVectorTable() {
-  if (vectorTableInitialized) {
-    return;
+/** Rows per INSERT / DELETE statement, to stay well below max_allowed_packet. */
+const WRITE_BATCH_SIZE = 200;
+
+export function encodeEmbedding(embedding: number[]): Buffer {
+  return Buffer.from(new Float32Array(embedding).buffer);
+}
+
+export function decodeEmbedding(buffer: Buffer): number[] {
+  // Copy first: a Buffer may be a view into a larger pooled ArrayBuffer.
+  const bytes = new Uint8Array(buffer.byteLength);
+  bytes.set(buffer);
+  return Array.from(new Float32Array(bytes.buffer));
+}
+
+function chunked<T>(items: T[], size: number): T[][] {
+  const batches: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    batches.push(items.slice(i, i + size));
   }
-
-  sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS chunk_embeddings (
-      chunk_id TEXT PRIMARY KEY,
-      embedding BLOB NOT NULL
-    )
-  `);
-  vectorTableInitialized = true;
+  return batches;
 }
 
 /**
  * Store an embedding for a chunk
  */
-export function insertEmbedding(chunkId: string, embedding: number[]): void {
-  ensureVectorTable();
-  const buffer = Buffer.from(new Float32Array(embedding).buffer);
-
-  sqlite
-    .prepare(
-      "INSERT OR REPLACE INTO chunk_embeddings (chunk_id, embedding) VALUES (?, ?)"
-    )
-    .run(chunkId, buffer);
-
-  embeddingCache.set(chunkId, embedding);
+export async function insertEmbedding(
+  chunkId: string,
+  embedding: number[]
+): Promise<void> {
+  await insertEmbeddings([{ chunkId, embedding }]);
 }
 
 /**
- * Store multiple embeddings in batch
+ * Store multiple embeddings in batch (insert or replace).
  */
-export function insertEmbeddings(
+export async function insertEmbeddings(
   items: { chunkId: string; embedding: number[] }[]
-): void {
-  ensureVectorTable();
-  const stmt = sqlite.prepare(
-    "INSERT OR REPLACE INTO chunk_embeddings (chunk_id, embedding) VALUES (?, ?)"
-  );
+): Promise<void> {
+  if (items.length === 0) return;
 
-  const insertMany = sqlite.transaction(
-    (entries: { chunkId: string; embedding: number[] }[]) => {
-      for (const { chunkId, embedding } of entries) {
-        const buffer = Buffer.from(new Float32Array(embedding).buffer);
-        stmt.run(chunkId, buffer);
-        embeddingCache.set(chunkId, embedding);
-      }
+  await db.transaction(async (tx) => {
+    for (const batch of chunked(items, WRITE_BATCH_SIZE)) {
+      await tx
+        .insert(chunkEmbeddings)
+        .values(
+          batch.map(({ chunkId, embedding }) => ({
+            chunkId,
+            embedding: encodeEmbedding(embedding),
+          }))
+        )
+        .onDuplicateKeyUpdate({
+          // Take the value from the row being inserted (INSERT ... ON DUPLICATE KEY UPDATE).
+          set: { embedding: sql`values(${sql.identifier("embedding")})` },
+        });
     }
-  );
+  });
 
-  insertMany(items);
+  for (const { chunkId, embedding } of items) {
+    embeddingCache.set(chunkId, embedding);
+  }
 }
 
 /**
  * Delete embeddings for given chunk IDs
  */
-export function deleteEmbeddings(chunkIds: string[]): void {
+export async function deleteEmbeddings(chunkIds: string[]): Promise<void> {
   if (chunkIds.length === 0) return;
-  ensureVectorTable();
 
-  const placeholders = chunkIds.map(() => "?").join(",");
-  sqlite
-    .prepare(`DELETE FROM chunk_embeddings WHERE chunk_id IN (${placeholders})`)
-    .run(...chunkIds);
+  for (const batch of chunked(chunkIds, WRITE_BATCH_SIZE)) {
+    await db
+      .delete(chunkEmbeddings)
+      .where(inArray(chunkEmbeddings.chunkId, batch));
+  }
 
   for (const id of chunkIds) {
     embeddingCache.delete(id);
@@ -95,7 +101,7 @@ export async function deleteEmbeddingsByWorkspace(
     .from(sourceChunks)
     .where(eq(sourceChunks.workspaceId, workspaceId));
 
-  deleteEmbeddings(chunks.map((c) => c.id));
+  await deleteEmbeddings(chunks.map((c) => c.id));
 }
 
 /**
@@ -118,26 +124,6 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 /**
- * Load an embedding from DB or cache
- */
-function loadEmbedding(chunkId: string): number[] | null {
-  ensureVectorTable();
-  if (embeddingCache.has(chunkId)) {
-    return embeddingCache.get(chunkId)!;
-  }
-
-  const row = sqlite
-    .prepare("SELECT embedding FROM chunk_embeddings WHERE chunk_id = ?")
-    .get(chunkId) as { embedding: Buffer } | undefined;
-
-  if (!row) return null;
-
-  const embedding = Array.from(new Float32Array(row.embedding.buffer));
-  embeddingCache.set(chunkId, embedding);
-  return embedding;
-}
-
-/**
  * Search for the most similar chunks to a query embedding.
  * Filters to only chunks belonging to the specified workspace.
  */
@@ -146,20 +132,30 @@ export async function searchSimilar(
   workspaceId: string,
   topK: number = 8
 ): Promise<{ chunkId: string; similarity: number }[]> {
-  // Get all chunk IDs for this workspace
+  // Chunk IDs of the workspace that have an embedding
   const workspaceChunks = await db
     .select({ id: sourceChunks.id })
     .from(sourceChunks)
+    .innerJoin(chunkEmbeddings, eq(chunkEmbeddings.chunkId, sourceChunks.id))
     .where(eq(sourceChunks.workspaceId, workspaceId));
 
+  // Load every embedding missing from the cache in one round trip
+  const missing = workspaceChunks.filter((c) => !embeddingCache.has(c.id));
+  for (const batch of chunked(missing.map((c) => c.id), 1000)) {
+    const rows = await db
+      .select({ chunkId: chunkEmbeddings.chunkId, embedding: chunkEmbeddings.embedding })
+      .from(chunkEmbeddings)
+      .where(inArray(chunkEmbeddings.chunkId, batch));
+    for (const row of rows) {
+      embeddingCache.set(row.chunkId, decodeEmbedding(row.embedding));
+    }
+  }
+
   const results: { chunkId: string; similarity: number }[] = [];
-
   for (const chunk of workspaceChunks) {
-    const embedding = loadEmbedding(chunk.id);
+    const embedding = embeddingCache.get(chunk.id);
     if (!embedding) continue;
-
-    const similarity = cosineSimilarity(queryEmbedding, embedding);
-    results.push({ chunkId: chunk.id, similarity });
+    results.push({ chunkId: chunk.id, similarity: cosineSimilarity(queryEmbedding, embedding) });
   }
 
   // Sort by similarity descending and take top K

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isSqliteUniqueConstraint } from "@/lib/db/errors";
+import { isUniqueConstraintError } from "@/lib/db/errors";
 import { workspaces } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(workspace[0], { status: 201 });
   } catch (error) {
-    if (isSqliteUniqueConstraint(error)) {
+    if (isUniqueConstraintError(error)) {
       return jsonError("This folder is already registered", 409);
     }
     return jsonException(error, "Failed to create workspace");

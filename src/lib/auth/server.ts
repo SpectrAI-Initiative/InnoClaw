@@ -157,10 +157,11 @@ export async function createUser(input: {
   const now = new Date().toISOString();
   const email = normalizeEmail(input.email);
   const fallbackName = email.split("@")[0] || "User";
-  const [created] = await db
+  const id = nanoid();
+  await db
     .insert(users)
     .values({
-      id: nanoid(),
+      id,
       email,
       name: input.name?.trim() || fallbackName,
       passwordHash: input.passwordHash,
@@ -168,9 +169,12 @@ export async function createUser(input: {
       isActive: input.isActive ?? true,
       createdAt: now,
       updatedAt: now,
-    })
-    .returning();
+    });
 
+  const [created] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  if (!created) {
+    throw new Error("Created user could not be read back");
+  }
   return toPublicUser(created);
 }
 

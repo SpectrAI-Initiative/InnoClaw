@@ -4,6 +4,7 @@ import { inArray } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
+import { isMissingTableError } from "@/lib/db/errors";
 
 const envVarSchema = z
   .object({
@@ -127,10 +128,7 @@ async function readSettingsMap(): Promise<Record<string, string>> {
       .where(inArray(appSettings.key, [...SETTINGS_KEYS]));
     return Object.fromEntries(rows.map((row) => [row.key, row.value]));
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.includes("no such table: app_settings")
-    ) {
+    if (isMissingTableError(error)) {
       return {};
     }
     throw error;

@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { notes, workspaces } from "@/lib/db/schema";
-import { eq, and, gte, lt, like } from "drizzle-orm";
+import { eq, and, gte, lt } from "drizzle-orm";
+import { likeIgnoreCase } from "@/lib/db/sql-helpers";
 import { nanoid } from "nanoid";
 import { generateText } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
@@ -66,7 +67,7 @@ async function weeklyReportExists(
       and(
         eq(notes.workspaceId, workspaceId),
         eq(notes.type, "weekly_report"),
-        like(notes.title, `%${weekLabel}%`)
+        likeIgnoreCase(notes.title, `%${weekLabel}%`)
       )
     )
     .limit(1);

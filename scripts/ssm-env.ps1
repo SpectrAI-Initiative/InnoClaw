@@ -15,6 +15,7 @@ $serializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
 $serializer.MaxJsonLength = [int]::MaxValue
 $SecretNames = @{
   AUTH_SECRET = $true
+  DATABASE_URL = $true
   DEEPSEEK_API_KEY = $true
   EMBEDDING_API_KEY = $true
   GITHUB_TOKEN = $true

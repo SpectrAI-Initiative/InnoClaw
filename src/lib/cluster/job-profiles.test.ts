@@ -2,6 +2,14 @@ import { mkdtemp, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+// No app_settings rows: these tests cover env and file configuration.
+vi.mock("@/lib/db", () => ({
+  db: {
+    select: () => ({ from: () => ({ where: async () => [] }) }),
+  },
+}));
+
 import {
   clearK8sJobConfigCache,
   getK8sJobConfig,

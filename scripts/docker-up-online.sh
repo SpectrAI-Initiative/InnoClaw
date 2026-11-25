@@ -25,13 +25,15 @@ AUTH_MODE=local
 AUTH_SINGLE_ADMIN=true
 AUTH_COOKIE_SECURE=false
 AUTH_SECRET=${secret}
+# 必填：腾讯云 MySQL 的内网连接串（同 VPC）。例：mysql://user:password@10.0.0.10:3306/innoclaw
+DATABASE_URL=
 DEEPSEEK_API_KEY=none
 DEEPSEEK_BASE_URL=https://tokenhub.tencentmaas.com/v1
 LLM_PROVIDER=deepseek
 LLM_MODEL=deepseek-v4.1-flash
 EOF
   chmod 600 "$env_file"
-  echo "Created .env.docker.online — set DEEPSEEK_API_KEY before relying on chat."
+  echo "Created .env.docker.online — set DATABASE_URL and DEEPSEEK_API_KEY before starting."
 fi
 
 host_path="$(awk -F= '$1=="HOST_WORKSPACE_PATH" { value=$2 } END { print value }' "$env_file")"

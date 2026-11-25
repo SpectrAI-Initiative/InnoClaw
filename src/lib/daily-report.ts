@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { notes, workspaces } from "@/lib/db/schema";
 import { eq, and, like } from "drizzle-orm";
+import { isUniqueConstraintError } from "@/lib/db/errors";
 import { nanoid } from "nanoid";
 import { generateText } from "ai";
 import { getConfiguredModel, isAIAvailable } from "@/lib/ai/provider";
@@ -117,9 +118,8 @@ export async function generateDailyReport(
   const id = nanoid();
   const isoNow = new Date().toISOString();
 
-  const inserted = await db
-    .insert(notes)
-    .values({
+  try {
+    await db.insert(notes).values({
       id,
       workspaceId,
       title,
@@ -128,15 +128,14 @@ export async function generateDailyReport(
       reportDate: date,
       createdAt: isoNow,
       updatedAt: isoNow,
-    })
-    .onConflictDoNothing({
-      target: [notes.workspaceId, notes.type, notes.reportDate],
-    })
-    .returning({ insertedId: notes.id });
-
-  // If another concurrent request already inserted the report, treat as skipped
-  if (inserted.length === 0) {
-    return { success: true, skipped: true, reason: "exists" };
+    });
+  } catch (error) {
+    // notes_daily_report_unique_idx: another concurrent request already
+    // inserted this day's report, so treat it as skipped.
+    if (isUniqueConstraintError(error)) {
+      return { success: true, skipped: true, reason: "exists" };
+    }
+    throw error;
   }
 
   return { success: true, noteId: id };

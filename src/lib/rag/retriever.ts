@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { sourceChunks, sources } from "@/lib/db/schema";
-import { eq, inArray, like, or, and, asc } from "drizzle-orm";
+import { eq, inArray, or, and, asc } from "drizzle-orm";
+import { likeIgnoreCase } from "@/lib/db/sql-helpers";
 import { generateEmbedding } from "./embeddings";
 import { searchSimilar } from "./vector-store";
 
@@ -211,7 +212,7 @@ export async function retrieveByKeywordSearch(
   // Build SQL LIKE conditions for each keyword and filter at DB level
   // Escape SQL LIKE wildcards to prevent injection
   const sanitize = (s: string) => s.replace(/[%_\\]/g, "\\$&");
-  const likeConditions = keywords.map((kw) => like(sourceChunks.content, `%${sanitize(kw)}%`));
+  const likeConditions = keywords.map((kw) => likeIgnoreCase(sourceChunks.content, `%${sanitize(kw)}%`));
   const keywordFilter = likeConditions.length === 1
     ? likeConditions[0]
     : or(...likeConditions)!;

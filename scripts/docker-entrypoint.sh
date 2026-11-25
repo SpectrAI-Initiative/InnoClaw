@@ -40,9 +40,14 @@ else
   echo "  [warn] no AI API key detected - chat features will not work"
 fi
 
-# 4. Database migrations
-# The app runs Drizzle migrations during startup via src/lib/db/migrate.ts.
-# Keep the entrypoint lightweight and avoid depending on a local CLI shim.
+# 4. Database connection and migrations
+# Relational data lives in MySQL. The app runs Drizzle migrations during
+# startup via src/lib/db/migrate.ts.
+case "$DATABASE_URL" in
+  mysql://*) echo "  [ok] DATABASE_URL points to MySQL" ;;
+  "") echo "ERROR: DATABASE_URL is not set. Set it to mysql://user:password@host:3306/database"; exit 1 ;;
+  *) echo "ERROR: DATABASE_URL must start with mysql:// (SQLite is no longer supported)"; exit 1 ;;
+esac
 echo "==> Database migrations will run during app startup"
 
 # 5. Start the server

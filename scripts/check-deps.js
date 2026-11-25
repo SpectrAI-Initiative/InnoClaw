@@ -6,7 +6,7 @@
  * clear error telling the user to run `npm install` (or `npm ci` in CI).
  */
 
-const deps = ["rehype-sanitize", "better-sqlite3"];
+const deps = ["rehype-sanitize", "mysql2"];
 
 const missing = deps.filter((dep) => {
   try {

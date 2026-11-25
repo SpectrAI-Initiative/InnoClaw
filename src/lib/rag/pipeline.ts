@@ -67,7 +67,7 @@ async function processSource(sourceId: string, filePath: string) {
       .where(eq(sourceChunks.sourceId, sourceId));
 
     if (existingChunks.length > 0) {
-      deleteEmbeddings(existingChunks.map((c) => c.id));
+      await deleteEmbeddings(existingChunks.map((c) => c.id));
       await db
         .delete(sourceChunks)
         .where(eq(sourceChunks.sourceId, sourceId));
@@ -110,7 +110,7 @@ async function processSource(sourceId: string, filePath: string) {
           embedding: embeddings[i],
         }));
 
-        insertEmbeddings(embeddingItems);
+        await insertEmbeddings(embeddingItems);
       } catch (embeddingError) {
         console.warn(
           `Embedding generation failed for source ${sourceId} (chunks still stored, keyword search available):`,
@@ -210,7 +210,7 @@ export async function syncWorkspace(
         .from(sourceChunks)
         .where(eq(sourceChunks.sourceId, existing.id));
 
-      deleteEmbeddings(chunks.map((c) => c.id));
+      await deleteEmbeddings(chunks.map((c) => c.id));
       await db
         .delete(sourceChunks)
         .where(eq(sourceChunks.sourceId, existing.id));

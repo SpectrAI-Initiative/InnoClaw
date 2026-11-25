@@ -1,74 +1,94 @@
-import fs from "fs";
-import os from "os";
-import path from "path";
-import Database from "better-sqlite3";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const originalDatabaseUrl = process.env.DATABASE_URL;
-const originalNodeEnv = process.env.NODE_ENV;
-const temporaryDirectories: string[] = [];
-let appDatabaseLoaded = false;
+const mocks = vi.hoisted(() => ({
+  query: vi.fn(),
+  release: vi.fn(),
+  migrate: vi.fn(),
+}));
 
-function restoreEnv(name: string, value: string | undefined): void {
-  if (value === undefined) {
-    delete process.env[name];
-  } else {
-    process.env[name] = value;
-  }
+vi.mock("drizzle-orm/mysql2/migrator", () => ({ migrate: mocks.migrate }));
+vi.mock("./index", () => ({
+  db: { kind: "db" },
+  getPool: () => ({
+    getConnection: async () => ({ query: mocks.query, release: mocks.release }),
+  }),
+}));
+
+function lockResult(acquired: number | null) {
+  return [[{ acquired }], []];
 }
 
-afterEach(async () => {
-  if (appDatabaseLoaded) {
-    const databaseModule = await import("./index");
-    if (databaseModule.sqlite.open) {
-      databaseModule.sqlite.close();
-    }
-  }
-  appDatabaseLoaded = false;
-  restoreEnv("DATABASE_URL", originalDatabaseUrl);
-  restoreEnv("NODE_ENV", originalNodeEnv);
-  delete (globalThis as typeof globalThis & {
-    __innobuddyMigrationPromise?: Promise<void>;
-  }).__innobuddyMigrationPromise;
-  vi.resetModules();
-  while (temporaryDirectories.length > 0) {
-    fs.rmSync(temporaryDirectories.pop()!, { recursive: true, force: true });
-  }
-});
-
-describe("database migration fallback", () => {
-  it("does not seed the new workspace-path index before it exists", async () => {
-    const directory = fs.mkdtempSync(
-      path.join(os.tmpdir(), "innobuddy-migrate-fallback-"),
-    );
-    temporaryDirectories.push(directory);
-    const databasePath = path.join(directory, "legacy.db");
-    const legacy = new Database(databasePath);
-    legacy.exec(`
-      CREATE TABLE app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-      CREATE TABLE workspaces (
-        id TEXT PRIMARY KEY,
-        folder_path TEXT NOT NULL
-      );
-    `);
-    legacy.close();
-
-    process.env.DATABASE_URL = databasePath;
-    Reflect.set(process.env, "NODE_ENV", "production");
+describe("runMigrations", () => {
+  beforeEach(() => {
     vi.resetModules();
-    const { runMigrations } = await import("./migrate");
-    appDatabaseLoaded = true;
+    mocks.query.mockReset();
+    mocks.release.mockReset();
+    mocks.migrate.mockReset();
+    delete (globalThis as { __innobuddyMigrationPromise?: unknown }).__innobuddyMigrationPromise;
+  });
 
+  afterEach(() => {
+    delete (globalThis as { __innobuddyMigrationPromise?: unknown }).__innobuddyMigrationPromise;
+  });
+
+  it("migrates while holding the advisory lock, then releases it", async () => {
+    mocks.query.mockResolvedValueOnce(lockResult(1)).mockResolvedValueOnce([[], []]);
+    mocks.migrate.mockResolvedValue(undefined);
+
+    const { runMigrations, MIGRATION_LOCK_NAME } = await import("./migrate");
     await runMigrations();
 
-    const inspected = new Database(databasePath, { readonly: true });
-    expect(
-      inspected
-        .prepare(
-          "SELECT name FROM sqlite_master WHERE type = 'index' AND name = ?",
-        )
-        .get("workspaces_folder_path_unique_idx"),
-    ).toEqual({ name: "workspaces_folder_path_unique_idx" });
-    inspected.close();
+    expect(mocks.query.mock.calls[0]).toEqual([
+      "SELECT GET_LOCK(?, ?) AS acquired",
+      [MIGRATION_LOCK_NAME, 120],
+    ]);
+    expect(mocks.migrate).toHaveBeenCalledWith(
+      { kind: "db" },
+      { migrationsFolder: expect.stringMatching(/drizzle$/) },
+    );
+    expect(mocks.query.mock.calls[1]).toEqual([
+      "SELECT RELEASE_LOCK(?)",
+      [MIGRATION_LOCK_NAME],
+    ]);
+    expect(mocks.release).toHaveBeenCalledTimes(1);
+  });
+
+  it("runs only once per process", async () => {
+    mocks.query.mockResolvedValueOnce(lockResult(1)).mockResolvedValueOnce([[], []]);
+    mocks.migrate.mockResolvedValue(undefined);
+
+    const { runMigrations } = await import("./migrate");
+    await Promise.all([runMigrations(), runMigrations()]);
+    await runMigrations();
+
+    expect(mocks.migrate).toHaveBeenCalledTimes(1);
+  });
+
+  it("releases the lock and connection when a migration fails, and allows a retry", async () => {
+    mocks.query
+      .mockResolvedValueOnce(lockResult(1))
+      .mockResolvedValueOnce([[], []])
+      .mockResolvedValueOnce(lockResult(1))
+      .mockResolvedValueOnce([[], []]);
+    mocks.migrate
+      .mockRejectedValueOnce(new Error("bad statement"))
+      .mockResolvedValueOnce(undefined);
+
+    const { runMigrations } = await import("./migrate");
+    await expect(runMigrations()).rejects.toThrow("bad statement");
+    expect(mocks.query.mock.calls[1][0]).toBe("SELECT RELEASE_LOCK(?)");
+    expect(mocks.release).toHaveBeenCalledTimes(1);
+
+    await expect(runMigrations()).resolves.toBeUndefined();
+    expect(mocks.migrate).toHaveBeenCalledTimes(2);
+  });
+
+  it("fails clearly when another instance holds the lock too long", async () => {
+    mocks.query.mockResolvedValueOnce(lockResult(0));
+
+    const { runMigrations } = await import("./migrate");
+    await expect(runMigrations()).rejects.toThrow(/waiting for another instance/);
+    expect(mocks.migrate).not.toHaveBeenCalled();
+    expect(mocks.release).toHaveBeenCalledTimes(1);
   });
 });

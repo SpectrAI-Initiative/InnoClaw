@@ -13,7 +13,8 @@ services:
     #   docker-compose.local.yml  -> .env.docker.local
     #   docker-compose.online.yml -> .env.docker.online
     volumes:
-      # Persistent data: SQLite DB, HF datasets, embeddings
+      # Persistent local files: HF datasets and other runtime data.
+      # Relational data lives in MySQL (DATABASE_URL in the active env file).
       - innobuddy-data:/app/data
       # Mount your research directories here.
       # Must match the paths listed in WORKSPACE_ROOTS.

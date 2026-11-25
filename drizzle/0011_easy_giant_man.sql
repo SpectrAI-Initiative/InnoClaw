@@ -1,1 +1,0 @@
-ALTER TABLE `remote_profiles` ADD `rjob_config_json` text;

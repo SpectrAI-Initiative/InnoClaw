@@ -91,7 +91,7 @@ ENV HOSTNAME=0.0.0.0
 RUN groupadd --system nodejs && \
     useradd --system --gid nodejs --home-dir /app --shell /usr/sbin/nologin nextjs
 
-# Copy standalone server output (includes traced node_modules with better-sqlite3)
+# Copy standalone server output (includes traced node_modules with mysql2)
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
@@ -103,10 +103,10 @@ COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
 # Copy pre-built drizzle-kit and its deps from the deps stage (native modules already compiled)
 COPY --from=deps /app/node_modules/drizzle-kit ./node_modules/drizzle-kit
-# drizzle-orm and better-sqlite3 are already in node_modules from standalone trace;
+# drizzle-orm and mysql2 are already in node_modules from standalone trace;
 # ensure they exist (standalone may place them in nested paths)
 COPY --from=deps /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
-COPY --from=deps /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+COPY --from=deps /app/node_modules/mysql2 ./node_modules/mysql2
 # pdf-parse depends on @napi-rs/canvas at runtime for DOM geometry polyfills.
 # Copy the full namespace so the platform-specific binary package from the Linux
 # build stage is available in the production runner.

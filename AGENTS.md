@@ -10,7 +10,7 @@ When those sources conflict, use them in this order:
 
 There is no staging environment. The online VM is production. Do not run `./scripts/docker-up-online.sh`, edit the online env file, or try migrations against the online container until the change has been verified in the local container. Do not start the app with `npm run dev`, `npm run dev:no-auth`, `npm start`, or PM2.
 
-Node.js `24+` (`package.json` `engines`). Use `npm`. The database is SQLite through Drizzle.
+Node.js `24+` (`package.json` `engines`). Use `npm`. The database is MySQL 8 through Drizzle (`DATABASE_URL=mysql://...`); see `docs/database.md`.
 
 ## Where Code Belongs
 
@@ -62,6 +62,8 @@ NEXT_TELEMETRY_DISABLED=1 npm run build
 - `src/lib/db/schema.ts` is the schema source of truth.
 - Generate and commit the matching migration under `drizzle/`.
 - Apply it locally with `npx drizzle-kit migrate` before review.
+- MySQL rules: index, key and foreign-key strings must be `varchar`; free text is `longtext`; constraint names are at most 64 characters; tables use `utf8mb4_bin`, so use `likeIgnoreCase` for case-insensitive `LIKE`; there is no `RETURNING`, so read the row back after writing.
+- `TEST_DATABASE_URL` enables the MySQL integration tests; they are skipped without it.
 - Do not edit an already committed migration unless you are fixing unreleased local work and know which databases it will affect.
 - If seed data or migration helpers change, review `src/lib/db/` and the startup path that uses them.
 

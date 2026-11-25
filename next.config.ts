@@ -31,7 +31,7 @@ const securityHeaders = [
 ];
 
 const serverExternalPackages = [
-  "better-sqlite3",
+  "mysql2",
   "pdf-parse",
   // Turbopack on Windows can panic while creating the junction for this scoped package.
   ...(process.platform === "win32" ? [] : ["@larksuiteoapi/node-sdk"]),

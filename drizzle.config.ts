@@ -20,9 +20,10 @@ try {
 const config = {
   schema: "./src/lib/db/schema.ts",
   out: "./drizzle",
-  dialect: "sqlite",
+  dialect: "mysql",
   dbCredentials: {
-    url: process.env.DATABASE_URL || "./data/innobuddy.db",
+    // mysql://user:password@host:3306/database
+    url: process.env.DATABASE_URL ?? "",
   },
 };
 

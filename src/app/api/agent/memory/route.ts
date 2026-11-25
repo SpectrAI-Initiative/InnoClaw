@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
-import { eq, and, desc, like } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
+import { likeIgnoreCase } from "@/lib/db/sql-helpers";
 import { nanoid } from "nanoid";
 import { streamText } from "ai";
 import { getConfiguredModelWithProvider } from "@/lib/ai/provider";
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
           and(
             eq(notes.workspaceId, workspaceId),
             eq(notes.type, "memory"),
-            like(notes.title, `Daily Log ${today}%`)
+            likeIgnoreCase(notes.title, `Daily Log ${today}%`)
           )
         )
         .limit(1);

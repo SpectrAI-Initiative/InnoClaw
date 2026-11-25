@@ -208,8 +208,12 @@ describe("POST /api/git/clone", () => {
 
   it("maps a workspace-path uniqueness race to 409", async () => {
     mocks.insertValues.mockRejectedValue(
-      Object.assign(new Error("UNIQUE constraint failed: workspaces.folder_path"), {
-        code: "SQLITE_CONSTRAINT_UNIQUE",
+      // Drizzle wraps the mysql2 error; the driver error is on `cause`.
+      new Error("Failed query: insert into `workspaces` ...", {
+        cause: Object.assign(
+          new Error("Duplicate entry '/x' for key 'workspaces.workspaces_folder_path_unique_idx'"),
+          { code: "ER_DUP_ENTRY", errno: 1062 },
+        ),
       }),
     );
 

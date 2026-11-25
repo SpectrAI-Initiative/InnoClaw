@@ -1,16 +1,18 @@
-import path from "node:path";
-import Database from "better-sqlite3";
+import mysql from "mysql2/promise";
 import { bootstrapAdministrator } from "../src/lib/auth/bootstrap-admin";
 import {
   parseBootstrapAdminArgs,
   readPasswordFromStream,
 } from "../src/lib/auth/bootstrap-admin-cli";
 
-function resolveDatabasePath(): string {
-  const configured = process.env.DATABASE_URL?.replace(/^file:/, "");
-  return configured
-    ? path.resolve(configured)
-    : path.join(process.cwd(), "data", "innobuddy.db");
+function createPoolFromEnv(): mysql.Pool {
+  const raw = process.env.DATABASE_URL?.trim();
+  if (!raw || !raw.startsWith("mysql://")) {
+    throw new Error(
+      "DATABASE_URL must be set to a mysql:// connection string (run the app once first so migrations create the tables)",
+    );
+  }
+  return mysql.createPool({ uri: raw, connectionLimit: 1, charset: "utf8mb4" });
 }
 
 async function main(): Promise<void> {
@@ -20,10 +22,10 @@ async function main(): Promise<void> {
 
   const args = parseBootstrapAdminArgs(process.argv.slice(2));
   const password = await readPasswordFromStream(process.stdin);
-  const sqlite = new Database(resolveDatabasePath());
+  const pool = createPoolFromEnv();
 
   try {
-    const result = bootstrapAdministrator(sqlite, {
+    const result = await bootstrapAdministrator(pool, {
       email: args.email,
       name: args.name,
       password,
@@ -31,7 +33,7 @@ async function main(): Promise<void> {
     const action = result.status === "created" ? "created" : "already exists";
     process.stdout.write(`Administrator ${action}: ${result.email}\n`);
   } finally {
-    sqlite.close();
+    await pool.end();
   }
 }
 
