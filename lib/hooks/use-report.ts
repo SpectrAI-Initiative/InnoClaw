@@ -1,0 +1,90 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import type { UIMessage } from "ai";
+import type { ReportData } from "@/types/report";
+import { buildReportData } from "@/lib/report/extract-report";
+import { scopeKey } from "@/lib/hooks/use-storage-scope";
+
+/**
+ * Compute the session-aware localStorage key for agent messages.
+ * Falls back to legacy (pre-session) key format if no active session is set.
+ */
+function getStorageKey(scopePrefix: string, workspaceId: string): string {
+  try {
+    const activeSession = localStorage.getItem(scopeKey(scopePrefix, `agent-active-session:${workspaceId}`));
+    if (activeSession) {
+      return scopeKey(scopePrefix, `agent-messages:${workspaceId}:${activeSession}`);
+    }
+  } catch {
+    // ignore
+  }
+  return scopeKey(scopePrefix, `agent-messages:${workspaceId}:agent`);
+}
+
+/**
+ * Read the latest report from localStorage.
+ *
+ * Reports are always extracted from the "agent" mode messages because only
+ * agent mode runs the full tool-calling pipeline that produces structured
+ * reports. "plan" and "ask" modes are lightweight Q&A conversations.
+ */
+function readReportFromStorage(scopePrefix: string, workspaceId: string): ReportData | null {
+  try {
+    const key = getStorageKey(scopePrefix, workspaceId);
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const messages: UIMessage[] = JSON.parse(raw);
+    return buildReportData(workspaceId, messages);
+  } catch {
+    return null;
+  }
+}
+
+export function useReport(workspaceId: string, storageScope?: string | null) {
+  const scopePrefix = storageScope ?? "anonymous";
+  const [report, setReport] = useState<ReportData | null>(() =>
+    typeof window !== "undefined" ? readReportFromStorage(scopePrefix, workspaceId) : null
+  );
+
+  // Re-read storage when workspaceId or account changes
+  useEffect(() => {
+    setReport(readReportFromStorage(scopePrefix, workspaceId));
+  }, [scopePrefix, workspaceId]);
+
+  const refresh = useCallback(() => {
+    setReport(readReportFromStorage(scopePrefix, workspaceId));
+  }, [scopePrefix, workspaceId]);
+
+  // Listen for cross-tab localStorage changes
+  useEffect(() => {
+    const prefix = scopeKey(scopePrefix, `agent-messages:${workspaceId}:`);
+    const handleStorage = (e: StorageEvent) => {
+      // Refresh on any agent-messages key change for this workspace
+      if (e.key?.startsWith(prefix)) {
+        refresh();
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [scopePrefix, workspaceId, refresh]);
+
+  // Listen for same-tab updates dispatched by AgentPanel
+  useEffect(() => {
+    const prefix = scopeKey(scopePrefix, `agent-messages:${workspaceId}:`);
+    const handleUpdate = (e: Event) => {
+      const detail = (e as CustomEvent<{ key: string }>).detail;
+      if (detail?.key?.startsWith(prefix)) {
+        refresh();
+      }
+    };
+    window.addEventListener("agent-messages-updated", handleUpdate);
+    return () => window.removeEventListener("agent-messages-updated", handleUpdate);
+  }, [scopePrefix, workspaceId, refresh]);
+
+  return {
+    report,
+    isAvailable: report !== null,
+    refresh,
+  };
+}
