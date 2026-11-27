@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local Docker debug on Ubuntu 24.04. Binds the app to 127.0.0.1:3000.
+# Local Docker debug on Linux and macOS. Binds the app to 127.0.0.1:3000.
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
@@ -8,7 +8,12 @@ cd "$root"
 env_file="$root/.env.docker.local"
 sealed_file="$root/config/secrets/docker.local.env"
 
-if [[ -f "$sealed_file" ]]; then
+if [[ "${INNOBUDDY_LOCAL_ENV_ONLY:-false}" == "true" && ! -f "$env_file" ]]; then
+  echo "Local env file is required when INNOBUDDY_LOCAL_ENV_ONLY=true." >&2
+  exit 1
+fi
+
+if [[ -f "$sealed_file" && "${INNOBUDDY_LOCAL_ENV_ONLY:-false}" != "true" ]]; then
   bash "$root/scripts/ssm-env.sh" materialize "$sealed_file" "$env_file"
 fi
 
@@ -22,6 +27,13 @@ PUBLISH_PORT=3000
 HOST_WORKSPACE_PATH=./workspace
 WORKSPACE_ROOTS=/research
 AUTH_MODE=local
+# Optional OneID application configuration (not Tencent Cloud account API keys).
+AUTH_OIDC_ENABLED=false
+AUTH_OIDC_ISSUER=
+AUTH_OIDC_CLIENT_ID=
+AUTH_OIDC_CLIENT_SECRET=
+AUTH_OIDC_REDIRECT_URI=
+AUTH_OIDC_ALLOW_HTTP=false
 AUTH_SINGLE_ADMIN=false
 AUTH_COOKIE_SECURE=false
 AUTH_SECRET=${secret}
@@ -38,8 +50,17 @@ host_path="$(awk -F= '$1=="HOST_WORKSPACE_PATH" { value=$2 } END { print value }
 host_path="${host_path:-./workspace}"
 mkdir -p "$host_path"
 
+compose_files=(-f docker-compose.yml -f docker-compose.local.yml)
+if [[ "${INNOBUDDY_LOCAL_HTTPS:-false}" == "true" ]]; then
+  if [[ ! -s "$root/deploy/tls-local/fullchain.pem" ]]; then
+    echo "Run 'bash scripts/local-tls.sh' before INNOBUDDY_LOCAL_HTTPS=true." >&2
+    exit 1
+  fi
+  compose_files+=(-f docker-compose.https.local.yml)
+  echo "Local HTTPS enabled: https://localhost:8443"
+fi
+
 exec docker compose \
   --env-file "$env_file" \
-  -f docker-compose.yml \
-  -f docker-compose.local.yml \
+  "${compose_files[@]}" \
   up -d --build "$@"

@@ -1,0 +1,20 @@
+# Requires Docker Compose >= 2.24.4. Apply after the online override.
+services:
+  innobuddy:
+    ports: !override
+      # Keep the port the environment file chose, but stop publishing it.
+      - "127.0.0.1:${PUBLISH_PORT:-3000}:3000"
+    environment:
+      AUTH_COOKIE_SECURE: "true"
+  https:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/innoscale.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./deploy/nginx/upgrade.conf:/etc/nginx/conf.d/upgrade.conf:ro
+      - ./deploy/tls:/etc/nginx/tls:ro
+    depends_on:
+      - innobuddy
+    restart: unless-stopped

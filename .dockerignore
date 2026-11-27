@@ -41,3 +41,8 @@ Thumbs.db
 # Docs not needed in image
 .claude
 CLAUDE.md
+
+# TLS private material and local cloud credentials
+/deploy/tls/
+/deploy/tls-local/
+SecretKey.csv

@@ -66,3 +66,8 @@ config/k8s-job-profiles.local.json
 reference/
 batch-test-logs/
 .worktrees/
+
+# TLS private material and local cloud credentials
+/deploy/tls/
+/deploy/tls-local/
+SecretKey.csv

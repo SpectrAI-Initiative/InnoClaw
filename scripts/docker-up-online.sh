@@ -38,8 +38,17 @@ host_path="$(awk -F= '$1=="HOST_WORKSPACE_PATH" { value=$2 } END { print value }
 host_path="${host_path:-/data/innobuddy/research}"
 mkdir -p "$host_path"
 
+# Once TLS material exists the Nginx front has to stay in every start. Running the
+# HTTP-only profile would tear down HTTPS and re-publish the app port on the VM net.
+compose_files=(-f docker-compose.yml -f docker-compose.online.yml)
+if [[ -s "$root/deploy/tls/fullchain.pem" && -s "$root/deploy/tls/privkey.pem" ]]; then
+  compose_files+=(-f docker-compose.https.yml)
+  echo "TLS material found in deploy/tls: including the HTTPS overlay."
+else
+  echo "No TLS material in deploy/tls: starting HTTP-only." >&2
+fi
+
 exec docker compose \
   --env-file "$env_file" \
-  -f docker-compose.yml \
-  -f docker-compose.online.yml \
+  "${compose_files[@]}" \
   up -d --build "$@"
