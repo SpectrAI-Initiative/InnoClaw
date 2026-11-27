@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOidcConfig } from "./config";
+import { getOidcConfig, isKeycloakMode } from "./config";
 import { authorizationUrl, digest, exchange, OIDC_COOKIE, randomValue, resolveMetadata, TRANSACTION_SECONDS } from "./protocol";
 import { oidcRepository } from "./repository";
 import { attachAuthCookies, createAuthSession } from "../server";
@@ -36,7 +36,11 @@ export async function startOidc(request: NextRequest) {
       returnTo: resolveSafeRedirectPath(request.nextUrl.searchParams.get("next"), "/"),
       expiresAt: Date.now() + TRANSACTION_SECONDS * 1000 };
     await oidcRepository.save(tx);
-    const response = NextResponse.redirect(authorizationUrl(config, metadata, state, tx));
+    const target = new URL(authorizationUrl(config, metadata, state, tx));
+    if (isKeycloakMode() && request.nextUrl.searchParams.get("action") === "register") {
+      target.pathname = target.pathname.replace(/\/auth$/, "/registrations");
+    }
+    const response = NextResponse.redirect(target);
     response.cookies.set(OIDC_COOKIE, binding, { httpOnly: true, sameSite: "lax", path: "/api/auth/oidc",
       secure: config.redirectUri.startsWith("https:"), maxAge: TRANSACTION_SECONDS });
     return noCache(response);

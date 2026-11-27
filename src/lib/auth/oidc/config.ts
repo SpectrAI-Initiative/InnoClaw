@@ -72,3 +72,17 @@ export function getOidcConfig(): OidcConfig | null {
   }
   return { ...config, endpoints };
 }
+
+// Keycloak mode delegates all public credential management to the identity provider.
+export const isKeycloakMode = () => process.env.AUTH_OIDC_ENABLED === "true" && process.env.AUTH_OIDC_PROVIDER === "keycloak";
+export function keycloakLogoutUrl(): string | null {
+  if (!isKeycloakMode()) return null;
+  const config = getOidcConfig();
+  if (!config) return null;
+  const url = new URL(`${config.issuer.replace(/\/$/, "")}/protocol/openid-connect/logout`);
+  url.searchParams.set("client_id", config.clientId);
+  url.searchParams.set("post_logout_redirect_uri", `${new URL(config.redirectUri).origin}/login`);
+  return url.toString();
+}
+
+export const KEYCLOAK_LOGOUT_COOKIE = "innoscale_end_sso";

@@ -22,6 +22,7 @@ HOST_WORKSPACE_PATH=./workspace
 WORKSPACE_ROOTS=/research
 AUTH_MODE=local
 # Optional OneID application configuration (not Tencent Cloud account API keys).
+AUTH_OIDC_PROVIDER=oidc
 AUTH_OIDC_ENABLED=false
 AUTH_OIDC_ISSUER=
 AUTH_OIDC_CLIENT_ID=

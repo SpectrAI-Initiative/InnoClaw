@@ -46,3 +46,7 @@ CLAUDE.md
 /deploy/tls/
 /deploy/tls-local/
 SecretKey.csv
+
+/deploy/keycloak/runtime/
+
+/deploy/keycloak/Dockerfile.local

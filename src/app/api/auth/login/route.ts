@@ -1,3 +1,4 @@
+import { isKeycloakMode } from "@/lib/auth/oidc/config";
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
@@ -13,6 +14,7 @@ import { verifyPassword } from "@/lib/auth/password";
 import { jsonError } from "@/lib/api-errors";
 
 export async function POST(request: NextRequest) {
+  if (isKeycloakMode()) return jsonError("Use the identity provider to sign in or register", 403);
   if (isAuthDisabled()) {
     return jsonError("Authentication is disabled", 403);
   }

@@ -1,3 +1,4 @@
+import { keycloakNavigation } from "@/lib/auth/oidc/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import {
   AUTH_SESSION_COOKIE,
@@ -61,6 +62,10 @@ export async function proxy(request: NextRequest) {
   const authDisabled = isAuthDisabled();
 
   const hasSession = authDisabled ? false : await hasValidSessionMarker(request);
+  if (!authDisabled && !hasSession) {
+    const identityNavigation = keycloakNavigation(request);
+    if (identityNavigation) return identityNavigation;
+  }
   const action = getAuthMiddlewareAction({
     pathname,
     authDisabled,

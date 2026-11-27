@@ -1,0 +1,69 @@
+name: innoscale-keycloak-sqlite-local
+services:
+  identity-db:
+    image: mysql:8.0
+    command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci]
+    environment:
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: ${KC_DB_PASSWORD:?Run init.py}
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+    volumes: [identity-data:/var/lib/mysql]
+    healthcheck:
+      test: [CMD-SHELL, 'mysqladmin ping -h 127.0.0.1 -ukeycloak -p"$$MYSQL_PASSWORD" --silent']
+      interval: 5s
+      timeout: 5s
+      retries: 40
+  mailpit:
+    image: axllent/mailpit:v1.27.4
+    ports: ['127.0.0.1:8025:8025']
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    command: [start-dev, --import-realm, --http-port=8280]
+    ports: ['127.0.0.1:8280:8280', '127.0.0.1:3200:3000']
+    volumes:
+      - './runtime/realm.json:/opt/keycloak/data/import/realm.json:ro'
+      - './themes/innoscale:/opt/keycloak/themes/innoscale:ro'
+    environment:
+      KC_DB: mysql
+      KC_DB_URL: jdbc:mysql://identity-db:3306/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD}
+      KC_HOSTNAME: http://localhost:8280
+    depends_on:
+      identity-db: {condition: service_healthy}
+      mailpit: {condition: service_started}
+  app:
+    image: innoscale-keycloak-sqlite:local
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    network_mode: service:keycloak
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: /app/data/innoscale.db
+      AUTH_MODE: local
+      AUTH_SINGLE_ADMIN: 'false'
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_COOKIE_SECURE: 'false'
+      AUTH_OIDC_PROVIDER: keycloak
+      AUTH_OIDC_ENABLED: 'true'
+      AUTH_OIDC_ISSUER: http://localhost:8280/realms/innoscale
+      AUTH_OIDC_CLIENT_ID: innoscale-local
+      AUTH_OIDC_CLIENT_SECRET: ${OIDC_SECRET}
+      AUTH_OIDC_REDIRECT_URI: http://localhost:3200/api/auth/oidc/callback
+      AUTH_OIDC_ALLOW_HTTP: 'true'
+      AUTH_OIDC_SCOPE: openid profile email
+      AUTH_OIDC_REQUIRE_NONCE: 'true'
+      AUTH_OIDC_REQUIRE_EMAIL_VERIFIED: 'true'
+      WORKSPACE_ROOTS: /research
+    volumes: [business-data:/app/data, research:/research]
+    depends_on: [keycloak]
+volumes:
+  identity-data:
+  business-data:
+  research:
