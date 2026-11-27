@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { OidcLogin } from "@/components/auth/oidc-login";
 import { useRouter, useSearchParams } from "next/navigation";
 import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -139,11 +140,12 @@ export default function RegisterPage() {
             <UserPlus className="h-5 w-5" />
           </div>
           <div>
-            <CardTitle className="text-2xl">Create an Innobuddy account</CardTitle>
+            <CardTitle className="text-2xl">Create an Innoscale account</CardTitle>
             <CardDescription>Open registration is enabled on this system.</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
+          <OidcLogin />
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>

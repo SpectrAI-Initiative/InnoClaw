@@ -43,6 +43,12 @@ function seedExistingMigrations(migrationsFolder: string) {
   if (entries.length === 0) return;
 
   for (const entry of entries) {
+    if (entry.tag === "0018_oidc_identity") {
+      const existing = sqlite.prepare(
+        "SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name IN ('oidc_identities', 'oidc_transactions')",
+      ).get() as { count: number };
+      if (existing.count !== 2) continue;
+    }
     if (entry.tag === WORKSPACE_PATH_INDEX_MIGRATION) {
       const indexExists = sqlite
         .prepare(

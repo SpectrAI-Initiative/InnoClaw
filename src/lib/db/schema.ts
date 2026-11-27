@@ -555,3 +555,21 @@ export const deepResearchExecutionRecords = sqliteTable("deep_research_execution
   index("dr_exec_records_status_idx").on(table.status),
   index("dr_exec_records_node_idx").on(table.nodeId),
 ]);
+
+// OIDC identities are keyed by a SHA-256 digest of the exact issuer/subject pair.
+export const oidcIdentities = sqliteTable("oidc_identities", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  issuer: text("issuer").notNull(),
+  subject: text("subject").notNull(),
+  createdAt: text("created_at").notNull(),
+}, (table) => [index("oidc_identity_user_idx").on(table.userId)]);
+
+export const oidcTransactions = sqliteTable("oidc_transactions", {
+  stateHash: text("state_hash").primaryKey(),
+  bindingHash: text("binding_hash").notNull(),
+  nonce: text("nonce").notNull(),
+  verifier: text("verifier").notNull(),
+  returnTo: text("return_to").notNull(),
+  expiresAt: integer("expires_at").notNull(),
+}, (table) => [index("oidc_transaction_expiry_idx").on(table.expiresAt)]);

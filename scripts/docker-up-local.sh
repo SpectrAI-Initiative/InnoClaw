@@ -34,6 +34,15 @@ AUTH_OIDC_CLIENT_ID=
 AUTH_OIDC_CLIENT_SECRET=
 AUTH_OIDC_REDIRECT_URI=
 AUTH_OIDC_ALLOW_HTTP=false
+# Leave the four URLs empty to use OIDC discovery. Tencent OneID has no discovery
+# document, so fill in authorize, token and jwks (userinfo if email is not a token claim).
+AUTH_OIDC_AUTHORIZE_URL=
+AUTH_OIDC_TOKEN_URL=
+AUTH_OIDC_JWKS_URL=
+AUTH_OIDC_USERINFO_URL=
+AUTH_OIDC_SCOPE=
+AUTH_OIDC_REQUIRE_NONCE=true
+AUTH_OIDC_REQUIRE_EMAIL_VERIFIED=true
 AUTH_SINGLE_ADMIN=false
 AUTH_COOKIE_SECURE=false
 AUTH_SECRET=${secret}

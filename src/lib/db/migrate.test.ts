@@ -69,6 +69,10 @@ describe("database migration fallback", () => {
         )
         .get("workspaces_folder_path_unique_idx"),
     ).toEqual({ name: "workspaces_folder_path_unique_idx" });
+    for (const name of ["oidc_identities", "oidc_transactions"]) {
+      expect(inspected.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?").get(name))
+        .toEqual({ name });
+    }
     inspected.close();
   });
 });

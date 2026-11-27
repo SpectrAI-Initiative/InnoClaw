@@ -14,6 +14,7 @@ $Region = 'ap-shanghai'
 $serializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
 $serializer.MaxJsonLength = [int]::MaxValue
 $SecretNames = @{
+  AUTH_OIDC_CLIENT_SECRET = $true
   AUTH_SECRET = $true
   DEEPSEEK_API_KEY = $true
   EMBEDDING_API_KEY = $true

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { OidcLogin } from "@/components/auth/oidc-login";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bot, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -153,11 +154,12 @@ export default function LoginPage() {
             <Bot className="h-5 w-5" />
           </div>
           <div>
-            <CardTitle className="text-2xl">Sign in to Innobuddy</CardTitle>
+            <CardTitle className="text-2xl">Sign in to Innoscale</CardTitle>
             <CardDescription>Use your local account to continue.</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
+          <OidcLogin />
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
