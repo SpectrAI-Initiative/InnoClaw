@@ -4,11 +4,11 @@ import { isUniqueConstraintError } from "./errors";
 
 describe("resolveDatabaseUrl", () => {
   it("accepts a mysql:// connection string", () => {
-    const url = resolveDatabaseUrl("mysql://app:p%40ss@10.0.0.5:3306/innoclaw");
+    const url = resolveDatabaseUrl("mysql://app:p%40ss@10.0.0.5:3306/innoscale");
     expect(url.hostname).toBe("10.0.0.5");
     expect(url.port).toBe("3306");
     expect(decodeURIComponent(url.password)).toBe("p@ss");
-    expect(url.pathname).toBe("/innoclaw");
+    expect(url.pathname).toBe("/innoscale");
   });
 
   it("rejects a missing value", () => {
@@ -17,8 +17,8 @@ describe("resolveDatabaseUrl", () => {
   });
 
   it("rejects an old SQLite file path with a migration hint", () => {
-    expect(() => resolveDatabaseUrl("./data/innobuddy.db")).toThrow(/SQLite file paths are no longer supported/);
-    expect(() => resolveDatabaseUrl("file:./data/innobuddy.db")).toThrow(/mysql:\/\//);
+    expect(() => resolveDatabaseUrl("./data/innoscale.db")).toThrow(/SQLite file paths are no longer supported/);
+    expect(() => resolveDatabaseUrl("file:./data/innoscale.db")).toThrow(/mysql:\/\//);
   });
 
   it("requires a database name", () => {

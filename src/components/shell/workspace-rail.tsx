@@ -1,11 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown, Folder, Plus, Settings } from "lucide-react";
+import { ChevronDown, Folder, Plus, Sun, MoreHorizontal, Pencil } from "lucide-react";
 import type { AgentSession } from "@/lib/hooks/use-agent-sessions";
 import type { DeepResearchSession } from "@/lib/deep-research/types";
 import { isCompletedSessionStatus } from "@/lib/deep-research/session-status";
 import type { Workspace } from "@/types";
+
+const BRAND_LOGO =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iNi43MiIgcnk9IjYuNzIiIGZpbGw9IiMxNTFDMkYiLz48cmVjdCB4PSI3LjA1IiB5PSI2LjU1IiB3aWR0aD0iMi42MiIgaGVpZ2h0PSIxMC45IiByeD0iMS4zMSIgZmlsbD0iI0ZGRkZGRiIvPjxwYXRoIGQ9Ik0xMC4zIDYuNTVoMy41YTMuMDUgMy4wNSAwIDAgMSAwIDUuOUgxMC4zeiIgZmlsbD0iI0ZGRkZGRiIvPjxwYXRoIGQ9Ik0xMC4zIDEyLjloMy4yYTIuOSAyLjkgMCAwIDEgMCA1LjZIMTAuM3oiIGZpbGw9IiNGRkZGRkYiLz48Y2lyY2xlIGN4PSIxMC42IiBjeT0iMTAuMTUiIHI9IjEuNiIgZmlsbD0iIzRBNUNGNSIvPjwvc3ZnPg==";
 
 interface WorkspaceRailProps {
   workspaces: Workspace[];
@@ -20,141 +24,156 @@ interface WorkspaceRailProps {
   onBrand: () => void;
   onSelectWorkspace: (workspaceId: string) => void;
   onCreateWorkspace: () => void;
+  onRenameWorkspace: () => void;
   onSelectSession: (sessionId: string) => void;
   onRenameSession: (session: AgentSession) => void;
   onDeleteSession: (session: AgentSession) => void;
   onCreateSession: () => void;
   onSelectResearch: (sessionId: string) => void;
   onCreateResearch: () => void;
+  onRenameResearch: (session: DeepResearchSession) => void;
+  onDeleteResearch: (session: DeepResearchSession) => void;
   onOpenSettings: () => void;
   settingsActive: boolean;
 }
 
 export function WorkspaceRail({
-  workspaces,
-  current,
-  sessions,
-  activeSessionId,
-  researchSessions,
-  activeResearchId,
-  researchActive,
-  menuOpen,
-  onToggleMenu,
-  onBrand,
-  onSelectWorkspace,
-  onCreateWorkspace,
-  onSelectSession,
-  onRenameSession,
-  onDeleteSession,
-  onCreateSession,
-  onSelectResearch,
-  onCreateResearch,
-  onOpenSettings,
-  settingsActive,
+  workspaces, current,
+  sessions, activeSessionId, researchSessions, activeResearchId,
+  researchActive, menuOpen, onToggleMenu, onBrand, onSelectWorkspace, onCreateWorkspace, onRenameWorkspace,
+  onSelectSession, onRenameSession, onDeleteSession, onCreateSession, onSelectResearch,
+  onCreateResearch, onRenameResearch, onDeleteResearch, onOpenSettings, settingsActive,
 }: WorkspaceRailProps) {
   const t = useTranslations("shell");
   const others = workspaces.filter((workspace) => workspace.id !== current.id);
+  type RailMenu = { x: number; y: number; session: AgentSession; kind: "agent" } | { x: number; y: number; session: DeepResearchSession; kind: "research" };
+  const [menu, setMenu] = useState<RailMenu | null>(null);
+
+  useEffect(() => {
+    if (!menu) return;
+    const close = () => setMenu(null);
+    window.addEventListener("click", close);
+    window.addEventListener("scroll", close, true);
+    return () => { window.removeEventListener("click", close); window.removeEventListener("scroll", close, true); };
+  }, [menu]);
 
   return (
-    <aside className="flex h-full min-h-0 flex-col border-r border-[#e7e7e8] bg-[#F7F7F8]">
-      <button type="button" onClick={onBrand} className="flex items-center gap-2 px-3.5 pb-1 pt-4 text-left">
-        <span className="grid h-[22px] w-[22px] place-items-center rounded-md bg-[#1B5561] text-[11px] font-semibold text-white">In</span>
-        <span className="text-xl font-semibold tracking-tight text-[#171716]">Innobuddy</span>
+    <aside className="rail">
+      {/* 品牌 —— 与截图一致：Innoscale */}
+      <button type="button" onClick={onBrand} className="brand" aria-label="返回对话">
+        <span className="mk" style={{ backgroundImage: `url("${BRAND_LOGO}")`, backgroundSize: "24px 24px", backgroundRepeat: "no-repeat" }} aria-hidden="true" />
+        <span className="nm">Innoscale</span>
       </button>
 
-      <div className="relative mx-2 mt-3">
-        <button
-          type="button"
-          aria-expanded={menuOpen}
-          onClick={onToggleMenu}
-          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[13px] hover:bg-[#EFEFF1]"
-        >
-          <Folder className="h-3.5 w-3.5 shrink-0 text-[#71717A]" />
-          <span className="min-w-0 flex-1 truncate font-medium">{current.name}</span>
-          <ChevronDown className="h-3.5 w-3.5 text-[#8A8A92]" />
+      {/* 工作空间下拉 */}
+      <div className="p21-top">
+        <button className="p21-cur" type="button" aria-expanded={menuOpen} onClick={onToggleMenu} data-tip="切换工作空间">
+          <Folder className="p21-ico" />
+          <span className="p21-nm">{current.name}</span>
+          <ChevronDown className="p21-arw" />
         </button>
         {menuOpen && (
-          <div className="absolute left-0 right-0 top-9 z-30 rounded-lg border border-[#e7e7e8] bg-white p-1 shadow-sm">
-            <div className="px-2 py-1 text-[10px] text-[#8A8A92]">{t("switchWorkspace")}</div>
-            {others.length === 0 && <div className="px-2 py-1.5 text-xs text-[#8A8A92]">{t("noOtherWorkspace")}</div>}
+          <div className="p21-drop">
+            <div className="p21-dhd">{t("switchWorkspace")}</div>
+            {others.length === 0 && <div className="p21-di">{t("noOtherWorkspace")}</div>}
             {others.map((workspace) => (
-              <button
-                key={workspace.id}
-                type="button"
-                onClick={() => onSelectWorkspace(workspace.id)}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs hover:bg-[#F6F6F4]"
-              >
+              <button key={workspace.id} type="button" className="p21-di" onClick={() => onSelectWorkspace(workspace.id)}>
                 <span className="min-w-0 flex-1 truncate">{workspace.name}</span>
               </button>
             ))}
-            <button type="button" onClick={onCreateWorkspace} className="mt-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-[#C2410C] hover:bg-[#F6F6F4]">
-              <Plus className="h-3.5 w-3.5" />
-              {t("newWorkspace")}
+            <div className="p21-dsep" />
+            <button type="button" className="p21-drename" onClick={onRenameWorkspace}>
+              <Pencil className="h-3.5 w-3.5" />{t("rename")}
+            </button>
+            <button type="button" className="p21-dnew" onClick={onCreateWorkspace}>
+              <Plus className="h-3.5 w-3.5" />{t("newWorkspace")}
             </button>
           </div>
         )}
       </div>
 
-      <div className="mt-3 min-h-0 flex-1 overflow-y-auto px-2 pb-2">
-        <section>
-          <div className="flex items-center gap-2 px-2 py-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-widest text-[#B45B36]">{t("agentGroup")}</span>
-            <button type="button" onClick={onCreateSession} className="ml-auto inline-flex items-center gap-1 rounded-md border border-[#E6E6E9] bg-white px-2 py-0.5 text-[10.5px] text-[#71717A] hover:bg-[#FAFAFB]">
-              <Plus className="h-3 w-3" />
-              {t("new")}
+      {/* 任务分组 —— 严格对齐参考文件 p21-grp 结构：分组头(标题+新建) + 任务列表 */}
+      <div className="p21-groups">
+        {/* Agent 分组 */}
+        <div className="p21-grp">
+          <div className="p21-ghd">
+            <span className="p21-gt">Agent</span>
+            <button type="button" className="p21-gnew" onClick={onCreateSession} data-tip="新建 Agent">
+              <Plus className="h-3 w-3" />新建
             </button>
           </div>
-          {sessions.map((session) => {
-            const selected = !researchActive && session.id === activeSessionId;
-            return (
-              <div key={session.id} className={`group flex h-8 items-center gap-2 rounded-md px-2 ${selected ? "bg-white shadow-sm ring-1 ring-[#EAEAEC]" : "hover:bg-[#EFEFF1]"}`}>
-                <button type="button" onClick={() => onSelectSession(session.id)} className="flex min-w-0 flex-1 items-center gap-2 text-left">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#D2703F]" />
-                  <span className={`truncate text-[12.5px] ${selected ? "font-semibold text-[#18181B]" : "text-[#52525B]"}`}>{session.name}</span>
-                </button>
-                <button type="button" className="text-[10px] text-[#8A8A92] opacity-0 group-hover:opacity-100" onClick={() => onRenameSession(session)}>{t("rename")}</button>
-                <button type="button" className="text-[10px] text-[#8A8A92] opacity-0 group-hover:opacity-100" onClick={() => onDeleteSession(session)}>{t("delete")}</button>
-              </div>
-            );
-          })}
-        </section>
+          <div className="p21-tasks">
+            {sessions.map((session) => {
+              const selected = !researchActive && session.id === activeSessionId;
+              return (
+                <div key={session.id} className={`p21-t${selected ? " cur" : ""}`} role="button" tabIndex={0}
+                  onClick={() => onSelectSession(session.id)}
+                  onKeyDown={(e) => { if (e.key === "Enter") onSelectSession(session.id); }}>
+                  <span className="p21-dot run" />
+                  <span className="p21-tn">{session.name}</span>
+                  <button type="button" className="p21-more" data-act="menu" data-tip="更多"
+                    onClick={(e) => { e.stopPropagation(); setMenu({ x: e.clientX, y: e.clientY, session, kind: "agent" }); }}
+                    aria-label="任务更多操作">
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
-        <section className="mt-4 border-t border-[#E9E9EC] pt-3">
-          <div className="flex items-center gap-2 px-2 py-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-widest text-[#6C63B4]">{t("researchGroup")}</span>
-            <button type="button" onClick={onCreateResearch} className="ml-auto inline-flex items-center gap-1 rounded-md border border-[#E7E4F3] bg-white px-2 py-0.5 text-[10.5px] text-[#6C63B4] hover:bg-[#F7F6FD]">
-              <Plus className="h-3 w-3" />
-              {t("new")}
+        {/* Deep Research 分组 —— 紧跟 Agent，对齐参考文件 */}
+        <div className="p21-grp dr">
+          <div className="p21-ghd">
+            <span className="p21-gt">Deep research</span>
+            <button type="button" className="p21-gnew" onClick={onCreateResearch} data-tip="新建 Deep research">
+              <Plus className="h-3 w-3" />新建
             </button>
           </div>
-          {researchSessions.map((session) => {
-            const selected = researchActive && session.id === activeResearchId;
-            const done = isCompletedSessionStatus(session.status);
-            return (
-              <button
-                key={session.id}
-                type="button"
-                onClick={() => onSelectResearch(session.id)}
-                className={`flex h-8 w-full items-center gap-2 rounded-md px-2 text-left ${selected ? "bg-white shadow-sm ring-1 ring-[#E6E3F4]" : "hover:bg-[#EFEFF1]"}`}
-              >
-                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${done ? "bg-[#4CA97C]" : "bg-[#7B72C6]"}`} />
-                <span className={`truncate text-[12.5px] ${selected ? "font-semibold text-[#4E46A0]" : "text-[#6C63B4]"}`}>{session.title}</span>
-              </button>
-            );
-          })}
-        </section>
+          <div className="p21-tasks">
+            {researchSessions.map((session) => {
+              const selected = researchActive && session.id === activeResearchId;
+              const done = isCompletedSessionStatus(session.status);
+              return (
+                <div key={session.id} className={`p21-t dr-item${selected ? " cur" : ""}`} role="button" tabIndex={0}
+                  onClick={() => onSelectResearch(session.id)}
+                  onKeyDown={(e) => { if (e.key === "Enter") onSelectResearch(session.id); }}>
+                  <span className={`p21-dot${done ? " done" : " run"}`} />
+                  <span className="p21-tn">{session.title}</span>
+                  <button type="button" className="p21-more" data-act="menu" data-tip="更多"
+                    onClick={(e) => { e.stopPropagation(); setMenu({ x: e.clientX, y: e.clientY, session, kind: "research" }); }}
+                    aria-label="任务更多操作">
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      <div className="border-t border-[#E9E9EC] p-2">
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-[13px] ${settingsActive ? "bg-white shadow-sm" : "text-[#52525B] hover:bg-[#EFEFF1]"}`}
-        >
-          <Settings className="h-4 w-4" />
-          {t("settings")}
+      {/* 底部设置 */}
+      <div className="railft">
+        <button type="button" className={`gear${settingsActive ? " on" : ""}`} onClick={onOpenSettings} data-tip="设置" aria-label="设置">
+          <Sun className="h-4 w-4" />
+          <span className="gearlbl">设置</span>
         </button>
       </div>
+
+      {/* 任务更多菜单 —— 对齐参考文件 p21-menu */}
+      {menu && (
+        <div className="p21-menu on" style={{ left: Math.min(menu.x, (typeof window !== "undefined" ? window.innerWidth : 9999) - 140), top: menu.y + 8 }}
+          onClick={(e) => e.stopPropagation()} role="menu">
+          <button type="button" className="p21-mi" role="menuitem" onClick={() => {
+            if (menu.kind === "agent") onRenameSession(menu.session); else onRenameResearch(menu.session);
+            setMenu(null);
+          }}>重命名</button>
+          <button type="button" className="p21-mi danger" role="menuitem" onClick={() => {
+            if (menu.kind === "agent") onDeleteSession(menu.session); else onDeleteResearch(menu.session);
+            setMenu(null);
+          }}>删除任务</button>
+        </div>
+      )}
     </aside>
   );
 }

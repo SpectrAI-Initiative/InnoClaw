@@ -37,7 +37,7 @@ describe("skill translation cache", () => {
   });
 
   it("tolerates corrupt data and missing storage", () => {
-    window.localStorage.setItem("Innobuddy.skillDescriptionTranslations.v1.zh", "{not json");
+    window.localStorage.setItem("InnoScale.skillDescriptionTranslations.v1.zh", "{not json");
     expect(readSkillTranslationCache("zh")).toEqual({});
     vi.stubGlobal("window", undefined);
     expect(readSkillTranslationCache("zh")).toEqual({});

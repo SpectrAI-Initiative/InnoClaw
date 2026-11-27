@@ -13,7 +13,7 @@ describe("bootstrapAdministrator input validation", () => {
 
   it("rejects a password shorter than eight characters before touching the database", async () => {
     await expect(bootstrapAdministrator(unusedPool, {
-      email: "admin@innobuddy.local",
+      email: "admin@innoscale.local",
       name: "Administrator",
       password: "short",
     })).rejects.toThrow("Administrator password must be at least 8 characters");
@@ -77,16 +77,16 @@ describeMysql("bootstrapAdministrator (MySQL)", () => {
 
   it("creates the sole active administrator with a verifiable password", async () => {
     const result = await bootstrapAdministrator(pool, {
-      email: " Admin@innobuddy.Local ",
+      email: " Admin@innoscale.Local ",
       name: "Administrator",
       password: "a-long-test-password",
     });
 
-    expect(result).toEqual({ status: "created", email: "admin@innobuddy.local" });
+    expect(result).toEqual({ status: "created", email: "admin@innoscale.local" });
     const rows = await users();
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
-      email: "admin@innobuddy.local",
+      email: "admin@innoscale.local",
       name: "Administrator",
       role: "admin",
       isActive: 1,
@@ -96,30 +96,30 @@ describeMysql("bootstrapAdministrator (MySQL)", () => {
 
   it("is idempotent for the same active administrator without resetting its password", async () => {
     await bootstrapAdministrator(pool, {
-      email: "admin@innobuddy.local",
+      email: "admin@innoscale.local",
       name: "Administrator",
       password: "original-password",
     });
     const [before] = await users();
 
     const result = await bootstrapAdministrator(pool, {
-      email: "ADMIN@innobuddy.LOCAL",
+      email: "ADMIN@innoscale.LOCAL",
       name: "Changed Name",
       password: "different-password",
     });
     const [after] = await users();
 
-    expect(result).toEqual({ status: "existing", email: "admin@innobuddy.local" });
+    expect(result).toEqual({ status: "existing", email: "admin@innoscale.local" });
     expect(after.passwordHash).toBe(before.passwordHash);
     expect(after.name).toBe("Administrator");
     expect(verifyPassword("different-password", after.passwordHash)).toBe(false);
   });
 
   it("rejects the same inactive administrator", async () => {
-    await insertUser({ id: "admin-id", email: "admin@innobuddy.local", role: "admin", isActive: false });
+    await insertUser({ id: "admin-id", email: "admin@innoscale.local", role: "admin", isActive: false });
 
     await expect(bootstrapAdministrator(pool, {
-      email: "admin@innobuddy.local",
+      email: "admin@innoscale.local",
       name: "Administrator",
       password: "a-long-test-password",
     })).rejects.toThrow("The existing administrator is inactive");
@@ -129,7 +129,7 @@ describeMysql("bootstrapAdministrator (MySQL)", () => {
     await insertUser({ id: "other-admin", email: "other@example.com", role: "admin" });
 
     await expect(bootstrapAdministrator(pool, {
-      email: "admin@innobuddy.local",
+      email: "admin@innoscale.local",
       name: "Administrator",
       password: "a-long-test-password",
     })).rejects.toThrow("A different administrator already exists");
@@ -140,17 +140,17 @@ describeMysql("bootstrapAdministrator (MySQL)", () => {
     await insertUser({ id: "admin-b", email: "b@example.com", role: "admin" });
 
     await expect(bootstrapAdministrator(pool, {
-      email: "admin@innobuddy.local",
+      email: "admin@innoscale.local",
       name: "Administrator",
       password: "a-long-test-password",
     })).rejects.toThrow("Multiple administrators already exist");
   });
 
   it("rejects an ordinary-user collision, even with different case", async () => {
-    await insertUser({ id: "user-id", email: "Admin@Innobuddy.local", role: "user" });
+    await insertUser({ id: "user-id", email: "Admin@InnoScale.local", role: "user" });
 
     await expect(bootstrapAdministrator(pool, {
-      email: "admin@innobuddy.local",
+      email: "admin@innoscale.local",
       name: "Administrator",
       password: "a-long-test-password",
     })).rejects.toThrow("The administrator email already belongs to an ordinary user");
@@ -158,7 +158,7 @@ describeMysql("bootstrapAdministrator (MySQL)", () => {
   });
 
   it("creates exactly one administrator when two bootstraps race", async () => {
-    const input = { email: "admin@innobuddy.local", name: "Administrator", password: "a-long-test-password" };
+    const input = { email: "admin@innoscale.local", name: "Administrator", password: "a-long-test-password" };
     const results = await Promise.all([
       bootstrapAdministrator(pool, input),
       bootstrapAdministrator(pool, input),

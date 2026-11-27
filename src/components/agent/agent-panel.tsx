@@ -9,11 +9,19 @@ import { agentStreamManager } from "@/lib/agent/agent-stream-manager";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AlertCircle,
+  ArrowUp,
   Bot,
   ChevronDown,
+  FileSearch,
+  FlaskConical,
+  Grid2X2,
   ImagePlus,
+  LineChart,
   Loader2,
+  Mic,
   Plus,
+  SlidersHorizontal,
+  Sparkles,
   Square,
   Eraser,
   SendHorizontal,
@@ -40,6 +48,7 @@ import type { Skill } from "@/types";
 import { swrFetcher as fetcher } from "@/lib/fetcher";
 import { useModelSelection } from "@/lib/hooks/use-model-selection";
 import { useCostTracking } from "@/lib/hooks/use-cost-tracking";
+import { useStorageScope, scopeKey } from "@/lib/hooks/use-storage-scope";
 import { AgentMessage } from "./agent-message";
 import { CostDisplay } from "./cost-display";
 import { MemoryPanel } from "./memory-panel";
@@ -83,8 +92,8 @@ type ModelSelection = { provider: string; model: string };
 /** Pixel threshold for considering the user "at the bottom" of the scroll area */
 const BOTTOM_THRESHOLD_PX = 80;
 /** Default / minimum height (px) of the resizable input area: text row + toolbar row. */
-const DEFAULT_INPUT_HEIGHT = 128;
-const MIN_INPUT_HEIGHT = 96;
+const DEFAULT_INPUT_HEIGHT = 40;
+const MIN_INPUT_HEIGHT = 120;
 
 /** XML tag used to wrap compacted context summaries in messages. */
 const CONTEXT_SUMMARY_OPEN = "<context_summary>";
@@ -149,6 +158,8 @@ export function AgentPanel({
   const t = useTranslations("agent");
   const tShell = useTranslations("shell");
   const tCommon = useTranslations("common");
+  const { scope: storageScope } = useStorageScope();
+  const scopePrefix = storageScope ?? "anonymous";
   const shell = presentation === "shell";
   const locale = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -232,20 +243,21 @@ export function AgentPanel({
 
   const configuredProviderIds = useMemo(() => {
     const configured = settings?.configuredProviders as string[] | undefined;
-    if (!configured) return [];
-    return configured.filter((id): id is ProviderId => Boolean(PROVIDERS[id as ProviderId]));
+    const ids = (configured ?? []).filter(
+      (id): id is ProviderId => Boolean(PROVIDERS[id as ProviderId]),
+    );
+    // SciReasoner is the research-facing default in the composer. It is an
+    // alias of the configured endpoint, so add it to the visible catalog.
+    if (!(ids as string[]).includes("scireasoner")) (ids as string[]).unshift("scireasoner");
+    return ids;
   }, [settings?.configuredProviders]);
 
-  const settingsFallback = useMemo<ModelSelection | null>(() => {
-    if (!settings?.llmProvider || !settings?.llmModel) return null;
-    if (
-      configuredProviderIds.length > 0 &&
-      !configuredProviderIds.includes(settings.llmProvider as ProviderId)
-    ) {
-      return null;
-    }
-    return { provider: settings.llmProvider as string, model: settings.llmModel as string };
-  }, [configuredProviderIds, settings?.llmModel, settings?.llmProvider]);
+  // Default composer model: SciReasoner, with DeepSeek V4.1 available as an
+  // explicit alternative. A persisted user choice still wins in the hook.
+  const settingsFallback = useMemo<ModelSelection | null>(
+    () => ({ provider: "scireasoner", model: "sci-reasoner" }),
+    [],
+  );
 
   const {
     selectedProvider,
@@ -257,11 +269,37 @@ export function AgentPanel({
     handleModelChange,
     refreshDiscoveredModels,
   } = useModelSelection({
-    storageKey: "innobuddy-agent-model-selection",
+    storageKey: scopeKey(scopePrefix, "innoscale-agent-model-selection-v2"),
     configuredProviderIds,
     settingsFallback,
     fallbackDisplayName: t("modelLabel"),
   });
+
+  // Conversation style saved in Settings → 对话风格 (mock-backed for now).
+  const [conversationStyle, setConversationStyle] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      return window.localStorage.getItem("innoscale-conversation-style") || "";
+    } catch {
+      return "";
+    }
+  });
+
+  useEffect(() => {
+    const onStyleChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ value?: string }>).detail;
+      setConversationStyle(detail?.value ?? "");
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "innoscale-conversation-style") setConversationStyle(event.newValue || "");
+    };
+    window.addEventListener("innoscale:style-change", onStyleChange);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("innoscale:style-change", onStyleChange);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
 
   // Mutable body object — allows injecting skillId/paramValues before each send
   const agentBody = useMemo(
@@ -277,7 +315,8 @@ export function AgentPanel({
     agentBody.cwd = folderPath;
     agentBody.sessionCreatedAt = sessionCreatedAt;
     agentBody.uiLocale = locale;
-  }, [workspaceId, folderPath, sessionCreatedAt, locale, agentBody]);
+    agentBody.conversationStyle = conversationStyle.trim();
+  }, [workspaceId, folderPath, sessionCreatedAt, locale, conversationStyle, agentBody]);
 
   // Stream key for the background stream manager (use refs so the memoized
   // transport always reads the latest values).
@@ -285,11 +324,11 @@ export function AgentPanel({
   // not change the key under which the active stream is registered.
   const streamKey = `${workspaceId}:${sessionId}`;
   const streamKeyRef = useRef(streamKey);
-  const storageKeyForManagerRef = useRef(`agent-messages:${workspaceId}:${sessionId}`);
+  const storageKeyForManagerRef = useRef(scopeKey(scopePrefix, `agent-messages:${workspaceId}:${sessionId}`));
   useEffect(() => {
     streamKeyRef.current = streamKey;
-    storageKeyForManagerRef.current = `agent-messages:${workspaceId}:${sessionId}`;
-  }, [workspaceId, sessionId, streamKey]);
+    storageKeyForManagerRef.current = scopeKey(scopePrefix, `agent-messages:${workspaceId}:${sessionId}`);
+  }, [workspaceId, sessionId, streamKey, scopePrefix]);
 
   // Create transport once with the mutable body reference.
   // Uses a custom fetch that tees the response body so the background manager
@@ -367,7 +406,7 @@ export function AgentPanel({
   const { messages, sendMessage, setMessages, stop, status, error: chatError } = useChat({ transport });
 
   // --- Message persistence via localStorage ---
-  const storageKey = `agent-messages:${workspaceId}:${sessionId}`;
+  const storageKey = scopeKey(scopePrefix, `agent-messages:${workspaceId}:${sessionId}`);
   // Counter-based gate: incremented on restore, decremented in the save effect
   // that sees the restored messages. Avoids save-during-restore race.
   const restoreGenRef = useRef(0);
@@ -614,7 +653,7 @@ export function AgentPanel({
   );
 
   const { costSnapshot } = useCostTracking({
-    storageKey: `agent-cost:${workspaceId}:${sessionId}`,
+    storageKey: scopeKey(scopePrefix, `agent-cost:${workspaceId}:${sessionId}`),
     messages,
     status,
     resolvedModel,
@@ -1214,17 +1253,27 @@ export function AgentPanel({
             </div>
           ) : messages.length === 0 ? (
             shell ? (
-              <div className="mx-auto flex max-w-xl flex-col items-center gap-4 py-16 text-center">
-                <p className="text-sm text-[#57574f]">{tShell("emptyHint")}</p>
-                <div className="grid w-full gap-2">
-                  {[tShell("example1"), tShell("example2"), tShell("example3")].map((prompt) => (
+              <div className="ib-agent-empty mx-auto max-w-xl">
+                <div className="ibe-mark" aria-hidden="true"><Sparkles /></div>
+                <div className="ibe-title">今天想研究点什么？</div>
+                <div className="ibe-sub">我可以检索文献、分析数据、写代码，或把你的想法拆成一份可执行的研究计划。</div>
+                <div className="ibe-sugs">
+                  {[
+                    { icon: FileSearch, label: "文献综述", text: "帮我梳理这个方向近三年的关键文献" },
+                    { icon: LineChart, label: "数据分析", text: "帮我分析这份实验数据并给出图表" },
+                    { icon: FlaskConical, label: "实验设计", text: "帮我设计一组对照实验方案" },
+                  ].map(({ icon: Icon, label, text }) => (
                     <button
-                      key={prompt}
+                      key={label}
                       type="button"
-                      onClick={() => setInput(prompt)}
-                      className="rounded-xl border border-[#e7e7e8] px-3 py-2 text-left text-[13px] hover:bg-[#f6f6f4]"
+                      className="ibe-sug"
+                      onClick={() => {
+                        setInput(text);
+                        requestAnimationFrame(() => inputRef.current?.focus());
+                      }}
                     >
-                      {prompt}
+                      <Icon />
+                      {label}
                     </button>
                   ))}
                 </div>
@@ -1263,7 +1312,7 @@ export function AgentPanel({
                   {/* Glow orbs */}
                   <div className="absolute -left-4 -top-4 h-16 w-16 rounded-full bg-primary/20 blur-xl animate-pulse" />
                   <div className="absolute -right-4 -bottom-4 h-12 w-12 rounded-full bg-accent/20 blur-xl animate-pulse [animation-delay:0.5s]" />
-                  <ThinkingIndicator label="Innobuddy thinking" />
+                  <ThinkingIndicator label="Innoscale thinking" />
                 </div>
               </div>
             )}
@@ -1322,7 +1371,7 @@ export function AgentPanel({
             onClose={() => setShowAutocomplete(false)}
           />
         )}
-      <div className="relative z-10 flex shrink-0 flex-col overflow-hidden bg-agent-bg/80 backdrop-blur-sm" style={{ height: inputHeight }}>
+      <div className="ib-agent-composer relative z-10 flex shrink-0 flex-col overflow-visible bg-agent-bg/80 backdrop-blur-sm" style={{ "--ib-input-height": `${inputHeight}px` } as React.CSSProperties}>
 
         <ImageAttachmentGrid
           attachments={pendingImages}
@@ -1332,7 +1381,7 @@ export function AgentPanel({
           removeLabel={t("removeImage")}
         />
 
-        <div className="flex min-h-0 flex-1 flex-col gap-1 px-3 py-2">
+        <div className="ib-agent-composer-inner flex min-h-0 flex-1 flex-col gap-1 px-3 py-2">
           {/* Row 1: full-width message input */}
           <div className="flex min-h-0 flex-1 items-start gap-2">
             <span className="text-agent-purple font-bold shrink-0 select-none leading-6">
@@ -1353,7 +1402,7 @@ export function AgentPanel({
                 }
               }}
               disabled={!aiEnabled || isSummarizing}
-              placeholder={aiEnabled ? t(MODE_PLACEHOLDER_KEYS[mode]) : t("disabledState")}
+              placeholder={aiEnabled ? (shell ? "输入问题或任务，/ 选择技能" : t(MODE_PLACEHOLDER_KEYS[mode])) : t("disabledState")}
               className="min-w-0 flex-1 bg-transparent text-agent-foreground placeholder:text-agent-muted outline-none text-sm font-mono resize-none h-full leading-6"
               rows={1}
               autoFocus
@@ -1361,7 +1410,12 @@ export function AgentPanel({
           </div>
 
           {/* Row 2: toolbar */}
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="ib-agent-tools flex shrink-0 items-center gap-2">
+          {shell && onNewSession && (
+            <button type="button" onClick={onNewSession} title={tShell("newSession")} className="ib-agent-tool rounded p-1 text-[#57574f] hover:bg-[#f4f4f5]">
+              <Plus className="h-4 w-4" />
+            </button>
+          )}
           {/* Model selector */}
           <DropdownMenu
             onOpenChange={(open) => {
@@ -1372,6 +1426,8 @@ export function AgentPanel({
           >
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1.5 shrink-0 rounded px-1.5 py-0.5 text-xs text-agent-accent hover:bg-agent-card-hover transition-colors max-w-[220px]">
+                <>
+                <SlidersHorizontal className="h-3.5 w-3.5" />
                 <span className="truncate">{modelDisplayName}</span>
                 {resolvedSelection?.unmatchedKind && (
                   <Badge
@@ -1396,9 +1452,10 @@ export function AgentPanel({
                   </Badge>
                 )}
                 <ChevronDown className="h-3 w-3 shrink-0" />
+                </>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-72 max-h-80 overflow-y-auto">
+            <DropdownMenuContent side="top" align="start" className="w-72 max-h-80 overflow-y-auto">
               <DropdownMenuLabel className="text-xs">{t("modelLabel")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {availableProviders.map((provider) => (
@@ -1472,22 +1529,35 @@ export function AgentPanel({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          {!shell && (
+          {shell && (
+            <button
+              type="button"
+              onClick={() => setShowMemoryPanel(true)}
+              title="智能体记忆"
+              className="ib-agent-tool shrink-0 rounded p-1 text-[#57574f] transition-colors hover:bg-[#f4f4f5]"
+            >
+              <Grid2X2 className="h-4 w-4" />
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setShowWorkspaceImagePicker(true)}
             title={t("workspaceImagePickerTitle")}
-            className="shrink-0 rounded p-1 text-agent-accent transition-colors hover:bg-agent-card-hover"
+            className="ib-agent-tool shrink-0 rounded p-1 text-[#57574f] transition-colors hover:bg-[#f4f4f5]"
             disabled={!aiEnabled || isSummarizing}
           >
             <ImagePlus className="h-4 w-4" />
           </button>
-          )}
           <div className="ml-auto flex items-center gap-1 shrink-0">
-            {shell && onNewSession && (
-              <button type="button" onClick={onNewSession} title={tShell("newSession")} className="rounded p-1 text-[#57574f] hover:bg-[#f4f4f5]">
-                <Plus className="h-4 w-4" />
-              </button>
+            {shell && (
+            <button
+              type="button"
+              onClick={() => toast.info("语音输入即将上线")}
+              title="语音"
+              className="ib-agent-tool shrink-0 rounded p-1 text-[#8a8a90] hover:bg-[#f4f4f5]"
+            >
+              <Mic className="h-4 w-4" />
+            </button>
             )}
             {!shell && (
             <>
@@ -1519,7 +1589,7 @@ export function AgentPanel({
                   className="flex shrink-0 items-center gap-1 rounded px-1.5 py-1 text-xs text-agent-muted transition-colors hover:bg-agent-card-hover hover:text-agent-foreground"
                 >
                   <Eraser className="h-4 w-4" />
-                  <span>{t("clearContext")}</span>
+                  <span className="ib-agent-clear-label">{t("clearContext")}</span>
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-64 text-xs leading-5">
@@ -1534,9 +1604,9 @@ export function AgentPanel({
               disabled={!canSend}
               title={t("sendHint")}
               aria-label={t("send")}
-              className="shrink-0 rounded-md bg-primary p-1.5 text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="ib-agent-send shrink-0 rounded-md bg-primary p-1.5 text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <SendHorizontal className="h-4 w-4" />
+              {shell ? <ArrowUp className="h-4 w-4" /> : <SendHorizontal className="h-4 w-4" />}
             </button>
           )}
           </div>

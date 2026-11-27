@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "==> Innobuddy startup checks"
+echo "==> InnoScale startup checks"
 
 # 1. Writable data directory
 if [ ! -w "/app/data" ]; then
@@ -51,5 +51,5 @@ esac
 echo "==> Database migrations will run during app startup"
 
 # 5. Start the server
-echo "==> Starting Innobuddy on port ${PORT:-3000}"
+echo "==> Starting InnoScale on port ${PORT:-3000}"
 exec node server.js

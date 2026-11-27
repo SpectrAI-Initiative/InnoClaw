@@ -19,7 +19,7 @@ interface ExistingAdministrator extends RowDataPacket {
 }
 
 /** Serialises concurrent bootstrap runs (e.g. two containers starting at once). */
-const BOOTSTRAP_LOCK_NAME = "innoclaw_bootstrap_admin";
+const BOOTSTRAP_LOCK_NAME = "innoscale_bootstrap_admin";
 const BOOTSTRAP_LOCK_TIMEOUT_SECONDS = 30;
 
 function validateInput(input: BootstrapAdminInput): { email: string; name: string } {

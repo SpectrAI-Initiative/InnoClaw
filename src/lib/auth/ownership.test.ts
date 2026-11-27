@@ -65,7 +65,7 @@ const adminAuth: AuthContext = {
 };
 
 function temporaryRoot(): string {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "innobuddy-ownership-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "innoscale-ownership-"));
   temporaryDirectories.push(root);
   return root;
 }

@@ -3,11 +3,11 @@ import { migrate } from "drizzle-orm/mysql2/migrator";
 import { db, getPool } from "./index";
 
 /** Name of the MySQL advisory lock that serialises migrations across app instances. */
-export const MIGRATION_LOCK_NAME = "innoclaw_schema_migrations";
+export const MIGRATION_LOCK_NAME = "innoscale_schema_migrations";
 const MIGRATION_LOCK_TIMEOUT_SECONDS = 120;
 
 const globalForMigrations = globalThis as typeof globalThis & {
-  __innobuddyMigrationPromise?: Promise<void>;
+  __innoscaleMigrationPromise?: Promise<void>;
 };
 
 /**
@@ -44,12 +44,12 @@ async function runMigrationsOnce(): Promise<void> {
 }
 
 export function runMigrations(): Promise<void> {
-  if (!globalForMigrations.__innobuddyMigrationPromise) {
-    globalForMigrations.__innobuddyMigrationPromise = runMigrationsOnce();
-    globalForMigrations.__innobuddyMigrationPromise.catch(() => {
-      globalForMigrations.__innobuddyMigrationPromise = undefined;
+  if (!globalForMigrations.__innoscaleMigrationPromise) {
+    globalForMigrations.__innoscaleMigrationPromise = runMigrationsOnce();
+    globalForMigrations.__innoscaleMigrationPromise.catch(() => {
+      globalForMigrations.__innoscaleMigrationPromise = undefined;
     });
   }
 
-  return globalForMigrations.__innobuddyMigrationPromise;
+  return globalForMigrations.__innoscaleMigrationPromise;
 }

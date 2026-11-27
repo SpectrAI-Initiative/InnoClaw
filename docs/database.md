@@ -2,7 +2,9 @@
 
 关系型数据都在 MySQL 里，通过 Drizzle 访问。原来的本地 SQLite 已经不再支持：换机器或换部署方式时，SQLite 文件跟着容器卷走，容易丢数据。
 
-工作区文件、Hugging Face 数据集缓存等不是关系型数据，仍在卷 `innobuddy-data`（容器内 `/app/data`）和 `HOST_WORKSPACE_PATH` 里，备份时要一起考虑。
+工作区文件、Hugging Face 数据集缓存等不是关系型数据，仍在卷 `innoscale-data`（容器内 `/app/data`）和 `HOST_WORKSPACE_PATH` 里，备份时要一起考虑。
+
+品牌从 InnoBuddy / InnoClaw 改为 InnoScale 后，本地默认库名/用户为 `innoscale`，Compose 卷为 `innoscale-data` / `innoscale-mysql`。旧的 `innobuddy*` 库或卷不会自动切换，需要 dump/restore 或改 `DATABASE_URL`。
 
 ## 连接配置
 
@@ -30,12 +32,14 @@
 
 ## 本地开发
 
-本地 Docker：`docker-compose.local.yml` 会顺带起一个 MySQL 8.0 容器（卷 `innobuddy-mysql`，不映射到宿主机端口）。`.env.docker.local` 里没写 `DATABASE_URL` 时，应用自动连这个容器。想连别的库，就在 `.env.docker.local` 里写 `DATABASE_URL`。
+本地默认用**宿主机 MySQL 进程**（`127.0.0.1:3306`），不用 Compose 里的 MySQL 镜像。`scripts/docker-up-local.ps1` / `scripts/docker-up-local.sh` 是总入口：检查并拉起本机 MySQL，写入/校正 `DATABASE_URL=mysql://...@host.docker.internal:3306/...`，再只启动应用容器。
+
+`docker-compose.local.yml` 里的 `mysql` 服务挂在 profile `compose-mysql` 下，仅在明确需要容器库时才启用。
 
 宿主机上跑单元测试不需要数据库，测试里会 mock 掉。想连真实 MySQL 跑集成测试：
 
 ```bash
-TEST_DATABASE_URL=mysql://user:password@127.0.0.1:3306/innoclaw_test npm test
+TEST_DATABASE_URL=mysql://user:password@127.0.0.1:3306/innoscale_test npm test
 ```
 
 - 每个测试文件会删掉并重建自己的库 `<库名>_<后缀>`，账号需要对 `<库名>_%` 有建库和删库权限。
@@ -68,21 +72,21 @@ TEST_DATABASE_URL=mysql://user:password@127.0.0.1:3306/innoclaw_test npm test
 
 SQLite 文件以只读方式打开，不会被修改。
 
-1. 停掉应用，先备份 SQLite 文件和卷 `innobuddy-data`。
+1. 停掉应用，先备份 SQLite 文件和卷 `innoscale-data`。
 2. 在仓库目录里安装依赖（脚本要用开发依赖里的 `better-sqlite3` 和 `tsx`），先 `--dry-run` 看一眼要复制多少行：
 
    ```bash
    npm ci
-   DATABASE_URL='mysql://...' npx tsx scripts/migrate-sqlite-to-mysql.ts --sqlite /path/to/innobuddy.db --dry-run
-   DATABASE_URL='mysql://...' npx tsx scripts/migrate-sqlite-to-mysql.ts --sqlite /path/to/innobuddy.db
+   DATABASE_URL='mysql://...' npx tsx scripts/migrate-sqlite-to-mysql.ts --sqlite /path/to/innoscale.db --dry-run
+   DATABASE_URL='mysql://...' npx tsx scripts/migrate-sqlite-to-mysql.ts --sqlite /path/to/innoscale.db
    ```
 
-   线上虚拟机只装了 Docker 时，可以起一个临时的 Node 容器来跑。下面的命令把卷里的 `innobuddy.db` 挂进去：
+   线上虚拟机只装了 Docker 时，可以起一个临时的 Node 容器来跑。下面的命令把卷里的 `innoscale.db` 挂进去：
 
    ```bash
-   docker run --rm -it -v "$PWD":/src -v innobuddy_innobuddy-data:/data:ro -w /src \
+   docker run --rm -it -v "$PWD":/src -v innoscale_innoscale-data:/data:ro -w /src \
      -e DATABASE_URL='mysql://...' docker.m.daocloud.io/library/node:24 \
-     sh -c 'npm ci && npx tsx scripts/migrate-sqlite-to-mysql.ts --sqlite /data/innobuddy.db'
+     sh -c 'npm ci && npx tsx scripts/migrate-sqlite-to-mysql.ts --sqlite /data/innoscale.db'
    ```
 
    卷的实际名字用 `docker volume ls` 确认。

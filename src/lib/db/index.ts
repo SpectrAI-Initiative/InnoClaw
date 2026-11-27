@@ -17,7 +17,7 @@ export function resolveDatabaseUrl(
   const value = raw?.trim();
   if (!value) {
     throw new Error(
-      "[db] DATABASE_URL is not set. Set it to a MySQL connection string, e.g. mysql://user:password@host:3306/innoclaw",
+      "[db] DATABASE_URL is not set. Set it to a MySQL connection string, e.g. mysql://user:password@host:3306/innoscale",
     );
   }
 
@@ -91,12 +91,12 @@ function createPoolOrPlaceholder(): mysql.Pool {
 // Use a global singleton so dev-mode HMR does not open a new pool per reload.
 // mysql2 pools connect lazily, so creating one here opens no connection.
 const globalForDb = globalThis as unknown as {
-  __innoclawMysqlPool?: mysql.Pool;
+  __innoscaleMysqlPool?: mysql.Pool;
 };
 
-const pool = globalForDb.__innoclawMysqlPool ?? createPoolOrPlaceholder();
+const pool = globalForDb.__innoscaleMysqlPool ?? createPoolOrPlaceholder();
 if (process.env.NODE_ENV !== "production") {
-  globalForDb.__innoclawMysqlPool = pool;
+  globalForDb.__innoscaleMysqlPool = pool;
 }
 
 export const db: Database = drizzle(pool, { schema, mode: "default" });
@@ -107,6 +107,6 @@ export function getPool(): mysql.Pool {
 
 /** Close the pool (scripts and tests). The module cannot be reused afterwards. */
 export async function closeDb(): Promise<void> {
-  globalForDb.__innoclawMysqlPool = undefined;
+  globalForDb.__innoscaleMysqlPool = undefined;
   await pool.end();
 }

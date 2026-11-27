@@ -1,6 +1,7 @@
-export const FONT_SIZE_KEY = "innobuddy-font-size";
-export const FONT_FAMILY_KEY = "innobuddy-font-family";
+export const FONT_SIZE_KEY = "innoscale-font-size";
+export const FONT_FAMILY_KEY = "innoscale-font-family";
 export const DEFAULT_FONT = "geist";
+export const DEFAULT_FONT_SIZE = 16;
 export const MIN_FONT_SIZE = 12;
 export const MAX_FONT_SIZE = 24;
 
@@ -47,13 +48,15 @@ export function buildFontInitScript(): string {
   const fontMap = JSON.stringify(fontFamilyMap);
   const urlMap = JSON.stringify(WEB_FONT_URLS);
 
-  // Minified IIFE: reads font-size and font-family from localStorage and applies
-  // them before React hydration to prevent flash of unstyled content.
+  // Minified IIFE: copy legacy font keys, then apply prefs before React hydration.
   return [
     "(function(){try{",
+    // Prefer new keys; fall back once from InnoBuddy-era keys
+    `if(!localStorage.getItem(${sizeKey})){var os=localStorage.getItem("innobuddy-font-size");if(os)localStorage.setItem(${sizeKey},os)}`,
+    `if(!localStorage.getItem(${familyKey})){var of=localStorage.getItem("innobuddy-font-family");if(of)localStorage.setItem(${familyKey},of)}`,
     // Apply saved font size
     `var s=localStorage.getItem(${sizeKey});`,
-    `if(s){var n=Number(s);if(n>=${min}&&n<=${max})document.documentElement.style.fontSize=n+"px"}`,
+    `if(s){var n=Number(s);if(n>=${min}&&n<=${max}){document.documentElement.style.fontSize=n+"px";document.documentElement.style.setProperty("--ui-font-scale",String(n/${DEFAULT_FONT_SIZE}))}}`,
     // Apply saved font family
     `var f=localStorage.getItem(${familyKey});`,
     `if(f&&f!==${defaultFont}){`,

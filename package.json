@@ -1,5 +1,5 @@
 {
-  "name": "innobuddy",
+  "name": "innoscale",
   "version": "0.2.0",
   "private": true,
   "description": "Self-hostable AI research assistant inspired by Google NotebookLM",
@@ -12,18 +12,18 @@
     "nextjs",
     "self-hosted"
   ],
-  "author": "Innobuddy Contributors",
+  "author": "InnoScale Contributors",
   "license": "Apache-2.0",
   "bin": {
-    "innobuddy": "./plugins/innobuddy-cli/scripts/innobuddy-cli.mjs"
+    "innoscale": "./plugins/innoscale-cli/scripts/innoscale-cli.mjs"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/SpectrAI-Initiative/InnoClaw.git"
+    "url": "https://github.com/SpectrAI-Initiative/InnoScale.git"
   },
-  "homepage": "https://github.com/SpectrAI-Initiative/InnoClaw",
+  "homepage": "https://github.com/SpectrAI-Initiative/InnoScale",
   "bugs": {
-    "url": "https://github.com/SpectrAI-Initiative/InnoClaw/issues"
+    "url": "https://github.com/SpectrAI-Initiative/InnoScale/issues"
   },
   "engines": {
     "node": ">=24.0.0"

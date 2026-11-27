@@ -12,7 +12,7 @@ vi.mock("swr", () => ({
       users: [
         {
           id: "admin-id",
-          email: "admin@innobuddy.local",
+          email: "admin@innoscale.local",
           name: "Administrator",
           role: "admin",
           isActive: true,

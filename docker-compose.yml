@@ -1,5 +1,5 @@
 services:
-  innobuddy:
+  innoscale:
     build:
       context: .
       args:
@@ -15,7 +15,7 @@ services:
     volumes:
       # Persistent local files: HF datasets and other runtime data.
       # Relational data lives in MySQL (DATABASE_URL in the active env file).
-      - innobuddy-data:/app/data
+      - innoscale-data:/app/data
       # Mount your research directories here.
       # Must match the paths listed in WORKSPACE_ROOTS.
       # Example: expose ~/research as /research inside the container,
@@ -24,4 +24,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  innobuddy-data:
+  innoscale-data:

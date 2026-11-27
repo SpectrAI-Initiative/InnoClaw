@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
       signal: controller.signal,
       headers: {
         "User-Agent":
-          "innobuddy/1.0 (Academic Research Tool; mailto:noreply@example.com)",
+          "innoscale/1.0 (Academic Research Tool; mailto:noreply@example.com)",
       },
     });
 

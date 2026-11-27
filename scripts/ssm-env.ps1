@@ -199,7 +199,7 @@ $version = 'v1'
 $body = @{
   SecretName = $SecretName
   VersionId = $version
-  Description = 'Innobuddy docker secrets'
+  Description = 'InnoScale docker secrets'
   EncryptType = 1
   SecretString = $serializer.Serialize($payloadMap)
 }

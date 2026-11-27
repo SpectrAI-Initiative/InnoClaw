@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -26,6 +26,16 @@ interface CreateWorkspaceDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+async function readApiError(res: Response, fallback: string): Promise<string> {
+  try {
+    const data = await res.json();
+    if (typeof data?.error === "string" && data.error.trim()) return data.error;
+  } catch {
+    /* ignore */
+  }
+  return fallback;
+}
+
 export function CreateWorkspaceDialog({
   trigger,
   workspaceRoots,
@@ -41,10 +51,27 @@ export function CreateWorkspaceDialog({
   const { manualPath, setManualPath, currentPath, entries, loading, browsePath, browse, goBack, reset } =
     useDirectoryBrowser(defaultBrowsePath);
   const [workspaceName, setWorkspaceName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const autoBrowsedRef = useRef(false);
+
+  // 只有一个可用根路径时，打开弹窗直接进入命名步骤，避免卡在「选择位置」
+  useEffect(() => {
+    if (!open) {
+      autoBrowsedRef.current = false;
+      return;
+    }
+    if (autoBrowsedRef.current || currentPath) return;
+    const onlyRoot = workspaceRoots.length === 1 ? workspaceRoots[0] : defaultBrowsePath;
+    if (!onlyRoot || workspaceRoots.length !== 1) return;
+    autoBrowsedRef.current = true;
+    void browsePath(onlyRoot);
+  }, [open, currentPath, workspaceRoots, defaultBrowsePath, browsePath]);
 
   const handleCreate = async () => {
-    if (!currentPath || !workspaceName) return;
-    const newFolderPath = `${currentPath}/${workspaceName}`;
+    if (!currentPath || !workspaceName.trim() || creating) return;
+    const name = workspaceName.trim();
+    const newFolderPath = `${currentPath.replace(/[\\/]$/, "")}/${name}`;
+    setCreating(true);
     try {
       const mkdirRes = await fetch("/api/files/mkdir", {
         method: "POST",
@@ -52,21 +79,24 @@ export function CreateWorkspaceDialog({
         body: JSON.stringify({ path: newFolderPath }),
       });
       if (!mkdirRes.ok) {
-        const err = await mkdirRes.json();
-        throw new Error(err.error || "Failed to create directory");
+        throw new Error(await readApiError(mkdirRes, t("createFailed")));
       }
 
       const res = await fetch("/api/workspaces", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: workspaceName, folderPath: newFolderPath }),
+        body: JSON.stringify({ name, folderPath: newFolderPath }),
       });
-      if (!res.ok) throw new Error("Failed to create workspace");
+      if (!res.ok) {
+        throw new Error(await readApiError(res, t("createFailed")));
+      }
       const workspace = await res.json();
       setOpen(false);
       router.push(`/workspace/${workspace.id}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create workspace");
+      toast.error(error instanceof Error ? error.message : t("createFailed"));
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -167,8 +197,10 @@ export function CreateWorkspaceDialog({
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={goBack}>{tCommon("back")}</Button>
-                <Button onClick={handleCreate} disabled={!workspaceName}>{tCommon("create")}</Button>
+                <Button variant="outline" onClick={goBack} disabled={creating}>{tCommon("back")}</Button>
+                <Button onClick={handleCreate} disabled={!workspaceName.trim() || creating}>
+                  {creating ? tCommon("loading") : tCommon("create")}
+                </Button>
               </div>
             </>
           )}

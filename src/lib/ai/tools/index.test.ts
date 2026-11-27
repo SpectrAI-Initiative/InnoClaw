@@ -57,7 +57,7 @@ let otherUserRoot: string;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "innobuddy-agent-tools-"));
+  const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "innoscale-agent-tools-"));
   temporaryDirectories.push(sandbox);
   userRoot = path.join(sandbox, "user-a");
   otherUserRoot = path.join(sandbox, "user-b");

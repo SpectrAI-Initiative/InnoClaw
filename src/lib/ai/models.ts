@@ -13,6 +13,26 @@ export const TOKENHUB_DEFAULT_BASE_URL = "https://tokenhub.tencentmaas.com/v1";
  * Previously supported vendors are kept in `archived-providers.ts`.
  */
 export const PROVIDERS = {
+  /**
+   * UI-first research model. It shares the configured DeepSeek key/endpoint:
+   * the server maps it to a real callable model before building the request.
+   * Kept in the catalog so the model selector and request validation agree.
+   */
+  scireasoner: {
+    id: "scireasoner",
+    name: "SciReasoner",
+    models: [
+      {
+        id: "sci-reasoner",
+        name: "SciReasoner",
+        contextWindow: 1_000_000,
+        supportsVision: false,
+      },
+    ] satisfies ModelDefinition[],
+    envKey: "DEEPSEEK_API_KEY",
+    supportsTools: true,
+    supportsVision: false,
+  },
   deepseek: {
     id: "deepseek",
     name: "Tencent Cloud DeepSeek",

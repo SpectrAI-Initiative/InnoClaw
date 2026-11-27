@@ -2,7 +2,7 @@
  * Helpers for MySQL integration tests.
  *
  * These tests run only when TEST_DATABASE_URL is set, e.g.
- *   TEST_DATABASE_URL=mysql://user:pw@127.0.0.1:3306/innoclaw_test npm test
+ *   TEST_DATABASE_URL=mysql://user:pw@127.0.0.1:3306/innoscale_test npm test
  * Each test file gets its own database named `<database>_<suffix>`, which is
  * dropped and recreated, so the account needs CREATE/DROP on `<database>_%`.
  * The database name must contain "test" as a guard against wiping real data.
@@ -47,9 +47,9 @@ export async function setUpTestDatabase(suffix: string): Promise<string> {
   url.pathname = `/${dbName}`;
   // Must run before ./index is first imported: the pool reads DATABASE_URL at load.
   process.env.DATABASE_URL = url.toString();
-  const globals = globalThis as { __innoclawMysqlPool?: unknown; __innobuddyMigrationPromise?: unknown };
-  delete globals.__innoclawMysqlPool;
-  delete globals.__innobuddyMigrationPromise;
+  const globals = globalThis as { __innoscaleMysqlPool?: unknown; __innoscaleMigrationPromise?: unknown };
+  delete globals.__innoscaleMysqlPool;
+  delete globals.__innoscaleMigrationPromise;
 
   const { runMigrations } = await import("./migrate");
   await runMigrations();

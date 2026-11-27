@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useCallback } from "react";
+import { useSyncExternalStore, useCallback, useEffect } from "react";
 import {
   FONT_FAMILY_KEY,
   DEFAULT_FONT,
@@ -15,7 +15,7 @@ export { FONT_OPTIONS } from "@/lib/font-constants";
 function loadWebFont(fontId: FontId) {
   const url = WEB_FONT_URLS[fontId];
   if (!url) return;
-  const linkId = `innobuddy-font-${fontId}`;
+  const linkId = `innoscale-font-${fontId}`;
   if (document.getElementById(linkId)) return;
   const link = document.createElement("link");
   link.id = linkId;
@@ -61,6 +61,9 @@ function getServerSnapshot(): FontId {
 
 export function useFontFamily() {
   const fontFamily = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  // 水合后重新应用已保存字体，避免服务端内联样式在首帧覆盖用户选择。
+  useEffect(() => { applyFont(fontFamily); }, [fontFamily]);
 
   const updateFontFamily = useCallback((id: FontId) => {
     try {

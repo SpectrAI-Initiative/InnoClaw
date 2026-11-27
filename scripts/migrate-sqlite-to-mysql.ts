@@ -1,9 +1,9 @@
 /**
- * One-off copy of an existing InnoClaw SQLite database into MySQL.
+ * One-off copy of an existing InnoScale SQLite database into MySQL.
  *
  * Usage (from the repository root, with dev dependencies installed):
- *   DATABASE_URL=mysql://user:pw@host:3306/innoclaw \
- *     npx tsx scripts/migrate-sqlite-to-mysql.ts --sqlite ./data/innobuddy.db [--dry-run]
+ *   DATABASE_URL=mysql://user:pw@host:3306/innoscale \
+ *     npx tsx scripts/migrate-sqlite-to-mysql.ts --sqlite ./data/innoscale.db [--dry-run]
  *
  * Behaviour:
  * - Applies the MySQL migrations first, then copies every table the two

@@ -1,13 +1,13 @@
 /**
  * Per-browser cache of AI-translated skill descriptions.
  *
- * Persisted key (shared contract): `Innobuddy.skillDescriptionTranslations.v1.<locale>`
+ * Persisted key (shared contract): `InnoScale.skillDescriptionTranslations.v1.<locale>`
  * → JSON object mapping `<skillId>:<hash of the original description>` to the
  * translated text. Including the description hash means an edited description
  * is translated again instead of showing a stale translation.
  */
 
-const STORAGE_PREFIX = "Innobuddy.skillDescriptionTranslations.v1.";
+const STORAGE_PREFIX = "InnoScale.skillDescriptionTranslations.v1.";
 /** Keep the cache bounded even if skills churn. */
 const MAX_ENTRIES = 2000;
 

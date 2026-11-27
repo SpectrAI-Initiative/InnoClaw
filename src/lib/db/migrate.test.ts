@@ -24,11 +24,11 @@ describe("runMigrations", () => {
     mocks.query.mockReset();
     mocks.release.mockReset();
     mocks.migrate.mockReset();
-    delete (globalThis as { __innobuddyMigrationPromise?: unknown }).__innobuddyMigrationPromise;
+    delete (globalThis as { __innoscaleMigrationPromise?: unknown }).__innoscaleMigrationPromise;
   });
 
   afterEach(() => {
-    delete (globalThis as { __innobuddyMigrationPromise?: unknown }).__innobuddyMigrationPromise;
+    delete (globalThis as { __innoscaleMigrationPromise?: unknown }).__innoscaleMigrationPromise;
   });
 
   it("migrates while holding the advisory lock, then releases it", async () => {

@@ -1,13 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Bot, LogIn } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useSearchParams } from "next/navigation";
 import {
   buildAuthPageHref,
   completeCliBrowserHandoff,
@@ -15,17 +10,16 @@ import {
 } from "@/lib/auth/cli-handoff";
 import { resolveRoleAwareRedirectPath } from "@/lib/auth/redirect-policy";
 import { useAuthUser } from "@/lib/hooks/use-auth";
+// 视觉对齐：demo 的品牌 logo（与欢迎页/左栏同一枚）
+const BRAND_LOGO =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iNi43MiIgcnk9IjYuNzIiIGZpbGw9IiMxNTFDMkYiLz48cmVjdCB4PSI3LjA1IiB5PSI2LjU1IiB3aWR0aD0iMi42MiIgaGVpZ2h0PSIxMC45IiByeD0iMS4zMSIgZmlsbD0iI0ZGRkZGRiIvPjxwYXRoIGQ9Ik0xMC4zIDYuNTVoMy41YTMuMDUgMy4wNSAwIDAgMSAwIDUuOUgxMC4zeiIgZmlsbD0iI0ZGRkZGRiIvPjxwYXRoIGQ9Ik0xMC4zIDEyLjloMy4yYTIuOSAyLjkgMCAwIDEgMCA1LjZIMTAuM3oiIGZpbGw9IiNGRkZGRkYiLz48Y2lyY2xlIGN4PSIxMC42IiBjeT0iMTAuMTUiIHI9IjEuNiIgZmlsbD0iIzRBNUNGNSIvPjwvc3ZnPg==";
 
-function resolvePostLoginPath(
-  next: string | null,
-  role: "admin" | "user",
-): string {
-  const fallback = role === "admin" ? "/admin/users" : "/";
-  return resolveRoleAwareRedirectPath(next, role, fallback);
+function resolvePostLoginPath(next: string | null, role: "admin" | "user"): string {
+  // 本地 Demo 的落地页就是工作空间选择页，不走后台管理页。
+  return resolveRoleAwareRedirectPath(next, role, "/");
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading, isAuthDisabled } = useAuthUser();
   const [email, setEmail] = useState("");
@@ -33,54 +27,42 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [cliHandoffLoading, setCliHandoffLoading] = useState(false);
+  const redirectingRef = useRef(false);
   const registerHref = buildAuthPageHref("/register", searchParams);
   const cliHandoff = parseCliHandoffParams(searchParams);
 
   useEffect(() => {
+    if (redirectingRef.current) return;
     if (isAuthDisabled) {
-      router.replace("/");
-      router.refresh();
+      window.location.replace("/");
       return;
     }
-
-    if (isLoading || !user) {
-      return;
-    }
-
-    if (cliHandoff) {
-      return;
-    }
-
-    router.replace(resolvePostLoginPath(searchParams.get("next"), user.role));
-    router.refresh();
-  }, [cliHandoff, isAuthDisabled, isLoading, router, searchParams, user]);
+    if (isLoading || !user) return;
+    if (cliHandoff) return;
+    window.location.replace(resolvePostLoginPath(searchParams.get("next"), user.role));
+  }, [cliHandoff, isAuthDisabled, isLoading, searchParams, user]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError("");
-
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error || "Login failed");
+        setError(data.error || "登录失败");
         return;
       }
-
       await completeCliBrowserHandoff(searchParams);
-      router.replace(resolvePostLoginPath(
-        searchParams.get("next"),
-        data.user?.role === "admin" ? "admin" : "user",
-      ));
-      router.refresh();
+      redirectingRef.current = true;
+      window.location.replace(resolvePostLoginPath(searchParams.get("next"), data.user?.role === "admin" ? "admin" : "user"));
+      return;
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Login failed");
+      setError(submitError instanceof Error ? submitError.message : "登录失败");
     } finally {
       setLoading(false);
     }
@@ -89,112 +71,63 @@ export default function LoginPage() {
   async function handleCliHandoffClick() {
     setCliHandoffLoading(true);
     setError("");
-
     try {
       await completeCliBrowserHandoff(searchParams);
-      router.replace(resolvePostLoginPath(
-        searchParams.get("next"),
-        user?.role === "admin" ? "admin" : "user",
-      ));
-      router.refresh();
+      redirectingRef.current = true;
+      window.location.replace(resolvePostLoginPath(searchParams.get("next"), user?.role === "admin" ? "admin" : "user"));
     } catch (handoffError) {
-      setError(handoffError instanceof Error ? handoffError.message : "CLI sign-in failed");
+      setError(handoffError instanceof Error ? handoffError.message : "CLI 登录失败");
     } finally {
       setCliHandoffLoading(false);
     }
   }
 
   if (isAuthDisabled) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4">
-        <p className="text-sm text-muted-foreground">Authentication is disabled. Redirecting...</p>
-      </main>
-    );
+    return <main className="ib-auth"><p className="ib-auth-redirect">认证已关闭，正在跳转…</p></main>;
   }
-
   if (user && !cliHandoff) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4">
-        <p className="text-sm text-muted-foreground">Redirecting...</p>
-      </main>
-    );
+    return <main className="ib-auth"><p className="ib-auth-redirect">正在跳转…</p></main>;
   }
 
+  // CLI handoff 完成页 —— 保留原交互
   if (user && cliHandoff) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md border-border/70 shadow-lg">
-          <CardHeader className="space-y-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Bot className="h-5 w-5" />
-            </div>
-            <div>
-              <CardTitle className="text-2xl">Complete CLI sign-in</CardTitle>
-              <CardDescription>Authorize the CLI to use your current browser session.</CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button className="w-full gap-2" type="button" disabled={cliHandoffLoading} onClick={handleCliHandoffClick}>
-              <LogIn className="h-4 w-4" />
-              {cliHandoffLoading ? "Completing..." : "Complete CLI sign-in"}
-            </Button>
-          </CardContent>
-        </Card>
+      <main className="ib-auth">
+        <div className="au-card au-card-cli">
+          <div className="au-brand"><span className="au-logo" style={{ backgroundImage: `url("${BRAND_LOGO}")` }} /><span className="au-word">Innoscale</span></div>
+          <div className="au-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3.4" y="7.3" width="17.2" height="12.1" rx="3.2"/><path d="M12 2.7v2.3M9.4 16.5h5.2"/><circle cx="9" cy="12.9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="12.9" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h1 className="au-title">完成 CLI 登录</h1>
+          <p className="au-sub">授权 CLI 使用你当前的浏览器会话。</p>
+          {error && <p className="au-err" role="alert">{error}</p>}
+          <button className="au-btn" type="button" disabled={cliHandoffLoading} onClick={handleCliHandoffClick}>
+            {cliHandoffLoading ? "正在完成…" : "完成 CLI 登录"}
+          </button>
+        </div>
       </main>
     );
   }
 
+  // 登录卡 —— 对齐 demo
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-border/70 shadow-lg">
-        <CardHeader className="space-y-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Bot className="h-5 w-5" />
+    <main className="ib-auth">
+      <div className="au-card">
+        <div className="au-brand"><span className="au-logo" style={{ backgroundImage: `url("${BRAND_LOGO}")` }} /><span className="au-word">Innoscale</span></div>
+        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+          <div className="au-field">
+            <label className="au-lb" htmlFor="email">邮箱</label>
+            <input className="au-in" id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@lab.com" required />
           </div>
-          <div>
-            <CardTitle className="text-2xl">Sign in to Innobuddy</CardTitle>
-            <CardDescription>Use your local account to continue.</CardDescription>
+          <div className="au-field">
+            <label className="au-lb" htmlFor="password">密码</label>
+            <input className="au-in" id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="请输入密码" required />
           </div>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-              />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button className="w-full gap-2" type="submit" disabled={loading}>
-              <LogIn className="h-4 w-4" />
-              {loading ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
-          <p className="mt-5 text-center text-sm text-muted-foreground">
-            No account yet?{" "}
-            <Link className="font-medium text-primary hover:underline" href={registerHref}>
-              Create one
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+          {error && <p className="au-err" role="alert">{error}</p>}
+          <button className="au-btn" type="submit" disabled={loading}>{loading ? "登录中…" : "登录"}</button>
+        </form>
+        <p className="au-foot"><span>还没有账号？</span><Link className="au-link" href={registerHref}>创建一个</Link></p>
+      </div>
     </main>
   );
 }

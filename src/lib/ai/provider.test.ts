@@ -56,7 +56,7 @@ describe("getPerModelProvider – base URL resolution", () => {
 
   beforeEach(() => {
     process.env = { ...originalEnv };
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "innobuddy-provider-test-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "innoscale-provider-test-"));
     vi.spyOn(process, "cwd").mockReturnValue(tmpDir);
     createOpenAISpy.mockClear();
     openAIDoGenerate.mockClear();

@@ -1,34 +1,35 @@
 # Local debug. Browser on this machine only: http://127.0.0.1:3000
-# Starts a private MySQL 8.0 container unless .env.docker.local sets DATABASE_URL.
-# The database is reachable only on the Compose network (no host port).
+# Default: app uses host MySQL via host.docker.internal (see scripts/docker-up-local.*).
+# Optional Compose MySQL: docker compose --profile compose-mysql ... up mysql
 services:
-  innobuddy:
+  innoscale:
     env_file:
       - .env.docker.local
     environment:
-      DATABASE_URL: ${DATABASE_URL:-mysql://innobuddy:${LOCAL_MYSQL_PASSWORD:-innobuddy-local}@mysql:3306/innobuddy}
+      DATABASE_URL: ${DATABASE_URL:-mysql://innoscale:${LOCAL_MYSQL_PASSWORD:-innoscale-local}@host.docker.internal:3306/innoscale}
+    # Allows DATABASE_URL to reach a MySQL process on the Windows/macOS/Linux host.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:${PUBLISH_PORT:-3000}:3000"
-    depends_on:
-      mysql:
-        condition: service_healthy
 
   mysql:
+    profiles: ["compose-mysql"]
     image: ${MYSQL_IMAGE:-docker.m.daocloud.io/library/mysql:8.0}
     command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_bin"]
     environment:
-      MYSQL_DATABASE: innobuddy
-      MYSQL_USER: innobuddy
-      MYSQL_PASSWORD: ${LOCAL_MYSQL_PASSWORD:-innobuddy-local}
+      MYSQL_DATABASE: innoscale
+      MYSQL_USER: innoscale
+      MYSQL_PASSWORD: ${LOCAL_MYSQL_PASSWORD:-innoscale-local}
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
     volumes:
-      - innobuddy-mysql:/var/lib/mysql
+      - innoscale-mysql:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uinnobuddy -p\"$$MYSQL_PASSWORD\" --silent"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uinnoscale -p\"$$MYSQL_PASSWORD\" --silent"]
       interval: 5s
       timeout: 5s
       retries: 30
     restart: unless-stopped
 
 volumes:
-  innobuddy-mysql:
+  innoscale-mysql:

@@ -11,7 +11,7 @@ function getSigningSecret(): string {
   return (
     process.env.AUTH_SECRET ||
     process.env.NEXTAUTH_SECRET ||
-    "innobuddy-development-secret"
+    "innoscale-development-secret"
   );
 }
 

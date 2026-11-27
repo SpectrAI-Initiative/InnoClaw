@@ -244,3 +244,41 @@ export interface SkillExportData {
   parameters: SkillParameter[] | null;
   version?: string;
 }
+
+// ============================================================
+// TEAMS
+// ============================================================
+export type TeamPlan = "free" | "plus" | "pro";
+export type TeamRole = "owner" | "admin" | "member";
+
+export interface Team {
+  id: string;
+  name: string;
+  description: string | null;
+  ownerUserId: string;
+  plan: TeamPlan;
+  createdAt: string;
+  updatedAt: string;
+  myRole?: TeamRole;
+}
+
+export interface TeamMember {
+  id: string;
+  userId: string;
+  role: TeamRole;
+  joinedAt: string;
+  name: string;
+  email: string;
+}
+
+export interface TeamWorkspace {
+  id: string;
+  name: string;
+  folderPath: string;
+  addedAt: string;
+}
+
+export interface TeamDetail extends Team {
+  members: TeamMember[];
+  workspaces: TeamWorkspace[];
+}

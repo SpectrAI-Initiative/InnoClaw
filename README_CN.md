@@ -1,7 +1,7 @@
-# Innobuddy
+# InnoScale
 
 <p align="center">
-  <img src="site/logos/20260316-112548.png" alt="Innobuddy Logo" width="200" />
+  <img src="site/logos/20260316-112548.png" alt="InnoScale Logo" width="200" />
 </p>
 
 <p align="center">
@@ -10,8 +10,8 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache 2.0 License"></a>
-  <a href="https://github.com/SpectrAI-Initiative/InnoClaw/stargazers"><img src="https://img.shields.io/github/stars/SpectrAI-Initiative/InnoClaw?style=flat&logo=github" alt="GitHub Stars"></a>
-  <a href="https://github.com/SpectrAI-Initiative/InnoClaw/issues"><img src="https://img.shields.io/github/issues/SpectrAI-Initiative/InnoClaw" alt="GitHub Issues"></a>
+  <a href="https://github.com/SpectrAI-Initiative/InnoScale/stargazers"><img src="https://img.shields.io/github/stars/SpectrAI-Initiative/InnoScale?style=flat&logo=github" alt="GitHub Stars"></a>
+  <a href="https://github.com/SpectrAI-Initiative/InnoScale/issues"><img src="https://img.shields.io/github/issues/SpectrAI-Initiative/InnoScale" alt="GitHub Issues"></a>
 </p>
 
 <p align="center">
@@ -19,20 +19,20 @@
 </p>
 
 <p align="center">
-  <a href="#highlights">产品亮点</a> · <a href="#using-Innobuddy">如何使用</a> · <a href="#get-started">开始使用</a> · <a href="#community">社区</a>
+  <a href="#highlights">产品亮点</a> · <a href="#using-InnoScale">如何使用</a> · <a href="#get-started">开始使用</a> · <a href="#community">社区</a>
 </p>
 
-Innobuddy 把服务器上的文件夹变成研究工作区。论文研读、针对自有文件的提问，以及后续的执行，都在同一处完成，不必在文件浏览、笔记、论文阅读和任务终端之间来回切换。
+InnoScale 把服务器上的文件夹变成研究工作区。论文研读、针对自有文件的提问，以及后续的执行，都在同一处完成，不必在文件浏览、笔记、论文阅读和任务终端之间来回切换。
 
 回答附带所依据的文档。讨论按固定角色进行。技能可以在不同研究中复用。高风险的执行步骤会停下来，等待人工确认。
 
 <p align="center">
-  <img src="public/innobuddy-flow.png" alt="Innobuddy 工作流" width="800" />
+  <img src="public/innoscale-flow.png" alt="InnoScale 工作流" width="800" />
 </p>
 
 ## 适用对象
 
-Innobuddy 面向希望从自有材料中获得有依据回答的研究人员，面向把代码、数据与论文放在一起阅读的工程师，也面向希望自行托管研究环境的实验室。
+InnoScale 面向希望从自有材料中获得有依据回答的研究人员，面向把代码、数据与论文放在一起阅读的工程师，也面向希望自行托管研究环境的实验室。
 
 <a id="highlights"></a>
 
@@ -46,7 +46,7 @@ Innobuddy 面向希望从自有材料中获得有依据回答的研究人员，�
 - **会话彼此独立。** 不同项目和标签保留各自的智能体上下文。
 - **自行托管。** 工作区、索引和笔记保留在您运行的服务器上。对话使用腾讯云 TokenHub 上的 DeepSeek V4.1 Flash 与 DeepSeek V4 Pro。
 
-<a id="using-Innobuddy"></a>
+<a id="using-InnoScale"></a>
 
 ## 如何使用
 
@@ -74,7 +74,7 @@ Innobuddy 面向希望从自有材料中获得有依据回答的研究人员，�
 
 ## 社区
 
-安装与部署方面的问题见 [开发说明](docs/开发说明.md)。缺陷与功能建议请提交到 [GitHub Issues](https://github.com/SpectrAI-Initiative/InnoClaw/issues)。如需直接交流，可加入下方飞书或微信群。
+安装与部署方面的问题见 [开发说明](docs/开发说明.md)。缺陷与功能建议请提交到 [GitHub Issues](https://github.com/SpectrAI-Initiative/InnoScale/issues)。如需直接交流，可加入下方飞书或微信群。
 
 <p align="center">
   <a href="#community">
@@ -91,4 +91,4 @@ Innobuddy 面向希望从自有材料中获得有依据回答的研究人员，�
 ## 项目信息
 
 - **许可证** — Apache-2.0，见 `LICENSE`
-- **仓库** — https://github.com/SpectrAI-Initiative/InnoClaw
+- **仓库** — https://github.com/SpectrAI-Initiative/InnoScale

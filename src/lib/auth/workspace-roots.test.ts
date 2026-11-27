@@ -34,7 +34,7 @@ function authContext(id: string, role: "admin" | "user"): AuthContext {
 }
 
 function temporaryRoot(): string {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "innobuddy-user-roots-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "innoscale-user-roots-"));
   sandboxes.push(root);
   return root;
 }

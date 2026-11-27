@@ -49,7 +49,7 @@ export async function searchHuggingFace(
     try {
       response = await fetch(apiUrl, {
         headers: {
-          "User-Agent": "innobuddy/1.0",
+          "User-Agent": "innoscale/1.0",
           Accept: "application/json",
         },
         signal: controller.signal,

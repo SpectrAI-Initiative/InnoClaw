@@ -49,7 +49,7 @@ describe("ensureEnvLocal", () => {
     ensureEnvLocal();
 
     const content = fs.readFileSync(path.join(tmpDir, ".env.local"), "utf-8");
-    expect(content).toContain("# Innobuddy configuration");
+    expect(content).toContain("# InnoScale configuration");
   });
 
   it("returns false instead of throwing when startup cannot create .env.local", async () => {

@@ -1,9 +1,8 @@
 "use client";
 
 import { useSyncExternalStore, useCallback } from "react";
-import { FONT_SIZE_KEY, MIN_FONT_SIZE, MAX_FONT_SIZE } from "@/lib/font-constants";
+import { FONT_SIZE_KEY, DEFAULT_FONT_SIZE, MIN_FONT_SIZE, MAX_FONT_SIZE } from "@/lib/font-constants";
 
-const DEFAULT_FONT_SIZE = 16;
 const STEP = 2;
 
 let listeners: Array<() => void> = [];
@@ -39,6 +38,7 @@ export function useFontSize() {
     const clamped = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, size));
     localStorage.setItem(FONT_SIZE_KEY, String(clamped));
     document.documentElement.style.fontSize = `${clamped}px`;
+    document.documentElement.style.setProperty("--ui-font-scale", String(clamped / DEFAULT_FONT_SIZE));
     emitChange();
   }, []);
 

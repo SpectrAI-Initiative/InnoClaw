@@ -18,12 +18,19 @@ export function useDirectoryBrowser(defaultBrowsePath?: string) {
       const res = await fetch(
         `/api/files/browse?path=${encodeURIComponent(dirPath)}`
       );
-      if (!res.ok) throw new Error("Failed to browse");
+      if (!res.ok) {
+        let message = "无法打开该目录";
+        try {
+          const err = await res.json();
+          if (typeof err?.error === "string" && err.error.trim()) message = err.error;
+        } catch { /* ignore */ }
+        throw new Error(message);
+      }
       const data = await res.json();
       setEntries(data.filter((e: FileEntry) => e.type === "directory"));
       setCurrentPath(dirPath);
-    } catch {
-      toast.error("Failed to browse directory");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "无法打开该目录");
     } finally {
       setLoading(false);
     }

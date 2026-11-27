@@ -81,7 +81,7 @@ export async function downloadFiguresToLocal(
           try {
             // Build headers — arXiv requires a Referer to serve images
             const headers: Record<string, string> = {
-              "User-Agent": "innobuddy/1.0 (Academic Research Tool; mailto:noreply@example.com)",
+              "User-Agent": "innoscale/1.0 (Academic Research Tool; mailto:noreply@example.com)",
               Accept: "image/*,*/*;q=0.8",
             };
             if (fig.url.includes("arxiv.org")) {

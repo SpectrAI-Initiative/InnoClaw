@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useSyncExternalStore } from "react";
 
-const STORAGE_KEY = "innobuddy-minimal-mode";
+const STORAGE_KEY = "innoscale-minimal-mode";
 
 function subscribe(callback: () => void) {
   window.addEventListener("storage", callback);

@@ -46,17 +46,17 @@ describe("computeK8sJobSpecHash", () => {
 });
 
 describe("ensureOwnedK8sJob", () => {
-  it("accepts matching Innobuddy labels", () => {
+  it("accepts matching InnoScale labels", () => {
     expect(() =>
       ensureOwnedK8sJob(
         {
           metadata: {
             labels: {
-              "app.kubernetes.io/managed-by": "Innobuddy",
-              "innobuddy.ai/job-hash": "hash-1".slice(0, 63),
+              "app.kubernetes.io/managed-by": "InnoScale",
+              "innoscale.ai/job-hash": "hash-1".slice(0, 63),
             },
             annotations: {
-              "innobuddy.ai/job-spec-hash": "hash-1",
+              "innoscale.ai/job-spec-hash": "hash-1",
             },
           },
         },
@@ -68,7 +68,7 @@ describe("ensureOwnedK8sJob", () => {
   it("rejects resources without matching ownership", () => {
     expect(() =>
       ensureOwnedK8sJob({ metadata: { labels: {} } }, "hash-1"),
-    ).toThrow(/not owned by innobuddy/);
+    ).toThrow(/not owned by innoscale/);
   });
 
   it("rejects resources without a matching full hash annotation", () => {
@@ -77,11 +77,11 @@ describe("ensureOwnedK8sJob", () => {
         {
           metadata: {
             labels: {
-              "app.kubernetes.io/managed-by": "Innobuddy",
-              "innobuddy.ai/job-hash": "a".repeat(63),
+              "app.kubernetes.io/managed-by": "InnoScale",
+              "innoscale.ai/job-hash": "a".repeat(63),
             },
             annotations: {
-              "innobuddy.ai/job-spec-hash": "b".repeat(64),
+              "innoscale.ai/job-spec-hash": "b".repeat(64),
             },
           },
         },

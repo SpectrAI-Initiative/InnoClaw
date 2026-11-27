@@ -1,0 +1,46 @@
+{
+  "name": "innoscale-cli",
+  "version": "0.1.0",
+  "description": "Command-line plugin for operating InnoScale and Deep Research workflows from Codex.",
+  "author": {
+    "name": "InnoScale Contributors",
+    "email": "support@openai.com",
+    "url": "https://github.com/SpectrAI-Initiative/InnoScale"
+  },
+  "homepage": "https://github.com/SpectrAI-Initiative/InnoScale",
+  "repository": "https://github.com/SpectrAI-Initiative/InnoScale",
+  "license": "Apache-2.0",
+  "keywords": [
+    "InnoScale",
+    "cli",
+    "deep-research",
+    "nextjs",
+    "research-assistant",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "InnoScale CLI",
+    "shortDescription": "Run innoscale app and Deep Research workflows from the terminal",
+    "longDescription": "Use InnoScale CLI to start the local app, run build and test commands, manage workspaces, create Deep Research sessions, start runs, and export final reports without leaving the terminal.",
+    "developerName": "InnoScale Contributors",
+    "category": "Research",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/SpectrAI-Initiative/InnoScale",
+    "privacyPolicyURL": "https://openai.com/policies/privacy-policy/",
+    "termsOfServiceURL": "https://openai.com/policies/terms-of-use/",
+    "defaultPrompt": [
+      "Start the local innoscale app and verify it is ready",
+      "Create and run a Deep Research session from the command line",
+      "Export the latest Deep Research report to the workspace"
+    ],
+    "brandColor": "#0F766E",
+    "composerIcon": "./assets/innoscale-cli-small.svg",
+    "logo": "./assets/innoscale-cli-logo.svg",
+    "screenshots": []
+  }
+}

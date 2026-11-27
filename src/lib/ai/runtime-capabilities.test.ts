@@ -9,7 +9,7 @@ describe("runtimeProviderSupportsTools", () => {
 
   beforeEach(() => {
     process.env = { ...originalEnv };
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "innobuddy-runtime-capabilities-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "innoscale-runtime-capabilities-"));
     vi.spyOn(process, "cwd").mockReturnValue(tmpDir);
   });
 

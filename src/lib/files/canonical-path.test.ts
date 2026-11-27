@@ -15,7 +15,7 @@ describe("canonical workspace path containment", () => {
   let userB: string;
 
   beforeEach(() => {
-    sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "innobuddy-canonical-path-"));
+    sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "innoscale-canonical-path-"));
     userA = path.join(sandbox, "user-a");
     userB = path.join(sandbox, "user-b");
     fs.mkdirSync(userA);

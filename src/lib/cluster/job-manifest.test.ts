@@ -34,9 +34,9 @@ describe("buildK8sJobManifest", () => {
         name: "smoke-test",
         namespace: "default",
         labels: {
-          "app.kubernetes.io/managed-by": "Innobuddy",
-          "innobuddy.ai/workspace-id": "ws-1",
-          "innobuddy.ai/job-hash": "hash-1",
+          "app.kubernetes.io/managed-by": "InnoScale",
+          "innoscale.ai/workspace-id": "ws-1",
+          "innoscale.ai/job-hash": "hash-1",
         },
       },
       spec: {
@@ -129,12 +129,12 @@ describe("buildK8sJobManifest", () => {
       },
     });
 
-    expect(manifest.metadata.labels["innobuddy.ai/job-hash"]).toHaveLength(63);
+    expect(manifest.metadata.labels["innoscale.ai/job-hash"]).toHaveLength(63);
     expect(manifest.metadata.annotations).toMatchObject({
-      "innobuddy.ai/job-spec-hash": fullHash,
+      "innoscale.ai/job-spec-hash": fullHash,
     });
     expect(manifest.spec.template.metadata.annotations).toMatchObject({
-      "innobuddy.ai/job-spec-hash": fullHash,
+      "innoscale.ai/job-spec-hash": fullHash,
     });
   });
 });

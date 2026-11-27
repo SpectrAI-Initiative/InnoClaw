@@ -1,0 +1,9 @@
+interface:
+  display_name: "InnoScale CLI"
+  short_description: "Run innoscale app workflows and Deep Research sessions from the terminal"
+  icon_small: "./assets/innoscale-cli-small.svg"
+  icon_large: "./assets/innoscale-cli-logo.svg"
+  default_prompt: "Use InnoScale CLI to run the local app, create a Deep Research session, and export the resulting report."
+
+dependencies:
+  tools: []

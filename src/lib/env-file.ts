@@ -61,7 +61,7 @@ export function ensureEnvLocal(): void {
   } else {
     fs.writeFileSync(
       target,
-      "# Innobuddy configuration – edit values as needed\n",
+      "# InnoScale configuration – edit values as needed\n",
       "utf-8",
     );
   }

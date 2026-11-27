@@ -8,7 +8,7 @@ function isAdministratorPath(path: string): boolean {
 
   try {
     const decoded = decodeURIComponent(pathname);
-    const normalized = new URL(decoded, "http://innobuddy.local").pathname;
+    const normalized = new URL(decoded, "http://innoscale.local").pathname;
     return normalized === "/admin" || normalized.startsWith("/admin/");
   } catch {
     return false;

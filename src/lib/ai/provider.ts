@@ -1,4 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
+import { shouldUseRemoteAgent } from "@/lib/ai/remote-agent-proxy";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
 import { inArray } from "drizzle-orm";
@@ -43,13 +44,22 @@ function getPerModelProvider(
   const providerDef = PROVIDERS[providerId as ProviderId];
   const perModelEnvVar = getPerModelBaseUrlEnvKey(providerId, modelId);
   const vendorEnvVar = getVendorBaseUrlEnvKey(providerId);
-  const baseURL = env[perModelEnvVar] || env[vendorEnvVar] || TOKENHUB_DEFAULT_BASE_URL;
+  const rawKey = env[providerDef?.envKey || getApiKeyEnvKey(providerId)] || "";
+  // 本地验证：key 为占位符(none/ssm:)且配置了线上账号时，走本地 LLM 中继，
+  // 由中继把请求转发到线上真实模型。仅在本地 Docker 副本中生效。
+  const isPlaceholderKey = !rawKey || rawKey === "none" || rawKey.startsWith("ssm:");
+  const useRelay = isPlaceholderKey && shouldUseRemoteAgent();
+  const relayBaseUrl =
+    process.env.LLM_RELAY_BASE_URL || "http://127.0.0.1:3000/api/llm-relay/v1";
+  const baseURL = useRelay
+    ? relayBaseUrl
+    : env[perModelEnvVar] || env[vendorEnvVar] || TOKENHUB_DEFAULT_BASE_URL;
 
   const cacheKey = `${providerId}:${modelId}:${baseURL}`;
   let cached = perModelProviderCache.get(cacheKey);
   if (!cached) {
     cached = createOpenAI({
-      apiKey: env[providerDef?.envKey || getApiKeyEnvKey(providerId)] || "",
+      apiKey: useRelay ? "local-relay" : rawKey,
       baseURL,
     });
     perModelProviderCache.set(cacheKey, cached);
@@ -74,9 +84,23 @@ function assertActiveModel(provider: string, modelId: string): void {
  * Build a LanguageModel for a catalog provider/model pair.
  * Calls stay on the Vercel AI SDK Chat Completions client.
  */
+/**
+ * UI-facing model aliases that are served by a real callable model.
+ * SciReasoner is the default shown in the composer; until a dedicated
+ * endpoint exists it runs on the strongest configured DeepSeek model.
+ */
+const MODEL_ALIASES: Record<string, { providerId: string; modelId: string }> = {
+  "scireasoner/sci-reasoner": { providerId: "deepseek", modelId: "deepseek-v4-pro" },
+};
+
+export function resolveRuntimeModel(provider: string, modelId: string) {
+  return MODEL_ALIASES[`${provider}/${modelId}`] ?? { providerId: provider, modelId };
+}
+
 function buildLanguageModel(provider: string, modelId: string): LanguageModel {
-  assertActiveModel(provider, modelId);
-  return getPerModelProvider(provider, modelId);
+  const resolved = resolveRuntimeModel(provider, modelId);
+  assertActiveModel(resolved.providerId, resolved.modelId);
+  return getPerModelProvider(resolved.providerId, resolved.modelId);
 }
 
 /**

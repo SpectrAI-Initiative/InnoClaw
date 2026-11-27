@@ -7,9 +7,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { buildFontInitScript } from "@/lib/font-constants";
 import "./globals.css";
+import "./innoscale-demo.css";
+import "./innoscale-refine.css";
 
 export const metadata: Metadata = {
-  title: "Innobuddy",
+  title: "InnoScale",
   description: "AI-powered research assistant for your workspace files",
 };
 
