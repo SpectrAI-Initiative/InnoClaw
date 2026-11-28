@@ -1,52 +1,16 @@
-# Ubuntu Server 24.04 LTS (Noble) amd64.
-# Default pull goes through a domestic Docker Hub mirror; override UBUNTU_IMAGE if needed.
-ARG UBUNTU_IMAGE=docker.m.daocloud.io/library/ubuntu:24.04
-ARG NODE_VERSION=24.22.3
-ARG NODE_DIST_URL=https://cdn.npmmirror.com/binaries/node
-ARG APT_MIRROR=mirrors.aliyun.com
+# App image. Expects a prebuilt base with Ubuntu + Node + build tools + tini:
+#   .\scripts\docker-build-base.ps1
+#   ./scripts/docker-build-base.sh
+ARG BASE_IMAGE=innoscale-base:24.04-node24.22.3
 ARG NPM_REGISTRY=https://registry.npmmirror.com
 # Prebuilt binaries for the optional `canvas` package (GitHub releases are unreliable from mainland China).
 ARG CANVAS_BINARY_HOST=https://registry.npmmirror.com/-/binary/canvas
 
-FROM ${UBUNTU_IMAGE} AS nodebase
-
-ARG NODE_VERSION
-ARG NODE_DIST_URL
-ARG APT_MIRROR
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Ubuntu Server 24.04 uses deb822 sources. The base image has no CA store yet,
-# so the first apt update must stay on plain HTTP. Domestic mirrors are used
-# before ca-certificates is installed.
-RUN set -eux; \
-    if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
-      sed -i \
-        -e "s|http://archive.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
-        -e "s|http://security.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
-        -e "s|https://archive.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
-        -e "s|https://security.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
-        /etc/apt/sources.list.d/ubuntu.sources; \
-    fi; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates curl xz-utils; \
-    curl -fsSL "${NODE_DIST_URL}/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" -o /tmp/node.tar.xz; \
-    tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1; \
-    rm -f /tmp/node.tar.xz; \
-    node --version; \
-    npm --version; \
-    rm -rf /var/lib/apt/lists/*
-
 # ── Stage 1: Install dependencies ──────────────────────────────────
-FROM nodebase AS deps
+FROM ${BASE_IMAGE} AS deps
 
 ARG NPM_REGISTRY
 ARG CANVAS_BINARY_HOST
-ARG APT_MIRROR
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 make g++ && \
-    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -57,7 +21,7 @@ RUN npm config set registry "${NPM_REGISTRY}" && \
     npm install --no-save drizzle-kit
 
 # ── Stage 2: Build the application ────────────────────────────────
-FROM nodebase AS builder
+FROM ${BASE_IMAGE} AS builder
 
 WORKDIR /app
 
@@ -79,11 +43,7 @@ RUN npm run build
 RUN npm run build:admin-cli
 
 # ── Stage 3: Production runner ────────────────────────────────────
-FROM nodebase AS runner
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends tini && \
-    rm -rf /var/lib/apt/lists/*
+FROM ${BASE_IMAGE} AS runner
 
 WORKDIR /app
 

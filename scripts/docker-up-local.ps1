@@ -4,6 +4,8 @@
 $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $Root
+# Keep container/image names on product brand, not the host folder name.
+$env:COMPOSE_PROJECT_NAME = "innoscale"
 
 $EnvFile = Join-Path $Root ".env.docker.local"
 $SealedFile = Join-Path $Root "config\secrets\docker.local.env"
@@ -196,6 +198,15 @@ $PublishPort = Get-PublishPort
 
 # Prefer not leaving a Compose MySQL running for this project.
 docker compose --env-file $EnvFile -f docker-compose.yml -f docker-compose.local.yml stop mysql 2>$null | Out-Null
+
+$BaseImage = if ($env:BASE_IMAGE) { $env:BASE_IMAGE } elseif ($env:INNOSCALE_BASE_IMAGE) { $env:INNOSCALE_BASE_IMAGE } else { "innoscale-base:24.04-node24.22.3" }
+$env:BASE_IMAGE = $BaseImage
+$baseExists = docker image inspect $BaseImage 2>$null
+if (-not $baseExists) {
+  Write-Host "==> base image missing, building $BaseImage"
+  & (Join-Path $PSScriptRoot "docker-build-base.ps1")
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
 
 Write-Host "==> building and starting app container (host MySQL)"
 docker compose --env-file $EnvFile -f docker-compose.yml -f docker-compose.local.yml up -d --build --no-deps innoscale @args

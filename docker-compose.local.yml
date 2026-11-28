@@ -15,7 +15,7 @@ services:
 
   mysql:
     profiles: ["compose-mysql"]
-    image: ${MYSQL_IMAGE:-docker.m.daocloud.io/library/mysql:8.0}
+    image: ${MYSQL_IMAGE:-docker.1ms.run/library/mysql:8.0}
     command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_bin"]
     environment:
       MYSQL_DATABASE: innoscale

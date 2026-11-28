@@ -4,6 +4,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
+export COMPOSE_PROJECT_NAME=innoscale
 
 env_file="$root/.env.docker.online"
 sealed_file="$root/config/secrets/docker.online.env"
@@ -39,6 +40,13 @@ fi
 host_path="$(awk -F= '$1=="HOST_WORKSPACE_PATH" { value=$2 } END { print value }' "$env_file")"
 host_path="${host_path:-/data/innoscale/research}"
 mkdir -p "$host_path"
+
+base_image="${BASE_IMAGE:-${INNOSCALE_BASE_IMAGE:-innoscale-base:24.04-node24.22.3}}"
+export BASE_IMAGE="$base_image"
+if ! docker image inspect "$base_image" >/dev/null 2>&1; then
+  echo "==> base image missing, building $base_image"
+  bash "$root/scripts/docker-build-base.sh"
+fi
 
 exec docker compose \
   --env-file "$env_file" \

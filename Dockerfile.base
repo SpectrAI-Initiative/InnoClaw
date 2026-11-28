@@ -1,0 +1,44 @@
+# InnoScale runtime/build base: Ubuntu 24.04 + Node + common apt packages.
+# Build once, reuse for every app image build:
+#   .\scripts\docker-build-base.ps1
+#   ./scripts/docker-build-base.sh
+ARG UBUNTU_IMAGE=docker.1ms.run/library/ubuntu:24.04
+ARG NODE_VERSION=24.22.3
+ARG NODE_DIST_URL=https://cdn.npmmirror.com/binaries/node
+ARG APT_MIRROR=mirrors.aliyun.com
+
+FROM ${UBUNTU_IMAGE}
+
+ARG NODE_VERSION
+ARG NODE_DIST_URL
+ARG APT_MIRROR
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    NODE_VERSION=${NODE_VERSION}
+
+# Ubuntu Server 24.04 uses deb822 sources. The base image has no CA store yet,
+# so the first apt update must stay on plain HTTP.
+RUN set -eux; \
+    if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
+      sed -i \
+        -e "s|http://archive.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
+        -e "s|http://security.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
+        -e "s|https://archive.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
+        -e "s|https://security.ubuntu.com/ubuntu|http://${APT_MIRROR}/ubuntu|g" \
+        /etc/apt/sources.list.d/ubuntu.sources; \
+    fi; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      xz-utils \
+      python3 \
+      make \
+      g++ \
+      tini; \
+    curl -fsSL "${NODE_DIST_URL}/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" -o /tmp/node.tar.xz; \
+    tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1; \
+    rm -f /tmp/node.tar.xz; \
+    node --version; \
+    npm --version; \
+    rm -rf /var/lib/apt/lists/*

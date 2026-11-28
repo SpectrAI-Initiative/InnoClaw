@@ -2,6 +2,8 @@
 
 This file is the instruction set for changing the code. Cursor loads it into the coding agent on every turn. How to start the local container and how to deploy is `docs/开发说明.md`. Command names live in `package.json`.
 
+Product name is **InnoScale** (`innoscale` in code, packages, Compose, cookies, CLI, and SSM). Do not reintroduce InnoBuddy / InnoClaw identifiers except in one-shot migration/compat paths.
+
 When those sources conflict, use them in this order:
 
 1. `AGENTS.md` for how to change the code
@@ -11,6 +13,15 @@ When those sources conflict, use them in this order:
 There is no staging environment. The online VM is production. Do not run `./scripts/docker-up-online.sh`, edit the online env file, or try migrations against the online container until the change has been verified in the local container. Do not start the app with `npm run dev`, `npm run dev:no-auth`, `npm start`, or PM2.
 
 Node.js `24+` (`package.json` `engines`). Use `npm`. The database is MySQL 8 through Drizzle (`DATABASE_URL=mysql://...`); see `docs/database.md`.
+
+## Docker And Secrets
+
+- App runs only via Docker. Local entry: `scripts/docker-up-local.ps1` / `scripts/docker-up-local.sh`. Online entry: `scripts/docker-up-online.sh`.
+- Start scripts set `COMPOSE_PROJECT_NAME=innoscale` so image/container names stay on brand even if the host folder is still named something else.
+- App image builds `FROM innoscale-base:24.04-node24.22.3` (`Dockerfile.base`). Build or refresh the base with `scripts/docker-build-base.ps1` / `scripts/docker-build-base.sh`. Start scripts build the base automatically when it is missing. Override with `BASE_IMAGE` / `INNOSCALE_BASE_IMAGE`.
+- Compose service is `innoscale`; local default DB is `mysql://innoscale:innoscale-local@host.docker.internal:3306/innoscale`.
+- Sealed env files live in `config/secrets/`. Secrets are Tencent Cloud SSM references (`ssm:AUTH_SECRET`, …). SSM secret names: `innoscale-docker-local`, `innoscale-docker-online`. Publish/materialize with `scripts/ssm-env.ps1` / `scripts/ssm-env.sh`. Never commit `.env.docker.local` / `.env.docker.online` or plaintext cloud API keys.
+- CLI plugin path is `plugins/innoscale-cli` (bin `innoscale`). Auth cookies are `INNOSCALE_session*`.
 
 ## Where Code Belongs
 
@@ -22,6 +33,8 @@ Product code and the runbook:
 - `docs/开发说明.md` local and online runbook
 - `public/` shipped static assets
 - `site/` homepage images
+- `Dockerfile` / `Dockerfile.base` app and reusable base images
+- `plugins/innoscale-cli/` local CLI plugin
 
 Scratch. Do not import these into shipped code:
 
@@ -32,8 +45,9 @@ Scratch. Do not import these into shipped code:
 - `batch-test-logs/`
 - `test-results/`
 - `tmp-playwright-review/`
+- `.runtime/`
 
-Do not commit secrets, `.env.docker.local`, `.env.docker.online`, or build output.
+Do not commit secrets, `.env.docker.local`, `.env.docker.online`, `.runtime/`, or build output.
 
 ## Before Editing
 

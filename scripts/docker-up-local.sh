@@ -6,6 +6,8 @@ set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
+# Keep container/image names on product brand, not the host folder name.
+export COMPOSE_PROJECT_NAME=innoscale
 
 env_file="$root/.env.docker.local"
 sealed_file="$root/config/secrets/docker.local.env"
@@ -158,6 +160,13 @@ publish_port="$(read_env_value PUBLISH_PORT || true)"
 publish_port="${publish_port:-3000}"
 
 docker compose --env-file "$env_file" -f docker-compose.yml -f docker-compose.local.yml stop mysql >/dev/null 2>&1 || true
+
+base_image="${BASE_IMAGE:-${INNOSCALE_BASE_IMAGE:-innoscale-base:24.04-node24.22.3}}"
+export BASE_IMAGE="$base_image"
+if ! docker image inspect "$base_image" >/dev/null 2>&1; then
+  echo "==> base image missing, building $base_image"
+  bash "$root/scripts/docker-build-base.sh"
+fi
 
 echo "==> building and starting app container (host MySQL)"
 docker compose \
