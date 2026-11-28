@@ -1,6 +1,6 @@
 # InnoScale Development Guidelines
 
-This file is the instruction set for changing the code. Cursor loads it into the coding agent on every turn. How to start the local container and how to deploy is `docs/开发说明.md`. Command names live in `package.json`.
+This file is the instruction set for changing the code. Cursor loads it into the coding agent on every turn. **From-zero local setup, env, secrets, and deploy** are in `docs/开发说明.md` (start at「从零开始：本地开发」). Command names live in `package.json`.
 
 Product name is **InnoScale** (`innoscale` in code, packages, Compose, cookies, CLI, and SSM). Do not reintroduce InnoBuddy / InnoClaw identifiers except in one-shot migration/compat paths.
 
